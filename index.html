@@ -9,7 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Imperium">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="stylesheet" href="fonts/fonts.css">
 <script>window.__IMP_TARGET='pwa';</script>
@@ -59,6 +60,19 @@ button:focus-visible{outline:2px solid var(--bronze-hi);outline-offset:2px}
 .mvcard{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(143,209,106,.55);background:rgba(143,209,106,.08)}.mvcard b{display:block}.mvcard small{display:block;margin-top:3px;opacity:.85;line-height:1.35}
 #pathlab{position:absolute;left:0;top:0;pointer-events:none;padding:3px 9px;border-radius:11px;background:rgba(26,21,16,.9);border:1.5px solid #8fd16a;color:#e9f5dc;font-size:12px;font-weight:700;white-space:nowrap;will-change:transform}
 #pathlab.later{border-color:#f0cf6a;color:#fbefc7}#pathlab.atk{border-color:#e0573f;color:#ffd9cf}
+#pathlab{z-index:25}
+#cmdbub{position:absolute;left:0;top:0;z-index:30;pointer-events:auto;display:flex;align-items:stretch;gap:6px;will-change:transform;filter:drop-shadow(0 3px 8px rgba(0,0,0,.55))}
+#cmdbub .bgo{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:46px;min-width:150px;max-width:min(300px,70vw);padding:6px 14px;border-radius:12px;border:2px solid #8fd16a;background:linear-gradient(180deg,#2f4a24,#1d2e16);color:#eef8e4;font:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+#cmdbub .bgo b{font-size:15px;line-height:1.2}#cmdbub .bgo small{font-size:12px;opacity:.88;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#cmdbub.later .bgo{border-color:#f0cf6a;background:linear-gradient(180deg,#4a3d1c,#2c2410);color:#fdf3d2}
+#cmdbub.atk .bgo{border-color:#e0573f;background:linear-gradient(180deg,#5a2418,#33140d);color:#ffe2d9}
+#cmdbub .bgo:disabled{opacity:.75;cursor:default}
+#cmdbub .bx{min-width:46px;min-height:46px;border-radius:12px;border:1.5px solid var(--line,#5a4a36);background:rgba(26,21,16,.94);color:#f0e4c8;font-size:18px;cursor:pointer;touch-action:manipulation}
+#cmdbub .bgo:active,#cmdbub .bx:active{transform:scale(.97)}
+@media (pointer:coarse){.achip::after{inset:-10px}}
+.cmdtop{margin:4px 0 10px;padding-bottom:10px;border-bottom:1px solid var(--line,#4a3d2c)}
+.cmdtop .mpline{margin-top:0}
+#undoBub{position:absolute;left:0;top:0;z-index:28;pointer-events:auto;min-height:44px;padding:0 14px;border-radius:22px;border:1.5px solid #f0cf6a;background:rgba(26,21,16,.94);color:#fdf3d2;font:700 13px/1 system-ui,sans-serif;cursor:pointer;will-change:transform;box-shadow:0 2px 8px rgba(0,0,0,.5);touch-action:manipulation}
 .achip.sel{background:var(--bronze);color:var(--on-bronze);border-color:var(--bronze-hi)}
 
 /* Reichsleiste */
@@ -185,6 +199,7 @@ h3{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--mute
 #sheet .armory{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px;padding:8px 10px;border:1px solid rgba(201,168,106,.35);border-radius:10px;background:rgba(0,0,0,.15);font-size:13px}#sheet .armory b{width:100%;font-weight:700;color:var(--bronze-hi,#e4b86c)}#sheet .armory .arm-here{font-size:12.5px;color:var(--good,#7fbf6a)}
 #sheet .tr.ret{border-color:#7a9a6a;color:#cfe3bd}.retfold{margin:0 0 10px}
 #hint .btn{min-height:36px;padding:0 12px;font-size:13px}
+#hint{pointer-events:none}#hint .btn{pointer-events:auto}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 66px);transform:translateX(-50%);z-index:7;padding:9px 16px;border-radius:20px;background:var(--parchment);color:var(--on-bronze);font-weight:700;font-size:14px;box-shadow:0 4px 14px var(--shadow);transition:opacity .25s;max-width:calc(100% - 32px);text-align:center}
 #toast.out{opacity:0;pointer-events:none}
 
@@ -259,11 +274,12 @@ table.rank .crest{width:14px;height:17px}
   #shBody{max-height:52vh}
 }
 @media (orientation:landscape) and (max-height:560px){
-  #sheet{top:calc(env(safe-area-inset-top,0px) + 58px);left:auto;right:0;bottom:0;width:min(340px,46vw);margin:0;border-radius:14px 0 0 0}
+  :root{--shw:min(296px,37vw)}
+  #sheet{top:calc(env(safe-area-inset-top,0px) + 58px);left:auto;right:0;bottom:0;width:var(--shw);margin:0;border-radius:14px 0 0 0}
   #shBody{max-height:none;flex:1}
   #sheet.collapsed{bottom:auto}
-  #toast{left:calc(50% - min(170px,23vw))}#hint{right:calc(min(340px,46vw) + 12px)}
-  #modeBtn,#legend{right:calc(min(340px,46vw) + 12px)}#modePop{right:calc(min(340px,46vw) + 60px)}
+  #toast{left:calc(50% - min(170px,23vw))}#hint{right:calc(var(--shw) + 12px)}
+  #modeBtn,#legend{right:calc(var(--shw) + 12px)}#modePop{right:calc(var(--shw) + 60px)}
 }
 @media (max-width:420px){
   #top{gap:8px;padding-left:12px;padding-right:12px}
@@ -711,7 +727,7 @@ table.goods td:first-child{display:table-cell}
 .tchip:active{transform:translateY(1px)}
 .deeds{display:block;color:var(--muted,#b9ab90);margin-top:2px}
 @media (max-width:700px){.tchip .tl{display:none}.tchip{padding:4px 10px}}
-@media (orientation:landscape) and (max-height:560px){#todo{max-width:calc(100vw - min(340px,46vw) - 90px)}}
+@media (orientation:landscape) and (max-height:560px){#todo{max-width:calc(100vw - var(--shw) - 90px)}}
 
 button.regline{width:100%;text-align:left;color:inherit;font:inherit;font-size:14px;cursor:pointer}
 .regline .regshow{font-style:normal;font-size:11.5px;font-weight:700;color:var(--bronze-hi);padding:3px 9px;border:1px solid rgba(201,145,70,.5);border-radius:12px}
@@ -1044,6 +1060,41 @@ body[data-theme] .bkcover{box-shadow:inset 0 0 0 4px var(--bronze,#c9a24a),inset
 .dphouse{margin:2px 0}
 .milsys{border-top:1px solid var(--line,#5a4a32);margin-top:8px;padding-top:6px}
 .sysimg{width:100%;aspect-ratio:16/7;background:#2a2016 center/cover no-repeat;border-radius:8px;margin:4px 0 8px;box-shadow:inset 0 0 0 1px #0005}.sysimg.small{aspect-ratio:16/5}.systh{display:inline-block;width:56px;height:34px;border-radius:5px;background:center/cover no-repeat;flex:none;margin-right:6px;vertical-align:middle}
+/* Querformat: Hinweis bei Handy hochkant */
+#rotHint{display:none;position:fixed;inset:0;z-index:2147483000;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:calc(env(safe-area-inset-top,0px) + 24px) 28px calc(env(safe-area-inset-bottom,0px) + 24px);text-align:center;color:#f0e6d2;background:radial-gradient(120% 80% at 50% 35%,#2a2016 0%,#14100b 60%,#0b0806 100%);touch-action:none;-webkit-user-select:none;user-select:none}
+body.rotNeed #rotHint{display:flex}
+#rotHint .rotPh{width:52px;height:90px;border:3px solid #e4b86c;border-radius:11px;position:relative;box-shadow:0 0 18px rgba(228,184,108,.25);animation:rotPh 2.6s ease-in-out infinite}
+#rotHint .rotPh::before{content:'';position:absolute;left:50%;top:6px;width:14px;height:3px;margin-left:-7px;border-radius:2px;background:#e4b86c;opacity:.7}
+#rotHint .rotPh::after{content:'';position:absolute;inset:14px 5px;border-radius:3px;background:linear-gradient(160deg,#5a4630,#2a2016)}
+#rotHint .rotAr{width:84px;height:84px;margin-top:-118px;border:2px dashed rgba(228,184,108,.35);border-radius:50%;pointer-events:none}
+@keyframes rotPh{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){#rotHint .rotPh{animation:none;transform:rotate(-90deg)}}
+#rotHint h2{margin:8px 0 0;font-family:Marcellus,Georgia,serif;font-weight:400;font-size:24px;letter-spacing:.02em;color:#f3dcae}
+#rotHint p{margin:0;max-width:300px;font-size:15px;line-height:1.45;opacity:.85}
+#rotHint button{margin-top:6px;padding:12px 20px;border-radius:999px;border:1px solid #b08a4e;background:linear-gradient(180deg,#e7c877,#b8893e);color:#18120a;font:600 15px/1.1 inherit;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+#rotHint button[hidden]{display:none}
+
+/* ---------- Bedienung Phase 1: Handy-Layout, Kopfleiste, Aufgaben ---------- */
+:root{--shw:min(340px,46vw)}
+@media (orientation:landscape) and (max-height:560px){:root{--shw:min(296px,37vw)}}
+.navbtn span{display:block;font-size:9px;line-height:1;margin-top:2px;letter-spacing:.06em}
+.navbtn .uico{width:30px;height:30px}
+@media (max-width:739px){.navbtn span{display:none}.navbtn .uico{width:36px;height:36px}}
+#tipBub{position:fixed;z-index:60;max-width:240px;padding:7px 11px;border-radius:10px;background:rgba(24,19,14,.97);border:1px solid #8a6c42;color:#f0e6d2;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.5);pointer-events:none}
+.tchip .tl2{font-size:12.5px}
+#todo.cmp{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;max-height:calc(100vh - 190px);overflow:auto;pointer-events:auto}
+#todo.cmp .tchip .tl{display:inline}
+#todo.cmp .tdclose{background:rgba(60,46,30,.96)}
+@media (orientation:landscape) and (max-height:560px){
+  #thSel{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:104px;right:auto;transform:none}
+  #todo{max-width:calc(100vw - var(--shw) - 90px)}
+  body.cityopen #sheet{visibility:hidden}
+  #cityPanel{top:calc(env(safe-area-inset-top,0px) + 62px);bottom:8px;height:auto;right:8px;width:min(400px,calc(100vw - 16px))}
+  .actions.soloclose{display:none}
+  .navbtn{min-width:52px;height:46px}
+}
+@media (max-width:760px){body.cityopen #sheet{visibility:hidden}}
+@media (max-width:700px){.actions.soloclose{display:none}}
 </style>
 
 <div id="loading"><div class="ldbox"><b>Die Welt wird gezeichnet …</b><span class="ldbar"><i></i></span><small id="ldTip"></small></div></div>
@@ -10786,13 +10837,13 @@ function showEvent(E,ctx,next){
 
 // Tutorial
 const TUT=[
-  {t:'Willkommen! Das ist deine Karte. Ziehe mit einem Finger, um sie zu verschieben, zoome mit zwei Fingern. Deine Provinzen tragen deine Farbe, Pergament ist unerforschtes Land.'},
-  {t:'Tippe auf eine Provinz. Unten siehst du dann Steuern, Ordnung, Gebäude und Heere. Dort hebst du Truppen aus und baust.',el:'#sheet'},
-  {t:'Die kleinen Marken mit Zahlen sind Heere. Tippe eins an: Grün erreicht es in dieser Runde, Gelb in der nächsten. Tippe ein Ziel an, um den Weg zu sehen, und nochmal zum Bestätigen. Rot heißt Angriff, blau heißt Frieden.'},
-  {t:'Das Buch oben rechts öffnet die Forschung. Über dein Wappen oben links erreichst du Steuern, Diplomatie und die Siegbedingungen.',el:'#resBtn,#facBtn'},
-  {t:'Über den Ebenen-Knopf rechts wechselst du die Kartenansicht, etwa zu Regionen. Eine ganz gehaltene Region bringt mehr Steuern und Ordnung.',el:'#modeBtn'},
-  {t:'Tipp für den Anfang: Freie Städte und Stämme (graues Wappen) sind schwach verteidigt. Erobere sie in den ersten Runden, dann wachsen Steuern und Heer schneller als bei deinen Nachbarn. Reiche im Krieg mit dir greifen erst nach einer Schonfrist an (Leicht 16, Normal 10, Schwer 5 Runden).'},
-  {t:'Bist du fertig, tippe auf die Sanduhr „Runde beenden“. Führe dein Volk durch fünf Epochen bis zu Napoleon. Viel Erfolg!',el:innerWidth>700?'#endMed':'#endBtn'},
+  {t:'Willkommen! Verschiebe die Karte mit einem Finger, zoome mit zwei. Deine Provinzen tragen deine Farbe, Pergament ist unerforschtes Land. Halte den Finger auf etwas gedrückt, dann siehst du Infos dazu.'},
+  {t:'Tippe auf eine Provinz. Im Blatt am Rand stehen Steuern, Ordnung und Gebäude, dort baust du und hebst Truppen aus. Mit dem Pfeil oben im Blatt klappst du es ein und wieder auf.',el:'#sheet'},
+  {t:'Heere bewegen: Tippe ein Heer an, dann ein Ziel. Am Ziel erscheint ein Knopf, etwa „⚔ Angreifen“ oder „Marschieren“. Ein Tipp darauf bestätigt. Du kannst die Figur auch direkt ans Ziel ziehen. Einen Marsch ohne Kampf nimmst du mit „↶ Rückgängig“ zurück.'},
+  {t:'Oben erreichst du Reich, Wirtschaft, Hof und Chronik. „Forschung“ wählt die nächste Erfindung. Halte einen Knopf gedrückt, wenn du nicht weißt, wofür er steht.',el:'#resBtn,.topnav'},
+  {t:'„Aufgaben“ oben links zeigt, was noch offen ist, etwa Heere ohne Befehl. Der Rat schlägt dir Schritte vor, mit 🗺 springst du direkt zur Stelle auf der Karte. Über den Kartenknopf rechts wechselst du die Ansicht.',el:'#todo,#modeBtn'},
+  {t:'Tipp für den Anfang: Freie Städte und Stämme (graues Wappen) sind schwach verteidigt. Erobere sie in den ersten Runden, dann wachsen Steuern und Heer schneller. Reiche im Krieg mit dir greifen erst nach einer Schonfrist an (Leicht 16, Normal 10, Schwer 5 Runden).'},
+  {t:'Bist du fertig, tippe auf „Runde beenden“. Führe dein Volk durch fünf Epochen bis zu Napoleon. Viel Erfolg!',el:innerWidth>700&&innerHeight>560?'#endMed':'#endBtn'},
 ];
 let tutI=-1;
 function maybeTutorial(force){let done=false;try{done=localStorage.getItem('imperium.tut')==='1';}catch(e){}if(done&&!force)return;tutI=0;showTut();}
@@ -12046,10 +12097,12 @@ function marchTo(a,dest,pt){
     showModal(`<h2>Gebiet von ${esc(FACTIONS[o].name)}</h2><p class="sub">${esc(PROV_DEF[dest].name)} · Beziehung ${fmtNum(relation(a.f,o))}</p><p>Du hast kein Durchmarschrecht. Dein Heer kann trotzdem einrücken: ${esc(FACTIONS[o].name)} nimmt das übel (Beziehung −4, jede Runde im Land −2), es gibt aber keinen Krieg. Ein Durchmarschrecht kannst du in der Diplomatie aushandeln.</p>${d.st==='ally'?'':'<p class="note">Willst du die Provinz erobern, wähle Angreifen. Das ist eine Kriegserklärung.</p>'}`,
       [{label:'Abbrechen'},{label:'Angreifen',fn:()=>{orderMove(a,dest);}},{label:'Durchziehen',cls:'primary',fn:()=>{UI._neuOk=true;try{marchTo(a,dest,pt);}finally{UI._neuOk=false;}}}]);return;}
   const foreign=!walkOk(a.f,dest);
+  let us=null;try{us=undoPrep(a,R,dest);}catch(e){us=null;}UNDO=null;
   if(walkPath(a,R,dest))AUDIO.sfx('march');
   UI.preview=null;UI.previewPt=null;UI.sel=a.p;UI.army=a.id;
   if(a.p===dest&&siegersIn(dest,a.f).length&&(S.prov[dest].owner===a.f||isAlly(a.f,S.prov[dest].owner))){a.goal=null;a.goalPt=null;const res=reliefBattle(a,dest);UI.mode='army';refreshOwnership();refresh();if(res)showBattle(res);return;}
   if(foreign&&L.t===0){a.goal=null;a.goalPt=null;a.pos=borderPt(a.p,dest);UI.mode='army';refresh();orderMove(a,dest);return;}
+  if(us&&!(foreign&&L.t===0))us.ok=true;
   if(a.p!==dest){a.goal=dest;a.goalPt=ptIn(dest,pt)?{x:pt.x,z:pt.z}:null;if(!foreign&&a.p!==dest)a.pos=null;toast(`${a.name} marschiert nach ${PROV_DEF[dest].name}, Ankunft ${turnsTxt(L.t)}`);}
   else{
     a.goal=null;a.goalPt=null;setPos(a,dest,pt);
@@ -12057,8 +12110,28 @@ function marchTo(a,dest,pt){
     const other=S.armies.find(x=>x!==a&&x.f===a.f&&x.p===dest&&x.units.length+a.units.length<=armyMax(a.f)&&near(x));
     if(other){other.units.push(...a.units);other.mp=Math.min(other.mp,a.mp);S.armies.splice(S.armies.indexOf(a),1);toast(`Mit ${other.name} vereinigt`);UI.army=other.id;a=other;}
   }
+  try{undoSet(us,a);}catch(e){UNDO=null;}
   UI.mode=a.mp>0?'move':'army';refresh();
 }
+// Rückgängig für die letzte Bewegung: nur eigener Marsch in dieser Runde, ohne Kampf, ohne Aufdecken, ohne fremdes Gebiet und ohne Belagerung
+let UNDO=null;
+function knownN(){if(!S.known)return 0;let n=0;for(const k in S.known)if(S.known[k])n++;return n;}
+function undoPrep(a,R,dest){if(!S||S.mp||a.f!==S.player||a.st==='belagern'||a.sieg!=null&&siegeAt(a.sieg))return null;
+  const path=pathTo(R,dest);if(path.some(n=>isNeutralFor(a.f,n)||!isKnown(n)))return null;
+  const cl=x=>JSON.parse(JSON.stringify(x));
+  return{turn:S.turn,id:a.id,idx:S.armies.indexOf(a),arm:cl(a),oth:S.armies.filter(x=>x!==a&&x.f===a.f&&x.p===dest).map(x=>cl(x)),kn:knownN(),from:a.p,to:dest};}
+function undoSet(us,a){UNDO=null;if(!us||!us.ok||!a)return;if(knownN()!==us.kn)return;if(a.id===us.id&&a.p===us.arm.p&&JSON.stringify(a)===JSON.stringify(us.arm))return;
+  UNDO=Object.assign(us,{cur:a.id,post:JSON.stringify(a)});}
+function undoValid(){const U=UNDO;if(!U||!S||S.mp||S.over||S.turn!==U.turn||busy||BATTLE)return false;const a=getArmy(U.cur);return!!a&&JSON.stringify(a)===U.post;}
+function undoMove(){if(!undoValid()){UNDO=null;toast('Dieser Zug lässt sich nicht mehr zurücknehmen.');refresh();return;}
+  const U=UNDO;UNDO=null;const cur=getArmy(U.cur);
+  const put=(o,snap)=>{for(const k of Object.keys(o))delete o[k];Object.assign(o,JSON.parse(JSON.stringify(snap)));};
+  if(U.cur!==U.id){// vereinigt: Ziel-Heer zurücksetzen, ursprüngliches Heer wieder einsetzen
+    const so=U.oth.find(x=>x.id===U.cur);if(so)put(cur,so);S.armies.splice(Math.min(U.idx,S.armies.length),0,JSON.parse(JSON.stringify(U.arm)));}
+  else put(cur,U.arm);
+  try{AUDIO.sfx('click');}catch(e){}UI.army=U.id;UI.sel=U.from;UI.preview=null;UI.previewPt=null;const a=getArmy(U.id);UI.mode=a&&a.mp>0?'move':'army';
+  try{syncTokens();}catch(e){}toast(`Marsch zurückgenommen: ${a?a.name:'Heer'} steht wieder in ${PROV_DEF[U.from].name}.`);refresh();}
+function undoHtml(a){return undoValid()&&UNDO.cur===a.id?`<div class="row" style="margin:0 0 8px"><button class="btn" data-act="undoMove">↶ Letzten Marsch zurücknehmen</button></div>`:'';}
 function trespassRound(){S.tres2=S.tres2||{};for(const a of S.armies){if(!a.units.length||!isNeutralFor(a.f,a.p))continue;const o=S.prov[a.p].owner,k=a.f+'|'+o;if(S.tres2[k]===S.turn)continue;S.tres2[k]=S.turn;relAdd(a.f,o,-2,'Durchmarsch');}}
 // Feldzugsziele für den Spieler: Heer zieht über Runden zum Ziel, hält vor jedem Angriff, bei Feindheeren und ohne Nachschub
 function fzPass(a,n,t){if(!isAct(n))return false;if(n===t||passOk(a.f,n))return true;const o=S.prov[n].owner;return o!==a.f&&o!=='frei'&&o!=='horde'&&atWar(a.f,o);}
@@ -14221,6 +14294,47 @@ const PATHMAT=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,vertexColors:tr
 const PATHBG=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,color:'#15110c',transparent:true,opacity:0.55,depthTest:false,depthWrite:false});
 const pathLab=document.createElement('div');pathLab.id='pathlab';pathLab.style.visibility='hidden';labelsEl.appendChild(pathLab);
 let pathLabPos=null;
+// Befehlsblase am Ziel: ein Tipp bestätigt den Marsch oder Angriff, ✕ bricht ab. Liegt über allen Marken und bleibt im sichtbaren Kartenbereich.
+const cmdBub=document.createElement('div');cmdBub.id='cmdbub';cmdBub.style.visibility='hidden';labelsEl.appendChild(cmdBub);
+let bubPos=null,bubBox=null,undoId=null;
+const undoBub=document.createElement('button');undoBub.id='undoBub';undoBub.type='button';undoBub.textContent='↶ Rückgängig';undoBub.style.visibility='hidden';labelsEl.appendChild(undoBub);
+undoBub.addEventListener('pointerdown',e=>e.stopPropagation());
+undoBub.addEventListener('click',e=>{e.stopPropagation();if(!S||busy)return;undoMove();});
+cmdBub.addEventListener('pointerdown',e=>e.stopPropagation());
+cmdBub.addEventListener('click',e=>{const b=e.target.closest('[data-bub]');if(!b||!S||busy)return;e.stopPropagation();
+  if(b.dataset.bub==='x'){AUDIO.sfx('click');UI.preview=null;UI.previewPt=null;refresh();return;}
+  if(b.dataset.bub==='go'&&!b.disabled)bubGo();});
+function bubGo(){const a=getArmy(UI.army),pi=UI.preview;if(!a||pi==null||UI.mode!=='move')return;
+  if(pi===a.p){UI.tapPt=UI.previewPt;try{onProvinceTap(pi);}finally{UI.tapPt=null;}return;}
+  marchTo(a,pi,UI.previewPt);}
+function bubLabel(a,dest,endPt){
+  if(dest===a.p){const c=endPt?localCost(a,endPt):1,ok=a.mp>=c;return{cls:ok?'':'atk',go:ok?`↔ Umstellen · ${c} Bewegung`:null,sub:ok?'':`Zu weit · ${c} nötig, ${a.mp} übrig`};}
+  const R=reachMap(a),L=R.get(dest);if(!L)return null;
+  const o=S.prov[dest].owner,foreign=!L.own,now=L.t===0;
+  if(isNeutralFor(a.f,dest)&&now)return{cls:'later',go:'➜ Einrücken',sub:`Gebiet von ${FACTIONS[o].name}`};
+  if(foreign&&now){let sub='';
+    if(o!=='frei'&&o!=='horde'&&!atWar(a.f,o))sub='Bedeutet Krieg mit '+FACTIONS[o].name;
+    else try{const cx=startAttackCtx(a,dest),att=cx.res.att,def=cx.res.def,pct=Math.round(clamp(att/(att+def),0.03,0.97)*100),[ot]=oddsText(att/Math.max(1,def));sub=`Aussicht ${pct} % · ${ot}`;}catch(e){}
+    return{cls:'atk',go:'⚔ Angreifen',sub};}
+  if(now)return{cls:'',go:'➜ Marschieren',sub:'Ankunft diese Runde'};
+  return{cls:'later',go:'⚑ Marschziel setzen',sub:`Ankunft ${turnsTxt(L.t)}${foreign?' · danach Angriff':''}`};}
+function bubSet(a,dest,endPt){const B=bubLabel(a,dest,endPt);if(!B){bubPos=null;cmdBub.style.visibility='hidden';return;}
+  cmdBub.className=B.cls;
+  cmdBub.innerHTML=`<button type="button" class="bgo" data-bub="go"${B.go?'':' disabled'}><b>${esc(B.go||'Nicht möglich')}</b>${B.sub?`<small>${esc(B.sub)}</small>`:''}</button><button type="button" class="bx" data-bub="x" aria-label="Abbrechen">✕</button>`;
+  const c=dest===a.p&&endPt?{x:endPt.x,y:groundAt(endPt.x,endPt.z)+0.3,z:endPt.z}:{x:CAP[dest].x,y:CAP[dest].hd+0.32,z:CAP[dest].z};
+  bubPos=c;cmdBub.style.visibility='';try{camera.updateMatrixWorld();}catch(e){}
+  // sichtbaren Bereich einmal je Neuzeichnen bestimmen: unter der Kopfleiste, neben dem Blatt
+  try{const t=$('#top'),tb=t&&!t.hidden?t.getBoundingClientRect().bottom:0,sh=$('#sheet'),sr=sh&&!sh.hidden&&!sh.classList.contains('collapsed')?sh.getBoundingClientRect():null,hi=$('#hint'),hr=hi&&!hi.hidden?hi.getBoundingClientRect():null;bubBox={top:tb+6,hr:hr&&hr.width>0?hr:null,sr:sr&&sr.width>0?sr:null,w:cmdBub.offsetWidth,h:cmdBub.offsetHeight};}catch(e){bubBox=null;}
+  try{placeBub();}catch(e){}}
+function placeUndo(){const t=undoId!=null&&!BATTLE?TOK.get(undoId):null;if(t&&t.g.visible){const p=t.g.position;placeEl(undoBub,p.x,p.y+(t.shad?0.6:0.55),p.z,-34);}else undoBub.style.visibility='hidden';}
+function placeBub(){if(!bubPos){cmdBub.style.visibility='hidden';return;}V.set(bubPos.x,bubPos.y,bubPos.z).project(camera);if(V.z>1){cmdBub.style.visibility='hidden';return;}
+  cmdBub.style.visibility='';const B=bubBox||{top:60,w:cmdBub.offsetWidth,h:cmdBub.offsetHeight};const w=B.w||200,h=B.h||50,m=8;
+  let x=(V.x+1)/2*innerWidth-w/2,y=(1-V.y)/2*innerHeight-h-14;
+  x=clamp(x,m,innerWidth-w-m);y=clamp(y,B.top,innerHeight-h-m);
+  const r=B.sr;if(r&&x<r.right&&x+w>r.left&&y<r.bottom&&y+h>r.top){const L=r.left-w-m,Rr=r.right+m;
+    if(L>=m&&(Rr+w>innerWidth-m||Math.abs(L-x)<=Math.abs(Rr-x)))x=L;else if(Rr+w<=innerWidth-m)x=Rr;else y=Math.max(B.top,r.top-h-m);}
+  const q=B.hr;if(q&&x<q.right&&x+w>q.left&&y<q.bottom&&y+h>q.top){if(q.bottom+6+h<=innerHeight-m)y=q.bottom+6;else if(q.left-w-m>=m)x=q.left-w-m;}
+  cmdBub.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;}
 function ribbon(pts,cols,w,mat,ro){
   const n=pts.length,pos=new Float32Array((n*2+3)*3),col=new Float32Array((n*2+3)*3),idx=[];
   for(let i=0;i<n;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1,nx=-dz/l*w,nz=dx/l*w,P=pts[i],c=cols[i];
@@ -14232,14 +14346,17 @@ function ribbon(pts,cols,w,mat,ro){
 }
 function syncPath(){
   while(PATHG.children.length){const m=PATHG.children.pop();m.geometry.dispose();}
-  pathLabPos=null;pathLab.style.visibility='hidden';needRender=3;
+  pathLabPos=null;pathLab.style.visibility='hidden';needRender=3;bubPos=null;cmdBub.style.visibility='hidden';
+  undoId=null;try{if(S&&undoValid())undoId=UNDO.cur;}catch(e){}try{placeUndo();}catch(e){}
   if(!S)return;const a=getArmy(UI.army);if(!a||a.f!==S.player)return;
+  const isPv=UI.mode==='move'&&UI.preview!=null;
   try{if(UI.mode!=='move')fzDraw(a);}catch(e){}
   const dest=UI.mode==='move'&&UI.preview!=null?UI.preview:a.goal;if(dest==null)return;
   const endPt=UI.mode==='move'&&UI.preview!=null?UI.previewPt:a.goalPt;
   if(dest===a.p){const tok0=TOK.get(a.id);if(!endPt||!tok0)return;const c=localCost(a,endPt),ok=a.mp>=c,A=tok0.target,L0=Math.hypot(endPt.x-A.x,endPt.z-A.z),end=Math.max(0.4,1-0.3/Math.max(0.01,L0)),col=new THREE.Color(ok?'#8fd16a':'#e0573f'),pts=[],cols=[];
     for(let i=0;i<=14;i++){const u=i/14*end,x=A.x+(endPt.x-A.x)*u,z=A.z+(endPt.z-A.z)*u;pts.push(new THREE.Vector3(x,groundAt(x,z)+0.05,z));cols.push(col);}
     ribbon(pts,pts.map(()=>new THREE.Color('#15110c')),0.062,PATHBG,6);ribbon(pts,cols,0.038,PATHMAT,7);
+    if(isPv){bubSet(a,dest,endPt);return;}
     pathLab.className=ok?'':'atk';pathLab.textContent=ok?`Umstellen · ${c} Bewegung`:`Zu weit · ${c} nötig, ${a.mp} übrig`;pathLabPos={x:endPt.x,y:groundAt(endPt.x,endPt.z)+0.3,z:endPt.z};pathLab.style.visibility='';return;}
   const R=reachMap(a),L=R.get(dest);if(!L)return;
   const nodes=[a.p,...pathTo(R,dest)],tok=TOK.get(a.id),pts=[],cols=[];
@@ -14254,6 +14371,7 @@ function syncPath(){
   if(pts.length<2)return;
   ribbon(pts,pts.map(()=>new THREE.Color('#15110c')),0.062,PATHBG,6);ribbon(pts,cols,0.038,PATHMAT,7);
   const foreign=!L.own,atk=foreign&&L.t===0;
+  if(isPv){bubSet(a,dest,endPt);return;}
   pathLab.className=atk?'atk':L.t>0?'later':'';
   pathLab.textContent=atk?'Angriff':L.t===0?'Diese Runde':L.t===1?'Nächste Runde':`${L.t} Runden`;
   const c=CAP[dest];pathLabPos={x:c.x,y:c.hd+0.32,z:c.z};pathLab.style.visibility='';
@@ -14312,7 +14430,10 @@ function startDrag(x,y,extra){
     if(drag.cand==='pan'||drag.cand==='lasso'||drag.cand==='path'){if(holdAt(drag.x0,drag.y0)){drag.mode='hold';}}},430);
 }
 canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1)startDrag(e.clientX,e.clientY);
+  if(ptrs.size===1){let fig=null;
+    // Ausgewähltes eigenes Heer an der Figur ziehen = marschieren; Antippen bleibt Antippen
+    if(!BATTLE&&S&&!busy&&!S.over&&UI.army!=null)try{const aid=armyFigAt(e.clientX,e.clientY),a=aid!=null?getArmy(aid):null;if(a&&aid===UI.army&&a.f===S.player&&a.mp>0)fig=aid;}catch(err){}
+    if(fig!=null)startDrag(e.clientX,e.clientY,{cand:'march',aid:fig,fig:true});else startDrag(e.clientX,e.clientY);}
   else if(drag){drag.pinch=true;drag.moved=true;drag.mode='pinch';gestDraw(null);}
   camTween=null;});
 function armyChipDown(e,id){
@@ -14353,7 +14474,7 @@ function gestEnd(e){if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
   if(ptrs.size>0||!drag)return;clearTimeout(holdT);
   const d=drag;drag=null;gestDraw(null);holdInfo(0,0,null);
   if(d.mode==='hold'){suppressClick=performance.now();return;}
-  if(!d.moved&&!d.pinch){if(d.cand!=='march'&&performance.now()-d.t0<600)tapAt(e.clientX,e.clientY);return;}
+  if(!d.moved&&!d.pinch){if((d.cand!=='march'||d.fig)&&performance.now()-d.t0<600)tapAt(e.clientX,e.clientY);return;}
   if(d.mode==='march'){suppressClick=performance.now();const a=getArmy(d.aid),g=screenGround(e.clientX,e.clientY);if(!a||!g)return;const id=pidAt(g.x,g.z);
     if(id>=NOPB||id===a.p){UI.preview=null;refresh();return;}if(!reachMap(a).has(id)){toast('Dieses Ziel ist zu weit entfernt.');UI.preview=null;refresh();return;}marchTo(a,id);return;}
   if(d.mode==='path'){const w=d.pts.map(q=>screenGround(q[0],q[1])).filter(Boolean);if(w.length>1)orderPath(w);return;}
@@ -14595,6 +14716,7 @@ function frame(t){
   for(const t2 of TOK.values()){const p=t2.g.position;placeEl(t2.chip,p.x,p.y+(t2.shad?0.6:0.55),p.z);}
   for(const t2 of FLT.values()){if(!t2.g.visible)continue;const p=t2.g.position;placeEl(t2.chip,p.x,p.y+0.75,p.z);}
   if(pathLabPos)placeEl(pathLab,pathLabPos.x,pathLabPos.y,pathLabPos.z);
+  placeBub();placeUndo();
   for(const o of OCEAN_STUBS){if(o.on&&PCENTER[o.a].th===CAM.th)placeEl(o.el,o.x,0.45,o.z);else o.el.style.visibility='hidden';}
 }
 
@@ -15016,16 +15138,17 @@ let busy=false;
 
 // ---------- Stadtansicht: Kamera umkreist die Stadt, rechts Gebäude, Betriebe und Lage ----------
 let CITYV=null;
+function citySmall(){try{return matchMedia('(orientation:landscape) and (max-height:560px), (max-width:760px)').matches;}catch(e){return false;}}
 function openCityView(pi){if(CITYV)closeCityView(true);CITYV={pi,cam:{tx:CAM.tx,tz:CAM.tz,d:CAM.d,yaw:CAM.yaw||0}};CAM.yaw=CAM.yaw||0;const c=CAP[pi];camTween={tx:c.x,tz:c.z+0.15,d:2.7};
   let el=$('#cityPanel');if(!el){el=document.createElement('div');el.id='cityPanel';document.body.appendChild(el);
     el.addEventListener('click',e=>{const b=e.target.closest('[data-cv]');if(!b||b.disabled)return;const a=b.dataset.cv,P=S.prov[CITYV.pi];
       if(a==='close'){closeCityView();return;}
       if(a==='cancel'){askCancelBuild(CITYV.pi,null);return;}
       if(a==='up'){if(startBuild(S.player,CITYV.pi,b.dataset.k)){AUDIO.sfx('build');toast(`${bName(b.dataset.k)} wird ausgebaut`);}refresh();return;}
-      if(a==='new'){UI.sel=CITYV.pi;UI.mode='buildmenu';$('#sheet').classList.remove('collapsed');refresh();return;}
-      if(a==='rec'){UI.sel=CITYV.pi;UI.mode='recruit';$('#sheet').classList.remove('collapsed');refresh();return;}});}
-  el.hidden=false;renderCityPanel();AUDIO.sfx('click');}
-function closeCityView(quiet){if(!CITYV)return;const o=CITYV.cam;CITYV=null;const el=$('#cityPanel');if(el)el.hidden=true;CAM.yaw=o.yaw;camTween={tx:o.tx,tz:o.tz,d:o.d};if(typeof updateNorth==='function')updateNorth();needRender=3;}
+      if(a==='new'){const cp=CITYV.pi;if(citySmall())closeCityView(true);UI.sel=cp;UI.mode='buildmenu';$('#sheet').classList.remove('collapsed');refresh();return;}
+      if(a==='rec'){const cp=CITYV.pi;if(citySmall())closeCityView(true);UI.sel=cp;UI.mode='recruit';$('#sheet').classList.remove('collapsed');refresh();return;}});}
+  el.hidden=false;document.body.classList.add('cityopen');renderCityPanel();AUDIO.sfx('click');}
+function closeCityView(quiet){if(!CITYV)return;const o=CITYV.cam;CITYV=null;const el=$('#cityPanel');if(el)el.hidden=true;document.body.classList.remove('cityopen');CAM.yaw=o.yaw;camTween={tx:o.tx,tz:o.tz,d:o.d};if(typeof updateNorth==='function')updateNorth();needRender=3;}
 function renderCityPanel(){if(!CITYV)return;const pi=CITYV.pi,P=S.prov[pi],d=PROV_DEF[pi],own=P.owner===S.player,el=$('#cityPanel');if(!el)return;
   const t=P.tier||0,ord=provOrder(pi),tierN=['Siedlung','Stadt','Provinzzentrum','Hauptstadt'][(CITY[pi].tier||1)-1];
   const card=(k,isB)=>{const D=isB?BUILDINGS[k]:BUILDINGS[k],lv=P.b[k];const c=own&&lv<3?canBuild(S.player,pi,k):null;
@@ -15047,12 +15170,12 @@ function renderTop(){
   $('#gold').textContent=Math.round(S.fac[S.player].gold);
   const ie=$('#inc');ie.textContent=(inc>=0?'+':'')+Math.round(inc);ie.className='inc '+(inc>=0?'pos':'neg');
   {const Se=SEASONS[season()];$('#year').textContent=fmtYear(S.year)+' · '+Se.ico+' '+Se.n;$('#year').title=Se.n+': '+Se.d;}$('#epochName').textContent=EPOCHS[ep()].name;
-  const F=S.fac[S.player],rb=$('#resBtn');$('#resPct').textContent=F.res?Math.floor(F.res.prog/TECH_BY[F.res.id].cost*100)+' %':'Wählen';rb.classList.toggle('idle',!F.res);
+  const F=S.fac[S.player],rb=$('#resBtn');$('#resPct').textContent=F.res?Math.floor(F.res.prog/TECH_BY[F.res.id].cost*100)+' %':'Forschung';rb.classList.toggle('idle',!F.res);
   $('#endBtn').disabled=S.over;{const m=$('#endMed');m.hidden=false;m.classList.toggle('dis',!!S.over);$('#endMedR').textContent=`Runde ${S.turn}`;}try{renderTodo();}catch(e){}
 }
 let toastT=0;
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.remove('out');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.add('out'),2600);}
-function renderHint(){const h=$('#hint');if(UI.mode==='move')$('#legend').hidden=true;else renderLegend();if(UI.mode==='move'){h.hidden=false;$('#hintText').innerHTML=UI.preview!=null?'Nochmal antippen zum Bestätigen':'Ziel antippen <small style="display:block;font-size:11.5px;opacity:.85"><b style="color:#9fdc7c">grün</b> diese Runde · <b style="color:#f0cf6a">gelb</b> später</small>';}else h.hidden=true;}
+function renderHint(){const h=$('#hint');if(UI.mode==='move')$('#legend').hidden=true;else renderLegend();if(UI.mode==='move'){h.hidden=false;$('#hintText').innerHTML=UI.preview!=null?'Am Ziel bestätigen oder ✕':'Ziel antippen <small style="display:block;font-size:11.5px;opacity:.85"><b style="color:#9fdc7c">grün</b> diese Runde · <b style="color:#f0cf6a">gelb</b> später</small>';}else h.hidden=true;}
 
 function armyRow(a,clickable=true){
   const mine=a.f===S.player;
@@ -15163,31 +15286,34 @@ function renderSheet(){
   }else if(m==='army'||m==='move'){
     const a=getArmy(UI.army);if(!a){UI.mode='idle';return renderSheet();}
     const mine=a.f===S.player;title=a.name;
-    html=`<div class="ptitle"><span class="crest" style="${cst(a.f)}"></span><div><h2>${esc(a.name)}</h2><p>${esc(FACTIONS[a.f].name)} · in ${esc(PROV_DEF[a.p].name)} · Stärke ${Math.round(armyPower(a))}${a.st?` · ${STANCES[a.st].ico} ${STANCES[a.st].n}`:''}</p></div></div>${genHtml(a,true)}${stanceHtml(a,mine)}${mine?armoryHtml(a)+retinueHtml(a):''}<div>`;
+    html=`<div class="ptitle"><span class="crest" style="${cst(a.f)}"></span><div><h2>${esc(a.name)}</h2><p>${esc(FACTIONS[a.f].name)} · in ${esc(PROV_DEF[a.p].name)} · Stärke ${Math.round(armyPower(a))}${a.st?` · ${STANCES[a.st].ico} ${STANCES[a.st].n}`:''}</p></div></div>@@CMD@@${genHtml(a,true)}${stanceHtml(a,mine)}${mine?armoryHtml(a)+retinueHtml(a):''}<div>`;
     a.units.forEach((u,i)=>{html+=unitCardHtml(a,u,i,mine);});
     html+='</div>';
+    let cmd='';
     if(mine){
       const mx=maxMP(a);
-      html+=`<div class="mpline"><span>Bewegung</span><span class="pbar"><i style="width:${Math.round(a.mp/mx*100)}%"></i></span><b class="num">${a.mp}/${mx}</b></div>`;
-      if(a.goal!=null)html+=`<p class="note" style="margin:6px 0 0">Marschziel: <b>${esc(PROV_DEF[a.goal].name)}</b>${(()=>{const L=reachMap(a).get(a.goal);return L?', Ankunft '+turnsTxt(L.t):', kein Weg'})()}.</p>`;
+      cmd+=undoHtml(a);
+      cmd+=`<div class="mpline"><span>Bewegung</span><span class="pbar"><i style="width:${Math.round(a.mp/mx*100)}%"></i></span><b class="num">${a.mp}/${mx}</b></div>`;
+      if(a.goal!=null)cmd+=`<p class="note" style="margin:6px 0 0">Marschziel: <b>${esc(PROV_DEF[a.goal].name)}</b>${(()=>{const L=reachMap(a).get(a.goal);return L?', Ankunft '+turnsTxt(L.t):', kein Weg'})()}.</p>`;
       if(m!=='move')html+=fzHtml(a);
       if(m!=='move')try{html+=sldHtml(a);}catch(e){console.warn('Söldner',e);}
       if(m==='move'&&UI.preview!=null){
         const R=reachMap(a),L=R.get(UI.preview),pv=UI.preview,foreign=!walkOk(a.f,pv),path=pathTo(R,pv),neu=[...new Set(path.filter(n=>isNeutralFor(a.f,n)).map(n=>S.prov[n].owner))],unk=path.some(n=>!isKnown(n));
         if(L){
           const via=path.slice(0,-1).map(n=>esc(PROV_DEF[n].name)).join(', ');
-          html+=`<div class="mvcard"><b>${foreign?'Angriff auf':'Marsch nach'} ${isKnown(pv)?esc(PROV_DEF[pv].name):'unerforschtes Land'}</b><small>${TER[pter(pv)].n} · Ankunft ${turnsTxt(L.t)}${via?' · über '+via:''}${foreign&&L.t>0?' · das Heer zieht bis an die Grenze':''}</small>${neu.length?`<small class="badc">Durch neutrales Gebiet von ${neu.map(o=>esc(FACTIONS[o].name)).join(', ')}: Beziehung −4, jede Runde dort −2.</small>`:''}${unk?'<small>Unerforschtes Land wird beim Einmarsch aufgedeckt.</small>':''}</div>`;
-          html+=`<div class="row" style="margin-top:10px"><button class="btn primary" data-act="go">${foreign&&L.t===0?'Angreifen':L.t===0?'Marschieren':'Marschziel setzen'}</button><button class="btn" data-act="unpreview">Anderes Ziel</button></div>`;
+          cmd+=`<div class="mvcard"><b>${foreign?'Angriff auf':'Marsch nach'} ${isKnown(pv)?esc(PROV_DEF[pv].name):'unerforschtes Land'}</b><small>${TER[pter(pv)].n} · Ankunft ${turnsTxt(L.t)}${via?' · über '+via:''}${foreign&&L.t>0?' · das Heer zieht bis an die Grenze':''}</small>${neu.length?`<small class="badc">Durch neutrales Gebiet von ${neu.map(o=>esc(FACTIONS[o].name)).join(', ')}: Beziehung −4, jede Runde dort −2.</small>`:''}${unk?'<small>Unerforschtes Land wird beim Einmarsch aufgedeckt.</small>':''}</div>`;
+          cmd+=`<div class="row" style="margin-top:10px"><button class="btn primary" data-act="go">${foreign&&L.t===0?'Angreifen':L.t===0?'Marschieren':'Marschziel setzen'}</button><button class="btn" data-act="unpreview">Anderes Ziel</button></div>`;
         }
-      }else if(m==='move')html+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="cancelMove">Fertig</button>${a.goal!=null?'<button class="btn" data-act="clearGoal">Ziel löschen</button>':''}<button class="btn" data-act="prov">Provinz</button></div>`;
-      else html+=`<div class="row" style="margin-top:12px"><button class="btn primary" data-act="move"${a.mp>0&&!S.over?'':' disabled'}>${a.mp>0?'Marschieren':'Bewegung verbraucht'}</button>${a.goal!=null?'<button class="btn" data-act="clearGoal">Ziel löschen</button>':''}<button class="btn" data-act="prov">Provinz</button></div>`;
+      }else if(m==='move')cmd+=`<p class="note" style="margin:8px 0 0">Ziel auf der Karte antippen. Am Ziel erscheint ein Knopf zum Bestätigen.</p><div class="row" style="margin-top:8px"><button class="btn" data-act="cancelMove">Fertig</button>${a.goal!=null?'<button class="btn" data-act="clearGoal">Ziel löschen</button>':''}<button class="btn" data-act="prov">Provinz</button></div>`;
+      else cmd+=`<div class="row" style="margin-top:12px"><button class="btn primary" data-act="move"${a.mp>0&&!S.over?'':' disabled'}>${a.mp>0?'Marschieren':'Bewegung verbraucht'}</button>${a.goal!=null?'<button class="btn" data-act="clearGoal">Ziel löschen</button>':''}<button class="btn" data-act="prov">Provinz</button></div>`;
       if(m!=='move'){const others=S.armies.filter(x=>x.f===a.f&&x.p===a.p&&x.id!==a.id);
         {const rr=canRetreatManual(a);if(rr.ok||/Rückzugsweg/.test(rr.why))html+=`<div class="row" style="margin-top:8px"><button class="btn" data-act="retreat"${rr.ok?'':' disabled'} title="${esc(rr.why||'')}">↩ Rückzug${rr.ok?'':' · '+esc(rr.why)}</button></div>`;}
         {if(a.boat){const fl=(S.fleets||[]).find(x=>x.id===a.boat);html+=`<p class="note" style="margin:8px 0 0">⚓ An Bord von <b>${fl?esc(fl.name):'einer Flotte'}</b>. Ausladen über die Flotte.</p>${fl?`<div class="row" style="margin-top:6px"><button class="btn primary" data-act="fleet" data-id="${fl.id}">Zur Flotte</button></div>`:''}`;}
          else{const FL=embarkFleets(a);if(FL.length)html+=`<div class="row" style="margin-top:8px">${FL.slice(0,3).map(fl=>`<button class="btn primary" data-act="embark2" data-a="${a.id}" data-id="${fl.id}"${a.mp>0?'':' disabled'}>⚓ Einschiffen: ${esc(fl.name)}</button>`).join('')}</div><p class="note" style="margin:4px 0 0">Das Heer geht an Bord und fährt mit der Flotte. Landung an feindlicher Küste: Angriff −20 %.</p>`;else if(feat(a.p).coast&&(S.fleets||[]).some(x=>x.f===a.f))html+=`<p class="note" style="margin:6px 0 0">Zum Einschiffen eine eigene Flotte an die Küste dieser Provinz segeln.</p>`;}}
         html+=`<div class="row" style="margin-top:8px">${a.units.length>1?'<button class="btn" data-act="split">Teilen</button>':''}${others.map(x=>a.units.length+x.units.length<=armyMax(a.f)?`<button class="btn" data-act="mergeWith" data-id="${x.id}">Mit ${esc(x.name)} vereinen</button>`:`<button class="btn" data-act="xfer" data-id="${x.id}">Tauschen mit ${esc(x.name)}</button>`).join('')}</div>`;
-        if(a.mp>0)html+=`<p class="note" style="margin:8px 0 0">Tipp: Vom Heer-Symbol auf der Karte aus mit dem Finger zum Ziel ziehen.</p>`;}
-    }else html+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="prov">Provinz</button></div>`;
+        if(a.mp>0)html+=`<p class="note" style="margin:8px 0 0">Tipp: Das Heer auf der Karte mit dem Finger zum Ziel ziehen, an der Figur oder am Schild.</p>`;}
+    }else cmd+=`<div class="row" style="margin-top:8px"><button class="btn" data-act="prov">Provinz</button></div>`;
+    html=html.replace('@@CMD@@',cmd?`<div class="cmdtop">${cmd}</div>`:'');
   }
   $('#shTitle').textContent=title;body.innerHTML=html;
 }
@@ -15271,6 +15397,7 @@ $('#shBody').addEventListener('click',e=>{
   else if(act==='back'){UI.mode='prov';refresh();}
   else if(act==='move'){UI.mode='move';UI.preview=null;refresh();}
   else if(act==='cancelMove'){UI.mode='army';UI.preview=null;refresh();}
+  else if(act==='undoMove'){undoMove();}
   else if(act==='unpreview'){UI.preview=null;refresh();}
   else if(act==='go'){const a=getArmy(UI.army);if(a&&UI.preview!=null)marchTo(a,UI.preview);}
   else if(act==='split'){UI.mode='split';UI.splitSel=new Set();refresh();}
@@ -15304,6 +15431,17 @@ document.addEventListener('keydown',e=>{if(!S||e.target&&/INPUT|TEXTAREA|SELECT/
   e.preventDefault();if(!BATTLE)camTween=null;C.tx=clamp(C.tx+dx,C.b.x0,C.b.x1);C.tz=clamp(C.tz+dz,C.b.z0,C.b.z1);C.d=clamp(C.d+dd,C.b.d0,C.b.d1);needRender=Math.max(needRender,3);});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||!S)return;if(!$('#modal').hidden){const x=$('#dialog .dlgx');if(x)x.click();return;}UI.mode='idle';UI.army=null;UI.sel=null;UI.preview=null;UI.previewPt=null;refresh();});
 $('#shToggle').addEventListener('click',()=>$('#sheet').classList.toggle('collapsed'));
+// ---------- Kopfleiste: langes Drücken zeigt, wofür ein Knopf steht ----------
+(()=>{const SEL='#top button,#top [role=button],#modeBtn,#endMed,#northBtn';let tm=null,shown=false,bub=null;
+  const hide=()=>{clearTimeout(tm);tm=null;if(bub){bub.remove();bub=null;}};
+  const lab=b=>b.getAttribute('aria-label')||b.getAttribute('title')||'';
+  const tip=b=>{const t=lab(b);if(!t)return;bub=document.createElement('div');bub.id='tipBub';bub.textContent=t;document.body.appendChild(bub);const r=b.getBoundingClientRect(),w=bub.offsetWidth,h=bub.offsetHeight;let x=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2)),y=r.bottom+8;if(y+h>innerHeight-8)y=r.top-h-8;bub.style.left=x+'px';bub.style.top=y+'px';shown=true;try{navigator.vibrate&&navigator.vibrate(8);}catch(e){}};
+  document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const b=e.target.closest&&e.target.closest(SEL);if(!b)return;hide();shown=false;tm=setTimeout(()=>tip(b),450);},true);
+  ['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{clearTimeout(tm);tm=null;if(bub)setTimeout(hide,1200);},true));
+  document.addEventListener('click',e=>{if(shown&&e.target.closest&&e.target.closest(SEL)){e.preventDefault();e.stopPropagation();shown=false;}},true);
+  document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest(SEL))e.preventDefault();},true);
+  const ti=()=>document.querySelectorAll(SEL).forEach(b=>{const t=b.getAttribute('aria-label');if(t&&!b.title)b.title=t;});ti();setTimeout(ti,3000);})();
+
 $('#endBtn').addEventListener('click',endTurn);$('#endMed').addEventListener('click',()=>{if(S&&!busy&&!S.over)endTurn();});
 $('#menuBtn').addEventListener('click',openMenu);
 {const nav=(id,fn)=>$(id).addEventListener('click',()=>{if(!S||busy)return;AUDIO.sfx('click');closeModal();fn();});
@@ -15333,7 +15471,8 @@ function onProvinceTap(pi){
     if(a&&pi===a.p){const t=TOK.get(a.id),pt=UI.tapPt;
       if(pt&&t&&a.f===S.player&&Math.hypot(t.target.x-pt.x,t.target.z-pt.z)>0.32){const c=localCost(a,pt);
         if(UI.preview===pi&&UI.previewPt&&Math.hypot(UI.previewPt.x-pt.x,UI.previewPt.z-pt.z)<0.45){if(a.mp<c){toast(`Nicht genug Bewegung: Umstellen kostet ${c}, übrig sind ${a.mp}.`);return;}
-          a.mp-=c;clearStance(a);setPos(a,pi,pt);UI.preview=null;UI.previewPt=null;AUDIO.sfx('march');UI.mode=a.mp>0?'move':'army';refresh();return;}
+          let us=null;try{us=undoPrep(a,reachMap(a),pi);if(us)us.ok=true;}catch(e){us=null;}
+          a.mp-=c;clearStance(a);setPos(a,pi,pt);try{undoSet(us,a);}catch(e){UNDO=null;}UI.preview=null;UI.previewPt=null;AUDIO.sfx('march');UI.mode=a.mp>0?'move':'army';refresh();return;}
         UI.preview=pi;UI.previewPt=pt;AUDIO.sfx('click');refresh();return;}
       AUDIO.sfx('click');UI.preview=null;UI.previewPt=null;UI.sel=pi;UI.army=null;UI.mode='prov';refresh();return;}
     if(a){const R=reachMap(a);if(R.has(pi)){const pt=UI.tapPt;if(UI.preview===pi){marchTo(a,pi,pt);return;}UI.preview=pi;UI.previewPt=pt;AUDIO.sfx('click');$('#sheet').classList.remove('collapsed');refresh();return;}}
@@ -15403,7 +15542,7 @@ function endTurn(){
 // Dialoge
 function showModal(html,buttons){
   const d=$('#dialog');d.classList.remove('wide','bookdlg');
-  d.innerHTML='<button class="dlgx" aria-label="Schließen">✕</button>'+html+(buttons&&buttons.length?`<div class="actions">${buttons.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`:'');
+  d.innerHTML='<button class="dlgx" aria-label="Schließen">✕</button>'+html+(buttons&&buttons.length?`<div class="actions${buttons.length===1&&!buttons[0].fn&&/^Schließen$/.test(buttons[0].label)?' soloclose':''}">${buttons.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`:'');
   $('#modal').hidden=false;
   d.querySelectorAll('.actions [data-i]').forEach(el=>el.addEventListener('click',()=>{const b=buttons[+el.dataset.i];if(b.keep!==true)closeModal();if(b.fn)b.fn();}));
   const first=d.querySelector('.actions .btn.primary')||d.querySelector('.actions .btn');if(first)first.focus({preventScroll:true});
@@ -17181,8 +17320,14 @@ function todoItems(){if(!S||S.over)return[];const me=S.player,out=[];try{const x
 function renderTodo(){const el=$('#todo');if(!el)return;if(!S||$('#top').hidden||BATTLE||!$('#hint').hidden||CITYV){el.hidden=true;return;}
   if(TODO_I.turn!==S.turn+':'+S.player)TODO_I={turn:S.turn+':'+S.player};
   const L=todoItems();if(!L.length){el.hidden=true;return;}el.hidden=false;
-  el.innerHTML=L.map((x,i)=>`<button class="tchip${x.warn?' warn':''}" data-td="${i}" aria-label="${esc(x.t)}">${x.img?`<img class="uico ti" src="img/ui_${x.img}.webp" alt="">`:`<span class="ti">${x.ico}</span>`}${x.n!=null?`<b>${x.n}</b>`:''}<span class="tl">${esc(x.t)}</span></button>`).join('');
-  el.querySelectorAll('[data-td]').forEach(b=>b.onclick=()=>{if(busy)return;const x=L[+b.dataset.td],i=TODO_I[x.k]||0;TODO_I[x.k]=i+1;AUDIO.sfx('click');closeModal();x.go(i);});}
+  const cmp=todoCompact();el.classList.toggle('cmp',cmp);
+  if(cmp&&!TODO_OPEN){const w=L.some(x=>x.warn),n=L.length;el.innerHTML=`<button class="tchip tdall${w?' warn':''}" id="tdAll" aria-label="Aufgaben anzeigen: ${n} offen"><span class="ti">📋</span><b>${n}</b><span class="tl2">Aufgaben</span></button>`;$('#tdAll').onclick=()=>{AUDIO.sfx('click');TODO_OPEN=true;renderTodo();};return;}
+  el.innerHTML=(cmp?`<button class="tchip tdclose" id="tdClose" aria-label="Aufgaben zuklappen"><span class="ti">✕</span><span class="tl2">Aufgaben</span></button>`:'')+L.map((x,i)=>`<button class="tchip${x.warn?' warn':''}" data-td="${i}" aria-label="${esc(x.t)}">${x.img?`<img class="uico ti" src="img/ui_${x.img}.webp" alt="">`:`<span class="ti">${x.ico}</span>`}${x.n!=null?`<b>${x.n}</b>`:''}<span class="tl">${esc(x.t)}</span></button>`).join('');
+  if(cmp)$('#tdClose').onclick=()=>{AUDIO.sfx('click');TODO_OPEN=false;renderTodo();};
+  el.querySelectorAll('[data-td]').forEach(b=>b.onclick=()=>{if(busy)return;const x=L[+b.dataset.td],i=TODO_I[x.k]||0;TODO_I[x.k]=i+1;AUDIO.sfx('click');closeModal();if(cmp)TODO_OPEN=false;x.go(i);if(cmp)renderTodo();});}
+var TODO_OPEN=false;const TODO_MQ='(orientation:landscape) and (max-height:560px), (max-width:700px)';
+function todoCompact(){try{return matchMedia(TODO_MQ).matches;}catch(e){return false;}}
+try{matchMedia(TODO_MQ).addEventListener('change',()=>{TODO_OPEN=false;renderTodo();});}catch(e){}
 try{new MutationObserver(()=>renderTodo()).observe($('#hint'),{attributes:true,attributeFilter:['hidden']});}catch(e){}
 
 // ---------- Region auf der Karte zeigen ----------
@@ -18101,6 +18246,50 @@ if(PWA.on){
     }).catch(e=>console.warn('Service Worker',e));}
 }
 
+</script>
+<script>
+/* Querformat auf Handys: Android/Chrome sperrt nach dem ersten Antippen per Vollbild + orientation.lock; sonst Hinweis „Bitte Gerät drehen“. iOS kann nicht sperren. */
+(function(){try{
+  var mq=function(q){try{return matchMedia(q).matches;}catch(e){return false;}};
+  var touch=(navigator.maxTouchPoints||0)>0||mq('(pointer:coarse)');
+  var inFrame=(function(){try{return window.self!==window.top;}catch(e){return true;}})();
+  var standalone=mq('(display-mode: standalone)')||mq('(display-mode: fullscreen)')||navigator.standalone===true;
+  var de=document.documentElement;
+  var fsOk=!!(document.fullscreenEnabled&&de.requestFullscreen);
+  var lockOk=!!(screen.orientation&&screen.orientation.lock);
+  function small(){return Math.min(screen.width||innerWidth,screen.height||innerHeight)<700;}
+  function portrait(){return innerHeight>innerWidth*1.05;}
+  var el=null,btn=null;
+  function lockLand(){
+    if(!lockOk)return Promise.reject();
+    if(standalone||document.fullscreenElement)return screen.orientation.lock('landscape');
+    if(!fsOk||inFrame)return Promise.reject();
+    return de.requestFullscreen({navigationUI:'hide'}).then(function(){return screen.orientation.lock('landscape');});
+  }
+  function build(){
+    if(el)return;el=document.createElement('div');el.id='rotHint';el.setAttribute('role','dialog');el.setAttribute('aria-live','polite');
+    el.innerHTML='<div class="rotPh" aria-hidden="true"></div><div class="rotAr" aria-hidden="true"></div><h2>Bitte Gerät drehen</h2><p>Imperium der Epochen ist für das Querformat gemacht. Halte dein Gerät quer, dann geht es direkt weiter.</p><button type="button" id="rotFs" hidden>Vollbild im Querformat</button>';
+    document.body.appendChild(el);btn=el.querySelector('#rotFs');
+    if(lockOk&&(standalone||(fsOk&&!inFrame)))btn.hidden=false;
+    btn.addEventListener('click',function(ev){ev.stopPropagation();lockLand().catch(function(){btn.hidden=true;var p=el.querySelector('p');if(p)p.textContent='Dein Browser kann das Querformat nicht selbst einstellen. Bitte drehe das Gerät, dann geht es direkt weiter.';});});
+  }
+  function upd(){
+    if(!document.body)return;
+    var need=touch&&small()&&portrait();
+    if(need)build();
+    document.body.classList.toggle('rotNeed',need);
+  }
+  window.ROT={upd:upd,lock:lockLand,state:function(){return{touch:touch,small:small(),portrait:portrait(),need:!!(document.body&&document.body.classList.contains('rotNeed')),fsOk:fsOk,lockOk:lockOk,inFrame:inFrame,standalone:standalone,btn:!!(btn&&!btn.hidden)};}};
+  addEventListener('resize',upd);addEventListener('orientationchange',function(){setTimeout(upd,120);});
+  try{screen.orientation&&screen.orientation.addEventListener&&screen.orientation.addEventListener('change',function(){setTimeout(upd,60);});}catch(e){}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',upd);else upd();
+  /* Android/Chrome: beim ersten Antippen auf dem Handy Vollbild + Querformat sperren (nur außerhalb des Artifact-Rahmens oder als installierte App) */
+  if(touch&&small()&&lockOk&&(standalone||(fsOk&&!inFrame))&&!/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    var once=function(){document.removeEventListener('pointerup',once,true);document.removeEventListener('touchend',once,true);
+      if(!small())return;lockLand().then(function(){setTimeout(upd,150);}).catch(function(){});};
+    document.addEventListener('pointerup',once,true);document.addEventListener('touchend',once,true);
+  }
+}catch(e){}})();
 </script>
 
 </html>
