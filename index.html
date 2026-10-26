@@ -55,6 +55,8 @@ button:focus-visible{outline:2px solid var(--bronze-hi);outline-offset:2px}
 .achip .pw::before{content:"⚔";font-size:9px;margin-right:1px;opacity:.85}
 .achip .cmp{position:absolute;left:9px;right:9px;top:-4px;height:3px;display:flex;gap:1px;border-radius:2px;overflow:hidden;pointer-events:none;box-shadow:0 0 0 1px rgba(10,8,6,.8)}
 .achip .cmp u{display:block;height:100%}
+.achip.stk::after{inset:-10px -3px}
+#hint.hl{right:auto!important;left:12px}
 .achip .gl{font-style:normal;font-size:11px;color:#f0cf6a;margin-left:1px}
 .mpline{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px}.mpline .pbar{flex:1}.mpline>span:first-child{color:var(--muted,#bfae90)}
 .mvcard{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(143,209,106,.55);background:rgba(143,209,106,.08)}.mvcard b{display:block}.mvcard small{display:block;margin-top:3px;opacity:.85;line-height:1.35}
@@ -13486,6 +13488,12 @@ function decodeKit(j,SC=0.01){const out={};
     const b=g.boundingBox;g.userData={w:b.max.x-b.min.x,d:b.max.z-b.min.z,h:b.max.y,r:0.5*Math.hypot(b.max.x-b.min.x,b.max.z-b.min.z)};out[k]=g;}
   return out;}
 // Häuser ruhiger färben: kräftige Akzentfarben (Markisen, Läden) werden zu erdigen Tönen, Dächer bleiben
+// Einfache Bausätze an die texturierten PC-Modelle angleichen (Moritz 26.10.: Stil detailliert; bis zum Ersatz): grelles Weiß zu warmem Stein, sehr satte Farben gedämpft, leichte Helligkeitsstreuung je Ecke wie Pinselstrich
+function harmKit(K){const c=new THREE.Color(),hs={h:0,s:0,l:0};for(const k in K){if(!(k.startsWith('L_')||k.startsWith('h_')||k.startsWith('farm')||k==='stalls')||/_F$/.test(k)||k.startsWith('L_pc'))continue;const g=K[k],A=g&&g.attributes&&g.attributes.color,Pp=g&&g.attributes&&g.attributes.position;if(!A||!Pp||g.userData&&g.userData.pc)continue;
+    for(let i=0;i<A.count;i++){c.setRGB(A.getX(i),A.getY(i),A.getZ(i));c.getHSL(hs);let{h,s,l}=hs;
+      if(s<0.3&&l>(k.startsWith('L_')?0.45:0.62)){const t0=k.startsWith('L_')?0.45:0.62;l=t0+(l-t0)*0.6;h=0.09;s=Math.max(s,0.16);}else if(s>0.5){s*=0.8;l*=0.95;}
+      const x=Pp.getX(i),y=Pp.getY(i),z=Pp.getZ(i),n=Math.sin(x*91.7+y*47.3+z*63.1)*43758.5453;l*=0.92+0.16*(n-Math.floor(n));
+      c.setHSL(h,s,Math.min(1,l));A.setXYZ(i,c.r,c.g,c.b);}A.needsUpdate=true;}}
 function muteKit(K){const c=new THREE.Color(),hs={h:0,s:0,l:0};for(const k in K){if(!(k.startsWith('h_')||k.startsWith('farm')||k==='stalls'))continue;const g=K[k],A=g&&g.attributes&&g.attributes.color;if(!A)continue;
     for(let i=0;i<A.count;i++){c.setRGB(A.getX(i),A.getY(i),A.getZ(i));c.getHSL(hs);const roof=hs.h<0.09||hs.h>0.95;if(hs.s>0.32&&!roof){c.setHSL(0.09,Math.min(hs.s,0.22),hs.l*0.92);A.setXYZ(i,c.r,c.g,c.b);}else if(roof&&hs.s>0.45){c.setHSL(hs.h,hs.s*0.82,hs.l*0.94);A.setXYZ(i,c.r,c.g,c.b);}}A.needsUpdate=true;}}
 // Habescha-Baukasten: Häuser, Stelen, Felsenkirche, Kloster auf dem Tafelberg, Kirche von Aksum, Burg von Gondar
@@ -13571,7 +13579,7 @@ function addCulKit(K){const B=PG.box,C=PG.cyl,CO=PG.cone,SP=PG.sph,R4=PG.roof;
   {const P=[part(B,0,0.002,0,0.13,0.004,0.12,'#8a6a46')];for(let k=0;k<20;k++){const a=k/20*6.28;P.push(part(C,Math.cos(a)*0.058,0.009,Math.sin(a)*0.05,0.003,0.018,0.003,'#6a4e30'));}
     for(const[x,z,r]of[[0,0,0.022],[-0.03,0.02,0.015],[0.03,0.018,0.015],[0.026,-0.024,0.014],[-0.028,-0.022,0.013]]){P.push(part(C,x,0.008,z,r,0.016,r,'#a0784e'),part(CO,x,0.026,z,r*1.25,0.022,r*1.25,'#a88c58'));}K.L_kraal=kitGeo(P);}}
 function loadKit(e){if(KIT[e]||KIT_LOADING[e]||typeof fetch==='undefined')return;KIT_LOADING[e]=true;
-  fetch(`models/kit${e}.json`).then(r=>{if(!r.ok)throw new Error('kit'+e);return r.json();}).then(j=>{KIT[e]=decodeKit(j);try{muteKit(KIT[e]);}catch(er){console.warn('Farben',er);}try{addHabKit(KIT[e]);addEafKit(KIT[e]);addCulKit(KIT[e]);}catch(er){console.warn('Habescha-Modelle',er);}try{pcKit(KIT[e]);}catch(er){console.warn('Großbauten',er);}try{vegHouseApply();}catch(er){}KIT_LOADING[e]=false;if(S&&ep()===e){CITY.forEach(c=>{c.sig='';c.ksig='';});syncCities();WMESH.forEach(m=>m.visible=false);}needRender=3;})
+  fetch(`models/kit${e}.json`).then(r=>{if(!r.ok)throw new Error('kit'+e);return r.json();}).then(j=>{KIT[e]=decodeKit(j);try{muteKit(KIT[e]);harmKit(KIT[e]);}catch(er){console.warn('Farben',er);}try{addHabKit(KIT[e]);addEafKit(KIT[e]);addCulKit(KIT[e]);}catch(er){console.warn('Habescha-Modelle',er);}try{pcKit(KIT[e]);}catch(er){console.warn('Großbauten',er);}try{vegHouseApply();}catch(er){}KIT_LOADING[e]=false;if(S&&ep()===e){CITY.forEach(c=>{c.sig='';c.ksig='';});syncCities();WMESH.forEach(m=>m.visible=false);}needRender=3;})
     .catch(err=>{KIT_LOADING[e]=false;console.warn('Baukasten',err);});}
 const OST_C=['aegyptisch','semitisch','persisch','arabisch','berber','kaukasisch'],MED_C=['latein','griechisch','punisch','iberisch'];
 function cityStyle(i,e){const c=cultOfProv(i),d=PROV_DEF[i];
@@ -13766,19 +13774,21 @@ function cityGround(c,i,R,st){if(c.gnd){c.g.remove(c.gnd);c.gnd.geometry.dispose
 
 // Stadt-Dioramen (Moritz' Modelle, je Kultur 3 Größen: _1 Dorf, _2 Stadt, _3 Großstadt mit Mauer) – Hauptdarstellung der Städte für die mittlere Zoomstufe
 const DIO_PK={st_a:['eu_ant','eu_ma','eu_nz','nord','orient','afrika','indien'],st_b:['ostasien_cn','ostasien_jp','suedost','steppe','meso','anden','nordam']},DIO_OF={};for(const pk in DIO_PK)for(const q of DIO_PK[pk])DIO_OF[q]=pk;
-const DIO_ON=true,DIO_SC=0.6;const DIO={raw:{},geo:{},mat:{},st:{}};
+const DIO_ON=true,DIO_SC=0.6;
+// Dioramen-Nachbesserung (Audit 3D): hängende Bodenschürze entfernen (Dreiecksliste, nur wenn Modell unverändert), Größenstufe Dorf kleiner
+const DIO_CUT={eu_ant_2:{ni:7554,t:[185,186,187,188,189,190,191,192,194,205,206,259,793,955,956,957,958,959,960,1298,1299,1303,1306,1315,1419,1439,1588,1589,1590,1592,1593,1594,1598,1602,1631,1981,1982,2393,2395,2401,2417,2423,2428,2435,2442,2448,2456,2465,2477,2484]}},DIO_SCF={eu_ma_1:0.8};const DIO={raw:{},geo:{},mat:{},st:{}};
 function dioLoad(pk){if(DIO.st[pk]||typeof fetch==='undefined')return;DIO.st[pk]=1;fetch('models/'+pk+'.json').then(r=>r.ok?r.json():null).then(j=>{if(!j){DIO.st[pk]=3;return;}Object.assign(DIO.raw,j);DIO.st[pk]=2;try{CITY.forEach(c=>{c.ksig='';});if(S)syncCities();needRender=3;}catch(e){console.warn('Dioramen',e);}}).catch(()=>{DIO.st[pk]=3;});}
 function dioPre(i,st,e){if(!DIO_ON||GFX.q==='leicht')return null;let q=null;try{q=pcPre(i,st,e);}catch(er){}return q&&DIO_OF[q]?q:null;}
 function dioReady(i,st,e){const q=dioPre(i,st,e);if(!q)return null;const pk=DIO_OF[q];if(DIO.st[pk]!==2){dioLoad(pk);return null;}return q;}
 function dioGeo(id){if(DIO.geo[id])return DIO.geo[id];const R=DIO.raw[id];if(!R)return null;const s=atob(R.v),u=new Uint8Array(s.length);for(let k=0;k<s.length;k++)u[k]=s.charCodeAt(k);
   const dv=new DataView(u.buffer),nv=dv.getUint32(0,true),ni=dv.getUint32(4,true);let o=8;const P=new Int16Array(u.buffer.slice(o,o+nv*6));o+=nv*6;const N=new Int8Array(u.buffer.slice(o,o+nv*3));o+=nv*3+((nv*3)%2);
-  const UV=new Uint16Array(u.buffer.slice(o,o+nv*4));o+=nv*4;const I=new Uint16Array(u.buffer.slice(o,o+ni*2));
+  const UV=new Uint16Array(u.buffer.slice(o,o+nv*4));o+=nv*4;let I=new Uint16Array(u.buffer.slice(o,o+ni*2));{const dc=DIO_CUT[id];if(dc&&dc.ni===ni){const D=new Set(dc.t),J=[];for(let t=0;t<ni/3;t++)if(!D.has(t))J.push(I[t*3],I[t*3+1],I[t*3+2]);I=Uint16Array.from(J);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(Float32Array.from(P,x=>x/20000),3));g.setAttribute('normal',new THREE.Float32BufferAttribute(Float32Array.from(N,x=>x/127),3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(Float32Array.from(UV,x=>x/65535),2));g.setIndex(new THREE.BufferAttribute(I,1));g.computeBoundingSphere();return DIO.geo[id]=g;}
 function dioMat(id){if(DIO.mat[id])return DIO.mat[id];const t=new THREE.TextureLoader().load(DIO.raw[id].t,()=>{needRender=3;});t.anisotropy=2;return DIO.mat[id]=new THREE.MeshLambertMaterial({map:t,emissive:0x303030,emissiveMap:t,emissiveIntensity:typeof MAPDIMK!=='undefined'?MAPDIMK:1});}
 function dioAttach(c,i,tier,e){if(c.dio){c.g.remove(c.dio);c.dio=null;}const st=cityStyle(i,e),q=dioReady(i,st,e);if(!q)return;
   const P=S?S.prov[i]:null,walls=tier>=3||(P&&P.b&&P.b.walls>0&&tier>=2),n=tier>=4||(walls&&tier>=3)?3:tier>=2?2:1,id=q+'_'+n,g=dioGeo(id);if(!g)return;
-  const m=new THREE.Mesh(g,dioMat(id)),W=CITY_R[tier]*2*DIO_SC*(n===3?1.08:n===2?1.0:0.9);m.scale.setScalar(W);m.rotation.set(0,hash(i*1.7,e+3)*Math.PI*2,0);
+  const m=new THREE.Mesh(g,dioMat(id)),W=CITY_R[tier]*2*DIO_SC*(n===3?1.08:n===2?1.0:0.9)*(DIO_SCF[id]||1);m.scale.setScalar(W);m.rotation.set(0,hash(i*1.7,e+3)*Math.PI*2,0);
   let cx=CAP[i].x,cz=CAP[i].z;const dv=dioRiverShift(cx,cz,W);cx+=dv.x;cz+=dv.z;let gy=0;for(let k=0;k<7;k++){const a=k*1.05,r=k?W*0.3:0;gy+=Math.max(heightAt(cx+Math.cos(a)*r,cz+Math.sin(a)*r),0)/7;}
   m.position.set(dv.x,Math.max(gy,0)-c.g.position.y-W*0.006,dv.z);m.renderOrder=2;c.g.add(m);c.dio=m;}
 function dioRiverShift(cx,cz,W){const R=W*0.42,o={x:0,z:0};try{let best=1e9,bx=0,bz=0;for(const L of RIVLINES){if(cx<L.x0-R-1||cx>L.x1+R+1||cz<L.z0-R-1||cz>L.z1+R+1)continue;const V=L.p;for(let k=1;k<V.length;k++){const ax=V[k-1].x,az=V[k-1].z,ex=V[k].x-ax,ez=V[k].z-az,l2=ex*ex+ez*ez||1e-9;let t=((cx-ax)*ex+(cz-az)*ez)/l2;t=t<0?0:t>1?1:t;const px=ax+ex*t,pz=az+ez*t,d=Math.hypot(cx-px,cz-pz)-(L.w||0)*0.5;if(d<best){best=d;bx=px;bz=pz;}}}
@@ -14045,9 +14055,21 @@ function shipLoGeo(e,f,id){const SG=SHIPLIB.get(e,true);id=id||shipIdFor(f,e);if
 let MDL_REQ=false;
 function mdlParse(buf){const h=new Uint32Array(buf,0,2),out=[];let o=8;for(const[nt,fac]of[[h[0],0],[h[1],1]]){const nv=nt*3,P=new Int16Array(buf.slice(o,o+nv*6));o+=nv*6;const N=new Int8Array(buf,o,nv*3);o+=nv*3;const C=new Uint8Array(buf,o,nv*3);o+=nv*3;
     const p=new Float32Array(nv*3),n=new Float32Array(nv*3),c=new Float32Array(nv*3);for(let i=0;i<nv*3;i++){p[i]=P[i]/16000;n[i]=N[i]/127;c[i]=C[i]/255;}out.push({p,n,c});}return out;}
+// Nachbesserungen einzelner PC-Modelle (Audit 3D, 26.10.): Farbe dämpfen/aufhellen (s/l/g), Drehung um y (ry), Bodenplatte versenken (sink, Modelleinheiten), drop = Modell nicht verwenden (Ersatz prozedural)
+const MDL_FIX={jag:{s:0.5,l:0.8},pla:{s:0.75,l:0.95},meso_tempel:{s:0.38,l:0.84},ger:{g:0.62,ry:Math.PI/2},gen_azt:{g:0.62},nordam_tempel:{drop:1},
+  w_akademie:{sink:0.093},w_amphitheater:{sink:0.069},w_basilika:{sink:0.059},w_bibliothek:{sink:0.138},w_kathedrale:{sink:0.034},w_universitas:{sink:0.064},w_arsenal:{sink:0.087},w_triumph:{sink:0.059},w_boerse:{sink:0.05},
+  lmk_stelen:{sink:0.07},lmk_lalibela:{sink:0.077},lmk_djenne:{sink:0.069},lmk_hagia:{sink:0.102},lmk_alhambra:{sink:0.113},lmk_kolosseum:{sink:0.086},lmk_parthenon:{sink:0.105},lmk_kaiserburg:{sink:0.048},lmk_stadtschloss:{sink:0.064},lmk_templomayor:{sink:0.037},lmk_angkor:{sink:0.085},lmk_himeji:{sink:0.073},lmk_taj:{sink:0.079}};
+function mdlFix(id,M){const f=MDL_FIX[id];if(!f||!M)return M;if(f.drop)return null;const c=new THREE.Color(),hs={h:0,s:0,l:0},co=Math.cos(f.ry||0),si=Math.sin(f.ry||0);
+  for(const g of M){if(f.s!=null||f.l!=null||f.g!=null)for(let i=0;i<g.c.length;i+=3){c.setRGB(g.c[i],g.c[i+1],g.c[i+2]);c.getHSL(hs);let l=hs.l;if(f.g)l=Math.pow(l,f.g);if(f.l!=null)l*=f.l;c.setHSL(hs.h,Math.min(1,hs.s*(f.s==null?1:f.s)),Math.min(1,l));g.c[i]=c.r;g.c[i+1]=c.g;g.c[i+2]=c.b;}
+    if(f.ry)for(let i=0;i<g.p.length;i+=3){const x=g.p[i],z=g.p[i+2],nx=g.n[i],nz=g.n[i+2];g.p[i]=x*co+z*si;g.p[i+2]=-x*si+z*co;g.n[i]=nx*co+nz*si;g.n[i+2]=-nx*si+nz*co;}
+    if(f.sink){for(let i=1;i<g.p.length;i+=3)g.p[i]-=f.sink;
+      // Sockelplatte: Dreiecke, die nach dem Versenken ganz auf/unter Bodenhöhe liegen, entfallen (Boden der Karte scheint durch)
+      const keep=[];for(let t=0;t<g.p.length;t+=9)if(Math.max(g.p[t+1],g.p[t+4],g.p[t+7])>0.015)keep.push(t);
+      if(keep.length*9<g.p.length){const p=new Float32Array(keep.length*9),n=new Float32Array(keep.length*9),cc=new Float32Array(keep.length*9);keep.forEach((t,k)=>{p.set(g.p.subarray(t,t+9),k*9);n.set(g.n.subarray(t,t+9),k*9);cc.set(g.c.subarray(t,t+9),k*9);});g.p=p;g.n=n;g.c=cc;}}}
+  return M;}
 // Lädt das Paket eines Modells bei Bedarf; true, wenn das Modell schon da ist
 function mdlNeed(id){if(!id)return false;if(MDL[id])return true;if(GFX.q==='leicht'||typeof fetch==='undefined')return false;const pk=MDL_OF[id];if(!pk||MDL_ST[pk])return false;MDL_ST[pk]=1;
-  fetch('models/'+pk+'.json').then(r=>r.ok?r.json():null).then(j=>{if(!j){MDL_ST[pk]=3;return;}for(const k in j){try{const s=atob(j[k]),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);MDL[k]=mdlParse(u.buffer);}catch(e){console.warn('Modell',k,e);}}MDL_ST[pk]=2;mdlRefresh(pk);})
+  fetch('models/'+pk+'.json').then(r=>r.ok?r.json():null).then(j=>{if(!j){MDL_ST[pk]=3;return;}for(const k in j){try{const s=atob(j[k]),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);MDL[k]=mdlFix(k,mdlParse(u.buffer));if(!MDL[k])delete MDL[k];}catch(e){console.warn('Modell',k,e);}}MDL_ST[pk]=2;mdlRefresh(pk);})
     .catch(e=>{MDL_ST[pk]=3;console.warn('Modellpaket',pk,e);});return false;}
 function mdlRefresh(pk){if(pk==='obj_b'||pk==='f_a2'){try{lifeModels();PORTSIG='';if(S){syncPorts();syncMarks();}CITY.forEach(c=>{c.psig='';c.ksig2='';});if(S)syncCities();TRG.traverse(o=>{if(o.isMesh&&o.geometry===VCARTG)o.geometry=vcartGeo();});}catch(e){console.warn('Objekte',e);}needRender=3;if(pk!=='f_a2')return;}if(pk==='s_all'){try{if(S){for(const[id,t]of FLT){scene.remove(t.g);try{t.chip.remove();}catch(e){}FLT.delete(id);}syncFleets();}}catch(e){console.warn('Schiffe',e);}needRender=3;return;}if(pk[0]==='f'){for(const h in HMAP){if(HMAP[h].fid){HMAP[h].b.dispose();HMAP[h].f.dispose();}delete HMAP[h];}for(const a in AGEO){AGEO[a].b.dispose();AGEO[a].f.dispose();delete AGEO[a];}for(const t of TOK.values())t.mk=null;try{if(S)syncTokens();}catch(e){}}
   else if(pk==='veg'||pk==='veg_eu'){try{vegPcApply();}catch(e){console.warn('Pflanzen',e);}}
@@ -14326,6 +14348,34 @@ function bubSet(a,dest,endPt){const B=bubLabel(a,dest,endPt);if(!B){bubPos=null;
   // sichtbaren Bereich einmal je Neuzeichnen bestimmen: unter der Kopfleiste, neben dem Blatt
   try{const t=$('#top'),tb=t&&!t.hidden?t.getBoundingClientRect().bottom:0,sh=$('#sheet'),sr=sh&&!sh.hidden&&!sh.classList.contains('collapsed')?sh.getBoundingClientRect():null,hi=$('#hint'),hr=hi&&!hi.hidden?hi.getBoundingClientRect():null;bubBox={top:tb+6,hr:hr&&hr.width>0?hr:null,sr:sr&&sr.width>0?sr:null,w:cmdBub.offsetWidth,h:cmdBub.offsetHeight};}catch(e){bubBox=null;}
   try{placeBub();}catch(e){}}
+// Heer-Marken: liegen mehrere Marken auf dem Bildschirm übereinander, fächern sie nebeneinander auf (Reihen zu höchstens 4)
+function placeChips(){const L=[];
+  for(const t2 of TOK.values()){const el=t2.chip;if(el.style.display==='none'||!t2.g.visible){el.style.visibility='hidden';continue;}const p=t2.g.position;
+    V.set(p.x,p.y+(t2.shad?0.6:0.55),p.z).project(camera);if(V.z>1||V.x<-1.2||V.x>1.2||V.y<-1.2||V.y>1.2){el.style.visibility='hidden';continue;}
+    L.push({el,id:t2.a?t2.a.id:0,x:(V.x+1)/2*innerWidth,y:(1-V.y)/2*innerHeight,w:el.offsetWidth||56});}
+  const n=L.length,par=L.map((_,i)=>i),f=i=>par[i]===i?i:(par[i]=f(par[i])),ov=(a,b,ax,ay,bx,by)=>Math.abs(ay-by)<30&&Math.abs(ax-bx)<(a.w+b.w)/2+4;
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(ov(L[i],L[j],L[i].x,L[i].y,L[j].x,L[j].y))par[f(i)]=f(j);
+  const lay=()=>{const G={};L.forEach((o,i)=>{(G[f(i)]=G[f(i)]||[]).push(o);});
+    for(const k in G){const g=G[k];if(g.length===1){g[0].sx=g[0].x;g[0].sy=g[0].y;g[0].stk=false;continue;}
+      g.sort((a,b)=>a.id-b.id);const cx=g.reduce((s,o)=>s+o.x,0)/g.length,cy=Math.max(...g.map(o=>o.y)),R=4;
+      for(let r=0;r*R<g.length;r++){const row=g.slice(r*R,r*R+R),W=row.reduce((s,o)=>s+o.w,0)+6*(row.length-1);let x=cx-W/2;
+        for(const o of row){o.sx=x+o.w/2;o.sy=cy-r*36;o.stk=true;x+=o.w+6;}}}};
+  // Auffächern kann neue Überschneidungen mit Nachbarn erzeugen: dann Gruppen zusammenlegen und neu legen (höchstens 3 Durchgänge)
+  for(let it=0;it<3;it++){lay();let ch=false;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(f(i)!==f(j)&&ov(L[i],L[j],L[i].sx,L[i].sy,L[j].sx,L[j].sy)){par[f(i)]=f(j);ch=true;}if(!ch)break;if(it===2)lay();}
+  for(const o of L){o.el.classList.toggle('stk',!!o.stk);o.el.style.visibility='';o.el.style.transform=`translate(${o.sx.toFixed(1)}px,${o.sy.toFixed(1)}px) translate(-50%,-100%)`;}
+}
+// Hinweisfeld: weicht aus, wenn es das gewählte Heer, die Befehlsblase oder das Ziel verdecken würde
+function placeHint(){const h=$('#hint');if(!h||h.hidden){if(h)h.classList.remove('hl');return;}
+  const keep=[];const a=UI.army!=null&&S?TOK.get(UI.army):null;
+  const pt=(x,y,z,r)=>{V.set(x,y,z).project(camera);if(V.z<=1)keep.push({x:(V.x+1)/2*innerWidth,y:(1-V.y)/2*innerHeight,r});};
+  if(a&&a.g.visible){const p=a.g.position;pt(p.x,p.y+0.15,p.z,44);pt(p.x,p.y+0.55,p.z,36);}
+  if(UI.previewPt)pt(UI.previewPt.x,UI.previewPt.y||0,UI.previewPt.z,30);
+  try{if(cmdBub.style.visibility!=='hidden'){const b=cmdBub.getBoundingClientRect();if(b.width)keep.push({x:b.left+b.width/2,y:b.top+b.height/2,r:Math.max(b.width,b.height)/2});}}catch(e){}
+  const r=h.getBoundingClientRect(),w=r.width,ht=r.height,left=h.classList.contains('hl');
+  if(!left)h._rx=r.right;const rx=h._rx!=null?h._rx-w:innerWidth-w-12;
+  const hit=x=>keep.some(k=>k.x+k.r>x&&k.x-k.r<x+w&&k.y+k.r>r.top&&k.y-k.r<r.top+ht);
+  const hitR=hit(left?rx:r.left),hitL=hit(12);
+  if(!left&&hitR&&!hitL)h.classList.add('hl');else if(left&&!hitR)h.classList.remove('hl');}
 function placeUndo(){const t=undoId!=null&&!BATTLE?TOK.get(undoId):null;if(t&&t.g.visible){const p=t.g.position;placeEl(undoBub,p.x,p.y+(t.shad?0.6:0.55),p.z,-34);}else undoBub.style.visibility='hidden';}
 function placeBub(){if(!bubPos){cmdBub.style.visibility='hidden';return;}V.set(bubPos.x,bubPos.y,bubPos.z).project(camera);if(V.z>1){cmdBub.style.visibility='hidden';return;}
   cmdBub.style.visibility='';const B=bubBox||{top:60,w:cmdBub.offsetWidth,h:cmdBub.offsetHeight};const w=B.w||200,h=B.h||50,m=8;
@@ -14713,10 +14763,10 @@ function frame(t){
   const showNames=CAM.d<15;
   PLAB.forEach((el,i)=>{if(!isAct(i)||!isKnown(i)||(!showNames&&!PROV_DEF[i].cap)){el.style.visibility='hidden';return;}const c=CAP[i];placeEl(el,c.x,c.hd+(PROV_DEF[i].cap?0.75:0.6),c.z);});
   for(const T of TOWNL){if(!showNames||CAM.d>11||PCENTER[T.pi].th!==CAM.th){T.el.style.visibility='hidden';continue;}placeEl(T.el,T.x,T.y,T.z);}
-  for(const t2 of TOK.values()){const p=t2.g.position;placeEl(t2.chip,p.x,p.y+(t2.shad?0.6:0.55),p.z);}
+  placeChips();
   for(const t2 of FLT.values()){if(!t2.g.visible)continue;const p=t2.g.position;placeEl(t2.chip,p.x,p.y+0.75,p.z);}
   if(pathLabPos)placeEl(pathLab,pathLabPos.x,pathLabPos.y,pathLabPos.z);
-  placeBub();placeUndo();
+  placeBub();placeUndo();try{placeHint();}catch(e){}
   for(const o of OCEAN_STUBS){if(o.on&&PCENTER[o.a].th===CAM.th)placeEl(o.el,o.x,0.45,o.z);else o.el.style.visibility='hidden';}
 }
 
