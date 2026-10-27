@@ -4853,13 +4853,15 @@ function epochTechCount(f,e){return TECHS.filter(t=>t.ep===e&&!t.xc&&hasTech(f,t
 function epochInfo(){const e=ep(),lead=Math.max(0,...PLAYABLE.filter(alive).map(f=>epochTechCount(f,e)));return{e,lead,min:S.epochTurn+EPOCH_MIN,max:S.epochTurn+EPOCH_MAX,mine:epochTechCount(S.player,e)};}
 // Geschichten: kein Epochenwechsel, auch nicht nach Sieg/Niederlage beim Weiterspielen – außer die Geschichte sieht ihn ausdrücklich vor (epochs:true)
 function scenNoEpoch(){return!!(S&&S.scen&&!(SCEN[S.scen.id]&&SCEN[S.scen.id].epochs));}
+function yearCapHit(){const e=ep(),E=EPOCHS[e],N=EPOCHS[e+1];return!!(S&&N&&!S.scen&&S.year>=N.year-E.ypt*2);}
 function checkEpoch(){
   if(ep()>=EPOCHS.length-1||scenNoEpoch())return;
   const I=epochInfo();
   const al=PLAYABLE.filter(alive),half=al.filter(f=>epochTechCount(f,I.e)>=EPOCH_TECHS).length>=Math.ceil(al.length/2);
-  const cond=S.turn>=I.min&&(I.mine>=EPOCH_TECHS||half),human=!S.mp&&alive(S.player);
-  if(S.turn>=I.max||(cond&&(!human||S.epGo))){S.epGo=false;S.epReady=false;doEpoch();return;}
-  if(cond&&human&&!S.epReady){S.epReady=true;addLog(`Eine neue Zeit kann beginnen: Du kannst das Zeitalter ${EPOCHS[I.e+1].gen} ausrufen. Spätestens in Runde ${I.max} beginnt es von selbst.`,true,'good');}
+  const cap=yearCapHit();if(cap&&S.epCapT==null)S.epCapT=S.turn;if(!cap)S.epCapT=null;
+  const cond=(S.turn>=I.min&&(I.mine>=EPOCH_TECHS||half))||cap,human=!S.mp&&alive(S.player);
+  if(S.turn>=I.max||(cap&&S.turn>=S.epCapT+3)||(cond&&(!human||S.epGo))){S.epGo=false;S.epReady=false;S.epCapT=null;doEpoch();return;}
+  if(cond&&human&&!S.epReady){S.epReady=true;addLog(cap?`Das Zeitalter ${EPOCHS[I.e].gen} neigt sich dem Ende: Du kannst das Zeitalter ${EPOCHS[I.e+1].gen} jetzt ausrufen. Spätestens in Runde ${S.epCapT+3} beginnt es von selbst.`:`Eine neue Zeit kann beginnen: Du kannst das Zeitalter ${EPOCHS[I.e+1].gen} ausrufen. Spätestens in Runde ${I.max} beginnt es von selbst.`,true,'good');}
 }
 // Volkswechsel des Spielers beim Epochenwechsel: neues Herrscherhaus; bei anderem Kulturkreis kulturpassende Namen und – wenn die Untertanen mehrheitlich so glauben – der Glaube des neuen Volkes
 function peopleSwitch(f,c0){const F=S.fac[f],D=F&&F.dyn;if(!F)return;let c1=null;try{c1=facCul(f);}catch(e){}
@@ -6913,12 +6915,12 @@ const EP_INTRO={
  4:['Massenheere und Nationen bestimmen die Zeit.','Fabriken und Chausseen tragen die Wirtschaft, Statthalter bauen weiter selbst.','Truppen ohne neue Ausrüstung verlieren gegen Linieninfanterie und Geschütze.']};
 // Vorbote und Ausrufen
 function epochState(){if(!S||ep()>=EPOCHS.length-1||scenNoEpoch())return null;const I=epochInfo(),al=PLAYABLE.filter(alive),nh=al.filter(f=>epochTechCount(f,I.e)>=EPOCH_TECHS).length,need=Math.ceil(al.length/2);
-  return{I,nh,need,cond:S.turn>=I.min&&(I.mine>=EPOCH_TECHS||nh>=need),near:S.turn>=I.min-5,next:EPOCHS[I.e+1]};}
-function epochInfoModal(){const X=epochState();if(!X)return;const{I,nh,need,next}=X;
+  const cap=yearCapHit(),last=Math.min(I.max,cap&&S.epCapT!=null?S.epCapT+3:I.max);return{I,nh,need,cap,last,cond:(S.turn>=I.min&&(I.mine>=EPOCH_TECHS||nh>=need))||cap,near:S.turn>=I.min-5||S.year>=EPOCHS[I.e+1].year-EPOCHS[I.e].ypt*6,next:EPOCHS[I.e+1]};}
+function epochInfoModal(){const X=epochState();if(!X)return;const{I,nh,need,next}=X;I.max=X.last;
   const row=(ok,t)=>`<li><span>${ok?'✓':'·'}</span>${t}</li>`;
   showModal(`<div class="ephero" style="background-image:url('img/ep_${I.e+1}.webp')"></div><p class="eyebrow" style="margin:0 0 6px">Eine neue Zeit naht</p><h2>${esc(next.name)}</h2>
   <p>${S.epGo?'Du hast die neue Epoche ausgerufen. Sie beginnt mit dem Ende dieser Runde.':X.cond?'Die Bedingungen sind erfüllt. Du entscheidest, wann die neue Epoche beginnt. Spätestens in Runde '+I.max+' beginnt sie von selbst.':'Noch ist es nicht so weit. Sobald die Bedingungen erfüllt sind, kannst du die neue Epoche selbst ausrufen.'}</p>
-  <ul class="log">${row(S.turn>=I.min,`Runde ${I.min} erreicht (jetzt ${S.turn})`)}${row(I.mine>=EPOCH_TECHS||nh>=need,`${EPOCH_TECHS} Techniken dieser Epoche (du: ${I.mine}) oder die Hälfte der Reiche (${nh} von ${need})`)}${row(false,`Spätestens in Runde ${I.max} beginnt sie von selbst`)}</ul>
+  <ul class="log">${row(S.turn>=I.min,`Runde ${I.min} erreicht (jetzt ${S.turn})`)}${row(I.mine>=EPOCH_TECHS||nh>=need,`${EPOCH_TECHS} Techniken dieser Epoche (du: ${I.mine}) oder die Hälfte der Reiche (${nh} von ${need})`)}${row(X.cap,`oder das Zeitalter ist zu Ende: Jahr ${fmtYear(next.year-EPOCHS[I.e].ypt*2)} erreicht (jetzt ${fmtYear(S.year)})`)}${row(false,`Spätestens in Runde ${X.last} beginnt sie von selbst`)}</ul>
   <p class="note">Beim Wechsel ziehst du Bilanz, erhältst Vermächtnisse, triffst eine Übergangsentscheidung und wählst eine Reform. Nutze die Zeit davor: Bauten fertigstellen, Story-Schritt abschließen, Gold zurücklegen.</p>
   ${X.cond&&!S.epGo?`<div class="row" style="margin-top:12px"><button class="btn primary" id="epGoBtn">${esc(next.name)} ausrufen</button></div>`:''}`,[]);
   const b=$('#epGoBtn');if(b)b.onclick=()=>{S.epGo=true;AUDIO.sfx('horn');closeModal();toast('Die neue Epoche beginnt mit dem Ende dieser Runde');addLog(`${FACTIONS[S.player].name} ruft das Zeitalter ${EPOCHS[ep()+1].gen} aus.`,true,'good');refresh();};}
@@ -12618,7 +12620,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
   for(const f of PLAYABLE)if(alive(f)){try{govRound(f);}catch(e){console.warn('Statthalter',e);}}
   try{if(!S.mp&&alive(S.player)){hofRound2(S.player);ratRound(S.player);}}catch(e){console.warn('Rat',e);}
   try{freeRound();}catch(e){console.warn('Freie',e);}
-  S.turn++;if(S.scen&&SCEN[S.scen.id]){const D=SCEN[S.scen.id];S.year=D.year+Math.floor((S.turn-S.scen.t0)*(D.ypt||1))+(S.scen.yoff||0);if(D.year<0&&S.year>=0)S.year+=1;}else{const E=EPOCHS[ep()];S.year+=E.ypt;if(EPOCHS[ep()+1])S.year=Math.min(S.year,EPOCHS[ep()+1].year-E.ypt);if(S.year===0)S.year=1;}
+  S.turn++;if(S.scen&&SCEN[S.scen.id]){const D=SCEN[S.scen.id];S.year=D.year+Math.floor((S.turn-S.scen.t0)*(D.ypt||1))+(S.scen.yoff||0);if(D.year<0&&S.year>=0)S.year+=1;}else{const E=EPOCHS[ep()],N=EPOCHS[ep()+1];let st=E.ypt;if(N){const cap=N.year-E.ypt,rem=cap-S.year;if(rem<=E.ypt*4)st=Math.max(0,Math.min(E.ypt,Math.ceil(rem/4)));S.year=Math.min(S.year+st,cap);}else S.year+=st;if(S.year===0)S.year=1;}
   try{oasEvents();}catch(e){console.warn('Ostasien',e);}
   checkEpoch();
 }
