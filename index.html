@@ -717,7 +717,7 @@ table.goods td:first-child{display:table-cell}
 .navbtn:hover,.navbtn:focus-visible{border-color:var(--bronze-hi)}
 .navbtn:active{transform:translateY(1px)}
 @media (max-width:860px){.navbtn span{display:none}.navbtn{min-width:40px;height:40px;padding:0 8px}}
-@media (max-width:600px){#navHof,#navLog{display:none}}
+
 @media (max-width:460px){.topnav{display:none}}
 
 #todo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 68px);left:12px;z-index:4;display:flex;flex-wrap:wrap;gap:6px;max-width:min(620px,58vw);pointer-events:none}
@@ -1097,6 +1097,35 @@ body.rotNeed #rotHint{display:flex}
 }
 @media (max-width:760px){body.cityopen #sheet{visibility:hidden}}
 @media (max-width:700px){.actions.soloclose{display:none}}
+
+/* Kopfleiste: Gold und Jahr behalten ihre Breite, Name des Reichs kürzt sich; Jahreszeit nur bei viel Platz (steht sonst im Tooltip) */
+#top .stat{flex-shrink:0}
+#top .fac{min-width:0;flex-shrink:1}
+#top .fnw{min-width:0;max-width:100%;overflow:hidden}
+#top .fnw>*{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:1240px){#year .ssn{display:none}}
+@media (max-width:1100px){#top .stat .k{max-width:96px}}
+
+.epbook{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}.epbook .btn{flex-shrink:0;min-height:40px}
+/* Menüführung: Bereiche, Unterreiter, Kurzhilfe, Zurück */
+.areatabs{margin:4px 0 8px;clear:both}
+.subtabs{clear:both}
+.subtabs{margin:-2px 0 10px;font-size:13px}
+.subtabs button{min-height:34px;padding:4px 12px;opacity:.92}
+.qhelp{margin-left:10px;vertical-align:middle;width:28px;height:28px;border-radius:50%;border:1px solid var(--bronze,#c99146);background:rgba(20,16,12,.6);color:var(--bronze-hi,#e4b86c);font:700 15px/1 var(--f-body,sans-serif);cursor:pointer}
+@media (pointer:coarse){.qhelp{width:34px;height:34px}}
+.qhelpbox{border-left:3px solid var(--bronze,#c99146);padding:6px 10px;background:rgba(201,145,70,.08);border-radius:6px;margin:0 0 10px}
+.dlgback{position:sticky;top:-8px;float:left;margin:-12px 10px 4px -8px;min-width:44px;min-height:44px;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:rgba(20,16,12,.85);color:var(--parchment,#eee);font-size:17px;cursor:pointer;z-index:3;display:flex;align-items:center;gap:6px}
+.dlgback span{font-size:13px}
+@media (max-width:760px){.dlgback span{display:none}}
+h3.mgrp{margin:12px 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#a99a80)}
+.navbtn svg.dipico{width:30px;height:30px;stroke:none}
+@media (max-width:739px){.navbtn svg.dipico{width:36px;height:36px}}
+details.stmore{margin:10px 0 0}details.stmore>summary{cursor:pointer;padding:10px 0;color:var(--bronze-hi,#e4b86c);font-weight:600}
+@media (max-height:500px){#start .lede{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
+
+/* Kopfleiste: unter 1100 px nur Symbole (Beschriftung per langem Drücken), damit Gold/Jahr nicht überlappen */
+@media (max-width:1099px){#top .navbtn span{display:none}}
 </style>
 
 <div id="loading"><div class="ldbox"><b>Die Welt wird gezeichnet …</b><span class="ldbar"><i></i></span><small id="ldTip"></small></div></div>
@@ -1148,9 +1177,10 @@ window.OFF=(function(){
   <div class="stat"><span class="k" id="epochName">Jahr</span><span class="v" id="year"></span></div>
   <div class="spacer"></div>
   <nav class="topnav" aria-label="Reichsverwaltung">
-    <button class="navbtn" id="navReich" aria-label="Reich und Diplomatie"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_reich" alt="" draggable="false"><span>Reich</span></button>
+    <button class="navbtn" id="navReich" aria-label="Reich"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_reich" alt="" draggable="false"><span>Reich</span></button>
+    <button class="navbtn" id="navDip" aria-label="Diplomatie"><svg class="uico dipico" viewBox="0 0 36 36" aria-hidden="true"><defs><linearGradient id="dipg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d79a"/><stop offset="1" stop-color="#a8792f"/></linearGradient></defs><path d="M9 5h16a3 3 0 0 1 3 3v17a5 5 0 0 1-5 5H11a3 3 0 0 1-3-3V8" fill="#3a2c1c" stroke="url(#dipg)" stroke-width="1.8"/><path d="M8 8a3 3 0 0 1 6 0v2H8z" fill="url(#dipg)"/><path d="M13 13h11M13 17h11M13 21h7" stroke="url(#dipg)" stroke-width="1.6" stroke-linecap="round"/><circle cx="25" cy="26" r="4.2" fill="#9c2f22" stroke="#f0c77a" stroke-width="1.2"/><path d="M23.5 29.5l-1.2 4 2.7-1.6 2.7 1.6-1.2-4" fill="#9c2f22"/></svg><span>Diplomatie</span></button>
     <button class="navbtn" id="navEco" aria-label="Wirtschaft"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_wirtschaft" alt="" draggable="false"><span>Wirtschaft</span></button>
-    <button class="navbtn" id="navHof" aria-label="Hof, Familie und Agenten"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_hof" alt="" draggable="false"><span>Hof</span></button>
+    <button class="navbtn" id="navHof" aria-label="Hof"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_hof" alt="" draggable="false"><span>Hof</span></button>
     <button class="navbtn" id="navLog" aria-label="Chronik"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_chronik" alt="" draggable="false"><span>Chronik</span></button>
   </nav>
   <button class="thrbtn" id="thrBtn" hidden aria-label="Bedrohungen"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_bedrohung" alt="" draggable="false"><b>0</b></button>
@@ -1192,15 +1222,17 @@ window.OFF=(function(){
       <div class="stmenu">
         <button class="stbig primary" id="contBtn" hidden></button>
         <button class="stbig" id="loadBtn"><b>Spielstand laden</b><small>Deine gespeicherten Spiele und die Cloud</small></button>
-        <button class="stbig" data-stgo="stStory"><b>Geschichte spielen</b><small>19 Geschichten und 3 Bonus-Geschichten, mit Kapiteln, Zielen und Rang</small></button>
+        <button class="stbig" data-stgo="stStory"><b>Geschichte spielen</b><small id="stStoryN">Geschichten mit Kapiteln, Zielen und Rang</small></button>
         <button class="stbig" data-stgo="stFree"><b>Endlos spielen</b><small>Wähle ein Volk und führe es durch fünf Epochen</small></button>
-        <button class="stbig" id="chronBtn"><b>Sammlung der Geschichten</b><small>Bilder und Geschichten aus gewonnenen Kapiteln</small></button>
+        <button class="stbig" id="chronBtn"><b>Geschichten</b><small>Bilder und Geschichten aus gewonnenen Kapiteln</small></button>
         <button class="stbig" id="achBtn"><b>Erfolge</b><small>Gesammelte Erfolge</small></button>
       </div>
       <div class="start-actions">
         <button class="btn" id="mpBtn">Mehrspieler</button>
         <button class="btn" id="impBtn">Spielstand importieren</button>
         <button class="btn" id="offBtn">Für unterwegs speichern</button>
+        <button class="btn" id="stSetBtn">Einstellungen</button>
+        <button class="btn" id="stHelpBtn">Hilfe</button>
       </div>
     </div>
     <div class="stview" id="stSub" hidden>
@@ -1208,11 +1240,13 @@ window.OFF=(function(){
       <div class="diffrow"><span>Schwierigkeit</span><div class="seg" id="diffSeg"></div></div>
       <div id="stStory" hidden><div class="scengrid" id="scenGrid"></div></div>
       <div id="stFree" hidden>
-        <h3 class="fh">Erweiterungen</h3><div class="chapgrid" id="chapGrid"></div>
-        <h3 class="fh">Vermächtnisse</h3><div id="legGrid"></div>
         <h3 class="fh">Wähle dein Volk</h3>
         <div class="setbox"><div class="diffrow epochrow"><span>Startepoche</span><div class="seg" id="epSeg"></div></div><p class="note" id="epNote" hidden></p><div class="diffrow controw"><span>Kontinente</span><div class="seg" id="contSeg"></div></div><p class="note" id="contNote">Die Alte Welt ist immer dabei. Weniger Kontinente heißt weniger Reiche und schnellere Runden.</p></div><p class="note" style="margin:-6px 0 12px">Tippe auf ein Volk für Herrscher, Startgebiet, Truppen und Besonderheiten.</p>
         <div class="facgrid" id="facGrid"></div>
+        <details class="stmore"><summary>Erweiterungen und Vermächtnisse</summary>
+          <h3 class="fh">Erweiterungen</h3><div class="chapgrid" id="chapGrid"></div>
+          <h3 class="fh">Vermächtnisse</h3><div id="legGrid"></div>
+        </details>
       </div>
     </div>
     <div id="testSaves" hidden></div>
@@ -2218,8 +2252,8 @@ const REGION_LIST=[
   {id:'bengalen_r',name:"Bengalen",p:[[], [], ["bengalen_s"], ["bengalen_n"]]},
   {id:'dekkan_r',name:"Dekkan",p:[[], [], ["dekkan_s"], ["marathen", "haiderabad"]]},
   {id:'sued_r',name:"Südindien",p:[[], [], ["vijayanagara"], ["mysore_k"]]},
-  {id:'cn_nord',name:"Nordchina",p:[["nwei","yan_h"], ["song","liao","hou_liang","jin_shatuo"], ["ming","shun_d"], ["qing"]]},
-  {id:'cn_west',name:"Westchina und Sichuan",p:[["qin_h","liang_n","nwei"], ["tang","shu_q","xixia","song"], ["ming","wu_s","shun_d"], ["qing","pingnan"]]},
+  {id:'cn_nord',name:"Nordchina",p:[["nwei","yan_h"], ["song","liao","hou_liang","jin_shatuo"], ["ming"], ["qing"]]},
+  {id:'cn_west',name:"Westchina und Sichuan",p:[["qin_h","liang_n","nwei"], ["tang","shu_q","xixia","song"], ["ming","wu_s"], ["qing"]]},
   {id:'cn_mitte',name:"Mittelchina am Jangtse",p:[["jin_s"], ["song","nantang","wuyue"], ["ming","suedming"], ["qing","taiping"]]},
   {id:'cn_sued',name:"Südchina",p:[["jin_s"], ["song","nanhan","chu_ma","min_k"], ["ming","suedming","tungning"], ["qing","taiping"]]},
   {id:'mandschurei',name:"Mandschurei",p:[["goguryeo","buyeo"], ["liao","balhae"], ["jurchen"], ["qing"]]},
@@ -2788,7 +2822,7 @@ function newsText(n){const d=PROV_DEF[n.pi],c=esc(d.city||d.name),pn=esc(d.name)
   if(n.k==='revolt')return{eb:'Meldung · Aufstand',t:`${c} hat sich erhoben`,p:`Aufständische haben die Garnison von ${pn} vertrieben und die Tore geschlossen. Die Provinz ist jetzt frei. Mit einem Heer kannst du sie zurückholen, doch die Bürger werden sich daran erinnern.`,tone:'bad'};
   if(n.k==='lost')return{eb:'Meldung · Verlust',t:`${c} ist gefallen`,p:`${pn} ist an ${by||'den Feind'} gefallen. Rauch steht über den Dächern, Flüchtlinge ziehen mit ihrer Habe über die Straßen. Die Bauten der Stadt haben Schaden genommen.`,tone:'bad'};
   if(n.k==='siege')return{eb:'Meldung · Belagerung',t:`${c} wird belagert`,p:`${by||'Ein Feind'} hat ${pn} eingeschlossen. Jede Runde schwindet die Garnison. Schick ein Heer, um die Belagerung zu brechen, sonst ergibt sich die Stadt.`,tone:'bad'};
-  if(n.k==='lvl'){const l=lvlOf(n.pi);return{eb:'Meldung · Wachstum',t:`${c} ist jetzt eine ${LVLN[l]}`,p:`Neue Viertel, Werkstätten und Märkte: ${pn} ist gewachsen. Mehr Bürger zahlen Steuern, und neue Gebäude sind möglich. Die Siedlung braucht jetzt aber auch mehr Waren.`,tone:'good'};}
+  if(n.k==='lvl'){const l=lvlOf(n.pi);return{eb:'Meldung · Wachstum',t:`${c} ist jetzt ${LVL_ART[l]||'ein'} ${LVLN[l]}`,p:`Neue Viertel, Werkstätten und Märkte: ${pn} ist gewachsen. Mehr Bürger zahlen Steuern, und neue Gebäude sind möglich. Die Siedlung braucht jetzt aber auch mehr Waren.`,tone:'good'};}
   if(n.k==='conq')return{eb:'Meldung · Eroberung',t:`${c} gehört dir`,p:`Deine Truppen ziehen in ${pn} ein. Die Bürger beobachten die neuen Herren mit Misstrauen. In den ersten Runden ist mit Unruhe zu rechnen.`,tone:'good'};
   return{eb:'Meldung',t:pn,p:'',tone:'info'};}
 function showAgentEvent(n,next){const ag=agentsOf(S.player).find(a=>a.id===n.ag);if(!ag||!ag.act){next();return;}const A=AG_ACTS[ag.act],pn=PROV_DEF[ag.tgt].name,c=Math.round(40*EPOCH_COST[ep()]);
@@ -3111,7 +3145,7 @@ const NEEDS=[[],
   [{id:'wein',g:['wein'],k:0.3,n:'Wein und Öl',b:'Weingut'},{id:'schmuck',g:['schmuck'],k:0.25,n:'Schmuck',b:'Mine mit Gold oder Silber und Goldschmied'},{id:'moebel',g:['moebel'],k:0.25,n:'Möbel',b:'Holzfäller und Tischlerei'},{id:'schreib',g:['schreib'],k:0.15,n:'Bücher (Schreibstoff)',b:'Schreibstube, später Papiermühle und Druckerei'},{id:'fern',g:['seide','weihrauch','purpur','bernstein'],k:0.15,n:'Fernwaren',b:'Handel mit fernen Ländern: Weihrauch aus Arabien, Bernstein von der Ostsee, Purpur aus Phönikien, Seide aus Indien'},{id:'lux',g:['gewuerz','zucker','pelz'],k:0.25,n:'Luxuswaren',b:'Plantage, Gewürzgarten oder Pelzposten',ep:3}]];
 
 // ---------- Siedlungsstufen ----------
-const LVLN=['','Dorf','Marktflecken','Stadt','Großstadt','Metropole'],LVL_COL=['#8f8676','#e0c86a','#58c23a','#2a86ea','#a24fe8','#ff9f10'];
+const LVL_ART=['','ein','ein','eine','eine','eine'],LVL_ZU=['','zum','zum','zur','zur','zur'];const LVLN=['','Dorf','Marktflecken','Stadt','Großstadt','Metropole'],LVL_COL=['#8f8676','#e0c86a','#58c23a','#2a86ea','#a24fe8','#ff9f10'];
 const LVL_NEEDS=[[],[],
   [{id:'kleid',g:['tuch'],k:0.3,n:'Kleidung (Tuch)',b:'Schäferei und Weberei'},{id:'geschirr',g:['keramik'],k:0.2,n:'Geschirr',b:'Töpferei'}],
   [{id:'trank',g:['wein','bier','met'],k:0.3,n:'Wein, Bier oder Met',b:'Weingut, Brauerei oder Imkerei und Metsiederei'},{id:'werkzeug',g:['werkzeug'],k:0.15,n:'Werkzeug',b:'Mine, Schmelze und Werkzeugschmiede'}],
@@ -3134,7 +3168,7 @@ function lvlUpCost(f,pi){const l=lvlOf(pi)+1,R=LVL_UP[l];if(!R)return null;const
 function canLvlUp(f,pi){const P=S.prov[pi];if(P.owner!==f)return{ok:false,why:'Nicht deine Provinz'};const l=lvlOf(pi);if(l>=5)return{ok:false,why:'Höchste Stufe'};if(l>=4&&pKind(pi)==='burg')return{ok:false,why:'Eine Burg wächst höchstens zur Großstadt'};if(l>=3&&!pKind(pi)&&!isCapProv(pi))return{ok:false,why:'Erst Burg oder Stadt wählen'};if(P.up)return{ok:false,why:'Aufstieg läuft'};
   if((P.gr||0)<100)return{ok:false,why:`Wachstum ${Math.round(P.gr||0)} von 100`};const c=lvlUpCost(f,pi);if(S.fac[f].gold<c.total)return{ok:false,why:'Zu wenig Gold',c};return{ok:true,c};}
 function startLvlUp(f,pi){const k=canLvlUp(f,pi);if(!k.ok)return false;S.fac[f].gold-=k.c.total;takeGoods(f,k.c.goods);S.prov[pi].up={t:2,l:k.c.l};
-  if(f===S.player)addLog(`${PROV_DEF[pi].city||PROV_DEF[pi].name}: Ausbau zur ${LVLN[k.c.l]} beginnt (2 Runden).`,true,'info');return true;}
+  if(f===S.player)addLog(`${PROV_DEF[pi].city||PROV_DEF[pi].name}: Ausbau ${LVL_ZU[k.c.l]||'zur'} ${LVLN[k.c.l]} beginnt (2 Runden).`,true,'info');return true;}
 function tierReq(pi,t){const P=S.prov[pi];
   if(t===1)return[{ok:P.b.market>=1,n:'Markt'},{ok:P.pop>=1,n:'Bevölkerung 1,0'}];
   if(t===2)return[{ok:P.b.market>=2,n:'Markt II'},{ok:(P.b.temple||0)>=1||(P.b.library||0)>=1,n:'Tempel oder Bibliothek'},{ok:P.pop>=1.5,n:'Bevölkerung 1,5'}];return[];}
@@ -3171,8 +3205,8 @@ function tierHtml(pi){const P=S.prov[pi];if(P.owner==='frei')return'';const own=
     x+=`<div class="needg">${L.map(N=>{const r=su.by&&su.by[N.id]!=null?su.by[N.id]:0;const ac=N.id!=='food'&&autoCover(N,pi);return`<div><span>${gIcon(N.g[0],'gis')}${N.n}${ac?' <small class="okc" title="Markt oder Lagerhaus versorgen automatisch">· Markt</small>':''}</span><span class="pbar"><i style="width:${pc(r)}%;background:${r>=0.75?'var(--good)':r>=0.5?'#d9b04a':'var(--danger)'}"></i></span><b class="num ${col(r)}">${pc(r)} %</b></div>`;}).join('')}</div>`;
     x+=`<p class="note" style="margin:6px 0 0">Ab 75 % Versorgung wächst die Siedlung, unter 50 % schrumpft der Balken. Bleibt er acht Runden leer, fällt sie eine Stufe zurück.${su.k<0.95?` Auf dem Weg hierher gehen ${100-pc(su.k)} % verloren, Straßenstation oder Lagerhaus helfen.`:''}</p>`;
     if(l<5){const nx=LVL_NEEDS[l+1].filter(needOn);x+=`<p class="note" style="margin:4px 0 0">Als ${LVLN[l+1]} braucht sie zusätzlich ${nx.map(N=>N.n).join(', ')}. Sie bekommt einen Bauplatz und einen Betriebsplatz mehr und schaltet ${Object.keys(BLVL).filter(k=>BLVL[k]===l+1&&!(BUILDINGS[k].ep>ep())).map(k=>bName(k)).join(', ')||'weitere Gebäude'} frei.</p>`;}
-    if(P.up)x+=`<p class="note" style="color:var(--good)">Ausbau zur ${LVLN[P.up.l]}: noch ${P.up.t} ${P.up.t===1?'Runde':'Runden'}.</p>`;
-    else if(l<5&&gr>=100){const k=canLvlUp(S.player,pi),c=lvlUpCost(S.player,pi);x+=`<div class="row" style="margin-top:6px"><button class="btn${k.ok?' primary':''}" data-act="lvlup"${k.ok?'':' disabled'}>Aufstieg zur ${LVLN[c.l]} · ${c.total} Gold</button></div><p class="note" style="margin:2px 0 0">Baustoffe: <span class="gts">${goodsTag(S.player,c.goods)}</span>${c.gold?` · ${c.gold} Gold`:''} · 2 Runden${k.ok?'':' · '+k.why}</p>`;}}
+    if(P.up)x+=`<p class="note" style="color:var(--good)">Ausbau ${LVL_ZU[P.up.l]||'zur'} ${LVLN[P.up.l]}: noch ${P.up.t} ${P.up.t===1?'Runde':'Runden'}.</p>`;
+    else if(l<5&&gr>=100){const k=canLvlUp(S.player,pi),c=lvlUpCost(S.player,pi);x+=`<div class="row" style="margin-top:6px"><button class="btn${k.ok?' primary':''}" data-act="lvlup"${k.ok?'':' disabled'}>Aufstieg ${LVL_ZU[c.l]||'zur'} ${LVLN[c.l]} · ${c.total} Gold</button></div><p class="note" style="margin:2px 0 0">Baustoffe: <span class="gts">${goodsTag(S.player,c.goods)}</span>${c.gold?` · ${c.gold} Gold`:''} · 2 Runden${k.ok?'':' · '+k.why}</p>`;}}
   return x+'</div></details>';}
 // Handelspartner liefern Überschüsse an Waren, die dir fehlen (gegen Bezahlung)
 function importGoods(f){const F=S.fac[f],E=F.eco;if(!E)return;const st=F.store||(F.store={}),cap=storeCap(f);F.imp={};let paid=0;
@@ -3282,7 +3316,7 @@ function ecoRound(f){
     if(P.up){}else if(sp>=0.75){if(l<5)P.gr=Math.min(100,(P.gr||0)+LVL_RATE[l]*(0.6+(sp-0.75)*1.6));P.bad=0;}
     else if(sp<0.5){P.gr=Math.max(0,(P.gr||0)-6);if((P.gr||0)<=0){P.bad=(P.bad||0)+1;if(P.bad>=8&&l>1){P.lvl=l-1;P.gr=50;P.bad=0;if(f===S.player)addLog(`${PROV_DEF[pi].city||PROV_DEF[pi].name} verfällt zum ${LVLN[l-1]}: Seit Runden fehlen Waren.`,true,'bad');}}}
     else P.bad=0;
-    if((P.gr||0)>=100&&l<5&&!P.up&&!P.grMsg&&f===S.player){P.grMsg=true;addLog(`${PROV_DEF[pi].city||PROV_DEF[pi].name} kann zur ${LVLN[l+1]} aufsteigen.`,true,'good');}
+    if((P.gr||0)>=100&&l<5&&!P.up&&!P.grMsg&&f===S.player){P.grMsg=true;addLog(`${PROV_DEF[pi].city||PROV_DEF[pi].name} kann ${LVL_ZU[l+1]||'zur'} ${LVLN[l+1]} aufsteigen.`,true,'good');}
     // Stände aus der Stufe, Mangel trifft zuerst die höchste Schicht
     const T=LVL_SH[lvlOf(pi)];let c=T.c,n=T.n;if(sp<0.6){n*=0.4;c*=0.75;}else if(sp>=0.9){c+=0.03;n+=n>0?0.02:0;}
     P.sh={c:Math.round(c*1000)/1000,n:Math.round(n*1000)/1000};const t0=P.tier||0;P.tier=shTier(P);P.tierP=0;
@@ -3545,7 +3579,8 @@ function openEconomy(tab){
   const fm=v=>(Math.round(v*10)/10).toLocaleString('de-DE');
   const bar=r=>`<span class="pbar"><i style="width:${Math.round(clamp(r,0,1)*100)}%;background:${r>=1?'var(--good)':r>=0.8?'#d9b04a':'var(--danger)'}"></i></span>`;
   const tabs=[['over','Übersicht'],['fin','Haushalt'],['cit','Siedlungen'],['chain','Ketten'],['prov','Provinzen'],['trans','Transport'],['trade','Handel'],...(compsOn()?[['komp','Kompanien']]:[])];if(ECO_TAB==='komp'&&!compsOn())ECO_TAB='over';
-  let h=`<h2>Wirtschaft</h2><p class="sub">${esc(FACTIONS[f].name)} · ${own.length} Provinzen · Lager bis ${storeCap(f)} je Ware</p><div class="seg ecotabs">${tabs.map(([k,n])=>`<button data-etab="${k}" class="${ECO_TAB===k?'on':''}">${n}</button>`).join('')}</div>`;
+  const EG=[['Haushalt',['fin']],['Waren',['over','chain']],['Siedlungen',['cit','prov']],['Handel',['trade','trans',...(compsOn()?['komp']:[])]]],TN=Object.fromEntries(tabs),eg=EG.find(g=>g[1].includes(ECO_TAB))||EG[1];
+  let h=`<h2>Wirtschaft</h2><p class="sub">${esc(FACTIONS[f].name)} · ${own.length} Provinzen · Lager bis ${storeCap(f)} je Ware</p><div class="seg ecotabs areatabs">${EG.map(([n,ks])=>`<button data-etab="${ks.includes(ECO_TAB)?ECO_TAB:ks[0]}" class="${ks.includes(ECO_TAB)?'on':''}">${n}</button>`).join('')}</div>${eg[1].length>1?`<div class="seg subtabs">${eg[1].map(k=>`<button data-etab="${k}" class="${ECO_TAB===k?'on':''}">${TN[k]}</button>`).join('')}</div>`:''}`;
   const PP={};for(const pi of own)PP[pi]=provProd(pi);
   if(ECO_TAB==='over'){
     const rows=GKEYS.map(g=>({g,pr:E.prod[g]||0,us:E.use[g]||0,v:st[g]||0})).filter(x=>x.pr>0.05||x.us>0.05||x.v>0.05||['erz','metall','waffen','holz','stein'].includes(x.g));const hints=ecoHints(f);
@@ -3553,10 +3588,13 @@ function openEconomy(tab){
     ${needsHtml(f)}${hints.length?`<h3>Engpässe</h3><ul class="hints">${hints.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
     <h3>Waren pro Runde</h3><table class="rank goods"><thead><tr><th>Ware</th><th>Lager</th><th>Erzeugt</th><th>Verbraucht</th><th>Preis</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${gIcon(x.g)} ${GOODS[x.g].n}</td><td class="num">${fm(x.v)}</td><td class="num" style="color:var(--good)">${x.pr>0.05?'+'+fm(x.pr):'–'}</td><td class="num" style="color:#e7907a">${x.us>0.05?'−'+fm(x.us):'–'}</td><td class="num" style="color:${(S.prices&&S.prices[x.g]||1)>1.15?'#f0a08c':(S.prices&&S.prices[x.g]||1)<0.85?'#9fdc7c':'inherit'}">${fm(priceOf(x.g))}</td><td><button class="gsrc" data-gsrc="${x.g}">${F.imp&&F.imp[x.g]?'⇄ ':''}Woher?</button>${x.us>x.pr+0.15||(x.v<2&&x.us>0)?`<button class="gsrc buy" data-proc="${x.g}">Beschaffen</button>`:''}${x.g!=='edel'?`<button class="gsrc${F.hold&&F.hold[x.g]?' on':''}" data-hold="${x.g}" title="Horten: kein Verkauf, Lager bis zur doppelten Grenze">${F.hold&&F.hold[x.g]?'Horten':'Verkaufen'}</button>`:''}</td></tr>`).join('')}</tbody></table><p class="note">„Verkaufen“: Überschuss über der Lagergrenze geht jede Runde auf den Markt. „Horten“: nichts wird verkauft, das Lager fasst das Doppelte, darüber verdirbt Ware. Horten lohnt sich, wenn ein Preis gerade fällt.</p>`;
   }else if(ECO_TAB==='fin'){
+    {const F=S.fac[f];h+=`<h3>Steuersatz</h3><div class="seg">${Object.keys(TAX).map(k=>`<button data-tax="${k}" class="${F.taxRate===k?'on':''}">${TAX[k].name}</button>`).join('')}</div>
+  <p class="note">Niedrig: −20 % Steuern, Ordnung +2, mehr Wachstum. Hoch: +25 % Steuern, Ordnung −3, weniger Wachstum.</p>
+  `;}
     const I=income(f),H=S.finH||[],row=(l,v,c)=>`<tr><td>${l}</td><td class="num" style="color:${c||(v>=0?'var(--good)':'#e7907a')}">${v>=0?'+':'−'}${fm(Math.abs(v))}</td></tr>`;
     h+=leaksHtml(f);
     h+=`<div class="stats four"><div><span>Schatz</span><b>${fm(F.gold)}</b></div><div><span>Bilanz je Runde</span><b class="${I.net>=0?'okc':'badc'}">${I.net>=0?'+':'−'}${fm(Math.abs(I.net))}</b></div><div><span>Steuern</span><b>${fm(I.tax)}</b></div><div><span>Sold</span><b>${fm(I.upk)}</b></div></div>
-    <h3>Einnahmen und Ausgaben je Runde</h3><table class="rank"><tbody>${(()=>{let al=0;try{al=Math.min(I.tax,Math.round(provsOf(f).filter(pi=>S.prov[pi].alt).reduce((s,pi)=>s+provIncome(pi),0)));}catch(e){}return row('Steuern',I.tax-al)+(al?row('Altepetl-Tribut (Kakao, Mäntel, Federn)',al):'');})()}${row('Handelsverträge',I.trade)}${I.mono?row('Monopolrente',I.mono):''}${I.merch?row('Händler',I.merch):''}${I.post?row('Handelsposten',I.post):''}${I.cred?row('Kreditraten',I.cred):''}${I.comp?row('Kompanie und Dividenden',I.comp):''}${I.gk?row('Goldkarawanen',I.gk):''}${I.fx?row('Faktoreien und Seehandel',I.fx):''}${I.hort?row('Verwahrung des Schatzes (5 % über '+fm(hortCap())+', 12 % über '+fm(2*hortCap())+', 20 % über '+fm(4*hortCap())+' Gold, höchstens '+Math.round(HORT_MAX*100)+' % der Steuern)',-I.hort):''}${I.priv?row('Zunftabgaben',I.priv):''}${row('Warenverkauf',I.sale)}${(()=>{const T=tributeParts(f);return(T.dip?row('Tribut aus Verträgen',T.dip):'')+(T.vas?row('Vasallenabgaben',T.vas):'')+(T.tri?row('Tributgesandtschaften (Gegengeschenke)',T.tri):'');})()}${I.ez?row('Bonus Schwierigkeit „Leicht“ (+15 % Steuern)',I.ez):''}${I.kir?row('Kirche und Orden',-I.kir):''}${row('Sold der Heere',-I.upk)}${row('Hof, Ämter und Flotte',-I.hof)}${I.buy?row('Getreidekauf',-I.buy):''}${I.loan?row('Rate der Anleihe',-I.loan):''}<tr><td><b>Bilanz</b></td><td class="num"><b>${I.net>=0?'+':'−'}${fm(Math.abs(I.net))}</b></td></tr></tbody></table>`;
+    <h3>Einnahmen und Ausgaben je Runde</h3><table class="rank"><tbody>${(()=>{let al=0;try{al=Math.min(I.tax,Math.round(provsOf(f).filter(pi=>S.prov[pi].alt).reduce((s,pi)=>s+provIncome(pi),0)));}catch(e){}return row('Steuern',I.tax-al)+(al?row('Altepetl-Tribut (Kakao, Mäntel, Federn)',al):'');})()}${I.adm?row(`Verwaltungslast (${provsOf(f).length} Provinzen: ab ${ADM_FREE+1} kostet jede weitere 0,8 % der Steuern, höchstens 20 %; jetzt ${Math.round(admRate(f)*1000)/10} %)`,-I.adm):''}${row('Handelsverträge',I.trade)}${I.mono?row('Monopolrente',I.mono):''}${I.merch?row('Händler',I.merch):''}${I.post?row('Handelsposten',I.post):''}${I.cred?row('Kreditraten',I.cred):''}${I.comp?row('Kompanie und Dividenden',I.comp):''}${I.gk?row('Goldkarawanen',I.gk):''}${I.fx?row('Faktoreien und Seehandel',I.fx):''}${I.hort?row('Verwahrung des Schatzes (5 % über '+fm(hortCap())+', 12 % über '+fm(2*hortCap())+', 20 % über '+fm(4*hortCap())+' Gold, höchstens '+Math.round(HORT_MAX*100)+' % der Steuern)',-I.hort):''}${I.priv?row('Zunftabgaben',I.priv):''}${row('Warenverkauf',I.sale)}${(()=>{const T=tributeParts(f);return(T.dip?row('Tribut aus Verträgen',T.dip):'')+(T.vas?row('Vasallenabgaben',T.vas):'')+(T.tri?row('Tributgesandtschaften (Gegengeschenke)',T.tri):'');})()}${I.ez?row('Bonus Schwierigkeit „Leicht“ (+15 % Steuern)',I.ez):''}${I.kir?row('Kirche und Orden',-I.kir):''}${row('Sold der Heere',-I.upk)}${row('Hof, Ämter und Flotte',-I.hof)}${I.buy?row('Getreidekauf',-I.buy):''}${I.loan?row('Rate der Anleihe',-I.loan):''}<tr><td><b>Bilanz</b></td><td class="num"><b>${I.net>=0?'+':'−'}${fm(Math.abs(I.net))}</b></td></tr></tbody></table>`;
     if(H.length>1){const W=520,Hh=150,pl=40,pr=10,pt=10,pb=22,mx=Math.max(10,...H.map(x=>x[1])),mn=Math.min(0,...H.map(x=>x[1])),t0=H[0][0],t1=H[H.length-1][0],X=t=>pl+(t-t0)/Math.max(1,t1-t0)*(W-pl-pr),Y=v=>pt+(1-(v-mn)/(mx-mn||1))*(Hh-pt-pb);
       const nm=Math.max(5,...H.map(x=>Math.abs(x[2]))),Y2=v=>pt+(1-(v+nm)/(2*nm))*(Hh-pt-pb);
       h+=`<h3>Verlauf der letzten ${H.length} Runden</h3><svg viewBox="0 0 ${W} ${Hh}" class="chron"><line x1="${pl}" x2="${W-pr}" y1="${Y2(0)}" y2="${Y2(0)}" class="gl"/><text x="${pl-6}" y="${Y(mx)+4}" text-anchor="end" class="ax">${Math.round(mx)}</text><text x="${pl-6}" y="${Y(mn)+4}" text-anchor="end" class="ax">${Math.round(mn)}</text><text x="${pl}" y="${Hh-6}" class="ax">Runde ${t0}</text><text x="${W-pr}" y="${Hh-6}" text-anchor="end" class="ax">Runde ${t1}</text>
@@ -3604,12 +3642,13 @@ function openEconomy(tab){
     const lux=['zucker','gewuerz','pelz','wein','tuch','edel','waffen','pferde'];
     h+=`<div class="needs"><div><span>Verkauf</span><span class="muted" style="flex:1">${Math.round(saleRate(f)*100)} % des Marktpreises</span><b class="num">+${E.sale||0}</b></div><div><span>Handel</span><span class="muted" style="flex:1">${parts.length} ${parts.length===1?'Partner':'Partner'}</span><b class="num">+${tradeIncome(f)}</b></div><div><span>Kontor</span><span class="muted" style="flex:1">${kl?'Stufe '+roman(kl):'keines'}</span><b class="num">${kl?'+'+8*kl+' %':'–'}</b></div></div>
     <p class="note">Überschuss über der Lagergrenze wird jede Runde verkauft. Ein Handelskontor an der Küste hebt den Erlös, jeder Handelsvertrag bringt feste Einnahmen.</p>
-    ${flowHtml(f)}${powerHtml(f,parts)}${contractsHtml(f)}${parts.length?`<h3>Handelsrouten</h3>${routesHtml(f,parts)}`:'<p class="note">Noch keine Handelsverträge. Unter „Reich und Diplomatie“ kannst du welche anbieten.</p>'}
+    ${flowHtml(f)}${powerHtml(f,parts)}${contractsHtml(f)}${parts.length?`<h3>Handelsrouten</h3>${routesHtml(f,parts)}`:'<p class="note">Noch keine Handelsverträge. In der Diplomatie eines Reichs kannst du welche anbieten.</p>'}
     <h3>Marktpreise</h3><div class="gcards">${GKEYS.filter(g=>!GOODS[g].ep||ep()>=GOODS[g].ep).sort((a,b)=>priceOf(b)-priceOf(a)).map(g=>`<div class="gcard">${gIcon(g,'gbig')}<div><b>${GOODS[g].n}</b><small>Preis ${fm(priceOf(g))} · für dich ${fm(priceOf(g)*(g==='edel'?1:saleRate(f))*EPOCH_INC[ep()])}</small><small>Lager ${fm(st[g]||0)}</small></div></div>`).join('')}</div>
     ${ep()>=3?`<h3>Kolonien</h3><p class="note">Freie Küstenprovinzen in Amerika, Indien, Afrika und Arabien kannst du für ${colonyCost()} Gold besiedeln, wenn ein eigener Hafen mit Seeweg dorthin führt. Tippe dazu die Provinz an. Zucker, Gewürze und Pelze bringen die besten Preise.</p>`:''}`;
   }
-  showModal(h,[{label:'Reich und Diplomatie',fn:()=>openOverview()},{label:'Schließen',cls:'primary'}]);
-  const d=$('#dialog');d.classList.add('wide');
+  showModal(h,[]);
+  const d=$('#dialog');d.classList.add('wide');helpInject('eco',ECO_TAB);
+  d.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{S.fac[f].taxRate=b.dataset.tax;AUDIO.sfx('click');renderTop();renderSheet();openEconomy('fin');});
   d.querySelectorAll('[data-etab]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');openEconomy(b.dataset.etab);});
   d.querySelectorAll('[data-priv]').forEach(b=>b.onclick=()=>{const[r,k,on]=b.dataset.priv.split('|');if(setPriv(S.player,r,k,on==='1')){AUDIO.sfx(on==='1'?'coin':'click');}openEconomy('trade');});
   d.querySelectorAll('[data-leak]').forEach(b=>b.onclick=()=>{const pi=+b.dataset.leak;closeModal();UI.sel=pi;UI.mode='prov';focusProv(pi,6);$('#sheet').classList.remove('collapsed');refresh();});
@@ -3635,8 +3674,10 @@ const TIMG=new Set(['t_karren','t_karawane','t_kogge','t_fluss','t_kanal','t_ost
 
 
 let HOF_TAB='hof';
-function openHof(tab){if(tab)HOF_TAB=tab;if(tab&&tab!=='ag')AG_SEL=null;const f=S.player,F=S.fac[f],hof=hofOf(f);
-  let h=`<h2>Hof, Feldherren und Agenten</h2><p class="sub">${esc(FACTIONS[f].name)} · Gold ${F.gold} · Gehälter ${hofCost(f)} je Runde</p><div class="seg ecotabs">${[['hof','Ämter'],['gov','Statthalter'],['pol','Parteien'],['kir',S&&satrapOf(S.player)?'Glaube und Satrapien':'Glaube und Lehen'],['fam','Familie'],['gen','Feldherren'],['ag','Agenten']].map(([k,n])=>`<button data-htab="${k}" class="${HOF_TAB===k?'on':''}">${n}</button>`).join('')}</div>`;
+function openHof(tab){if(typeof tab!=='string')tab=null;if(tab)HOF_TAB=tab;if(tab&&tab!=='ag')AG_SEL=null;const f=S.player,F=S.fac[f],hof=hofOf(f);
+  if(HOF_TAB==='rat'){openRat();return;}
+  const HG=[['Ämter',['hof','gov','pol']],['Familie',['fam']],['Feldherren',['gen']],['Agenten',['ag']],['Glaube',['kir']],['Rat',['rat']]],HN={hof:'Ämter',gov:'Statthalter',pol:'Parteien'},hg=HG.find(g=>g[1].includes(HOF_TAB))||HG[0];
+  let h=`<h2>Hof</h2><p class="sub">${esc(FACTIONS[f].name)} · Gold ${F.gold} · Gehälter ${hofCost(f)} je Runde</p>${hofTabsHtml(HOF_TAB)}${hg[1].length>1?`<div class="seg subtabs">${hg[1].map(k=>`<button data-htab="${k}" class="${HOF_TAB===k?'on':''}">${HN[k]}</button>`).join('')}</div>`:''}`;
   if(HOF_TAB==='hof'){
     h+=`<p class="note">Ämter stärken dein Reich. Diplomat ab König, Heermeister ab Kaiser. Ernennen kostet einmalig Gold, danach zahlt jedes Amt ein Gehalt pro Runde. Alle acht Runden bewerben sich neue Kandidaten.</p>`;
     for(const o of OKEYS){const O=OFFICES[o],m=hof[o];
@@ -3645,15 +3686,15 @@ function openHof(tab){if(tab)HOF_TAB=tab;if(tab&&tab!=='ag')AG_SEL=null;const f=
         <div class="cands">${F.cand[o].map((c,i)=>{const cost=appointCost(c),ok=F.gold>=cost;return`<div class="cand"><b>${esc(c.n)}</b><small>${'★'.repeat(c.s)}${'☆'.repeat(3-c.s)} · ${MIN_TRAITS[c.t].n}</small><small>${O.d(minEff(c))}</small><small class="muted">${MIN_TRAITS[c.t].d} · Gehalt ${minSalary(c)}</small><button class="btn${ok?' primary':''}" data-appoint="${o}" data-i="${i}"${ok?'':' disabled'}>${m?'Ersetzen':'Ernennen'} · ${cost}</button></div>`;}).join('')}</div></div>`;}
   }else if(HOF_TAB==='gov'){h+=govTeamHtml(f);
   }else if(HOF_TAB==='pol'){h+=polHtml(f);
-  }else if(HOF_TAB==='kir'){h+=relHtml(f)+kirHtml(f);
+  }else if(HOF_TAB==='kir'){h+=relHtml(f)+kirHtml(f);if(S&&satrapOf(S.player))h+=`<p class="note">Satrapien und Lehen findest du hier unter Glaube.</p>`;
   }else if(HOF_TAB==='fam'){h+=famHtml(f);
   }else if(HOF_TAB==='ag'){h+=agentsTabHtml();
   }else{
     const mine=S.armies.filter(a=>a.f===f).sort((a,b)=>genOf(b).lvl-genOf(a).lvl||genOf(b).xp-genOf(a).xp);
     h+=`<p class="note">Jedes Heer führt ein Feldherr. Er sammelt in Schlachten Erfahrung, steigt bis Stufe 6 auf und erhält dabei neue Eigenschaften. Verliert sein Heer eine Schlacht, kann er fallen. Beim Zusammenlegen bleibt der erfahrenere Feldherr.</p>`;
-    h+=mine.map(a=>`<div class="genrow" data-gotoarmy="${a.id}">${genHtml(a,true)}<small class="muted">${esc(a.name)} · ${a.units.length} Einheiten · in ${esc(PROV_DEF[a.p].name)}</small></div>`).join('')||'<p class="note">Keine Heere.</p>';
+    h+=mine.map(a=>`<div class="genrow" data-gotoarmy="${a.id}">${genHtml(a,true)}<small class="muted">${esc(a.name)} · ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · in ${esc(PROV_DEF[a.p].name)}</small></div>`).join('')||'<p class="note">Keine Heere.</p>';
   }
-  showModal(h,[{label:'Schließen',cls:'primary'}]);const d=$('#dialog');d.classList.add('wide');
+  showModal(h,[]);const d=$('#dialog');d.classList.add('wide');helpInject('hof',HOF_TAB);
   d.querySelectorAll('[data-polgift]').forEach(b=>b.onclick=()=>{if(polGift(f,b.dataset.polgift)){AUDIO.sfx('coin');refresh();}openHof('pol');});
   d.querySelectorAll('[data-polconc]').forEach(b=>b.onclick=()=>{if(polConcede(f,b.dataset.polconc)){AUDIO.sfx('click');refresh();}openHof('pol');});
   d.querySelectorAll('[data-htab]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');openHof(b.dataset.htab);});if(HOF_TAB==='gov')try{govTeamBind(d,f);}catch(e){console.warn(e);}try{relBind(d,f);}catch(e){console.warn(e);}
@@ -3738,7 +3779,8 @@ function techCulHtml(f,e,row){const r=techRegion(f),L=CUL_TECHS.filter(t=>t.reg=
   const vis=L.filter(t=>(t.ep||0)<=e+1);
   if(vis.length)h+=vis.map(t=>(t.ep||0)>e?row(t).replace('<small>',`<small>Ab ${EPOCHS[t.ep].name}. `):row(t)).join('');
   return h+'</div>';}
-function openResearch(){
+let RES_TAB='mil';
+function openResearch(tab){
   const f=S.player,F=S.fac[f],rate=researchRate(f),e=ep(),I=epochInfo();
   const row=t=>{
     const done=hasTech(f,t.id),cur=F.res&&F.res.id===t.id,av=techAvail(f,t),sv=F.saved[t.id];
@@ -3759,14 +3801,20 @@ function openResearch(){
   let h=`<h2>Forschung · ${EPOCHS[e].name}</h2><p class="sub">${rate.toLocaleString('de-DE')} Punkte pro Runde${F.res?` · ${tName(f,TECH_BY[F.res.id])} in ${Math.max(1,Math.ceil(((TECH_BY[F.res.id].rep?repCost(f,TECH_BY[F.res.id].br):tCost(f,TECH_BY[F.res.id]))-F.res.prog)/rate))} Runden`:' · Wähle ein Ziel'}</p>`;
   if(e<EPOCHS.length-1)h+=`<p class="note" style="margin-top:-6px">Nächste Epoche, ${EPOCHS[e+1].name}: ab Runde ${I.min}, sobald ein Reich ${EPOCH_TECHS} Technologien dieser Epoche kennt (führend ${I.lead}, du ${I.mine}). Spätestens in Runde ${I.max}. Jetzt: Runde ${S.turn}.</p>`;
   {const t=F.res&&TECH_BY[F.res.id]&&!TECH_BY[F.res.id].rep?TECH_BY[F.res.id]:null;if(t)h+=`<div class="row" style="margin:-2px 0 10px"><button class="btn" id="tecMap">📜 Wer kennt ${esc(tName(f,t))}? Auf der Karte zeigen</button></div>`;}
-  h+=techCulHtml(f,e,row);
-  BRANCHES.forEach((bn,bi)=>{h+=`<div class="tbranch"><div class="tban" style="background-image:url('img/r_${['mil','eco','cul'][bi]}_e${e}.webp')"><h3>${bn}</h3></div>${branchHtml(bi,TECHS.filter(t=>t.br===bi&&t.ep===e&&!t.reg))}</div>`;});
+  const P={kul:techCulHtml(f,e,row)};
+  BRANCHES.forEach((bn,bi)=>{P[['mil','eco','cul'][bi]]=`<div class="tbranch"><div class="tban" style="background-image:url('img/r_${['mil','eco','cul'][bi]}_e${e}.webp')"><h3>${bn}</h3></div>${branchHtml(bi,TECHS.filter(t=>t.br===bi&&t.ep===e&&!t.reg))}</div>`;});
   {const left=TECHS.filter(t=>t.ep===e&&techAvail(f,t)).length;
-   h+=`<div class="tbranch"><h3>Fortschritte · wiederholbar</h3><p class="note" style="margin:0 0 6px">${left?'Jederzeit wählbar. Ein gewählter Fortschritt läuft danach Stufe um Stufe weiter, bis du etwas anderes wählst.':'Alle Technologien dieser Epoche sind erforscht. Ein gewählter Fortschritt läuft Stufe um Stufe weiter, jede Stufe wirkt dauerhaft und wird etwas teurer.'}</p>${REP.map(R=>{const n=repLv(f,R.br),c=repCost(f,R.br),cur=F.res&&F.res.id===R.id;return`<button class="tech${cur?' cur':''}" data-tech="${R.id}"><b>${R.name} ${roman(n+1)}</b><span class="ts">${cur?`${Math.floor(F.res.prog)}/${c}`:`${c} P`}</span><small>${R.d}. Bisher Stufe ${n}.</small>${cur?`<span class="pbar"><i style="width:${Math.round(F.res.prog/c*100)}%"></i></span>`:''}</button>`;}).join('')}</div>`;}
+   P.rep=`<div class="tbranch"><h3>Fortschritte · wiederholbar</h3><p class="note" style="margin:0 0 6px">${left?'Jederzeit wählbar. Ein gewählter Fortschritt läuft danach Stufe um Stufe weiter, bis du etwas anderes wählst.':'Alle Technologien dieser Epoche sind erforscht. Ein gewählter Fortschritt läuft Stufe um Stufe weiter, jede Stufe wirkt dauerhaft und wird etwas teurer.'}</p>${REP.map(R=>{const n=repLv(f,R.br),c=repCost(f,R.br),cur=F.res&&F.res.id===R.id;return`<button class="tech${cur?' cur':''}" data-tech="${R.id}"><b>${R.name} ${roman(n+1)}</b><span class="ts">${cur?`${Math.floor(F.res.prog)}/${c}`:`${c} P`}</span><small>${R.d}. Bisher Stufe ${n}.</small>${cur?`<span class="pbar"><i style="width:${Math.round(F.res.prog/c*100)}%"></i></span>`:''}</button>`;}).join('')}</div>`;}
   const old=TECHS.filter(t=>t.ep<e&&!t.reg&&techAvail(f,t));
-  if(old.length)h+=`<div class="tbranch"><h3>Ältere Epochen · noch offen</h3>${old.map(row).join('')}</div>`;
-  showModal(h,[{label:'Schließen'}]);$('#dialog').classList.add('wide');
-  document.querySelectorAll('[data-tech]').forEach(b=>b.onclick=()=>{if(F.res&&F.res.id===b.dataset.tech)return;setResearch(f,b.dataset.tech);AUDIO.sfx('click');renderTop();openResearch();});
+  ['mil','eco','cul'].forEach((k,bi)=>{const o=old.filter(t=>t.br===bi);if(o.length)P[k]+=`<div class="tbranch"><h3>Ältere Epochen · noch offen</h3>${o.map(row).join('')}</div>`;});
+  {const o=old.filter(t=>![0,1,2].includes(t.br));if(o.length)P.rep+=`<div class="tbranch"><h3>Ältere Epochen · noch offen</h3>${o.map(row).join('')}</div>`;}
+  const RT=[['mil',BRANCHES[0]],['eco',BRANCHES[1]],['cul',BRANCHES[2]],['kul','Eigenes Wissen'],['rep','Fortschritte']];
+  if(typeof tab==='string'&&P[tab]!=null)RES_TAB=tab;else if(typeof tab!=='string'&&F.res&&TECH_BY[F.res.id]){const t=TECH_BY[F.res.id];RES_TAB=t.reg?'kul':t.rep?'rep':['mil','eco','cul'][t.br]||RES_TAB;}
+  if(P[RES_TAB]==null)RES_TAB='mil';
+  h+=`<div class="seg ecotabs areatabs">${RT.map(([k,n])=>`<button data-rtab="${k}" class="${RES_TAB===k?'on':''}">${n}</button>`).join('')}</div>`+P[RES_TAB];
+  showModal(h,[]);$('#dialog').classList.add('wide');helpInject('res',RES_TAB);
+  document.querySelectorAll('[data-rtab]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');openResearch(b.dataset.rtab);});
+  document.querySelectorAll('[data-tech]').forEach(b=>b.onclick=()=>{if(F.res&&F.res.id===b.dataset.tech)return;setResearch(f,b.dataset.tech);AUDIO.sfx('click');renderTop();openResearch(RES_TAB);});
   {const b=$('#tecMap');if(b)b.onclick=()=>{AUDIO.sfx('click');TECVIEW=F.res.id;closeModal();if(MAPMODE==='tec')syncTiles();else setMapMode('tec');};}
 }
 // ---------- Grafikstufen und Leistungsanzeige ----------
@@ -4767,6 +4815,13 @@ function checkEpoch(){
   if(S.turn>=I.max||(cond&&(!human||S.epGo))){S.epGo=false;S.epReady=false;doEpoch();return;}
   if(cond&&human&&!S.epReady){S.epReady=true;addLog(`Eine neue Zeit kann beginnen: Du kannst das Zeitalter ${EPOCHS[I.e+1].gen} ausrufen. Spätestens in Runde ${I.max} beginnt es von selbst.`,true,'good');}
 }
+// Volkswechsel des Spielers beim Epochenwechsel: neues Herrscherhaus; bei anderem Kulturkreis kulturpassende Namen und – wenn die Untertanen mehrheitlich so glauben – der Glaube des neuen Volkes
+function peopleSwitch(f,c0){const F=S.fac[f],D=F&&F.dyn;if(!F)return;let c1=null;try{c1=facCul(f);}catch(e){}
+  if(D){const old=D.house;let h=null;try{h=cHouse(f);}catch(e){}if(!h||h===old){h=null;try{const c=facCul(f),CH=CUL_HOUSES[c];let C=CH?CH.slice(0,clamp(ep(),0,4)+1).filter(x=>x!==old):[];if(!C.length&&!housePool(f))C=(HOUSES[ep()]||[]).filter(x=>x!==old);if(C.length)h=CH?C[C.length-1]:rnd1x(C);}catch(e){}}
+    if(h&&h!==old){D.house=h;D.since=S.turn;addLog(`Mit ${FACTIONS[f].name} beginnt die Herrschaft des Hauses ${h}.`,true,'info');try{chronAdd('ruler',`Haus ${h} folgt auf Haus ${old}.`);}catch(e){}}
+    if(c1&&c0&&c1!==c0){const ps=[D.ruler,D.ruler&&D.ruler.sp,...(D.kids||[]),...(D.kin||[])].filter(Boolean);const was=D.ruler&&D.ruler.n;ps.forEach(p=>{try{orName(p,f);}catch(e){}});if(D.ruler&&was&&D.ruler.n!==was)addLog(`${was} herrscht nun unter dem Namen ${D.ruler.n}.`,true,'info');}}
+  if(c1&&c0&&c1!==c0){const r1=CUL_REL0[c1],cur=facRel(f);if(r1&&cur&&r1!==cur){const sh=relShares(f).find(x=>x[0]===r1);if(sh&&sh[1]>=0.5){setStateRel(f,r1,'Volkswechsel');addLog(`Der Glaube deines neuen Volkes wird Staatsglaube: ${relName(r1)}.`,true,'info');}
+    else addLog(`Dein neues Volk pflegt eigentlich ${relName(r1)}, doch deine Untertanen glauben überwiegend anders. Der Staatsglaube bleibt ${relName(cur)}; wechseln kannst du im Hof unter Glaube.`,true,'info');}}}
 function successorOptions(f,resv){
   const e=S.epoch,cnt={};for(const pi of provsOf(f)){const g=PROV_DEF[pi].reg;cnt[g]=(cnt[g]||0)+1;}
   const cap=capitalOf(f),cr=cap!=null?PROV_DEF[cap].reg:null;
@@ -4804,6 +4859,9 @@ function doEpoch(){
     const ps=sp.provs.map(id=>PI[id]).filter(i=>i!=null&&!isHumanP(S.prov[i].owner)&&!(COFF&&COFF[i]));if(!ps.length)continue;
     const prev=new Set(ps.map(i=>S.prov[i].owner).filter(o=>o!=='frei'));
     S.armies=S.armies.filter(a=>!ps.includes(a.p)||isHumanP(a.f));
+    // Spielerheere in Provinzen der neuen Macht ziehen in das nächste eigene Land zurück; laufende Belagerungen dort enden
+    try{for(const pi of ps){if(S.sieges&&S.sieges[pi])delete S.sieges[pi];}
+      for(const A of S.armies){if(!ps.includes(A.p)||!isHumanP(A.f))continue;const own=provsOf(A.f).filter(i=>!ps.includes(i));if(!own.length)continue;const P0=PROV_DEF[A.p];own.sort((x,y)=>Math.hypot(PROV_DEF[x].lon-P0.lon,PROV_DEF[x].lat-P0.lat)-Math.hypot(PROV_DEF[y].lon-P0.lon,PROV_DEF[y].lat-P0.lat));const from=A.p;A.p=own[0];A.goal=null;A.fz=null;A.mp=0;try{if(TOK&&TOK.get(A.id)){const t=TOK.get(A.id);t.target=CAP[A.p];}}catch(e){}if(A.f===S.player)addLog(`${A.name} zieht sich aus ${PROV_DEF[from].name} nach ${PROV_DEF[A.p].name} zurück: Dort entsteht ${FACTIONS[sp.slot].name}.`,true,'info');}}catch(er){console.warn('Spawn-Rückzug',er);}
     for(const k in S.dip){const[a,b]=k.split('|');if(a===sp.slot||b===sp.slot)delete S.dip[k];}
     for(const x in S.fac){const M=S.fac[x].met;if(M)delete M[sp.slot];}
     Object.assign(F,{gold:350*EPOCH_COST[e],alive:true,born:true,was:null,people:SLOT_PEOPLE[sp.slot],res:null,saved:{},taxRate:'normal'});
@@ -4828,6 +4886,8 @@ function doEpoch(){
     if(f!==S.player)addLog(`${old} wird zu ${FACTIONS[f].name}.`,false,'info');
   }
   for(const f of PLAYABLE)if(alive(f)&&!S.fac[f].res)S.fac[f].saved={};
+  // Reiche, die durch neue Mächte oder aktivierte Provinzen ihr ganzes Land verloren haben, gehen sofort unter und stehen im Bericht
+  try{news.fallen=PLAYABLE.filter(f=>S.fac[f]&&S.fac[f].alive&&!isHumanP(f)&&provsOf(f).length===0).map(f=>FACTIONS[f].name);if(news.fallen.length)checkElimination();}catch(er){console.warn('Untergang',er);}
   addLog(`Eine neue Epoche beginnt: ${EPOCHS[e].name}.`,true,'good');
   S.epochNews=news;
   if(S.mp){S.mp.epNews={};for(const h of S.mp.humans)if(alive(h))S.mp.epNews[h]=Object.assign({},news,news.chBy&&news.chBy[h]?news.chBy[h]:{choice:null,keep:null});S.epochNews=null;}
@@ -6861,19 +6921,28 @@ function faithWaveChoice(done){const f=S.player,F=S.fac[f],W=F&&F.relWave;if(!W|
     if(b.dataset.wave==='go'){setStateRel(f,W.nr,'Glaubenswelle');addMod(f,'order',-1,4,'Glaubenswechsel');}
     else{if(W.c!=null&&S.prov[W.c]&&S.prov[W.c].owner===f){S.prov[W.c].rel=W.old;S.prov[W.c].rp=0;}addMod(f,'order',-1,8,'Glaubensstreit');addLog(`${FACTIONS[f].name} hält am Glauben fest: ${on}.`,true,'info');try{chronAdd('faith',`Treue zum alten Glauben: ${on}`);}catch(er){}}
     closeModal();try{faithReset();}catch(er){}refresh();done();});}
+let EP_MINE=null;
 function showEpochNews0(done){
-  if(S.bookShow){showBookNews(()=>showEpochNews(done));return;}
+  if(S.bookShow&&!S.epochNews){showBookNews(()=>showEpochNews(done));return;}
   const n=S.epochNews;if(!n){done();return;}S.epochNews=null;
+  // Gebündelt: Buchkapitel, Thronwechsel und Meldungen dieser Runde stehen im Epochen-Bericht statt in eigenen Fenstern
+  const BK=S.bookShow;S.bookShow=null;if(BK)n.bk=BK;
+  {const m=S.thronMsg;if(m&&m.t>=S.turn-2&&!S.dynQ){n.thr=m;S.thronMsg=null;}}
+  if(EP_MINE){n.mine=EP_MINE;EP_MINE=null;}
   const E=EPOCHS[n.e],me=S.player;
   const names=n.provs.map(i=>PROV_DEF[i].name);
   const units=rolesNow().map(r=>unitStat(me,r).name).join(', ');
   const body=`<div class="ephero" style="background-image:url('img/ep_${n.e}.webp')"></div><h2>${esc(E.name)}</h2><p class="sub">${fmtYear(S.year)} · Jahrhunderte sind vergangen</p>
   ${EP_INTRO[n.e]?`<div class="epintro"><p><b>Neu:</b> ${esc(EP_INTRO[n.e][0])}</p><p><b>Hilft dir:</b> ${esc(EP_INTRO[n.e][1])}</p><p><b>Achtung:</b> ${esc(EP_INTRO[n.e][2])}</p><p><b>Staatsform:</b> ${esc(staatsform(me))}, Verwaltung bis ${adminCap(me)} Provinzen ohne Abzug.</p></div>`:''}
   ${(()=>{let ob=0;for(const pi of provsOf(me))for(const k in S.prov[pi].b)if(bOld(S.prov[pi],k))ob++;let ou=0;try{ou=S.armies.filter(a=>a.f===me).reduce((s,a)=>s+a.units.filter(u=>uStat(me,u).old).length,0);}catch(e){}const L=[];if(ou)L.push(`${ou} veraltete Einheiten modernisieren (halber Preis)`);if(ob)L.push(`${ob} alte Bauten umbauen`);L.push('Die neue Geschichte deines Volkes beginnt');return`<h3>Für die Schonfrist</h3><ul class="eptodo">${L.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`;})()}
+  ${n.thr?`<h3>Herrscherhaus</h3><p>${esc(n.thr.o)} ist im Alter von ${n.thr.oa} Jahren gestorben. ${n.thr.rg?`${esc(n.thr.n)} ist erst ${n.thr.a} Jahre alt, ein Regent führt die Geschäfte.`:`${esc(n.thr.n)} (${n.thr.a} Jahre) aus dem Haus der ${esc(n.thr.h)} besteigt den Thron.`}</p>`:''}
   ${faithNewsHtml(n)}
+  ${n.bk?`<div class="epbook"><span>📖 Das vergangene Zeitalter ist als Kapitel im Buch des Reiches verzeichnet.</span><button class="btn" type="button" id="epBookBtn">Kapitel lesen</button></div>${n.bk.own?bkMapHtml(n.bk.own,0,false):''}`:''}
+  ${n.mine&&n.mine.length?`<details class="epfold"><summary>Meldungen dieser Runde (${n.mine.length})</summary><ul class="log">${n.mine.map(e=>logLi(e,true)).join('')}</ul></details>`:''}
   <details class="epfold"><summary>Alles, was sich geändert hat</summary>
   <ul class="log">
   ${names.length?`<li><span>Neues Land</span>${names.length} Provinzen: ${[...new Set(n.provs.map(i=>REG[PROV_DEF[i].reg].name))].map(esc).join(', ')}</li>`:''}
+  ${n.fallen&&n.fallen.length?`<li><span>Untergegangen</span>${n.fallen.map(esc).join(', ')}</li>`:''}
   ${n.spawned.length?`<li><span>Neue Mächte</span>${n.spawned.map(f=>esc(FACTIONS[f].name)).join(', ')}</li>`:''}
   ${n.colonies?`<li><span>Übersee</span>${n.colonies.map(([f,i])=>esc(FACTIONS[f].name)+' in '+esc(PROV_DEF[i].name)).join(', ')}</li>`:''}
   ${THEATERS.filter(T=>T.ep===n.e).length?`<li><span>Neue Welt</span>${THEATERS.filter(T=>T.ep===n.e).map(T=>esc(T.name)).join(' und ')} sind über Seewege erreichbar. Oben in der Mitte wechselst du den Schauplatz.</li>`:''}
@@ -6883,12 +6952,14 @@ function showEpochNews0(done){
   <li><span>Truppen</span>${esc(units)}</li>
   <li><span>Forschung</span>${TECHS.filter(t=>t.ep===n.e).length} neue Technologien</li></ul></details>`;
   if(n.choice){
-    showModal(body+`<h3>Wohin entwickelt sich dein Volk?</h3><p class="note">Dein Gebiet, deine Heere, Gebäude und Schätze bleiben in jedem Fall erhalten. Es ändern sich nur Name, Farbe und Einheitennamen.</p><div class="list">${n.keep&&PEOPLE[n.keep]?`<button class="faccard" data-people="${n.keep}"><span class="crest" style="${cstP(n.keep)}"></span><b>${esc(PEOPLE[n.keep].name)} bleiben</b><p>Name und Farbe behalten.</p></button>`:''}${n.choice.map(id=>`<button class="faccard" data-people="${id}"><span class="crest" style="${cstP(id)}"></span><b>${esc(PEOPLE[id].name)}</b><p>${esc(PEOPLE[id].desc||'')}</p></button>`).join('')}</div>`,[]);
-    document.querySelectorAll('[data-people]').forEach(b=>b.onclick=()=>{const ch=S.fac[me].people!==b.dataset.people;S.fac[me].people=b.dataset.people;applyPeople(me);if(ch)addLog(`Dein Volk wird zu ${FACTIONS[me].name}.`,true,'good');closeModal();AUDIO.sfx('win');refreshOwnership();refresh();done();});
+    showModal(body+`<h3>Wohin entwickelt sich dein Volk?</h3><p class="note">Dein Gebiet, deine Heere, Gebäude und Schätze bleiben in jedem Fall erhalten. Ein neues Volk bringt eigenen Namen, Farbe und Einheitennamen. Wechselt dabei der Kulturkreis, ändern sich auch Stadtbild und Gebäudeformen, ein neues Herrscherhaus übernimmt, und der Glaube folgt, wenn deine Untertanen ihn schon mehrheitlich teilen.</p><div class="list">${n.keep&&PEOPLE[n.keep]?`<button class="faccard" data-people="${n.keep}"><span class="crest" style="${cstP(n.keep)}"></span><b>${esc(PEOPLE[n.keep].name)} bleiben</b><p>Name und Farbe behalten.</p></button>`:''}${n.choice.map(id=>`<button class="faccard" data-people="${id}"><span class="crest" style="${cstP(id)}"></span><b>${esc(PEOPLE[id].name)}</b><p>${esc(PEOPLE[id].desc||'')}</p></button>`).join('')}</div>`,[]);
+    document.querySelectorAll('[data-people]').forEach(b=>b.onclick=()=>{const ch=S.fac[me].people!==b.dataset.people,c0=(()=>{try{return facCul(me);}catch(e){return null;}})();S.fac[me].people=b.dataset.people;applyPeople(me);if(ch){addLog(`Dein Volk wird zu ${FACTIONS[me].name}.`,true,'good');try{peopleSwitch(me,c0);}catch(er){console.warn('Volkswechsel',er);}}closeModal();AUDIO.sfx('win');refreshOwnership();refresh();done();});
   }else{
     const ch=n.changes.find(c=>c[1]===me);
     showModal(body+(ch?`<p class="verdict">${esc(ch[0])} wird zu ${esc(FACTIONS[me].name)}.</p>`:''),[{label:'Weiter',cls:'primary',fn:done}]);
   }
+  try{if(n.bk&&n.bk.own)bkDrawMap(document.querySelector('#dialog canvas[data-bkmap]'),n.bk.own);}catch(e){}
+  try{const bb=document.getElementById('epBookBtn');if(bb)bb.onclick=()=>{closeModal();openReichBook('last',()=>{S.epochNews=n;S.bookShow=null;n.bk=null;showEpochNews0(done);});};}catch(e){}
   AUDIO.sfx('horn');
 }
 
@@ -7359,13 +7430,16 @@ function armyMen(a){return a.units.reduce((s,u)=>s+u.men,0);}
 function fortMul(pi,attF){const P=S.prov[pi],w=Math.max(0,(P.b.walls||0)-(pKind(pi)==='stadt'&&!isCapProv(pi)?1:0));return 1.25*(1+0.3*w)*(PROV_DEF[pi].cap?1.2:1)*(attF&&w>0&&!siegeAt(pi)?1.3:1);}
 function provDefense(pi,attF,vis){const g=attF&&attF!==S.prov[pi].owner?gwLv(pi):0;return provDefense0(pi,attF,vis)*(g>=3?1.3:g>=2?1.15:1);}
 function provDefense0(pi,attF,vis){return S.prov[pi].gar*EPOCH_STR[ep()]*fortMul(pi,attF)*(attF&&hasTech(attF,'siege')?0.75:1)*siegeMul(pi)+armiesAt(pi).filter(a=>a.f===S.prov[pi].owner||isAlly(a.f,S.prov[pi].owner)&&(!attF||atWar(a.f,attF))).reduce((s,a)=>s+(vis&&a.st==='hinter'?0:armyPower(a)*stanceDef(a)),0);}
+// Verwaltungslast: ab 16 Provinzen kostet jede weitere 0,8 % der Steuern, höchstens 20 % (gilt für alle Reiche)
+const ADM_FREE=15,ADM_PER=0.008,ADM_MAX=0.2;
+function admRate(f){return Math.min(ADM_MAX,ADM_PER*Math.max(0,provsOf(f).length-ADM_FREE));}
 function income(f){
-  const tax=provsOf(f).reduce((s,pi)=>s+provIncome(pi),0);
+  const tax=provsOf(f).reduce((s,pi)=>s+provIncome(pi),0),adm=Math.round(tax*admRate(f));
   const upk=Math.round((ep()>=3?1.1:1)*S.armies.filter(a=>a.f===f&&a.levy==null).reduce((s,a)=>s+a.units.reduce((t,u)=>t+uStat(f,u).upk*(1+milUpk(f,u.r)),0)*(1+genFx(a,'upk'))*(winterQ(a)?0.8:1),0)*(1+techBonus(f,'upk'))*(1+0.15*armyOver(f))),hof=hofCost(f)+fleetUpk(f)+trossUpk(f);
   const trade=tradeIncome(f),trib=tributeNet(f),sale=(S.fac[f].eco&&S.fac[f].eco.sale)||0,buy=(S.fac[f].eco&&S.fac[f].eco.buy)||0,loan=S.fac[f].loan?S.fac[f].loan.pay:0;
   const ez=isHumanP(f)&&!(S&&S.mp)?Math.round(tax*((dif().pl||1)-1)):0;// Leicht: +15 % Steuern für den Spieler
   const mono=monoIncome(f),priv=privIncome(f),merch=merchantIncome(f),post=postIncome(f),cred=lendIncome(f),kir=kirCost(f,tax),comp=compIncome(f),gk=goldCaravan(f),fx=featIncome(f),hort=hortCost(f,tax);
-  return{tax,upk,hof,trade,trib,sale,buy,loan,ez,mono,priv,merch,post,cred,kir,comp,gk,fx,hort,net:fx+gk+comp-hort-kir+cred+post+merch+mono+priv+tax+ez-upk-hof+trade+trib+sale-buy-loan};
+  return{tax,adm,upk,hof,trade,trib,sale,buy,loan,ez,mono,priv,merch,post,cred,kir,comp,gk,fx,hort,net:fx+gk+comp-hort-kir+cred+post+merch+mono+priv+tax-adm+ez-upk-hof+trade+trib+sale-buy-loan};
 }
 function addLog(text,p,k,w){S.logN=(S.logN||0)+1;const e={y:S.year,t:text,p:!!p,k:k||'info',n:S.logN};if(p)e.w=w||S.player;S.log.push(e);if(p&&e.w===S.player)try{ratVoiceLog(text,k);}catch(er){}const cap=S.mp?260:120;if(S.log.length>cap)S.log.splice(0,S.log.length-cap);}
 function recruit(f,pi,role,v){
@@ -7446,7 +7520,7 @@ function genXP(a,v){const G=genOf(a);if(!G)return;v*=1+((G.ret||[]).includes('ch
 function genHtml(a,full){const G=genOf(a);if(!G)return'';const nx=GEN_LV[G.lvl]||null,p0=GEN_LV[G.lvl-1]||0;
   return`<div class="gencard">${genPortrait(a,'gport')}<div><span class="eyebrow">Feldherr · Stufe ${G.lvl}</span><b>${esc(G.n)}${G.hon?` <em class="newu">${esc(genTitle(G,a.f))}</em>`:''}</b><div class="trs">${G.tr.map(t=>`<span class="tr${GEN_TRAITS[t].neg?' neg':''}" title="${GEN_TRAITS[t].d}">${GEN_TRAITS[t].n}</span>`).join('')}</div>${(G.ret||[]).length?`<div class="trs">${G.ret.map(r=>`<span class="tr ret" title="${RETINUE[r].d}">⚑ ${RETINUE[r].n}</span>`).join('')}</div>`:''}${deedHtml(G,full)}${(()=>{try{return fameHtml(G,a.f);}catch(e){return'';}})()}${full?`<small>${G.tr.map(t=>GEN_TRAITS[t].d).concat((G.ret||[]).map(r=>RETINUE[r].d)).join(' · ')}${G.lvl>1?` · Stufe: Angriff und Verteidigung +${Math.round(2.5*(G.lvl-1))} %`:''}</small>`:''}${nx?`<span class="pbar thin"><i style="width:${Math.round((G.xp-p0)/(nx-p0)*100)}%"></i></span>`:'<small>Höchste Stufe</small>'}</div></div>`;}
 const PORTRAITS=new Set([0,1,2,3,4].flatMap(e=>[0,1].map(k=>`gp_e${e}_${k}`)));
-function genPortrait(a,cls){const G=genOf(a),e=clamp(G.e==null?ep():G.e,0,4),k=`gp_e${e}_${G.face%2}`;return PORTRAITS.has(k)?`<img class="${cls}" src="img/${k}.webp" alt="">`:`<span class="${cls} ge" style="${cst(a.f)}"><span class="crest" style="${cst(a.f)}"></span></span>`;}
+function genPortrait(a,cls){const G=genOf(a),e=clamp(G.e==null?ep():G.e,0,4),k=`gp_e${e}_${(G.face|0)%2}`;return PORTRAITS.has(k)?`<img class="${cls}" src="img/${k}.webp" alt="">`:`<span class="${cls} ge" style="${cst(a.f)}"><span class="crest" style="${cst(a.f)}"></span></span>`;}
 // Hof: fünf Ämter
 const OFFICES={
   kanzler:{n:'Kanzler',d:s=>`Steuern +${5*s} %`,k:'tax',v:s=>0.05*s,ico:'💰'},
@@ -7739,7 +7813,7 @@ function adopt(f,c){const D=dynOf(f),F=S.fac[f];if(F.gold<adoptCost())return fal
   else{const a=getArmy(c.aid);p=newPerson('m',a&&a.gen&&a.gen.age!=null?a.gen.age:30+Math.floor(Math.random()*10));p.n=c.n;p.tr=['kriegerisch'];if(a&&a.gen&&(a.gen.lvl||1)>=3)p.tr.push(rnd1x(RT_POS.filter(t=>t!=='kriegerisch')));}
   p.adopt=true;D.kids.push(p);D.heir=p.id;addMod(f,'order',-1,4,'Adoption');if(f===S.player){addLog(`${D.ruler.n} adoptiert ${p.n} und bestimmt ihn zum Erben.`,true,'good');try{chronAdd('hist',`${p.n} wird adoptiert und zum Erben bestimmt`);}catch(e){}}return true;}
 function famHtml(f){const D=dynOf(f),R=D.ruler,h=dynHeir(f),e=ep();
-  const port=(p,cls)=>p.sex==='m'?`<img class="${cls}" src="${p===R&&habOf(f)?'img/af_ruler_a1.webp':p===R&&amRuler(f)?amRuler(f):p===R&&satrapOf(f)?`img/ar_ruler_${eraOf(e)}1.webp`:`img/gp_e${clamp(p.e==null?e:p.e,0,4)}_${p.face%2}.webp`}" alt="">`:`<span class="${cls} ge" style="${cst(f)}"><span class="crest" style="${cst(f)}"></span></span>`;
+  const port=(p,cls)=>p.sex==='m'?`<img class="${cls}" src="${p===R&&habOf(f)?'img/af_ruler_a1.webp':p===R&&amRuler(f)?amRuler(f):p===R&&satrapOf(f)?`img/ar_ruler_${eraOf(e)}1.webp`:`img/gp_e${clamp(p.e==null?e:p.e,0,4)}_${(p.face|0)%2}.webp`}" alt="">`:`<span class="${cls} ge" style="${cst(f)}"><span class="crest" style="${cst(f)}"></span></span>`;
   const trs=p=>p.tr.length?`<div class="trs">${p.tr.map(t=>`<span class="tr${RUL_TRAITS[t].neg?' neg':''}" title="${RUL_TRAITS[t].d}">${RUL_TRAITS[t].n}</span>`).join('')}</div>`:'';
   const risk=Math.round(deathRisk(R)*100);
   let h0=`<p class="note">Das Herrscherhaus bestimmt die Thronfolge. Die Eigenschaften des Herrschers wirken im ganzen Reich. Erbt kein Kind, springt die Seitenlinie (Bruder, Vetter) ein, das kostet etwas Ordnung. Erst wenn auch sie fehlt, droht eine Thronfolgekrise. Fehlt ein Erbe, kannst du einen Feldherrn oder Verwandten adoptieren.</p>`;
@@ -7836,7 +7910,7 @@ function dynPick(title,rows,onPick){showModal(`<h2>${esc(title)}</h2><div class=
   $('#dialog').querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{if(b.disabled)return;const r=rows[+b.dataset.pk];closeModal();onPick(r);AUDIO.sfx('build');renderTop();openHof('fam');});}
 function dynBind(f){const d=$('#dialog');if(!d)return;
   d.querySelectorAll('[data-dynjob]').forEach(b=>b.onclick=()=>{const p=dynFind(f,+b.dataset.p);if(!p)return;AUDIO.sfx('click');
-    if(b.dataset.dynjob==='gen'){const L=dynGenArmies(f).sort((a,b)=>b.units.length-a.units.length);dynPick(`${p.n} als Feldherr`,L.map(a=>({a,b:esc(a.name),s:`${a.units.length} Einheiten · in ${esc(PROV_DEF[a.p].name)} · bisher ${esc(genOf(a).n)} (Stufe ${genOf(a).lvl||1})`})),r=>dynMakeGen(f,p,r.a.id));}
+    if(b.dataset.dynjob==='gen'){const L=dynGenArmies(f).sort((a,b)=>b.units.length-a.units.length);dynPick(`${p.n} als Feldherr`,L.map(a=>({a,b:esc(a.name),s:`${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · in ${esc(PROV_DEF[a.p].name)} · bisher ${esc(genOf(a).n)} (Stufe ${genOf(a).lvl||1})`})),r=>dynMakeGen(f,p,r.a.id));}
     else{const L=dynRegs(f);dynPick(`${p.n} als Statthalter`,L.map(r=>{const G=govOf(f,r),n=provsOf(f).filter(pi=>PROV_DEF[pi].reg===r).length;return{r,b:esc(REG[r].name),s:`${n} Provinz${n>1?'en':''} · ${G?'bisher '+esc(G.n):'noch ohne Statthalter'}`};}),x=>dynMakeGov(f,p,x.r));}});
   d.querySelectorAll('[data-dynwed]').forEach(b=>b.onclick=()=>{const k=dynFind(f,+b.dataset.dynwed);if(!k)return;AUDIO.sfx('click');const own=kidWedOk(f,k,null);
     const rows=[{g:null,b:'Eigener Adel',s:'Kostenlos · Ordnung +1 für 4 Runden',dis:!own.ok}].concat(marryTargets(f).map(g=>{const c=kidWedOk(f,k,g);return{g,b:esc(FACTIONS[g].name),s:c.ok?`${marryCost()} Gold · Beziehung +${WED_REL}, die Häuser sind verschwägert`:esc(c.why),dis:!c.ok};}));
@@ -8449,7 +8523,7 @@ function bookHtml(B){const ico=BK_ICO;const st=(l,v)=>`<div><span>${l}</span><b>
   <div class="stats">${st('Provinzen',`${B.prov[0]} → ${B.prov[1]}`)}${st('Bevölkerung',`${fmtNum(B.pop[0]).replace('+','')} → ${fmtNum(B.pop[1]).replace('+','')}`)}${st('Siege',B.wins)}${st('Eroberungen',B.conq)}${st('Abwehrerfolge',B.defw)}${st('Kultur',fmtNum(B.cul))}</div>${B.own?bkMapHtml(B.own,0,false):''}
   ${B.deeds.length?`<h3>Denkwürdige Taten</h3><ul class="log">${(B.deeds.length>16?B.deeds.slice().sort((a,b)=>(BK_W[b.k]||1)-(BK_W[a.k]||1)||a.t-b.t).slice(0,16).sort((a,b)=>a.t-b.t):B.deeds).map(d=>`<li><span class="muted">${fmtYear(d.y)}</span> ${ico[d.k]||'·'} ${esc(d.txt)}</li>`).join('')}</ul>`:'<p class="note">Eine stille Epoche ohne große Taten.</p>'}`;}
 function showBookNews(done){const B=S.bookShow;if(!B){done();return;}S.bookShow=null;showModal(bookHtml(B)+chronicleHtml(),[{label:'Im Buch lesen',fn:()=>openReichBook('last',done)},{label:'Weiter',cls:'primary',fn:done}]);$('#dialog').classList.add('wide');if(B.own)bkDrawMap(document.querySelector('#dialog canvas[data-bkmap]'),B.own);}
-function openBooks(){openReichBook('last');}
+function openBooks(){openChronicle('buch');}
 // ---------- „Das Buch des Reiches“: Kapitel je Epoche, darin Abschnitte je Herrscher, Doppelseiten mit Initiale und Bild ----------
 const BK_ICO={brk:'★',hist:'📜',conq:'⚔',lost:'✖',win:'🛡',ruler:'👑',war:'⚔',peace:'🕊',ally:'🤝',wonder:'🏛',faith:'✝',plague:'☠',famine:'🌾',epoch:'⏳',hero:'✦'};
 const BK_W={wonder:9,epoch:2,conq:7,win:6,lost:6,ruler:5,hero:6,war:4,peace:4,ally:3,faith:5,plague:5,famine:4,brk:3,hist:3};
@@ -8493,7 +8567,7 @@ function bkParas(L){const out=[];for(let i=0;i<L.length;){const d=L[i];let j=i;w
 // Kapitel → Abschnitte je Herrscher
 function bkSections(B){const D=(B.deeds||[]).slice().sort((a,b)=>a.t-b.t),out=[];for(const d of D){const r=d.r||'';let s=out[out.length-1];if(!s||s.r!==r){s={r,L:[]};out.push(s);}s.L.push(d);}return out;}
 function bkIntro(B,cur){const nm=esc(FACTIONS[S.player].name),p0=B.prov[0],p1=B.prov[1];
-  let t=`Als das Zeitalter ${esc(B.name)} anbrach, gebot ${nm} über ${p0} ${p0===1?'Provinz':'Provinzen'}. ${cur?'Bis heute':'Als es endete'}, ${p1===1?'war es noch eine':'waren es '+p1}.`;
+  let t=`Als das Zeitalter ${esc(B.name)} anbrach, gebot ${nm} über ${p0} ${p0===1?'Provinz':'Provinzen'}. ${cur?'Bis heute':'Als es endete'} ${p1===1?'war es noch eine':'waren es '+p1}.`;
   const bits=[];if(B.wins)bits.push(`${B.wins} ${B.wins===1?'Sieg':'Siege'} im Feld`);if(B.conq)bits.push(`${B.conq} ${B.conq===1?'Eroberung':'Eroberungen'}`);if(B.defw)bits.push(`${B.defw} abgewehrte Angriffe`);
   if(bits.length)t+=` Die Register nennen ${bits.join(', ').replace(/, ([^,]*)$/,' und $1')}.`;else t+=' Es war eine stille Zeit, arm an Schlachten.';return t;}
 // Seiten (je Seite HTML); auf schmalen Bildschirmen einzeln, sonst als Doppelseite
@@ -8504,7 +8578,7 @@ function bkPages(){const f=S.player,F=FACTIONS[f],P=[],toc=[];let house='';try{h
   P.push(`<div class="bkcover"><span class="crest bkcrest" style="${cst(f)}"></span><p class="bkey">Das Buch des Reiches</p><h2>${esc(F.name)}</h2>${house?`<p class="bksub">Chronik des Hauses ${esc(house)}</p>`:''}<p class="bksub">${books.length?fmtYear(books[0].from):''} bis ${fmtYear(S.year)}</p></div>`);
   const tocAt=P.length;P.push('');
   books.forEach((B,bi)=>{toc.push([B,P.length]);
-    P.push(pic(`img/ep_${clamp(B.e,0,4)}.webp`,`${fmtYear(B.from)} bis ${fmtYear(B.to)}`));
+    P.push(pic(`img/ep_${clamp(B.e,0,4)}.webp`,fmtYear(B.from)===fmtYear(B.to)?`seit ${fmtYear(B.from)}`:`${fmtYear(B.from)} bis ${fmtYear(B.to)}`));
     P.push(`<p class="bkey">Kapitel ${bi+1}${B.cur?' · Entwurf':''}</p><h2>Das Zeitalter ${esc(B.name)}</h2><p class="bktxt">${ini(bkIntro(B,B.cur))}</p>${B.story?'<p class="bknote">In dieser Zeit erfüllte sich die Geschichte des Volkes.</p>':''}${bkMapHtml(B.own,maps.push(B.own||null)-1,B.cur)}`);
     const SEC=bkSections(B);if(!SEC.length){P.push(pic(`img/ep_${clamp(B.e,0,4)}.webp`,''));P.push(`<p class="bktxt">${ini('Über diese Jahre weiß der Chronist wenig zu berichten. Das Reich lebte still, die Felder trugen, und die Herrscher regierten ohne großen Lärm.')}</p>`);}
     for(const s of SEC){const pa=bkParas(s.L),top=s.L.slice().sort((a,b)=>(BK_W[b.k]||1)-(BK_W[a.k]||1)||a.t-b.t)[0];const per=6;
@@ -9121,10 +9195,10 @@ function fleetSheetHtml(){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(!f
   // Ladung und Anlanden
   const cargo=(fl.cargo||[]).map(id=>getArmy(id)).filter(Boolean);
   if(cargo.length){const LT=landTargets(fl);h+=`<h3>An Bord · ${cargoUnits(fl)}/${fl.n*SHIP_CAP} Einheiten</h3>`;
-    for(const a of cargo){h+=`<p class="note" style="margin:4px 0"><b>${esc(a.name)}</b> · ${a.units.length} Einheiten${a.landT===S.turn?' · diese Runde schon gelandet':''}</p>`;
+    for(const a of cargo){h+=`<p class="note" style="margin:4px 0"><b>${esc(a.name)}</b> · ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'}${a.landT===S.turn?' · diese Runde schon gelandet':''}</p>`;
       if(a.landT!==S.turn)h+=`<div class="list">${LT.map(j=>{const o=S.prov[j].owner,ok=walkOk(a.f,j);return`<button class="arow" data-act="land" data-a="${a.id}" data-p="${j}"><span class="crest" style="${cst(o)}"></span><span class="nm"><b>Ausladen: ${isKnown(j)?esc(PROV_DEF[j].name):'Unerforschte Küste'}</b><small>${ok?(o===a.f?'Eigenes Land':'Anlanden'):'Landung mit Angriff · '+esc(FACTIONS[o].name)}${!ok&&minSiege(j)?' · Stadt: erst Belagerung nötig':''}</small></span></button>`;}).join('')||'<p class="note">Keine Küste in Reichweite. Fahre näher ans Land.</p>'}</div>`;}}
   else{const near=coastNear(fl.x,fl.z,LAND_R),cand=S.armies.filter(a=>a.f===fl.f&&!a.boat&&near.has(a.p));
-    if(cand.length)h+=`<h3>Einschiffen</h3><div class="list">${cand.map(a=>`<button class="arow" data-act="embark2" data-a="${a.id}" data-id="${fl.id}"${a.mp>0&&cargoUnits(fl)+a.units.length<=fl.n*SHIP_CAP?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)} an Bord nehmen</b><small>${a.units.length} Einheiten · ${a.mp>0?'kostet die restliche Bewegung des Heeres':'Heer hat keine Bewegung mehr'}${cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP?' · zu wenig Platz':''}</small></span></button>`).join('')}</div>`;
+    if(cand.length)h+=`<h3>Einschiffen</h3><div class="list">${cand.map(a=>`<button class="arow" data-act="embark2" data-a="${a.id}" data-id="${fl.id}"${a.mp>0&&cargoUnits(fl)+a.units.length<=fl.n*SHIP_CAP?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)} an Bord nehmen</b><small>${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · ${a.mp>0?'kostet die restliche Bewegung des Heeres':'Heer hat keine Bewegung mehr'}${cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP?' · zu wenig Platz':''}</small></span></button>`).join('')}</div>`;
     else h+=`<p class="note">Zum Einschiffen ein eigenes Heer in eine Küstenprovinz neben der Flotte bringen.</p>`;}
   // Hochseefahrt
   {const OR=oceanRoutesFor(fl);if(fl.ocean)h+=`<p class="note" style="margin:6px 0"><b>Hochseefahrt nach ${esc(THEATERS[PCENTER[fl.ocean.q].th].name)}</b> geplant: Die Flotte segelt zum Ablegepunkt vor ${esc(PROV_DEF[fl.ocean.p].name)} und überquert dann den Ozean.</p>`;
@@ -9147,12 +9221,20 @@ function applyLoss(a,frac){frac*=1+genFx(a,'loss');
 }
 function removeEmpty(){S.armies=S.armies.filter(a=>a.units.length>0);}
 function reinforcements(f,ti,skip,foe){if(!f||f==='frei')return[];const out=[];for(const n of ADJ[ti])if(!isSeaLink(n,ti))for(const x of S.armies){if(x.p!==n||x===skip||!x.units.length)continue;const own=x.f===f&&S.prov[n].owner===f,ally=x.f!==f&&foe&&x.f!==foe&&isAlly(x.f,f)&&atWar(x.f,foe)&&(S.prov[n].owner===x.f||S.prov[n].owner===f);if(own||ally)out.push(x);}return out.sort((p,q)=>armyPower(q)-armyPower(p)).slice(0,3);}
+// Berechnete Schlacht: gemischte Heere +3 % je weiterer Waffengattung (höchstens +9 %); Reiterei +25 % ihres Anteils gegen Heere fast ohne Speere
+const MIX_STEP=0.03,MIX_MAX=0.09,CAV_VS=0.25;
+function unitsMen(us,r){return us.reduce((t,u)=>t+(r==null||u.r===r?u.men:0),0);}
+function matchMul(own,foe){const tot=unitsMen(own);if(!tot)return 1;const kinds=['spear','sword','missile','cav','art'].filter(r=>unitsMen(own,r)>=tot*0.08).length;
+  const mix=Math.min(MIX_MAX,MIX_STEP*Math.max(0,kinds-1));const ft=unitsMen(foe);const cav=ft&&unitsMen(foe,'spear')<ft*0.1?CAV_VS*unitsMen(own,'cav')/tot:0;return 1+mix+cav;}
 function startAttackCtx(a,ti){
   const P=S.prov[ti],defArmies=armiesAt(ti).filter(x=>x.f===P.owner||isAlly(x.f,P.owner)&&atWar(x.f,a.f)),attRe=reinforcements(a.f,ti,a,P.owner),defRe=P.owner==='frei'?[]:reinforcements(P.owner,ti,null,a.f);
   const reA=attRe.reduce((s,x)=>s+armyPower(x),0)*0.6,reD=defRe.reduce((s,x)=>s+armyPower(x),0)*0.6;
   const gp=P.gar*EPOCH_STR[ep()]*(hasTech(a.f,'siege')?0.75:1)*siegeMul(ti)*genFx(a,'siege');
   const rvx=riverDef(a,ti);
-  return{a,ti,defArmies,attRe,defRe,res:{river:rvx,att:(armyPower(a)+reA)*kirAtt(a,ti),def:(provDefense(ti,a.f)-gp+reD)*(rvx?1.2:1),reA:attRe.length,reD:defRe.length,attF:a.f,defF:P.owner,prov:ti,from:a.p===ti?(a.sFrom!=null?a.sFrom:null):a.p,captured:false,win:false,
+  const aU=a.units.concat(...attRe.map(x=>x.units)),dU=[].concat(...defArmies.map(x=>x.units),...defRe.map(x=>x.units));
+  const dArm=defArmies.reduce((s,x)=>s+armyPower(x),0)+reD,dTot=Math.max(1,provDefense(ti,a.f)-gp+reD),dSh=clamp(dArm/dTot,0,1);
+  const mA=dU.length?matchMul(aU,dU):1+Math.min(MIX_MAX,MIX_STEP*Math.max(0,['spear','sword','missile','cav','art'].filter(r=>unitsMen(aU,r)>=unitsMen(aU)*0.08).length-1)),mD=dU.length?1+(matchMul(dU,aU)-1)*dSh:1;
+  return{a,ti,defArmies,attRe,defRe,res:{river:rvx,att:(armyPower(a)+reA)*kirAtt(a,ti)*mA,def:(provDefense(ti,a.f)-gp+reD)*(rvx?1.2:1)*mD,mA,mD,reA:attRe.length,reD:defRe.length,attF:a.f,defF:P.owner,prov:ti,from:a.p===ti?(a.sFrom!=null?a.sFrom:null):a.p,captured:false,win:false,
     attMen0:armyMen(a),defMen0:defArmies.reduce((s,x)=>s+armyMen(x),0)+P.gar*12,attLost:0,defLost:0}};
 }
 function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
@@ -10790,12 +10872,18 @@ function ratSpeakFx(key,txt){ratSpeakEnd();const m=String(key||'').match(/^rat_(
 
 // Kinoszene zum Auftakt einer Geschichte: Standbilder mit langsamer Kamerafahrt, Untertitel und Erzählerstimme. Tippen = weiter, Überspringen jederzeit
 function cineSplit(text){return(String(text).replace(/\s+/g,' ').match(/[^.!?]+[.!?]*/g)||[text]).map(x=>x.trim()).filter(Boolean);}
-function cineImgs(keys){const out=[];for(const k of keys){if(!k)continue;let u=null;if(/^img\//.test(k))u=k;else{try{u=heroImg(k,S.turn,false);}catch(e){}}if(u&&!out.includes(u))out.push(u);}if(!out.length)out.push(`img/ep_${ep()}.webp`);return out;}
+function cineImgs(keys){const out=[];for(const k of keys){if(!k)continue;let u=null;if(/^img\//.test(k))u=k;else{try{u=heroImg(k,S.turn,false);}catch(e){}}if(u&&!out.includes(u))out.push(u);}if(!out.length)out.push(cineFallback());return out;}
+// Rückfallbild: Die Epochenbilder zeigen Europa; für andere Kulturräume ein neutrales Bild (Karte im Kerzenlicht)
+const CINE_EU=['latein','griechisch','punisch','iberisch','keltisch','germanisch','britisch','gallisch','franzoesisch','deutsch','italienisch','nordisch','slawisch','thrakisch','byzantinisch','baltisch','ungarisch','polnisch','russisch'];
+function cineFallback(){let c=null;try{c=S&&facCul(S.player);}catch(e){}return(!c||CINE_EU.includes(c))?`img/ep_${ep()}.webp`:'img/load_1.webp';}
 let CINE=null;
 // Standbilder der Geschichten-Intros: je Geschichte ein Paket img/in_<id>.json (spart Dateien), wird erst beim Abspielen geladen
 const IN_MAP={"haudenosaunee":"in_as3","zhenghe":"in_as3","naresuan":"in_as3","yisunsin":"in_as2","kublai":"in_as2","nobunaga":"in_as","temujin":"in_as","dreibund":"in_am","atahualpa":"in_am","caesar":"in_a","hannibal":"in_a","karl":"in_a","wikinger":"in_a","kleopatra":"in_a","kaleb":"in_a","augustus":"in_a","harun":"in_a","saladin":"in_m","mongolen":"in_m","mansa":"in_m","venedig":"in_m","nuernberg":"in_m","cuauhtemoc":"in_n1","suleiman":"in_n1","kastilien":"in_n1","portugal":"in_n1","akbar":"in_n1","pachacutec":"in_n1","ostindien":"in_n1","hundert":"in_n2","napoleon":"in_n2","usa":"in_n2","berlin":"in_n2"},IN_PACKS=new Set(Object.keys(IN_MAP)),IN_CACHE={};
 function inPack(id){return IN_CACHE[id]||(IN_CACHE[id]=fetch(`img/${IN_MAP[id]||('in_'+id)}.json`).then(r=>r.json()).then(d=>Object.keys(d).filter(k=>k.startsWith(`in_${id}_`)).sort().map(k=>{const s=d[k],b=atob(s.slice(s.indexOf(',')+1)),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return URL.createObjectURL(new Blob([a],{type:'image/webp'}));})).catch(e=>{delete IN_CACHE[id];throw e;}));}
-function playCine(o,done){try{if(CINE)CINE.end();}catch(e){}
+function playCine(o,done){try{const ks=(o&&o.ikeys)||[],P=new Set();for(const k of ks){if(!k||/^img\//.test(k))continue;for(const v of(IMGLIB[k]||[])){const n=k+'_'+v;if(PKOF[n]&&!PKU[n])P.add(PKOF[n]);}}
+  if(P.size&&!o._pw){o._pw=1;Promise.race([Promise.all([...P].map(p=>pkLoad(p).catch(()=>{}))),new Promise(z=>setTimeout(z,3000))]).then(()=>{try{const re=cineImgs(ks);if(re.length)o.imgs=re;}catch(e){}playCine(o,done);});return;}}catch(e){}
+  return playCine0(o,done);}
+function playCine0(o,done){try{if(CINE)CINE.end();}catch(e){}
   const sen=cineSplit(o.text),nS=Math.min(5,Math.max(1,Math.ceil(sen.length/2))),per=Math.ceil(sen.length/nS),SL=[];for(let i=0;i<sen.length;i+=per)SL.push(sen.slice(i,i+per).join(' '));
   const ofS=i=>Math.min(SL.length-1,Math.floor(i/per)),tot=sen.join(' ').length,cum=[];{let c=0;for(const t of SL){cum.push(c/tot);c+=t.length+1;}}
   const el=document.createElement('div');el.className='cine';el.innerHTML=`<div class="ci"></div><div class="ci"></div><div class="cvig"></div><div class="ctit"><p class="eyebrow">${esc(o.eb||'Geschichte')}</p><h1>${esc(o.title||'')}</h1></div><p class="ccap"></p><div class="cbar"><button class="cbtn" data-c="mute" type="button">${NARR.cfg.cineMute?'🔇':'🔊'}</button><button class="cbtn" data-c="skip" type="button">Überspringen ›</button></div><div class="cdots">${SL.map(()=>'<i></i>').join('')}</div>`;
@@ -10842,8 +10930,8 @@ const TUT=[
   {t:'Willkommen! Verschiebe die Karte mit einem Finger, zoome mit zwei. Deine Provinzen tragen deine Farbe, Pergament ist unerforschtes Land. Halte den Finger auf etwas gedrückt, dann siehst du Infos dazu.'},
   {t:'Tippe auf eine Provinz. Im Blatt am Rand stehen Steuern, Ordnung und Gebäude, dort baust du und hebst Truppen aus. Mit dem Pfeil oben im Blatt klappst du es ein und wieder auf.',el:'#sheet'},
   {t:'Heere bewegen: Tippe ein Heer an, dann ein Ziel. Am Ziel erscheint ein Knopf, etwa „⚔ Angreifen“ oder „Marschieren“. Ein Tipp darauf bestätigt. Du kannst die Figur auch direkt ans Ziel ziehen. Einen Marsch ohne Kampf nimmst du mit „↶ Rückgängig“ zurück.'},
-  {t:'Oben erreichst du Reich, Wirtschaft, Hof und Chronik. „Forschung“ wählt die nächste Erfindung. Halte einen Knopf gedrückt, wenn du nicht weißt, wofür er steht.',el:'#resBtn,.topnav'},
-  {t:'„Aufgaben“ oben links zeigt, was noch offen ist, etwa Heere ohne Befehl. Der Rat schlägt dir Schritte vor, mit 🗺 springst du direkt zur Stelle auf der Karte. Über den Kartenknopf rechts wechselst du die Ansicht.',el:'#todo,#modeBtn'},
+  {t:'Oben findest du die Bereiche Reich, Diplomatie, Wirtschaft, Hof und Chronik, daneben „Forschung“ für die nächste Erfindung. Jeder Bereich hat Reiter und ein „?“ mit kurzer Erklärung. Fenster schließt du mit ✕, „‹“ führt zurück. Halte einen Knopf gedrückt, wenn du nicht weißt, wofür er steht.',el:'#resBtn,.topnav'},
+  {t:'„Aufgaben“ oben links zeigt, was noch offen ist, etwa Heere ohne Befehl. Der Rat (Hof → Rat) schlägt dir Schritte vor, mit 🗺 springst du direkt zur Stelle auf der Karte. Über den Kartenknopf rechts wechselst du die Ansicht. Speichern, Einstellungen und Hilfe stehen im Menü ☰.',el:'#todo,#modeBtn'},
   {t:'Tipp für den Anfang: Freie Städte und Stämme (graues Wappen) sind schwach verteidigt. Erobere sie in den ersten Runden, dann wachsen Steuern und Heer schneller. Reiche im Krieg mit dir greifen erst nach einer Schonfrist an (Leicht 16, Normal 10, Schwer 5 Runden).'},
   {t:'Bist du fertig, tippe auf „Runde beenden“. Führe dein Volk durch fünf Epochen bis zu Napoleon. Viel Erfolg!',el:innerWidth>700&&innerHeight>560?'#endMed':'#endBtn'},
 ];
@@ -11657,7 +11745,7 @@ function openDiplomacy(f,msg){
   <p class="note">Dein Ruf <b>${Math.round(trustOf(p))}</b> (${trustName(trustOf(p))}) · Ruf von ${esc(F.name)} <b>${Math.round(trustOf(f))}</b> (${trustName(trustOf(f))}). Wer Verträge bricht, bekommt schwerer Bündnisse, Pakte und Handel.</p>
   <div class="stats" style="margin-top:10px"><div><span>Provinzen</span><b>${provsOf(f).length}</b></div><div><span>Heere</span><b>${S.armies.filter(a=>a.f===f).length}</b></div><div><span>Macht</span><b style="font-size:14px">${ratio>1.3?'Stärker':ratio<0.77?'Schwächer':'Ähnlich'}</b></div></div>
   ${trib}${msg?`<p class="dmsg ${msg.ok?'ok':'no'}">${esc(msg.t)}</p>`:''}${d.st!=='war'?tradeInfoHtml(f):''}${dipMapHtml()}
-  <div class="list" style="margin-top:12px">${acts}</div>`,[{label:'Zurück',fn:openOverview},{label:'Auf der Karte',fn:()=>{setMapMode('dip');setDipView(f);const c=capitalOf(f);if(c!=null)focusProv(c,12);}},{label:'Schließen',cls:'primary'}]);
+  <div class="list" style="margin-top:12px">${acts}</div>`,[{label:'Zurück',fn:()=>openDipHub()},{label:'Auf der Karte',fn:()=>{setMapMode('dip');setDipView(f);const c=capitalOf(f);if(c!=null)focusProv(c,12);}},{label:'Schließen',cls:'primary'}]);
   $('#dialog').classList.add('wide');try{drawDipMap(f);}catch(e){console.warn(e);}
   document.querySelectorAll('[data-dip]').forEach(b=>b.onclick=()=>{const a=b.dataset.dip,N=FACTIONS[f].name,d=dip(S.player,f);
     const C={war:[`Krieg gegen ${N} erklären?`,`${d.nap>S.turn?'Damit brichst du den Nichtangriffspakt: Beziehung zu allen −12, Ruf −20. ':''}Ein Krieg ohne Kriegsgrund kostet Beziehung zu allen und Ruf.`,'Krieg erklären'],
@@ -12405,7 +12493,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     const f=P.owner,thr=f!=='frei'&&S.armies.some(a=>a.f!==f&&ADJ[i].has(a.p)&&atWar(a.f,f)),mx=Math.round(garMax(i)*(thr?1.25:1));P.levy=thr?1:0;
     if(P.gar<mx&&!siegeAt(i))P.gar=Math.min(mx,P.gar+(f==='frei'?1:2)+(P.b.walls?1:0)+(thr?3+(techBonus(f,'levy')>0?2:0):0));
     P.rec=recMax(i);
-    if(P.up){P.up.t--;if(P.up.t<=0){P.lvl=P.up.l;P.up=null;P.gr=0;P.grMsg=false;if(f===S.player){addLog(`${PROV_DEF[i].city||PROV_DEF[i].name} ist jetzt eine ${LVLN[P.lvl]}.`,true,'good');provNews(f,'lvl',i);}}}
+    if(P.up){P.up.t--;if(P.up.t<=0){P.lvl=P.up.l;P.up=null;P.gr=0;P.grMsg=false;if(f===S.player){addLog(`${PROV_DEF[i].city||PROV_DEF[i].name} ist jetzt ${LVL_ART[P.lvl]||'ein'} ${LVLN[P.lvl]}.`,true,'good');provNews(f,'lvl',i);}}}
     else if(f!=='frei'&&!isHumanP(f)&&(P.gr||0)>=100&&S.fac[f].gold>((lvlUpCost(f,i)||{}).total||1e9)*1.4)startLvlUp(f,i);
     if(P.build&&P.build.mod){P.build.t--;if(P.build.t<=0){const k=P.build.k;P.bep=P.bep||{};P.bep[k]=ep();if(f===S.player)addLog(`${PROV_DEF[i].name}: ${bName(k)} ist umgebaut und wieder auf dem Stand der Zeit.`,true,'good');P.build=null;}}
     else if(f!=='frei'&&!isHumanP(f)&&!P.build&&P.bep){const k=Object.keys(BNAMES).find(k=>bOld(P,k));if(k&&S.fac[f].gold>modernCost(f,i,k)*3)startModernize(f,i,k);}
@@ -13464,7 +13552,7 @@ const MODEL_LIST=[];
 function loadModels(){if(typeof fetch==='undefined')return;Promise.all(MODEL_LIST.map(n=>fetch(`models/${n}.json`).then(r=>{if(!r.ok)throw new Error(n);return r.json();}).then(j=>{const s=atob(j.glb),u=new Uint8Array(s.length);for(let k=0;k<s.length;k++)u[k]=s.charCodeAt(k);return u.buffer;}).then(b=>{MODELS[n]=parseGLB(b);})))
   .then(()=>{MODELS_READY=true;CITY.forEach(c=>c.sig='');for(const t of TOK.values())t.mk=null;try{if(S){syncCities();syncTokens();}}catch(e){console.warn(e);}needRender=3;}).catch(e=>console.warn('Modelle',e));}
 // ---------- Stadt-Baukasten aus Blender: Teile je Epoche, Städte je Provinz einzeln angelegt, global instanziert ----------
-const KIT={},KIT_LOADING={},KITMAT=new THREE.MeshLambertMaterial({vertexColors:true}),KITMATF=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
+const KIT={},KIT_LOADING={},KIT_FAIL={},KIT_WAIT={},KITMAT=new THREE.MeshLambertMaterial({vertexColors:true}),KITMATF=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
 const FLAGWAVE={value:0},KITMATFL=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
 KITMATFL.onBeforeCompile=sh=>{sh.uniforms.uWv=FLAGWAVE;sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uWv;').replace('#include <begin_vertex>',`#include <begin_vertex>
   float ph=0.0;
@@ -13580,7 +13668,7 @@ function addCulKit(K){const B=PG.box,C=PG.cyl,CO=PG.cone,SP=PG.sph,R4=PG.roof;
     for(const[x,z,r]of[[0,0,0.022],[-0.03,0.02,0.015],[0.03,0.018,0.015],[0.026,-0.024,0.014],[-0.028,-0.022,0.013]]){P.push(part(C,x,0.008,z,r,0.016,r,'#a0784e'),part(CO,x,0.026,z,r*1.25,0.022,r*1.25,'#a88c58'));}K.L_kraal=kitGeo(P);}}
 function loadKit(e){if(KIT[e]||KIT_LOADING[e]||typeof fetch==='undefined')return;KIT_LOADING[e]=true;
   fetch(`models/kit${e}.json`).then(r=>{if(!r.ok)throw new Error('kit'+e);return r.json();}).then(j=>{KIT[e]=decodeKit(j);try{muteKit(KIT[e]);harmKit(KIT[e]);}catch(er){console.warn('Farben',er);}try{addHabKit(KIT[e]);addEafKit(KIT[e]);addCulKit(KIT[e]);}catch(er){console.warn('Habescha-Modelle',er);}try{pcKit(KIT[e]);}catch(er){console.warn('Großbauten',er);}try{vegHouseApply();}catch(er){}KIT_LOADING[e]=false;if(S&&ep()===e){CITY.forEach(c=>{c.sig='';c.ksig='';});syncCities();WMESH.forEach(m=>m.visible=false);}needRender=3;})
-    .catch(err=>{KIT_LOADING[e]=false;console.warn('Baukasten',err);});}
+    .catch(err=>{KIT_LOADING[e]=false;KIT_FAIL[e]=(KIT_FAIL[e]||0)+1;console.warn('Baukasten',err);try{if(S&&ep()===e){CITY.forEach(c=>{c.sig='';});syncCities();needRender=3;}}catch(er){}});}
 const OST_C=['aegyptisch','semitisch','persisch','arabisch','berber','kaukasisch'],MED_C=['latein','griechisch','punisch','iberisch'];
 function cityStyle(i,e){const c=cultOfProv(i),d=PROV_DEF[i];
   if(c==='habescha')return'hab';if(c==='chinesisch'||c==='koreanisch')return'cn';if(c==='japanisch')return'jp';if(c==='suedostasiatisch'||c==='khmer'||c==='suedost')return'sea';if(c==='indisch')return'ind';if(c==='indigen')return'ame';if(c==='afrikanisch')return'afr';if(c==='steppe')return'stp';
@@ -13800,7 +13888,7 @@ function syncCityKit(c,i,tier,own){const e=ep(),K=KIT[e];if(!K){loadKit(e);retur
 const ROOFMAT={s:new THREE.MeshLambertMaterial({color:'#b8562f'}),n:new THREE.MeshLambertMaterial({color:'#6b5038'}),sl:new THREE.MeshLambertMaterial({color:'#5b5650'}),w:new THREE.MeshLambertMaterial({color:'#7a6a52'})};
 const VCMAT2=new THREE.MeshLambertMaterial({vertexColors:true});
 function lodOk(c){const R=CAM.d*3.4;const dx=c.g.position.x-CAM.tx,dz=c.g.position.z-CAM.tz;return dx*dx+dz*dz<R*R;}
-let lodCk='';function lodCities(){const k=Math.round(CAM.tx*2)+'|'+Math.round(CAM.tz*2)+'|'+Math.round(CAM.d);if(k===lodCk)return;lodCk=k;const near=CAM.d<10;{const op=CAM.d>=17?0.45:CAM.d>=10?0.75:1;for(const m of Object.values(GROUNDMAT))m.opacity=op;}for(const c of CITY){if(c.vis!=null)c.g.visible=c.vis&&lodOk(c);if(c.props)c.props.visible=near;}rebuildKit();}
+let lodCk='';function lodCities(){const k=Math.round(CAM.tx*2)+'|'+Math.round(CAM.tz*2)+'|'+Math.round(CAM.d);if(k===lodCk)return;lodCk=k;const near=CAM.d<10;{const op=CAM.d>=17?0.45:CAM.d>=10?0.75:1;for(const m of Object.values(GROUNDMAT))m.opacity=op;}for(const c of CITY){if(c.vis!=null)c.g.visible=c.vis&&lodOk(c)&&!c.kw;if(c.props)c.props.visible=near;}rebuildKit();}
 const CITY=PROV_DEF.map((p,i)=>{
   const c=CAP[i],g=new THREE.Group();g.position.set(c.x,c.hd,c.z);
   const pole=new THREE.Mesh(PG.cyl,MAT.wood);pole.scale.set(0.006,0.34,0.006);pole.position.set(0.02,0.25,-0.02);g.add(pole);
@@ -13881,13 +13969,16 @@ function syncKeep(c,i){const k=S?pKind(i):null,burg=k==='burg'&&c.vis;
   const x=-R*0.78,z=-R*0.5,gx=c.g.position.x+x,gz=c.g.position.z+z;c.keep.position.set(x,Math.max(0,heightAt(gx,gz))-c.g.position.y,z);const sc=1.05+R*0.7;c.keep.scale.set(sc,sc,sc);c.keep.visible=true;
   if(ep()>=3){if(!c.star){c.star=new THREE.Mesh(starGeo(),KEEPMAT);c.g.add(c.star);}c.star.scale.set(R*1.08,1,R*1.08);c.star.position.y=0.002;c.star.visible=true;}else if(c.star)c.star.visible=false;}
 function syncCities(){const caps=cityCaps();CITY.forEach((c,i)=>{
-  c.vis=isAct(i)&&isKnown(i);c.g.visible=c.vis&&lodOk(c);const own=S?S.prov[i].owner:PROV_DEF[i].owner;c.flag.material=FLAGMAT[own];
+  c.vis=isAct(i)&&isKnown(i);c.kw=false;c.g.visible=c.vis&&lodOk(c);const own=S?S.prov[i].owner:PROV_DEF[i].owner;c.flag.material=FLAGMAT[own];
   try{syncKeep(c,i);}catch(e){console.warn('Burg',e);}
   if(MODELS_READY){try{syncCityProps(c,i);}catch(e){console.warn(e);}}
   if(KIT_ON&&KIT[ep()]){const tier=cityTier(i,caps);c.tier=tier;syncCityKit(c,i,tier,own);
     if(c.mg){c.g.remove(c.mg);c.mg=null;}if(c.monu){c.g.remove(c.monu);c.monu=null;}if(c.mesh){c.g.remove(c.mesh);c.mesh=null;}c.fac=null;c.flag.visible=false;c.pole.visible=false;c.sig='K';
     if(!c.blob){c.blob=new THREE.Mesh(BLOBGEO,BLOBMAT);c.blob.position.y=0.006;c.blob.renderOrder=1;c.g.add(c.blob);}c.blob.visible=false;if(c.gnd)c.gnd.visible=true;return;}
-  if(KIT_ON){loadKit(ep());if(c.sig==='K')c.sig='';}if(c.gnd)c.gnd.visible=false;
+  if(KIT_ON){loadKit(ep());if(c.sig==='K')c.sig='';
+    // Baukasten lädt noch: Stadt ausblenden statt kurz die alte Ersatzstadt zu zeigen (Rückfall nur bei Ladefehler oder nach 25 s)
+    if(KIT_LOADING[ep()]&&!KIT_FAIL[ep()]){if(!KIT_WAIT[ep()])KIT_WAIT[ep()]=Date.now();if(Date.now()-KIT_WAIT[ep()]<25000){c.kw=true;c.g.visible=false;return;}}}
+  if(c.gnd)c.gnd.visible=false;
   if(MODELS_READY&&MODELS['city'+ep()]){if(c.fac)c.fac.material=FMAT[own]||FMAT.frei;const d=PROV_DEF[i],tier=cityTier(i,caps),big=tier>=3,e=ep(),key=`city${e}${big?'b':''}`,sig='M'+key+tier;if(sig===c.sig)return;c.sig=sig;c.tier=tier;
     if(c.mesh){c.g.remove(c.mesh);c.mesh=null;}if(c.mg)c.g.remove(c.mg);if(c.monu){c.g.remove(c.monu);c.monu=null;}
     if(tier>=2&&!c.blob){c.blob=new THREE.Mesh(BLOBGEO,BLOBMAT);c.blob.position.y=0.006;c.blob.renderOrder=1;c.g.add(c.blob);}if(c.blob){c.blob.visible=tier>=2;c.blob.scale.setScalar(CITY_BLOB[tier]);}
@@ -14298,7 +14389,7 @@ function syncTokens(){needRender=3;figPreload();
     t.ring.visible=sel;const kn=isKnown(a.p);t.g.visible=kn;t.chip.style.display=kn?'':'none';
     t.chip.className='achip'+(sel?' sel':mine&&a.mp>0&&!S.over?' ready':'');
     t.chip.innerHTML=`<i style="${cst(a.f)}"></i><span class="num">${a.units.length}</span>${shaken(a)?'<em class="shk" title="Erschüttert">↯</em>':''}${a.fz&&a.f===S.player?'<em class="fzf" title="Feldzug">⚑</em>':''}<small class="pw">${Math.round(armyPower(a))}</small>${compBar(a)}${a.st?`<em class="stc">${STANCES[a.st].ico}</em>`:''}${a.camp!=null?'<em class="campb">⚑</em>':''}`+(mine&&!S.over?`<b class="mpb"><u style="width:${Math.round(clamp(a.mp/maxMP(a),0,1)*100)}%"></u></b>`:'')+(mine&&a.goal!=null?'<em class="gl">➜</em>':'');
-    t.chip.setAttribute('aria-label',`${a.name}, ${a.units.length} Einheiten`);
+    t.chip.setAttribute('aria-label',`${a.name}, ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'}`);
     if(MODELS_READY||ARMY[ep()])applyTokModel(t,a);
     if(P&&P.face!=null&&t.g.position.distanceToSquared(t.target)<1e-4)t.face=Math.atan2(-Math.cos(P.face),Math.sin(P.face));
     if(t.spr){const k=spriteKey(a);if(k!==t.spr.userData.k){t.spr.material=spriteMat(k);t.spr.userData.k=k;}const im=t.spr.material.map.image;if(im&&im.width)t.spr.scale.set(0.4*im.width/im.height,0.4,1);}
@@ -14470,7 +14561,7 @@ function holdAt(x,y){
   if(!isAct(id)){holdInfo(x,y,`<b>${esc(d.name)}</b><span>Öffnet sich in der Epoche ${esc(EPOCHS[d.ep].name)}</span>`);return true;}
   if(!isKnown(id)){holdInfo(x,y,`<b>Unerforschtes Land</b>`);return true;}
   const ar=armiesAt(id);
-  holdInfo(x,y,`<b>${esc(d.name)}</b><span>${esc(FACTIONS[P.owner].name)} · ${esc(d.city)}</span><span>Garnison ${P.gar} · ${TER[pter(id)].n}</span>${ar.map(a=>`<span>${esc(a.name)}: ${a.units.length} Einheiten, ${armyMen(a)} Mann</span>`).join('')}${MAPMODE!=='pol'?'<hr class="vih">'+viewInfo(id):''}`);return true;
+  holdInfo(x,y,`<b>${esc(d.name)}</b><span>${esc(FACTIONS[P.owner].name)} · ${esc(d.city)}</span><span>Garnison ${P.gar} · ${TER[pter(id)].n}</span>${ar.map(a=>`<span>${esc(a.name)}: ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'}, ${armyMen(a)} Mann</span>`).join('')}${MAPMODE!=='pol'?'<hr class="vih">'+viewInfo(id):''}`);return true;
 }
 function startDrag(x,y,extra){
   drag=Object.assign({x0:x,y0:y,t0:performance.now(),moved:false,pinch:false,mode:null,cand:'pan',pts:[[x,y]]},extra||{});
@@ -15014,7 +15105,7 @@ function nemesisRound(){if(!S||S.over)return;ensureNem();const me=S.player,f=nem
 function nemCheckFall(){const N=S&&S.nem;if(!N||!N.f)return;if(!alive(N.f)&&!N.fell){N.fell=true;N.news.push({k:'triumph',f:N.f});S.fac[S.player].gold+=Math.round(200*EPOCH_COST[ep()]);addMod(S.player,'order',2,10,'Triumph');N.wait=S.turn+5;}}
 function threatsOf(f){return S.armies.filter(a=>a.f!==f&&a.units.length&&atWar(f,a.f)&&isKnown(a.p)&&(S.prov[a.p].owner===f||[...ADJ[a.p]].some(n=>S.prov[n].owner===f))).sort((a,b)=>armyPower(b)-armyPower(a));}
 function rulerPk(f){try{const cu=facCul(f),e=ep(),d=PROV_DEF[capitalOf(f)]||{lat:20};const k=cu==='chinesisch'?'oa_cn_ruler':cu==='japanisch'?'oa_jp_ruler':cu==='koreanisch'?'oa_kr_ruler':cu==='suedostasiatisch'?'oa_sa_ruler':cu==='steppe'&&e>=2&&e<=3?'oa_mn_ruler':cu==='habescha'?(e<=1?'hb_ruler_ezana':'hb_ruler_bahrnegash'):cu==='indigen'?(d.lat>28?'av_ruler_sachem':d.lat>8?'av_ruler_tikal':'av_ruler_sipan'):null;return k?pkUrl(k+'_x1'):null;}catch(e){return null;}}
-function rulerPort(f,p,cls){const e=ep();{let u=null;try{if(p.sex==='m'&&dynOf(f).ruler===p)u=rulerPk(f);}catch(x){}if(u)return`<img class="${cls}" src="${u}" alt="">`;}return p.sex==='m'?`<img class="${cls}" src="img/gp_e${clamp(p.e==null?e:p.e,0,4)}_${p.face%2}.webp" alt="">`:`<span class="${cls} ge" style="${cst(f)}"><span class="crest" style="${cst(f)}"></span></span>`;}
+function rulerPort(f,p,cls){const e=ep();{let u=null;try{if(p.sex==='m'&&dynOf(f).ruler===p)u=rulerPk(f);}catch(x){}if(u)return`<img class="${cls}" src="${u}" alt="">`;}return p.sex==='m'?`<img class="${cls}" src="img/gp_e${clamp(p.e==null?e:p.e,0,4)}_${(p.face|0)%2}.webp" alt="">`:`<span class="${cls} ge" style="${cst(f)}"><span class="crest" style="${cst(f)}"></span></span>`;}
 function nemNewsHtml(n,f){const nm=esc(FACTIONS[f].name),R=dynOf(f).ruler;
   switch(n.k){
     case'intro':return`<li class="bad"><b>Dein Erzfeind: ${nm}.</b> ${S.nem.why==='hist'?`Eine alte Rivalität: ${nm} und ${esc(FACTIONS[S.player].name)} kämpfen um dieselbe Vorherrschaft.`:`${nm} ist die stärkste Macht an deinen Grenzen.`} ${esc(R.n)} wird dir keinen Frieden gönnen. Das Wappen oben zeigt dir jederzeit seine Lage.</li>`;
@@ -15047,7 +15138,7 @@ function openNemesis(after){const f=nemF();if(!f){toast('Zurzeit hast du keinen 
   ${cmp('Provinzen',provsOf(me).length,provsOf(f).length)}${cmp('Heere',armyCount(me),armyCount(f))}${cmp('Heeresstärke',pw(me),pw(f))}${cmp('Einkommen',Math.max(0,income(me).net),Math.max(0,income(f).net))}
   <h3>Lage</h3>`;
   if(d.st==='war'){html+=`<p class="note"><b style="color:var(--danger)">Krieg</b> seit ${d.warT} Runden. Schlachten: ${N.st.bw} gewonnen, ${N.st.bl} verloren · Provinzen: ${N.st.pw} erobert, ${N.st.pl} verloren.</p>`;
-    html+=C&&ca?`<div class="campcard"><b>⚑ Feldzug von ${esc(C.g)}</b><small>${ca.units.length} Einheiten in ${esc(PROV_DEF[ca.p].name)} · Ziel ${esc(PROV_DEF[C.t].name)} · Stärke ${Math.round(armyPower(ca))} gegen Verteidigung ${Math.round(provDefense(C.t,f))}</small><button class="btn" data-nemgo="${ca.p}">Zeigen</button></div>`:`<p class="note">Kein Feldzug bekannt. ${N.cd>0?`Späher erwarten den nächsten in etwa ${N.cd} Runden.`:'Ein neuer Feldzug steht bevor.'}</p>`;
+    html+=C&&ca?`<div class="campcard"><b>⚑ Feldzug von ${esc(C.g)}</b><small>${ca.units.length} ${ca.units.length===1?'Einheit':'Einheiten'} in ${esc(PROV_DEF[ca.p].name)} · Ziel ${esc(PROV_DEF[C.t].name)} · Stärke ${Math.round(armyPower(ca))} gegen Verteidigung ${Math.round(provDefense(C.t,f))}</small><button class="btn" data-nemgo="${ca.p}">Zeigen</button></div>`:`<p class="note">Kein Feldzug bekannt. ${N.cd>0?`Späher erwarten den nächsten in etwa ${N.cd} Runden.`:'Ein neuer Feldzug steht bevor.'}</p>`;
     if(th.length)html+=`<p class="note">${th.length} feindliche ${th.length===1?'Heer steht':'Heere stehen'} an deinen Grenzen.</p>`;}
   else{const t=Math.min(12,N.ten||0);html+=`<p class="note">Frieden${d.truce>0?` (Waffenstillstand noch ${d.truce} Runden)`:''}. Die Spannung wächst jede Runde, an einer gemeinsamen Grenze doppelt so schnell.</p><div class="tension"><span>Kriegsgefahr</span><span class="pbar"><i style="width:${Math.round(t/12*100)}%"></i></span></div>`;}
   if(claims.length||mine.length)html+=`<h3>Ansprüche</h3><p class="note">${claims.length?`${esc(FACTIONS[f].name)} beansprucht ${claims.map(esc).join(', ')}. `:''}${mine.length?`Du beanspruchst ${mine.map(esc).join(', ')}.`:''}</p>`;
@@ -15057,7 +15148,7 @@ function openNemesis(after){const f=nemF();if(!f){toast('Zurzeit hast du keinen 
   document.querySelectorAll('[data-nemgo]').forEach(b=>b.onclick=()=>{closeModal();focusProv(+b.dataset.nemgo,6);after&&after();});}
 function openThreats(){const me=S.player,L=threatsOf(me),nf=nemF();
   if(!L.length){toast('Keine feindlichen Heere an deinen Grenzen.');return;}
-  showModal(`<h2>Bedrohungen</h2><p class="sub">Feindliche Heere in oder an deinen Provinzen</p><div class="list">${L.map(a=>{const tgt=[...ADJ[a.p]].filter(n=>S.prov[n].owner===me);return`<button class="arow" data-thr="${a.id}"><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)}${a.f===nf?' <em class="nemtag">Erzfeind</em>':''}${a.camp!=null?' <em class="nemtag">⚑ Feldzug</em>':''}</b><small>${esc(FACTIONS[a.f].name)} · ${esc(genOf(a).n)} · ${a.units.length} Einheiten · in ${esc(PROV_DEF[a.p].name)}${tgt.length&&S.prov[a.p].owner!==me?' · bedroht '+tgt.slice(0,2).map(n=>esc(PROV_DEF[n].name)).join(', '):''}</small></span><span class="pw num">${Math.round(armyPower(a))}</span></button>`;}).join('')}</div>`,[{label:'Schließen',cls:'primary'}]);
+  showModal(`<h2>Bedrohungen</h2><p class="sub">Feindliche Heere in oder an deinen Provinzen</p><div class="list">${L.map(a=>{const tgt=[...ADJ[a.p]].filter(n=>S.prov[n].owner===me);return`<button class="arow" data-thr="${a.id}"><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)}${a.f===nf?' <em class="nemtag">Erzfeind</em>':''}${a.camp!=null?' <em class="nemtag">⚑ Feldzug</em>':''}</b><small>${esc(FACTIONS[a.f].name)} · ${esc(genOf(a).n)} · ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · in ${esc(PROV_DEF[a.p].name)}${tgt.length&&S.prov[a.p].owner!==me?' · bedroht '+tgt.slice(0,2).map(n=>esc(PROV_DEF[n].name)).join(', '):''}</small></span><span class="pw num">${Math.round(armyPower(a))}</span></button>`;}).join('')}</div>`,[{label:'Schließen',cls:'primary'}]);
   document.querySelectorAll('[data-thr]').forEach(b=>b.onclick=()=>{const a=getArmy(+b.dataset.thr);closeModal();if(a){focusProv(a.p,6);UI.army=a.id;UI.sel=null;UI.mode='army';refresh();}});}
 function renderNemTop(){const b=$('#nemBtn'),t=$('#thrBtn');if(!b||!S)return;const f=nemF();
   if(f){b.hidden=false;b.querySelector('.crest').setAttribute('style',cst(f));b.classList.toggle('war',atWar(S.player,f));b.title=`Erzfeind: ${FACTIONS[f].name}`;}else b.hidden=true;
@@ -15175,7 +15266,13 @@ function ownDiff(f){const now=S.prov.map(P=>P.owner),o=S.own0;S.own0=now;if(!o||
 function glHtml(gl){if(!gl)return'';const by={};for(const[i,w]of gl.l)(by[w]=by[w]||[]).push(i);
   return`<div class="glbox">${gl.g.length?`<div class="gl good"><b>Gewonnen · ${gl.g.length}</b><span>${gl.g.map(i=>`<a data-jump="${i}">${esc(PROV_DEF[i].name)}</a>`).join(', ')}</span></div>`:''}${gl.l.length?`<div class="gl bad"><b>Verloren · ${gl.l.length}</b><span>${Object.keys(by).map(w=>by[w].map(i=>`<a data-jump="${i}">${esc(PROV_DEF[i].name)}</a>`).join(', ')+` <small>an ${esc(w==='frei'?'freie Völker':FACTIONS[w].name)}</small>`).join(' · ')}</span></div>`:''}</div>`;}
 function showReport(mine,cont,gl){showModal(`<h2>Bericht</h2><p class="sub">Runde ${S.turn} · ${fmtYear(S.year)} · 📍 zeigt den Ort auf der Karte</p>${glHtml(gl)}${epShield()?`<p class="dmsg ok" style="margin-top:0">Schonfrist: noch ${S.epochTurn+EPOCH_SHIELD-S.turn} Runden, Modernisieren zum halben Preis.</p>`:''}${govRepSec()}<ul class="log">${mine.map(e=>logLi(e,true)).join('')}</ul>`,[{label:'Weiter',cls:'primary',fn:()=>{$('#resumeBtn').hidden=true;cont();}}]);wireJumps(()=>showReport(mine,cont,gl));govRepBind(()=>showReport(mine,cont,gl));}
-function openChronicle(){showModal(`<h2>Chronik</h2><ul class="log">${S.log.slice().reverse().map(e=>logLi(e,e.p)).join('')}</ul>`,[{label:'Das Buch des Reiches',fn:()=>openBooks()},{label:'Schließen',fn:()=>{$('#resumeBtn').hidden=true;}}]);wireJumps(openChronicle);}
+let CHRON_TAB='log';
+function openChronicle(tab){if(typeof tab==='string')CHRON_TAB=tab;if(!AREAS.chron.t.some(x=>x[0]===CHRON_TAB))CHRON_TAB='log';
+  if(CHRON_TAB==='buch'){openReichBook('last');areaInject('chron','buch');return;}
+  if(CHRON_TAB==='gesch'){openChronik();areaInject('chron','gesch');return;}
+  if(CHRON_TAB==='erf'){openAch();areaInject('chron','erf');return;}
+  showModal(`<h2>Chronik</h2>${chronicleHtml()}<h3>Protokoll</h3><ul class="log">${S.log.slice().reverse().map(e=>logLi(e,e.p)).join('')}</ul><div class="row" style="margin-top:8px"><button class="btn" id="revBtn">Rückblick auf diese Partie</button></div>`,[{label:'Schließen',fn:()=>{$('#resumeBtn').hidden=true;}}]);wireJumps(openChronicle);
+  {const b=$('#revBtn');if(b)b.onclick=()=>openReview(()=>openChronicle('log'));}$('#dialog').classList.add('wide');areaInject('chron','log');}
 // Umstellen innerhalb der Provinz kostet Bewegung
 function localCost(a,pt){const t=TOK.get(a.id),p0=t?t.target:CAP[a.p],d=Math.hypot(pt.x-p0.x,pt.z-p0.z);return Math.max(8,Math.round(d*30*TER[pter(a.p)].c/60));}
 function tradeTrim(){for(const f of PLAYABLE){if(f==='horde'||!alive(f))continue;if(tradeCount(f)<=tradeSlots(f))continue;
@@ -15219,7 +15316,7 @@ function renderTop(){
   $('#facCrest').setAttribute('style',cst(S.player));$('#facName').textContent=f.name;{const r=facRank(S.player);$('#facRank').textContent=`${RANK_ICO[r]} ${mainTitle(S.player)} · ${staatsform(S.player)}`;}try{renderNemTop();}catch(e){}
   $('#gold').textContent=Math.round(S.fac[S.player].gold);
   const ie=$('#inc');ie.textContent=(inc>=0?'+':'')+Math.round(inc);ie.className='inc '+(inc>=0?'pos':'neg');
-  {const Se=SEASONS[season()];$('#year').textContent=fmtYear(S.year)+' · '+Se.ico+' '+Se.n;$('#year').title=Se.n+': '+Se.d;}$('#epochName').textContent=EPOCHS[ep()].name;
+  {const Se=SEASONS[season()];$('#year').innerHTML=esc(fmtYear(S.year))+'<span class="ssn"> · '+Se.ico+' '+esc(Se.n)+'</span>';$('#year').title=Se.n+': '+Se.d;}$('#epochName').textContent=EPOCHS[ep()].name;
   const F=S.fac[S.player],rb=$('#resBtn');$('#resPct').textContent=F.res?Math.floor(F.res.prog/TECH_BY[F.res.id].cost*100)+' %':'Forschung';rb.classList.toggle('idle',!F.res);
   $('#endBtn').disabled=S.over;{const m=$('#endMed');m.hidden=false;m.classList.toggle('dis',!!S.over);$('#endMedR').textContent=`Runde ${S.turn}`;}try{renderTodo();}catch(e){}
 }
@@ -15230,7 +15327,7 @@ function renderHint(){const h=$('#hint');if(UI.mode==='move')$('#legend').hidden
 function armyRow(a,clickable=true){
   const mine=a.f===S.player;
   const tag=mine?(a.fz?'<span class="tag">⚑ Feldzug</span>':a.goal!=null?'<span class="tag">unterwegs</span>':a.mp>0?'<span class="tag">bereit</span>':'<span class="tag off">marschiert</span>'):'';
-  return `<button class="arow" data-act="army" data-id="${a.id}"${clickable?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)}</b><small>${a.units.length} Einheiten · ${armyMen(a)} Mann${a.gen?` · ${esc(a.gen.n)}, Stufe ${a.gen.lvl}`:''}</small></span>${tag}<span class="pw num" title="Stärke">${Math.round(armyPower(a))}</span></button>`;
+  return `<button class="arow" data-act="army" data-id="${a.id}"${clickable?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)}</b><small>${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · ${armyMen(a)} Mann${a.gen?` · ${esc(a.gen.n)}, Stufe ${a.gen.lvl}`:''}</small></span>${tag}<span class="pw num" title="Stärke">${Math.round(armyPower(a))}</span></button>`;
 }
 (()=>{const sh=document.getElementById('sheet');if(!sh||!window.MutationObserver)return;const up=()=>document.body.classList.toggle('shopen',!sh.hidden&&!sh.classList.contains('collapsed')&&getComputedStyle(sh).display!=='none');new MutationObserver(up).observe(sh,{attributes:true,attributeFilter:['class','hidden','style']});up();})();
 function renderSheet(){
@@ -15238,14 +15335,13 @@ function renderSheet(){
   if(m==='idle'||UI.sel==null&&m!=='army'&&m!=='move'){
     const mine=S.armies.filter(a=>a.f===S.player),ready=mine.filter(a=>a.mp>0);
     html=`<p class="note" style="margin-top:0">Tippe auf eine Provinz oder ein Heer. Ziehen verschiebt die Karte, zwei Finger zoomen.</p>`;
-    if(!S.fac[S.player].res)html+=`<p class="note" style="color:var(--bronze-hi)">Keine Forschung gewählt. Tippe oben auf das Buch.</p>`;
+    if(!S.fac[S.player].res)html+=`<p class="note" style="color:var(--bronze-hi)">Keine Forschung gewählt. Tippe oben auf „Forschung“.</p>`;
     const unrest=provsOf(S.player).filter(pi=>provOrder(pi)<0);
     if(unrest.length)html+=`<p class="note" style="color:var(--danger)">Unruhe in ${unrest.map(pi=>esc(PROV_DEF[pi].name)).join(', ')}.</p>`;
     if(hordeActive()){const F=S.fac.horde,left=F.hz?F.hz.dur-(S.turn-F.hz.t0):0;html+=`<p class="note crisisline">🔥 ${esc(FACTIONS.horde.name)} ziehen über das Land: ${provsOf('horde').length} Provinzen, ${S.armies.filter(a=>a.f==='horde').length} Heere. Der Heerzug zerfällt in etwa ${Math.max(1,left)} Runden.</p>`;}
     {const D=dynOf(S.player),R=D.ruler,hh=dynHeir(S.player);html+=`<button class="dynline" data-act="fam"><span>👑 ${esc(R.n)} (${R.age})${D.regent?' · Regentschaft':''}</span><small class="${hh?'':'badc'}">${hh?'Erbe: '+esc(hh.n)+' ('+hh.age+')':'Kein Erbe'}</small></button>`;}
     html+=scenHtml()+storyHtml();html+=missionsHtml();
     html+=`<h3>Deine Heere · ${ready.length} bereit</h3><div class="list">${mine.map(a=>armyRow(a)).join('')||'<p class="note">Keine Heere. Hebe in einer eigenen Provinz Truppen aus.</p>'}</div>`;
-    html+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="eco">Wirtschaft</button><button class="btn" data-act="hof">Hof</button><button class="btn" data-act="realm">Reich und Diplomatie</button></div>`;
     {const E=S.fac[S.player].eco;if(E&&(E.foodR<1||(E.civN>0&&E.civR<0.9)))html+=`<p class="note" style="color:var(--bronze-hi)">${E.foodR<1?`Nahrung nur ${Math.round(E.foodR*100)} %. `:''}${E.civN>0&&E.civR<0.75?'Siedlungen unterversorgt. ':''}Details unter Wirtschaft.</p>`;}
     html+=`<p class="note">Ziel: ${winTarget()} von ${activeCount()} Provinzen halten. Du besitzt ${provsOf(S.player).length}.</p>`;
   }else if(m==='embark'||m==='fsail'){UI.mode=m==='fsail'?'fsail':'fleet';const fh=fleetSheetHtml();if(fh==null){UI.mode='idle';UI.fleet=null;return renderSheet();}const fl=S.fleets.find(x=>x.id===UI.fleet);title=fl.name+(m==='fsail'?' · Segeln':'');html=fh;
@@ -15493,9 +15589,9 @@ $('#shToggle').addEventListener('click',()=>$('#sheet').classList.toggle('collap
   const ti=()=>document.querySelectorAll(SEL).forEach(b=>{const t=b.getAttribute('aria-label');if(t&&!b.title)b.title=t;});ti();setTimeout(ti,3000);})();
 
 $('#endBtn').addEventListener('click',endTurn);$('#endMed').addEventListener('click',()=>{if(S&&!busy&&!S.over)endTurn();});
-$('#menuBtn').addEventListener('click',openMenu);
+$('#menuBtn').addEventListener('click',()=>openMenu());
 {const nav=(id,fn)=>$(id).addEventListener('click',()=>{if(!S||busy)return;AUDIO.sfx('click');closeModal();fn();});
-  nav('#navReich',openOverview);nav('#navEco',()=>openEconomy());nav('#navHof',()=>openHof());nav('#navLog',openChronicle);}
+  nav('#navReich',()=>openOverview());nav('#navDip',()=>openDipHub());nav('#navEco',()=>openEconomy());nav('#navHof',()=>openHof());nav('#navLog',()=>openChronicle());}
 $('#goldStat').addEventListener('click',()=>{if(S&&!busy){AUDIO.sfx('click');openEconomy();}});
 $('#modeBtn').addEventListener('click',e=>{e.stopPropagation();$('#modePop').hidden=!$('#modePop').hidden;});
 $('#northBtn').addEventListener('click',e=>{e.stopPropagation();CV.yaw=0;updateNorth();needRender=3;});
@@ -15504,10 +15600,10 @@ $('#modePop').addEventListener('click',e=>{const b=e.target.closest('button[data
 $('#legend').addEventListener('click',e=>{const v=e.target.closest('[data-mv]'),h=e.target.closest('[data-lh]');if(e.target.closest('[data-dipme]')){e.stopPropagation();AUDIO.sfx('click');setDipView(null);return;}if(v){e.stopPropagation();AUDIO.sfx('click');setMapMode(v.dataset.mv);return;}if(h){e.stopPropagation();const k=+h.dataset.lh;LEGHL=LEGHL===k?null:k;syncTiles();}});
 try{renderModePop();if(MAPMODE!=='pol')setTimeout(()=>{try{setMapMode(MAPMODE,true);}catch(e){}},0);}catch(e){}
 canvas.addEventListener('pointerdown',()=>{$('#modePop').hidden=true;if(VIT){clearTimeout(VIT);VIT=null;holdInfo(0,0,null);}});
-$('#facBtn').addEventListener('click',openOverview);
+$('#facBtn').addEventListener('click',()=>openOverview());
 $('#nemBtn').addEventListener('click',()=>{if(!S)return;AUDIO.sfx('click');openNemesis();});
 $('#thrBtn').addEventListener('click',()=>{if(!S)return;AUDIO.sfx('click');openThreats();});
-$('#resBtn').addEventListener('click',openResearch);
+$('#resBtn').addEventListener('click',()=>openResearch());
 
 function selectArmy(id){const a=getArmy(id);if(!a)return;try{AUDIO.sfx('select');}catch(e){}UI.army=id;UI.sel=a.p;UI.preview=null;UI.mode=a.f===S.player&&a.mp>0&&!S.over?'move':'army';if(innerHeight>innerWidth*1.2){const c=CAP[a.p],d=Math.min(CAM.d,12);camTween={tx:c.x,tz:c.z+0.6+d*0.24,d};}$('#sheet').classList.remove('collapsed');refresh();}
 function onArmyChip(id){
@@ -15571,7 +15667,7 @@ function showDefeat(){showModal(`${heroHtml('game_lose',S.turn,false)}<h2>Unterg
 
 function showCrisisNews(done){const N=S.crisisNews;if(!N){done();return;}S.crisisNews=null;try{applyKnown();refreshOwnership();}catch(e){}AUDIO.sfx('horn');const c=N.ps[0];
   showModal(`<h2>${esc(N.title)}</h2><p class="sub">${fmtYear(S.year)}</p><p>${esc(N.text)}</p><p class="note">${esc(FACTIONS.horde.name)} halten ${N.ps.map(i=>esc(PROV_DEF[i].name)).join(', ')}. Sie greifen jede Runde an. Der Heerzug zerfällt nach einiger Zeit von selbst. Befestigte Heere und Mauern halten ihn am besten auf.</p>`,[{label:'Zeigen',fn:()=>{focusProv(c,14);done();}},{label:'Weiter',cls:'primary',fn:done}]);}
-function endTurn(){
+function endTurn(){try{if(KIT_ON&&S&&ep()<4&&S.epochTurn!=null&&S.turn>=S.epochTurn+30)loadKit(ep()+1);}catch(e){}
   if(S&&S.mp){mpEndTurn();return;}
   if(!S||busy||S.over)return;busy=true;AUDIO.sfx('turn');const techs0=Object.keys(S.fac[S.player].tech).length;
   UI.mode='idle';UI.sel=null;UI.army=null;UI.preview=null;
@@ -15582,9 +15678,9 @@ function endTurn(){
     newRound();advanceGoals();refreshOwnership();refresh();save(KEY_AUTO);cloudSave('auto');busy=false;
     if(Object.keys(S.fac[S.player].tech).length>techs0)setTimeout(()=>AUDIO.sfx('tech'),700);
     if(S.over){showDefeat();return;}
-    const gl=ownDiff(S.player);
+    const gl=ownDiff(S.player),epT=!!S.epochNews;if(epT)EP_MINE=S.log.slice(before).filter(e=>e.p);
     showEpochNews(()=>showCrisisNews(()=>showNemNews(()=>showProvNews(()=>{const mine=S.log.slice(before).filter(e=>e.p);
-    if(mine.length||gl)showReport(mine,()=>runEvents(()=>showProposals(afterAction)),gl);
+    if((mine.length||gl)&&!epT)showReport(mine,()=>runEvents(()=>showProposals(afterAction)),gl);
     else{toast(`Runde ${S.turn} · ${fmtYear(S.year)} · gespeichert`);runEvents(()=>showProposals(afterAction));}}))));
   });
 }
@@ -15592,45 +15688,51 @@ function endTurn(){
 // Dialoge
 function showModal(html,buttons){
   const d=$('#dialog');d.classList.remove('wide','bookdlg');
-  d.innerHTML='<button class="dlgx" aria-label="Schließen">✕</button>'+html+(buttons&&buttons.length?`<div class="actions${buttons.length===1&&!buttons[0].fn&&/^Schließen$/.test(buttons[0].label)?' soloclose':''}">${buttons.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`:'');
+  // Schließen nur noch über ✕ oben rechts: reine Schließen-Knöpfe fallen weg, ihre Aktion übernimmt das ✕
+  let xFn=null,xCut=false;const vis=(buttons||[]).map((b,i)=>[b,i]).filter(([b])=>{if(b&&b.keep!==true&&!b.cancel&&/^(Schließen|Fertig)$/.test(b.label||'')){xCut=true;if(b.fn)xFn=b.fn;return false;}return true;});
+  d.innerHTML='<button class="dlgx" aria-label="Schließen">✕</button>'+html+(vis.length?`<div class="actions">${vis.map(([b,i])=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`:'');
   $('#modal').hidden=false;
   d.querySelectorAll('.actions [data-i]').forEach(el=>el.addEventListener('click',()=>{const b=buttons[+el.dataset.i];if(b.keep!==true)closeModal();if(b.fn)b.fn();}));
   const first=d.querySelector('.actions .btn.primary')||d.querySelector('.actions .btn');if(first)first.focus({preventScroll:true});
-  d.querySelector('.dlgx').addEventListener('click',()=>{const bs=[...d.querySelectorAll('.actions [data-i]')],pick=bs.find(b=>/Schließen|Weiter|Verstanden|Abbrechen|Zurück|Nicht angreifen|Berechnen|Ablehnen|Fernbleiben|Nichts unternehmen|Später/.test(b.textContent))||bs.find(b=>b.classList.contains('primary'));if(pick)pick.click();else closeModal();});
+  d.querySelector('.dlgx').addEventListener('click',()=>{if(d.querySelector('.dlgback')){closeModal();if(xFn){try{xFn();}catch(e){}if(!$('#modal').hidden)closeModal();}try{navFresh();}catch(e){}return;}const bs=[...d.querySelectorAll('.actions [data-i]')],cn=bs.find(b=>buttons[+b.dataset.i]&&buttons[+b.dataset.i].cancel);if(cn){cn.click();return;}
+    if(xCut){closeModal();if(xFn)xFn();return;}
+    const pick=bs.find(b=>/Schließen|Weiter|Verstanden|Abbrechen|Zurück|Nicht angreifen|Berechnen|Ablehnen|Fernbleiben|Nichts unternehmen|Später/.test(b.textContent))||bs.find(b=>b.classList.contains('primary'));if(pick)pick.click();else closeModal();});
 }
 // Kurze Bestätigung: Titel, Folgen, Knopftext, Aktion, zurück (✕/Abbrechen)
 function confirmAct(title,txt,okLabel,fn,back,img){showModal(`${img?heroHtml(img,S?S.turn:0,false):''}<h2>${esc(title)}</h2><p>${esc(txt)}</p>`,[{label:'Abbrechen',fn:()=>{if(back)back();}},{label:okLabel,cls:'primary',fn}]);}
 function closeModal(){try{delete $('#dialog').dataset.theme;}catch(e){}try{NARR.stop();}catch(e){}$('#modal').hidden=true;$('#dialog').innerHTML='';$('#dialog').classList.remove('wide');}
 function openMenu(){
+  const it=(id,ico,t,cls)=>`<button class="btn block mico${cls?' '+cls:''}" id="${id}">${ico?`<img class="uico" src="img/ui_${ico}.webp" alt="" draggable="false">`:''}${t}</button>`;
   showModal(`<h2>Menü</h2><p class="sub">Runde ${S.turn} · ${fmtYear(S.year)}</p>${mpMenuHtml()}
-  <div class="list"><button class="btn block mico" id="mMp"><img class="uico" src="img/ui_mehrspieler.webp" alt="" draggable="false">Mehrspieler</button><button class="btn block mico" id="mSave"><img class="uico" src="img/ui_speichern.webp" alt="" draggable="false">Spiel speichern</button><button class="btn block mico" id="mLoad"><img class="uico" src="img/ui_laden.webp" alt="" draggable="false">Spielstand laden</button><button class="btn block mico" id="mChron">Sammlung der Geschichten</button><button class="btn block mico" id="mRev">Rückblick auf diese Partie</button><button class="btn block mico" id="mAch">Erfolge</button><button class="btn block mico" id="mExp"><img class="uico" src="img/ui_export.webp" alt="" draggable="false">Exportieren</button><button class="btn block mico" id="mImp"><img class="uico" src="img/ui_import.webp" alt="" draggable="false">Importieren</button><button class="btn block mico" id="mDip"><img class="uico" src="img/ui_reich.webp" alt="" draggable="false">Reich und Diplomatie</button><button class="btn block mico" id="mHof"><img class="uico" src="img/ui_hof.webp" alt="" draggable="false">Hof, Feldherren und Agenten</button><button class="btn block mico" id="mEco"><img class="uico" src="img/ui_wirtschaft.webp" alt="" draggable="false">Wirtschaft</button><button class="btn block mico" id="mLog"><img class="uico" src="img/ui_chronik.webp" alt="" draggable="false">Protokoll und Buch des Reiches</button><button class="btn block mico" id="mHints">Ratgeber-Hinweise: ${hintsOff()?'aus':'an'}</button><button class="btn block mico" id="mOff">Für unterwegs (offline)</button><button class="btn block mico" id="mAudio"><img class="uico" src="img/ui_ton.webp" alt="" draggable="false">Ton und Musik</button><button class="btn block mico" id="mTheme">Oberfläche: Kulturstil ${uiThemeOn()?'an':'aus'}</button><button class="btn block mico" id="mGfx"><img class="uico" src="img/ui_karte.webp" alt="" draggable="false">Grafik</button>${devOn()?'<button class="btn block mico" id="mTest"><img class="uico" src="img/ui_test.webp" alt="" draggable="false">Test-Spielstand laden</button>':''}<button class="btn block mico" id="mTut"><img class="uico" src="img/ui_hilfe.webp" alt="" draggable="false">Einführung zeigen</button><button class="btn block mico" id="mHelp"><img class="uico" src="img/ui_chronik.webp" alt="" draggable="false">Steuerung und Regeln</button><button class="btn block danger mico" id="mNew"><img class="uico" src="img/ui_neu.webp" alt="" draggable="false">Neues Spiel</button></div>`,[{label:'Schließen'}]);
+  <h3 class="mgrp">Partie</h3><div class="list mlist">${it('mSave','speichern','Spiel speichern')}${it('mLoad','laden','Spielstand laden')}${it('mExp','export','Exportieren')}${it('mImp','import','Importieren')}${S.mp?it('mMp','mehrspieler','Mehrspieler'):''}${devOn()?it('mTest','test','Test-Spielstand laden'):''}${it('mNew','neu','Neues Spiel','danger')}</div>
+  <h3 class="mgrp">Einstellungen</h3><div class="list mlist">${it('mSet','ton','Einstellungen')}</div><p class="note" style="margin:2px 0 0">Ton, Grafik, Oberfläche und Offline-Modus.</p>
+  <h3 class="mgrp">Hilfe</h3><div class="list mlist">${it('mTut','hilfe','Einführung zeigen')}${it('mHelp','chronik','Steuerung und Regeln')}${it('mLic','','Lizenzen und Danksagung')}</div>`,[]);
   $('#mSave').onclick=()=>{openSaveSlots();};
-  $('#mLoad').onclick=()=>openLoad();{const mc=$('#mChron');if(mc)mc.onclick=()=>openChronik();}{const mr=$('#mRev');if(mr)mr.onclick=()=>openReview();const ma=$('#mAch');if(ma)ma.onclick=()=>openAch();}
-  $('#mMp').onclick=openMP;
-  $('#mAudio').onclick=openAudio;{const mo=$('#mOff');if(mo)mo.onclick=openOffline;}{const mt=$('#mTheme');if(mt)mt.onclick=()=>{const on=!uiThemeOn();try{localStorage.setItem('imperium.uitheme',on?'1':'0');}catch(e){}applyUiTheme();mt.textContent='Oberfläche: Kulturstil '+(on?'an':'aus');};}{const g=$('#mGfx');if(g)g.onclick=openGfx;}
+  $('#mLoad').onclick=()=>openLoad();
+  {const m=$('#mMp');if(m)m.onclick=openMP;}
+  $('#mSet').onclick=()=>openSettings();
   $('#mTut').onclick=()=>{closeModal();maybeTutorial(true);};
-  {const t=$('#mTest');if(t)t.onclick=openTestSaves;}{const hb=$('#mHints');if(hb)hb.onclick=()=>{try{localStorage.setItem('imperium.hints',hintsOff()?'on':'off');}catch(e){}toast(`Ratgeber-Hinweise ${hintsOff()?'aus':'an'}`);openMenu();};}
-  try{const L=$('#modal .list');if(L&&!S.scen){const d=document.createElement('div');const ch=Object.keys(ADDONS).filter(k=>ADDONS[k].on).map(k=>`${esc(ADDONS[k].n)}: ${addonOn(k)?'an':'aus'}`),co=S.conts?Object.keys(CONT_TH).map(k=>`${CONT_N[k]}: ${S.conts[k]===false?'aus':'an'}`):[];
-    d.innerHTML=`<h3 style="margin:12px 0 6px">Kapitel und Kontinente dieser Partie</h3><p class="note">${[...co,...ch].join(' · ')}. Festgelegt beim Start, änderbar nur für eine neue Partie.</p>`;L.after(d);}}catch(e){}
-  $('#mEco').onclick=openEconomy;
-  $('#mHof').onclick=()=>openHof();
-  $('#mDip').onclick=openOverview;
+  {const t=$('#mTest');if(t)t.onclick=openTestSaves;}
   $('#mExp').onclick=openExport;
   $('#mImp').onclick=openImport;
-  $('#mLog').onclick=openChronicle;
-  $('#mHelp').onclick=()=>showModal(`<h2>Steuerung und Regeln</h2><ul class="log">
+  $('#mHelp').onclick=()=>openHelp();
+  $('#mLic').onclick=()=>openLicenses();
+  $('#mNew').onclick=()=>showModal(`<h2>Neues Spiel?</h2><p>Das laufende Spiel bleibt als automatischer Spielstand erhalten, bis du die nächste Runde beendest.</p>`,[{label:'Abbrechen'},{label:'Neues Spiel',cls:'primary',fn:showStart}]);
+}
+function openHelp(){showModal(`<h2>Steuerung und Regeln</h2><ul class="log">
+  <li><span>Bereiche</span>Oben in der Leiste: Reich (Überblick, Regionen, Ziele), Diplomatie (Reiche, Verträge, Karte), Wirtschaft (Haushalt, Waren, Siedlungen, Handel), Hof (Ämter, Familie, Feldherren, Agenten, Glaube, Rat), Forschung und Chronik (Protokoll, Buch des Reiches, Geschichten, Erfolge). Das ☰-Menü enthält Speichern, Einstellungen und Hilfe. Ein „?“ in jedem Bereich erklärt kurz den Reiter. Fenster schließt du mit ✕, „‹“ führt zurück.</li>
   <li><span>Karte</span>Ziehen verschiebt, zwei Finger zoomen. Antippen wählt Provinz oder Heer.</li>
-  <li><span>Marsch</span>Heer antippen: Grün ist in dieser Runde erreichbar, Gelb in der nächsten. Ziel antippen zeigt den Weg, nochmal antippen marschiert. Weiter entfernte Ziele marschiert das Heer über mehrere Runden an. Gebirge und Wald kosten mehr Bewegung, Reiterei ist schneller, Artillerie langsamer. Neben feindlichen Heeren endet der Marsch.</li>
+  <li><span>Marsch</span>Heer antippen: Grün ist in dieser Runde erreichbar, Gelb in der nächsten. Ziel antippen zeigt den Weg und am Ziel einen Befehlsknopf („⚔ Angreifen“ oder „Marschieren“), ein Tipp darauf bestätigt. Doppeltippen aufs Ziel geht auch. Du kannst die Figur auch direkt ans Ziel ziehen, „↶ Rückgängig“ nimmt einen Marsch ohne Kampf zurück. Weiter entfernte Ziele marschiert das Heer über mehrere Runden an. Gebirge und Wald kosten mehr Bewegung, Reiterei ist schneller, Artillerie langsamer. Neben feindlichen Heeren endet der Marsch.</li>
   <li><span>Kampf</span>Rote Provinzen sind Angriffe. Die Verteidigung ist Garnison plus Heere vor Ort.</li>
   <li><span>Gold</span>Steuern aller Provinzen minus Sold der Truppen. Ohne Gold desertieren Einheiten.</li>
   <li><span>Erholung</span>Heere füllen sich jede Runde um 8 % auf, Garnisonen wachsen nach.</li>
   <li><span>Bauen</span>Jede Stadt hat 3 Bauplätze, Hauptstädte 4. Stufe III braucht Forschung.</li>
   <li><span>Ordnung</span>Tempel, Truppen und niedrige Steuern helfen. Unter 0 sinken die Einnahmen, ab −4 droht ein Aufstand.</li>
-  <li><span>Forschung</span>Das Buch oben. Drei Zweige: Militär, Wirtschaft, Kultur.</li>
-  <li><span>Diplomatie</span>Über dein Wappen oben links. Krieg, Frieden, Bündnisse, Handel, Tribut und Geschenke. Angreifen geht nur im Krieg, freie Völker immer.</li>
+  <li><span>Forschung</span>Knopf „Forschung“ oben. Reiter für Militär, Wirtschaft, Kultur, das eigene Wissen deiner Kultur und wiederholbare Fortschritte.</li>
+  <li><span>Diplomatie</span>Knopf „Diplomatie“ oben, oder ein Reich auf der Karte antippen. Krieg, Frieden, Bündnisse, Handel, Tribut und Geschenke. Angreifen geht nur im Krieg, freie Völker immer.</li>
   <li><span>Epochen</span>Fünf Zeitalter von der Antike bis Napoleon. Jede bringt neues Land, neue Völker, neue Truppen und Forschung. Den Fortschritt siehst du im Buch.</li>
-  <li><span>Ereignisse</span>Seuchen, Ernten, Söldner und historische Wendepunkte verlangen Entscheidungen. Laufende Folgen siehst du in der Reichsübersicht.</li>
-  <li><span>Großbauten</span>Im Bauen-Menü. Jeder existiert nur einmal und bringt Kultur.</li>
+  <li><span>Ereignisse</span>Seuchen, Ernten, Söldner und historische Wendepunkte verlangen Entscheidungen. Laufende Folgen siehst du unter Reich → Überblick.</li>
+  <li><span>Großbauten</span>In der Provinz unter „Bauen“. Jeder existiert nur einmal und bringt Kultur.</li>
   <li><span>Durchmarsch</span>Heere ziehen auch durch das Land von Reichen, mit denen du Frieden hast. Das kostet Beziehung (−4 beim Betreten, −2 je Runde), führt aber nicht zum Krieg. Unerforschtes Land lässt sich im Marschmodus antippen und wird beim Einmarsch aufgedeckt.</li>
   <li><span>Schiffe</span>Steht ein Heer mit einer Flotte in derselben Küstenprovinz, setzt „Mit Flotte übersetzen“ es an jede Küste in Reichweite über, auch an neutrale und unerforschte.</li>
   <li><span>Belagerung</span>Städte und ummauerte Orte brauchen erst Belagerungsrunden. Dabei entsteht Gerät: Leitern nach 1, Rammbock nach 2, Belagerungsturm nach 3 Runden (bis zum Mittelalter). Die Hauptstadt hält mindestens 2 Runden. Steht ein Feind an der Grenze, wächst die Garnison schneller (Aufgebot).</li>
@@ -15638,12 +15740,17 @@ function openMenu(){
   <li><span>Wandel</span>Veraltete Gebäude ziehen von selbst nach, wenn ein modernes Vorbild in der Nachbarprovinz oder der Hauptstadt steht. Der Umbau per Knopf wird mit fortschreitendem Wandel billiger.</li>
   <li><span>Geistesblitze</span>Viele Techniken haben eine Bedingung (zum Beispiel zwei Siege mit Reiterei). Ist sie erfüllt, kostet die Technik 40 % weniger. Wer eine Schlüsseltechnik als erstes Reich erforscht, erhält einen historischen Durchbruch mit dauerhaftem Bonus.</li>
   <li><span>Doktrinen</span>Am Ende jedes Forschungszweigs wählst du eine von zwei Doktrinen. Jede hat neben dem Bonus eine eigene Regel.</li>
-  <li><span>Wirtschaft</span>Im Haushalt siehst du Einnahmen, Ausgaben, Verlauf, Anleihen, Zunftzentren und die Marktlage. Je Ware kannst du „Verkaufen“ oder „Horten“ wählen. Drei gleiche Verarbeitungsbetriebe in einer Region bilden ein Zunftzentrum (+25 %).</li>
+  <li><span>Wirtschaft</span>Unter Wirtschaft → Haushalt siehst du Einnahmen, Ausgaben, Verlauf, Anleihen, Zunftzentren und die Marktlage. Je Ware kannst du „Verkaufen“ oder „Horten“ wählen. Drei gleiche Verarbeitungsbetriebe in einer Region bilden ein Zunftzentrum (+25 %).</li>
   <li><span>Herrscherhaus</span>Unter Hof → Familie: Heirat (eigener Adel oder anderes Reich), Kinder, Erziehung des Erben, Adoption eines Feldherrn oder Verwandten. Stirbt der Herrscher ohne Kind, folgt die Seitenlinie (Ordnung −2), ohne Verwandte droht eine Thronfolgekrise. Hofereignisse wie Krankheit, Erbstreit oder Brautwerbung verlangen Entscheidungen.</li>
-  <li><span>Chronik</span>Am Ende jeder Epoche schreibt der Hofchronist ein Kapitel über dein Reich. Alle Kapitel findest du unter Chronik → Das Buch des Reiches. Große Entscheidungen lösen später Folgeereignisse aus.</li>
-  <li><span>Sieg</span>Herrschaft: 60 % der Provinzen im Napoleonischen Zeitalter oder alle Rivalen besiegt. Wirtschaft: 20.000 Gold. Kultur: 2.000 Punkte.</li></ul>`,[{label:'Verstanden',cls:'primary'}]);
-  $('#mNew').onclick=()=>showModal(`<h2>Neues Spiel?</h2><p>Das laufende Spiel bleibt als automatischer Spielstand erhalten, bis du die nächste Runde beendest.</p>`,[{label:'Abbrechen'},{label:'Neues Spiel',cls:'primary',fn:showStart}]);
-}
+  <li><span>Chronik</span>Am Ende jeder Epoche schreibt der Hofchronist ein Kapitel über dein Reich. Alle Kapitel findest du unter Chronik → Buch des Reiches. Große Entscheidungen lösen später Folgeereignisse aus.</li>
+  <li><span>Sieg</span>Herrschaft: 60 % der Provinzen im Napoleonischen Zeitalter oder alle Rivalen besiegt. Wirtschaft: 20.000 Gold. Kultur: 2.000 Punkte.</li></ul>`,[]);}
+function openLicenses(){showModal(`<h2>Lizenzen und Danksagung</h2><ul class="log">
+  <li><span>Musik</span>Musik erzeugt mit MusicGen (Meta), CC-BY-NC 4.0. Nur nicht-kommerzielle Nutzung.</li>
+  <li><span>Klänge</span>Instrumentenklänge: FluidR3 GM Soundfont von Frank Wen, aufbereitet von midi-js-soundfonts, CC BY 3.0.</li>
+  <li><span>Stimmen</span>Erzähler und Berater erzeugt mit XTTS (Coqui), nicht-kommerzielle Lizenz.</li>
+  <li><span>Bilder und 3D</span>Bilder erzeugt mit FLUX, 3D-Modelle mit TRELLIS, für dieses Spiel aufbereitet.</li>
+  <li><span>Schriften</span>Marcellus und Alegreya Sans, SIL Open Font License.</li>
+  <li><span>Technik</span>three.js (MIT-Lizenz).</li></ul><p class="note">Private, nicht-kommerzielle Fassung.</p>`,[]);}
 function regionsHtml(){
   const me=S.player,rs=REGION_LIST.map(R=>({R,n:R.provs.filter(i=>S.prov[i].owner===me).length})).filter(x=>x.n>0).sort((a,b)=>b.n/b.R.provs.length-a.n/a.R.provs.length);
   if(!rs.length)return'';
@@ -15663,30 +15770,51 @@ function treatiesHtml(){const p=S.player,rows=[];
     if(it.length)rows.push({f,it});}
   if(!rows.length)return`<h3>Verträge</h3><p class="note">Noch keine Abkommen. Handel, Nichtangriffspakte und Bündnisse schließt du in der Diplomatie eines Reichs.</p>`;
   return`<h3>Verträge</h3><table class="rank trt"><thead><tr><th>Reich</th><th>Abkommen</th><th>Läuft noch</th></tr></thead><tbody>${rows.map(r=>r.it.map((x,i)=>`<tr class="click" data-dipf="${r.f}"><td>${i===0?`<span class="crest" style="${cst(r.f)}"></span>${esc(FACTIONS[r.f].name)}`:''}</td><td><span class="trk ${x[0]}"></span>${x[1]}</td><td>${x[2]||'–'}</td></tr>`).join('')).join('')}</tbody></table>`;}
-function openOverview(){
+function openOverview(tab){if(tab)REICH_TAB=tab;if(!AREAS.reich.t.some(x=>x[0]===REICH_TAB))REICH_TAB='ueb';
   const F=S.fac[S.player],inc=income(S.player);
   const unk=PLAYABLE.filter(f=>S.fac[f].alive&&!knows(f)).length;
   const facTh=f=>{const c=capitalOf(f);if(c!=null)return PCENTER[c].th;const o=provsOf(f);return o.length?PCENTER[o[0]].th:-1;},myTh=facTh(S.player);
   const rows=PLAYABLE.filter(f=>S.fac[f].born&&knows(f)).map(f=>({f,ps:provsOf(f).length,alive:S.fac[f].alive,th:facTh(f),ct:f===S.player||!S.fac[f].alive||inContact(S.player,f)})).sort((a,b)=>((a.th===myTh?0:1)-(b.th===myTh?0:1))||(a.th-b.th)||(b.ct-a.ct)||(b.ps-a.ps));
-  showModal(`<h2>Reich und Diplomatie</h2><p class="sub">${esc(FACTIONS[S.player].name)} · Runde ${S.turn} · Forschung ${researchRate(S.player).toLocaleString('de-DE')} pro Runde · Staatsform ${staatsform(S.player)} · Verwaltung ${provsOf(S.player).length} von ${adminCap(S.player)} Provinzen${provsOf(S.player).length>adminCap(S.player)?' (Ordnung sinkt, Statthalter und Reformen heben die Grenze)':''}</p><p class="note" style="margin-top:-4px">Verwaltungsgrenze: ${adminParts(S.player).map(([t,v])=>`${esc(t)} +${v}`).join(', ')}. Darüber sinkt die Ordnung, Eroberungen bleiben immer möglich.</p>
+  let h=`<h2>Reich</h2>`;
+  if(REICH_TAB==='ueb')h+=`<p class="sub">${esc(FACTIONS[S.player].name)} · Runde ${S.turn} · Forschung ${researchRate(S.player).toLocaleString('de-DE')} pro Runde · Staatsform ${staatsform(S.player)} · Verwaltung ${provsOf(S.player).length} von ${adminCap(S.player)} Provinzen${provsOf(S.player).length>adminCap(S.player)?' (Ordnung sinkt, Statthalter und Reformen heben die Grenze)':''}</p><p class="note" style="margin-top:-4px">Verwaltungsgrenze: ${adminParts(S.player).map(([t,v])=>`${esc(t)} +${v}`).join(', ')}. Darüber sinkt die Ordnung, Eroberungen bleiben immer möglich.</p>
   <div class="stats four"><div><span>Steuern</span><b>+${inc.tax}</b></div><div><span>Handel, Waren</span><b>${fmtNum(inc.trade+inc.trib+inc.sale-inc.buy)}</b></div><div><span>Sold und Hof</span><b>−${inc.upk+inc.hof}</b></div><div><span>Saldo</span><b style="color:${inc.net>=0?'var(--good)':'var(--danger)'}">${fmtNum(inc.net)}</b></div></div>
   ${nemCardHtml()}${titlesHtml()}${epSysHtml()}${(()=>{try{return oasHtml();}catch(e){return'';}})()}${(()=>{try{return amkHtml();}catch(e){return'';}})()}${reformsHtml()}
-  <h3>Steuersatz</h3><div class="seg">${Object.keys(TAX).map(k=>`<button data-tax="${k}" class="${F.taxRate===k?'on':''}">${TAX[k].name}</button>`).join('')}</div>
-  <p class="note">Niedrig: −20 % Steuern, Ordnung +2, mehr Wachstum. Hoch: +25 % Steuern, Ordnung −3, weniger Wachstum.</p>
-  ${treatiesHtml()}<h3>Lage der Reiche</h3>${dipMapHtml()}<p class="note">Handelsplätze: ${tradeCount(S.player)} von ${tradeSlots(S.player)} belegt. Mehr Plätze bringen Märkte, Kontore, Forschung und spätere Epochen.</p><h3>Reiche · antippen für Diplomatie</h3><table class="rank"><thead><tr><th>Reich</th><th>Status</th><th>Provinzen</th></tr></thead><tbody>${rows.map((r,i)=>{const me=r.f===S.player,hd=(i===0||rows[i-1].th!==r.th)&&THEATERS[r.th]?`<tr class="thgrp"><td colspan="4">${esc(THEATERS[r.th].name)}${r.th===myTh?' · dein Kontinent':''}</td></tr>`:'';if(!me&&r.alive&&!r.ct)return hd+`<tr class="nocont"><td><span class="crest" style="${cst(r.f)}"></span>${esc(FACTIONS[r.f].name)}</td><td><span class="dtag">Kein Kontakt</span></td><td>${r.ps}</td></tr>`;return hd+`<tr${!me&&r.alive?` class="click" data-dipf="${r.f}"`:''}><td><span class="crest" style="${cst(r.f)}"></span>${esc(FACTIONS[r.f].name)}${r.f===nemF()?' <em class="nemtag">Erzfeind</em>':''}${r.alive&&facRank(r.f)>0?`<small class="rkline">${RANK_ICO[facRank(r.f)]} ${esc(mainTitle(r.f))}</small>`:''}</td><td>${me?'<span class="muted">Du</span>':r.alive?dipBadge(r.f)+(dip(S.player,r.f).trade?' <span class="dtag">⚖</span>':'')+'<br>'+attTag(r.f):'<span class="muted">vernichtet</span>'}</td><td>${r.ps}</td></tr>`;}).join('')}<tr><td><span class="crest" style="${cst('frei')}"></span>Freie Völker</td><td><span class="dtag war">Feindlich</span></td><td>${provsOf('frei').length}</td></tr></tbody></table>
-  ${rows.some(r=>!r.ct)?`<p class="note">Reiche ohne Kontakt sind zu weit entfernt für Gesandte und Verträge. Kontakt entsteht über eine gemeinsame Grenze, denselben Kontinent oder – ab der Frühen Neuzeit – über See, wenn beide Reiche einen Hafen haben.</p>`:''}${unk?`<p class="note">${unk} weitere Reiche sind dir noch unbekannt. Erkunde die Karte, um sie zu treffen.</p>`:''}
-  <h3>Erkunden</h3><div class="row"><button class="btn" id="scoutBtn"${S.fac[S.player].gold>=scoutCost()&&(S.fac[S.player].scoutT||-99)+4<=S.turn&&scoutTargets(S.player).length?'':' disabled'}>Kundschafter aussenden · ${scoutCost()} Gold</button></div><p class="note" style="margin:2px 0 0">Deckt bis zu 6 unbekannte Provinzen nahe deinen Grenzen auf, alle 4 Runden. Karten fremder Reiche kaufst du in deren Diplomatie.</p>${chronicleHtml()}${regionsHtml()}${victoryHtml()}${modsHtml()}<p class="note">Freie Völker kannst du jederzeit angreifen. Kleine Reiche mit bis zu drei Provinzen kannst du in der Diplomatie zur Unterwerfung auffordern.</p>`,[{label:'Schließen'}]);
-  document.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{F.taxRate=b.dataset.tax;AUDIO.sfx('click');renderTop();renderSheet();openOverview();});
-  document.querySelectorAll('[data-sankin]').forEach(b=>b.onclick=()=>confirmAct('Sankin-kōtai erlassen?',`Kostet ${sankinCost()} Gold. 20 Runden lang steigt die Treue der Daimyō stark.`,'Erlassen',()=>{if(sankinIssue(S.player))AUDIO.sfx('click');renderTop();renderSheet();openOverview();},openOverview,'oa_jp_ev_sankin'));
+  `;
+  else if(REICH_TAB==='reg')h+=(regionsHtml()||`<h3>Regionen</h3><p class="note">Du hältst noch keine Provinz einer Region.</p>`).replace('<h3>Regionen</h3>','');
+  else h+=victoryHtml()+modsHtml()+partieInfoHtml();
+  showModal(h,[]);
+  document.querySelectorAll('[data-tax]').forEach(b=>b.onclick=()=>{F.taxRate=b.dataset.tax;AUDIO.sfx('click');renderTop();renderSheet();openOverview(REICH_TAB);});
+  document.querySelectorAll('[data-sankin]').forEach(b=>b.onclick=()=>confirmAct('Sankin-kōtai erlassen?',`Kostet ${sankinCost()} Gold. 20 Runden lang steigt die Treue der Daimyō stark.`,'Erlassen',()=>{if(sankinIssue(S.player))AUDIO.sfx('click');renderTop();renderSheet();openOverview(REICH_TAB);},openOverview,'oa_jp_ev_sankin'));
   document.querySelectorAll('[data-dipf]').forEach(r=>r.onclick=()=>{AUDIO.sfx('click');openDiplomacy(r.dataset.dipf);});
-  {const sb=$('#scoutBtn');if(sb)sb.onclick=()=>{const n=sendScouts(S.player);AUDIO.sfx(n?'march':'error');toast(n?`Kundschafter haben ${n} Provinzen erkundet`:'Nichts zu erkunden');renderTop();openOverview();};}
+  {const sb=$('#scoutBtn');if(sb)sb.onclick=()=>{const n=sendScouts(S.player);AUDIO.sfx(n?'march':'error');toast(n?`Kundschafter haben ${n} Provinzen erkundet`:'Nichts zu erkunden');renderTop();openOverview(REICH_TAB);};}
   document.querySelectorAll('[data-nemopen]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');openNemesis();});
   epSysWire();
   try{amkWire();}catch(e){console.warn('Amerika',e);}
   document.querySelectorAll('[data-refnach]').forEach(b=>b.onclick=()=>{const[e,id]=b.dataset.refnach.split(':'),c=refCost();if(S.fac[S.player].gold<c)return;confirmAct('Reform nachholen?',`Kostet ${c} Gold.`,'Einführen',()=>{if(S.fac[S.player].gold<c)return;S.fac[S.player].gold-=c;takeReform(S.player,+e,id);AUDIO.sfx('tech');renderTop();picMsg('ev_reform','Reform eingeführt','Der Herrscher unterzeichnet das neue Gesetz. Die Ratgeber tragen es in alle Provinzen.',openOverview);},openOverview);});
   $('#dialog').classList.add('wide');try{drawDipMap(null);}catch(e){console.warn(e);}
-}
 
+  $('#dialog').classList.add('wide');areaInject('reich',REICH_TAB);
+}
+let REICH_TAB='ueb',DIP_TAB='reiche';
+function openDipHub(tab){if(tab)DIP_TAB=tab;if(!AREAS.dip.t.some(x=>x[0]===DIP_TAB))DIP_TAB='reiche';
+  const unk=PLAYABLE.filter(f=>S.fac[f].alive&&!knows(f)).length;
+  const facTh=f=>{const c=capitalOf(f);if(c!=null)return PCENTER[c].th;const o=provsOf(f);return o.length?PCENTER[o[0]].th:-1;},myTh=facTh(S.player);
+  const rows=PLAYABLE.filter(f=>S.fac[f].born&&knows(f)).map(f=>({f,ps:provsOf(f).length,alive:S.fac[f].alive,th:facTh(f),ct:f===S.player||!S.fac[f].alive||inContact(S.player,f)})).sort((a,b)=>((a.th===myTh?0:1)-(b.th===myTh?0:1))||(a.th-b.th)||(b.ct-a.ct)||(b.ps-a.ps));
+  let h=`<h2>Diplomatie</h2>`;
+  if(DIP_TAB==='reiche')h+=`<p class="note" style="margin-top:0">Antippen öffnet die Diplomatie mit dem Reich.</p><table class="rank"><thead><tr><th>Reich</th><th>Status</th><th>Provinzen</th></tr></thead><tbody>${rows.map((r,i)=>{const me=r.f===S.player,hd=(i===0||rows[i-1].th!==r.th)&&THEATERS[r.th]?`<tr class="thgrp"><td colspan="4">${esc(THEATERS[r.th].name)}${r.th===myTh?' · dein Kontinent':''}</td></tr>`:'';if(!me&&r.alive&&!r.ct)return hd+`<tr class="nocont"><td><span class="crest" style="${cst(r.f)}"></span>${esc(FACTIONS[r.f].name)}</td><td><span class="dtag">Kein Kontakt</span></td><td>${r.ps}</td></tr>`;return hd+`<tr${!me&&r.alive?` class="click" data-dipf="${r.f}"`:''}><td><span class="crest" style="${cst(r.f)}"></span>${esc(FACTIONS[r.f].name)}${r.f===nemF()?' <em class="nemtag">Erzfeind</em>':''}${r.alive&&facRank(r.f)>0?`<small class="rkline">${RANK_ICO[facRank(r.f)]} ${esc(mainTitle(r.f))}</small>`:''}</td><td>${me?'<span class="muted">Du</span>':r.alive?dipBadge(r.f)+(dip(S.player,r.f).trade?' <span class="dtag">⚖</span>':'')+'<br>'+attTag(r.f):'<span class="muted">vernichtet</span>'}</td><td>${r.ps}</td></tr>`;}).join('')}<tr><td><span class="crest" style="${cst('frei')}"></span>Freie Völker</td><td><span class="dtag war">Feindlich</span></td><td>${provsOf('frei').length}</td></tr></tbody></table>
+  ${rows.some(r=>!r.ct)?`<p class="note">Reiche ohne Kontakt sind zu weit entfernt für Gesandte und Verträge. Kontakt entsteht über eine gemeinsame Grenze, denselben Kontinent oder – ab der Frühen Neuzeit – über See, wenn beide Reiche einen Hafen haben.</p>`:''}${unk?`<p class="note">${unk} weitere Reiche sind dir noch unbekannt. Erkunde die Karte, um sie zu treffen.</p>`:''}
+  <h3>Erkunden</h3><div class="row"><button class="btn" id="scoutBtn"${S.fac[S.player].gold>=scoutCost()&&(S.fac[S.player].scoutT||-99)+4<=S.turn&&scoutTargets(S.player).length?'':' disabled'}>Kundschafter aussenden · ${scoutCost()} Gold</button></div><p class="note" style="margin:2px 0 0">Deckt bis zu 6 unbekannte Provinzen nahe deinen Grenzen auf, alle 4 Runden. Karten fremder Reiche kaufst du in deren Diplomatie.</p><p class="note">Freie Völker kannst du jederzeit angreifen. Kleine Reiche mit bis zu drei Provinzen kannst du in der Diplomatie zur Unterwerfung auffordern.</p>`;
+  else if(DIP_TAB==='vertr')h+=treatiesHtml().replace('<h3>Verträge</h3>','')+`<p class="note">Handelsplätze: ${tradeCount(S.player)} von ${tradeSlots(S.player)} belegt. Mehr Plätze bringen Märkte, Kontore, Forschung und spätere Epochen.</p>`;
+  else h+=`${dipMapHtml()}<p class="note">Tippe auf ein Reich, um seine Beziehungen zu sehen. „Auf der Karte“ zeigt die Diplomatie-Ansicht der großen Karte.</p><div class="row"><button class="btn" id="dipMapBig">🗺 Auf der Karte</button></div>`;
+  showModal(h,[]);
+  document.querySelectorAll('[data-dipf]').forEach(r=>r.onclick=()=>{AUDIO.sfx('click');openDiplomacy(r.dataset.dipf);});
+  {const sb=$('#scoutBtn');if(sb)sb.onclick=()=>{const n=sendScouts(S.player);AUDIO.sfx(n?'march':'error');toast(n?`Kundschafter haben ${n} Provinzen erkundet`:'Nichts zu erkunden');renderTop();openDipHub('reiche');};}
+  {const mb=$('#dipMapBig');if(mb)mb.onclick=()=>{AUDIO.sfx('click');closeModal();try{setMapMode('dip');}catch(e){}};}
+  $('#dialog').classList.add('wide');areaInject('dip',DIP_TAB);if(DIP_TAB==='karte')try{drawDipMap(null);}catch(e){console.warn(e);}
+}
+// Kapitel und Kontinente dieser Partie (früher im Menü)
+function partieInfoHtml(){try{if(S.scen)return'';const ch=Object.keys(ADDONS).filter(k=>ADDONS[k].on).map(k=>`${esc(ADDONS[k].n)}: ${addonOn(k)?'an':'aus'}`),co=S.conts?Object.keys(CONT_TH).map(k=>`${CONT_N[k]}: ${S.conts[k]===false?'aus':'an'}`):[];
+  return`<h3>Kapitel und Kontinente dieser Partie</h3><p class="note">${[...co,...ch].join(' · ')}. Festgelegt beim Start, änderbar nur für eine neue Partie.</p>`;}catch(e){return'';}}
 /* ===================== SPEICHERN ===================== */
 const KEY_AUTO='imperium.auto.v1',KEY_MAN='imperium.manual.v1',KEY_BATTLE='imperium.battle.v1';
 function save(k){if(S&&S.mp&&S.mp.gid&&k===KEY_AUTO)return true;try{localStorage.setItem(k,JSON.stringify(S));return true;}catch(e){return false;}}
@@ -15703,7 +15831,7 @@ function catchUpSpawns(){
     ps.forEach((pi,k)=>{const P=S.prov[pi];P.owner=sp.slot;P.unrest=0;P.b.barracks=Math.max(1,P.b.barracks||0);if(k===0)P.b.temple=1;createArmy(sp.slot,pi,k===0?sp.army:sp.army.slice(0,3),1);});
   }
 }
-function loadGame(s,noMp){try{if(s&&s.scen&&s.scen.id)NARR.pre(s.scen.id);}catch(e){}pkPreload();try{const Z=s&&s.scen;if(Z&&Z.res==='win'&&Z.rank&&Z.id){const W=JSON.parse(localStorage.getItem('imperium.scenWins')||'{}')||{};if(!W[Z.id]||WRANK.indexOf(Z.rank)>WRANK.indexOf(W[Z.id])){W[Z.id]=Z.rank;localStorage.setItem('imperium.scenWins',JSON.stringify(W));setTimeout(()=>{try{winsSync();}catch(e){}},500);}}}catch(e){}
+function loadGame(s,noMp){try{if(KIT_ON&&s&&s.epoch!=null)loadKit(s.epoch);}catch(e){}try{if(s&&s.scen&&s.scen.id)NARR.pre(s.scen.id);}catch(e){}pkPreload();try{const Z=s&&s.scen;if(Z&&Z.res==='win'&&Z.rank&&Z.id){const W=JSON.parse(localStorage.getItem('imperium.scenWins')||'{}')||{};if(!W[Z.id]||WRANK.indexOf(Z.rank)>WRANK.indexOf(W[Z.id])){W[Z.id]=Z.rank;localStorage.setItem('imperium.scenWins',JSON.stringify(W));setTimeout(()=>{try{winsSync();}catch(e){}},500);}}}catch(e){}
   S=s;try{contsApply();}catch(e){COFF=null;}try{applyUiTheme();}catch(e){}try{houseFix();}catch(e){}mpUncover();if(!noMp)MPWAIT=null;UI.sel=null;UI.army=null;UI.mode='idle';closeModal();catchUpSpawns();
   refreshAdj();for(const f of PLAYABLE)applyPeople(f);applyEpochLook();
   $('#start').hidden=true;$('#top').hidden=false;$('#sheet').hidden=false;
@@ -17733,6 +17861,9 @@ function ratBestBuild(f,key,cond){let best=null,bs=-1e9;for(const pi of provsOf(
 const RAT_RULES=[
  {id:'mangel',o:'kanzler',cat:'eco',cd:8,f:f=>{const L=empireNeeds(f).filter(n=>!impOf(f).some(c=>c.g===n.g)&&!(n.g==='pulver'||n.g==='geschuetz'));for(const n of L.slice(0,3)){const S2=procSuppliers(f,n.g).filter(o=>o.ev.ok);if(!S2.length)continue;const o=S2[0];
    return{k:'mangel_'+n.g,urg:Math.min(5,1.5+n.prio/4),txt:`Uns fehlt ${GOODS[n.g].n}: ${fq1(n.miss)} je Runde. ${FACTIONS[o.x].name} hat Überschuss und liefert für ${fq1(impPrice(f,o.x,n.g))} Gold je Stück.`,why:[`${GOODS[n.g].i} ${n.why[0]}`,`Lager ${fq1((S.fac[f].store||{})[n.g]||0)}`,`Aufpreis beim Bauen ohne Ware`],act:{k:'procure',g:n.g},vo:'waren_mangel'};}return null;}},
+ {id:'sold',o:'kanzler',cat:'eco',cd:8,f:f=>{const F=S.fac[f],I=income(f);if(I.net>=0||I.upk<=0||I.upk<-I.net)return null;const n=Math.max(0,Math.floor(F.gold/Math.max(1,-I.net)));if(n>6)return null;
+   let big=null,bu=0;for(const a of S.armies){if(a.f!==f||!a.units.length)continue;const u=a.units.reduce((t,x)=>t+uStat(f,x).upk,0);if(u>bu){bu=u;big=a;}}
+   return{k:'sold',urg:n<=2?4.5:3.2,txt:`Der Sold frisst die Kasse: Die Heere kosten ${fmtNum(Math.round(I.upk))} Gold je Runde, die Bilanz liegt bei ${fmtNum(Math.round(I.net))}. ${n<=0?'Der Schatz ist leer – nächste Runde laufen Truppen davon.':`Der Schatz reicht noch etwa ${n} Runde${n===1?'':'n'}.`}${big?` Teuerstes Heer: ${big.name} (${Math.round(bu)} Sold).`:''} Einheiten entlassen oder Heere in die Heimat holen.`,why:[`Sold ${Math.round(I.upk)}`,`Bilanz ${Math.round(I.net)}`,`Schatz ${Math.round(F.gold)}`],act:big?{k:'goprov',pi:big.p}:{k:'open',w:'eco',tab:'fin'},vo:'kasse_knapp'};}},
  {id:'kasse',o:'kanzler',cat:'eco',cd:10,f:f=>{const F=S.fac[f],I=income(f);if(I.net>=0||F.gold>3*Math.abs(I.net)||F.taxRate==='high')return null;return{k:'kasse',urg:F.gold<Math.abs(I.net)*1.5?4:2.5,txt:`Die Kasse leert sich: ${fmtNum(Math.round(I.net))} Gold je Runde. Höhere Steuern für einige Runden würden helfen.`,why:[`Schatz ${Math.round(F.gold)}`,'Steuern hoch: +25 %, Ordnung −3'],act:{k:'tax',r:'high'},vo:'kasse_knapp'};}},
  {id:'route',o:'kanzler',cat:'eco',cd:12,f:f=>{for(const x of rivals(f)){const d=dip(f,x);if(!d.trade||d.st==='war'||(d.rlv||1)>=3)continue;const R=routeInfo(f,x);if(R.cap&&R.used/R.cap>=0.95){const c=routeCost(R.lv);return{k:'route_'+x,urg:2,txt:`Der Handelsweg nach ${FACTIONS[x].name} ist voll. Ein Ausbau trägt mehr Waren und bringt Gold.`,why:[`Auslastung ${fq1(R.used)}/${fq1(R.cap)}`,'+3 Gold je Runde und Stufe'],act:{k:'route',x},cost:c,vo:'route_voll'};}}return null;}},
  {id:'voll',o:'kanzler',cat:'eco',cd:15,f:f=>{const F=S.fac[f],I=income(f),c=capitalOf(f);if(c==null||I.net<=0||F.gold<1200*EPOCH_COST[ep()]||bBusy(c))return null;return{k:'voll',urg:1.4,txt:`Die Truhen sind voll. Gold, das ruht, arbeitet nicht: In ${PROV_DEF[c].city||PROV_DEF[c].name} ist Platz für ein neues Bauwerk.`,why:[`Schatz ${Math.round(F.gold)}`,`Bilanz +${Math.round(I.net)}`],act:{k:'open',w:'build',pi:c},vo:'kasse_voll'};}},
@@ -17757,7 +17888,7 @@ const RAT_RULES=[
  {id:'schreib',o:'gelehrter',cat:'res',cd:12,f:f=>{const E=S.fac[f].eco;if(!E||!E.libs||E.schrR>=0.9)return null;return{k:'schreib',urg:1.8,txt:`Unsere Bibliotheken bekommen nur ${Math.round(E.schrR*100)} % des Schreibstoffs, den sie brauchen.`,why:['Forschung leidet'],act:{k:'procure',g:'schreib'},vo:'schreibstoff'};}},
  {id:'region',o:'statthalter',cat:'gov',cd:10,f:f=>{const r=[...new Set(provsOf(f).map(pi=>PROV_DEF[pi].reg))].filter(r=>REG[r]&&!govOf(f,r)&&regOwn(f,r).length>=2).sort((a,b)=>regOwn(f,b).length-regOwn(f,a).length)[0];if(!r)return null;return{k:'region_'+r,urg:1.8,txt:`${REG[r].name} hat keinen Statthalter. ${regOwn(f,r).length} Provinzen warten auf Verwaltung.`,why:['Ordnung und Verwaltungsgrenze +2'],act:{k:'gov',reg:r},vo:'region_ohne'};}},
  {id:'treue',o:'statthalter',cat:'gov',cd:6,f:f=>{const GS=govsOf(f);for(const r in GS){const G=GS[r];if(G.loy==null||G.loy>=30)continue;return{k:'treue_'+r,urg:G.warn!=null?5:2.6,txt:G.warn!=null?`${G.n} in ${REG[r].name} bereitet den Abfall vor! Ein Geschenk oder eine Ehrung könnte ihn halten.`:`${G.n} (${REG[r].name}) ist ${govLoyTxt(G.loy)}. Eine Geste der Wertschätzung wäre klug.`,why:[`Treue ${Math.round(G.loy)}`,`Ehrgeiz ${Math.round(G.amb||0)}`],act:{k:'open',w:'region',reg:r},vo:'statthalter_untreu'};}return null;}},
- {id:'aufstieg',o:'statthalter',cat:'gov',cd:6,f:f=>{for(const pi of provsOf(f)){const P=S.prov[pi];if((P.gr||0)<100||P.up||lvlOf(pi)<2)continue;const G=govOf(f,PROV_DEF[pi].reg);if(G&&G.auto&&G.dir!=='hold')continue;const k=canLvlUp(f,pi);if(!k.ok)continue;return{k:'aufstieg_'+pi,urg:2.2,txt:`${PROV_DEF[pi].city||PROV_DEF[pi].name} ist bereit, zur ${LVLN[lvlOf(pi)+1]} aufzusteigen.`,why:['mehr Bauplätze und Steuern'],act:{k:'lvlup',pi},cost:k.c.total,vo:'aufstieg'};}return null;}},
+ {id:'aufstieg',o:'statthalter',cat:'gov',cd:6,f:f=>{for(const pi of provsOf(f)){const P=S.prov[pi];if((P.gr||0)<100||P.up||lvlOf(pi)<2)continue;const G=govOf(f,PROV_DEF[pi].reg);if(G&&G.auto&&G.dir!=='hold')continue;const k=canLvlUp(f,pi);if(!k.ok)continue;return{k:'aufstieg_'+pi,urg:2.2,txt:`${PROV_DEF[pi].city||PROV_DEF[pi].name} ist bereit, ${LVL_ZU[lvlOf(pi)+1]||'zur'} ${LVLN[lvlOf(pi)+1]} aufzusteigen.`,why:['mehr Bauplätze und Steuern'],act:{k:'lvlup',pi},cost:k.c.total,vo:'aufstieg'};}return null;}},
  {id:'unruhe',o:'statthalter',cat:'gov',cd:6,f:f=>{for(const pi of provsOf(f)){const P=S.prov[pi];if(provOrder(pi)>-2||festOn(P)||(P.festCd>S.turn))continue;const c=festCost(pi);return{k:'unruhe_'+pi,urg:3.2,txt:`${PROV_DEF[pi].name} steht kurz vor dem Aufruhr. ${FEST_N[ep()]} würde die Lage entspannen.`,why:[`Ordnung ${fmtNum(provOrder(pi))}`],act:{k:'fest',pi},cost:c,vo:'unruhe'};}return null;}},
  {id:'bauplatz',o:'statthalter',cat:'gov',cd:12,f:f=>{for(const pi of provsOf(f)){if(lvlOf(pi)<4||bBusy(pi)||S.prov[pi].q&&S.prov[pi].q.length)continue;const G=govOf(f,PROV_DEF[pi].reg);if(G&&G.dir!=='hold')continue;if(slotsOf(pi)-slotsUsed(pi)<=0)continue;return{k:'bauplatz_'+pi,urg:1.3,txt:`In ${PROV_DEF[pi].city||PROV_DEF[pi].name} liegt ein Bauplatz brach.`,why:[`${slotsUsed(pi)}/${slotsOf(pi)} Bauplätze`],act:{k:'open',w:'build',pi},vo:'bauplatz'};}return null;}},
  {id:'doc',o:'statthalter',cat:'doc',cd:14,f:f=>{const g=docGrp(f),L=g&&DOCTRINE[g];if(!L)return null;for(const D of L){if(!BUILDINGS[D.b]||(BUILDINGS[D.b].ep>ep()))continue;if(D.b==='salpeterei'&&ep()<2)continue;const b=ratBestBuild(f,D.b,D.c);if(!b||bBusy(b.pi))continue;
@@ -17801,11 +17932,14 @@ function ratHtml(){const f=S.player,R=S.rat||{L:[]},O=hofOpt();
       <div class="ratbtn">${ratMapOf(p)?`<button class="btn" data-ratmap="${i}" title="Auf der Karte zeigen">🗺</button>`:''}<button class="btn primary" data-ratok="${i}"${poor?' disabled':''}>${p.cost?(p.act.k==='build'&&gold<p.cost?'Vormerken':'Annehmen · '+p.cost):'Annehmen'}</button><button class="btn" data-ratlater="${i}">Später</button><button class="btn" data-ratnever="${i}" title="Nicht mehr vorschlagen">⋯</button></div></div>`;}).join('')}</div>`
     :`<p class="note">Der Rat hat gerade nichts vorzuschlagen. In ruhigen Runden schweigt er.</p>`;
   h+=`<div class="gtc" style="margin-top:10px"><span>Rat</span><div class="seg">${RAT_MODES.map(([k,n])=>`<button data-ratm="${k}" class="${O.rat===k?'on':''}">${n}</button>`).join('')}</div></div><p class="note">„Später“ legt den Vorschlag einige Runden zur Seite, „⋯“ für 40 Runden. Ablehnen hat keine Folgen.</p><div class="gtc"><span>Stimmen</span><div class="seg">${[['aus','Aus'],['dring','Nur Dringendes'],['alle','Alles']].map(([k,n])=>`<button data-ratv="${k}" class="${RATV.cfg.on===k?'on':''}">${n}</button>`).join('')}</div></div>`;return h;}
-function openRat(){showModal(ratHtml(),[{label:'Hof',fn:()=>openHof()},{label:'Schließen',cls:'primary'}]);const d=$('#dialog');d.classList.add('wide');try{RATV.pre();ratVoiceOpen();}catch(e){}
+function hofTabsHtml(cur){const HG=[['Ämter',['hof','gov','pol']],['Familie',['fam']],['Feldherren',['gen']],['Agenten',['ag']],['Glaube',['kir']],['Rat',['rat']]];
+  return`<div class="seg ecotabs areatabs">${HG.map(([n,ks])=>`<button data-htab="${ks.includes(cur)?cur:ks[0]}" class="${ks.includes(cur)?'on':''}">${n}</button>`).join('')}</div>`;}
+function openRat(){HOF_TAB='rat';const f=S.player,F=S.fac[f];showModal(`<h2>Hof</h2><p class="sub">${esc(FACTIONS[f].name)} · Gold ${F.gold} · Gehälter ${hofCost(f)} je Runde</p>${hofTabsHtml('rat')}`+ratHtml().replace(/<h2>Der Rat<\/h2><p class="sub">([^<]*)<\/p>/,'<p class="note" style="margin-top:0">$1</p>'),[]);const d=$('#dialog');d.classList.add('wide');helpInject('hof','rat');
+  d.querySelectorAll('[data-htab]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');openHof(b.dataset.htab);});try{RATV.pre();ratVoiceOpen();}catch(e){}
   d.querySelectorAll('[data-ratok]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');ratAccept(+b.dataset.ratok);});
   d.querySelectorAll('[data-ratlater]').forEach(b=>b.onclick=()=>{try{const p=S.rat.L[+b.dataset.ratlater];if(p)ratVoiceReact(p.o,false);}catch(e){}ratLater(+b.dataset.ratlater,false);AUDIO.sfx('click');renderTodo();openRat();});
   d.querySelectorAll('[data-ratnever]').forEach(b=>b.onclick=()=>{ratLater(+b.dataset.ratnever,true);AUDIO.sfx('click');renderTodo();openRat();});
-  d.querySelectorAll('[data-rathof]').forEach(b=>b.onclick=()=>openHof());
+  d.querySelectorAll('[data-rathof]').forEach(b=>b.onclick=()=>openHof('hof'));
   d.querySelectorAll('[data-ratmap]').forEach(b=>b.onclick=()=>{const p=S.rat.L[+b.dataset.ratmap];const m=p&&ratMapOf(p);if(m){AUDIO.sfx('click');showOnMap(m[0],m[1]);}});
   d.querySelectorAll('[data-ratv]').forEach(b=>b.onclick=()=>{RATV.set('on',b.dataset.ratv);AUDIO.sfx('click');d.querySelectorAll('[data-ratv]').forEach(x=>x.classList.toggle('on',x===b));});
   d.querySelectorAll('[data-ratm]').forEach(b=>b.onclick=()=>{hofOpt().rat=b.dataset.ratm;if(b.dataset.ratm==='aus'&&S.rat)S.rat.L=[];else{try{ratRound(S.player);}catch(e){}}AUDIO.sfx('click');renderTodo();openRat();});}
@@ -18088,7 +18222,7 @@ function finishWorld(e,f){try{legacyInit();}catch(er){console.warn('Vermächtnis
     save(KEY_AUTO);loadGame(S);try{const c=capitalOf(f)??provsOf(f)[0];const P=c!=null&&CAP[c];if(P){CAM.tx=P.x;CAM.tz=P.z+0.4;CAM.d=Math.min(CAM.d||9,9);camTween=null;clampCam();applyCam();}}catch(er){}toast(`Ziel: ${winTarget()} Provinzen halten`);
     // Wie bei den Geschichten: Das erste Kapitel kommt sofort, nicht erst nach der ersten Runde
     setTimeout(()=>{try{if(S&&S.player===f){storyRound();runEvents(()=>refresh());}}catch(er){console.warn(er);}},900);}
-function startWorld(e,f){const w=WORLDS_IDX&&WORLDS_IDX[e];if(!w)return;toast('Die Welt wird vorbereitet …');
+function startWorld(e,f){const w=WORLDS_IDX&&WORLDS_IDX[e];if(!w)return;try{if(KIT_ON)loadKit(e);}catch(er){}toast('Die Welt wird vorbereitet …');
   wjGet(e).then(t=>{if(!prepWorld(e,f,t)){toast('Diese Welt passt nicht zur Spielversion.');return;}finishWorld(e,f);}).catch(er=>{console.warn(er);toast('Die Welt konnte nicht geladen werden.');});}
 // Volk-Details vor dem Start: Der Vorschau-Spielstand wird gebaut, die Details daraus gelesen; „Starten“ übernimmt genau diesen Stand (gleicher Herrscher, gleiche Lage)
 const WJ={},FD_ROLE={spear:'Speer',sword:'Nahkampf',missile:'Fernkampf',cav:'Reiterei',art:'Geschütz'};
@@ -18340,6 +18474,100 @@ if(PWA.on){
     document.addEventListener('pointerup',once,true);document.addEventListener('touchend',once,true);
   }
 }catch(e){}})();
+</script>
+<script>
+/* ===================== Menüführung: Bereiche, Reiter, Kurzhilfe, Zurück ===================== */
+const AREAS={
+  reich:{n:'Reich',t:[['ueb','Überblick'],['reg','Regionen'],['ziel','Ziele']],go:k=>openOverview(k)},
+  dip:{n:'Diplomatie',t:[['reiche','Reiche'],['vertr','Verträge'],['karte','Karte']],go:k=>openDipHub(k)},
+  chron:{n:'Chronik',t:[['log','Protokoll'],['buch','Buch des Reiches'],['gesch','Geschichten'],['erf','Erfolge']],go:k=>openChronicle(k)},
+  set:{n:'Einstellungen',t:[['ton','Ton'],['gfx','Grafik'],['ui','Oberfläche'],['off','Offline']],go:k=>openSettings(k)}
+};
+const AREA_HELP={
+  reich:{ueb:'Dein Reich auf einen Blick: Einnahmen, Rang und Titel, Erzfeind, Zeichen der Zeit und Reformen. Den Steuersatz stellst du unter Wirtschaft → Haushalt ein.',
+    reg:'Hältst du alle Provinzen einer Region, steigen dort Steuern und Ordnung. Der Balken zeigt, wie viel dir schon gehört. Statthalter für Regionen ernennst du unter Hof → Ämter → Statthalter.',
+    ziel:'Hier stehen die Siegbedingungen dieser Partie und die gewählten Erweiterungen. In Geschichten zählen zusätzlich die Ziele der Geschichte.'},
+  dip:{reiche:'Alle bekannten Reiche nach Kontinent. Antippen öffnet die Diplomatie: Krieg, Frieden, Bündnis, Handel, Glaubensbund, Heirat und Geschenke. Kundschafter decken unbekanntes Land in der Nähe auf.',
+    vertr:'Alle laufenden Abkommen mit Restlaufzeit: Bündnisse, Nichtangriffspakte, Handel, Tribut, Gesandte und Lieferaufträge. Antippen öffnet das Reich.',
+    karte:'Die Lage der Reiche als Karte. Farben zeigen Krieg, Frieden und Bündnis aus deiner Sicht. „Auf der Karte“ öffnet dieselbe Ansicht auf der großen Karte, dort kannst du auch die Sicht eines anderen Reichs wählen.'},
+  eco:{fin:'Einnahmen und Ausgaben je Runde, Verlauf, Anleihen und der Steuersatz. Niedrige Steuern heben Ordnung und Wachstum, hohe bringen mehr Gold.',
+    over:'Nahrung, Versorgung der Siedlungen und alle Waren mit Lager, Erzeugung und Verbrauch. „Woher?“ zeigt die Quellen, „Beschaffen“ sucht Lieferanten.',
+    chain:'Welche Ware aus welchen Rohstoffen entsteht und wo es in der Kette hakt.',
+    cit:'Städte und ihre Versorgung. Gut versorgte Siedlungen wachsen und zahlen mehr.',
+    prov:'Alle Provinzen mit Erträgen im Vergleich. Antippen springt zur Provinz.',
+    trade:'Verkaufserlöse, Handelsrouten, Lieferaufträge und Marktpreise. Neue Handelsabkommen schließt du in der Diplomatie.',
+    trans:'Wie gut Waren durchs Reich kommen. Straßen und Häfen senken den Transportverlust.',
+    komp:'Handelskompanien für Übersee: Gewinne, Risiken und Ausbau.'},
+  hof:{hof:'Ämter bringen dauerhafte Boni. Ernennen kostet einmalig Gold, danach ein Gehalt. Neue Kandidaten bewerben sich alle acht Runden.',
+    gov:'Statthalter verwalten ganze Regionen, bauen selbst und berichten alle paar Runden. Achte auf ihre Treue.',
+    pol:'Die Stände deines Reichs mit ihrer Stimmung. Geschenke und Zugeständnisse halten sie zufrieden.',
+    fam:'Dein Herrscherhaus: Erbe, Erziehung, Heirat, Adoption und das Hausgesetz. Der Stammbaum zeigt Verwandte, auch in anderen Häusern.',
+    gen:'Alle Feldherren mit Stufe und Eigenschaften. Antippen springt zum Heer.',
+    ag:'Agenten anwerben und auf Missionen schicken: Spionage, Bekehrung, Handel und Ansprüche.',
+    kir:'Staatsglaube, Anteile im Reich, Toleranz, heilige Stätten und die Kirche bzw. das geistliche Haupt deines Glaubens.',
+    rat:'Deine Berater machen Vorschläge. „Annehmen“ führt sie aus, „Später“ legt sie zur Seite. Hier stellst du auch ein, wie oft der Rat spricht.'},
+  res:{mil:'Militärische Techniken: neue Einheiten, Taktiken und am Ende eine Doktrin. Was Nachbarn schon kennen, wird billiger.',
+    eco:'Wirtschaftliche Techniken: Gebäude, Waren und Handel. Am Ende des Zweigs wählst du eine Doktrin.',
+    cul:'Kultur und Staat: Ordnung, Verwaltung, Glaube und Ansehen. Am Ende des Zweigs wählst du eine Doktrin.',
+    kul:'Wissen, das nur deine Kultur kennt. Es kommt aus der Geschichte deines Volkes und hat eigene Bilder.',
+    rep:'Wiederholbare Fortschritte für jeden Zweig. Jede Stufe wirkt dauerhaft und wird etwas teurer.'},
+  chron:{log:'Alle Meldungen dieser Partie, neueste oben. Antippen springt zum Ort. Darüber der Verlauf der Macht der großen Reiche.',
+    buch:'Das Buch des Reiches: Am Ende jeder Epoche schreibt der Chronist ein Kapitel über dein Reich, mit Karte und Herrschern.',
+    gesch:'Die Sammlung aller Geschichten mit Bildern aus gewonnenen Kapiteln.',
+    erf:'Erfolge gelten für alle Partien.'},
+  set:{ton:'Musik, Sprecher, Berater-Stimmen und Effekte.',gfx:'Wenn das Spiel ruckelt oder das Gerät warm wird, eine Stufe niedriger wählen.',
+    ui:'Kulturstil der Oberfläche, Ratgeber-Hinweise und wie oft der Rat Vorschläge macht.',off:'Spiel und Bilder für unterwegs auf dem Gerät speichern.'}
+};
+function helpInject(area,key){try{const d=$('#dialog'),txt=(AREA_HELP[area]||{})[key];if(!txt||d.querySelector('.qhelp'))return;const h2=d.querySelector('h2');if(!h2)return;
+  const b=document.createElement('button');b.className='qhelp';b.type='button';b.textContent='?';b.setAttribute('aria-label','Kurzhilfe');h2.appendChild(b);
+  const box=document.createElement('p');box.className='note qhelpbox';box.hidden=true;box.textContent=txt;const after=d.querySelector('.subtabs')||d.querySelector('.areatabs')||h2;after.after(box);
+  b.onclick=e=>{e.stopPropagation();box.hidden=!box.hidden;};}catch(e){}}
+function areaInject(area,key){try{const A=AREAS[area],d=$('#dialog');if(!A||d.querySelector('.areatabs[data-area]'))return;
+  const bar=document.createElement('div');bar.className='seg ecotabs areatabs';bar.dataset.area=area;bar.innerHTML=A.t.map(([k,n])=>`<button data-atab="${k}" class="${k===key?'on':''}">${n}</button>`).join('');
+  let h2=d.querySelector('h2');
+  if(!h2||area==='chron'&&key!=='log'||area==='set'){const t=document.createElement('h2');t.className='areah';t.textContent=A.n;const x=d.querySelector('.dlgx');(x||d.firstChild).after(t);
+    if(h2&&h2!==t){const sub=document.createElement('h3');sub.textContent=h2.textContent;h2.replaceWith(sub);}h2=t;}
+  h2.after(bar);
+  bar.querySelectorAll('[data-atab]').forEach(b=>b.onclick=()=>{AUDIO.sfx('click');NAV_TAB=true;try{A.go(b.dataset.atab);}finally{NAV_TAB=false;}});
+  AREA_CUR={area,key};helpInject(area,key);}catch(e){console.warn('Bereich',e);}}
+// Einstellungen als ein Fenster mit Reitern
+let SET_TAB='ton';
+function openSettings(tab){if(typeof tab==='string')SET_TAB=tab;if(!AREAS.set.t.some(x=>x[0]===SET_TAB))SET_TAB='ton';
+  if(SET_TAB==='ton')openAudio();else if(SET_TAB==='gfx')openGfx();else if(SET_TAB==='off')openOffline();
+  else{showModal(`<h2>Oberfläche</h2>
+    <label class="sw"><span>Kulturstil der Oberfläche</span><input type="checkbox" id="uiTheme"${uiThemeOn()?' checked':''}></label><p class="note" style="margin:2px 0 8px">Farben und Rahmen passend zur Kultur deines Volkes.</p>
+    <label class="sw"><span>Ratgeber-Hinweise</span><input type="checkbox" id="uiHints"${hintsOff()?'':' checked'}></label><p class="note" style="margin:2px 0 8px">Kurze Tipps am Kartenrand.</p>
+    ${S&&!S.mp?`<div class="sw"><span>Rat: Vorschläge</span><div class="seg" id="uiRat">${RAT_MODES.map(([k,n])=>`<button data-ratm="${k}" class="${hofOpt().rat===k?'on':''}">${n}</button>`).join('')}</div></div>`:''}`,[]);
+    $('#uiTheme').onchange=e=>{try{localStorage.setItem('imperium.uitheme',e.target.checked?'1':'0');}catch(x){}applyUiTheme();};
+    $('#uiHints').onchange=e=>{try{localStorage.setItem('imperium.hints',e.target.checked?'on':'off');}catch(x){}};
+    document.querySelectorAll('#uiRat [data-ratm]').forEach(b=>b.onclick=()=>{hofOpt().rat=b.dataset.ratm;if(b.dataset.ratm==='aus'&&S.rat)S.rat.L=[];else{try{ratRound(S.player);}catch(e){}}AUDIO.sfx('click');try{renderTodo();}catch(e){}openSettings('ui');});}
+  if(!$('#modal').hidden)areaInject('set',SET_TAB);}
+// ---------- Zurück: kleine Fenster-Historie ----------
+let NAVSTK=[],NAV_CUR=null,NAV_LAST=null,NAV_LT=0,NAV_BACKING=false,NAV_TAB=false,NAV_DEPTH=0,AREA_CUR=null;
+const AREA_OF={openAudio:['set','ton'],openGfx:['set','gfx'],openOffline:['set','off'],openPwaOffline:['set','off'],openChronik:['chron','gesch'],openAch:['chron','erf'],openReichBook:['chron','buch']};
+const NAV_LAB={openOverview:'Reich',openDipHub:'Diplomatie',openDiplomacy:'Diplomatie',openEconomy:'Wirtschaft',openHof:'Hof',openRat:'Hof',openResearch:'Forschung',openChronicle:'Chronik',openChronik:'Geschichten',openAch:'Erfolge',openReview:'Rückblick',openThreats:'Bedrohungen',openNemesis:'Erzfeind',openRegion:'Region',openMenu:'Menü',openSettings:'Einstellungen',openAudio:'Einstellungen',openGfx:'Einstellungen',openOffline:'Einstellungen',openHelp:'Hilfe',openLicenses:'Lizenzen',openSaveSlots:'Speichern',openLoad:'Laden',openExport:'Export',openImport:'Import',openReichBook:'Chronik',openMP:'Mehrspieler'};
+function navFresh(){NAVSTK=[];NAV_CUR=null;NAV_LAST=null;AREA_CUR=null;}
+{const _cm=closeModal;closeModal=function(){if(NAV_CUR){NAV_LAST=NAV_CUR;NAV_LT=performance.now();}NAV_CUR=null;return _cm.apply(this,arguments);};}
+function navBackBtn(){const d=$('#dialog');if(!d||d.querySelector('.dlgback')||!NAVSTK.length)return;const top=NAVSTK[NAVSTK.length-1];
+  const b=document.createElement('button');b.className='dlgback';b.type='button';b.setAttribute('aria-label','Zurück');b.innerHTML=`‹<span>${esc(NAV_LAB[top.fn]||'Zurück')}</span>`;d.insertBefore(b,d.firstChild);
+  d.querySelectorAll('.actions [data-i]').forEach(x=>{if(/^‹?\s*Zurück$/.test(x.textContent.trim()))x.remove();});const ac=d.querySelector('.actions');if(ac&&!ac.children.length)ac.remove();
+  b.onclick=()=>{const p=NAVSTK.pop();if(!p)return;AUDIO.sfx('click');NAV_BACKING=true;try{window[p.fn].apply(null,p.a);}finally{NAV_BACKING=false;}};}
+Object.keys(NAV_LAB).forEach(name=>{const o=window[name];if(typeof o!=='function')return;
+  window[name]=function(...a){if(NAV_DEPTH>0)return o.apply(this,a);
+    const open=!$('#modal').hidden,prev=open&&NAV_CUR?NAV_CUR:(NAV_LAST&&performance.now()-NAV_LT<80?NAV_LAST:null);NAV_LAST=null;
+    if(!prev&&!NAV_BACKING&&!NAV_TAB)AREA_CUR=null;
+    const back=NAV_BACKING,tabSw=NAV_TAB;NAV_DEPTH++;let r;try{r=o.apply(this,a);}finally{NAV_DEPTH--;}
+    if($('#modal').hidden)return r;
+    if(back||tabSw){}else if(!prev)NAVSTK=[];
+    else if(prev.fn!==name&&!(AREA_OF[name]&&AREA_CUR&&AREA_OF[name][0]===AREA_CUR.area)){if(NAVSTK.length&&NAVSTK[NAVSTK.length-1].fn===name)NAVSTK.pop();else{NAVSTK.push(prev);if(NAVSTK.length>8)NAVSTK.shift();}}
+    NAV_CUR={fn:name,a};
+    if(AREA_OF[name]&&AREA_CUR&&AREA_OF[name][0]===AREA_CUR.area)areaInject(AREA_OF[name][0],AREA_OF[name][1]);
+    navBackBtn();return r;};});
+// Bereiche aus der Kopfleiste, dem Lagebrett oder dem Rundenknopf beginnen ohne Rückweg
+document.addEventListener('click',e=>{try{if(e.target.closest&&e.target.closest('#top,#todo,#endMed,#endBtn,#start'))navFresh();}catch(x){}},true);
+// Startmenü: Einstellungen, Hilfe, Zahl der Geschichten
+try{const b=$('#stSetBtn');if(b)b.onclick=()=>openSettings();const h=$('#stHelpBtn');if(h)h.onclick=()=>openHelp();
+  const n=Object.keys(SCEN).length,bo=Object.keys(SCEN).filter(k=>(SCEN[k].req||[]).length).length,el=$('#stStoryN');if(el)el.textContent=`${n-bo} Geschichten und ${bo} Bonus-Geschichten, mit Kapiteln, Zielen und Rang`;}catch(e){}
 </script>
 
 </html>
