@@ -13094,7 +13094,7 @@ function buildRivers(){const bank=[],water=[],shine=[],verge=[];RIVLINES=[];cons
   mergeStrips(verge,RIVVERGE,RIVG);{const m=RIVG.children[RIVG.children.length-1];if(m&&m.material===RIVVERGE){const n=m.geometry.attributes.position.count,a=new Float32Array(n);for(let k=0;k<n;k++)a[k]=k%2?-1:1;m.geometry.setAttribute('aSide',new THREE.BufferAttribute(a,1));m.renderOrder=1;}}
   mergeStrips(bank,RIVMAT,RIVG);mergeStrips(water,RIVMAT,RIVG);mergeStrips(shine,RIVMAT,RIVG);try{riverBridges();}catch(e){console.warn('Brücken',e);}needRender=3;}
 let ROADSIG='',RIV_KN=-2;
-function syncRoads(){if(!RIVG.children.length)try{buildRivers();}catch(e){console.warn('Flüsse',e);}if(!S)return;const ROADC=[null,new THREE.Color('#8a6a44'),new THREE.Color('#a49c8e'),new THREE.Color('#e6dcc4')];
+function syncRoads(){if(!RIVG.children.length)try{buildRivers();}catch(e){console.warn('Flüsse',e);}if(!S)return;const ROADC=[null,new THREE.Color('#8a6a44'),new THREE.Color('#a49c8e'),new THREE.Color('#b3a487')];
   const segs=[];for(let i=0;i<S.prov.length;i++){const ri=S.prov[i].b?roadLv(i):0;if(!ri||!isKnown(i))continue;for(const j of ADJ[i]){if(j<=i||isSeaLink(i,j))continue;const rj=S.prov[j].b?roadLv(j):0;if(!rj||!isKnown(j)||PCENTER[i].poly!==PCENTER[j].poly)continue;segs.push([i,j,Math.min(ri,rj)]);}}
   const sig=segs.map(s=>s.join(':')).join(',');if(sig===ROADSIG)return;ROADSIG=sig;
   while(ROADG.children.length){const m=ROADG.children.pop();m.geometry.dispose();}
