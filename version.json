@@ -1,5 +1,5 @@
 {
-"version": "v186-3afdc9ec51",
+"version": "v186-0aae8f44d9",
 "files": {
 "img/pk_glaube.json": "33f1e54544686da3",
 "img/pk_neu.json": "b8b78eb6db5d237f",
@@ -132,6 +132,6 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"index.html": "05283e70dd0d0b62"
+"index.html": "4464d2f24ca25a74"
 }
 }
