@@ -1179,7 +1179,7 @@ body.rotNeed #rotHint{display:flex}
 .dlgback span{font-size:13px}
 @media (max-width:760px){.dlgback span{display:none}}
 h3.mgrp{margin:12px 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#a99a80)}
-.navbtn svg.dipico{width:30px;height:30px;stroke:none}
+.navbtn svg.dipico{width:30px;height:30px;stroke:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
 @media (max-width:739px){.navbtn svg.dipico{width:36px;height:36px}}
 details.stmore{margin:10px 0 0}details.stmore>summary{cursor:pointer;padding:10px 0;color:var(--bronze-hi,#e4b86c);font-weight:600}
 @media (max-height:500px){#start .lede{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
@@ -1198,7 +1198,7 @@ body{height:100%;min-height:-webkit-fill-available}
 #modePop{max-height:calc(100vh - 90px - var(--sat) - var(--sab))}
 #top{padding-left:calc(var(--sal) + 16px);padding-right:calc(var(--sar) + 16px)}
 @media (min-width:900px){#sheet{left:calc(var(--sal) + 16px);bottom:calc(var(--sab) + 12px);padding-bottom:0;max-height:calc(100vh - var(--sat) - var(--sab) - 80px)}#shBody{max-height:min(52vh,calc(100vh - var(--sat) - var(--sab) - 170px))}}
-@media (orientation:landscape) and (max-height:560px){#sheet{right:var(--sar);bottom:0}}
+@media (orientation:landscape) and (max-height:560px){#sheet{right:var(--sar);bottom:0}#modeBtn,#legend,#hint{right:calc(var(--shw) + var(--sar) + 12px)}#modePop{right:calc(var(--shw) + var(--sar) + 60px)}}
 .pk2line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 2px;padding:6px 10px;border:1px solid rgba(201,145,70,.45);border-radius:10px;background:linear-gradient(180deg,rgba(60,44,26,.55),rgba(30,22,14,.55));font-size:13px}
 .pk2line .gbar{width:64px}.pk2line em{font-style:normal;color:var(--bronze-hi);margin-left:4px}.pk2line .btn{margin-left:auto;padding:4px 10px;min-height:0}
 .pk2line.bad{border-color:rgba(194,65,47,.75);background:linear-gradient(180deg,rgba(90,25,18,.5),rgba(40,14,10,.5))}.pk2line.bad em{color:#e7907a;font-weight:700}
@@ -1631,7 +1631,7 @@ window.OFF=(function(){
   <div class="spacer"></div>
   <nav class="topnav" aria-label="Reichsverwaltung">
     <button class="navbtn" id="navReich" aria-label="Reich"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_reich" alt="" draggable="false"><span>Reich</span></button>
-    <button class="navbtn" id="navDip" aria-label="Diplomatie"><svg class="uico dipico" viewBox="0 0 36 36" aria-hidden="true"><defs><linearGradient id="dipg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d79a"/><stop offset="1" stop-color="#a8792f"/></linearGradient></defs><path d="M9 5h16a3 3 0 0 1 3 3v17a5 5 0 0 1-5 5H11a3 3 0 0 1-3-3V8" fill="#3a2c1c" stroke="url(#dipg)" stroke-width="1.8"/><path d="M8 8a3 3 0 0 1 6 0v2H8z" fill="url(#dipg)"/><path d="M13 13h11M13 17h11M13 21h7" stroke="url(#dipg)" stroke-width="1.6" stroke-linecap="round"/><circle cx="25" cy="26" r="4.2" fill="#9c2f22" stroke="#f0c77a" stroke-width="1.2"/><path d="M23.5 29.5l-1.2 4 2.7-1.6 2.7 1.6-1.2-4" fill="#9c2f22"/></svg><span>Diplomatie</span></button>
+    <button class="navbtn" id="navDip" aria-label="Diplomatie"><svg class="uico dipico" viewBox="0 0 36 36" aria-hidden="true"><defs><linearGradient id="dipg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6b26c"/><stop offset="1" stop-color="#8a6226"/></linearGradient></defs><path d="M9 5h16a3 3 0 0 1 3 3v17a5 5 0 0 1-5 5H11a3 3 0 0 1-3-3V8" fill="#3a2c1c" stroke="url(#dipg)" stroke-width="1.8"/><path d="M8 8a3 3 0 0 1 6 0v2H8z" fill="url(#dipg)"/><path d="M13 13h11M13 17h11M13 21h7" stroke="url(#dipg)" stroke-width="1.6" stroke-linecap="round"/><circle cx="25" cy="26" r="4.2" fill="#7a2a1e" stroke="#b98c4c" stroke-width="1.2"/><path d="M23.5 29.5l-1.2 4 2.7-1.6 2.7 1.6-1.2-4" fill="#7a2a1e"/></svg><span>Diplomatie</span></button>
     <button class="navbtn" id="navEco" aria-label="Wirtschaft"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_wirtschaft" alt="" draggable="false"><span>Wirtschaft</span></button>
     <button class="navbtn" id="navHof" aria-label="Hof"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_hof" alt="" draggable="false"><span>Hof</span></button>
     <button class="navbtn" id="navLog" aria-label="Chronik"><img class="uico" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#pb=ui_chronik" alt="" draggable="false"><span>Chronik</span></button>
