@@ -5,7 +5,19 @@ Methode: Playwright, Spielfunktionen direkt (Flotte, Landung, `resolveAttack`, `
 Teile mit „Abkürzung“ setzen Schrittbedingungen per Flag/Besitz. Ein Spieler am iPad wurde **nicht** simuliert: keine selbst geführten Schlachten, kein vollständiger 80-Runden-Durchlauf, echtes iPad nicht getestet,
 Sprecher-Inhalt nicht per Whisper geprüft (nur: Datei und Schlüssel vorhanden). Angaben mit „(Schätzung)“ sind Hochrechnungen aus 2–3 Bot-Läufen.
 
-## Befunde nach Schwere
+## Behoben in v213 (Wikinger spielbar)
+Geprüft mit `vk_kampagne_t.js` (jetzt PASS statt BEFUND). Echtes iPad nicht getestet.
+- Befund 1: `canRaub` erlaubt den Raubzug an Bord für Seeräuber; Landung im Raubzug plündert (kein Erobern, keine Belagerung). Akt-I-Text: Raubzug an Bord, bei Bernicia anlanden, nicht bei Jórvík.
+- Befund 2: Beute 150 → 100, 700 → 400. Eroberungs-Plünderung und erhaltenes Danegeld zählen auf die Beute (nur Spieler im Szenario). Szenario-Regel `raidLoot` 1,1 (Beute des Spielers +10 %), damit 100 in Runde 3 bis 4 erreicht wird (ohne: 99 nach drei Raubzügen).
+- Befund 3: Startgold 400; Sold im Feindesland und an Bord ×0,5, daheim ×0,7 (`raidUpkeep`, `homeUpkeep`, nur Seeräuber-Spieler im Wikinger-Szenario). Bilanz am Start −34 → −17, auf Fahrt/im Feindesland −14 bis −20. Das ist noch leicht negativ; das Gold (400 + Beute) reicht im Test über 14 Runden.
+- Befund 4: Schonfrist `rules.shield` 25: keine neue KI-Kriegserklärung gegen den Spieler in den ersten 25 Szenario-Runden (`scenShield` in `declareWar`). Der Startkrieg mit Northumbria bleibt; der Spieler darf selbst angreifen.
+- Befund 5: `rus` aufgedeckt; Ziele zusätzlich Esten, Karelien, Liven (Esten per Landzug ab Gautar in 2 Runden). Die Ostsee bleibt für die Flotte unbefahrbar.
+- Befund 6: `stSkip` löst Meldung und Haken des nächsten Schritts aus (ohne Belohnung).
+- Befund 8: Jahr springt beim Beginn eines Schritts auf das historische Jahr (`steps[].year`), nie rückwärts, kein Epochenwechsel (Szenarien haben keinen).
+- Befund 9: Island/Vinland: Texte versprechen nur noch Ruhm; „Noch warten“ verweist auf den Geschichte-Knopf. Befund 10: Normandie „Lehen“ verlegt fränkische Heere aus den übergebenen Provinzen. Befund 11: Paris-Ziel ist nur noch Parisier.
+- Offen: Befund 7 (Landnahme-Kosten), Kosmetik 12, Ersatzbilder und fehlende Sprecher (ki:0), Bilanz noch leicht negativ.
+
+## Befunde nach Schwere (Stand v212, vor den Korrekturen)
 
 **Blockierend / sehr schwer**
 1. **Raubzug-Landung ist unmöglich.** `canRaub` verbietet den Raubzug an Bord (`a.boat`); der Code für „Landung vom Schiff ohne Abzug“ (Z. ~10014/10032, `a._land && a.rz && raidKind==='see'`) ist damit toter Code. Ohne Raubzug wird jede gewonnene Landung zur Eroberung: Votadiner fällt (6/6 Siege), bringt aber **keine Beute** und ist als Beutequelle verbraucht; bei Jórvík (Briganten) verliert man 5 von 6 Landungsschlachten (1 Sieg), mit gesetztem Raubzug 4 von 6 (Test setzt `a.rz` künstlich). Der Akt-I-Text („lande an … dort schaltest du den Raubzug ein“) führt zur schlechten Variante. *Vorschlag:* in `canRaub` Boot für `raidKind==='see'` erlauben, damit `rzLand` beim Anlanden greift; Text: „Lande bei Bernicia (Votadiner)“.

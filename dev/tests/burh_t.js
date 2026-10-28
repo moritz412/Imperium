@@ -52,7 +52,8 @@ ok('Vorhandener Burh wirkt in späterer Epoche weiter',w.late===0.5,w.late+' Gar
 ok('Plündern reißt Burh nie ab (200 Versuche)',w.lost===0,'verloren '+w.lost);
 // KI und Statthalter
 const k=await p.evaluate(()=>{const f='mogul',pi=PI.corieltauver;S.prov[pi].dv=null;S.prov[pi].b.burh=0;
-  const w0=burhWant(f,pi);declareWar(f,'nord');const w1=burhWant(f,pi);
+  const w0=burhWant(f,pi);if(S.scen)S.scen.t0-=30;// v213: Schonfrist des Wikinger-Szenarios (25 Runden) sperrt neue KI-Kriegserklärungen
+  declareWar(f,'nord');const w1=burhWant(f,pi);
   return{w0,w1,mil:GOV_DIR.mil.k.includes('burh'),atw:atWar(f,'nord')};});
 ok('KI: Burh gewünscht, wenn ein Raubvolk Krieg führt (sonst niedrig)',k.w1>0&&k.w0<0,JSON.stringify(k));
 ok('Statthalter-Auftrag Verteidigung enthält Burh',k.mil===true,String(k.mil));
