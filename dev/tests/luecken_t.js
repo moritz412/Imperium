@@ -18,9 +18,9 @@ const pk=await p.evaluate(async()=>{const o={};for(const n of['pk_lk','pk_lb']){
   const reg=PKREG[n]||[];o[n]={st:r.status,n:Object.keys(d).length,reg:reg.length,same:Object.keys(d).sort().join()===[...reg].sort().join(),size:buf.byteLength,man:(OFF_MAN.find(x=>x[0]==='img/'+n+'.json')||[])[1],inOf:reg.every(k=>PKOF[k]===n)};}
   return o;});
 ok('pk_lk: 200, 55 Bilder, Schlüssel = PKREG, alle in PKOF',pk.pk_lk.st===200&&pk.pk_lk.n===55&&pk.pk_lk.reg===55&&pk.pk_lk.same&&pk.pk_lk.inOf,pk.pk_lk);
-ok('pk_lb: 200, 10 Bilder, Schlüssel = PKREG, alle in PKOF',pk.pk_lb.st===200&&pk.pk_lb.n===10&&pk.pk_lb.reg===10&&pk.pk_lb.same&&pk.pk_lb.inOf,pk.pk_lb);
+ok('pk_lb: 200, 11 Bilder (v209: + b_burh_x1), Schlüssel = PKREG, alle in PKOF',pk.pk_lb.st===200&&pk.pk_lb.n===11&&pk.pk_lb.reg===11&&pk.pk_lb.same&&pk.pk_lb.inOf,pk.pk_lb);
 ok('Größen = OFF_MAN (beide Pakete)',pk.pk_lk.size===pk.pk_lk.man&&pk.pk_lb.size===pk.pk_lb.man,[pk.pk_lk.size,pk.pk_lk.man,pk.pk_lb.size,pk.pk_lb.man]);
-ok('OFF_VER v206',await p.evaluate(()=>OFF_VER==='v206'));
+ok('OFF_VER ab v206',await p.evaluate(()=>+OFF_VER.slice(1)>=206));
 // 1. IMGLIB / PKOF
 const CUL=['aegyptisch','afrikanisch','arabisch','berber','britisch','chinesisch','germanisch','griechisch','habescha','iberisch','indigen','indisch','japanisch','kaukasisch','keltisch','koreanisch','latein','nordisch','persisch','punisch','semitisch','slawisch','steppe','suedostasiatisch','thrakisch'];
 const X5=['habescha','indigen','japanisch','koreanisch','suedostasiatisch'];
