@@ -1,6 +1,8 @@
 {
-"version": "v205-2fafc373f8",
+"version": "v206-f61cfb8d9f",
 "files": {
+"img/pk_lk.json": "c0a3080187a134fa",
+"img/pk_lb.json": "4443569a1afc1c6d",
 "img/pk_vk.json": "a0f1fbfb0e010002",
 "img/pk_tk.json": "52efa51b1f46a1c0",
 "img/pk_p2.json": "62b8edbea97f0215",
@@ -137,6 +139,6 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"index.html": "fdb63ad494b6ec30"
+"index.html": "932121202db5b4d3"
 }
 }
