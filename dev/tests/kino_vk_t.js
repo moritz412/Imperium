@@ -26,7 +26,7 @@ ok('Bildpaket pk_vk: 200, 23 Bilder, in PKREG/PKOF/IMGLIB',pk.ia===200&&pk.n===2
 ok('Sprecherpaket: 200, 5 Clips, X_PACKS',pk.ca===200&&pk.ck==='wikinger_kino1,wikinger_kino2,wikinger_kino3,wikinger_kino4a,wikinger_kino4b'&&pk.xp,pk.ck);
 ok('OFF_MAN enthält beide Pakete, OFF_VER ab v205',/pk_vk\.json:\d+/.test(pk.off)&&/x_wikinger_kino\.json:\d+/.test(pk.off)&&+pk.ver.slice(1)>=205,pk.off+' '+pk.ver);
 const sz=await p.evaluate(async()=>{const o={};for(const [f,n] of OFF_MAN.filter(x=>/vk|kino/.test(x[0]))){const r=await fetch(f);o[f]=(await r.arrayBuffer()).byteLength===n;}return o;});
-ok('Größen in OFF_MAN stimmen mit den Dateien',Object.values(sz).every(Boolean)&&Object.keys(sz).length===2,JSON.stringify(sz));
+ok('Größen in OFF_MAN stimmen mit den Dateien',Object.values(sz).every(Boolean)&&Object.keys(sz).length===4,JSON.stringify(sz));
 
 // 1. Start der Geschichte: Sequenz 1
 await p.evaluate(()=>{startScenario('wikinger');try{storyRound();}catch(e){}loadGame(S);try{closeModal();}catch(e){}window.__d=0;setTimeout(()=>runEvents(()=>{window.__d=1;}),300);});
