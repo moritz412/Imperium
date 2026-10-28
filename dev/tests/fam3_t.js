@@ -1,0 +1,36 @@
+// node fam3_t.js <html> [port] – Hausgesetz ändern
+const {chromium}=require('playwright');const fs=require('fs');
+const FILE=process.argv[2],PORT=process.argv[3]||'8772';
+(async()=>{const b=await chromium.launch({executablePath:process.env.PW_CHROMIUM||undefined,args:process.env.PW_GPU?[]:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const ctx=await b.newContext({viewport:{width:1024,height:768},hasTouch:true,isMobile:true});const p=await ctx.newPage();const errs=[];
+p.on('pageerror',e=>errs.push('PAGE '+e.message));p.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource|WebGL|GPU stall/.test(m.text()))errs.push('CON '+m.text().slice(0,160));});
+await p.addInitScript(()=>{try{localStorage.setItem('imperium.gfx',JSON.stringify({q:'leicht'}));}catch(e){}});
+await p.route(/cdnjs/,r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));
+await p.route(/fonts\.g/,r=>r.abort());await p.route(/\.html$/,r=>r.fulfill({body:fs.readFileSync(FILE),contentType:'text/html; charset=utf-8'}));
+await p.goto(`http://localhost:${PORT}/imperium.html`,{timeout:300000});await p.waitForFunction(()=>document.getElementById('loading').hidden,null,{timeout:300000});
+const R=[];const ok=(n,c,i='')=>{R.push(!!c);console.log((c?'PASS ':'FAIL ')+n+(i?'  '+i:''));};
+await p.evaluate(()=>{window.showEvent=(E,ctx,next)=>{try{E.opts[0].fx(S.player,ctx);}catch(e){}next&&next();};window.picMsg=()=>{};});
+const a=await p.evaluate(()=>{newGame('rom');loadGame(S);closeModal();const f=S.player,D=dynOf(f);S.fac[f].gold=2000;D.regent=0;D.pret=null;
+  const law0=lawOf(f),opts=lawOpts(f);openHof('fam');const box=!!document.querySelector('[onclick="lawOpen()"]');const txt=(document.querySelector('#dialog')||document.body).innerText.includes('Hausgesetz');
+  lawOpen();const rows=document.querySelectorAll('[data-lawset]').length;return{law0,opts,box,txt,rows,cust:lawCust(f)};});
+ok('Anzeige im Familienreiter + Auswahl',a.box&&a.txt&&a.rows===a.opts.length&&a.rows>0,JSON.stringify(a));
+await p.screenshot({path:__dirname+'/fam3_wahl.jpg',quality:70});
+const b1=await p.evaluate(()=>{const f=S.player,D=dynOf(f),F=S.fac[f],P=polOf(f);const g0=F.gold,a0=P.adel,k=lawOpts(f).find(x=>x!==lawCust(f))||lawOpts(f)[0],c=lawCost(f,k);
+  document.querySelector(`[data-lawset="${k}"]`).click();const m=S.mods.filter(x=>x.f===f&&x.label==='Neues Hausgesetz');
+  return{k,law:lawOf(f),dg:g0-F.gold,cg:c.gold,da:Math.round((P.adel-a0)*10)/10,ca:c.adel,mod:m.length?m[0].v:0,co:c.order,set:D.lawSet,T:D.lawT===S.turn};});
+ok('Wechsel mit Kosten (Gold, Adel, Ordnung)',b1.law===b1.k&&b1.dg===b1.cg&&b1.da===b1.ca&&b1.mod===b1.co&&b1.T,JSON.stringify(b1));
+const c1=await p.evaluate(()=>{const f=S.player;const w=lawWhy(f);const r=lawSet(f,lawOpts(f)[0]);return{w,r};});
+ok('Sperre 30 Runden',/Runden/.test(c1.w)&&c1.r===false,JSON.stringify(c1));
+const c2=await p.evaluate(()=>{const f=S.player,D=dynOf(f);D.lawT=S.turn-31;D.regent=1;const w1=lawWhy(f);D.regent=0;D.pret={n:'X',ps:[],t:S.turn};const w2=lawWhy(f);D.pret=null;const w3=lawWhy(f);return{w1,w2,w3};});
+ok('Gesperrt bei Regentschaft/Thronstreit',/Regentschaft/.test(c2.w1)&&/Thronstreit/.test(c2.w2)&&c2.w3==='',JSON.stringify(c2));
+// Nachfolge nach neuem Gesetz: Seniorat erzwingen -> Bruder vor Sohn
+const d=await p.evaluate(()=>{const f=S.player,D=dynOf(f);D.law='sen';const h=dynHeir(f);const R=D.ruler;return{law:lawOf(f),heir:h?h.n:null,heirAge:h?h.age:null,isKid:h?(D.kids||[]).some(k=>k.id===h.id):null,kids:(D.kids||[]).length,kin:(D.kin||[]).filter(k=>k.sex==='m').length};});
+const d2=await p.evaluate(()=>{const f=S.player,D=dynOf(f);D.law='prim';const h=dynHeir(f);return{heir:h?h.n:null,isKid:h?(D.kids||[]).some(k=>k.id===h.id):null};});
+ok('Erbe richtet sich nach Gesetz (sen vs prim)',d.law==='sen'&&(d.heir!==d2.heir||!d.kin),JSON.stringify({d,d2}));
+const e1=await p.evaluate(async()=>{const f=S.player,D=dynOf(f);D.law='sal';D.lawSet=1;dynJump(20);const afterJump=D.law;save(KEY_AUTO);const s=JSON.parse(localStorage.getItem(KEY_AUTO));loadGame(s);const D2=dynOf(S.player);return{afterJump,loaded:D2.law,lawT:D2.lawT,set:D2.lawSet};});
+ok('Zeitsprung behält Wahl, Speichern/Laden',e1.afterJump==='sal'&&e1.loaded==='sal'&&e1.set===1,JSON.stringify(e1));
+const o=await p.evaluate(async()=>{const f=S.player,D=dynOf(f);delete D.lawT;delete D.lawSet;const w=lawWhy(f);try{for(let i=0;i<2;i++){endTurn();await new Promise(z=>setTimeout(z,2500));closeModal();}}catch(e){return'ERR '+e.message;}return'ok '+JSON.stringify(w)+' T'+S.turn;});
+ok('Alter Spielstand ohne Felder, 2 Runden',/^ok ""/.test(o),o);
+await p.evaluate(()=>{closeModal();openHof('fam');});await p.waitForTimeout(500);await p.screenshot({path:__dirname+'/fam3_hof.jpg',quality:70});
+ok('Keine Seiten-/Konsolenfehler',!errs.length,errs.slice(0,4).join(' | '));
+console.log(`FAM3 ${R.filter(Boolean).length}/${R.length}`);await b.close();})();

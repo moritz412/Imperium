@@ -1,0 +1,5 @@
+_build/
+_build_assets/
+dev/tests/node_modules/
+dev/tests/*.jpg
+__pycache__/

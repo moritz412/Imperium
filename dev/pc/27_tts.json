@@ -1,0 +1,73 @@
+{
+"paket": "x_rat2",
+"saetze": [
+{
+"id": "rat_marschall_putsch_warnung_01",
+"text": "Herr, ein Feldherr sammelt Getreue um sich. Die Soldaten rufen seinen Namen, nicht deinen."
+},
+{
+"id": "rat_marschall_putsch_ehre_01",
+"text": "Ein Triumph würde ihn binden. Er kostet Gold, aber er kostet keine Krone."
+},
+{
+"id": "rat_marschall_putsch_01",
+"text": "Er hat den Rubikon überschritten. Sein Heer marschiert unter fremder Fahne."
+},
+{
+"id": "rat_kanzler_abfall_reich_01",
+"text": "Die Region hat sich losgesagt und eine eigene Krone gewählt. Wir können zahlen, anerkennen oder kämpfen."
+},
+{
+"id": "rat_kanzler_gegenkoenig_01",
+"text": "Ein Gegenkönig! Ferne Provinzen folgen ihm. Noch ist der Streit nicht verloren."
+},
+{
+"id": "rat_kanzler_zeitenwende_01",
+"text": "Die Zeitenwende naht. Wo kein Statthalter regiert und Unruhe herrscht, wanken die Regionen."
+},
+{
+"id": "rat_kanzler_zeitenwende_gut_01",
+"text": "Die Zeitenwende ist überstanden. Das Reich hält zusammen."
+},
+{
+"id": "rat_marschall_foederaten_01",
+"text": "Die Föderaten murren. Ein Jahrgeld oder ein Sieg würde sie beruhigen."
+},
+{
+"id": "rat_kanzler_thronstreit_warnung_01",
+"text": "Der Herrscher altert, und ein Verwandter wartet. Kaufen wir seinen Anspruch, solange es noch geht."
+},
+{
+"id": "rat_kanzler_volk_neu_01",
+"text": "Ein fremdes Volk in unserem Reich schickt Gesandte. Hören wir, was sie wollen."
+},
+{
+"id": "rat_kanzler_volk_wunsch_01",
+"text": "Die Gesandten warten auf Antwort. Ein Zugeständnis kostet uns etwas, Schweigen kostet ihre Treue."
+},
+{
+"id": "rat_kanzler_volk_zufrieden_01",
+"text": "Das Volk ist zufrieden. Seine Krieger stehen bereit, unter unserem Banner zu kämpfen."
+},
+{
+"id": "rat_kanzler_volk_warnung_01",
+"text": "Herr, ein Volk unseres Reichs will sich lossagen. Noch vier Runden, dann ist es zu spät."
+},
+{
+"id": "rat_kanzler_volk_abfall_01",
+"text": "Sie haben sich losgesagt und einen eigenen Fürsten gewählt. Bestechen, anerkennen oder zurückholen?"
+},
+{
+"id": "rat_kanzler_volk_wortbruch_01",
+"text": "Wir haben unser Wort gebrochen. Dieses Volk wird es so bald nicht vergessen."
+},
+{
+"id": "rat_kanzler_volk_angleichen_01",
+"text": "Angleichung braucht Geduld. Wer sie erzwingt, erntet Groll."
+},
+{
+"id": "rat_kanzler_sold_01",
+"text": "Der Sold frisst die Kasse. Wir müssen Truppen entlassen oder neue Einnahmen finden."
+}
+]
+}

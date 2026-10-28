@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:process.env.PW_CHROMIUM||undefined,args:process.env.PW_GPU?[]:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const ctx=await b.newContext({viewport:{width:900,height:620},hasTouch:true,isMobile:true});const p=await ctx.newPage();
+const c=await ctx.newCDPSession(p);await c.send('Network.enable');
+0&&c.on('Network.requestWillBeSent',e=>{if(/sc_caesar_x1\.webp/.test(e.request.url)){console.log('REQ',e.type,JSON.stringify(e.initiator).slice(0,1200));}});
+await p.addInitScript(()=>{try{localStorage.setItem('imperium.gfx',JSON.stringify({q:'leicht'}));}catch(e){}});
+await p.route(/cdnjs/,r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/\.html$/,r=>r.fulfill({body:fs.readFileSync(process.argv[2]),contentType:'text/html; charset=utf-8'}));await p.route(/fonts\.g/,r=>r.abort());
+await p.goto('http://localhost:'+(process.env.PORT||8772)+'/imperium.html',{timeout:300000});await p.waitForFunction(()=>document.getElementById('loading').hidden,null,{timeout:300000});
+const errs=[];p.on('pageerror',e=>errs.push(e.message));const r=await p.evaluate(async()=>{newGame('rom');loadGame(S);closeModal();await pkLoad('pk_glaube');const a=faithHtml(PI.latium);const bz=PI.byzantion;S.fac.rom.rel='ortho';let h='',w='';try{h=headOn('rom')?headHtml('rom'):'(head aus)';}catch(e){h='ERR '+e.message;}try{w=hwHtml('rom');}catch(e){w='ERR '+e.message;}return{hs:/sysimg/.test(a)&&/blob:/.test(a),head:h.slice(0,80),headImg:/sysimg/.test(h),hw:/sysimg/.test(w)||w==='',hwErr:/ERR/.test(w)};});console.log(JSON.stringify(r),'errs',errs.length);
+await b.close();})();

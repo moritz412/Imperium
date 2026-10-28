@@ -1,0 +1,14 @@
+// node dioshot.js out.jpg file.json:label ... (Eintrag {v,t,h} je Datei, oder paket.json#id)
+const {chromium}=require('/opt/npm-tools/node_modules/playwright');const fs=require('fs');
+const out=process.argv[2],items=process.argv.slice(3).map(a=>{const [f,l]=a.split(':');let R;if(f.includes('#')){const [p,id]=f.split('#');R=JSON.parse(fs.readFileSync(p))[id];}else R=JSON.parse(fs.readFileSync(f));return{R,l:l||f};});
+const three=fs.readFileSync(__dirname+'/../vendor/three.min.js','utf8');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:360*Math.min(3,items.length),height:300*Math.ceil(items.length/3)}});
+await p.setContent('<body style="margin:0;background:#333"><script>'+three+'</script></body>');
+await p.evaluate(async(items)=>{const W=360,H=300;for(const [n,it] of items.entries()){const c=document.createElement('canvas');c.width=W;c.height=H;c.style.cssText=`position:absolute;left:${(n%3)*W}px;top:${Math.floor(n/3)*H}px`;document.body.appendChild(c);
+ const r=new THREE.WebGLRenderer({canvas:c,antialias:true,preserveDrawingBuffer:true});const sc=new THREE.Scene();sc.background=new THREE.Color(0x8a7f62);sc.add(new THREE.HemisphereLight(0xffffff,0x444433,0.8));const dl=new THREE.DirectionalLight(0xffffff,0.7);dl.position.set(2,3,1);sc.add(dl);
+ const R=it.R,s=atob(R.v),u=new Uint8Array(s.length);for(let k=0;k<s.length;k++)u[k]=s.charCodeAt(k);const dv=new DataView(u.buffer),nv=dv.getUint32(0,true),ni=dv.getUint32(4,true);let o=8;const P=new Int16Array(u.buffer.slice(o,o+nv*6));o+=nv*6;const N=new Int8Array(u.buffer.slice(o,o+nv*3));o+=nv*3+((nv*3)%2);const UV=new Uint16Array(u.buffer.slice(o,o+nv*4));o+=nv*4;const I=new Uint16Array(u.buffer.slice(o,o+ni*2));
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(Float32Array.from(P,x=>x/20000),3));g.setAttribute('normal',new THREE.Float32BufferAttribute(Float32Array.from(N,x=>x/127),3));g.setAttribute('uv',new THREE.Float32BufferAttribute(Float32Array.from(UV,x=>x/65535),2));g.setIndex(new THREE.BufferAttribute(I,1));
+ const t=await new Promise(z=>new THREE.TextureLoader().load(R.t,z));const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({map:t,emissive:0x303030,emissiveMap:t}));sc.add(m);
+ const cam=new THREE.PerspectiveCamera(35,W/H,0.01,50);cam.position.set(1.1,0.95,1.1);cam.lookAt(0,0.12,0);r.render(sc,cam);
+ const ctx=document.createElement('div');ctx.textContent=it.l;ctx.style.cssText=`position:absolute;left:${(n%3)*W+4}px;top:${Math.floor(n/3)*H+4}px;color:#fff;font:12px sans-serif;background:#0008`;document.body.appendChild(ctx);}},items.map(i=>({R:i.R,l:i.l})));
+await p.screenshot({path:out,quality:80,type:'jpeg'});await b.close();})();

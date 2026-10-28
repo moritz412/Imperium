@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:process.env.PW_CHROMIUM||undefined,args:process.env.PW_GPU?[]:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const ctx=await b.newContext({viewport:{width:900,height:620},hasTouch:true,isMobile:true});const p=await ctx.newPage();
+const c=await ctx.newCDPSession(p);await c.send('Network.enable');
+const reqs=[];c.on('Network.requestWillBeSent',e=>{if(/img\/[a-z0-9_]+_x1\.webp/.test(e.request.url))reqs.push(e.request.url.split('/').pop()+' '+((e.initiator.stack&&e.initiator.stack.callFrames[0])?e.initiator.stack.callFrames[0].functionName:e.initiator.type));});
+await p.addInitScript(()=>{try{localStorage.setItem('imperium.gfx',JSON.stringify({q:'leicht'}));}catch(e){}});
+await p.route(/cdnjs/,r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/\.html$/,r=>r.fulfill({body:fs.readFileSync(process.argv[2]),contentType:'text/html; charset=utf-8'}));await p.route(/fonts\.g/,r=>r.abort());
+await p.goto('http://localhost:'+(process.env.PORT||8772)+'/imperium.html',{timeout:300000});await p.waitForFunction(()=>document.getElementById('loading').hidden,null,{timeout:300000});
+const r=await p.evaluate(async()=>{const w=ms=>new Promise(z=>setTimeout(z,ms));const d=document.createElement('div');d.style.cssText='position:fixed;left:0;top:0;width:50px;height:50px';document.body.appendChild(d);
+  d.style.backgroundImage="url('img/sc_hannibal_x1.webp')";void d.offsetWidth;await w(1500);const a=getComputedStyle(d).backgroundImage.slice(0,30);
+  try{closeModal();}catch(e){}startScenario('caesar');try{storyRound();}catch(e){}await w(900);try{$('#tut').hidden=true;runEvents(()=>refresh());}catch(e){}await w(6000);
+  const c=document.querySelector('.cine .ctit');if(c)c.click();await w(8000);return{direkt:a,cine:!!document.querySelector('.cine')};});
+console.log(JSON.stringify(r));console.log('Anfragen _x1:',JSON.stringify(reqs));
+await b.close();})();

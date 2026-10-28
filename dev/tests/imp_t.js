@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:process.env.PW_CHROMIUM||undefined,args:process.env.PW_GPU?[]:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const ctx=await b.newContext({viewport:{width:900,height:620},hasTouch:true,isMobile:true});const p=await ctx.newPage();
+const c=await ctx.newCDPSession(p);await c.send('Network.enable');
+0&&c.on('Network.requestWillBeSent',e=>{if(/sc_caesar_x1\.webp/.test(e.request.url)){console.log('REQ',e.type,JSON.stringify(e.initiator).slice(0,1200));}});
+await p.addInitScript(()=>{try{localStorage.setItem('imperium.gfx',JSON.stringify({q:'leicht'}));}catch(e){}});
+await p.route(/cdnjs/,r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/\.html$/,r=>r.fulfill({body:fs.readFileSync(require('path').join(__dirname,'..','imperium.html')),contentType:'text/html; charset=utf-8'}));await p.route(/fonts\.g/,r=>r.abort());
+await p.goto('http://localhost:'+(process.env.PORT||8772)+'/imperium.html',{timeout:300000});await p.waitForFunction(()=>document.getElementById('loading').hidden,null,{timeout:300000});
+const R=[];for(const f of ['imperium_rom_runde_78_2210.json','imperium_rom_runde_74_1810.json','imperium_aegypten_der_kleopatra_runde_43_1710.json','imperium_schnellspeicher_karthago_runde15.json']){const txt=fs.readFileSync(process.env.CE+'/'+f,'utf8');R.push(await p.evaluate(async t=>{try{const o=parseImport(t);if(!o||!o.save)return'parse null';loadGame(o.save);closeModal();await new Promise(z=>setTimeout(z,1500));endTurn();await new Promise(z=>setTimeout(z,4000));closeModal();return'ok '+S.player+' T'+S.turn+' '+S.year+(S.scen?' scen '+S.scen.id:'');}catch(e){return'ERR '+e.message;}},txt));}console.log(JSON.stringify(R));
+await b.close();})();
