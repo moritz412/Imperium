@@ -1,5 +1,5 @@
 {
-"version": "v196-dedd2480aa",
+"version": "v196-b711a98925",
 "files": {
 "img/pk_tk.json": "52efa51b1f46a1c0",
 "img/pk_p2.json": "62b8edbea97f0215",
@@ -134,6 +134,6 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"index.html": "82f18206168c79db"
+"index.html": "21a0568de35630da"
 }
 }

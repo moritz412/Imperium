@@ -259,3 +259,7 @@ Moritz 23:06: Geschichten-Ziele unrealistisch (Cäsar: am Ende 3 Regionen in 10 
 - 28.10. v197: Treue-Gründe sichtbar, Erfolge heben Treue, Landgut-Bug (+15 fehlte in der Formel). pk2 19/19.
 - 28.10. Konzept Echtzeitschlachten (Entwurf) geschrieben, Entscheidungen offen. v198 (Sprechersätze, Seeweg-Hinweis) unveröffentlicht; angel_halle aufbereitet.
 - 28.10. Phase-0-Prototyp Echtzeitschlacht: Quelle dev/proto/schlacht_p0.html, deploy.py kopiert dev/proto → proto/ (Wurzel wird beim Bauen geleert!). v198 veröffentlicht.
+- 28.10. v199 (unveröffentlicht): Paket W1 Raubzug & Verwüstung (Befehl Raubzug, Verwüstung 5–10 Runden + 6 Erholung, Wikinger/Steppe-Profile, Abwehr über vorhandene Bauten, Danegeld, Ruhm aus Beute). raub_t 19/19.
+
+- 28.10. v200 (unveröffentlicht): Erklärkarte per langem Druck (imperium.html: HELP_ACT, helpText, Handler nach der Kopfleisten-Blase; CSS #helpCard), Klick danach unterdrückt, Rechtsklick öffnet sie am PC; Tipp-Toast beim ersten Start (imperium.helptip). Reichsvolk-Kachel (rkHtml) im Hof › Völker. help_t.js 15/15.
+- 28.10. abends v201: Beute Raubvölker höher, keine doppelte Halbierung, Wikinger-Flussfahrt. raub 19/19, smoke 4/4, help 15/15. Übergabe im BACKLOG oben.

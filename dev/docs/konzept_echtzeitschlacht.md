@@ -57,7 +57,7 @@ Das passt zu three r128 (eigener Shader über `onBeforeCompile`, wie heute schon
 | Alle Pakete zusammen (optional offline, wie die Musik) | ca. 150–300 MB |
 | Ladezeit einer Schlacht (Paket im Cache) | einige Sekunden, unbekannt bis gemessen |
 
-**Einschätzung:** Auf einem neueren iPad (M1 oder später) wirkt Stufe „Hoch“ machbar. Auf älteren Geräten (A12–A14) eher „Mittel“ mit der Hälfte der Figuren. Größte Unbekannte ist Safaris Speichergrenze pro Tab. Die Kampagnenkarte muss deshalb während der Schlacht ganz aus dem Grafikspeicher, nicht nur ausgeblendet.
+**Einschätzung:** Auf einem neueren iPad (M1 oder später) wirkt Stufe „Hoch“ machbar. Auf älteren Geräten (A12–A14) eher „Mittel“ mit der Hälfte der Figuren. Größte Unbekannte ist die Speichergrenze pro Tab (auf dem iPad nutzen Chrome und Safari dieselbe WebKit-Engine). Die Kampagnenkarte muss deshalb während der Schlacht ganz aus dem Grafikspeicher, nicht nur ausgeblendet.
 
 ### Übersteigt es das Projekt?
 Technisch nicht. Der Aufwand liegt im **Inhalt**: Figuren, Ausrüstung und Animationen für 5 Epochen und viele Kulturen. Deshalb gilt:
@@ -90,7 +90,7 @@ Neu zu installieren: Blender (~1 GB) und die CC0-Ausgangsdaten. Für jeden Downl
 **Phase 0: Machbarkeits-Prototyp (Entscheidung danach)**
 - Eine Testschlacht: 1 Skelett (Mensch), 2 Einheitentypen (Speer, Schwert), 6 Clips, 2.500 Figuren, einfacher Boden.
 - Ladeschirm mit Balken, eigenes Paket.
-- Messung **auf deinem iPad** (die Leistungsanzeige gibt es schon): Bilder pro Sekunde, Ladezeit, ob Safari abstürzt.
+- Messung **auf deinem iPad** (die Leistungsanzeige gibt es schon): Bilder pro Sekunde, Ladezeit, ob der Browser abstürzt.
 - Weiter nur bei mindestens 30 Bildern pro Sekunde auf „Mittel“ (Schwelle zu entscheiden).
 
 **Phase 1: Schlachtphase und Karte**
@@ -115,7 +115,7 @@ Neu zu installieren: Blender (~1 GB) und die CC0-Ausgangsdaten. Für jeden Downl
 
 ## 6. Risiken
 
-- **Safari-Speicher:** Stürzt die Seite ab, muss das Paket kleiner werden (weniger Figuren, kleinere Texturen).
+- **Browser-Speicher (WebKit):** Stürzt die Seite ab, muss das Paket kleiner werden (weniger Figuren, kleinere Texturen).
 - **Einheitlicher Look:** Modelle aus verschiedenen Quellen passen schlecht zusammen. Gegenmittel: ein gemeinsamer Grundkörper und eine einheitliche Farbgebung.
 - **Lizenzen:** nur CC0/frei nutzbare Ausgangsdaten. KI-Bewegungsmodelle haben oft Forschungslizenzen (für das nicht-kommerzielle Projekt meist in Ordnung, trotzdem einzeln prüfen).
 - **Aufwand:** Das ist das größte Paket bisher, größer als Wikinger- und Hannibal-Paket. Wer es vorzieht, verschiebt die anderen.
@@ -140,3 +140,20 @@ Neu zu installieren: Blender (~1 GB) und die CC0-Ausgangsdaten. Für jeden Downl
 - Stil: **realistisch** (Proportionen, Rüstung und Stoffe naturnah; keine Comic-Figuren). Folge: CC0-Grundkörper müssen realistisch sein, ggf. eigener Grundkörper in Blender.
 - Alte Schlacht als Option „Schnelle Schlacht“: **nein**. Sie bleibt nur intern als Rückfall, bis die neue Schlacht für die jeweilige Epoche fertig ist, und wird dann entfernt.
 - Reihenfolge (Empfehlung Claude): Phase 0 zuerst (klein, entscheidet die Machbarkeit). Das Wikinger-Paket ist überwiegend Kampagne und Erzählung und kann danach normal laufen. Das Hannibal-Paket (Cannae, Trebia) erst nach dem neuen Schlachtsystem, sonst doppelte Arbeit.
+
+---
+
+## 9. Ergebnis Phase 0 (iPad Pro 11" 2. Gen, Chrome – auf dem iPad mit WebKit-Engine wie Safari, 28.10. 13:06, Screenshots von Moritz)
+
+| Figuren | Kamera | Bilder/s | schlechtester Wert | Dreiecke gesamt | Zeichenaufrufe | Pixelverhältnis |
+|---|---|---|---|---|---|---|
+| 1.500 | Übersicht | 59,9 | 59,3 | 556.400 | 7 | 2 |
+| 1.500 | Front nah | 60,0 | 50,6 | 446.302 | 7 | 2 |
+| 2.500 | Front | 60,0 | 57,4 | 446.756 | 7 | 2 |
+| 4.000 | Front | 59,9 | 54,8 | 536.062 | 7 | 2 |
+| 4.000 | Übersicht | 60,0 | 59,0 | 890.354 | 7 | 2 (Fenster 1194×702) |
+
+- Ladezeit 1,6 s, CPU je Bild 0,7–1,6 ms, kein Absturz bei 4.000.
+- Der iPad-Browser begrenzt auf 60 Bilder/s, die echte Reserve ist also unbekannt (größer als null). Ein Lastsprung zeigt sich nur in „schlechtester Wert“ (≥ 50).
+- **Bewertung: Phase 0 bestanden.** Die Technik (gebackene Skelett-Animation + Instancing) trägt auf dem Zielgerät mit Abstand.
+- Noch nicht abgedeckt: realistische Figuren mit Texturen (mehr Speicher, teurere Pixel), echtes Gelände, Effekte, Spiel-UI, Dauerlast (Wärme, Akku nach 10+ Minuten). Diese Punkte misst der nächste Prototyp-Schritt mit.
