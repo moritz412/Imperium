@@ -4,12 +4,13 @@
 - Erledigt bis v194: Bilder Paket 2 + 20 Völker-Porträts (pk_p2), 17 Sprechersätze (in x_rat, verdrahtet über RATV_P2-Muster im Protokoll, Sold-Warnung, Angleichen).
   Rest: rat_marschall_foederaten noch leicht fehlerhaft gesprochen; rat_kanzler_thronstreit_warnung, _putsch_ehre, _volk_wunsch, _volk_zufrieden sind geliefert, aber noch nicht verdrahtet.
 - 8 kurze Sprechersätze halluzinieren weiterhin → per Whisper-Wortzeiten schneiden (Liste in Bericht Job 25c/28).
-- Angelsächsische Halle (`angel_halle`) neu erzeugen (Loch im Dach): Vorlage e gewählt (3d/vorlagen_32), `3d_32.bat` startet TRELLIS nach Job 31 (Ausgabe 3d/roh_32),
+- Angelsächsische Halle (`angel_halle`) neu erzeugen (Loch im Dach): Vorlage e gewählt (3d/vorlagen_32), TRELLIS fertig: 3d/roh_32/angel_halle.glb,
   danach r3 (Sockel weg) und ins Wikinger-Paket. Übrige 11 England-Modelle sind aufbereitet (r3).
 - Technikbilder `tk_<id>` (82 Techniken ohne Einheiten/Eigenes Wissen, 1:1) + Banner aus `assets_design.md` (16:9),
   erzeugt mit `dev/pc/tech_bilder.js`: Probe Job 29_tech_probe (8 Techniken + ev_urkunden) fertig, Bogen in warteschlange/29_tech_probe/bogen.jpg; Hauptauftrag
-  31_tech_bilder (162 Bilder, Armbrust mit neuem Motiv) freigegeben und in der Warteschlange.
-  Danach: Auswahl, Paket, `RIMG` auf `pkUrl('tk_'+id)` mit bisherigem Bild als Rückfall.
+  31_tech_bilder fertig; Auswahl (81 Techniken + 7 Banner) in warteschlange/31_tech_bilder/auswahl (Liste auswahl.txt).
+  Armbrust auch im 2. Versuch nur Bögen → bleibt beim alten Bild.
+  v196 eingebaut: Paket img/pk_tk.json (1,7 MB), RIMG, Schatzkammer, Urkundenkammer, Grafikstufen; alte Bilder als Rückfall. Nicht veröffentlicht.
 - Hof-Reiterleiste (Familie, Feldherren …) noch im alten Stil.
 
 ## iPad-Test Moritz 28.10. (v194, Screenshots im Chat)

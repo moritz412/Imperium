@@ -254,3 +254,4 @@ Moritz 23:06: Geschichten-Ziele unrealistisch (Cäsar: am Ende 3 Regionen in 10 
 - 28.10. Technikbilder: dev/pc/tech_bilder.js schreibt Probe (Job 29, 18 Bilder), Hauptauftrag (Job 31 in _neu, 160 Bilder) und angel_halle c–f (Job 30). Schlüssel tk_<id>, Banner laut assets_design.md.
 - 28.10. angel_halle: Vorlage e (Dach geschlossen) → 3d_32.bat, wartet auf Job 31.
 - 28.10. v195 Darstellung (nicht committet/gebaut): Diplomatie-Siegel bronze; Kopfleiste +7 px unter Statusleiste (--sx, nur mit Safe-Area); html/body dunkel; Hof-Ämter Raster gleich hohe Reihen; Feldherren-Szenenbild nur 84-px-Banner beim ersten Eintrag. chkf (Node-Äquivalent) checked, smoke 4/4. Echtes iPad nicht getestet.
+- 28.10. v196: Technikbilder pk_tk (81 Techniken + 7 Banner) eingebaut. smoke 4/4, reach_fo_des2 120/120. Armbrust bleibt altes Bild. Unveröffentlicht.
