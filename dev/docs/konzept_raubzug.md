@@ -27,3 +27,7 @@ Inspiration: wie sich Völker wandeln (Moritz nennt „The Last Kingdom“) – 
 - Mehr ausgebaute Siedlungen/Befestigungen passend zur Zeit: angelsächsische Burhs (befestigte Städte mit Erdwall + Palisade, z. B. Winchester, Wallingford, Wareham), Königshallen (Holz-Halle, Winchester/Cheddar), Klöster (Lindisfarne, Jarrow), Handelsorte (Lundenwic, Jorvik/York als dänische Stadt), dänische Lager (Repton: Erdwall am Fluss mit Kirche), Wehrhöfe; KEINE Steinburgen (normannisch, erst ab 1066).
 - Umsetzung: neue Stadtbausatz-/Diorama-Varianten „angelsächsisch“ und „nordisch-Danelag“ (PC: FLUX-Vorlagen + TRELLIS), Gebäude „Burh“ (Wall-Stufe) als Abwehr gegen Raubzüge (passt zu Abwehr-Punkt 4: Alfreds Burh-System).
 - Karte England feiner? prüfen, ob Provinzen für Wessex/Mercia/Northumbria/East Anglia reichen.
+
+## Umsetzung v204 (W3, 28.10.)
+- Landnahme: Knopf im Provinzfenster (Bedingung: Raubvolk, 3 Plünderungen in der Region, eigenes Heer, ab Runde 10, 150 Gold × Epochenfaktor). Stufen Lager, Siedlung (nach 6 Runden), Heimat (nach 14). Steuern/Wachstum +10/+20/+30 %. Ab 3 Siedlungen Beute ×0,8, Bauen −10 % dort. KI selten (3 % je Runde, 1 je 10 Runden).
+- Taufe oder Treue als Wahlfenster (ab 2 Siedlungen an christlichen Nachbarn), Rückfall-Ereignis, Danelag-Mischkultur (Angleichung ×1,5, Nachbarn ×1,2). Alle Werte in der Konstante LN. Wikinger-Geschichte: Schritte Landnahme und Wedmore. Test: dev/tests/landnahme_t.js.
