@@ -1,4 +1,4 @@
-# Backlog – Imperium der Epochen 2 (Stand 28.10.2026, v194)
+# Backlog – Imperium der Epochen 2 (Stand 28.10.2026, v194, Setup PC fertig)
 
 ## Läuft / gleich als Nächstes
 - Erledigt bis v194: Bilder Paket 2 + 20 Völker-Porträts (pk_p2), 17 Sprechersätze (in x_rat, verdrahtet über RATV_P2-Muster im Protokoll, Sold-Warnung, Angleichen).
