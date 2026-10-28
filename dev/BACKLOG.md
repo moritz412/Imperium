@@ -1,11 +1,14 @@
 # Backlog – Imperium der Epochen 2 (Stand 28.10.2026, v194, Setup PC fertig)
 
 ## Läuft / gleich als Nächstes
+- v198 (unveröffentlicht): 4 Sprechersätze verdrahtet (Thronstreit-Warnung, Putsch-Ehre, Völker-Wunsch, Völker zufrieden); Hinweis bei neuer Epoche, wie man Ostafrika/Indien/Amerika erreicht.
 - Erledigt bis v194: Bilder Paket 2 + 20 Völker-Porträts (pk_p2), 17 Sprechersätze (in x_rat, verdrahtet über RATV_P2-Muster im Protokoll, Sold-Warnung, Angleichen).
   Rest: rat_marschall_foederaten noch leicht fehlerhaft gesprochen; rat_kanzler_thronstreit_warnung, _putsch_ehre, _volk_wunsch, _volk_zufrieden sind geliefert, aber noch nicht verdrahtet.
-- 8 kurze Sprechersätze halluzinieren weiterhin → per Whisper-Wortzeiten schneiden (Liste in Bericht Job 25c/28).
-- Angelsächsische Halle (`angel_halle`) neu erzeugen (Loch im Dach): Vorlage e gewählt (3d/vorlagen_32), TRELLIS fertig: 3d/roh_32/angel_halle.glb,
-  danach r3 (Sockel weg) und ins Wikinger-Paket. Übrige 11 England-Modelle sind aufbereitet (r3).
+- 8 kurze Sprechersätze halluzinieren weiterhin → per Whisper-Wortzeiten schneiden (Liste: warteschlange/28_tts_pruef/bericht.json, erste 8 Keys; Prüfskript tts_pruef.py). Angefangen 28.10., zurückgestellt für Konzept Echtzeitschlachten.
+- Angelsächsische Halle (`angel_halle`) neu: fertig aufbereitet (Dach dicht, Sockel weg, 1760 Dreiecke) in `3d/roh_32/r3/angel_halle_ns.glb`,
+  Vorschau `bogen_ns.jpg`. Ins Paket erst mit dem Wikinger-Paket. Achtung: die übrigen 11 England-Modelle liegen aufbereitet nur in der
+  Cloud (/home/claude/r3/out21); lokal gibt es nur die Rohdaten 3d/roh_21 → bei Bedarf hier mit `r3venv` neu aufbereiten.
+  r3 auf dem PC: eigene Umgebung `Desktopimperium-bilder3venv` (trimesh usw.), `PYTHONUTF8=1` setzen; shot.js braucht lokale Pfade.
 - Technikbilder `tk_<id>` (82 Techniken ohne Einheiten/Eigenes Wissen, 1:1) + Banner aus `assets_design.md` (16:9),
   erzeugt mit `dev/pc/tech_bilder.js`: Probe Job 29_tech_probe (8 Techniken + ev_urkunden) fertig, Bogen in warteschlange/29_tech_probe/bogen.jpg; Hauptauftrag
   31_tech_bilder fertig; Auswahl (81 Techniken + 7 Banner) in warteschlange/31_tech_bilder/auswahl (Liste auswahl.txt).
@@ -36,6 +39,10 @@ Spielregeln (Entscheidung nötig):
 2. Hannibal-Paket (`konzept_hannibal.md`), Kino.
 3. Spätspiel Paket 3 (`konzept_spaetspiel.md`): Ambitionen & Epochenwertung, Urteil der Geschichte (C),
    Zeitenwenden (F), Mächte ohne Land (G), Reichsteilung (D, höchstes Risiko).
+
+## Neu: Echtzeitschlachten (Moritz 28.10.)
+- Konzept-Entwurf `dev/docs/konzept_echtzeitschlacht.md`: gebackene Skelett-Animation auf der GPU, Ladeschirm, größere Felder, PC-Pipeline (Blender, CC0, TRELLIS).
+  Entschieden (Abschnitt 8): iPad Pro 11" 2. Gen (A12Z), realistisch, alte Schlacht entfällt später, PC darf Blender/CC0 laden. Empfehlung: Phase 0 vor Wikinger, Hannibal nach Schlachtsystem.
 
 ## Zurückgestellt / zu entscheiden
 - Agenten (Hof › Agenten) überarbeiten: wirken kaum spürbar, viel manuelle Arbeit, wenig Spaß (Moritz, 28.10.).

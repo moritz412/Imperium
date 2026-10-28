@@ -24,4 +24,7 @@ for n in os.listdir(ROOT):
 for n in os.listdir(B):
     shutil.move(os.path.join(B, n), os.path.join(ROOT, n))
 shutil.rmtree(B); shutil.rmtree(A)
+# Testseiten (Prototypen) liegen als Quelle in dev/proto und werden nach proto/ kopiert – die Wurzel wird oben geleert!
+P = os.path.join(ROOT, 'dev', 'proto')
+if os.path.isdir(P): shutil.copytree(P, os.path.join(ROOT, 'proto'))
 print('Fertig. Jetzt: git add -A && git commit -m "..." && git push')

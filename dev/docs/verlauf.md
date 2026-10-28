@@ -257,3 +257,5 @@ Moritz 23:06: Geschichten-Ziele unrealistisch (Cäsar: am Ende 3 Regionen in 10 
 - 28.10. v196: Technikbilder pk_tk (81 Techniken + 7 Banner) eingebaut. smoke 4/4, reach_fo_des2 120/120. Armbrust bleibt altes Bild. Unveröffentlicht.
 - 28.10. v197 (unveröffentlicht): Hafen-Farbfehler (lift entsättigt), dunkle Dioramen DIO_HELL, Statthalter Weg A (keine Bauvorlagen mit Statthalter). smoke 4/4.
 - 28.10. v197: Treue-Gründe sichtbar, Erfolge heben Treue, Landgut-Bug (+15 fehlte in der Formel). pk2 19/19.
+- 28.10. Konzept Echtzeitschlachten (Entwurf) geschrieben, Entscheidungen offen. v198 (Sprechersätze, Seeweg-Hinweis) unveröffentlicht; angel_halle aufbereitet.
+- 28.10. Phase-0-Prototyp Echtzeitschlacht: Quelle dev/proto/schlacht_p0.html, deploy.py kopiert dev/proto → proto/ (Wurzel wird beim Bauen geleert!). v198 veröffentlicht.
