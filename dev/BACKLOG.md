@@ -1,9 +1,11 @@
-# Backlog – Imperium der Epochen 2 (Stand 28.10.2026 abends, v203 veröffentlicht)
+# Backlog – Imperium der Epochen 2 (Stand 28.10.2026 abends, v203 veröffentlicht, v204 auf Branch w3-landnahme)
 
 ## ÜBERGABE an den nächsten Chat (zuerst lesen)
 - **W2 England fertig und veröffentlicht (v203, 28.10.):** Burh-Gebäude (britisch, Ep 1–2, Abwehr gegen Raubzüge), Wikinger-Szenario mit 4 Königreichen (Wessex usa, Mercia mogul, East Anglia vijaya, Northumbria briten; `caps`), englische Stadtbilder aus `models/c_en.json` (`enPre`, `enCityGeo`; angel/dane). Tests: smoke 4/4, raub 19/19, burh_t 20/20, en_stadt_t 8/8. Echtes iPad nicht getestet, GFX „mittel" nicht angesehen.
   Offen W2: Burh-Bild (Rückfall Grenzwall-Bild) → FLUX; `dane_haus_gross` (Job 23) fehlt → Rückfall angel_haus_gross; Städte wirken im Screenshot eher klein (dev/tests/shot/w2_england.png), Helligkeit gegen Nachbarstädte prüfen; alte Wikinger-Spielstände kennen die neuen Reiche nicht; chkf.sh braucht python3 (auf dem PC nicht im PATH, nur `r3venv`).
-- Nächstes Paket: **W3** Landnahme/Glaubenswechsel/Danelag, dann W4.
+- **W3 fertig (v204, Branch `w3-landnahme`, Commit 58d256f, nicht gemergt/deployt):** Landnahme (Lager → Siedlung 6 R. → Heimat 14 R., Steuern/Wachstum +10/20/30 %, ab 3 Siedlungen Beute ×0,8 und Bau −10 %), Taufe/Treue-Wahl mit Rückfall (40 %), Danelag-Mischkultur (Angleichung ×1,5 / ×1,2), Wikinger-Kapitel + „Akt II · Landnahme" und „Akt II · Wedmore"; Engländer/Franken im Szenario fest christlich. Alle Werte in Konstante `LN`. Tests: smoke 4/4, raub 19/19, burh 20/20, glaube 7/7, help ok, landnahme_t 42/42. Nicht getestet: echtes iPad, KI-Taufe, Thronstreit-Aufschlag.
+  Offen W3: Taufe-Bild (jetzt `ev_mission`, passt nicht) → FLUX; Taufe kostet über die vorhandene Glaubenslogik mehr Ordnung als −1 (Test: Kernland 3,6 → 0,6) – beim Spielen bewerten; alte Spielstände im Wikinger-Kapitel können durch die 2 neuen Schritte verrutschen; neue Schritte ohne Sprecher.
+- Nächstes Paket: **W4** Kapitel + 4 Kinosequenzen (`konzept_kino.md`).
 - Fertig im Code (v199–v201): W1 Raubzug & Verwüstung; Artillerie-Namen; Völkerbilder laden; Waren/Märkte-Bild + Ring; Erklärkarte (lange drücken, `HELP_ACT` 96 Einträge); Reichsvolk-Kachel (`rkHtml`); Beute Raubvölker ×3/×2,5, erste Runde nur Verwüstung, Wikinger-Flussfahrt im Raubzug (halbe Marschkosten).
 - Tests v201: smoke 4/4, raub 19/19, help 15/15 (v200: bed1 26/26, bed2 34/34, reach_fo_des2 120/120). `bed3_t.js` bricht ab (`HD is not defined`, Testskript veraltet).
 - PC-Warteschlange: Job 33 (Wikinger-Kinosprecher) und 34 (130 Lückenbilder) – Ergebnisse auswählen und einbauen (heroImg: Epochen-Fassung vor _x1 bevorzugen; Artillerie u_art_e0–e2 in PIC.unit; b_* in PIC.bld; ui_waren/ui_maerkte als Paket).
