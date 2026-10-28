@@ -1,7 +1,7 @@
-# Backlog – Imperium der Epochen 2 (Stand 28.10.2026 abends, v203 fertig auf Branch w2-england, unveröffentlicht bis Freigabe)
+# Backlog – Imperium der Epochen 2 (Stand 28.10.2026 abends, v203 veröffentlicht)
 
 ## ÜBERGABE an den nächsten Chat (zuerst lesen)
-- **W2 England fertig (v202/v203, Branch `w2-england`, nicht committet/deployt):** Burh-Gebäude (britisch, Ep 1–2, Abwehr gegen Raubzüge), Wikinger-Szenario mit 4 Königreichen (Wessex usa, Mercia mogul, East Anglia vijaya, Northumbria briten; `caps`), englische Stadtbilder aus `models/c_en.json` (`enPre`, `enCityGeo`; angel/dane). Tests: smoke 4/4, raub 19/19, burh_t 20/20, en_stadt_t 8/8. Echtes iPad nicht getestet, GFX „mittel" nicht angesehen.
+- **W2 England fertig und veröffentlicht (v203, 28.10.):** Burh-Gebäude (britisch, Ep 1–2, Abwehr gegen Raubzüge), Wikinger-Szenario mit 4 Königreichen (Wessex usa, Mercia mogul, East Anglia vijaya, Northumbria briten; `caps`), englische Stadtbilder aus `models/c_en.json` (`enPre`, `enCityGeo`; angel/dane). Tests: smoke 4/4, raub 19/19, burh_t 20/20, en_stadt_t 8/8. Echtes iPad nicht getestet, GFX „mittel" nicht angesehen.
   Offen W2: Burh-Bild (Rückfall Grenzwall-Bild) → FLUX; `dane_haus_gross` (Job 23) fehlt → Rückfall angel_haus_gross; Städte wirken im Screenshot eher klein (dev/tests/shot/w2_england.png), Helligkeit gegen Nachbarstädte prüfen; alte Wikinger-Spielstände kennen die neuen Reiche nicht; chkf.sh braucht python3 (auf dem PC nicht im PATH, nur `r3venv`).
 - Nächstes Paket: **W3** Landnahme/Glaubenswechsel/Danelag, dann W4.
 - Fertig im Code (v199–v201): W1 Raubzug & Verwüstung; Artillerie-Namen; Völkerbilder laden; Waren/Märkte-Bild + Ring; Erklärkarte (lange drücken, `HELP_ACT` 96 Einträge); Reichsvolk-Kachel (`rkHtml`); Beute Raubvölker ×3/×2,5, erste Runde nur Verwüstung, Wikinger-Flussfahrt im Raubzug (halbe Marschkosten).
