@@ -1181,7 +1181,7 @@ button,.arow,.rcard,.stb,.kindopt,.btn{-webkit-touch-callout:none;-webkit-user-s
 #helpCard b{display:block;font:400 17px/1.25 var(--f-display,Georgia,serif);color:#e4b86c;padding-bottom:5px;margin-bottom:6px;border-bottom:1px solid rgba(201,145,70,.5)}
 #helpCard p{margin:0;font-size:15px;line-height:1.4}
 .rkhead{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
-.rktile{border:1px solid #c99146;border-radius:10px;background:linear-gradient(180deg,#322a20,#241d16);padding:10px 14px;box-shadow:inset 0 1px 0 rgba(255,232,196,.1)}
+.rktile{border:1px solid #c99146;border-radius:10px;background:linear-gradient(180deg,#322a20,#241d16);padding:10px 62px 10px 14px;box-shadow:inset 0 1px 0 rgba(255,232,196,.1)}
 .rktile b{display:block;font:400 19px/1.2 var(--f-display,Georgia,serif);color:#e4b86c}
 .rktile p{margin:4px 0 0;font-size:14px;line-height:1.35}
 .rkbars{display:flex;flex-direction:column;gap:5px;margin-top:8px}
@@ -8606,6 +8606,7 @@ const STANCES={
 function stanceDef(a){return!a?1:a.st==='fest'?1.25:a.st==='hinter'?1.3:a.st==='gewalt'?0.85:1;}
 /* ===== v199: Raubzug, Verwüstung, Danegeld ===== */
 // v206 (Lückenbilder): Pakete pk_lk (55 Völker-Gesandte: _m1/_n1 für 25 Kulturen, _x1 für habescha/indigen/japanisch/koreanisch/suedostasiatisch) und pk_lb (Gebäude b_*, Artillerie u_art_e0–e2, ui_waren, ui_maerkte); heroImg bevorzugt die Epochen-Fassung vor _x1; BPK/upkKey/Wirtschaft-Banner
+// v207 (Kosmetik/Erklärtexte): Reichsvolk-Kachel (.rktile) lässt rechts Platz für den Schließen-Knopf; HELP_ACT/HELP_ATTRS um Handel (Märkte, Routen, Verträge, Kompanien, Anleihe), Forschung (data-tech), Agenten (data-hire/agact/agtgt …) und Geschichte/Szenario (story*, mission, scenbribe) erweitert; Schließen-, Zurück- und ?-Knopf erklärt. Keine Datenpakete geändert, OFF_VER unverändert.
 // v205 (W4): Kinosequenzen Wikinger (Segel im Morgennebel, Das Große Heer, Edington, zwei Enden Taufe/Treue), Kapitelbilder je Schritt, Taufe-Fenster mit eigenem Bild; Paket pk_vk, Sprecher x_wikinger_kino; Block „v205 (W4)“ VK_KINO vor stVk
 // v204 (W3): Landnahme (Lager, Siedlung, Heimat), Taufe oder Treue zu den alten Göttern, Danelag-Mischkultur; Block „v204 (W3)“ nach dem Völkermosaik, Geschichte Wikinger mit den Schritten Landnahme und Wedmore
 // v203 (W2 Paket B): englische Stadtbilder aus Einzelmodellen (models/c_en.json, enPre/enCityGeo/enMat, Epoche 1, Provinzen Englands; angel/dane je nach Besitzer) statt texturiertem Diorama
@@ -17287,12 +17288,60 @@ const HELP_ACT={
   'kir:hwar':'Ein heiliger Krieg gibt einen Kriegsgrund.',
   'kir:orden':'Gründet einen Ritterorden in dieser Burg.',
   'hau:wampum':'Wampum-Gürtel stärken die Eintracht des Bundes um 10. Kostet Gold.',
-  'hau:kond':'Das Kondolenzritual stärkt Eintracht und Ordnung für einige Runden.'
+  'hau:kond':'Das Kondolenzritual stärkt Eintracht und Ordnung für einige Runden.',
+  // v207: Handel (Wirtschaft › Märkte, Routen, Verträge)
+  'ejump':el=>{const N={over:'Übersicht',fin:'Haushalt',cit:'Siedlungen',chain:'Warenketten',prov:'Alle Provinzen',trans:'Transport',trade:'Märkte & Verträge',komp:'Kompanien'};return 'Springt in diesem Fenster zum Abschnitt „'+(N[el.dataset.ejump]||'weiter unten')+'“. Du musst nicht blättern.';},
+  'gsrc':'Zeigt, woher diese Ware kommt: welche deiner Provinzen sie erzeugen und wo du sie selbst herstellen kannst. Lohnt, wenn die Ware knapp oder teuer ist.',
+  'proc':'Öffnet die Warenbeschaffung: Lieferanten, Preise und Liefermengen. Ein Liefervertrag läuft, bis du ihn kündigst. Lohnt, wenn dir eine Ware fehlt.',
+  'loan':()=>{const bank=provsOf(S.player).some(pi=>S.prov[pi].b.bank>0),amt=Math.round(400*G()*(bank?1.5:1)),pay=Math.round(amt*(bank?1.15:1.35)/12);return `Eine Anleihe bringt sofort ${amt} Gold. Du zahlst 12 Runden lang ${pay} Gold je Runde zurück. Fällt eine Rate aus, droht der Staatsbankrott. Mit einer Bank ist sie größer und billiger. Lohnt nur in Geldnot.`;},
+  'debase':()=>{const I=debaseInfo(S.player);return `Münze abwerten bringt sofort ${I.gold} Gold. Danach sinken die Steuern 15 Runden lang um ${I.cut} %, und die Ordnung sinkt 12 Runden lang um 1. Danach 15 Runden Pause. Ein teurer Ausweg, wenn die Kasse leer ist.`;},
+  'priv':el=>{const on=(el.dataset.priv||'').split('|')[2]==='1';return on?`Verleiht der Zunft in dieser Region ein Privileg: Erzeugung +25 %, Abgabe +3 Gold, aber Ordnung −0,5 in der Region. Du kannst höchstens ${privMax(S.player)} Privilegien vergeben (eines je 10 Provinzen).`:'Entzieht das Privileg wieder. Die Zunft murrt: Ordnung −1 in der Region für 5 Runden.';},
+  'leak':'Zeigt auf der Karte die Provinz, in der du Gold verlierst. Dort lässt sich der Verlust beheben.',
+  'ghq':()=>`Macht dieses Zunftzentrum zum Gilden-Hauptsitz. Kostet ${ghqCost()} Gold. Dort steigt die Erzeugung um weitere 20 %, im übrigen Reich um 10 %. Ein Umzug geht erst nach 15 Runden wieder.`,
+  'cfound':()=>`Gründet eine Handelskompanie für ${compCost()} Gold. Du brauchst einen Hafen und Handelskontor, Bank oder Markt II. Sie bringt Gold aus Seewegen, Übersee-Provinzen und Handelsposten. Auch Handelspartner können Anteile kaufen.`,
+  'cbuy':'Kauft einen von 20 Anteilen. 60 % des Gewinns werden an die Anteilseigner verteilt, jede Runde nach Zahl der Anteile. Bei einer fremden Kompanie brauchst du ein Handelsabkommen; die Hälfte des Preises geht an den Gründer. Ein Sturm kann die Dividende einer Runde kosten.',
+  'csell':'Verkauft einen Anteil zu 95 % des Kurses. Der Gründer behält immer mindestens einen. Lohnt, wenn die Gewinne der Kompanie fallen.',
+  'cacc':el=>{const c=(S.contracts||[]).find(c=>c.id===+el.dataset.cacc);return c?`Nimmt den Lieferauftrag an: ${c.amt} ${GOODS[c.g].n} in ${c.dur} Runden. Jede Runde liefert dein Lager so viel, wie die Route trägt. Bei Erfolg ${c.pay} Gold und Beziehung +8. Bei Misserfolg Beziehung −6 und nur eine halbe Teilzahlung.`:'Nimmt den Lieferauftrag an.';},
+  'cdec':'Lehnt das Angebot ab. Die Beziehung zu diesem Reich sinkt um 2. Das Angebot verfällt ohnehin nach wenigen Runden.',
+  'resc':el=>{const x=el.dataset.resc,on=dip(S.player,x).esc;return on?'Beendet den Geleitschutz. Die Route ist dann wieder ungeschützt und der Unterhalt entfällt.':`Geleitschutz kostet ${escCost(S.player,x)} Gold je Runde und halbiert die Gefahr von Überfällen auf dieser Route. Lohnt, wenn die Gefahr hoch ist.`;},
+  'rup':el=>{const x=el.dataset.rup,lv=dip(S.player,x).rlv||1;return `Baut den Handelsweg aus: mehr Waren je Runde und +3 Gold je Runde. Kostet ${routeCost(lv)} Gold. Höchste Stufe ist III. Lohnt, wenn die Route fast voll ist.`;},
+  'rshow':'Zeigt den Handelsweg auf der Karte, mit seinen Etappen.',
+  'gopost':()=>`Zeigt diese Stadt auf der Karte. Ein Handelsposten kostet ${postCost()} Gold und bringt danach ${postInc()} Gold je Runde. Er lohnt sich in fremden Großstädten und Häfen.`,
+  'goprov':'Zeigt diese Provinz auf der Karte.',
+  'ebuild':'Öffnet das Baumenü dieser Provinz. Dort kannst du die Mine bauen, die diese Ware liefert.',
+  'impgo':'Schließt einen Liefervertrag über diese Menge je Runde. Der Betrag auf dem Knopf wird jede Runde bezahlt. Er läuft, bis du ihn kündigst. Wer drei Runden nichts liefern kann, beendet ihn.',
+  'impstop':'Kündigt diesen Liefervertrag. Die Lieferungen enden sofort.',
+  'procdip':'Öffnet die Diplomatie dieses Reichs. Mit Handelsabkommen ist die Ware 10 % billiger und der Weg trägt doppelt so viel.',
+  'gsrc2':'Zeigt, wo du die Ware selbst herstellen kannst. Das dauert länger, kostet danach aber nichts mehr.',
+  'gdip':'Öffnet die Diplomatie dieses Reichs, um einen Handel zu vereinbaren.',
+  // v207: Forschung
+  'tech':el=>{const f=S.player,F=S.fac[f],t=TECH_BY[el.dataset.tech];if(!t)return'';if(hasTech(f,t.id))return'Diese Forschung ist abgeschlossen.';
+    if(techExcl(f,t))return'Diese Forschung ist ausgeschlossen, weil du die andere Wahl getroffen hast.';if(!techAvail(f,t))return techWhy(f,t)||'Noch gesperrt.';
+    const tc=tCost(f,t),r=Math.max(0.1,researchRate(f)),prog=F.res&&F.res.id===t.id?F.res.prog:(F.saved[t.id]||0),n=Math.max(1,Math.ceil((tc-prog)/r)),eu=EUR[t.id];
+    if(F.res&&F.res.id===t.id)return `Wird gerade erforscht: noch etwa ${n} Runden. Es läuft immer nur eine Forschung.`;
+    return `Startet diese Forschung. Sie kostet ${tc} Punkte, bei ${(Math.round(r*10)/10).toLocaleString('de-DE')} Punkten je Runde etwa ${n} Runden. Wechselst du später, bleibt der Fortschritt erhalten.${eu?' Ein Geistesblitz (siehe Karte) macht sie 40 % billiger.':''}`;},
+  // v207: Agenten (Hof › Agenten)
+  'hire':el=>{const t=el.dataset.hire,T=AGENT_T[t];if(!T)return'';const f=S.player,n=agentsOf(f).length,cap=agentCap(f);return `${T.d} Anwerben kostet ${agentCost(t)} Gold. Du hast ${n} von ${cap} Plätzen. Ein Platz mehr kommt je sechs Provinzen dazu.`;},
+  'agent':'Öffnet die Aufträge dieses Agenten. Du wählst Auftrag und Ziel. Ein Plan läuft mehrere Runden, bis er gelingt oder der Agent entdeckt wird.',
+  'agstop':'Bricht den laufenden Plan ab. Der Agent bleibt bei dir und wartet auf einen neuen Auftrag. Der bisherige Fortschritt geht verloren.',
+  'agact':el=>{const k=el.dataset.agact,A=AG_ACTS[k];if(!A)return'';return A.d+' '+(A.stay?'Läuft dauerhaft.':`Dauer bei Stufe 1 etwa ${AG_DUR[k]} Runden plus Anreise. Jede Runde kann der Plan entdeckt werden.`)+(k==='beste'?' Kostet Gold, je nach Provinz.':'');},
+  'agtgt':'Schickt den Agenten zu dieser Provinz. Unter dem Namen stehen Dauer und Entdeckungsrisiko, beim Händler der erwartete Gewinn je Runde. Ist die Provinz bewacht, dauert es länger.',
+  'agback':'Zurück zur Liste deiner Agenten, ohne einen Plan zu beginnen.',
+  'agmap':el=>el.dataset.agmap==='han'?'Zeigt die Handelskarte: Wo Rohstoffe liegen und was sie bringen. Lohnt, bevor du ein Ziel für den Händler wählst.':'Zeigt die Glaubenskarte: Welche Provinz welchen Glauben hat. Lohnt, bevor du ein Ziel für den Priester wählst.',
+  'htab':el=>({hof:'Die Tafel des Hofes: Ämter besetzen. Ernennen kostet einmal Gold, danach zahlt jedes Amt ein Gehalt.',gov:'Statthalter der Regionen einsetzen und ihnen einen Auftrag geben.',gen:'Jedes Heer führt ein Feldherr. Er steigt in Schlachten bis Stufe 6 auf.',fam:'Das Herrscherhaus bestimmt die Thronfolge. Die Eigenschaften des Herrschers wirken im ganzen Reich.',kir:'Glaube und Kirche deines Reichs. Gunst schützt vor dem Bann.',rat:'Der Rat sammelt Vorschläge deiner Berater, was als Nächstes dran ist.',ag:`Agenten handeln im Verborgenen. Du kannst bis zu ${agentCap(S.player)} unterhalten.`})[el.dataset.htab]||'',
+  // v207: Szenario und Geschichte (Kapitel, Ziele, Aufträge)
+  'act:scenbribe':()=>`Du schickst ${Math.round(150*G())} Gold an Freunde im Senat: Einfluss +12. Der Einfluss sinkt von selbst um 1 je Runde. Fällt er auf 0, endet deine Laufbahn. Lohnt, wenn die Zahl unter 20 fällt.`,
+  'act:story':'Das aktuelle Ziel der Geschichte. Tippen zeigt den Ort auf der Karte. Ist das Ziel erfüllt, gibt es die Belohnung am Knopf und der nächste Schritt beginnt.',
+  'act:storychoice':'Eine Entscheidung der Geschichte wartet. Tippen öffnet sie. Jede Antwort nennt ihre Folgen.',
+  'act:storyend':'Alle Schritte des Kapitels sind erfüllt. Tippen öffnet die Schlussentscheidung.',
+  'act:storyskip':'Gibt diesen Schritt auf und springt zum nächsten. Es gibt keine Belohnung. Der Knopf erscheint erst, wenn der Schritt 30 Runden offen ist.',
+  'act:mission':'Ein Auftrag deines Hofes. Tippen zeigt das Ziel auf der Karte oder öffnet die passende Seite. Die Belohnung steht auf dem Knopf, die Frist in der letzten Zeile.'
 };
-const HELP_ATTRS=['act','govact','govdir','govpot','govapp','pk2','dip','vm','kir','hau'];
+const HELP_ATTRS=['act','govact','govdir','govpot','govapp','pk2','dip','vm','kir','hau','ejump','gsrc','proc','loan','debase','priv','leak','ghq','cfound','cbuy','csell','cacc','cdec','resc','rup','rshow','gopost','goprov','ebuild','impgo','impstop','procdip','gsrc2','gdip','tech','hire','agent','agstop','agact','agtgt','agback','agmap','htab'];
 function helpKeys(el){const ks=[],d=el.dataset||{};for(const a of HELP_ATTRS){const v=d[a];if(v==null)continue;if(a==='act'&&v==='stance'&&d.s)ks.push('act:stance:'+d.s);
-    ks.push(a+':'+v);const i=v.indexOf(':');if(i>0)ks.push(a+':'+v.slice(0,i));if(a==='govdir'||a==='govpot'||a==='govapp')ks.push(a);}return ks;}
+    ks.push(a+':'+v);const i=v.indexOf(':');if(i>0)ks.push(a+':'+v.slice(0,i));if(a!=='act'&&!/^(govact|pk2|dip|vm|kir|hau)$/.test(a))ks.push(a);}return ks;}
 function helpText(el){const h=el.closest('[data-help]');if(h&&h.dataset.help)return h.dataset.help;
+  if(el.classList){if(el.classList.contains('dlgx'))return'Schließt das Fenster.';if(el.classList.contains('dlgback'))return'Zurück zum vorigen Fenster.';if(el.classList.contains('qhelp'))return'Zeigt oder versteckt eine kurze Hilfe zu diesem Bereich.';}
   for(const k of helpKeys(el)){let v=HELP_ACT[k];if(v==null)continue;try{if(typeof v==='function')v=v(el,k);}catch(e){v=null;}if(v)return String(v);}
   const ti=el.getAttribute('title')||(el.closest('[title]')||{}).title;if(ti&&ti.length>3)return ti;
   const sm=el.querySelector&&el.querySelector('small');if(sm&&sm.textContent.trim().length>3)return sm.textContent.trim();
