@@ -5873,7 +5873,7 @@ Object.assign(SCEN,{
    {t:'Akt I · Ruhm',img:'vk_kap_raubzeit',txt:'Ein Jarl ist so viel wert wie sein Ruf. Jeder Sommer bringt neue Fahrten: nach Irland, auf die Inseln, an die Mündungen der Flüsse. Wer reich zurückkehrt, findet Männer für das nächste Jahr. Wer leer zurückkehrt, rudert bald für einen anderen.',g:{cond:'beute',n:400,txt:'Insgesamt 400 Gold Beute.'},rew:{atk:0.05}},
    {t:'Akt I · Das Thing',img:'vk_kap_thronstreit',txt:'Einmal im Jahr treffen sich die freien Männer auf dem Thing. Dort wird Recht gesprochen, Streit geschlichtet und manchmal ein König ausgerufen. Mit genug Ruhm und genug Silber für Geschenke folgen die Jarle eines Tages nicht mehr nur sich selbst.',g:{cond:'ruhm',n:60,txt:'Ruhm 60 erreichen (Siege, Eroberungen, Beute).'},rew:{gold:300}},
    {t:'Akt II · Das große Heer',year:865,img:'vk_kap_jorvik',kino:'k2',txt:'Die Zeit der schnellen Überfälle ist vorbei. Ein großes Heer setzt nach England über, um zu bleiben. Es nimmt die Stadt York, die man nun Jórvík nennt, und überwintert in fremdem Land. Die Könige der Angelsachsen zahlen Danegeld, damit die Nordmänner weiterziehen. Doch sie kommen wieder.',g:{hold:['briganten']},rew:{gold:400}},
-   {t:'Akt II · Landnahme',year:876,ki:0,img:'vk_kap_landnahme',txt:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder. Plündere in England mindestens dreimal, halte dort ein Heer in einer eigenen Provinz und siedle dort. Nach sechs Runden wird aus dem Lager eine Siedlung.',vo:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder.',g:{cond:'landnahme',txt:'In England mindestens dreimal plündern, mit einem Heer in einer eigenen Provinz „Hier siedeln – Landnahme“ wählen und sechs Runden bis zur Siedlung warten.'},rew:{gold:300,order:1}},
+   {t:'Akt II · Landnahme',year:876,ki:0,img:'vk_kap_landnahme',txt:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder. Plündere in England mindestens dreimal, halte dort ein Heer in einer eigenen Provinz und siedle dort. Nach sechs Runden wird aus dem Lager eine Siedlung. Später, wenn dein Hof in einer Heimat-Provinz sitzt, kannst du dort „Die Heimat verlegen“ wählen und entscheiden, was aus dem alten Land im Norden wird.',vo:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder.',g:{cond:'landnahme',txt:'In England mindestens dreimal plündern, mit einem Heer in einer eigenen Provinz „Hier siedeln – Landnahme“ wählen und sechs Runden bis zur Siedlung warten.'},rew:{gold:300,order:1}},
    {t:'Akt II · Wedmore',year:878,ki:0,img:'vk_kap_burhbau',kino:'k3',txt:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren. Wie hältst du es mit dem Glauben?',vo:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren.',g:{cond:'choice',flag:'wedmore',txt:'Über Taufe oder Treue zu den alten Göttern entscheiden.'},rew:{gold:0},choice:[
      {l:'Die Taufe annehmen',d:'Frieden und bessere Beziehungen zu den Christen, Beute ×0,8. Ordnung −1 im Kernland (10 Runden), Thronstreit wahrscheinlicher.',act:'wedmore_tauf'},{l:'Den alten Göttern treu bleiben',d:'Ruhm +15, Ordnung +1 im Kernland (10 Runden). Die Christen werden kühler.',act:'wedmore_treue'}]},
    {t:'Akt II · Paris',year:885,ki:5,img:'vk_kap_danegeld',txt:'Die Seine windet sich tief in das Land der Franken. Rouen liegt am Ufer, weiter flussaufwärts Paris auf seiner Insel. Die Franken sperren den Fluss mit Brücken und Türmen. Doch Langschiffe kann man über Land ziehen, und Mauern kann man aushungern.',g:{hold:['parisier']},rew:{gold:400}},
@@ -8613,6 +8613,7 @@ function stanceDef(a){return!a?1:a.st==='fest'?1.25:a.st==='hinter'?1.3:a.st==='
 /* ===== v199: Raubzug, Verwüstung, Danegeld ===== */
 // v206 (Lückenbilder): Pakete pk_lk (55 Völker-Gesandte: _m1/_n1 für 25 Kulturen, _x1 für habescha/indigen/japanisch/koreanisch/suedostasiatisch) und pk_lb (Gebäude b_*, Artillerie u_art_e0–e2, ui_waren, ui_maerkte); heroImg bevorzugt die Epochen-Fassung vor _x1; BPK/upkKey/Wirtschaft-Banner
 // v207 (Kosmetik/Erklärtexte): Reichsvolk-Kachel (.rktile) lässt rechts Platz für den Schließen-Knopf; HELP_ACT/HELP_ATTRS um Handel (Märkte, Routen, Verträge, Kompanien, Anleihe), Forschung (data-tech), Agenten (data-hire/agact/agtgt …) und Geschichte/Szenario (story*, mission, scenbribe) erweitert; Schließen-, Zurück- und ?-Knopf erklärt. Keine Datenpakete geändert, OFF_VER unverändert.
+// v214 (Übersiedlung): „Die Heimat verlegen“ für Raubvölker (Block UB; ubCan/ubWindow/ubDo): Hauptstadt in Heimat-Provinz (Landnahme Stufe 3) + Provinzen in der alten Heimat-Region; Wahl behalten (Unruhe +1) / Lehen (pk2Realm + makeVassal, Tribut vassalTribute) / aufgeben (Gold ×5, Gefolge); F.kern (Region) steuert lnCore (Ordnung nach Taufe/Treue), F.home0 merkt die erste Hauptstadt-Region; KI 2 % je Runde; OFF_VER unverändert
 // v213 (Wikinger spielbar; rules raidUpkeep 0,5 / homeUpkeep 0,7 / raidLoot 1,1): canRaub erlaubt Raubzug an Bord für Seeräuber (Landung plündert); Beute-Ziele 100/400, Eroberungs-Plünderung und Danegeld zählen als Beute; Startgold 400, halber Sold im Feindesland/auf See (rules.raidUpkeep); Schonfrist 25 Runden gegen neue KI-Kriegserklärungen (rules.shield, scenShield); Waräger-Ziele um Esten/Karelien/Liven, rus aufgedeckt; stSkip mit Meldung/Haken; Schritt-Jahre (steps[].year, nur Anzeige, kein Epochenwechsel); Paris-Ziel Parisier; Normandie verlegt Franken-Heere; Island/Vinland-Texte ehrlich
 // v212: Wikinger starten mit Hafen in Vestfold und 3 Langschiffen (SCEN.ports/fleets, volle Reichweite in Runde 1); Akt-I-Text erklärt Einschiffen/Anlanden/Raubzug
 // v211: rat_marschall_foederaten_01 neu gesprochen (Job 37, Text „Die Föderaten werden unruhig …“, Whisper ok)
@@ -16676,7 +16677,7 @@ function lnBaptInfo(f){const cnt={};let n=0;for(let i=0;i<S.prov.length;i++){con
   const nb=Object.keys(cnt).sort((a,b)=>(atWar(f,b)-atWar(f,a))||cnt[b]-cnt[a]);return{n,nb,giver:nb[0]||null};}
 function lnBaptOk(f){const F=S.fac[f];if(!F||F.bapt||!raidKind(f)||!lnPagan(f))return false;return lnBaptInfo(f).n>=LN.baptMin;}
 // Kernland (alte Heimat): Provinzen ohne Landnahme in eigener Kultur, sonst die Hauptstadt
-function lnCore(f,pi){const P=S.prov[pi];return(lnOf(pi)===0&&P.cul===facCul(f))||pi===capitalOf(f);}
+function lnCore(f,pi){const P=S.prov[pi],F=S.fac[f];if(F&&F.kern!=null)return PROV_DEF[pi].reg===F.kern;return(lnOf(pi)===0&&P.cul===facCul(f))||pi===capitalOf(f);} // v214: nach der Übersiedlung (F.kern = Region) ist das Kernland die neue Heimat-Region
 function lnBapt(f,c,ai){const F=S.fac[f];if(!F||F.bapt)return false;const I=lnBaptInfo(f),g=I.giver,old=facRel(f);F.bapt={t:S.turn,c,old,ord:[]};const me=f===S.player,B=F.bapt;
   if(c==='tauf'){const rel=g&&CHR.includes(facRel(g))?facRel(g):'christ';B.g=g;setStateRel(f,rel,'Taufe');
     for(const x of I.nb)try{relAdd(f,x,x===g?LN.relGiver:LN.relBapt,'Taufe');}catch(e){}
@@ -16700,6 +16701,7 @@ function lnEvRueck(){const f=S.player,B=S.fac[f].bapt,old=B&&B.old;
     opts:[{label:'Nachgeben',desc:()=>`Der alte Glaube (${relName(old||'germ')}) kehrt zurück. Die Beziehungen zu den Christen sinken.`,fx:ff=>{const I=lnBaptInfo(ff);if(old)setStateRel(ff,old,'Rückfall der Jarle');for(const x of I.nb)try{relAdd(ff,x,LN.relRueck,'Rückfall');}catch(e){}if(B)B.c='rueck';return'Der alte Glaube kehrt zurück.';}},
       {label:'Standhaft bleiben',desc:()=>`Ordnung −${LN.ordV} im Kernland für ${LN.ordT} Runden.`,fx:ff=>{if(B)B.ord.push({v:-LN.ordV,until:S.turn+LN.ordT,l:'Streit mit den Jarlen'});return'Du bleibst standhaft.';}}]},ctx:{}};}
 function lnRunQ(done){const Q=S&&S.lnQ;if(!Q||!Q.length||!alive(S.player)||S.mp){done();return;}const x=Q.shift();let ev=null;
+  if(x.k==='ueb'){if(ubCan(S.player).ok){ubWindow(S.player,()=>lnRunQ(done));return;}S.fac[S.player].ubQ=null;lnRunQ(done);return;}
   try{if(x.k==='tauf'){if(lnBaptOk(S.player))ev=lnEvTauf();else S.fac[S.player].baptQ=0;}else if(x.k==='rueck'){const B=S.fac[S.player].bapt;if(B&&B.c==='tauf')ev=lnEvRueck();}}catch(e){console.warn('Landnahme Ereignis',e);}
   if(!ev){lnRunQ(done);return;}showEvent(ev.E,ev.ctx,()=>lnRunQ(done));}
 {const _e=runEvents;runEvents=function(done){_e(()=>lnRunQ(done));};}
@@ -16711,11 +16713,14 @@ function lnRound(){if(!S||!S.prov)return;
     else if(P.ln===2&&age>=LN.t3){P.ln=3;if(me)addLog(`${PROV_DEF[i].name} ist jetzt eure Heimat: Steuern und Wachstum +${Math.round(LN.eco[3]*100)} %.`,true,'good');}
     if(P.unrest>0)P.unrest=Math.max(0,P.unrest-LN.unrest[P.ln]);}
   for(const f of PLAYABLE){if(!alive(f)||f==='horde')continue;const F=S.fac[f];F.settled=lnSettled(f);if(!raidKind(f))continue;
+    if(F.home0==null&&F.kern==null){const cp=capitalOf(f);if(cp!=null)F.home0=PROV_DEF[cp].reg;}
     if(!isHumanP(f)){
+      if((F.ubT==null||S.turn-F.ubT>=UB.again)&&Math.random()<UB.aiP&&ubCan(f).ok)try{ubDo(f,ubAiPick(f),true);}catch(e){console.warn('Übersiedlung KI',e);}
       if((F.lnAiT==null||S.turn-F.lnAiT>=LN.aiGap)&&Math.random()<LN.aiP){const L=provsOf(f).filter(pi=>lnCan(f,pi).ok);if(L.length){lnStart(f,L[Math.floor(Math.random()*L.length)]);F.lnAiT=S.turn;}}
       if(!F.bapt&&Math.random()<LN.aiBaptP&&lnBaptOk(f))lnBapt(f,'tauf',true);
     }else if(f===S.player&&!S.mp){
       if(!F.bapt&&!F.baptQ&&lnBaptOk(f)&&!(scenOn()&&S.scen.id==='wikinger')){F.baptQ=1;(S.lnQ=S.lnQ||[]).push({k:'tauf'});}
+      if((F.ubQ==null||S.turn-F.ubQ>=UB.again)&&!(S.lnQ||[]).some(q=>q.k==='ueb')&&ubCan(f).ok){F.ubQ=S.turn;(S.lnQ=S.lnQ||[]).push({k:'ueb'});}
       const B=F.bapt;if(B&&B.c==='tauf'&&B.rfT!=null&&!B.rfDone&&S.turn>=B.rfT){B.rfDone=1;(S.lnQ=S.lnQ||[]).push({k:'rueck'});}}}}
 {const _f=faithRound;faithRound=function(){const snap={};try{for(let i=0;i<S.prov.length;i++){const P=S.prov[i];if(P.owner&&P.owner!=='frei'&&P.owner!=='horde')snap[i]=[P.cul,P.cp||0];}}catch(e){}
   _f();try{lnCulture(snap);lnRound();}catch(e){console.warn('Landnahme',e);}};}
@@ -16727,6 +16732,7 @@ function lnRound(){if(!S||!S.prov)return;
 function lnHtml(pi){try{const P=S.prov[pi],f=S.player;if(!P||P.owner!==f||!raidKind(f))return'';const L=lnOf(pi),n=lnSettled(f);let h='';
   if(L){const left=L<3?Math.max(0,(L===1?LN.t2:LN.t3)-(S.turn-P.lnT)):0;
     h+=`<div class="pk2card slim"><div><span class="eyebrow">Landnahme</span><b>${LN_NAME[L]}</b><small>Steuern und Wachstum +${Math.round(LN.eco[L]*100)} %, die Unruhe sinkt.${L<3?` Nächste Stufe „${LN_NAME[L+1]}“ in ${left} ${left===1?'Runde':'Runden'}.`:' Höchste Stufe.'}</small></div></div>`;
+    if(L===3){const u=ubCan(f,pi);h+=`<div class="row"><button class="btn${u.ok?' primary':''}" data-act="uebopen"${u.ok?'':' disabled'}>🏠 Die Heimat verlegen</button></div><p class="note" style="margin:2px 0 0">${u.ok?`Dein Hof zieht hierher: ${esc(ubRegName(u.newReg))} wird das Kernland. Du entscheidest, was aus ${esc(ubRegName(u.oldReg))} wird.`:esc(u.why)+'.'}</p>`;}
     const fc=facCul(f);if(fc&&P.cul&&P.cul!==fc)h+=`<p class="note" style="margin:4px 0 0">${fc==='nordisch'&&P.cul==='britisch'?'Danelag: nordische und angelsächsische Siedler mischen sich.':'Mischkultur: Siedler und Einheimische mischen sich.'} Die Angleichung geht ${Math.round((LN.culFac-1)*100)} % schneller.</p>`;
   }else{const c=lnCan(f,pi);if(!c.home){const reg=PROV_DEF[pi].reg;
     h+=`<div class="row"><button class="btn${c.ok?' primary':''}" data-act="landnahme"${c.ok?'':' disabled'}>🏕 Hier siedeln – Landnahme · ${lnCost()} Gold</button></div><p class="note" style="margin:2px 0 0">${c.ok?`Aus dem Lager wird nach ${LN.t2} Runden eine Siedlung, später die Heimat: Steuern und Wachstum +10, +20, +30 %.`:esc(c.why)+'.'} Plünderungen in dieser Region: ${lnRaids(f,reg)} von ${LN.raids}.</p>`;
@@ -16746,6 +16752,66 @@ function vkEnd(id){try{const c=vkCine(id);if(c)setTimeout(()=>{try{playCine(c,()
 function stVk(sid,st,s){return st.ki===0?[]:[sid+'_k'+(st.ki||s.i+1)];}
 Object.assign(SC_COND,{landnahme:(f,g)=>[provsOf(f).some(pi=>PROV_DEF[pi].reg==='britannien'&&lnOf(pi)>=2)?1:0,1]});
 {const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='landnahme')return 16;return _sn(f,g);};}
+/* ===== v214: Übersiedlung – „Die Heimat verlegen“ (Entscheidung Moritz 28.10.) ===== */
+// Stellschrauben: again = Runden bis zur nächsten Übersiedlung/zum erneuten Angebot, unrest = Unruhe in der alten Heimat bei „behalten“,
+// give = Gold je Steuer-Gold bei „aufgeben“ (provIncome schließt den Epochenfaktor schon ein), units/roles = Gefolge bei „aufgeben“,
+// jarl = Größe des Jarl-Heeres bei „Lehen“ (Tribut: vorhandene Vasallenabgabe vassalTribute, ein Viertel der Steuern), aiP/aiW = KI (je Runde, Gewichte)
+const UB={again:30,unrest:1,give:5,units:2,roles:{see:['sword','sword'],steppe:['cav','missile']},jarl:[2,5],aiP:0.02,aiW:{lehen:0.7,behalten:0.2,aufgeben:0.1}};
+const UB_MODES=['behalten','lehen','aufgeben'];
+function ubRegName(r){return r!=null&&REG[r]?REG[r].name:'der alten Heimat';}
+// Region des alten Kernlands: F.kern (nach einer Übersiedlung), sonst die Region der ersten Hauptstadt (F.home0)
+function ubKern(f){const F=S&&S.fac&&S.fac[f];return F?(F.kern!=null?F.kern:F.home0!=null?F.home0:null):null;}
+function ubCan(f,pi){const F=S&&S.fac&&S.fac[f];if(!F||!alive(f))return{ok:false,why:'Kein Reich'};if(!raidKind(f))return{ok:false,why:'Nur Raubvölker verlegen ihre Heimat'};
+  if(S.mp&&isHumanP(f))return{ok:false,why:'Nicht im Mehrspielermodus'};
+  if(pi==null)pi=capitalOf(f);if(pi==null||!S.prov[pi]||S.prov[pi].owner!==f)return{ok:false,why:'Keine Heimat-Provinz'};
+  if(lnOf(pi)!==3)return{ok:false,why:'Nur eine Provinz mit Landnahme-Stufe Heimat kommt in Frage'};
+  if(capitalOf(f)!==pi)return{ok:false,why:'Dein Hof muss hier stehen: Verlege erst die Hauptstadt hierher'};
+  if(F.ubT!=null&&S.turn-F.ubT<UB.again)return{ok:false,why:`Erst in ${UB.again-(S.turn-F.ubT)} Runden wieder möglich`};
+  const nr=PROV_DEF[pi].reg,or=ubKern(f);if(or==null||or===nr)return{ok:false,why:'Die alte Heimat liegt in derselben Region'};
+  const ps=provsOf(f).filter(q=>PROV_DEF[q].reg===or&&!isCapProv(q));if(!ps.length)return{ok:false,why:`Du hast keine Provinzen mehr in ${ubRegName(or)}`};
+  const tax=ps.reduce((a,q)=>a+provIncome(q),0),slot=!S.mp&&!!pk2Slot();
+  return{ok:true,pi,newReg:nr,oldReg:or,ps,tax:Math.round(tax),give:Math.round(tax*UB.give),tr:Math.round(tax*0.25),slot};}
+// Heere der alten Heimat ziehen in die neue Heimat-Provinz
+function ubArmiesHome(f,c){let n=0;for(const a of S.armies)if(a.f===f&&!a.boat&&c.ps.includes(a.p)){a.p=c.pi;a.goal=null;a.fz=null;n++;}return n;}
+function ubAiPick(f){const c=ubCan(f);let r=Math.random(),k=null;for(const m of['lehen','behalten','aufgeben']){r-=UB.aiW[m];if(r<=0){k=m;break;}}k=k||'behalten';if(k==='lehen'&&!(c.ok&&c.slot))k='behalten';return k;}
+function ubDo(f,mode,ai){const c=ubCan(f);if(!c.ok||!UB_MODES.includes(mode))return false;if(mode==='lehen'&&!c.slot)return false;
+  const F=S.fac[f],me=f===S.player,n=c.ps.length,oldN=ubRegName(c.oldReg),newN=ubRegName(c.newReg);let msg='',sl=null;
+  if(mode==='behalten'){for(const q of c.ps){const P=S.prov[q];P.unrest=Math.min(6,(P.unrest||0)+UB.unrest);P.uw='Die Jarle fühlen sich verlassen';}
+    msg=`Der Hof ist übersiedelt: ${newN} ist jetzt das Kernland. Die ${n} ${n===1?'Provinz':'Provinzen'} in ${oldN} bleiben dein, doch die Jarle dort fühlen sich verlassen (Unruhe +${UB.unrest}).`;}
+  else if(mode==='lehen'){ubArmiesHome(f,c);const _dw=declareWar;declareWar=function(){};// das neue Jarltum erklärt dem Lehnsherrn keinen Krieg
+    try{sl=pk2Realm(f,c.ps,{name:`Jarltum ${oldN}`,ruler:orName(newPerson('m',38),f).n,k:'leh',units:0,img:'vk_e1_danelag'});}finally{declareWar=_dw;}
+    if(!sl)return false;try{createArmy(sl,c.ps[0],PK2_ROLES.slice(0,clamp(1+n,UB.jarl[0],UB.jarl[1])),1);}catch(e){console.warn('Jarl-Heer',e);}// pk2Realm baut im Szenario kein Heer (pk1F = 0)
+    makeVassal(f,sl);relAdd(f,sl,30,'Lehen vergeben');const R=pk2S().R[sl];if(R)R.vas=S.turn;
+    msg=`Der Hof ist übersiedelt: ${newN} ist jetzt das Kernland. ${FACTIONS[sl].name} (${n} ${n===1?'Provinz':'Provinzen'}) ist dein Vasall, verbündet, und zahlt dir ein Viertel seiner Steuern, etwa ${c.tr} Gold je Runde. Deine Heere dort ziehen in die neue Heimat.`;}
+  else{ubArmiesHome(f,c);F.gold+=c.give;
+    for(const q of c.ps){const P=S.prov[q];P.owner='frei';P.gar=Math.ceil(garMax(q)*0.7);P.unrest=0;P.rebel=0;P.build=null;P.q=null;P.ln=0;P.lnF=null;if(S.sieges&&S.sieges[q])delete S.sieges[q];}
+    const roles=(UB.roles[raidKind(f)]||UB.roles.see).slice(0,UB.units);let add=0;
+    for(const r of roles){const A=S.armies.filter(a=>a.f===f&&!a.boat&&PROV_DEF[a.p]&&PROV_DEF[a.p].reg===c.newReg&&a.units.length<armyMax(f)).sort((a,b)=>a.units.length-b.units.length)[0];
+      if(A)A.units.push(newUnit(f,r));else createArmy(f,c.pi,[r],1);add++;}
+    msg=`Der Hof ist übersiedelt: ${newN} ist jetzt das Kernland. Die ${n} ${n===1?'Provinz':'Provinzen'} in ${oldN} sind frei. Du erhältst ${c.give} Gold, ${add} ${add===1?'Einheit':'Einheiten'} Gefolge stoßen zu deinen Heeren.`;}
+  F.kern=c.newReg;F.home0=c.newReg;F.ubT=S.turn;F.ubQ=S.turn;F.ubN=(F.ubN||0)+1;F.ubMode=mode;
+  try{SN_CACHE.delete(f);}catch(e){}
+  if(me){addLog(msg,true,'info');try{chronAdd('hist',`Heimat nach ${newN} verlegt (${mode==='lehen'?'Lehen':mode==='aufgeben'?'alte Heimat aufgegeben':'alte Heimat behalten'})`);}catch(e){}}
+  else addLog(`${FACTIONS[f].name}: Der Hof zieht nach ${newN}. ${mode==='lehen'?'Die alte Heimat wird einem Jarl als Lehen gegeben.':mode==='aufgeben'?'Die alte Heimat wird aufgegeben.':'Die alte Heimat bleibt im Reich.'}`,knows(f),'info');
+  try{refreshOwnership();}catch(e){}return true;}
+// Fenster wie das der Taufe: Bild, Text, Knöpfe untereinander (Erklärkarten: HELP_ACT act:ueb:*)
+function ubWindow(f,done){done=done||(()=>{});const c=ubCan(f);if(!c.ok){toast(c.why);done();return;}
+  const F=S.fac[f],oldN=ubRegName(c.oldReg),newN=ubRegName(c.newReg),city=PROV_DEF[c.pi].city||PROV_DEF[c.pi].name,n=c.ps.length,pl=n===1?'Provinz':'Provinzen';
+  const opt=(k,t,d,dis)=>`<button class="rcard evopt" data-act="ueb:${k}"${dis?' disabled':''}><b>${t}</b><small>${d}</small></button>`;
+  showModal(`${heroOr('vk_kap_landnahme','ev_thron',S.turn)}<p class="eyebrow" style="margin:0 0 6px">Übersiedlung</p><h2>Die Heimat verlegen</h2><p class="sub">${fmtYear(S.year)} · ${esc(city)}</p>
+    <p>Dein Hof sitzt jetzt in ${esc(city)}, mitten in ${esc(newN)}. Dein Reich hat noch ${n} ${pl} in ${esc(oldN)}, dem alten Land. Wenn du die Heimat verlegst, wird ${esc(newN)} das Kernland: Dorthin richten sich künftig die Ordnung nach Taufe und Treue. Was soll aus ${esc(oldN)} werden?</p>
+    <div class="list" style="margin-top:12px">
+      ${opt('behalten','Die alte Heimat behalten',`Alle ${n} ${pl} bleiben dein. Die Jarle fühlen sich verlassen: Unruhe +${UB.unrest} dort, einmalig.`)}
+      ${opt('lehen','Einem Jarl als Lehen geben',c.slot?`Ein neues Jarltum übernimmt die ${n} ${pl}, wird dein Vasall und zahlt dir ein Viertel seiner Steuern: etwa ${c.tr} Gold je Runde. Deine Heere dort ziehen in die neue Heimat.`:'Gerade ist kein Jarl bereit, das Land zu übernehmen.',!c.slot)}
+      ${opt('aufgeben','Die alte Heimat aufgeben',`Die ${n} ${pl} werden frei. Du erhältst sofort ${c.give} Gold und bis zu ${UB.units} Einheiten Gefolge für deine Heere in der neuen Heimat.`)}
+      ${opt('spaeter','Später entscheiden','Es ändert sich nichts. Im Fenster dieser Provinz kannst du es jederzeit wählen.')}
+    </div>`,[]);noX();
+  document.querySelectorAll('#dialog [data-act^="ueb:"]').forEach(b=>b.onclick=()=>{if(b.disabled)return;const k=b.dataset.act.slice(4);closeModal();
+    if(k==='spaeter'){F.ubQ=S.turn;AUDIO.sfx('click');done();return;}
+    if(ubDo(f,k)){AUDIO.sfx('horn');toast('Die Heimat ist verlegt');}else toast('Das geht gerade nicht');
+    try{refreshOwnership();}catch(e){}refresh();done();});}
+// Die erste Hauptstadt-Region merken, bevor der Hof das erste Mal zieht
+{const _m=moveCap;moveCap=function(f,pi){const F=S.fac[f],old=capitalOf(f),r=_m(f,pi);try{if(r&&F&&F.home0==null&&F.kern==null&&old!=null)F.home0=PROV_DEF[old].reg;}catch(e){}return r;};}
 {const _sc=scenChoice;scenChoice=function(act){try{if(act==='wedmore_tauf'||act==='wedmore_treue'){S.scen.flags.wedmore=1;lnBapt(S.player,act==='wedmore_tauf'?'tauf':'treue');vkEnd(act==='wedmore_tauf'?'e1':'e2');}}catch(e){console.warn('Wedmore',e);}return _sc(act);};}
 // Nachbarn gleicher Kultur: Kriegsgrund „Landsleute befreien“, wenn ihr Volk im Reich des Spielers verärgert ist
 function vmFree(f,x){if(!S||!S.vm||x!==S.player||!vmOn())return null;const c=facCul(f),V=c&&vmOf(c);if(!V||V.z>VM_BAD)return null;return provsOf(x).some(pi=>S.prov[pi].cul===c&&[...ADJ[pi]].some(q=>S.prov[q].owner===f))?c:null;}
@@ -17129,6 +17195,7 @@ $('#shBody').addEventListener('click',e=>{
   else if(act==='stance'){const a=getArmy(UI.army);if(a&&a.f===S.player){setStance(a,b.dataset.s);AUDIO.sfx('click');if(a.st)toast(STANCES[a.st].n);}refresh();}
   else if(act==='story'){const s=stState(S.player),t=s&&stTarget(S.player,s.g);if(t!=null){UI.sel=t;UI.army=null;UI.mode='prov';focusProv(t,10);refresh();}}
   else if(act==='storyskip'){stSkip(S.player);refresh();}
+  else if(act==='uebopen'){ubWindow(S.player,()=>refresh());}
   else if(act==='landnahme'){const pi=UI.sel,c=lnCan(S.player,pi);if(c.ok){lnStart(S.player,pi);AUDIO.sfx('horn');toast('Landnahme: Lager gegründet');}else toast(c.why);refreshOwnership();refresh();}
   else if(act==='storychoice'){const s=stState(S.player),C=stCh(S.player),st=s&&C.steps[s.i];if(st&&st.choice){const x=stChoiceEv(st,s,C);showEvent(x.E,x.ctx,()=>refresh());}}
   else if(act==='scenbribe'){const c=Math.round(150*G());if(S.fac[S.player].gold>=c&&S.scen){S.fac[S.player].gold-=c;S.scen.einfl+=12;AUDIO.sfx('click');toast('Einfluss +12');renderTop();refresh();}}
@@ -17205,6 +17272,11 @@ const HELP_ACT={
   'act:trBuy':()=>`Der Tross ist der Versorgungszug des Heeres. Mit ihm reicht der Nachschub 3 statt 2 Provinzen über eigenes oder verbündetes Land hinaus. Ohne Versorgung verliert ein Heer 2 % seiner Männer je Runde. Kostet ${trossCost()} Gold, dazu ${trossUpkOne()} Gold Unterhalt je Runde; bei einer verlorenen Schlacht fällt er dem Sieger zu. Lohnt nur für Feldzüge tief im Feindesland.`,
   'act:trDrop':()=>`Spart ${trossUpkOne()} Gold Unterhalt je Runde. Danach reicht der Nachschub wieder nur 2 Provinzen weit. Das Gold für den Tross kommt nicht zurück.`,
   'act:sldPick':()=>`Wirbt sofort Söldner an, ohne Kaserne und ohne Wartezeit. Sie kosten doppelten Sold, höchstens ${SLD_TURN} je Runde, nur in eigenem oder verbündetem Land. Ist die Kasse leer, ziehen sie ab, plündern oder laufen über. Lohnt, wenn du schnell Stärke brauchst.`,
+  'act:uebopen':()=>`Die Heimat verlegen: Dein Hof sitzt in dieser Heimat-Provinz. Du machst ihre Region zum Kernland und entscheidest, was aus den Provinzen der alten Heimat wird. Geht nur mit der Hauptstadt in einer Provinz der Landnahme-Stufe Heimat und eigenen Provinzen in der alten Heimat. Danach ${UB.again} Runden Ruhe.`,
+  'act:ueb:behalten':()=>`Die alte Heimat behalten: Alle Provinzen dort bleiben dein, nur das Kernland wechselt. Die Jarle fühlen sich verlassen: einmalig Unruhe +${UB.unrest} in diesen Provinzen.`,
+  'act:ueb:lehen':()=>`Einem Jarl als Lehen geben: Die Provinzen der alten Heimat gehen an ein neues Jarltum. Es wird dein Vasall (verbündet, Frieden) und zahlt dir ein Viertel seiner Steuern pro Runde. Deine Heere dort ziehen in die neue Heimat. Der Jarl bekommt ein eigenes kleines Heer.`,
+  'act:ueb:aufgeben':()=>`Die alte Heimat aufgeben: Ihre Provinzen werden frei. Dafür bekommst du sofort Gold (das ${UB.give}-fache ihrer Steuern) und bis zu ${UB.units} Einheiten Gefolge für die Heere in der neuen Heimat. Deine Heere dort ziehen mit.`,
+  'act:ueb:spaeter':()=>`Später entscheiden: Es ändert sich nichts. Das Angebot erscheint nach ${UB.again} Runden wieder, und im Provinzfenster der Heimat steht der Knopf „Die Heimat verlegen“ jederzeit bereit.`,
   'act:landnahme':()=>`Landnahme: Dein Raubvolk lässt sich in dieser Provinz nieder. Voraussetzung: mindestens ${LN.raids} Plünderungen in dieser Region, ein eigenes Heer hier und frühestens Runde ${LN.minTurn}. Kostet ${Math.round(LN.cost*EPOCH_COST[ep()])} Gold. Aus dem Lager wird nach ${LN.t2} Runden eine Siedlung und nach weiteren ${LN.t3-LN.t2} Runden die Heimat: Steuern und Wachstum +10, +20, +30 %, die Unruhe sinkt, und die Kultur gleicht sich schneller an. Der Preis: Ab ${LN.setN} gesiedelten Provinzen schrumpft die Raub-Beute auf 80 %, dafür baust du dort 10 % günstiger.`,
   'act:raub':'Raubzug: Das Heer zieht ins Feindesland, plündert jede Provinz, in die es kommt, und zieht weiter. Es bringt Gold, etwas Gefolge und Ruhm, aber kein Land: Die Provinz bleibt 5 bis 10 Runden verwüstet. Besonders stark für Seeräuber und Reiternomaden. Antippen beendet den Raubzug.',
   'act:stance:gewalt':()=>STANCES.gewalt.d+' Lohnt, wenn das Heer rasch ans Ziel muss.',
