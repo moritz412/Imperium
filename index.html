@@ -3290,7 +3290,7 @@ function canBuild(f,pi,key){
   if(key==='library'&&lvl===2&&P.pop<1.6)return{ok:false,why:'Universität braucht 1,6 Bevölkerung'};
   if(lvl===0){if(B.kind==='b'){if(!B.need(feat(pi)))return{ok:false,why:B.why||'Hier nicht möglich'};if(betrUsed(pi)>=betrSlots(pi))return{ok:false,why:'Kein Betriebsplatz frei'};}else if(!B.free&&slotsUsed(pi)>=slotsOf(pi))return{ok:false,why:'Kein Bauplatz frei'};}
   if(lvl===2&&B.req3&&!hasTech(f,B.req3))return{ok:false,why:`Benötigt ${TECH_BY[B.req3].name}`};
-  const cost=Math.round(buildCost(f,key,lvl)*(pKind(pi)==='burg'&&(key==='barracks'||key==='walls')?0.7:1)*(govRet(f,PROV_DEF[pi].reg,'baumeister')?0.9:1));
+  const cost=Math.round(buildCost(f,key,lvl)*(pKind(pi)==='burg'&&(key==='barracks'||key==='walls')?0.7:1)*(govRet(f,PROV_DEF[pi].reg,'baumeister')?0.9:1)*lnBuildMul(f,pi));
   if(S.fac[f].gold<cost)return{ok:false,why:'Zu wenig Gold',cost};
   return{ok:true,cost,turns:B.turns[lvl]};
 }
@@ -3463,7 +3463,7 @@ function taxParts(pi){const d=PROV_DEF[pi],P=S.prov[pi],f=P.owner;if(f==='frei')
   {const k=pKind(pi),s=pSway(pi);if(k==='stadt')mul('Stadt',1.15);if(s==='handel'||s==='hafen')mul(s==='handel'?'Handelsplatz':'Hafen',1.1);if(s==='handel')add('Handelsplatz',4*I);}
   if(messeOn(P))mul('Messe',1.3);else if(messeNear(pi))mul('Messe in der Nähe',1.1);if(P.jm===S.turn)mul('Jahrmarkt',1.1);
   if(regionHeld(f,d.reg))mul('Region vereint',1+REG_TAX);mul('Titel',titleTaxMul(f,pi));{const G=govOf(f,d.reg);if(G&&G.t==='gierig')mul('Gieriger Statthalter',0.9);if(G&&(G.ret||[]).includes('steuer'))mul('Gefolge des Statthalters',1.05);}
-  if(P.raid!=null&&S.turn-P.raid<=1&&!(P.dv&&P.dv.a>0))mul('Überfall',0.5);if(dvSev(pi)>0)mul('Verwüstung',dvTaxMul(pi));if(siegeAt(pi))mul('Belagerung',0.5);if(P.b.port>0&&blockaded(pi)&&pSway(pi)!=='hafenf')mul('Blockade',0.6);
+  if(P.raid!=null&&S.turn-P.raid<=1&&!(P.dv&&P.dv.a>0))mul('Überfall',0.5);if(dvSev(pi)>0)mul('Verwüstung',dvTaxMul(pi));if(lnOf(pi))mul('Landnahme',lnEco(pi));if(siegeAt(pi))mul('Belagerung',0.5);if(P.b.port>0&&blockaded(pi)&&pSway(pi)!=='hafenf')mul('Blockade',0.6);
   {const o=provOrder(pi);mul('Ordnung',o<0?Math.max(0.25,1+0.12*o):1+ordTaxBonus(o));}{const a=adminLoss(f);if(a>0)mul(`Über der Verwaltungsgrenze (${adminCap(f)} Provinzen)`,1-a);}
   try{mul('Nil',nilMul(pi));}catch(e){}if(integOf(pi)!=null)mul('Bundesgenosse',0.5);if(townOf(pi))mul('Burg oder Stadtrecht',1.1);if(P.kb!=null&&P.kb>=S.turn)mul('Gnadenerweis',1.1);
   if(P.b.garten>0)mul('Persischer Garten',1+0.04*P.b.garten);if(P.b.boerse>0&&addonOn('wi'))mul('Börse',1+0.1*P.b.boerse);if(P.b.stelen>0)mul('Stelenfeld',1+0.03*P.b.stelen);if(P.b.felskirche>=3)add('Felsenkirche',4*I);if(P.b.karawanserei>0)add('Karawanserei',3*P.b.karawanserei*I);
@@ -3482,7 +3482,7 @@ function provIncome0(pi){
   t*=titleTaxMul(f,pi);{const G=govOf(f,d.reg);if(G&&G.t==='gierig')t*=0.9;if(G&&(G.ret||[]).includes('steuer'))t*=1.05;}
   if(P.raid!=null&&S.turn-P.raid<=1&&!(P.dv&&P.dv.a>0))t*=0.5;if(dvSev(pi)>0)t*=dvTaxMul(pi);if(siegeAt(pi))t*=0.5;if(P.b.port>0&&blockaded(pi)&&pSway(pi)!=='hafenf')t*=0.6;
   const o=provOrder(pi);if(o<0)t*=Math.max(0.25,1+0.12*o);else t*=1+ordTaxBonus(o);
-  t*=1-adminLoss(f);
+  t*=lnEco(pi);t*=1-adminLoss(f);
   return Math.round(t);
 }
 function researchRate(f){const own=provsOf(f),E=S.fac[f].eco;let r=5+own.filter(pi=>pSway(pi)==='gelehrt').length*3+own.length*0.6+own.reduce((s,pi)=>s+bLv(S.prov[pi],'temple')*0.5+(S.prov[pi].b.kloster||0),0)+own.reduce((s,pi)=>s+[0,1,3,6][S.prov[pi].b.library||0]*(bOld(S.prov[pi],'library')?0.7:1),0)*(0.5+0.5*(E&&E.schrR!=null?E.schrR:1));r+=own.reduce((s,pi)=>s+(S.prov[pi].b.felskirche||0)+[0,1,2,4][S.prov[pi].b.lehmmoschee||0],0);r+=own.reduce((s,pi)=>{const x=templeRelFx(pi);return s+(x&&x.rp||0);},0);{const w=Math.max(0,...own.map(pi=>S.prov[pi].b.weisheit||0));if(w){r+=[0,2,4,7][w];r*=1+[0,0,0.04,0.08][w];}}r+=own.reduce((s,pi)=>{const h=shInit(S.prov[pi]);return s+0.4*h.c+2.5*h.n;},0);if(hasTech(f,'writing'))r*=1.2;r*=1+techBonus(f,'rp');return Math.round(r*10)/10;}
@@ -5884,18 +5884,22 @@ Object.assign(SCEN,{
    {t:'Akt I · Ruhm',txt:'Ein Jarl ist so viel wert wie sein Ruf. Jeder Sommer bringt neue Fahrten: nach Irland, auf die Inseln, an die Mündungen der Flüsse. Wer reich zurückkehrt, findet Männer für das nächste Jahr. Wer leer zurückkehrt, rudert bald für einen anderen.',g:{cond:'beute',n:700,txt:'Insgesamt 700 Gold Beute.'},rew:{atk:0.05}},
    {t:'Akt I · Das Thing',txt:'Einmal im Jahr treffen sich die freien Männer auf dem Thing. Dort wird Recht gesprochen, Streit geschlichtet und manchmal ein König ausgerufen. Mit genug Ruhm und genug Silber für Geschenke folgen die Jarle eines Tages nicht mehr nur sich selbst.',g:{cond:'ruhm',n:60,txt:'Ruhm 60 erreichen (Siege, Eroberungen, Beute).'},rew:{gold:300}},
    {t:'Akt II · Das große Heer',txt:'Die Zeit der schnellen Überfälle ist vorbei. Ein großes Heer setzt nach England über, um zu bleiben. Es nimmt die Stadt York, die man nun Jórvík nennt, und überwintert in fremdem Land. Die Könige der Angelsachsen zahlen Danegeld, damit die Nordmänner weiterziehen. Doch sie kommen wieder.',g:{hold:['briganten']},rew:{gold:400}},
-   {t:'Akt II · Paris',txt:'Die Seine windet sich tief in das Land der Franken. Rouen liegt am Ufer, weiter flussaufwärts Paris auf seiner Insel. Die Franken sperren den Fluss mit Brücken und Türmen. Doch Langschiffe kann man über Land ziehen, und Mauern kann man aushungern.',g:{any:[['kaleter','parisier','lexovier'],1]},rew:{gold:400}},
-   {t:'Akt II · Normandie',txt:'Im Jahr 911 lässt der Frankenkönig Karl dem Nordmann Rollo ein Angebot machen. Er soll Land an der Mündung der Seine erhalten, als Lehen, wenn er sich taufen lässt und den Fluss gegen andere Nordmänner schützt. Aus Räubern könnten Herzöge werden.',g:{cond:'choice',flag:'normandie',txt:'Über das Angebot entscheiden.'},rew:{gold:0},choice:[
+   {t:'Akt II · Landnahme',ki:0,txt:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder. Plündere in England mindestens dreimal, halte dort ein Heer in einer eigenen Provinz und siedle dort. Nach sechs Runden wird aus dem Lager eine Siedlung.',vo:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder.',g:{cond:'landnahme',txt:'In England mindestens dreimal plündern, mit einem Heer in einer eigenen Provinz „Hier siedeln – Landnahme“ wählen und sechs Runden bis zur Siedlung warten.'},rew:{gold:300,order:1}},
+   {t:'Akt II · Wedmore',ki:0,txt:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren. Wie hältst du es mit dem Glauben?',vo:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren.',g:{cond:'choice',flag:'wedmore',txt:'Über Taufe oder Treue zu den alten Göttern entscheiden.'},rew:{gold:0},choice:[
+     {l:'Die Taufe annehmen',d:'Frieden und bessere Beziehungen zu den Christen, Beute ×0,8. Ordnung −1 im Kernland (10 Runden), Thronstreit wahrscheinlicher.',act:'wedmore_tauf'},{l:'Den alten Göttern treu bleiben',d:'Ruhm +15, Ordnung +1 im Kernland (10 Runden). Die Christen werden kühler.',act:'wedmore_treue'}]},
+   {t:'Akt II · Paris',ki:5,txt:'Die Seine windet sich tief in das Land der Franken. Rouen liegt am Ufer, weiter flussaufwärts Paris auf seiner Insel. Die Franken sperren den Fluss mit Brücken und Türmen. Doch Langschiffe kann man über Land ziehen, und Mauern kann man aushungern.',g:{any:[['kaleter','parisier','lexovier'],1]},rew:{gold:400}},
+   {t:'Akt II · Normandie',ki:6,txt:'Im Jahr 911 lässt der Frankenkönig Karl dem Nordmann Rollo ein Angebot machen. Er soll Land an der Mündung der Seine erhalten, als Lehen, wenn er sich taufen lässt und den Fluss gegen andere Nordmänner schützt. Aus Räubern könnten Herzöge werden.',g:{cond:'choice',flag:'normandie',txt:'Über das Angebot entscheiden.'},rew:{gold:0},choice:[
      {l:'Das Lehen annehmen',d:'Seinemündung und Lexovier werden dein, Frieden mit den Franken.',act:'normandie_ja'},{l:'Weiter plündern',d:'400 Gold Beute, Krieg mit den Franken bleibt.',act:'normandie_nein'}]},
-   {t:'Akt III · Der Weg der Waräger',txt:'Im Osten führen Flüsse durch endlose Wälder nach Süden. Schweden und Nordmänner, die man dort Waräger nennt, fahren über Ladoga und Nowgorod bis Kiew. An den Stromschnellen des Dnepr tragen sie ihre Boote über Land. Am Ende des Weges liegt das Schwarze Meer.',g:{any:[['ilmen','smolensk','neurer','dregowitschen'],1]},rew:{gold:300}},
-   {t:'Akt III · Miklagard',txt:'Am Ende des Ostwegs liegt Miklagard, die große Stadt, die die Griechen Konstantinopel nennen. Ihre Mauern sind höher als alles im Norden, ihr Kaiser trägt Purpur. Er zahlt Nordmännern viel Gold, wenn sie seine Leibwache werden. Andere kommen nur, um Pelze, Wachs und Sklaven gegen Seide und Silber zu tauschen.',g:{cond:'choice',flag:'miklagard',txt:'Über den Dienst in Miklagard entscheiden.'},rew:{gold:0},choice:[
+   {t:'Akt III · Der Weg der Waräger',ki:7,txt:'Im Osten führen Flüsse durch endlose Wälder nach Süden. Schweden und Nordmänner, die man dort Waräger nennt, fahren über Ladoga und Nowgorod bis Kiew. An den Stromschnellen des Dnepr tragen sie ihre Boote über Land. Am Ende des Weges liegt das Schwarze Meer.',g:{any:[['ilmen','smolensk','neurer','dregowitschen'],1]},rew:{gold:300}},
+   {t:'Akt III · Miklagard',ki:8,txt:'Am Ende des Ostwegs liegt Miklagard, die große Stadt, die die Griechen Konstantinopel nennen. Ihre Mauern sind höher als alles im Norden, ihr Kaiser trägt Purpur. Er zahlt Nordmännern viel Gold, wenn sie seine Leibwache werden. Andere kommen nur, um Pelze, Wachs und Sklaven gegen Seide und Silber zu tauschen.',g:{cond:'choice',flag:'miklagard',txt:'Über den Dienst in Miklagard entscheiden.'},rew:{gold:0},choice:[
      {l:'In die Warägergarde eintreten',d:'Zwei Einheiten Warägergarde und 400 Gold',act:'mikla_garde'},{l:'Nur handeln',d:'Steuern +10 % für 30 Runden',act:'mikla_handel'}]},
-   {t:'Akt IV · Island und Grönland',txt:'Im Westen, weit hinter den Färöern, haben Seefahrer eine Insel aus Feuer und Eis gefunden. Man nennt sie Island. Noch weiter liegt ein Land, das Erik der Rote Grönland nennt, damit mehr Siedler kommen. Es ist eine Fahrt ohne Wiederkehr, für Familien, Vieh und Saatgut.',g:{cond:'choice',flag:'island',txt:'Die Siedlerflotte ausrüsten (300 Gold).'},rew:{gold:0},choice:[
+   {t:'Akt IV · Island und Grönland',ki:9,txt:'Im Westen, weit hinter den Färöern, haben Seefahrer eine Insel aus Feuer und Eis gefunden. Man nennt sie Island. Noch weiter liegt ein Land, das Erik der Rote Grönland nennt, damit mehr Siedler kommen. Es ist eine Fahrt ohne Wiederkehr, für Familien, Vieh und Saatgut.',g:{cond:'choice',flag:'island',txt:'Die Siedlerflotte ausrüsten (300 Gold).'},rew:{gold:0},choice:[
      {l:'Siedler ausschicken (300 Gold)',d:'Zwei Siedlungen jenseits des Meeres: Ruhm +20, Bevölkerung der Heimat entlastet',act:'island'},{l:'Noch warten',d:'Die Entscheidung kommt wieder',act:'warten'}]},
-   {t:'Akt IV · Vinland',txt:'Leif, der Sohn Eriks, erzählt von einem Land jenseits von Grönland, mit Wäldern, Lachs und wildem Wein. Er nennt es Vinland. Niemand weiß, wie weit es reicht und wer dort lebt. Eine Fahrt dorthin ist die kühnste, die ein Nordmann wagen kann.',g:{cond:'choice',flag:'vinland',txt:'Die Fahrt nach Vinland wagen (400 Gold).'},rew:{gold:0},choice:[
+   {t:'Akt IV · Vinland',ki:10,txt:'Leif, der Sohn Eriks, erzählt von einem Land jenseits von Grönland, mit Wäldern, Lachs und wildem Wein. Er nennt es Vinland. Niemand weiß, wie weit es reicht und wer dort lebt. Eine Fahrt dorthin ist die kühnste, die ein Nordmann wagen kann.',g:{cond:'choice',flag:'vinland',txt:'Die Fahrt nach Vinland wagen (400 Gold).'},rew:{gold:0},choice:[
      {l:'Nach Vinland fahren (400 Gold)',d:'Ruhm +30. Eine Siedlung am Rand der Welt.',act:'vinland'},{l:'Noch warten',d:'Die Entscheidung kommt wieder',act:'warten'}]}],
    end:{t:'Saga',txt:'Die Skalden versammeln sich in der Halle und stimmen ihre Lieder an. Zwei Jahrhunderte Fahrten, Kämpfe und Handel sollen zu einer Saga werden. Was soll sie erzählen?',opts:[
      {l:'Vom König des Nordens',d:'Ordnung +2 für 40 Runden',fx:{order:2}},{l:'Vom Schrecken der Küsten',d:'Angriff +12 % für 40 Runden',fx:{atk:0.12}},{l:'Vom Händler zwischen den Welten',d:'Steuern +15 % für 40 Runden',fx:{tax:0.15}}]}},
+  christ:['briten','usa','mogul','vijaya','arverner'],
   hooks:{3:f=>{for(const id of ['trondelag','haelsingland']){const i=PI[id];if(i!=null){S.prov[i].owner=f;}}S.armies.filter(a=>a.f==='polen').forEach(a=>{a.f=f;});try{S.fac.polen.alive=false;}catch(e){}addLog('Das Thing hat entschieden: Die Jarle von Lade folgen dir als König.',true,'good');}},
   gold:(f)=>(S.scen.flags.beute||0)>=1500&&S.scen.flags.vinland}
 });
@@ -8615,6 +8619,7 @@ const STANCES={
 };
 function stanceDef(a){return!a?1:a.st==='fest'?1.25:a.st==='hinter'?1.3:a.st==='gewalt'?0.85:1;}
 /* ===== v199: Raubzug, Verwüstung, Danegeld ===== */
+// v204 (W3): Landnahme (Lager, Siedlung, Heimat), Taufe oder Treue zu den alten Göttern, Danelag-Mischkultur; Block „v204 (W3)“ nach dem Völkermosaik, Geschichte Wikinger mit den Schritten Landnahme und Wedmore
 // v203 (W2 Paket B): englische Stadtbilder aus Einzelmodellen (models/c_en.json, enPre/enCityGeo/enMat, Epoche 1, Provinzen Englands; angel/dane je nach Besitzer) statt texturiertem Diorama
 // v202 (W2 Paket A): Burh (BUILDINGS.burh, rzDef, garMax, burhWant) und Wikinger-Szenario mit vier englischen Reichen (Slots usa, mogul, vijaya, briten)
 const RZ_SEE=new Set(['wikinger','nordleute','daenen','jarl_lade','sveakoenige','norweger','normannen']);
@@ -8643,8 +8648,9 @@ function rzDef(pi,kind){const P=S.prov[pi],why=[];let m=1,p=1;
 function plunderProv(a,t,mode){const P=S.prov[t],rf=a.f,o=P.owner;if(o==='frei'||o===rf||!atWar(rf,o)||raidPact(rf,o))return null;
   const k=raidKind(rf),pr=RZ_PROF[k||'other'],sev=dvSev(t),bf=1-0.85*sev,df=rzDef(t,k),cruel=genFx(a,'cruel');
   let m=pr.m;if(k==='see'){let wet=false;try{const ft=feat(t);wet=!!(ft.coast||ft.river);}catch(e){}if(wet)m*=1.2;}
-  const loot=Math.max(0,Math.round(PROV_DEF[t].tax*1.2*EPOCH_INC[ep()]*(1+cruel+genFx(a,'raid'))*m*bf*df.m));
-  S.fac[rf].gold+=loot;a.rzH=S.turn;
+  const loot=Math.max(0,Math.round(PROV_DEF[t].tax*1.2*EPOCH_INC[ep()]*(1+cruel+genFx(a,'raid'))*m*bf*df.m*lnLoot(rf)));
+  S.fac[rf].gold+=loot;a.rzH=S.turn;if(k){const F0=S.fac[rf],rg=PROV_DEF[t].reg;F0.rzReg=F0.rzReg||{};F0.rzReg[rg]=(F0.rzReg[rg]||0)+1;}// v204: Plünderungen je Region für die Landnahme
+
   if(S.scen&&rf===S.player){S.scen.flags.beute=(S.scen.flags.beute||0)+loot;scenFame(rf,loot/30);}
   // Gefolge aus Beute: ein kleiner Teil der Verluste kehrt zurück (höchstens 15 % der Sollstärke und 2,5 Mann je Beute-Gold)
   let men=0;if(loot>0){let cap=0;for(const u of a.units)cap+=unitStat(rf,u.r,u.v).men;cap=Math.min(cap*0.15,loot*2.5);for(const u of a.units){const mx=unitStat(rf,u.r,u.v).men,miss=mx-u.men;if(miss<=0||cap<=0)continue;const add=Math.min(miss,cap,Math.max(1,Math.round(miss*pr.ret*bf)));u.men+=add;men+=add;cap-=add;}men=Math.round(men);}
@@ -9140,11 +9146,11 @@ function stEvents(f){const s=stState(f);if(!s||!s.q||!s.q.length)return[];const 
     const st=C.steps[s.i];if(!st)continue;
     const intro=m.k==='intro';if(st.choice&&!intro){out.push(stChoiceEv(st,s,C,m.done));continue;}
     let cine=null;if(intro&&!s.cine){s.cine=1;const me=S.scen&&f===S.player,sc=me?S.scen.id:null;cine={pack:me?sc:null,title:C.t,eb:me?'Geschichte':(S.wsT!=null&&S.turn-S.wsT<=2&&s.i===0?'Deine Geschichte beginnt':'Neues Kapitel'),text:(C.vo||C.txt)+' '+(st.vo||st.txt),keys:sid?[sid+'_intro']:gk?genVk(C,s,'intro'):[],ikeys:[...(me?[1,2,3,4].map(n=>'in_'+sc+'_'+n):[]),S.scen&&f===S.player&&SC_IMGS.includes(sc)?`img/sc_${sc}_x1.webp`:null,C.img,stImg(st,s.g),...(me?Object.values(CINE_EXTRA[sc]||{}):[]),`img/ep_${ep()}.webp`]};cine.imgs=cineImgs(cine.ikeys);}
-    out.push({E:{id:'st_step',cine,vo:(intro?(C.vo||C.txt)+' ':'')+(st.vo||st.txt),vk:sid?(intro?[sid+'_intro']:[sid+'_k'+(s.i+1)]):gk?genVk(C,s,intro?'intro':'k'):[],img:intro?(C.img||stImg(st,s.g)):stImg(st,s.g),eb:intro?(S.wsT!=null&&S.turn-S.wsT<=2?(S.scen?'Geschichte · Der Beginn':'Geschichte · Deine Geschichte beginnt'):`Geschichte · Neues Kapitel`):`Geschichte · Schritt ${s.i+1} von ${C.steps.length}`,title:()=>intro?C.t:st.t,
+    out.push({E:{id:'st_step',cine,vo:(intro?(C.vo||C.txt)+' ':'')+(st.vo||st.txt),vk:sid?(intro?[sid+'_intro']:stVk(sid,st,s)):gk?genVk(C,s,intro?'intro':'k'):[],img:intro?(C.img||stImg(st,s.g)):stImg(st,s.g),eb:intro?(S.wsT!=null&&S.turn-S.wsT<=2?(S.scen?'Geschichte · Der Beginn':'Geschichte · Deine Geschichte beginnt'):`Geschichte · Neues Kapitel`):`Geschichte · Schritt ${s.i+1} von ${C.steps.length}`,title:()=>intro?C.t:st.t,
       text:()=>(intro?C.txt+' ':(m.done?`Erfüllt: ${m.done}. `:''))+(intro?`Erster Schritt: ${st.t}. `:'')+st.txt+' Ziel: '+stGoalText(s.g)+(stRew(st.rew||{})?' Belohnung: '+stRew(st.rew||{})+'.':''),
       opts:[{label:'Weiter',desc:()=>`${C.steps.length} Schritte, am Ende eine Entscheidung`,fx:()=>null}]},ctx:{}});}
   return out;}
-function stChoiceEv(st,s,C,done){return{E:{id:'st_choice',vo:st.vo||st.txt,vk:S.scen?[S.scen.id+'_k'+(s.i+1)]:(!s.gen&&STORY[s.pid]&&STORY[s.pid][s.e]?[stPack(s.pid,s.e)+'_k'+(s.i+1)]:[]),img:'ev_thron',eb:`Geschichte · Schritt ${s.i+1} von ${C.steps.length}`,title:()=>st.t,text:()=>(done?`Erfüllt: ${done}. `:'')+st.txt,opts:st.choice.map(o=>({label:o.l,desc:()=>o.d,fx:()=>{scenChoice(o.act);return null;}}))},ctx:{}};}
+function stChoiceEv(st,s,C,done){return{E:{id:'st_choice',vo:st.vo||st.txt,vk:S.scen?stVk(S.scen.id,st,s):(!s.gen&&STORY[s.pid]&&STORY[s.pid][s.e]?[stPack(s.pid,s.e)+'_k'+(s.i+1)]:[]),img:'ev_thron',eb:`Geschichte · Schritt ${s.i+1} von ${C.steps.length}`,title:()=>st.t,text:()=>(done?`Erfüllt: ${done}. `:'')+st.txt,opts:st.choice.map(o=>({label:o.l,desc:()=>o.d,fx:()=>{scenChoice(o.act);return null;}}))},ctx:{}};}
 function storyHtml(){const f=S.player,s=stState(f);if(!s)return'';const C=stCh(f);
   if(s.done)return`<h3>Geschichte</h3><div class="list"><div class="mission story done"><span class="oico">📜</span><span class="nm"><b>${esc(C.t)}</b><small>Kapitel abgeschlossen. Das nächste beginnt mit der neuen Epoche.</small></span></div></div>`;
   if(s.end)return`<h3>Geschichte</h3><div class="list"><button class="mission story" data-act="storyend"><span class="oico">📜</span><span class="nm"><b>${esc(C.t)}</b><small>Alle Schritte erfüllt. Tippe hier, um die Schlussentscheidung zu treffen.</small></span></button></div>`;
@@ -13309,7 +13315,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     if(!P.build&&P.build2){P.build=P.build2;delete P.build.f;P.build2=null;}
     if(f==='frei')return;
     const tr=TAX[S.fac[f].taxRate||'normal'],irr=hasTech(f,'irrigation');
-    const E0=S.fac[f].eco,fr0=E0?(E0.isoFr&&E0.isoFr[i]!=null?E0.isoFr[i]:E0.foodR):1,fr=noHunger(i)?Math.max(fr0,0.85):fr0,g=(0.008+0.006*P.b.farm+0.003*(P.b.hospital||0)-((govOf(f,PROV_DEF[i].reg)||{}).t==='streng'?0.002:0)+tr.grow+(irr?0.004:0)+techBonus(f,'grow')+(season()===0?0.003:0))*Math.min(1,fr)*dvGrow(i),cap=0.75+0.12*feat(i).fert+0.15*P.b.farm+0.12*(P.b.aquaedukt||0)+(irr?0.1:0)+(P.b.market?0.1:0)+0.12*(lvlOf(i)-1);
+    const E0=S.fac[f].eco,fr0=E0?(E0.isoFr&&E0.isoFr[i]!=null?E0.isoFr[i]:E0.foodR):1,fr=noHunger(i)?Math.max(fr0,0.85):fr0,g=(0.008+0.006*P.b.farm+0.003*(P.b.hospital||0)-((govOf(f,PROV_DEF[i].reg)||{}).t==='streng'?0.002:0)+tr.grow+(irr?0.004:0)+techBonus(f,'grow')+(season()===0?0.003:0))*Math.min(1,fr)*dvGrow(i)*lnEco(i),cap=0.75+0.12*feat(i).fert+0.15*P.b.farm+0.12*(P.b.aquaedukt||0)+(irr?0.1:0)+(P.b.market?0.1:0)+0.12*(lvlOf(i)-1);
     if(fr<0.8)P.pop=Math.max(0.5,P.pop*0.985);else P.pop=P.pop>cap?Math.max(cap,P.pop*0.99):Math.min(cap,P.pop*(1+g));
     const o=provOrder(i);
     if(o<0)P.pop=Math.max(0.5,P.pop*0.99);
@@ -16630,6 +16636,105 @@ function vmSum(f,k){if(k!=='tax'||!S||!S.vm||f!==S.player||!vmOn())return 0;let 
 // Identität achten: keine Angleichung in ihren Provinzen
 {const _r=faithRound;faithRound=function(){const keep=[];try{if(vmOn()&&S.vm)for(const pi of provsOf(S.player)){const V=vmProvOf(pi);if(V&&V.pol==='res')keep.push([pi,S.prov[pi].cul,S.prov[pi].cp||0]);}for(const[pi]of keep)S.prov[pi].cp=-1e6;}catch(e){}
   _r();for(const[pi,c,cp]of keep){const P=S.prov[pi];if(P.owner!==S.player)continue;P.cul=c;P.cp=cp;}};}
+/* ===== v204 (W3): Landnahme, Glaubenswechsel (Taufe), Danelag – Konzept dev/docs/konzept_raubzug.md (Punkt 6, „Wandel der Völker“) ===== */
+// Alle Stellschrauben stehen hier oben (vorsichtige Standardwerte).
+const LN={cost:150,minTurn:10,raids:3,t2:6,t3:14,eco:[0,0.1,0.2,0.3],unrest:[0,0.1,0.2,0.3],culFac:1.5,adjFac:1.2,
+ setN:3,lootSet:0.8,lootBapt:0.8,buildSet:0.9,aiP:0.03,aiGap:10,aiBaptP:0.02,baptMin:2,
+ ordT:10,ordV:1,rfMin:6,rfWin:20,rfP:0.4,thrMul:1.5,thrT:30,truce:10,relBapt:15,relGiver:25,relTreue:-8,relRueck:-10,fame:15};
+const LN_NAME=['','Lager','Siedlung','Heimat'],LN_PAG=['germ','druiden','tengri','natur','pantheon','baal'];
+function lnT0(){return S&&S.scen&&!S.scen.over?S.scen.t0:0;}
+// Stufe der Landnahme (0–3); nur gültig, solange der Gründer die Provinz hält
+function lnOf(pi){const P=S&&S.prov&&S.prov[pi];return P&&P.ln&&P.lnF===P.owner?P.ln:0;}
+function lnSettled(f){let n=0;for(let i=0;i<S.prov.length;i++){const P=S.prov[i];if(P.owner===f&&lnOf(i)>=2)n++;}return n;}
+function lnEco(pi){return 1+LN.eco[lnOf(pi)];}
+function lnBuildMul(f,pi){return lnOf(pi)>=2&&lnSettled(f)>=LN.setN?LN.buildSet:1;}
+// Beute-Faktor: ab 3 gesiedelten Provinzen ×0,8, nach der Taufe zusätzlich ×0,8
+function lnLoot(f){let m=1;try{if(lnSettled(f)>=LN.setN)m*=LN.lootSet;const B=S.fac[f]&&S.fac[f].bapt;if(B&&B.c==='tauf')m*=LN.lootBapt;}catch(e){}return m;}
+function lnRaids(f,reg){const F=S.fac[f];return F&&F.rzReg?(F.rzReg[reg]||0):0;}
+function lnCost(){return Math.round(LN.cost*EPOCH_COST[ep()]);}
+function lnCan(f,pi){const P=S.prov[pi],F=S.fac[f];if(!F||!P||P.owner!==f)return{ok:false,why:'Nicht deine Provinz'};if(!raidKind(f))return{ok:false,why:'Nur Raubvölker siedeln so'};
+  if(lnOf(pi))return{ok:false,why:'Hier wird schon gesiedelt'};
+  const reg=PROV_DEF[pi].reg,fc=facCul(f),cap=capitalOf(f);if(!(P.cul!==fc||(cap!=null&&PROV_DEF[cap].reg!==reg)))return{ok:false,why:'Das ist schon deine Heimat',home:true};
+  const t=S.turn-lnT0();if(t<LN.minTurn)return{ok:false,why:`Frühestens ab Runde ${LN.minTurn}`};
+  const n=lnRaids(f,reg);if(n<LN.raids)return{ok:false,why:`Erst ${LN.raids} Plünderungen in dieser Region nötig (bisher ${n})`};
+  if(!S.armies.some(a=>a.f===f&&a.p===pi&&a.units&&a.units.length))return{ok:false,why:'Ein eigenes Heer muss in der Provinz stehen'};
+  const cost=lnCost();if(F.gold<cost)return{ok:false,why:'Zu wenig Gold',cost};return{ok:true,cost};}
+function lnStart(f,pi){const c=lnCan(f,pi);if(!c.ok)return false;const P=S.prov[pi];S.fac[f].gold-=c.cost;P.ln=1;P.lnF=f;P.lnT=S.turn;
+  if(f===S.player){addLog(`Landnahme in ${PROV_DEF[pi].name}: Deine Leute schlagen ein Lager auf. In ${LN.t2} Runden wird daraus eine Siedlung.`,true,'good');try{chronAdd('hist',`Landnahme in ${PROV_DEF[pi].name}`);}catch(e){}scenFame(f,5);}return true;}
+// Mischkultur (Danelag): Provinzen mit Landnahme gleichen sich ×1,5 schneller an, angrenzende eigene Provinzen ×1,2
+function lnCulFac(pi){const P=S.prov[pi],f=P.owner;if(!f||f==='frei'||!raidKind(f))return 1;if(lnOf(pi))return LN.culFac;for(const q of ADJ[pi])if(S.prov[q].owner===f&&lnOf(q))return LN.adjFac;return 1;}
+function lnCulture(snap){for(const k in snap){const i=+k,P=S.prov[i],s=snap[k];if(P.cul!==s[0])continue;const f=P.owner;if(!f||f==='frei'||f==='horde')continue;const fc=facCul(f);if(!fc||P.cul===fc)continue;
+  const d=(P.cp||0)-s[1];if(d<=0)continue;const m=lnCulFac(i);if(m<=1)continue;P.cp+=d*(m-1);
+  if(P.cp>=100){P.cul=fc;P.cp=0;if(f===S.player)addLog(`${PROV_DEF[i].name} hat die Kultur der ${CULT[fc]?CULT[fc].n[ep()]:'Siedler'} angenommen.`,true,'good');}}}
+// Glaubenswechsel: Voraussetzungen und Nachbarn
+function lnPagan(f){const r=facRel(f);return!!r&&LN_PAG.includes(r);}
+function lnBaptInfo(f){const cnt={};let n=0;for(let i=0;i<S.prov.length;i++){const P=S.prov[i];if(P.owner!==f||lnOf(i)<2)continue;let b=false;for(const q of ADJ[i]){const o=S.prov[q].owner;if(!o||o==='frei'||o==='horde'||o===f||!S.fac[o]||!alive(o))continue;if(CHR.includes(facRel(o))){cnt[o]=(cnt[o]||0)+1;b=true;}}if(b)n++;}
+  const nb=Object.keys(cnt).sort((a,b)=>(atWar(f,b)-atWar(f,a))||cnt[b]-cnt[a]);return{n,nb,giver:nb[0]||null};}
+function lnBaptOk(f){const F=S.fac[f];if(!F||F.bapt||!raidKind(f)||!lnPagan(f))return false;return lnBaptInfo(f).n>=LN.baptMin;}
+// Kernland (alte Heimat): Provinzen ohne Landnahme in eigener Kultur, sonst die Hauptstadt
+function lnCore(f,pi){const P=S.prov[pi];return(lnOf(pi)===0&&P.cul===facCul(f))||pi===capitalOf(f);}
+function lnBapt(f,c,ai){const F=S.fac[f];if(!F||F.bapt)return false;const I=lnBaptInfo(f),g=I.giver,old=facRel(f);F.bapt={t:S.turn,c,old,ord:[]};const me=f===S.player,B=F.bapt;
+  if(c==='tauf'){const rel=g&&CHR.includes(facRel(g))?facRel(g):'christ';B.g=g;setStateRel(f,rel,'Taufe');
+    for(const x of I.nb)try{relAdd(f,x,x===g?LN.relGiver:LN.relBapt,'Taufe');}catch(e){}
+    if(g&&atWar(f,g))try{makePeace(f,g);dip(f,g).truce=LN.truce;}catch(e){}
+    B.ord.push({v:-LN.ordV,until:S.turn+LN.ordT,l:'Unmut der alten Gefolgsleute'});B.thrT=S.turn+LN.thrT;
+    if(me&&Math.random()<LN.rfP)B.rfT=S.turn+LN.rfMin+Math.floor(Math.random()*(LN.rfWin-LN.rfMin));
+    if(me){addLog(`Die Taufe: ${relName(rel)} ist jetzt Staatsglaube.${g?` ${FACTIONS[g].name} und die christlichen Nachbarn begegnen dir freundlicher.`:''} Im Kernland murren die alten Gefolgsleute (Ordnung −${LN.ordV} für ${LN.ordT} Runden), die Beute sinkt auf 80 %, und ein Thronstreit wird wahrscheinlicher.`,true,'info');try{chronAdd('faith',`Die Taufe: Staatsglaube ${relName(rel)}`);}catch(e){}}
+    else addLog(`${FACTIONS[f].name}: Der Anführer lässt sich taufen und schließt Frieden mit den christlichen Nachbarn.`,true,'info');}
+  else{for(const x of I.nb)try{relAdd(f,x,LN.relTreue,'Treue zu den alten Göttern');}catch(e){}
+    B.ord.push({v:LN.ordV,until:S.turn+LN.ordT,l:'Gefolgsleute zufrieden'});scenFame(f,LN.fame);
+    if(me){addLog(`Du bleibst den alten Göttern treu. Die Gefolgsleute jubeln (Ordnung +${LN.ordV} im Kernland für ${LN.ordT} Runden), die christlichen Nachbarn werden kühler.`,true,'info');try{chronAdd('faith','Treue zu den alten Göttern');}catch(e){}}}
+  return true;}
+function lnEvTauf(){const f=S.player,I=lnBaptInfo(f),g=I.giver,gn=g?FACTIONS[g].name:'Die christlichen Nachbarn',rel=g&&CHR.includes(facRel(g))?facRel(g):'christ';
+  return{E:{id:'ln_tauf',img:'ev_mission',eb:'Glaubenswechsel',title:()=>'Taufe oder alte Götter?',
+    text:()=>`Deine Siedler leben Tür an Tür mit Christen. ${gn} bietet Frieden und Freundschaft, wenn du dich taufen lässt, so wie einst Guthrum und Rollo. Doch die alten Jarle murren: Sie wollen bei Thor und Odin bleiben. ${g&&atWar(f,g)?'Der Krieg mit '+gn+' würde mit einem Waffenstillstand enden. ':''}Wie entscheidest du?`,
+    opts:[{label:'Taufe annehmen',desc:()=>`Staatsglaube ${relName(rel)}. Frieden und Beziehungen besser, Beute ×0,8. Aber Ordnung −${LN.ordV} im Kernland für ${LN.ordT} Runden, Thronstreit wahrscheinlicher.`,fx:ff=>{lnBapt(ff,'tauf');return'Du bist getauft.';}},
+      {label:'Den alten Göttern treu bleiben',desc:()=>`Ruhm +, Ordnung +${LN.ordV} im Kernland für ${LN.ordT} Runden. Die Beziehungen zu den Christen sinken.`,fx:ff=>{lnBapt(ff,'treue');return'Die alten Götter bleiben.';}}]},ctx:{}};}
+function lnEvRueck(){const f=S.player,B=S.fac[f].bapt,old=B&&B.old;
+  return{E:{id:'ln_rueck',img:'ev_thron',eb:'Rückfall der Jarle',title:()=>'Die Jarle murren',
+    text:()=>'Seit der Taufe sind einige Jahre vergangen. Im Kernland opfern manche Jarle wieder heimlich den alten Göttern und fordern, dass der Hof zu ihnen zurückkehrt. Gibst du nach, oder bleibst du standhaft?',
+    opts:[{label:'Nachgeben',desc:()=>`Der alte Glaube (${relName(old||'germ')}) kehrt zurück. Die Beziehungen zu den Christen sinken.`,fx:ff=>{const I=lnBaptInfo(ff);if(old)setStateRel(ff,old,'Rückfall der Jarle');for(const x of I.nb)try{relAdd(ff,x,LN.relRueck,'Rückfall');}catch(e){}if(B)B.c='rueck';return'Der alte Glaube kehrt zurück.';}},
+      {label:'Standhaft bleiben',desc:()=>`Ordnung −${LN.ordV} im Kernland für ${LN.ordT} Runden.`,fx:ff=>{if(B)B.ord.push({v:-LN.ordV,until:S.turn+LN.ordT,l:'Streit mit den Jarlen'});return'Du bleibst standhaft.';}}]},ctx:{}};}
+function lnRunQ(done){const Q=S&&S.lnQ;if(!Q||!Q.length||!alive(S.player)||S.mp){done();return;}const x=Q.shift();let ev=null;
+  try{if(x.k==='tauf'){if(lnBaptOk(S.player))ev=lnEvTauf();else S.fac[S.player].baptQ=0;}else if(x.k==='rueck'){const B=S.fac[S.player].bapt;if(B&&B.c==='tauf')ev=lnEvRueck();}}catch(e){console.warn('Landnahme Ereignis',e);}
+  if(!ev){lnRunQ(done);return;}showEvent(ev.E,ev.ctx,()=>lnRunQ(done));}
+{const _e=runEvents;runEvents=function(done){_e(()=>lnRunQ(done));};}
+// Runde: Stufen, Unruhe, KI-Landnahme (selten), Taufe-Angebot, Rückfall
+function lnRound(){if(!S||!S.prov)return;
+  for(let i=0;i<S.prov.length;i++){const P=S.prov[i];if(!P.ln)continue;if(P.lnF!==P.owner){P.ln=0;P.lnF=null;continue;}
+    const age=S.turn-(P.lnT||0),me=P.owner===S.player;
+    if(P.ln===1&&age>=LN.t2){P.ln=2;if(me)addLog(`${PROV_DEF[i].name} ist jetzt eine Siedlung: Steuern und Wachstum +${Math.round(LN.eco[2]*100)} %.`,true,'good');}
+    else if(P.ln===2&&age>=LN.t3){P.ln=3;if(me)addLog(`${PROV_DEF[i].name} ist jetzt eure Heimat: Steuern und Wachstum +${Math.round(LN.eco[3]*100)} %.`,true,'good');}
+    if(P.unrest>0)P.unrest=Math.max(0,P.unrest-LN.unrest[P.ln]);}
+  for(const f of PLAYABLE){if(!alive(f)||f==='horde')continue;const F=S.fac[f];F.settled=lnSettled(f);if(!raidKind(f))continue;
+    if(!isHumanP(f)){
+      if((F.lnAiT==null||S.turn-F.lnAiT>=LN.aiGap)&&Math.random()<LN.aiP){const L=provsOf(f).filter(pi=>lnCan(f,pi).ok);if(L.length){lnStart(f,L[Math.floor(Math.random()*L.length)]);F.lnAiT=S.turn;}}
+      if(!F.bapt&&Math.random()<LN.aiBaptP&&lnBaptOk(f))lnBapt(f,'tauf',true);
+    }else if(f===S.player&&!S.mp){
+      if(!F.bapt&&!F.baptQ&&lnBaptOk(f)&&!(scenOn()&&S.scen.id==='wikinger')){F.baptQ=1;(S.lnQ=S.lnQ||[]).push({k:'tauf'});}
+      const B=F.bapt;if(B&&B.c==='tauf'&&B.rfT!=null&&!B.rfDone&&S.turn>=B.rfT){B.rfDone=1;(S.lnQ=S.lnQ||[]).push({k:'rueck'});}}}}
+{const _f=faithRound;faithRound=function(){const snap={};try{for(let i=0;i<S.prov.length;i++){const P=S.prov[i];if(P.owner&&P.owner!=='frei'&&P.owner!=='horde')snap[i]=[P.cul,P.cp||0];}}catch(e){}
+  _f();try{lnCulture(snap);lnRound();}catch(e){console.warn('Landnahme',e);}};}
+// Ordnung im Kernland (Taufe: Unmut, Treue: zufrieden, Rückfall-Streit)
+{const _o=orderParts;orderParts=function(pi){const L=_o(pi);try{const o=S.prov[pi].owner,B=o&&o!=='frei'&&S.fac[o]&&S.fac[o].bapt;if(B&&B.ord&&B.ord.length&&lnCore(o,pi))for(const m of B.ord)if(m.until>=S.turn)L.push([m.l,m.v]);}catch(e){}return L;};}
+// Thronstreit nach der Taufe einmal wahrscheinlicher (30 Runden lang)
+{const _rv=dynRival;dynRival=function(f){const x=_rv(f);try{const B=S.fac[f]&&S.fac[f].bapt;if(x&&B&&B.thrT!=null&&S.turn<=B.thrT)x.p=Math.min(0.6,x.p*LN.thrMul);}catch(e){}return x;};}
+// Provinzfenster
+function lnHtml(pi){try{const P=S.prov[pi],f=S.player;if(!P||P.owner!==f||!raidKind(f))return'';const L=lnOf(pi),n=lnSettled(f);let h='';
+  if(L){const left=L<3?Math.max(0,(L===1?LN.t2:LN.t3)-(S.turn-P.lnT)):0;
+    h+=`<div class="pk2card slim"><div><span class="eyebrow">Landnahme</span><b>${LN_NAME[L]}</b><small>Steuern und Wachstum +${Math.round(LN.eco[L]*100)} %, die Unruhe sinkt.${L<3?` Nächste Stufe „${LN_NAME[L+1]}“ in ${left} ${left===1?'Runde':'Runden'}.`:' Höchste Stufe.'}</small></div></div>`;
+    const fc=facCul(f);if(fc&&P.cul&&P.cul!==fc)h+=`<p class="note" style="margin:4px 0 0">${fc==='nordisch'&&P.cul==='britisch'?'Danelag: nordische und angelsächsische Siedler mischen sich.':'Mischkultur: Siedler und Einheimische mischen sich.'} Die Angleichung geht ${Math.round((LN.culFac-1)*100)} % schneller.</p>`;
+  }else{const c=lnCan(f,pi);if(!c.home){const reg=PROV_DEF[pi].reg;
+    h+=`<div class="row"><button class="btn${c.ok?' primary':''}" data-act="landnahme"${c.ok?'':' disabled'}>🏕 Hier siedeln – Landnahme · ${lnCost()} Gold</button></div><p class="note" style="margin:2px 0 0">${c.ok?`Aus dem Lager wird nach ${LN.t2} Runden eine Siedlung, später die Heimat: Steuern und Wachstum +10, +20, +30 %.`:esc(c.why)+'.'} Plünderungen in dieser Region: ${lnRaids(f,reg)} von ${LN.raids}.</p>`;
+    if(lnCulFac(pi)>1&&facCul(f)&&P.cul!==facCul(f))h+=`<p class="note" style="margin:4px 0 0">Nachbar einer Siedlung: Die Kultur gleicht sich ${Math.round((LN.adjFac-1)*100)} % schneller an.</p>`;}}
+  if(n)h+=`<p class="note" style="margin:4px 0 0">Gesiedelte Provinzen: ${n}. ${n>=LN.setN?`Die Raub-Beute beträgt nur noch ${Math.round(lnLoot(f)*100)} %, Bauen in gesiedelten Provinzen ist 10 % günstiger.`:`Ab ${LN.setN} gesiedelten Provinzen sinkt die Raub-Beute auf 80 %, dafür wird Bauen dort 10 % günstiger.`}</p>`;
+  return h;}catch(e){return'';}}
+// Geschichte „Wikinger“: Schritte Landnahme und Wedmore. Die englischen Reiche und das Frankenreich sind christlich (Taufe, Frieden), der Zufallswurf der Provinzglauben gilt hier nicht.
+{const _s=startScenario;startScenario=function(id){_s.apply(this,arguments);try{const D=SCEN[id];if(D&&D.christ)for(const f of D.christ){const F=S.fac[f];if(!F)continue;F.rel='christ';for(const pi of provsOf(f)){S.prov[pi].rel='christ';S.prov[pi].rp=0;}}}catch(e){console.warn('Glaube Geschichte',e);}};}
+function stVk(sid,st,s){return st.ki===0?[]:[sid+'_k'+(st.ki||s.i+1)];}
+Object.assign(SC_COND,{landnahme:(f,g)=>[provsOf(f).some(pi=>PROV_DEF[pi].reg==='britannien'&&lnOf(pi)>=2)?1:0,1]});
+{const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='landnahme')return 16;return _sn(f,g);};}
+{const _sc=scenChoice;scenChoice=function(act){try{if(act==='wedmore_tauf'||act==='wedmore_treue'){S.scen.flags.wedmore=1;lnBapt(S.player,act==='wedmore_tauf'?'tauf':'treue');}}catch(e){console.warn('Wedmore',e);}return _sc(act);};}
 // Nachbarn gleicher Kultur: Kriegsgrund „Landsleute befreien“, wenn ihr Volk im Reich des Spielers verärgert ist
 function vmFree(f,x){if(!S||!S.vm||x!==S.player||!vmOn())return null;const c=facCul(f),V=c&&vmOf(c);if(!V||V.z>VM_BAD)return null;return provsOf(x).some(pi=>S.prov[pi].cul===c&&[...ADJ[pi]].some(q=>S.prov[q].owner===f))?c:null;}
 {const _c=cbOf;cbOf=function(f,x){const out=_c(f,x);try{const c=vmFree(f,x);if(c)out.push({k:'befreien',n:'Landsleute befreien',d:`Die ${vmName(c)} im Reich von ${FACTIONS[x].name} sind verärgert und rufen um Hilfe.`});}catch(e){}return out;};}
@@ -16847,7 +16952,7 @@ function renderSheet(){
     <p class="note" style="margin:-6px 0 8px">${!free?`<span class="${HARV[harvOf(pi)].c}">${HARV[harvOf(pi)].n}${harvOf(pi)!==2?` (Getreide ${harvMul(pi)>=1?'+':'−'}${Math.round(Math.abs(harvMul(pi)-1)*100)} %)`:''}</span>${messeOn(P)?' · Messe läuft':''}${P.jm===S.turn?' · Jahrmarkt':''} · `:''}${Math.round(d.tax*420*P.pop).toLocaleString('de-DE')} Einwohner · Verteidigung ${Math.round(provDefense(pi))}${P.b.walls>0?` · Mauern ${roman(P.b.walls)}: Sturm ohne Belagerung schwer`:''} · ${TER[pter(pi)].n}</p>${bChips(pi)}<div class="sheet-slots">${slotBarHtml(pi)}</div>`;
     {const sv=dvSev(pi);if(sv>0){const D=P.dv,rec=!(D.a>0);html+=`<div class="siegebox">🔥 ${rec?'Erholt sich von der Verwüstung':'Verwüstet'} · noch ${rec?D.r:D.a} ${(rec?D.r:D.a)===1?'Runde':'Runden'}<small>${rec?'Die Wirkung klingt Runde um Runde ab.':'Danach folgen '+(D.r0||RZ_REC)+' Runden Erholung.'} Steuern −${Math.round((1-dvTaxMul(pi))*100)} %, Wachstum −${Math.round((1-dvGrow(pi))*100)} %, neue Plünderung bringt nur ${Math.round((1-0.85*sv)*100)} % der Beute.</small></div>`;}}
     {const R=REG[d.reg],mine=R.provs.filter(i=>S.prov[i].owner===S.player).length,full=regionHeld(S.player,d.reg);
-     html+=integHtml(pi)+defectHtml(pi)+kbHtml(pi)+feat3ProvHtml(pi)+tierHtml(pi)+kindHtml(pi)+capMoveHtml(pi)+fiefHtml(pi)+inqHtml(pi);
+     html+=integHtml(pi)+defectHtml(pi)+kbHtml(pi)+feat3ProvHtml(pi)+tierHtml(pi)+kindHtml(pi)+capMoveHtml(pi)+fiefHtml(pi)+inqHtml(pi)+lnHtml(pi);
      html+=`<button class="regline${full?' full':''}${REGHL===d.reg?' on':''}" data-act="region"><span>Region</span><b>${esc(R.name)}</b><em>${mine}/${R.provs.length}</em><i class="regshow">${REGHL===d.reg?'Ausblenden':'Zeigen'}</i></button>`+(full?'<p class="note" style="margin:4px 0 0;color:var(--good)">Vereint: Steuern +'+Math.round(REG_TAX*100)+' %, Ordnung +1 in allen Provinzen der Region.</p>':'');}
     if(own)html+=`<button class="dynline" data-act="regview"><span>🗺 Regionsansicht: ${esc(REG[d.reg].name)}</span><small>Alle Siedlungen, Bauen, Bauschlange</small></button>`;
     html+=`<button class="dynline" data-act="cityview"><span>🏛 Stadtansicht: ${esc(d.city)}</span><small>Gebäude, Betriebe, Ausbau</small></button>`;
@@ -17012,6 +17117,7 @@ $('#shBody').addEventListener('click',e=>{
   else if(act==='stance'){const a=getArmy(UI.army);if(a&&a.f===S.player){setStance(a,b.dataset.s);AUDIO.sfx('click');if(a.st)toast(STANCES[a.st].n);}refresh();}
   else if(act==='story'){const s=stState(S.player),t=s&&stTarget(S.player,s.g);if(t!=null){UI.sel=t;UI.army=null;UI.mode='prov';focusProv(t,10);refresh();}}
   else if(act==='storyskip'){stSkip(S.player);refresh();}
+  else if(act==='landnahme'){const pi=UI.sel,c=lnCan(S.player,pi);if(c.ok){lnStart(S.player,pi);AUDIO.sfx('horn');toast('Landnahme: Lager gegründet');}else toast(c.why);refreshOwnership();refresh();}
   else if(act==='storychoice'){const s=stState(S.player),C=stCh(S.player),st=s&&C.steps[s.i];if(st&&st.choice){const x=stChoiceEv(st,s,C);showEvent(x.E,x.ctx,()=>refresh());}}
   else if(act==='scenbribe'){const c=Math.round(150*G());if(S.fac[S.player].gold>=c&&S.scen){S.fac[S.player].gold-=c;S.scen.einfl+=12;AUDIO.sfx('click');toast('Einfluss +12');renderTop();refresh();}}
   else if(act==='defect'){if(tryDefect(S.player,+b.dataset.p))AUDIO.sfx('win');else AUDIO.sfx('error');renderTop();refreshOwnership();refresh();}
@@ -17087,6 +17193,7 @@ const HELP_ACT={
   'act:trBuy':()=>`Der Tross ist der Versorgungszug des Heeres. Mit ihm reicht der Nachschub 3 statt 2 Provinzen über eigenes oder verbündetes Land hinaus. Ohne Versorgung verliert ein Heer 2 % seiner Männer je Runde. Kostet ${trossCost()} Gold, dazu ${trossUpkOne()} Gold Unterhalt je Runde; bei einer verlorenen Schlacht fällt er dem Sieger zu. Lohnt nur für Feldzüge tief im Feindesland.`,
   'act:trDrop':()=>`Spart ${trossUpkOne()} Gold Unterhalt je Runde. Danach reicht der Nachschub wieder nur 2 Provinzen weit. Das Gold für den Tross kommt nicht zurück.`,
   'act:sldPick':()=>`Wirbt sofort Söldner an, ohne Kaserne und ohne Wartezeit. Sie kosten doppelten Sold, höchstens ${SLD_TURN} je Runde, nur in eigenem oder verbündetem Land. Ist die Kasse leer, ziehen sie ab, plündern oder laufen über. Lohnt, wenn du schnell Stärke brauchst.`,
+  'act:landnahme':()=>`Landnahme: Dein Raubvolk lässt sich in dieser Provinz nieder. Voraussetzung: mindestens ${LN.raids} Plünderungen in dieser Region, ein eigenes Heer hier und frühestens Runde ${LN.minTurn}. Kostet ${Math.round(LN.cost*EPOCH_COST[ep()])} Gold. Aus dem Lager wird nach ${LN.t2} Runden eine Siedlung und nach weiteren ${LN.t3-LN.t2} Runden die Heimat: Steuern und Wachstum +10, +20, +30 %, die Unruhe sinkt, und die Kultur gleicht sich schneller an. Der Preis: Ab ${LN.setN} gesiedelten Provinzen schrumpft die Raub-Beute auf 80 %, dafür baust du dort 10 % günstiger.`,
   'act:raub':'Raubzug: Das Heer zieht ins Feindesland, plündert jede Provinz, in die es kommt, und zieht weiter. Es bringt Gold, etwas Gefolge und Ruhm, aber kein Land: Die Provinz bleibt 5 bis 10 Runden verwüstet. Besonders stark für Seeräuber und Reiternomaden. Antippen beendet den Raubzug.',
   'act:stance:gewalt':()=>STANCES.gewalt.d+' Lohnt, wenn das Heer rasch ans Ziel muss.',
   'act:stance:fest':()=>STANCES.fest.d+' Lohnt, wenn ein Angriff droht.',
