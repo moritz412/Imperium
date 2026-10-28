@@ -1,9 +1,8 @@
-# Backlog – Imperium der Epochen 2 (Stand 28.10.2026, v191)
+# Backlog – Imperium der Epochen 2 (Stand 28.10.2026, v194)
 
 ## Läuft / gleich als Nächstes
-- PC-Aufträge in der Warteschlange: 26 (70 Bilder Paket 2 + Völker-Porträts, je 2 Varianten → Auswahl, einbauen),
-  27 (17 Sprechersätze `x_rat2`, u. a. `rat_kanzler_sold`), 28 (Whisper-Prüfung aller Clips).
-  Nach Lieferung: Sprecher in Paket 2/Völkermosaik verdrahten (`RATV.say`, Stellen in `dev/docs/assets_p2.md`).
+- Erledigt bis v194: Bilder Paket 2 + 20 Völker-Porträts (pk_p2), 17 Sprechersätze (in x_rat, verdrahtet über RATV_P2-Muster im Protokoll, Sold-Warnung, Angleichen).
+  Rest: rat_marschall_foederaten noch leicht fehlerhaft gesprochen; rat_kanzler_thronstreit_warnung, _putsch_ehre, _volk_wunsch, _volk_zufrieden sind geliefert, aber noch nicht verdrahtet.
 - 8 kurze Sprechersätze halluzinieren weiterhin → per Whisper-Wortzeiten schneiden (Liste in Bericht Job 25c/28).
 - Angelsächsische Halle (`angel_halle`) neu erzeugen (Loch im Dach). Übrige 11 England-Modelle sind aufbereitet (r3).
 - Bilder je Technik für das Forschungsmenü (heute ein Motiv je Bereich) und Banner aus `dev/docs/assets_design.md`.
