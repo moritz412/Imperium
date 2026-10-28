@@ -24,7 +24,7 @@ const pk=await p.evaluate(async()=>{const a=await fetch('img/pk_vk.json'),A=a.ok
     off:OFF_MAN.filter(x=>/vk|kino/.test(x[0])).map(x=>x[0]+':'+x[1]).join(' '),ver:OFF_VER,xp:X_PACKS.has('wikinger_kino')};});
 ok('Bildpaket pk_vk: 200, 23 Bilder, in PKREG/PKOF/IMGLIB',pk.ia===200&&pk.n===23&&pk.reg===23&&pk.of==='pk_vk'&&pk.lib==='x1',JSON.stringify(pk));
 ok('Sprecherpaket: 200, 5 Clips, X_PACKS',pk.ca===200&&pk.ck==='wikinger_kino1,wikinger_kino2,wikinger_kino3,wikinger_kino4a,wikinger_kino4b'&&pk.xp,pk.ck);
-ok('OFF_MAN enthält beide Pakete, OFF_VER v205',/pk_vk\.json:\d+/.test(pk.off)&&/x_wikinger_kino\.json:\d+/.test(pk.off)&&pk.ver==='v205',pk.off+' '+pk.ver);
+ok('OFF_MAN enthält beide Pakete, OFF_VER ab v205',/pk_vk\.json:\d+/.test(pk.off)&&/x_wikinger_kino\.json:\d+/.test(pk.off)&&+pk.ver.slice(1)>=205,pk.off+' '+pk.ver);
 const sz=await p.evaluate(async()=>{const o={};for(const [f,n] of OFF_MAN.filter(x=>/vk|kino/.test(x[0]))){const r=await fetch(f);o[f]=(await r.arrayBuffer()).byteLength===n;}return o;});
 ok('Größen in OFF_MAN stimmen mit den Dateien',Object.values(sz).every(Boolean)&&Object.keys(sz).length===2,JSON.stringify(sz));
 
