@@ -20,13 +20,16 @@ Darstellung (ein Paket): STAND v195 (Quelle bearbeitet, nicht gebaut/deployt, ec
 - Hof › Ämter (Posten): Kacheln zerschossen – Spalten ungleich hoch, Kopfkarten oben abgeschnitten, große Lücken. [v195 teils: gleich hohe Reihen, Blöcke breiter, Texte umbrechen sauber; den genauen Fehler aus dem iPad-Bild konnte ich im Browser nicht nachstellen]
 - Feldherren-Übersicht: großes Szenenbild je Feldherr dominiert und wiederholt sich → kleiner/nur beim ausgewählten oder je Titel variieren. [v195 erledigt: nur 84-px-Banner beim ersten Feldherrn der Liste]
 Karte (ein Paket):
-- Hafen-Modell mit bunten Dreiecken (Pixelfehler, vermutlich kaputte UVs/NaN, vgl. r3 `nan_to_num`).
-- Städte teils zu dunkel (v. a. im Gebirge/Schatten).
+- Hafen-Modell mit bunten Dreiecken. [v197: Ursache `MDL_FIX.lift` hellte fast schwarze Flächen mit zufälligem Farbton auf → jetzt entsättigt. Nur rechnerisch geprüft (grelle Ecken m_hafen_med 3082 → 426), nicht im Bild]
+- Städte teils zu dunkel. [v197: 15 dunkle Dioramen-Texturen (nord, eu_ma, eu_ant_1, jp, nordam_2 …) per `DIO_HELL` ×1,1–1,4 aufgehellt. Nicht im Bild geprüft]
 Spielregeln (Entscheidung nötig):
 - Statthalter: „Auftrag“ (GOV_DIR, baut aus der Regionskasse, plus Wirkung) und „Bauvorlagen“ (TPL, plant je Siedlung bei leerer
   Bauschlange) überschneiden sich, dazu das Stadtprofil im Provinzfenster. Vorschlag: im Statthalterfenster nur Auftrag;
   Bauvorlage nur noch als Ausnahme je Stadt im Provinzfenster.
+  [v197 Weg A umgesetzt: mit Statthalter keine Bauvorlagen mehr (Regionsfenster zeigt Hinweis, Auto-Bau nach Vorlage ruht); ohne Statthalter wie bisher. Geprüft per Browser-Test, smoke 4/4]
 - Treue/Zufriedenheit von Feldherren und Statthaltern intransparent → Ursachen sichtbar machen (was hebt/senkt, Ziel, Trend).
+  Freigegeben (Moritz 28.10.): Ziel-Wert + Pfeil neben dem Balken, Gründe-Liste darunter; Erfolge (Siege, Eroberungen, gute Verwaltung) sollen Treue heben.
+  [v197 umgesetzt: Zeile „▲/▼ Ziel NN · Gründe“ bei Feldherren und Statthaltern; Erfolge der letzten 12 Runden: Feldherr +5 je Sieg/Eroberung (max. +15), Statthalter +3 je Bau/Aufstieg (max. +12); Landgut +15 jetzt wirklich im Ziel (war nur angezeigt). smoke 4/4, pk2 19/19]
 
 ## Freigegebene Pakete (Reihenfolge)
 1. Wikinger-Paket: Raubzug & Verwüstung (`konzept_raubzug.md`), England 865–950, Glaubenswechsel, Kino (`konzept_kino.md`).

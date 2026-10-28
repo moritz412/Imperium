@@ -1531,6 +1531,7 @@ body{height:100%;min-height:-webkit-fill-available}
 .hcand .heff{white-space:normal;text-wrap:balance}
 .hcand .btn{min-height:40px;padding:0 9px;font-size:13px;align-self:center;white-space:nowrap}
 .hcand b{display:block;line-height:1.2}
+.lywhy{flex-basis:100%;display:block;margin-top:4px;font-size:12px;line-height:1.35;color:var(--muted,#b9a98c)}.lywhy b{font-weight:700;margin-right:2px}/* v197 Treue-Gründe */
 /* v195 Feldherren: kleines Banner statt Szenenbild in voller Breite, nur beim ersten Feldherrn der Liste */
 .gencard .sysimg.small{aspect-ratio:auto;height:84px;margin:4px 0 6px;max-width:420px;background-position:50% 22%}
 .genrow ~ .genrow .gencard .sysimg{display:none}
@@ -4043,7 +4044,7 @@ function openRegion(reg,scroll){REGV=reg;const _st=(()=>{const c=document.queryS
     const cur=P.build&&P.b[P.build.k]>0?`<small class="okc">${P.build.mod?'Umbau':'Ausbau'}: ${esc(bName(P.build.k))} · ${P.build.t} R.</small>`:'';
     return`<div class="rcol${sel?' sel':''}"><b>${esc(d.city||d.name)}</b><small>${LVLN[l]} · ${Math.round(d.tax*420*P.pop).toLocaleString('de-DE')} Einwohner</small>
       ${l<5?`<div class="grbar"><i style="width:${gr}%"></i></div>`:''}<small class="${su>=0.75?'okc':su<0.5?'badc':''}">Versorgung ${Math.round(su*100)} % · Ordnung ${fmtNum(provOrder(pi))}</small>${cur}
-      ${group('city')}${group('betr')}<label class="rtpl">Bauvorlage <select data-rtpl="${pi}"><option value="">keine</option>${Object.keys(TPL).map(k=>`<option value="${k}"${P.tpl===k?' selected':''}>${TPL[k].ico} ${TPL[k].n}</option>`).join('')}</select></label>${P.tpl?(()=>{const nx=tplNext(me,pi);return`<small class="muted">Als Nächstes: ${nx?esc(bName(nx))+' '+roman((P.b[nx]||0)+1):'nichts mehr möglich'}</small>`;})():''}<button class="btn rgo" data-goprov="${pi}">Zur Provinz</button></div>`;};
+      ${group('city')}${group('betr')}${govOf(me,reg)?'':`<label class="rtpl">Bauvorlage <select data-rtpl="${pi}"><option value="">keine</option>${Object.keys(TPL).map(k=>`<option value="${k}"${P.tpl===k?' selected':''}>${TPL[k].ico} ${TPL[k].n}</option>`).join('')}</select></label>${P.tpl?(()=>{const nx=tplNext(me,pi);return`<small class="muted">Als Nächstes: ${nx?esc(bName(nx))+' '+roman((P.b[nx]||0)+1):'nichts mehr möglich'}</small>`;})():''}`}<button class="btn rgo" data-goprov="${pi}">Zur Provinz</button></div>`;};
   // Bauauswahl unter den Spalten
   const picker=()=>{if(!REGV_ADD)return'';const pi=REGV_ADD.pi,P=S.prov[pi],d=PROV_DEF[pi],isB=REGV_ADD.kind==='betr',k0=REGV_ADD.k,busy=!!P.build;
     const card=(k,mode)=>{const B=BUILDINGS[k],lv=P.b[k]||0,im=bImg(k);
@@ -4064,7 +4065,7 @@ function openRegion(reg,scroll){REGV=reg;const _st=(()=>{const c=document.queryS
   const html=`<h2>${esc(R.name)}</h2><p class="sub">${B.own.length} von ${R.provs.length} Provinzen${full?' · Region vereint: Steuern +12 %, Ordnung +1':''}</p>
     <div class="stats four"><div><span>Steuern</span><b>+${fq1(tax)}</b></div><div><span>Ordnung Ø</span><b>${fmtNum(Math.round(ord*10)/10)}</b></div><div><span>Versorgung Ø</span><b>${Math.round(sup*100)} %</b></div><div><span>Siedlungen</span><b style="font-size:13px">${(()=>{const c={};B.own.forEach(pi=>{const n=LVLN[lvlOf(pi)];c[n]=(c[n]||0)+1;});return Object.entries(c).map(([n,k])=>k+' '+n).join(', ')||'–';})()}</b></div></div>
     ${govHtml(reg)}
-    ${B.own.length?`<h3>Bauvorlagen</h3><p class="note" style="margin:0 0 6px">Eine Vorlage plant den nächsten Bau von selbst, sobald in der Siedlung nichts gebaut wird und die Bauschlange leer ist: erst alles auf Stufe I, dann II, dann III. Gebaut wird, sobald das Gold reicht. Du kannst jederzeit selbst eingreifen.</p><div class="seg tplall">${Object.keys(TPL).map(k=>`<button data-rtplall="${k}" class="${B.own.every(pi=>S.prov[pi].tpl===k)?'on':''}" title="${esc(TPL[k].d)}">${TPL[k].ico} ${TPL[k].n}</button>`).join('')}<button data-rtplall="" class="${B.own.every(pi=>!S.prov[pi].tpl)?'on':''}">Keine</button></div><p class="note" style="margin:4px 0 0">Gilt für alle deine Siedlungen der Region. Einzeln stellst du sie unten in jeder Spalte ein.</p>`:''}
+    ${B.own.length&&govOf(me,reg)?`<p class="note" style="margin:6px 0">Der Statthalter baut nach seinem Auftrag. ${ep()>=2?"Einzelne Städte lenkst du im Provinzfenster über das Stadtprofil.":"Einzelne Bauten kannst du jederzeit selbst in Auftrag geben."}</p>`:''}${B.own.length&&!govOf(me,reg)?`<h3>Bauvorlagen</h3><p class="note" style="margin:0 0 6px">Eine Vorlage plant den nächsten Bau von selbst, sobald in der Siedlung nichts gebaut wird und die Bauschlange leer ist: erst alles auf Stufe I, dann II, dann III. Gebaut wird, sobald das Gold reicht. Du kannst jederzeit selbst eingreifen.</p><div class="seg tplall">${Object.keys(TPL).map(k=>`<button data-rtplall="${k}" class="${B.own.every(pi=>S.prov[pi].tpl===k)?'on':''}" title="${esc(TPL[k].d)}">${TPL[k].ico} ${TPL[k].n}</button>`).join('')}<button data-rtplall="" class="${B.own.every(pi=>!S.prov[pi].tpl)?'on':''}">Keine</button></div><p class="note" style="margin:4px 0 0">Gilt für alle deine Siedlungen der Region. Einzeln stellst du sie unten in jeder Spalte ein.</p>`:''}
     ${bal?`<h3>Waren der Region · Erzeugung pro Runde</h3><div class="rbal">${bal}</div>`:''}
     <h3>Siedlungen · Plus oder Gebäude antippen</h3><div class="rcols">${R.provs.filter(isAct).sort((a,b)=>(S.prov[b].owner===me)-(S.prov[a].owner===me)).map(col).join('')}</div>${picker()}
     <p class="note">Pro Siedlung läuft ein Bau gleichzeitig. Weitere Bauten kommen in die Bauschlange (bis 3) und starten von selbst, sobald Gold da ist. Geplantes antippen entfernt es. Jeder Aufstieg bringt einen Stadtplatz und einen Betriebsplatz mehr.</p>`;
@@ -8132,7 +8133,7 @@ function addRetinue(a,k,pay){const G=genOf(a);if(pay){const c=canRetinue(a,k);if
 function retinueOnWin(a){const G=genOf(a);if(!G||(G.ret||[]).length>=3||Math.random()>0.2)return;const c=Object.keys(RETINUE).filter(k=>!(G.ret||[]).includes(k));if(c.length)addRetinue(a,c[Math.floor(Math.random()*c.length)],false);}
 function govRet(f,reg,k){const G=govOf(f,reg);return!!(G&&G.ret&&G.ret.includes(k));}
 const DEEDS=[{k:'w',n:'Siege',t:'sieggewohnt',at:4},{k:'d',n:'Abwehrerfolge',t:'bollwerk',at:3},{k:'c',n:'eroberte Städte',t:'staedte',at:3},{k:'p',n:'Plünderzüge',t:'pluenderer',at:3},{k:'l',n:'Niederlagen',t:'glucklos',at:3},{k:'r',n:'Rückzüge',t:'zauderer',at:3}];
-function genDeed(a,k){if(!a||!a.units)return;const G=genOf(a);if(!G)return;const D=G.dd||(G.dd={});D[k]=(D[k]||0)+1;
+function genDeed(a,k){if(!a||!a.units)return;const G=genOf(a);if(!G)return;const D=G.dd||(G.dd={});D[k]=(D[k]||0)+1;if(k==='w'||k==='c'||k==='fz')okMark(G);
   for(const x of DEEDS){if(x.k!==k||D[k]<x.at||G.tr.includes(x.t))continue;if(k==='l'&&(D.w||0)+(D.d||0)>D.l)continue;G.tr.push(x.t);deedLog(a,x.t);}
   if((D.w||0)+(D.d||0)>=6&&!D.l&&!G.tr.includes('unbesiegt')){G.tr.push('unbesiegt');deedLog(a,'unbesiegt');}}
 function deedLog(a,t){const T=GEN_TRAITS[t],G=genOf(a);if(isHumanP(a.f))addLog(`${G.n} (${a.name}) gilt jetzt als „${T.n}“: ${T.d}.`,true,T.neg?'bad':'good',a.f);}
@@ -13176,7 +13177,8 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     if(P.build&&P.build.mod){P.build.t--;if(P.build.t<=0){const k=P.build.k;P.bep=P.bep||{};P.bep[k]=ep();if(f===S.player)addLog(`${PROV_DEF[i].name}: ${bName(k)} ist umgebaut und wieder auf dem Stand der Zeit.`,true,'good');P.build=null;}}
     else if(f!=='frei'&&!isHumanP(f)&&!P.build&&P.bep){const k=Object.keys(BNAMES).find(k=>bOld(P,k));if(k&&S.fac[f].gold>modernCost(f,i,k)*3)startModernize(f,i,k);}
     if(f!=='frei'&&isHumanP(f)&&lvlOf(i)===1&&(P.gr||0)>=100&&!P.up&&canLvlUp(f,i).ok&&S.fac[f].gold>lvlUpCost(f,i).total*3)startLvlUp(f,i);
-    if(P.tpl&&!P.build&&!(P.q&&P.q.length)&&f!=='frei'){const k=tplNext(f,i);if(k)P.q=[k];}
+    if(P.tpl&&!P.build&&!(P.q&&P.q.length)&&f!=='frei'&&!govOf(f,PROV_DEF[i].reg)){// v197: mit Statthalter baut nur er (Auftrag)
+      const k=tplNext(f,i);if(k)P.q=[k];}
     if(!bBusy(i)&&P.q&&P.q.length&&f!=='frei'){const k=P.q[0],c=canBuild(f,i,k);if(c.ok){startBuild(f,i,k);P.q.shift();if(f===S.player)addLog(`${PROV_DEF[i].name}: Geplanter Bau beginnt, ${bName(k)}.`,true,'info');}else if(!/Gold|gebaut/.test(c.why)){P.q.shift();if(f===S.player)addLog(`${PROV_DEF[i].name}: Geplanter Bau ${bName(k)} entfällt (${c.why}).`,true,'bad');}}
     if(P.build&&!P.build.mod){P.build.t--;if(P.build.t<=0){P.b[P.build.k]=(P.b[P.build.k]||0)+1;P.bep=P.bep||{};P.bep[P.build.k]=ep();if(f===S.player){S.doneB=S.doneB||{};(S.doneB[f]=S.doneB[f]||[]).push(i);}if(f===S.player)addLog(`${bName(P.build.k)} ${roman(P.b[P.build.k])} in ${PROV_DEF[i].name} ist fertig.`,true,'good');P.build=null;}}
     if(P.build2){const B2=P.build2;if(B2.f!==f||f==='frei'||f==='horde')P.build2=null;else{B2.t--;if(B2.t<=0){P.b[B2.k]=(P.b[B2.k]||0)+1;P.bep=P.bep||{};P.bep[B2.k]=ep();if(f===S.player){S.doneB=S.doneB||{};(S.doneB[f]=S.doneB[f]||[]).push(i);addLog(`${bName(B2.k)} ${roman(P.b[B2.k])} in ${PROV_DEF[i].name} ist fertig.`,true,'good');}P.build2=null;}}}
@@ -14568,7 +14570,9 @@ function dioGeo(id){if(DIO.geo[id])return DIO.geo[id];const R=DIO.raw[id];if(!R)
   const UV=new Uint16Array(u.buffer.slice(o,o+nv*4));o+=nv*4;let I=new Uint16Array(u.buffer.slice(o,o+ni*2));{const dc=DIO_CUT[id];if(dc&&dc.ni===ni){const D=new Set(dc.t),J=[];for(let t=0;t<ni/3;t++)if(!D.has(t))J.push(I[t*3],I[t*3+1],I[t*3+2]);I=Uint16Array.from(J);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(Float32Array.from(P,x=>x/20000),3));g.setAttribute('normal',new THREE.Float32BufferAttribute(Float32Array.from(N,x=>x/127),3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(Float32Array.from(UV,x=>x/65535),2));g.setIndex(new THREE.BufferAttribute(I,1));g.computeBoundingSphere();return DIO.geo[id]=g;}
-function dioMat(id){if(DIO.mat[id])return DIO.mat[id];const t=new THREE.TextureLoader().load(DIO.raw[id].t,()=>{needRender=3;});t.anisotropy=2;return DIO.mat[id]=new THREE.MeshLambertMaterial({map:t,emissive:0x303030,emissiveMap:t,emissiveIntensity:typeof MAPDIMK!=='undefined'?MAPDIMK:1});}
+// v197: dunkle Dioramen-Texturen (mittlere Helligkeit < 77 statt ~85) aufhellen, höchstens ×1,4 (iPad-Test: Städte zu dunkel)
+const DIO_HELL={"ostasien_jp_1":1.4,"nordam_2":1.4,"ostasien_jp_2":1.4,"nord_1":1.31,"ostasien_jp_3":1.31,"suedost_2":1.31,"eu_ant_1":1.29,"eu_ma_2":1.16,"eu_ma_3":1.16,"afrika_1":1.15,"meso_3":1.15,"nord_2":1.13,"nord_3":1.13,"orient_1":1.12,"suedost_3":1.12};
+function dioMat(id){if(DIO.mat[id])return DIO.mat[id];const t=new THREE.TextureLoader().load(DIO.raw[id].t,()=>{needRender=3;});t.anisotropy=2;DIO.mat[id]=new THREE.MeshLambertMaterial({map:t,emissive:0x303030,emissiveMap:t,emissiveIntensity:typeof MAPDIMK!=='undefined'?MAPDIMK:1});if(DIO_HELL[id])DIO.mat[id].color.setScalar(DIO_HELL[id]);return DIO.mat[id];}
 function dioAttach(c,i,tier,e){if(c.dio){c.g.remove(c.dio);c.dio=null;}const st=cityStyle(i,e),q=dioReady(i,st,e);if(!q)return;
   const P=S?S.prov[i]:null,walls=tier>=3||(P&&P.b&&P.b.walls>0&&tier>=2),n=tier>=4||(walls&&tier>=3)?3:tier>=2?2:1,id=q+'_'+n,g=dioGeo(id);if(!g)return;
   const m=new THREE.Mesh(g,dioMat(id)),W=CITY_R[tier]*2*DIO_SC*(n===3?1.08:n===2?1.0:0.9)*(DIO_SCF[id]||1);m.scale.setScalar(W);m.rotation.set(0,hash(i*1.7,e+3)*Math.PI*2,0);
@@ -14850,9 +14854,10 @@ const MDL_FIX={m_hafen_med:{dd:[0.045,0.15],g:0.8,lift:0.24},m_hafen_ori:{dd:[0.
   lmk_stelen:{sink:0.07},lmk_lalibela:{sink:0.077},lmk_djenne:{sink:0.069},lmk_hagia:{sink:0.102},lmk_alhambra:{sink:0.113},lmk_kolosseum:{sink:0.086},lmk_parthenon:{sink:0.105},lmk_kaiserburg:{sink:0.048},lmk_stadtschloss:{sink:0.064},lmk_templomayor:{sink:0.037},lmk_angkor:{sink:0.085},lmk_himeji:{sink:0.073},lmk_taj:{sink:0.079}};
 function mdlFix(id,M){const f=MDL_FIX[id];if(!f||!M)return M;if(f.drop)return null;const c=new THREE.Color(),hs={h:0,s:0,l:0},co=Math.cos(f.ry||0),si=Math.sin(f.ry||0);
   const kp=(g,ok)=>{const keep=[];for(let t=0;t<g.p.length;t+=9)if(ok(t))keep.push(t);if(keep.length*9<g.p.length){const p=new Float32Array(keep.length*9),n=new Float32Array(keep.length*9),cc=new Float32Array(keep.length*9);keep.forEach((t,k)=>{p.set(g.p.subarray(t,t+9),k*9);n.set(g.n.subarray(t,t+9),k*9);cc.set(g.c.subarray(t,t+9),k*9);});g.p=p;g.n=n;g.c=cc;}};
+  // v197: lift entsättigt dunkle Flächen (sonst bunte Dreiecke am Hafen, iPad-Test 28.10.)
   // v181 Optik: dd=[yMax,lMax] – dunkle Bodenplatte (TRELLIS-Häfen: schwarze Wasserplatte/Unterseite) entfällt; lift = Helligkeits-Boden für fast schwarze Flächen
   if(f.dd)for(const g of M){const L=v=>(Math.max(g.c[v],g.c[v+1],g.c[v+2])+Math.min(g.c[v],g.c[v+1],g.c[v+2]))/2;kp(g,t=>Math.max(g.p[t+1],g.p[t+4],g.p[t+7])>=f.dd[0]||(L(t)+L(t+3)+L(t+6))/3>=f.dd[1]);}
-  for(const g of M){if(f.s!=null||f.l!=null||f.g!=null||f.lift)for(let i=0;i<g.c.length;i+=3){c.setRGB(g.c[i],g.c[i+1],g.c[i+2]);c.getHSL(hs);let l=hs.l;if(f.g)l=Math.pow(l,f.g);if(f.lift&&l<f.lift)l+=(f.lift-l)*0.7;if(f.l!=null)l*=f.l;c.setHSL(hs.h,Math.min(1,hs.s*(f.s==null?1:f.s)),Math.min(1,l));g.c[i]=c.r;g.c[i+1]=c.g;g.c[i+2]=c.b;}
+  for(const g of M){if(f.s!=null||f.l!=null||f.g!=null||f.lift)for(let i=0;i<g.c.length;i+=3){c.setRGB(g.c[i],g.c[i+1],g.c[i+2]);c.getHSL(hs);let l=hs.l;if(f.g)l=Math.pow(l,f.g);if(f.lift&&l<f.lift){hs.s*=l/f.lift;l+=(f.lift-l)*0.7;}if(f.l!=null)l*=f.l;c.setHSL(hs.h,Math.min(1,hs.s*(f.s==null?1:f.s)),Math.min(1,l));g.c[i]=c.r;g.c[i+1]=c.g;g.c[i+2]=c.b;}
     if(f.ry)for(let i=0;i<g.p.length;i+=3){const x=g.p[i],z=g.p[i+2],nx=g.n[i],nz=g.n[i+2];g.p[i]=x*co+z*si;g.p[i+2]=-x*si+z*co;g.n[i]=nx*co+nz*si;g.n[i+2]=-nx*si+nz*co;}
     if(f.sink){for(let i=1;i<g.p.length;i+=3)g.p[i]-=f.sink;
       // Sockelplatte: Dreiecke, die nach dem Versenken ganz auf/unter Bodenhöhe liegen, entfallen (Boden der Karte scheint durch)
@@ -16094,8 +16099,14 @@ function pk2RunQ(done){const R=S&&S.pk2;if(!R||!R.q||!R.q.length||!alive(S.playe
 function fhMig(G){if(G.loy==null){G.loy=G.fam?85:62+Math.round(Math.random()*16);G.amb=G.fam?10:Math.round(20+Math.random()*45+((G.tr||[]).includes('ungestuem')?10:0));}return G;}
 function fhDist(a){const cap=capitalOf(S.player);if(cap==null)return 0;try{return Math.min(4,Math.hypot(PROV_DEF[a.p].lon-PROV_DEF[cap].lon,PROV_DEF[a.p].lat-PROV_DEF[cap].lat)/8);}catch(e){return 0;}}
 function fhOk(a){return a&&a.f===S.player&&a.units.length&&a.levy==null&&a.gen&&!a.gen.leg&&!a.boat;}
-function fhTgt(a){const G=a.gen,me=S.player,hon=G.hon||0,big=a.units.length>=8?2:a.units.length>=5?1:0;let t=70+(G.fam?20:0)+((G.triT||-99)+12>S.turn?15:0)-hon*6-big*5-fhDist(a)*4-(S.fac[me].gold<0?15:0)-(G.amb||0)*0.25;
-  try{if(polOn(me)&&polOf(me).adel<30)t-=8;}catch(e){}return t;}
+// v197: Treue-Ziel mit Gründen (Anzeige), Erfolge der letzten 12 Runden heben es, Landgut +15 wie angezeigt
+function okRecent(G){return(G.okT||[]).filter(t=>S.turn-t<12).length;}
+function okMark(G){if(!G)return;G.okT=(G.okT||[]).concat(S.turn).slice(-6);}
+function fhTgtParts(a){const G=a.gen,me=S.player,hon=G.hon||0,big=a.units.length>=8?2:a.units.length>=5?1:0,L=[['Grundhaltung',70]],ad=(n,v)=>{v=Math.round(v);if(v)L.push([n,v]);};
+  if(G.fam)ad('Familie',20);if((G.triT||-99)+12>S.turn)ad('Triumphzug',15);try{if(G.lg!=null&&lgOk(G.lg,a))ad('Landgut',15);}catch(e){}ad('Erfolge',Math.min(15,5*okRecent(G)));
+  ad('Ruhm',-hon*6);ad('Großes Heer',-big*5);ad('Fern der Hauptstadt',-fhDist(a)*4);if(S.fac[me].gold<0)ad('Leere Kasse',-15);ad('Ehrgeiz',-(G.amb||0)*0.25);
+  try{if(polOn(me)&&polOf(me).adel<30)ad('Adel unzufrieden',-8);}catch(e){}return L;}
+function fhTgt(a){return fhTgtParts(a).reduce((s,x)=>s+x[1],0);}
 // Gefahr: Ehrentitel 2+, großes Heer fern der Hauptstadt, Treue unter 30, Ehrgeiz ab 50
 function fhDanger(a){const G=a.gen;return(G.hon||0)>=2&&a.units.length>=5&&fhDist(a)>=1.5&&!G.fam&&G.loy<30+epA('dang')&&(G.amb||0)>=50-epA('dang');}
 function fhRound(){const me=S.player;if(!pk2F()||!alive(me))return;
@@ -16136,7 +16147,7 @@ function fhPutsch(a){const me=S.player,G=a.gen,room=pk2Room();
   addLog(`${G.n} überschreitet den Rubikon: Mit ${a.name} ruft er sich zum Herrscher aus. ${ps.map(pi=>PROV_DEF[pi].name).join(', ')} ${ps.length>1?'folgen':'folgt'} ihm.`,true,'bad');
   try{chronAdd('lost',`Putsch: ${G.n} ruft sich zum Herrscher aus`);}catch(e){}pk2Queue({k:'sec',sl});try{syncTokens();}catch(e){}}
 function fhLine(a){if(!pk2F()||!fhOk(a)||!(a.gen.hon>=1))return'';const G=fhMig(a.gen),d=G.pw!=null,risk=d?'Putsch droht':G.loy<30?'gefährlich':G.loy<45?'unruhig':'treu';
-  return`<div class="pk2line${d?' bad':''}"><span>Treue</span>${govBar(G.loy)}<b class="num">${Math.round(G.loy)}</b><span>Ehrgeiz</span>${govBar(G.amb||0,'#c99146')}<b class="num">${Math.round(G.amb||0)}</b><em>${risk}</em><button class="btn" data-pk2="fh:${a.id}">Ehrgeiz</button>${fhActs(a)}</div>`;}
+  return`<div class="pk2line${d?' bad':''}"><span>Treue</span>${govBar(G.loy)}<b class="num">${Math.round(G.loy)}</b><span>Ehrgeiz</span>${govBar(G.amb||0,'#c99146')}<b class="num">${Math.round(G.amb||0)}</b><em>${risk}</em><button class="btn" data-pk2="fh:${a.id}">Ehrgeiz</button>${fhActs(a)}${loyWhy(G.loy,fhTgtParts(a))}</div>`;}
 {const _g=genHtml;genHtml=function(a,full){const h=_g(a,full);try{return h+fhLine(a);}catch(e){return h;}};}
 
 /* --- A2: Feldherren bei Laune halten (Geschenk, Landgut, Einheirat, Heimholen) --- */
@@ -19134,6 +19145,9 @@ function govPotCap(f,reg,G){return Math.round(Math.max(regTax(f,reg)*(GOV_POT[G.
 // Steuerwirkung des Statthalters (gierig, Korruption bei geringer Treue, Auftrag Steuern)
 function govTaxMul(pi){const P=S.prov[pi];if(!P||P.owner==='frei'||P.owner==='horde')return 1;const G=govOf(P.owner,PROV_DEF[pi].reg);if(!G)return 1;let m=1;if(G.t==='gierig')m*=0.9;if(G.loy!=null&&G.loy<40&&P.owner===S.player)m*=1-(0.05+0.1*(40-G.loy)/40);if(G.dir==='tax')m*=1.1;return m;}
 function govLoyTxt(v){return v>=70?'treu ergeben':v>=45?'loyal':v>=30?'unzufrieden':v>=20?'untreu':'auf Abfall bedacht';}
+// v197: Treue-Ziel und Gründe sichtbar
+function loyWhy(v,L){if(!L||!L.length)return'';const t=Math.round(clamp(L.reduce((s,x)=>s+x[1],0),0,100)),d=t-v,ar=d>=2?'▲':d<=-2?'▼':'■';
+  return`<small class="lywhy"><b class="${d>=2?'okc':d<=-2?'badc':''}">${ar} Ziel ${t}</b> · ${L.map(([n,x])=>`${esc(n)} ${x>0?'+':'−'}${Math.abs(x)}`).join(' · ')}</small>`;}
 function govBar(v,col){return`<span class="pbar gbar"><i style="width:${Math.round(clamp(v,0,100))}%;background:${col||(v>=45?'var(--good)':v>=30?'#d9b04a':'var(--danger)')}"></i></span>`;}
 function govGiftCost(G){return Math.round(45*(G.s||1)*EPOCH_COST[ep()]);}
 function govPromoCost(G){return Math.round(70*((G.s||1)+1)*EPOCH_COST[ep()]);}
@@ -19144,9 +19158,13 @@ function govAct(f,reg,a){const G=govOf(f,reg),F=S.fac[f];if(!G)return false;govM
   if(a==='off'){delete govsOf(f)[reg];for(const pi of regOwn(f,reg))S.prov[pi].unrest=Math.min(6,(S.prov[pi].unrest||0)+1);for(const r in govsOf(f)){const H=govsOf(f)[r];if(H.loy!=null)H.loy=Math.max(0,H.loy-3);}return true;}
   return false;}
 // Erfahrung, Treue, Abfall (Treue und Abfall nur für den Spieler, nie vor Runde 30, abschaltbar)
+// v197: Treue-Ziel des Statthalters mit Gründen; Erfolge (Bauten, Aufstiege der letzten 12 Runden) heben es
+function govTgtParts(f,G,own,dist){const F=S.fac[f],L=[['Grundhaltung',58]],ad=(n,v)=>{v=Math.round(v);if(v)L.push([n,v]);};
+  if(G.fam)ad('Familie',20);if((G.hon||0)>=S.turn)ad('Ehrung',12);ad('Erfolge',Math.min(12,3*okRecent(G)));if(F.gold<0)ad('Leere Kasse',-15);
+  ad(own.length>2||dist>1.5?'Ehrgeiz, große ferne Region':'Ehrgeiz',-Math.min(35,(G.amb||0)/100*own.length*2.2*(1+dist/2)));try{if(polOn(f)&&polOf(f).adel<30)ad('Adel unzufrieden',-10);}catch(e){}return L;}
 function govPerson(f,reg,G,own,me){if(!isHumanP(f))return;G.xp=(G.xp||0)+1;const lv=1+[30,80,150].filter(x=>x<=G.xp).length;if(lv>(G.lvx||1)){G.lvx=lv;if(G.s<3){G.s++;G.rep.note=(G.rep.note||[]).concat(`steigt auf Stufe ${G.s}`);}}
   if(!me)return;const F=S.fac[f],cap=capitalOf(f),c0=own[0];let dist=1;try{if(cap!=null)dist=Math.min(4,Math.hypot(PROV_DEF[c0].lon-PROV_DEF[cap].lon,PROV_DEF[c0].lat-PROV_DEF[cap].lat)/8);}catch(e){}
-  let tgt=58+(G.fam?20:0)+((G.hon||0)>=S.turn?12:0)-(F.gold<0?15:0)-Math.min(35,(G.amb||0)/100*own.length*2.2*(1+dist/2));try{if(polOn(f)&&polOf(f).adel<30)tgt-=10;}catch(e){}
+  G.tgtL=govTgtParts(f,G,own,dist);let tgt=G.tgtL.reduce((s,x)=>s+x[1],0);
   G.loy=Math.round(clamp(G.loy+(tgt-G.loy)*0.1,0,100)*10)/10;
   const can=hofOpt().abfall&&S.turn>=30&&!S.mp&&(S.diff==null||S.diff>=1)&&own.length>=3&&!G.fam;
   if(G.warn!=null){const army=S.armies.some(a=>a.f===f&&own.includes(a.p)&&a.units.length);
@@ -19170,8 +19188,8 @@ function govRound(f){const F=S.fac[f],GS=govsOf(f),me=f===S.player&&!S.mp,human=
     if(G.dir==='mil')for(const pi of own){const P=S.prov[pi],mx=Math.round(garMax(pi)*1.25);if(P.levy&&P.gar<mx){const c=Math.round(20*EPOCH_COST[ep()]);if(afford(c)){F.gold-=c;spend(c);P.gar=Math.min(mx,P.gar+2);G.rep.gar++;}}}
     let done=false;
     for(const pi of own){const P=S.prov[pi];if(P.build||P.up)continue;
-      if((P.gr||0)>=100&&D.b!==false&&canLvlUp(f,pi).ok&&afford(lvlUpCost(f,pi).total)){const c=lvlUpCost(f,pi).total;if(startLvlUp(f,pi)){spend(c);done=true;G.rep.lv++;G.xp+=5;G.rep.b.push(`Aufstieg ${PROV_DEF[pi].city||PROV_DEF[pi].name}`);break;}}
-      const ok=Object.keys(BNAMES).find(k=>bOld(P,k));if(ok&&afford(modernCost(f,pi,ok))){const c=modernCost(f,pi,ok);startModernize(f,pi,ok);spend(c);done=true;G.rep.b.push(`Umbau ${bName(ok)}`);break;}}
+      if((P.gr||0)>=100&&D.b!==false&&canLvlUp(f,pi).ok&&afford(lvlUpCost(f,pi).total)){const c=lvlUpCost(f,pi).total;if(startLvlUp(f,pi)){spend(c);done=true;G.rep.lv++;G.xp+=5;okMark(G),G.rep.b.push(`Aufstieg ${PROV_DEF[pi].city||PROV_DEF[pi].name}`);break;}}
+      const ok=Object.keys(BNAMES).find(k=>bOld(P,k));if(ok&&afford(modernCost(f,pi,ok))){const c=modernCost(f,pi,ok);startModernize(f,pi,ok);spend(c);done=true;okMark(G),G.rep.b.push(`Umbau ${bName(ok)}`);break;}}
     if(done)continue;
     for(let nb=0;nb<(ep()>=3?2:1);nb++){
     let best=null,bs=-1;const fr=frontierOf(f);
@@ -19181,7 +19199,7 @@ function govRound(f){const F=S.fac[f],GS=govsOf(f),me=f===S.player&&!S.mp,human=
 
         if(NE.length){const g=BUILDINGS[key].g||(key==='farm'?'getreide':null),n=g&&NE.find(x=>x.g===g);if(n&&!(P.b[key]>0)){const left=n.miss-2*(CL[g]||0);if(left>0)sc+=Math.min(2.5,0.4+n.prio/6)*(G.dir==='eco'?2:1);}}
         if(sc>bs){bs=sc;best=[pi,key];}}}
-    if(best&&bs>1){const[pi,key]=best;const lv=S.prov[pi].b[key]||0;if(startBuild(f,pi,key)){const B=bRun(S.prov[pi],key);if(G.t==='bauherr'&&B){const back=Math.round(B.cost*0.15);F.gold+=back;B.cost-=back;}spend(B?B.cost:0);G.xp+=3;const g=BUILDINGS[key].g;if(g)CL[g]=(CL[g]||0)+1;G.rep.b.push(`${bName(key)}${lv?' '+roman(lv+1):''} (${PROV_DEF[pi].name})`);}}else break;}}
+    if(best&&bs>1){const[pi,key]=best;const lv=S.prov[pi].b[key]||0;if(startBuild(f,pi,key)){const B=bRun(S.prov[pi],key);if(G.t==='bauherr'&&B){const back=Math.round(B.cost*0.15);F.gold+=back;B.cost-=back;}spend(B?B.cost:0);G.xp+=3;const g=BUILDINGS[key].g;if(g)CL[g]=(CL[g]||0)+1;okMark(G),G.rep.b.push(`${bName(key)}${lv?' '+roman(lv+1):''} (${PROV_DEF[pi].name})`);}}else break;}}
   if(f===S.player&&!S.mp){const n=hofOpt().rep||5;if(S.turn%n===0)govReport(f);}}
 // Bericht aller Statthalter, alle 5 Runden eine Zeile je Region
 function govReport(f){const GS=govsOf(f),L=[];for(const reg in GS){const G=govMigrate(GS[reg]),own=regOwn(f,reg);if(!own.length)continue;const o1=own.reduce((s,pi)=>s+provOrder(pi),0)/own.length;
@@ -19197,7 +19215,7 @@ function govRepBind(reopen){document.querySelectorAll('#dialog [data-hrreg]').fo
 function govHtml(reg){const f=S.player,G=govOf(f,reg),own=REG[reg].provs.filter(pi=>S.prov[pi].owner===f);if(!own.length)return'';
   if(G){govMigrate(G);const D=GOV_DIR[G.dir]||GOV_DIR.grow,xpN=[30,80,150].find(x=>x>G.xp),gc=govGiftCost(G),pc=govPromoCost(G),gold=S.fac[f].gold;
     return`<h3>Statthalter</h3><div class="govcard big">${hofPic('statthalter','⚖️')}<div style="flex:1"><b>${esc(G.n)}${G.fam?' <em class="newu">Familie</em>':''}</b><small>Stufe ${G.s} · ${GOV_TR[G.t].n}: ${GOV_TR[G.t].d} · Ordnung in der Region ${fmtNum(govOrd(own[0]))} · Gehalt ${Math.round(3*G.s*EPOCH_INC[ep()])} Gold/Runde${(G.ret||[]).length?' · Gefolge: '+G.ret.map(k=>GOV_RET[k].n+' ('+GOV_RET[k].d+')').join(', '):''}</small>
-      <div class="gbars"><span>Treue</span>${govBar(G.loy)}<b class="num">${Math.round(G.loy)}</b><small>${govLoyTxt(G.loy)}${G.loy<40?' · zweigt '+Math.round((0.05+0.1*(40-G.loy)/40)*100)+' % der Steuern ab':''}</small></div>
+      <div class="gbars"><span>Treue</span>${govBar(G.loy)}<b class="num">${Math.round(G.loy)}</b><small>${govLoyTxt(G.loy)}${G.loy<40?' · zweigt '+Math.round((0.05+0.1*(40-G.loy)/40)*100)+' % der Steuern ab':''}</small>${loyWhy(G.loy,G.tgtL)}</div>
       <div class="gbars"><span>Erfahrung</span>${govBar(xpN?G.xp/xpN*100:100,'#7cc4e0')}<b class="num">${Math.round(G.xp)}</b><small>${xpN?`nächste Stufe bei ${xpN}`:'höchste Erfahrung'}</small></div></div></div>
     ${G.warn!=null?`<p class="dmsg">Abfall droht in ${Math.max(0,G.warn-S.turn)} ${G.warn-S.turn===1?'Runde':'Runden'}. Treue über 25 oder ein Heer in der Region verhindern ihn.</p>`:''}
     <div class="ghead">Auftrag</div><div class="seg wrap govdir">${Object.keys(GOV_DIR).map(k=>`<button data-govdir="${k}" class="${G.dir===k?'on':''}">${GOV_DIR[k].n}</button>`).join('')}</div><p class="note">Gilt für alle Städte der Region. Einzelne Städte können im Provinzfenster ein eigenes Profil bekommen.</p>
