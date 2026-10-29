@@ -12,7 +12,8 @@ Wo unten „Moritz“ als Bauender steht, gilt jetzt Claude.
 - Headless geprüft (`blender\test_koerper.py`): `HumanService.create_human` + `add_builtin_rig(…, "cmu_mb")` + Proxy über `add_mhclo_asset(<proxy>.proxy, …, asset_type="Proxymeshes")`.
 - **Skelett-Wahl: `cmu_mb`** – 31 Knochen, Namen identisch mit den CMU-BVH-Dateien (Hips, LeftUpLeg … Head), also kein Retarget nötig. Gilt ab jetzt für alle Menschenfiguren.
 - Proxy `proxy741`: 1460 Dreiecke, `male1591`: 3140 (zu viel) → proxy741 als Grundlage, für Nah-Stufe auf ≈ 1000 dezimieren (Platz für Ausrüstung). Standardhöhe 1,66 m → auf 1,72 m skalieren.
-- CMU-Bewegungen: freigegeben, noch nicht geladen.
+- CMU-Bewegungen: Original-Seite mocap.cs.cmu.edu (ASF/AMC, kein BVH nötig). Geladen nach `blender\cmu\02`: Subject 02 – 01 Gehen, 03 Laufen, 05 Schlag, 07/08 Schwertkampf (≈ 5 MB).
+- **Übertragung geprüft (29.10. 22:40):** `dev/pc/blender/cmu_auf_koerper.py` liest ASF/AMC direkt, ordnet CMU-Segmente den cmu_mb-Knochen zu und überträgt je Knochen in Weltlage (Ruherichtung angeglichen, CMU-T-Pose → MPFB-A-Pose). Gehen und Schwertkampf sehen im Bild plausibel aus (`dev/pc/blender/cmu_test.jpg`). Fehler: kleine Zacken am Rumpf (Gewichte des Proxys), Hände ohne Griff, Füße gleiten noch (keine Bodenkorrektur). Noch nicht: Schleifen schneiden, 30 B/s, Export, Back-Skript.
 - Ausrüstung Antike: 18 Teile als TRELLIS-Rohmodelle in `3d\roh_44` (13) und `3d\roh_45` (5), noch ohne r3-Nachbearbeitung.
 
 ## 1. Werkzeuge (einmalig)
