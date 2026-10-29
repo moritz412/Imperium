@@ -1,0 +1,5330 @@
+[
+ {
+  "name": "Gaius Julius Cäsar",
+  "aliase": [
+   "Caesar",
+   "Gaius Iulius Caesar"
+  ],
+  "szenarien": [
+   "caesar",
+   "kleopatra"
+  ],
+  "rolle": "held",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "42",
+  "aussehen": "Hochgewachsen, helle Haut, fein gebaut, volles Gesicht mit schwarzen, lebhaften Augen; Stirnglatze, spärliches Haar nach vorn gekämmt, rasiert (Sueton, Plutarch).",
+  "ruestung": "Muskelpanzer (Brustharnisch, Leder/Metall) mit Gürtel, roter Feldherrnmantel (paludamentum), kein Helm, Feldherrnstab nur bei Triumph",
+  "reittier": "pferd",
+  "leibwache": "legion",
+  "eigenschaften": [
+   "taktiker",
+   "sieggewohnt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen in Reichweite beruhigen, Moral +, Zehnte-Legion-Ruf: Linie hält 20 s",
+  "stimme": "klar, durchdringend",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_caesar_x1",
+  "quelle": "Caesar (Commentarii), Sueton, Plutarch, Appian",
+  "hinweis": "Dieselbe Person: „Gaius Julius Cäsar“, „Caesar“ (Kleopatra-Geschichte), SC_LEG „Gaius Iulius Caesar“. Alter in der Kleopatra-Geschichte ~52 (Jahr -48). Münzbilder zeigen älteres Gesicht (44 v. Chr.). Kein Lorbeerkranz im Feld."
+ },
+ {
+  "name": "Titus Labienus",
+  "aliase": [],
+  "szenarien": [
+   "caesar"
+  ],
+  "rolle": "feldherr",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~42",
+  "aussehen": "unbekannt, plausibel: kräftiger Römer um die 40, kurzes Haar, rasiert, Soldatengesicht; Quellen schildern nur Charakter (Ehrgeiz, Verlässlichkeit bis 49).",
+  "ruestung": "Muskelpanzer oder Kettenhemd, Offiziersmantel (rot), Helm mit Federbusch",
+  "reittier": "pferd",
+  "leibwache": "auxreit",
+  "eigenschaften": [
+   "reiter",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Zange: Reiterei fällt dem gebundenen Feind in die Flanke",
+  "stimme": "kurz, trocken",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Caesar (Commentarii), Lucan, Plutarch",
+  "hinweis": "Legat Caesars bis 49 v. Chr., dann Pompeianer (Alter bei Beginn ~42: geb. um 100 v. Chr., unsicher)."
+ },
+ {
+  "name": "Ariovist",
+  "aliase": [],
+  "szenarien": [
+   "caesar"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 0,
+  "alter": "~50",
+  "aussehen": "unbekannt, plausibel: groß, kräftig, blond oder rotblond, langer Zopf oder Haarknoten (Suebenknoten), Schnurrbart; Caesar nennt nur Stolz und Rede.",
+  "ruestung": "Kettenhemd (Beute), Eisenhelm (römischer Typ), Rundschild, Fellumhang",
+  "reittier": "pferd",
+  "leibwache": "germreit",
+  "eigenschaften": [
+   "ungestuem",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter mit Fußkämpfern greifen aus der Flanke an",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Caesar (Commentarii I), Cassius Dio",
+  "hinweis": "Suebenkönig. Alter geschätzt (Quelle fehlt). Name keltisch-germanisch („Ariovistus“). Kein Hörnerhelm."
+ },
+ {
+  "name": "Gnaeus Pompeius",
+  "aliase": [],
+  "szenarien": [
+   "caesar"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~48",
+  "aussehen": "Jugendlich-anmutiges, volles Gesicht, wellige Haarwelle über der Stirn (Alexander-Frisur, anastole), kräftiger Körperbau; Plutarch: „angenehm, feierlich“.",
+  "ruestung": "Muskelpanzer mit Fransen, roter Mantel, Helm mit Federbusch, Feldherrnstab",
+  "reittier": "pferd",
+  "leibwache": "manipel",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Linie hält Stellung, Moral +",
+  "stimme": "gemessen, würdevoll",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Plutarch, Appian, Cassius Dio",
+  "hinweis": "Pompeius „der Große“ (geb. 106 v. Chr., 58 v. Chr. 48 Jahre). Als Gegner erst ab 49 v. Chr. Marmorköpfe (Kopenhagen) belegen die Frisur."
+ },
+ {
+  "name": "Hannibal Barkas",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "held",
+  "kultur": "punisch",
+  "epoche": 0,
+  "alter": "28",
+  "aussehen": "Römische Quellen: kräftig, mit scharfem Blick, bartlos (Münzbilder der Barkiden zeigen ihn bartlos mit Lockenhaar); linkes Auge verlor er 217 im Sumpf (nach 217 Einäugigkeit, nicht vor Beginn). Haut dunkel getönt, Nase kräftig.",
+  "ruestung": "Bronzener Muskelpanzer oder Kettenhemd, iberischer Helm (Bronze), roter Mantel, Falcata oder gerades Schwert",
+  "reittier": "pferd",
+  "leibwache": "leichtr",
+  "eigenschaften": [
+   "taktiker",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Zange: Reiterei +Ansturm, wenn Feind gebunden (Cannae)",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_hannibal_x1",
+  "quelle": "Polybios, Livius, Appian, Cornelius Nepos",
+  "hinweis": "Alter 28 bei Sagunt (219 v. Chr., geb. 247). Münzbild (Karthago-Nova, Schekel) zeigt vermutlich Hannibal oder Hamilkar (umstritten). Einäugigkeit erst ab 217 (Etrurien). Elefantenbild: Hannibal ritt selbst auf dem „Surus“ (Quelle Plinius/Cato)."
+ },
+ {
+  "name": "Hasdrubal Barkas",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "feldherr",
+  "kultur": "punisch",
+  "epoche": 0,
+  "alter": "~26",
+  "aussehen": "unbekannt, plausibel: dem Bruder ähnlich, bärtig oder rasiert, kräftig, Offizierstyp; Münzen zeigen jugendliche Barkiden mit Lockenhaar.",
+  "ruestung": "Muskelpanzer (Bronze), iberischer Helm, purpurner Mantel, Kurzschwert",
+  "reittier": "pferd",
+  "leibwache": "numid",
+  "eigenschaften": [
+   "taktiker",
+   "reiter"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Reiter und Fußvolk verbergen sich bis zum Angriff",
+  "stimme": "laut, entschieden",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Polybios, Livius",
+  "hinweis": "Hasdrubal, Bruder Hannibals, ~244 geb.; 207 am Metaurus gefallen. Nicht verwechseln mit Hasdrubal dem Schönen (Schwiegersohn Hamilkars) und Hasdrubal Gisgo."
+ },
+ {
+  "name": "Publius Cornelius Scipio",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Konsul 218, kräftiger Mann um die 40, kurzes Haar, rasiert, Offiziersgesicht; Livius schildert nur Tapferkeit am Ticinus.",
+  "ruestung": "Muskelpanzer, Helm mit Federbusch, roter Feldherrenmantel",
+  "reittier": "pferd",
+  "leibwache": "manipel",
+  "eigenschaften": [
+   "taktiker",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Moral +, Truppen in Reichweite ordnen sich neu",
+  "stimme": "kräftig, formal",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Polybios (III), Livius (XXI)",
+  "hinweis": "DOPPELT: Im Hannibal-Szenario meint der Name zwei Personen. (1) Vater, Konsul 218 v. Chr., Ticinus (verwundet), Trebia; geb. ~255, gefallen 211 in Spanien. (2) Sohn, „Africanus“, Cannae (Militärtribun), Spanien 210–206, Zama 202. Dieser Eintrag = Vater; Sohn separat."
+ },
+ {
+  "name": "Publius Cornelius Scipio Africanus",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~17 (Beginn), 34 (Zama)",
+  "aussehen": "Livius und Polybios schildern ihn als jung, ruhig und überzeugend; gesicherte Porträts fehlen (Büsten ihm nur vermutet zugeschrieben). Plausibel: schlank, kurzes Haar, rasiert, jugendliches Gesicht.",
+  "ruestung": "Muskelpanzer mit Fransen, Helm (Montefortino, Federbusch), purpurner Mantel",
+  "reittier": "pferd",
+  "leibwache": "manipel",
+  "eigenschaften": [
+   "taktiker",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Zange: Flügel greifen nach Bindung des Zentrums (Zama)",
+  "stimme": "ruhig, überzeugend",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Polybios, Livius, Appian",
+  "hinweis": "Sohn des Vorgängers (Zama 202); Alter ~17 beim Ticinus 218. Im Code taucht nur „Publius Cornelius Scipio“ auf (Vater oder Sohn?): Skript lässt als Gegner Hannibal in Zama gegen den Sohn antreten, Ticinus/Trebia gegen den Vater."
+ },
+ {
+  "name": "Tiberius Sempronius Longus",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: stämmiger Römer um die 45, rasiert, kurzes Haar; Livius: „ungeduldig, ehrgeizig, siegesgewiss“.",
+  "ruestung": "Muskelpanzer, Helm mit Federbusch, roter Mantel",
+  "reittier": "pferd",
+  "leibwache": "manipel",
+  "eigenschaften": [
+   "ungestuem",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Linie greift zügig an (Trebia), danach angreifbar",
+  "stimme": "laut, drängend",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Polybios (III), Livius (XXI)",
+  "hinweis": "Konsul 218 v. Chr. (Trebia, Winter, wateten durch eisigen Fluss). Alter nicht überliefert."
+ },
+ {
+  "name": "Quintus Fabius Maximus",
+  "aliase": [],
+  "szenarien": [
+   "hannibal"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~61",
+  "aussehen": "Livius: alter Senator, nüchtern, geduldig, Haar kurz oder ergraut, würdevoll; einfacher Gesichtsausdruck, ruhig. Der Beiname „Verrucosus“ (Warze) deutet eine auffällige Warze auf der Oberlippe an.",
+  "ruestung": "Muskelpanzer, Senatorenmantel (toga praetexta) im Lager, Helm bei Dictatur, einfacher Feldherrnstab",
+  "reittier": "pferd",
+  "leibwache": "manipel",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Feind nicht stellen, Moral +, Ermüdung des Feindes",
+  "stimme": "tief, bedächtig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Livius (XXII), Plutarch (Fabius), Polybios",
+  "hinweis": "Cunctator (Zögerer); Diktator 217 v. Chr.; Alter ~63 (geb. ~280). Wohl alter als Ticinus-Szenen; ältere Büste fehlt."
+ },
+ {
+  "name": "Karl",
+  "aliase": [
+   "Karl der Große"
+  ],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "held",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "20",
+  "aussehen": "Einhard: groß (ca. 1,90 m), kräftig, Nacken kurz und dick, große lebhafte Augen, Nase etwas lang, Schnurrbart (ohne Vollbart), Haar zunächst braun, später weiß; fröhliches Gesicht, hohe Stimme.",
+  "ruestung": "Kettenhemd (Brünne), Spangenhelm, Rundschild oder Mandelschild, roter Mantel mit Goldfibel, Schwert (Spatha) „Joyeuse“ erst später (Legende)",
+  "reittier": "pferd",
+  "leibwache": "paladin",
+  "eigenschaften": [
+   "ausbilder",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich, Schildwall hält; Bannerträger",
+  "stimme": "ruhig, hoch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_karl_x1",
+  "quelle": "Einhard (Vita Karoli), Fränkische Reichsannalen",
+  "hinweis": "Karl der Große (SC_LEG „karl“), Alter 20 bei Thronbesteigung 768, 53 bei Kaiserkrönung 800. Kein Vollbart (Einhard), keine eiserne Krone. Barthaar im Mittelalterbild später als Legende."
+ },
+ {
+  "name": "Graf Roland",
+  "aliase": [],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "feldherr",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: kräftiger Franke, Bart oder rasiert, Kettenhemd; Einhard nennt nur den Tod bei Roncesvalles („Hruodlandus, Präfekt der Bretonischen Mark“).",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Spatha (nicht „Durendal“, Legendenwaffe), Lanze",
+  "reittier": "pferd",
+  "leibwache": "paladin",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Nachhut hält Pass, Moral +",
+  "stimme": "kräftig, fest",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Einhard, Annales Regni Francorum; Rolandslied (12. Jh.) als Legende",
+  "hinweis": "Hruodland, Präfekt der Bretonischen Mark, gefallen 778 bei Roncesvalles (Baske-Überfall, nicht Sarazenen). Rolandslied (um 1100) erfindet Sarazenen und Horn „Olifant“."
+ },
+ {
+  "name": "Karlmann",
+  "aliase": [],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "17",
+  "aussehen": "unbekannt, plausibel: Jugendlicher Franke, Haar kurz oder schulterlang, rasiert oder leichter Flaum, Kettenhemd; Quelle nennt nur Streit mit Karl.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Mantel (blau)",
+  "reittier": "pferd",
+  "leibwache": "scara",
+  "eigenschaften": [
+   "zoegerlich",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich bei Wanken",
+  "stimme": "leise, nervös",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Fränkische Reichsannalen, Einhard",
+  "hinweis": "Karlmann I. (751–771), Bruder und Mitkönig Karls; im Code „Gegner“ (Streit). Alter 17 bei Thronbeginn 768; starb 771."
+ },
+ {
+  "name": "Widukind",
+  "aliase": [],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: kräftiger Sachse, langes Haar, Schnurrbart, Wollkleidung; Reichsannalen nennen ihn nur „dux Widukindus“. Taufe 785 in Attigny.",
+  "ruestung": "Wollkittel, Kettenhemd selten, Lederhelm oder Eisenhaube, Rundschild, Speer, Sax",
+  "reittier": "pferd",
+  "leibwache": "sachs",
+  "eigenschaften": [
+   "ungestuem",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Truppen im Wald verborgen, bis Feind eng",
+  "stimme": "rau, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Fränkische Reichsannalen, Einhard",
+  "hinweis": "Widukind (um 730–807), Herzog der Westfalen, Gegner Karls 777–785. Kein „Wittekind mit Pferdewappen“ (Legende)."
+ },
+ {
+  "name": "Desiderius",
+  "aliase": [],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "~60",
+  "aussehen": "unbekannt, plausibel: alter Langobardenkönig, Bart, kräftige Gestalt, langes Haar; Notker beschreibt ihn als erschreckend.",
+  "ruestung": "Kettenhemd, Helm mit Eisenkamm, Langschild, Spatha, Mantel (rot, mit Goldborte)",
+  "reittier": "pferd",
+  "leibwache": "langobr",
+  "eigenschaften": [
+   "standhaft",
+   "bollwerk"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Mauer aus Schilden vor Pavia",
+  "stimme": "rau, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Paulus Diaconus, Einhard, Notker",
+  "hinweis": "Desiderius (756–774), letzter Langobardenkönig; Pavia fiel 774. Alter geschätzt (geb. ~710)."
+ },
+ {
+  "name": "Tassilo",
+  "aliase": [],
+  "szenarien": [
+   "karl"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 1,
+  "alter": "~27",
+  "aussehen": "unbekannt, plausibel: junger bairischer Herzog, Haar schulterlang, rasiert oder Flaum, Kettenhemd; Tassilo-Kelch (Kremsmünster) zeigt ihn nicht porträtähnlich.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Mantel (blau-weiß, bairische Farben später)",
+  "reittier": "pferd",
+  "leibwache": "scara",
+  "eigenschaften": [
+   "zoegerlich",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich hinter dem Fluss",
+  "stimme": "mild, höflich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Fränkische Reichsannalen, Einhard",
+  "hinweis": "Tassilo III. von Bayern (741–~796), 788 abgesetzt. Alter 27 bei Karls Thronbeginn."
+ },
+ {
+  "name": "Ragnar Lodbrok",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "held",
+  "kultur": "nordisch",
+  "epoche": 1,
+  "alter": "~35",
+  "aussehen": "Sagas (Ragnars saga, Gesta Danorum): groß, blond, Bart; Beiname „Lodbrok“ (Lodenhose, Zottelhose, Saga). Historisch ungesichert, vielleicht Verschmelzung mehrerer Anführer.",
+  "ruestung": "Kettenhemd, Spangenhelm mit Nasenschutz (kein Hörnerhelm), Rundschild, Axt, Schwert",
+  "reittier": "keins",
+  "leibwache": "husk",
+  "eigenschaften": [
+   "ungestuem",
+   "pluenderer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Schildwall rennt an, erste Welle +Angriff",
+  "stimme": "tief, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Saxo Grammaticus, Ragnars saga, Angelsächsische Chronik",
+  "hinweis": "Legendäre Gestalt (SC_LEG „wikinger“). Alter im Szenariojahr 793 (Lindisfarne) ist unsicher: Sagas setzen ihn ins 9. Jh. KEIN Hörnerhelm."
+ },
+ {
+  "name": "Björn Eisenseite",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "feldherr",
+  "kultur": "nordisch",
+  "epoche": 1,
+  "alter": "~25",
+  "aussehen": "Saga: Sohn Ragnars, Beiname „Eisenseite“ (Ironside): unverwundbare Seite (Legende). Plausibel: kräftig, blond, Bart, Kettenhemd.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Axt, Schwert",
+  "reittier": "keins",
+  "leibwache": "berserker",
+  "eigenschaften": [
+   "tapfer",
+   "unbesiegt"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Berserker +Angriff, kein Rückzug",
+  "stimme": "laut, grob",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ragnars saga, Gesta Danorum, Fränkische Annalen (Bjarni)",
+  "hinweis": "Legendär (Anachronismus: Björn ca. 855 aktiv, Szenario 793). Realer „Bjorn“ plünderte Seine 858, Mittelmeer 859–862."
+ },
+ {
+  "name": "Håkon Jarl",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "nordisch",
+  "epoche": 1,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: Norwegischer Jarl, kräftig, Bart, Kettenhemd; Saga schildert ihn als mächtig und listig.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Axt, Schwert",
+  "reittier": "keins",
+  "leibwache": "husk",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Lagerverteidigung, Moral +",
+  "stimme": "kalt, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Heimskringla (Snorri), Fagrskinna",
+  "hinweis": "Anachronismus: Hákon Sigurdsson (um 937–995), Szenario 793. Name vermutlich als nordischer Jarl-Typ gedacht."
+ },
+ {
+  "name": "Gudfred",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "nordisch",
+  "epoche": 1,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Dänenkönig, groß, Bart, Kettenhemd; Einhard beschreibt Gudfred (Godfred) als stolz.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Schwert, Mantel (rot)",
+  "reittier": "keins",
+  "leibwache": "husk",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Wall am Danewerk",
+  "stimme": "laut, stolz",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Einhard, Fränkische Reichsannalen",
+  "hinweis": "Godfred (Gudfred) war König der Dänen 804–810 (Szenario 793: Anachronismus oder Vorgänger Sigfred). Bau des Danewerks 808."
+ },
+ {
+  "name": "Egbert",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 1,
+  "alter": "~23",
+  "aussehen": "unbekannt, plausibel: Angelsächsischer Edler, kurzes Haar, Schnurrbart, Kettenhemd; verbrachte 789–802 im Exil am Frankenhof.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Speer, Schwert",
+  "reittier": "pferd",
+  "leibwache": "fyrd",
+  "eigenschaften": [
+   "taktiker",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Fyrd sammelt sich, Moral +",
+  "stimme": "klar, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Angelsächsische Chronik, Einhard",
+  "hinweis": "Egbert von Wessex (802–839). Im Jahr 793 war er im Exil (Anachronismus). Als späterer König Gegner der Dänen."
+ },
+ {
+  "name": "Offa",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 1,
+  "alter": "~63",
+  "aussehen": "Offa von Mercia: Münzen zeigen ihn mit Lockenhaar und Diadem; Quellen schildern ihn als herrisch. Plausibel: groß, kräftig, graues Haar, Bart.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Schwert, Mantel (blau)",
+  "reittier": "pferd",
+  "leibwache": "fyrd",
+  "eigenschaften": [
+   "bollwerk",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Wall (Offa’s Dyke), Verteidigung +",
+  "stimme": "tief, herrisch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Angelsächsische Chronik, Münzen",
+  "hinweis": "Offa († 796) herrschte 757–796. Offa’s Dyke (Wall) um 784 begonnen. Alter ~63 (geb. ~730)."
+ },
+ {
+  "name": "Æthelberht",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 1,
+  "alter": "unbekannt (~25)",
+  "aussehen": "unbekannt, plausibel: junger Angelsachsen-König von East Anglia, kurzes Haar, rasiert, Kettenhemd.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Speer, Mantel (grün)",
+  "reittier": "pferd",
+  "leibwache": "fyrd",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Fyrd sammelt sich, Truppe bleibt stehen",
+  "stimme": "sanft, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Angelsächsische Chronik, Münzen",
+  "hinweis": "Æthelberht II. von East Anglia (788–794), von Offa 794 enthauptet. Alter nicht überliefert."
+ },
+ {
+  "name": "Graf Odo",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "keltisch",
+  "epoche": 1,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: fränkischer Graf, Schnurrbart, Kettenhemd; keine Beschreibung.",
+  "ruestung": "Kettenhemd, Spangenhelm, Rundschild, Lanze, Mantel (blau)",
+  "reittier": "pferd",
+  "leibwache": "scara",
+  "eigenschaften": [
+   "standhaft",
+   "bollwerk"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Stadtverteidigung",
+  "stimme": "fest, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Abbo von Saint-Germain (Belagerung Paris 885)",
+  "hinweis": "Anachronismus: Odo von Paris (um 860–898), Belagerung Paris 885, Szenario 793. Alternativ Odo von Orléans. Quelle unklar."
+ },
+ {
+  "name": "Harald Hardrada",
+  "aliase": [],
+  "szenarien": [
+   "wikinger"
+  ],
+  "rolle": "gegner",
+  "kultur": "nordisch",
+  "epoche": 2,
+  "alter": "~50",
+  "aussehen": "Heimskringla: sehr groß (ca. 2 m), blond, Schnurrbart (kein Vollbart), ein Auge höher als das andere, derber Körper; Warägergarde (Konstantinopel).",
+  "ruestung": "Kettenhemd (lang), Kegelhelm mit Nasenschutz, Rundschild, Schwert „Hneitir“ nicht belegt, Dänenaxt, Mantel (rot)",
+  "reittier": "keins",
+  "leibwache": "varanger",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Elite-Axtträger +Angriff, Schildwall bricht",
+  "stimme": "tief, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Heimskringla (Snorri), Skylitzes",
+  "hinweis": "Harald Hardrada (1015–1066), Stamford Bridge (Szenario-Hook). Nicht in der Geschichte als Armee, nur als Entscheidung (Wikinger)."
+ },
+ {
+  "name": "Kleopatra",
+  "aliase": [
+   "Kleopatra VII."
+  ],
+  "szenarien": [
+   "kleopatra",
+   "augustus"
+  ],
+  "rolle": "held",
+  "kultur": "aegyptisch",
+  "epoche": 0,
+  "alter": "18",
+  "aussehen": "Münzbilder: markante Nase, spitzes Kinn, Haar in Knoten (Melonenfrisur), kein Schönheitsideal; Plutarch: Reiz in Stimme und Geist. Hellhäutig (griechisch-makedonische Dynastie), schlank.",
+  "ruestung": "Kleid aus feinem Leinen (Chiton), Stirnreif (Diadem) mit Geierkopf (Uräus), Goldschmuck; kein Panzer, im Feld Reitkleid",
+  "reittier": "pferd",
+  "leibwache": "galater",
+  "eigenschaften": [
+   "beliebt",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich, Moral + in Reichweite des Palastes",
+  "stimme": "weich, klug",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_kleopatra_x1",
+  "quelle": "Plutarch, Cassius Dio, Münzen",
+  "hinweis": "Kleopatra VII. (69–30 v. Chr.). Alter 18 im Jahr -51; 38 im Jahr -31 (Actium). Dieselbe Person als Heldin (Kleopatra) und als Gegnerin/Verbündete des Antonius (Augustus). SC_LEG „Kleopatra VII.“."
+ },
+ {
+  "name": "Apollodoros",
+  "aliase": [],
+  "szenarien": [
+   "kleopatra"
+  ],
+  "rolle": "feldherr",
+  "kultur": "griechisch",
+  "epoche": 0,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: sizilischer Grieche, Bart oder rasiert, Chiton, einfacher Mantel; Plutarch erzählt, er trug Kleopatra im Bettsack zu Caesar.",
+  "ruestung": "Chiton, leichter Mantel, Dolch",
+  "reittier": "keins",
+  "leibwache": "machimoi",
+  "eigenschaften": [
+   "schnell",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: kleine Truppe schleicht durch Hafen",
+  "stimme": "leise, schnell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Plutarch (Caesar 49)",
+  "hinweis": "Apollodoros von Sizilien: Höfling, Kurier, Kaufmann, kein ausgewiesener Feldherr. Alter nicht überliefert."
+ },
+ {
+  "name": "Achillas",
+  "aliase": [],
+  "szenarien": [
+   "kleopatra"
+  ],
+  "rolle": "gegner",
+  "kultur": "aegyptisch",
+  "epoche": 0,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Ägyptischer Hofgeneral hellenistischer Prägung, Bart, Muskelpanzer, Helm; Quellen nennen ihn „Kommandeur der Garde“.",
+  "ruestung": "Muskelpanzer, hellenistischer Helm, Rundschild, Schwert, roter Mantel",
+  "reittier": "pferd",
+  "leibwache": "machimoi",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Phalanx greift in Straßen an",
+  "stimme": "laut, grob",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Caesar (Bellum Civile III), Cassius Dio",
+  "hinweis": "Achillas, Heerführer des Ptolemaios XIII., 47 v. Chr. von Arsinoe getötet. Alter geschätzt."
+ },
+ {
+  "name": "Octavian",
+  "aliase": [
+   "Augustus"
+  ],
+  "szenarien": [
+   "kleopatra",
+   "augustus"
+  ],
+  "rolle": "held",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "32",
+  "aussehen": "Sueton: schön, ruhige strahlende Augen, helles, leicht gelocktes Haar, Zähne klein, Augenbrauen zusammengewachsen, kleiner Körper (ca. 1,70 m), blass; kränklich.",
+  "ruestung": "Muskelpanzer, roter Mantel, Helm nur in der Schlacht; Agrippa kommandiert",
+  "reittier": "pferd",
+  "leibwache": "legion",
+  "eigenschaften": [
+   "taktiker",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich, Moral + durch Anwesenheit",
+  "stimme": "kühl, präzise",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Sueton (Augustus), Cassius Dio, Appian",
+  "hinweis": "Octavian (später Augustus), 63 v. – 14 n. Chr.; Alter 32 bei Actium (31 v. Chr.). In der Kleopatra-Geschichte (-51) 12 Jahre alt (Anachronismus: Octavian erscheint dort als Gegner, Skript). Augusteische Porträts idealisiert."
+ },
+ {
+  "name": "Marcus Agrippa",
+  "aliase": [],
+  "szenarien": [
+   "augustus"
+  ],
+  "rolle": "feldherr",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~32",
+  "aussehen": "Büsten: breites Gesicht, markante Nase, kräftiger Hals, kurzes Haar, ernster Soldat; kein Bart.",
+  "ruestung": "Muskelpanzer (Leder), Helm mit Federbusch, roter Mantel, Schwert",
+  "reittier": "pferd",
+  "leibwache": "legion",
+  "eigenschaften": [
+   "taktiker",
+   "belagerer"
+  ],
+  "faehigkeit_schlacht": "Zange: Flotte und Fußvolk bilden Zange (Actium)",
+  "stimme": "rau, nüchtern",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Plinius, Cassius Dio, Velleius",
+  "hinweis": "Marcus Vipsanius Agrippa (63–12 v. Chr.), Flottenführer bei Actium/Mylae. Alter 32 bei Actium."
+ },
+ {
+  "name": "Marcus Antonius",
+  "aliase": [],
+  "szenarien": [
+   "augustus"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "~52",
+  "aussehen": "Plutarch/Büsten: kräftig, breite Stirn, gebogene Nase, Vollbart (Trauerbart 44 v. Chr.), kräftiger Nacken, Heraklesgesicht; später gedunsen.",
+  "ruestung": "Muskelpanzer (Brustplatte), Römischer Helm, roter Mantel, Schwert",
+  "reittier": "pferd",
+  "leibwache": "legion",
+  "eigenschaften": [
+   "tapfer",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Legionäre +Angriff im Sturm, kurzfristig",
+  "stimme": "laut, jovial",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Plutarch (Antonius), Cassius Dio",
+  "hinweis": "Marcus Antonius (83–30 v. Chr.), Alter ~52 bei Actium. Hinweis: Skript führt als „Gegner“ mit Kleopatra-Heer."
+ },
+ {
+  "name": "Vercingetorix",
+  "aliase": [],
+  "szenarien": [
+   "caesar"
+  ],
+  "rolle": "gegner",
+  "kultur": "keltisch",
+  "epoche": 0,
+  "alter": "~30",
+  "aussehen": "Caesar: junger Arverner, Münzbild (Stater, Arverner) zeigt Profil mit Haar in Locken, Schnurrbart (Münze). Gesichtsform nur aus Münzen.",
+  "ruestung": "Kettenhemd, Eisenhelm, langer Ovalschild, Langschwert, Torques, karierter Mantel",
+  "reittier": "pferd",
+  "leibwache": "soldurii",
+  "eigenschaften": [
+   "taktiker",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Reiter locken, Fußvolk bricht aus Wald",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Caesar (Commentarii VII), Cassius Dio",
+  "hinweis": "NICHT in heroes.json (Hook, Gallier-Bund „gallbund“, Szenario Cäsar, Schritt 6). Vercingetorix ist im Code nur als Text und Volk „Gallischer Bund“. Hier ergänzt."
+ },
+ {
+  "name": "Rufio",
+  "aliase": [],
+  "szenarien": [
+   "kleopatra"
+  ],
+  "rolle": "feldherr",
+  "kultur": "latein",
+  "epoche": 0,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Römischer Legat, rasiert, Muskelpanzer; Quellen nur Name.",
+  "ruestung": "Muskelpanzer, Helm, roter Mantel",
+  "reittier": "pferd",
+  "leibwache": "legion",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Legion verteidigt Brückenkopf",
+  "stimme": "trocken, kurz",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Bellum Alexandrinum (Rufio, Legat)",
+  "hinweis": "Rufio (Caesars Legat im Alexandrinischen Krieg, Entscheidung „kleo_caesar“). Nicht in heroes.json; hier ergänzt."
+ },
+ {
+  "name": "Kaleb",
+  "aliase": [
+   "Kaleb von Aksum"
+  ],
+  "szenarien": [
+   "kaleb"
+  ],
+  "rolle": "held",
+  "kultur": "habescha",
+  "epoche": 1,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Aksumitischer König, dunkelhäutig, Krone mit Goldkreuz, Baumwollgewand (shamma); Münzen zeigen Herrscher mit Krone und Speer. Kreuz-Münzen ab Ezana.",
+  "ruestung": "Baumwollgewand (shamma), Goldkrone, Speer, Rundschild, Schwert (gerade)",
+  "reittier": "keins",
+  "leibwache": "aksumsp",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Linie aus Speeren hält Stellung",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_kaleb_x1",
+  "quelle": "Prokop, Kosmas Indikopleustes, Himjariten-Inschriften",
+  "hinweis": "Kaleb (Elesbaas, ~510–540), Aksum. Alter geschätzt. Kreuzfahrt gegen Himjar 520–525 (Dhu Nuwas)."
+ },
+ {
+  "name": "Abraha",
+  "aliase": [],
+  "szenarien": [
+   "kaleb"
+  ],
+  "rolle": "feldherr",
+  "kultur": "habescha",
+  "epoche": 1,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: aksumitischer General, dunkelhäutig, kräftig, Baumwollgewand, Eisenhaube.",
+  "ruestung": "Baumwollgewand, Eisenhaube, Rundschild, Speer",
+  "reittier": "pferd",
+  "leibwache": "aksumsp",
+  "eigenschaften": [
+   "ungestuem",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Aksumitische Reiter +Angriff",
+  "stimme": "laut, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Prokop, Inschrift Murayghan (547)",
+  "hinweis": "Abraha, Statthalter von Himjar (~525–570), später „Elefantenjahr“ (Mekka). Alter geschätzt."
+ },
+ {
+  "name": "Dhu Nuwas",
+  "aliase": [],
+  "szenarien": [
+   "kaleb"
+  ],
+  "rolle": "gegner",
+  "kultur": "arabisch",
+  "epoche": 1,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: jüdischer Himjariten-König, Bart, Turban, Kettenhemd; Quellen nennen Pogrom in Nadschran (523).",
+  "ruestung": "Kettenhemd, Spitzhelm, Rundschild, gerades Schwert, Mantel (weiß)",
+  "reittier": "pferd",
+  "leibwache": "himkav",
+  "eigenschaften": [
+   "grausam",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Reiter locken, Fußvolk hält Pass",
+  "stimme": "hart, hoch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Prokop, Syrische Märtyrerakten, Himjariten-Inschriften",
+  "hinweis": "Dhu Nuwas (Yusuf As’ar, ~517–525), König von Himjar; 525 tot. Alter geschätzt."
+ },
+ {
+  "name": "Harun ar-Raschid",
+  "aliase": [
+   "Harun ar-Raschid"
+  ],
+  "szenarien": [
+   "harun"
+  ],
+  "rolle": "held",
+  "kultur": "arabisch",
+  "epoche": 1,
+  "alter": "~22",
+  "aussehen": "Spätere Berichte (Tabari): groß, hellhäutig, wohlgestaltet, mit Bart; Quellenlage dünn, kein zeitgenössisches Bild.",
+  "ruestung": "Kettenhemd unter schwarzem Kaftan (Abbasiden), Spitzhelm mit Turban, gerades Schwert, schwarze Fahne",
+  "reittier": "pferd",
+  "leibwache": "khurasani",
+  "eigenschaften": [
+   "sparsam",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Chorasanische Garde sammelt sich, Moral +",
+  "stimme": "tief, weich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_harun_x1",
+  "quelle": "at-Tabari, al-Masudi (Goldwiesen)",
+  "hinweis": "Harun (763/66–809), Kalif ab 786 (Alter ~22). Tausendundeine Nacht-Bild ist spätere Dichtung, nicht ins Aussehen übernehmen. SC_LEG „harun“."
+ },
+ {
+  "name": "Jafar al-Barmaki",
+  "aliase": [],
+  "szenarien": [
+   "harun"
+  ],
+  "rolle": "feldherr",
+  "kultur": "persisch",
+  "epoche": 1,
+  "alter": "~19",
+  "aussehen": "unbekannt, plausibel: junger Perser, kurzer schwarzer Bart, Turban, Kaftan; Quellen betonen Bildung und Charme.",
+  "ruestung": "Kaftan (grau), Turban, Kettenhemd nur im Feld, gerades Schwert",
+  "reittier": "pferd",
+  "leibwache": "khurasani",
+  "eigenschaften": [
+   "sparsam",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: ordnet Truppen, kurze Befehle",
+  "stimme": "sanft, gebildet",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "at-Tabari, Ibn Chaldun",
+  "hinweis": "Jafar ibn Yahya (767–803), Wesir, Familie Barmakiden; 803 hingerichtet. Im Jahr 786 ca. 19; Rolle als Feldherr historisch nachrangig."
+ },
+ {
+  "name": "Ali ibn Isa",
+  "aliase": [],
+  "szenarien": [
+   "harun"
+  ],
+  "rolle": "feldherr",
+  "kultur": "persisch",
+  "epoche": 1,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Mann mittleren Alters, Bart, Turban, Kaftan, Kettenhemd; Chroniken schildern Gier.",
+  "ruestung": "Kettenhemd, Spitzhelm, Turban, Säbel, Mantel (schwarz)",
+  "reittier": "pferd",
+  "leibwache": "khurasani",
+  "eigenschaften": [
+   "grausam",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Chorasanische Fußtruppen halten",
+  "stimme": "hart, kalt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "at-Tabari (Statthalter von Chorasan)",
+  "hinweis": "Ali ibn Isa ibn Mahan, Statthalter von Chorasan 796–808 (Anachronismus zu 786); verfolgte Rafi ibn al-Layth. Alter geschätzt."
+ },
+ {
+  "name": "Nikephoros",
+  "aliase": [],
+  "szenarien": [
+   "harun"
+  ],
+  "rolle": "gegner",
+  "kultur": "griechisch",
+  "epoche": 1,
+  "alter": "~26",
+  "aussehen": "Münzbilder (Solidus): Bart, Krone mit Kreuz; Theophanes schildert ihn als geizig. Alter Anachronismus (Kaiser 802–811).",
+  "ruestung": "Brustpanzer (Lamellen), Spitzhelm mit Kreuz, Purpurmantel, Schwert",
+  "reittier": "pferd",
+  "leibwache": "kata",
+  "eigenschaften": [
+   "sparsam",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Skutatoi halten Pass, Moral +",
+  "stimme": "nüchtern, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Theophanes Confessor, Münzen",
+  "hinweis": "Nikephoros I. (Kaiser 802–811, gefallen bei Pliska). In der Harun-Geschichte (786) ist Nikephoros noch Finanzminister: Anachronismus."
+ },
+ {
+  "name": "Rafi ibn al-Layth",
+  "aliase": [],
+  "szenarien": [
+   "harun"
+  ],
+  "rolle": "gegner",
+  "kultur": "persisch",
+  "epoche": 1,
+  "alter": "~30",
+  "aussehen": "unbekannt, plausibel: Chorasanischer Rebell, Bart, Turban, Kaftan, Kettenhemd; Quellen nennen nur Herkunft aus Samarkand.",
+  "ruestung": "Kettenhemd, Spitzhelm, Turban, Säbel, Mantel (schwarz)",
+  "reittier": "pferd",
+  "leibwache": "harch",
+  "eigenschaften": [
+   "ungestuem",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Reiter locken Verfolger, Fußvolk bricht aus",
+  "stimme": "hart, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "at-Tabari (806–809)",
+  "hinweis": "Rafi ibn al-Layth, Rebell in Samarkand 806–809 (Entscheidung im Harun-Szenario). Nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Saladin",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "held",
+  "kultur": "arabisch",
+  "epoche": 2,
+  "alter": "31",
+  "aussehen": "Ibn Schaddad und Imad ad-Din: mittelgroß, hager, kurzer dunkler Bart, freundlicher, ernster Ausdruck, leise Stimme; kein gesichertes Porträt (Münzen zeigen Titel, kein Gesicht).",
+  "ruestung": "Kettenhemd unter gelbem Kaftan (Ayyubidenfarbe), Spitzhelm mit Turban, Rundschild (selten), Säbel, gelbe Fahne",
+  "reittier": "pferd",
+  "leibwache": "halqa",
+  "eigenschaften": [
+   "reiter",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen sammeln sich, Moral +, Fahne gelb wirkt weit",
+  "stimme": "leise, höflich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_saladin_x1",
+  "quelle": "Baha ad-Din ibn Schaddad, Imad ad-Din al-Isfahani, Ibn al-Athir",
+  "hinweis": "Salah ad-Din (1137/38–1193). Alter 31 bei Machtantritt in Ägypten 1169. SC_LEG „saladin“. Kein Turban nach „Orientklischee“: schlicht."
+ },
+ {
+  "name": "al-Adil",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "arabisch",
+  "epoche": 2,
+  "alter": "~24",
+  "aussehen": "unbekannt, plausibel: jüngerer Bruder Saladins, kurzer Bart, Turban, Kaftan; spätere Quellen beschreiben ihn als beleibt.",
+  "ruestung": "Kettenhemd, Spitzhelm mit Turban, Säbel, gelber Mantel",
+  "reittier": "pferd",
+  "leibwache": "halqa",
+  "eigenschaften": [
+   "sparsam",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Sammeln: ordnet Nachhut, Versorgung gesichert",
+  "stimme": "trocken, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ibn al-Athir, Ibn Schaddad",
+  "hinweis": "al-Adil Saif ad-Din (Saphadin, 1145–1218), Bruder Saladins; Alter 24 im Jahr 1169."
+ },
+ {
+  "name": "Nur ad-Din",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "gegner",
+  "kultur": "arabisch",
+  "epoche": 2,
+  "alter": "~51",
+  "aussehen": "Ibn al-Athir: groß, dunkel, Bart ohne Schnurrbart, breite Stirn, angenehmer Blick; kein Porträt.",
+  "ruestung": "Kettenhemd, Spitzhelm, Turban, Säbel, Mantel (schwarz-weiß)",
+  "reittier": "pferd",
+  "leibwache": "mamluk",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Mamluken sammeln sich gegen Kreuzfahrer",
+  "stimme": "tief, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ibn al-Athir, Ibn al-Qalanisi",
+  "hinweis": "Nur ad-Din Mahmud (1118–1174), Herrscher von Aleppo/Damaskus; Alter 51 im Jahr 1169. Im Szenario Gegner, historisch Saladins Oberherr."
+ },
+ {
+  "name": "Guido von Lusignan",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~19",
+  "aussehen": "unbekannt, plausibel: Franzose aus Poitou, hübsch, kurzes helles Haar, Schnurrbart/rasiert, Kettenhemd; Quellen (Wilhelm von Tyrus) nennen sein gutes Aussehen.",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (weiß, rotes Kreuz), Dreieckschild, Schwert",
+  "reittier": "pferd",
+  "leibwache": "templer",
+  "eigenschaften": [
+   "ungestuem",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter greifen frontal an, danach Ermüdung",
+  "stimme": "jung, hell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Wilhelm von Tyrus, Ernoul",
+  "hinweis": "Guido, König von Jerusalem 1186–1192. Im Jahr 1169 (Szenario) ~19: Anachronismus, spätere Rolle bei Hattin 1187."
+ },
+ {
+  "name": "Raimund von Tripolis",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~29",
+  "aussehen": "Wilhelm von Tyrus: mager, dunkler Teint, glattes dunkles Haar, Adlernase, schlank; kein Bild.",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (blau), Dreieckschild, Schwert",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "taktiker",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Ritterlinie wartet ab, Ermüdung des Feindes",
+  "stimme": "kühl, leise",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Wilhelm von Tyrus, Ibn al-Athir",
+  "hinweis": "Raimund III. von Tripolis (1140–1187), Graf; Alter 29 im Jahr 1169."
+ },
+ {
+  "name": "Richard Löwenherz",
+  "aliase": [],
+  "szenarien": [
+   "saladin"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~34",
+  "aussehen": "Chronisten: groß (ca. 1,90 m), rötlich-blondes Haar, helle Augen, kräftig, Schnurrbart (oder Vollbart), lange Arme; Grabfigur Fontevraud rasiert-ähnlich.",
+  "ruestung": "Kettenhemd, Topfhelm mit Krone, Waffenrock (weiß, Kreuz), Dreieckschild mit drei Löwen (1198 erstmals belegt, nicht vorher), Schwert, Armbrust (Lieblingswaffe)",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "tapfer",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiterei +Angriff, Ritter brechen die Linie",
+  "stimme": "tief, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ambroise (Estoire), Itinerarium Peregrinorum, Roger von Howden",
+  "hinweis": "Richard I. (1157–1199), Dritter Kreuzzug 1191 (Arsuf). Nicht in heroes.json; Entscheidung im Saladin-Szenario. Drei Löwen erst später belegt."
+ },
+ {
+  "name": "Subutai",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "held",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~61",
+  "aussehen": "Persische Quellen: breit, schwer, im Alter zu dick zum Reiten (Wagen in Ungarn); kein Porträt. Plausibel: Mongole, Zöpfe, Schnurrbart, Pelzmütze.",
+  "ruestung": "Lamellenpanzer aus gelacktem Leder, Eisenhelm mit Nackenschutz, Deel (blau), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongpanz",
+  "eigenschaften": [
+   "taktiker",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Zange: Bogenreiter umfassen den Feind, Flanken +Angriff",
+  "stimme": "tief, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_mongolen_x1",
+  "quelle": "Rashid ad-Din, Dschuwaini, Yuanshi",
+  "hinweis": "Subutai (um 1175–1248), Alter ~61 bei Beginn des Westfeldzugs 1236. Jelme war sein Bruder (nicht verwechseln mit Jelme in Temüjin-Geschichte). SC_LEG „mongolen“ (Held = Dschingis Khan)."
+ },
+ {
+  "name": "Batu Khan",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "feldherr",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~31",
+  "aussehen": "unbekannt, plausibel: jüngerer Chinggisside, Zöpfe, Schnurrbart, Pelzmütze, Lamellenpanzer; Rubruk beschreibt Batu später als „würdig, ernst“.",
+  "ruestung": "Lamellenpanzer, Helm mit Nackenschutz, Deel (rot), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "taktiker",
+   "sieggewohnt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Bogenreiter ordnen sich zu Tumen",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Rashid ad-Din, Plano Carpini, Rubruk",
+  "hinweis": "Batu (um 1205–1255), Gründer der Goldenen Horde; Alter ~31 im Jahr 1236."
+ },
+ {
+  "name": "Möngke",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "feldherr",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~27",
+  "aussehen": "unbekannt, plausibel: Mongolischer Prinz, Zöpfe, Schnurrbart, kräftig; Rashid ad-Din nennt ihn streng und einfach.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (rot), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "standhaft",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Fußvolk deckt Rückzug (selten), sonst Sammeln",
+  "stimme": "knapp, streng",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Rashid ad-Din, Dschuwaini",
+  "hinweis": "Möngke (1209–1259), Großkhan ab 1251; Alter ~27 im Jahr 1236."
+ },
+ {
+  "name": "Köten Khan",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~55",
+  "aussehen": "unbekannt, plausibel: Kiptschak-Fürst, Zöpfe, Schnurrbart, Pelzkappe, Lamellenpanzer.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (blau), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "harch",
+  "eigenschaften": [
+   "schnell",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Bogenreiter locken Gegner in die Falle",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Juzjani, Ibn al-Athir, Hypatios-Chronik",
+  "hinweis": "Köten (Kuthen, † 1241), Kumanen-Khan; nahm 1239 Zuflucht in Ungarn. Alter geschätzt."
+ },
+ {
+  "name": "Juri von Wladimir",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "gegner",
+  "kultur": "slawisch",
+  "epoche": 2,
+  "alter": "~48",
+  "aussehen": "unbekannt, plausibel: russischer Großfürst, Bart, Spitzhelm, Kettenhemd, Fürstenmantel; Chronik nennt Fromme und Entschlossenheit.",
+  "ruestung": "Kettenhemd, Spitzhelm (Typ Černigov), Mandelschild (rot), Schwert, Fürstenmantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Druschina hält die Stellung am Fluss Sit",
+  "stimme": "tief, formell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Laurentius-Chronik, Nowgoroder Chronik",
+  "hinweis": "Juri II. Wsewolodowitsch (1189–1238), Großfürst von Wladimir; Alter ~48 im Jahr 1237; gefallen am Sit 1238."
+ },
+ {
+  "name": "Heinrich der Fromme",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Schlesischer Herzog, Bart, Kettenhemd, Topfhelm, Waffenrock; Überlieferung: nach Legnica 1241 an sechs Zehen erkannt.",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (schwarz mit weißem Adler, Schlesien), Dreieckschild, Lanze",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter reiten den Mongolen entgegen",
+  "stimme": "fest, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Annales Silesiaci, Jan Długosz (spät)",
+  "hinweis": "Heinrich II. der Fromme (um 1196–1241), gefallen bei Legnica (Liegnitz), 9. April 1241. Schlesischer Adler schwarz auf Gold/Weiß, späteres Wappen."
+ },
+ {
+  "name": "König Béla",
+  "aliase": [],
+  "szenarien": [
+   "mongolen"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: Ungarischer König, hochgewachsen (Chronik), Bart, Kettenhemd, Krone; Wappen späteres Árpád-Streifen.",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (rot-weiß), Dreieckschild, Lanze",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Sammeln: sammelt Ritter, danach Rückzug nach Sajó (Mohi)",
+  "stimme": "tief, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Rogerius (Carmen miserabile), Thomas von Spalato",
+  "hinweis": "Béla IV. (1206–1270), Mohi 1241. Szenariojahr 1236: Alter ~30 (Béla war seit 1235 König)."
+ },
+ {
+  "name": "Mansa Musa",
+  "aliase": [],
+  "szenarien": [
+   "mansa"
+  ],
+  "rolle": "held",
+  "kultur": "afrikanisch",
+  "epoche": 2,
+  "alter": "~32",
+  "aussehen": "Katalanischer Atlas (1375): thronend, goldene Krone, Goldklumpen in der Hand, Zepter, dunkelhäutig, Bart; Quelle: Ibn Chaldun, al-Umari beschreiben ihn jung, freigebig.",
+  "ruestung": "Boubou (blau-weiß), Turban mit Goldschmuck, gesteppter Panzer bei Feldzug, Schwert (gerade), Speer",
+  "reittier": "pferd",
+  "leibwache": "mandinka",
+  "eigenschaften": [
+   "sparsam",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Reiter und Fußvolk sammeln sich, Gold +Moral",
+  "stimme": "tief, warm",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_mansa_x1",
+  "quelle": "Katalanischer Atlas, al-Umari, Ibn Chaldun, Ibn Battuta",
+  "hinweis": "Mansa Musa I. (um 1280–1337), Pilgerfahrt Mekka 1324. Alter ~32 bei Amtsantritt 1312. SC_LEG „mansa“."
+ },
+ {
+  "name": "Saran Mandian",
+  "aliase": [],
+  "szenarien": [
+   "mansa"
+  ],
+  "rolle": "feldherr",
+  "kultur": "afrikanisch",
+  "epoche": 2,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Mande-General, kräftig, Boubou, Lederkappe, Bart; Quelle: al-Umari nennt „Sagmanja“ als Heerführer.",
+  "ruestung": "Boubou, gesteppter Panzer, Lederkappe, Speer, Schwert",
+  "reittier": "pferd",
+  "leibwache": "mandinka",
+  "eigenschaften": [
+   "taktiker",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiterei +Angriff, Gao-Feldzug",
+  "stimme": "laut, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "al-Umari (Masalik al-Absar), Ibn Chaldun",
+  "hinweis": "Name unsicher: Tradition kennt „Saran Mandian“ / „Sagmandir“ (Eroberung Gaos). Quellenlage dünn, Szenario-Zuordnung unsicher."
+ },
+ {
+  "name": "Enrico Dandolo",
+  "aliase": [],
+  "szenarien": [
+   "venedig"
+  ],
+  "rolle": "held",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~91",
+  "aussehen": "Villehardouin: blind bzw. fast blind, aber Augen wirken normal; Dogenmütze (corno), weißer Bart, hohe Statur; Quellen: Geoffroi de Villehardouin, Andrea Dandolo.",
+  "ruestung": "Gewand (rot, Dogenmantel), Dogenhut (Corno), Kettenhemd unter dem Mantel bei Landung, Schwert",
+  "reittier": "keins",
+  "leibwache": "balestr",
+  "eigenschaften": [
+   "belagerer",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: spricht zu den Galeeren, Moral +, Landung Zara",
+  "stimme": "alt, scharf",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_venedig_x1",
+  "quelle": "Villehardouin, Robert de Clari, Andrea Dandolo",
+  "hinweis": "Enrico Dandolo (um 1107–1205), Doge ab 1192, Alter ~91 im Jahr 1198. Hoher Alter ist historisch (Zeitgenossen wundern sich). SC_LEG „venedig“."
+ },
+ {
+  "name": "Alexios III.",
+  "aliase": [],
+  "szenarien": [
+   "venedig"
+  ],
+  "rolle": "gegner",
+  "kultur": "griechisch",
+  "epoche": 2,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: byzantinischer Kaiser, Bart, Krone (Stemma), Purpurmantel; Niketas Choniates kritisiert Schwäche.",
+  "ruestung": "Lamellen-Brustpanzer, Spitzhelm, Purpurmantel, Schwert",
+  "reittier": "pferd",
+  "leibwache": "varanger",
+  "eigenschaften": [
+   "zoegerlich",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Warägergarde hält am Hafen, Rückzug",
+  "stimme": "nüchtern, schwach",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Niketas Choniates, Villehardouin",
+  "hinweis": "Alexios III. Angelos (Kaiser 1195–1203). Szenariojahr 1198 (Venedig)."
+ },
+ {
+  "name": "Lamba Doria",
+  "aliase": [],
+  "szenarien": [
+   "venedig"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~53",
+  "aussehen": "unbekannt, plausibel: Genuesischer Admiral, Bart, Kettenhemd, Helm.",
+  "ruestung": "Kettenhemd, Helm, Waffenrock (weiß mit rotem Kreuz Genuas), Armbrust",
+  "reittier": "keins",
+  "leibwache": "balestr",
+  "eigenschaften": [
+   "taktiker",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Armbrustschützen auf Galeeren",
+  "stimme": "kräftig, heiser",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Jacopo Doria (Annalen), Marco Polo (Gefangenschaft)",
+  "hinweis": "Lamba Doria (um 1245–1323), Sieg bei Curzola 1298 über Venedig. Anachronismus zu 1198. Rolle: Gegner zur See."
+ },
+ {
+  "name": "Bonifatius von Montferrat",
+  "aliase": [],
+  "szenarien": [
+   "venedig"
+  ],
+  "rolle": "gegner",
+  "kultur": "latein",
+  "epoche": 2,
+  "alter": "~51",
+  "aussehen": "unbekannt, plausibel: Italienischer Markgraf, stattlich, Bart oder rasiert, Kettenhemd; Troubadour-Mäzen.",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (blau-weiß), Dreieckschild, Lanze",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter reiten vor, Reiterei +Angriff",
+  "stimme": "fest, hoch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Villehardouin, Robert de Clari",
+  "hinweis": "Bonifaz von Montferrat (um 1150–1207), Anführer des Vierten Kreuzzugs ab 1201 (Zara). Nicht in heroes.json; Entscheidung im Venedig-Szenario „ven_zara“, ergänzt."
+ },
+ {
+  "name": "Ulman Stromer",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "held",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "27",
+  "aussehen": "Püchel von mein geslechet: Nürnberger Patrizier, Händler und Ratsherr; kein Porträt. Plausibel: Bart, Barett, Wams mit Mantel.",
+  "ruestung": "Wams, Barett, Brigantine im Lager, Streitkolben, Armbrust",
+  "reittier": "keins",
+  "leibwache": "armbr",
+  "eigenschaften": [
+   "sparsam",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Armbrustschützen auf der Stadtmauer",
+  "stimme": "nüchtern, genau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ulman Stromer, Püchel von mein geslechet und von abentewr (um 1390)",
+  "hinweis": "Ulman Stromer (1329–1407). Kein Berufsfeldherr: Stadtpatrizier und Kaufmann. Alter 27 im Jahr 1356."
+ },
+ {
+  "name": "Burggraf Albrecht",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "~37",
+  "aussehen": "unbekannt, plausibel: Hohenzollern-Burggraf, Bart, Kettenhemd, Topfhelm, Waffenrock (schwarz-weiß).",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (schwarz-weiß, Zollern), Dreieckschild, Lanze",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "ungestuem",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter greifen Stadt an, danach Ermüdung",
+  "stimme": "tief, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik der Stadt Nürnberg, Meisterlin",
+  "hinweis": "Wahrscheinlich Albrecht der Schöne (1319–1361), Burggraf von Nürnberg: Zuordnung unsicher (Code sagt nur „Burggraf Albrecht“)."
+ },
+ {
+  "name": "Karl IV.",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "Votivbild von Jan Očko (um 1371): rundes Gesicht, hohe Stirn, kurzer brauner Bart, kräftige Nase, gedrungene Gestalt; Kaiserkrone.",
+  "ruestung": "Reichsrock (Kaisermantel), Krone, Kettenhemd im Feld, Schwert (Reichsschwert)",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Ritter schützen Reichstag, Moral +",
+  "stimme": "ruhig, formal",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Johann von Neumarkt, Přibík Pulkava, Votivbild Očko",
+  "hinweis": "Karl IV. (1316–1378), Goldene Bulle in Nürnberg/Metz 1356; Alter ~40. Im Szenario als Gegner."
+ },
+ {
+  "name": "Stephan II.",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "unbekannt (~37)",
+  "aussehen": "unbekannt, plausibel: bayerischer Herzog, Bart, Kettenhemd, Topfhelm, Waffenrock (blau-weiß Rauten).",
+  "ruestung": "Kettenhemd, Topfhelm, Waffenrock (blau-weiß), Dreieckschild, Lanze",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "ungestuem",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter greifen zügig an",
+  "stimme": "laut, derb",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik Bayerns (spät), Urkunden",
+  "hinweis": "Unsicher: vermutlich Stephan II. von Bayern („mit der Hafte“, 1319–1375). Zuordnung zum Szenario unklar (Code nennt nur „Stephan II.“)."
+ },
+ {
+  "name": "Albrecht Achilles",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "35",
+  "aussehen": "Spätere Bildnisse: kräftig, kurzes dunkles Haar, rasiert oder Schnurrbart (nicht belegt für 1449), Rüstung; Quellen schildern ihn als streitbar.",
+  "ruestung": "Plattenharnisch (Halbharnisch), Armet oder Schaller, Waffenrock (schwarz-weiß), Lanze, Streitkolben",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "tapfer",
+   "grausam"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter +Angriff, schwere Reiter reiten Fußvolk nieder",
+  "stimme": "tief, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Fränkische Chroniken, Erhard Schürstab (Zeitgenosse)",
+  "hinweis": "Albrecht Achilles (1414–1486), Markgraf von Brandenburg-Ansbach, Markgrafenkrieg 1449–1450. Anachronismus zu 1356 (Hook „Städtekrieg“). Nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Erhard Schürstab",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "feldherr",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "~39",
+  "aussehen": "unbekannt, plausibel: Nürnberger Hauptmann und Patrizier, Bart, Barett, Brigantine; Chronik des Ersten Markgrafenkriegs (1449).",
+  "ruestung": "Brigantine, Barett, Armbrust, Schwert, Mantel (rot)",
+  "reittier": "keins",
+  "leibwache": "armbr",
+  "eigenschaften": [
+   "sparsam",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Armbrustschützen an den Stadttoren",
+  "stimme": "nüchtern, genau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Erhard Schürstab (Chronik des Ersten Markgrafenkriegs)",
+  "hinweis": "Erhard Schürstab (um 1410–1470), Nürnberger Kriegshauptmann 1449. Anachronismus zu 1356. Nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Willibald Pirckheimer",
+  "aliase": [],
+  "szenarien": [
+   "nuernberg"
+  ],
+  "rolle": "feldherr",
+  "kultur": "germanisch",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "Dürer-Bildnisse (1503, 1524): kräftiges, breites Gesicht, schwere Lider, später Vollbart; Gelehrtenmantel.",
+  "ruestung": "Wams, Barett, Brigantine nur im Feldzug (Schweizerkrieg 1499), Schwert",
+  "reittier": "pferd",
+  "leibwache": "hellebarde",
+  "eigenschaften": [
+   "sparsam",
+   "ingenieur"
+  ],
+  "faehigkeit_schlacht": "Sammeln: ordnet Nürnberger Kontingent",
+  "stimme": "ruhig, belesen",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Pirckheimer (Schweizerkrieg), Dürer-Bildnisse",
+  "hinweis": "Nur als SC_LEG-Held „nuernberg“: Pirckheimer (1470–1530) lebte 150 Jahre nach dem Szenariojahr 1356. Vermächtnisfigur (Kampagnenhelden-Slot). Alter 40 im Schweizerkrieg 1499."
+ },
+ {
+  "name": "Temüjin",
+  "aliase": [
+   "Dschingis Khan"
+  ],
+  "szenarien": [
+   "temujin",
+   "mongolen"
+  ],
+  "rolle": "held",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "Juzjani: groß, kräftig, „Katzenaugen“; Rashid ad-Din: Borjigin oft mit rötlichem Haar und hellen Augen; Bart schütter, Zöpfe; kein zeitgenössisches Bild (Yuan-Porträt ist posthum).",
+  "ruestung": "Lamellenpanzer aus Leder, Eisenhelm mit Nackenschutz, Deel (blau), Säbel, Bogen, Tug (Standarte mit Yakschwänzen)",
+  "reittier": "pferd",
+  "leibwache": "mongpanz",
+  "eigenschaften": [
+   "reiter",
+   "sieggewohnt"
+  ],
+  "faehigkeit_schlacht": "Zange: Bogenreiter umfassen, schwere Reiter stoßen nach",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte der Mongolen, Rashid ad-Din, Juzjani",
+  "hinweis": "Dschingis Khan. Alter ~40 im Jahr 1202 (Geburtsjahr unsicher: 1155, 1162 oder 1167). SC_LEG hat zwei Einträge (mongolen, temujin) für dieselbe Person: Eigenschaften reiter+sieggewohnt (temujin) bzw. reiter+schnell (mongolen). SC_LEG hat Dschingis Khan zweimal: „mongolen“ (Eigenschaften reiter, schnell) und „temujin“ (reiter, sieggewohnt); gleiche Person."
+ },
+ {
+  "name": "Boʼorchu",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~42",
+  "aussehen": "unbekannt, plausibel: Mongolischer Gefährte, Zöpfe, Schnurrbart, Lamellenpanzer.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (rot), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: hält Ger-Tür, Rückzug sichert",
+  "stimme": "treu, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte (§ 90 ff.)",
+  "hinweis": "Boʼorchu (Bo‘orču), engster Gefährte Temüjins. Geburtsjahr unsicher."
+ },
+ {
+  "name": "Jelme",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Uriankhai-Krieger, Schnurrbart, Lamellenpanzer.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (blau), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "schnell",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Bogenschützen aus Verstecken",
+  "stimme": "knapp, heiser",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte",
+  "hinweis": "Jelme (Jälmä), Gefährte Temüjins und Bruder von Subutai; nicht zu verwechseln mit dem Westfeldzug-Subutai."
+ },
+ {
+  "name": "Megüjin Seʼültü",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "unbekannt (~45)",
+  "aussehen": "unbekannt, plausibel: Stammesfürst, Zöpfe, Schnurrbart, Fell- und Lederkleidung.",
+  "ruestung": "Lederpanzer, Helm, Deel (braun), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_steppe_e2_cav",
+  "eigenschaften": [
+   "ungestuem",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiterei greift unvorbereitet an",
+  "stimme": "laut, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte (Merkit-/Tatarenkreis)",
+  "hinweis": "Zuordnung unsicher: „Megüjin Seʼültü“ erscheint in der Geheimen Geschichte als Stammesführer; Stammeszuordnung der Quelle nicht eindeutig (Tataren/Merkit)."
+ },
+ {
+  "name": "Toghrul",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~70",
+  "aussehen": "unbekannt, plausibel: alter Kereit-Khan, Bart, Nestorianisches Kreuz, Pelzmantel; Quellen beschreiben seinen Hof.",
+  "ruestung": "Lamellenpanzer, Pelzhut, Deel (rot), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_steppe_e2_cav",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Kereit-Reiter in dichter Linie",
+  "stimme": "tief, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte, Rashid ad-Din",
+  "hinweis": "Toghrul (Ong Khan, Wang Khan, † 1203), Kereit-Khan, erst Verbündeter, dann Gegner Temüjins. Alter ~70 (unsicher)."
+ },
+ {
+  "name": "Toqtoʼa Beki",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Merkit-Häuptling, Zöpfe, Schnurrbart, Lederpanzer.",
+  "ruestung": "Lederpanzer, Helm, Deel (braun), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_steppe_e2_cav",
+  "eigenschaften": [
+   "schnell",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Reiter im Wald verborgen",
+  "stimme": "rau, schnell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte, Rashid ad-Din",
+  "hinweis": "Toqtoʼa Beki, Merkit-Häuptling, entführte Börte. Alter unsicher."
+ },
+ {
+  "name": "Tayang Khan",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Naiman-Khan, Zöpfe, Schnurrbart, nestorianisch beeinflusste Tracht; Quellen: weich und selbstgefällig.",
+  "ruestung": "Lamellenpanzer, Helm, Deel (blau), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_steppe_e2_cav",
+  "eigenschaften": [
+   "ungestuem",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Naiman-Reiter greifen an",
+  "stimme": "hoch, selbstbewusst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Geheime Geschichte, Rashid ad-Din",
+  "hinweis": "Tayang Khan (Tai Buqa, † 1204), Naiman-Khan. Alter geschätzt."
+ },
+ {
+  "name": "Li Anquan",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~32",
+  "aussehen": "unbekannt, plausibel: Xixia (Tangut) Herrscher, geschorener Scheitel mit Haarsträhnen an den Schläfen, Kettenhemd, Chinesische Robe.",
+  "ruestung": "Eisenhelm, Lamellen, Rundschild, Säbel, Mantel (gelb-schwarz)",
+  "reittier": "pferd",
+  "leibwache": "basis_china_e2_cav",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Xixia-Fußvolk hält Passstellung",
+  "stimme": "ernst, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Xi Xia Shu Shi, Geheime Geschichte",
+  "hinweis": "Li Anquan (1170–1211), Kaiser Xiangzong von Xixia (1206–1211). Im Jahr 1202 nur Thronfolger (Alter ~32). Anachronismus des Titels."
+ },
+ {
+  "name": "Wanyan Jiujin",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Jurchen-General der Jin, Zopf, rasierter Vorderkopf (Jurchen-Tracht), Lamellenpanzer, Bart.",
+  "ruestung": "Lamellenpanzer, Helm, Rundschild, Dao, Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "basis_china_e2_cav",
+  "eigenschaften": [
+   "taktiker",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Zange: Reiter und Fußvolk umfassen den Feind",
+  "stimme": "tief, kühl",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Jin Shi, Yuan Shi",
+  "hinweis": "Wanyan Jiujin (Wanyan Jiujin, Jin-General um 1200). Genaue Lebensdaten unsicher."
+ },
+ {
+  "name": "Heshilie Zhizhong",
+  "aliase": [],
+  "szenarien": [
+   "temujin"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "unbekannt (~45)",
+  "aussehen": "unbekannt, plausibel: Jin-General (Khitan-Herkunft), Lamellenpanzer, Bart.",
+  "ruestung": "Lamellenpanzer, Helm, Rundschild, Dao, Mantel (grün)",
+  "reittier": "pferd",
+  "leibwache": "basis_china_e2_cav",
+  "eigenschaften": [
+   "zoegerlich",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Fußvolk in Linie",
+  "stimme": "kühl, formell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Jin Shi",
+  "hinweis": "Heshilie Zhizhong (Jin-General, Yehuling 1211): Anachronismus zu 1202. Lebensdaten unsicher."
+ },
+ {
+  "name": "Kublai",
+  "aliase": [
+   "Kublai Khan"
+  ],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "held",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~45",
+  "aussehen": "Marco Polo: mittelgroß, wohlgebaut, helle Haut mit roten Wangen, schwarze Augen, wohlgeformte Nase; Anige-Porträt (1280er): rundes Gesicht, dünner Bart und Schnurrbart.",
+  "ruestung": "Lamellenpanzer, Eisenhelm mit Nackenschutz, Deel (gelb-gold, Yuan-Herrscher), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongpanz",
+  "eigenschaften": [
+   "baumeister",
+   "richter"
+  ],
+  "faehigkeit_schlacht": "Sammeln: ordnet Tumen, Belagerer zuerst (Chinkat)",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Marco Polo, Rashid ad-Din, Yuan Shi, Anige-Porträt",
+  "hinweis": "Kublai Khan (1215–1294). Alter ~45 im Jahr 1260. SC_LEG „kublai“."
+ },
+ {
+  "name": "Bayan",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "feldherr",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~24",
+  "aussehen": "unbekannt, plausibel: junger Mongole, Zöpfe, Schnurrbart, Lamellenpanzer; Quellen (Yuan Shi): hochgewachsen, ruhig.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (rot), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "taktiker",
+   "belagerer"
+  ],
+  "faehigkeit_schlacht": "Zange: Flotte und Reiter umfassen Städte",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Yuan Shi",
+  "hinweis": "Bayan von den Baarin (1236–1295); Alter ~24 im Jahr 1260 (noch jung, später Eroberer der Song)."
+ },
+ {
+  "name": "Liu Bingzhong",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "feldherr",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~44",
+  "aussehen": "unbekannt, plausibel: Chinesischer Berater, ehemaliger Mönch, Gelehrtenrobe, Bart (Quelle: Yuan Shi).",
+  "ruestung": "Gelehrtenrobe, Kappe, kein Panzer",
+  "reittier": "keins",
+  "leibwache": "basis_china_e2_spear",
+  "eigenschaften": [
+   "baumeister",
+   "richter"
+  ],
+  "faehigkeit_schlacht": "Sammeln: ordnet Verwaltung, Versorgung +",
+  "stimme": "ruhig, gebildet",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Yuan Shi",
+  "hinweis": "Liu Bingzhong (1216–1274), Berater Kublais, Planer von Shangdu; kein Feldherr im strengen Sinn."
+ },
+ {
+  "name": "Ariq Böke",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 2,
+  "alter": "~41",
+  "aussehen": "unbekannt, plausibel: jüngster Sohn Tolui, Zöpfe, Schnurrbart, Fell- und Lamellenpanzer.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Deel (blau), Säbel, Bogen",
+  "reittier": "pferd",
+  "leibwache": "mongbog",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Reiter sammeln sich um die Horde",
+  "stimme": "tief, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Rashid ad-Din, Yuan Shi",
+  "hinweis": "Ariq Böke (um 1219–1266), Gegner Kublais im Thronstreit 1260."
+ },
+ {
+  "name": "Lü Wenhuan",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~47",
+  "aussehen": "unbekannt, plausibel: Song-General, Bart, Lamellenpanzer, Helm.",
+  "ruestung": "Lamellenpanzer, Eisenhelm, Rundschild, Dao, Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "basis_china_e2_spear",
+  "eigenschaften": [
+   "standhaft",
+   "bollwerk"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Verteidigung der Stadt Xiangyang",
+  "stimme": "ernst, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Song Shi, Yuan Shi",
+  "hinweis": "Lü Wenhuan (1213–1274), Verteidiger von Xiangyang 1268–1273. Anachronismus zu 1260."
+ },
+ {
+  "name": "Jia Sidao",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~47",
+  "aussehen": "unbekannt, plausibel: Song-Kanzler, Beamtenrobe, kurzer Bart; Quellen: korrupt und eitel.",
+  "ruestung": "Beamtenrobe, Kappe, Brustpanzer nur im Feld, Dao",
+  "reittier": "keins",
+  "leibwache": "basis_china_e2_spear",
+  "eigenschaften": [
+   "zoegerlich",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Truppen ordnen, kaum Wirkung (Zögerlich)",
+  "stimme": "hoch, selbstgefällig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Song Shi, Yuan Shi",
+  "hinweis": "Jia Sidao (1213–1275), Song-Kanzler; Schlacht von Dingjiazhou 1275. Alter ~47 im Jahr 1260."
+ },
+ {
+  "name": "Ismail",
+  "aliase": [
+   "Ismail und Ala ad-Din"
+  ],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "feldherr",
+  "kultur": "persisch",
+  "epoche": 2,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Persischer Ingenieur, Bart, Turban, Kaftan.",
+  "ruestung": "Kaftan, Turban, Lederschürze",
+  "reittier": "keins",
+  "leibwache": "chinkat",
+  "eigenschaften": [
+   "ingenieur",
+   "belagerer"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Blide richtet Salve auf Mauer",
+  "stimme": "leise, genau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Yuan Shi (Ismail, Ala ad-Din)",
+  "hinweis": "Ismail (Yisima’yin) und Ala ad-Din (Alawadin) waren muslimische Ingenieure Kublais; Gegengewichtsblide bei Xiangyang 1272. Szenario nennt beide als eine Person („Ismail und Ala ad-Din“) und 1260: zwei Personen, Anachronismus."
+ },
+ {
+  "name": "Ala ad-Din",
+  "aliase": [],
+  "szenarien": [
+   "kublai"
+  ],
+  "rolle": "feldherr",
+  "kultur": "arabisch",
+  "epoche": 2,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Ingenieur aus Mosul, Bart, Turban, Kaftan.",
+  "ruestung": "Kaftan, Turban, Lederschürze",
+  "reittier": "keins",
+  "leibwache": "chinkat",
+  "eigenschaften": [
+   "ingenieur",
+   "belagerer"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Blide richtet Salve auf Mauer",
+  "stimme": "leise, genau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Yuan Shi",
+  "hinweis": "Zweite Person zu „Ismail und Ala ad-Din“ (siehe dort)."
+ },
+ {
+  "name": "Zheng He",
+  "aliase": [],
+  "szenarien": [
+   "zhenghe"
+  ],
+  "rolle": "held",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~34",
+  "aussehen": "Ming Shi: sehr groß (ca. 2 m, „neun Chi“), kräftiger Bau, hohe Wangenknochen, kleine Nase, klare Augen, helle Ohren, volle Stimme, Gang „wie ein Tiger“; Eunuch, ohne Bart.",
+  "ruestung": "Ming-Beamtenrobe (rot), Rangtafel, Schwert, Brigantine nur im Feld",
+  "reittier": "keins",
+  "leibwache": "basis_china_e2_spear",
+  "eigenschaften": [
+   "entdecker",
+   "richter"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Flotte sammelt sich, Landungstruppe formiert sich",
+  "stimme": "tief, voll",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ming Shi, Yingya Shenglan (Ma Huan), Gedenksteine in Liujiagang",
+  "hinweis": "Zheng He (1371–1433), muslimischer Eunuch (ursprünglich Ma He). Alter ~34 im Jahr 1405 (erste Schatzflotte). SC_LEG „zhenghe“."
+ },
+ {
+  "name": "Zhu Neng",
+  "aliase": [],
+  "szenarien": [
+   "zhenghe"
+  ],
+  "rolle": "feldherr",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: Ming-General, Bart, Brigantine, Helm; Quellen: Heerführer in Yongles Kriegen.",
+  "ruestung": "Brigantine, Helm (Ming), Rundschild, Dao, Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "basis_china_e2_cav",
+  "eigenschaften": [
+   "tapfer",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiterei +Angriff, Vorhut",
+  "stimme": "laut, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ming Shi",
+  "hinweis": "Zhu Neng (1370–1406), Ming-General (Jingnan-Feldzug). Rolle im Szenario unsicher."
+ },
+ {
+  "name": "Chen Zuyi",
+  "aliase": [],
+  "szenarien": [
+   "zhenghe"
+  ],
+  "rolle": "gegner",
+  "kultur": "chinesisch",
+  "epoche": 2,
+  "alter": "unbekannt (~45)",
+  "aussehen": "unbekannt, plausibel: Piratenführer von Palembang, Schnurrbart, Zopf, Seemannskleidung, Kettenhemd.",
+  "ruestung": "Kettenhemd, Rundschild, Dao, Mantel (grün)",
+  "reittier": "keins",
+  "leibwache": "basis_sea_e2_sword",
+  "eigenschaften": [
+   "pluenderer",
+   "grausam"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Schiffe verstecken sich in der Flussmündung",
+  "stimme": "heiser, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Ming Shi, Ma Huan",
+  "hinweis": "Chen Zuyi (Piratenhäuptling in Palembang, 1407 von Zheng He besiegt). Alter nicht überliefert."
+ },
+ {
+  "name": "Hiawatha",
+  "aliase": [],
+  "szenarien": [
+   "haudenosaunee"
+  ],
+  "rolle": "held",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Mohawk, Haarlocke (Skalplocke), Wildleder, Wampum-Gürtel; mündliche Überlieferung statt Bilder.",
+  "ruestung": "Wildlederkleidung, Wampum-Gürtel, Federn, Gastoweh (Keule), Bogen",
+  "reittier": "keins",
+  "leibwache": "waldkr",
+  "eigenschaften": [
+   "redner",
+   "richter"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Stämme sammeln sich unter Wampum, Moral +",
+  "stimme": "ruhig, bedacht",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Mündliche Überlieferung (Wampum), Legende",
+  "hinweis": "Hiawatha (Hayenwatha), Legende (SC_LEG „haudenosaunee“). Nicht mit Longfellows Gedicht (1855) verwechseln. Datierung unsicher (um 1450 oder 1142)."
+ },
+ {
+  "name": "Der Friedensstifter",
+  "aliase": [],
+  "szenarien": [
+   "haudenosaunee"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt",
+  "aussehen": "unbekannt, plausibel: Huronen-Mann (Deganawida), Wildleder, Federn, Wampum; mündliche Überlieferung.",
+  "ruestung": "Wildlederkleidung, Federn, Wampum, Beil",
+  "reittier": "keins",
+  "leibwache": "waldkr",
+  "eigenschaften": [
+   "redner",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Stämme sammeln sich, Friede macht Moral +",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Mündliche Überlieferung (Deganawida)",
+  "hinweis": "Der Große Friedensstifter (Deganawida), Gründer des Bundes. Im Code anonym („Der Friedensstifter“); traditionell Deganawida. Der Name wird in der Überlieferung teils bewusst nicht genannt: Verwendung mit Haudenosaunee-Quellen abstimmen."
+ },
+ {
+  "name": "Atironta",
+  "aliase": [],
+  "szenarien": [
+   "haudenosaunee"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt",
+  "aussehen": "Legende: Onondaga-Häuptling, Schlangen im Haar (Sage); plausibel: Haarkranz, Wildleder, Federn, Keule.",
+  "ruestung": "Wildleder, Federn, Gastoweh (Keule), Muschelketten",
+  "reittier": "keins",
+  "leibwache": "waldkr",
+  "eigenschaften": [
+   "ungestuem",
+   "grausam"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Keulenkrieger +Angriff",
+  "stimme": "heiser, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Mündliche Überlieferung (Atotarho)",
+  "hinweis": "Atironta (Atotarho/Tadodaho): legendärer Onondaga-Häuptling, in der Sage „Schlangenhaar“. Historisch ungesichert."
+ },
+ {
+  "name": "Tlacaelel",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "held",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~43",
+  "aussehen": "Quellen (Durán, Tezozómoc): Cihuacoatl, Berater der Tlatoani, Haar geschnitten, Baumwollmantel (xicolli) mit Rangzeichen; kein zeitgenössisches Bild.",
+  "ruestung": "Baumwollpanzer (ichcahuipilli), Federschmuck, Rundschild (chimalli), Macuahuitl",
+  "reittier": "keins",
+  "leibwache": "adlerkr",
+  "eigenschaften": [
+   "baumeister",
+   "richter"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Kriegsrat sammelt Truppen, Moral +",
+  "stimme": "tief, würdig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Diego Durán, Tezozómoc, Codex Mendoza",
+  "hinweis": "Tlacaelel (1397–1487), Cihuacoatl, „Architekt“ des Aztekenreiches. Alter ~43 im Jahr 1440. SC_LEG „dreibund“."
+ },
+ {
+  "name": "Moctezuma Ilhuicamina",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~42",
+  "aussehen": "Codex Mendoza: Tlatoani mit Diadem (xiuhuitzolli), blauer Mantel, Haar im Knoten; Gesicht nicht porträtiert.",
+  "ruestung": "Baumwollpanzer (Ichcahuipilli), Federhaube, Rundschild, Macuahuitl, Mantel (türkis)",
+  "reittier": "keins",
+  "leibwache": "jaguar",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Jaguarkrieger decken Rückzug",
+  "stimme": "tief, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Codex Mendoza, Durán, Tezozómoc",
+  "hinweis": "Moctezuma I. Ilhuicamina (1398–1469), Tlatoani 1440–1469; nicht mit Moctezuma II. (Xocoyotzin) verwechseln."
+ },
+ {
+  "name": "Atonal",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Altmexikanischer Fürst, Baumwollmantel, Federn, Haarknoten.",
+  "ruestung": "Baumwollpanzer, Federschmuck, Rundschild, Macuahuitl",
+  "reittier": "keins",
+  "leibwache": "basis_indigen_e3_spear",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Fußvolk bildet Linie",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "unklar (Cempoala/Totonaken?)",
+  "hinweis": "UNSICHER: „Atonal“ lässt sich keiner Person sicher zuordnen (Name bedeutet „Wassersonne“, auch Fürstentitel). Quellenlage dünn."
+ },
+ {
+  "name": "Herr von Cempoala",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt",
+  "aussehen": "Bernal Díaz (1519): beleibter Totonaken-Kazike („fetter Kazike“), Lippenpflock, Baumwollmantel; kein Name überliefert.",
+  "ruestung": "Baumwollmantel, Federschmuck, Rundschild, Speer",
+  "reittier": "keins",
+  "leibwache": "basis_indigen_e3_spear",
+  "eigenschaften": [
+   "sparsam",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Totonaken halten Stadt",
+  "stimme": "schwer, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Bernal Díaz, Cortés (Cartas de relación)",
+  "hinweis": "Titel statt Name („Herr von Cempoala“); 1519 Verbündeter Cortés (Szenario 1440: Anachronismus). Keine Aussage über 1440."
+ },
+ {
+  "name": "Tzitzipandácuare",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt",
+  "aussehen": "Relación de Michoacán (um 1540): Purépecha-Herrscher, Haar geschnitten, Federmantel, Kupferschmuck; Bild (Relación) schematisch.",
+  "ruestung": "Baumwollpanzer, Federkrone, Rundschild, Bogen, Kupferbeil",
+  "reittier": "keins",
+  "leibwache": "tarbog",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Bogenschützen auf Anhöhe",
+  "stimme": "tief, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Relación de Michoacán",
+  "hinweis": "Tzitzipandácuare (Cazonci von Michoacán, um 1520–1530): Anachronismus zu 1440 (Szenariojahr). Frühere Cazonci: Tariácuri."
+ },
+ {
+  "name": "Kʼiqʼab",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~40",
+  "aussehen": "Popol Vuh / Titulo de Totonicapán: Kʼicheʼ-König, Federkrone, Jaguarmantel, Jadeschmuck; Maya-Gestalt nach Reliefs: kräftig, mit Ohrpflöcken.",
+  "ruestung": "Baumwollpanzer, Federhelm, Holzschild, Speer, Obsidianschwert",
+  "reittier": "keins",
+  "leibwache": "basis_indigen_e3_sword",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Krieger greifen an, Moral +",
+  "stimme": "tief, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Popol Vuh, Titulo de Totonicapán",
+  "hinweis": "Kʼiqʼab (Kʼicheʼ-König, r. ~1425–1475), Eroberer von Qʼumarkaj; Alter ~40 im Jahr 1440."
+ },
+ {
+  "name": "Tutul Xiu",
+  "aliase": [],
+  "szenarien": [
+   "dreibund"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt (~40)",
+  "aussehen": "unbekannt, plausibel: Maya-Fürst von Maní, Federschmuck, Jadeohrpflöcke, Baumwollmantel (nach Wandbildern von Bonampak).",
+  "ruestung": "Baumwollpanzer, Federhelm, Holzschild, Speer, Obsidianschwert",
+  "reittier": "keins",
+  "leibwache": "holkan",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Holkan decken die Stadt",
+  "stimme": "ruhig, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Landa (Relación de las cosas de Yucatán), Chilam Balam",
+  "hinweis": "Tutul Xiu (Dynastie von Maní, Yucatán): Zuordnung zu 1440 unsicher (Landa 1566 nennt Namen und Titel)."
+ },
+ {
+  "name": "Cuauhtémoc",
+  "aliase": [],
+  "szenarien": [
+   "cuauhtemoc"
+  ],
+  "rolle": "held",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~22",
+  "aussehen": "Bernal Díaz: wohlgebauter junger Mann mit längerem, heiterem Gesicht und etwas hellerem Teint als die übrigen Mexica; Codices (Florentiner Kodex) zeigen ihn schematisch.",
+  "ruestung": "Baumwollpanzer (ichcahuipilli), Federhelm, Rundschild (chimalli) mit Federmosaik, Macuahuitl, Mantel (blau)",
+  "reittier": "keins",
+  "leibwache": "adlerkr",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Adlerkrieger halten die Brücke, Moral +",
+  "stimme": "jung, fest",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_cuauhtemoc_x1",
+  "quelle": "Bernal Díaz, Sahagún (Florentiner Kodex), Cortés (Cartas de relación)",
+  "hinweis": "Cuauhtémoc (~1497–1525), letzter Tlatoani, ab 1520. Alter ~22 im Jahr 1519 (Geburtsjahr unsicher). Quellenlage spanisch bzw. nahuatl (nach 1550)."
+ },
+ {
+  "name": "Cuitláhuac",
+  "aliase": [],
+  "szenarien": [
+   "cuauhtemoc"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~43",
+  "aussehen": "unbekannt, plausibel: Mexica-Prinz, Haarknoten, Baumwollmantel, Federschmuck; keine Beschreibung (starb 1520 an den Pocken).",
+  "ruestung": "Baumwollpanzer, Federhelm, Rundschild, Macuahuitl, Mantel (rot)",
+  "reittier": "keins",
+  "leibwache": "jaguar",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Jaguarkrieger +Angriff in der Noche Triste",
+  "stimme": "tief, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Sahagún, Bernal Díaz, Torquemada",
+  "hinweis": "Cuitláhuac (um 1476–1520), Tlatoani 1520 (80 Tage). Alter ~43 im Jahr 1519."
+ },
+ {
+  "name": "Hernán Cortés",
+  "aliase": [],
+  "szenarien": [
+   "cuauhtemoc",
+   "kastilien"
+  ],
+  "rolle": "gegner",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "34",
+  "aussehen": "Bernal Díaz und Gómara: mittelgroß, breite Brust, bleiches Gesicht, schütterer Bart, ernster Blick, leichter Körper.",
+  "ruestung": "Brustharnisch, Morion, Rundschild (Rodela), Schwert, Wams (schwarz), Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "conquist",
+  "eigenschaften": [
+   "taktiker",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Sammeln: sammelt Spanier und Tlaxcalteken, Moral +, Bergentisch",
+  "stimme": "tief, bedacht",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Bernal Díaz (Historia verdadera), Cortés (Cartas), Gómara",
+  "hinweis": "Hernán Cortés (1485–1547), Alter 34 im Jahr 1519. Im Kastilien-Szenario (Hook) als Entscheidung („kast_…“). Konquistadoren trugen oft Baumwollpanzer (escaupil)."
+ },
+ {
+  "name": "Pánfilo de Narváez",
+  "aliase": [],
+  "szenarien": [
+   "cuauhtemoc"
+  ],
+  "rolle": "gegner",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~50",
+  "aussehen": "Bernal Díaz: sehr groß, rothaarig mit rotem Bart, Stimme wie aus einem Fass, langes Gesicht.",
+  "ruestung": "Brustharnisch, Morion, Schwert, Lanze, Mantel (grün)",
+  "reittier": "pferd",
+  "leibwache": "conquist",
+  "eigenschaften": [
+   "ungestuem",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter +Angriff, schlecht koordiniert",
+  "stimme": "dröhnend, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Bernal Díaz, Cortés (Cartas)",
+  "hinweis": "Pánfilo de Narváez (um 1470–1528), von Cortés bei Cempoala 1520 besiegt. Alter ~50 geschätzt."
+ },
+ {
+  "name": "Francisco Pizarro",
+  "aliase": [],
+  "szenarien": [
+   "kastilien",
+   "atahualpa"
+  ],
+  "rolle": "gegner",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~54",
+  "aussehen": "Spätere Bildnisse (Museo de América): kräftig, ernstes Gesicht, dunkler Bart und Haar; Quellen widersprechen: groß, mager. Bildung gering (Analphabet).",
+  "ruestung": "Brustharnisch, Morion, Schwert, Rodela, Wams (schwarz), Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "conquist",
+  "eigenschaften": [
+   "grausam",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Truppen aus Gebäuden (Cajamarca) im richtigen Moment",
+  "stimme": "rau, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Xérez, Cieza de León, Pedro Pizarro",
+  "hinweis": "Francisco Pizarro (um 1478–1541), Cajamarca 1532 (Alter ~54). In „kastilien“ und „atahualpa“ als Hook-Heer, nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Diego de Almagro",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "gegner",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~57",
+  "aussehen": "Quellen: Beiname „el Tuerto“ (der Einäugige), kleiner Wuchs, breiter Körper; Bart; unbekannt, plausibel: dunkles Haar.",
+  "ruestung": "Brustharnisch, Morion, Schwert, Rodela, Mantel (braun)",
+  "reittier": "pferd",
+  "leibwache": "conquist",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter +Angriff, Kavallerie reitet Fußvolk nieder",
+  "stimme": "laut, heiser",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Pedro Pizarro",
+  "hinweis": "Diego de Almagro (um 1475–1538). Nicht in heroes.json; Hook „atahualpa“, ergänzt."
+ },
+ {
+  "name": "Kolumbus",
+  "aliase": [],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "gegner",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~41",
+  "aussehen": "Las Casas: groß, langes Gesicht, Adlernase, helle Augen, sommersprossig, rötliches Haar (früh ergraut), kräftiger Körper.",
+  "ruestung": "Wams, Admiralsmantel (rot), Barett, Schwert, Kürass nur im Landgang",
+  "reittier": "keins",
+  "leibwache": "conquist",
+  "eigenschaften": [
+   "entdecker",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: sammelt Mannschaft am Strand",
+  "stimme": "ruhig, bestimmt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Las Casas (Historia), Fernando Colón, Bordbuch",
+  "hinweis": "Christoph Kolumbus (1451–1506), 1492 ~41. Nicht in heroes.json; Entscheidung „kast_kolumbus“, ergänzt. Kein erhaltenes Zeitporträt: alle Bilder posthum."
+ },
+ {
+  "name": "Isabella und Ferdinand",
+  "aliase": [
+   "Isabella und Ferdinand"
+  ],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "held",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "31",
+  "aussehen": "Pulgar: Isabella mittelgroß, hellhäutig, rötlich-blondes Haar, blaugrüne Augen, ernste Haltung; Porträts (Prado) zeigen sie.",
+  "ruestung": "Gewand (rot-gold), Krone, Brigantine nur im Feld, Schwert",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Königspaar sammelt Heer, Moral +",
+  "stimme": "klar, königlich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Hernando del Pulgar, Fernández de Oviedo",
+  "hinweis": "Isabella I. von Kastilien (1451–1504); Eintrag steht für das Königspaar „Isabella und Ferdinand“: Ferdinand separat. Isabella Alter 31 im Jahr 1482. Szenario-Held ist das Paar (Kastilien)."
+ },
+ {
+  "name": "Ferdinand II. von Aragón",
+  "aliase": [],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "held",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "30",
+  "aussehen": "Pulgar: mittelgroß, wohlproportioniert, kastanienbraunes Haar, heiteres Gesicht, rasiert; Münzbilder (Ferdinand/Isabella) zeigen Profil.",
+  "ruestung": "Kettenhemd, Topfhelm (spät), Rüstung (Halbharnisch), Waffenrock (rot-gelb), Schwert",
+  "reittier": "pferd",
+  "leibwache": "feudal",
+  "eigenschaften": [
+   "taktiker",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter greifen an, Pikeniere dahinter",
+  "stimme": "klar, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Hernando del Pulgar, Münzen",
+  "hinweis": "Zweite Person zu „Isabella und Ferdinand“. Ferdinand II. (1452–1516), Alter 30 im Jahr 1482. Ergänzt."
+ },
+ {
+  "name": "Boabdil",
+  "aliase": [],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "gegner",
+  "kultur": "arabisch",
+  "epoche": 3,
+  "alter": "~22",
+  "aussehen": "unbekannt, plausibel: Nasridenherrscher, junger Mann mit Bart, Turban, Kaftan; Beiname „el Zogoybi“ (der Unglückliche) in spanischen Chroniken.",
+  "ruestung": "Kettenhemd, Spitzhelm, Turban, Säbel, Rundschild (Adarga)",
+  "reittier": "pferd",
+  "leibwache": "ghazi",
+  "eigenschaften": [
+   "ungestuem",
+   "glucklos"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Ghazi-Reiter sammeln sich, Moral nur gering",
+  "stimme": "hoch, nervös",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Hernando del Pulgar, Ibn al-Khatib (Vorgänger), Chroniken",
+  "hinweis": "Boabdil (Muhammad XII., 1459/60–1527), Alter ~22 im Jahr 1482; Granada fiel 1492."
+ },
+ {
+  "name": "Moctezuma",
+  "aliase": [],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~16 (Szenario), ~40 (1519)",
+  "aussehen": "Bernal Díaz: mittelgroß, mager, wenig Bart, schwarzes Haar knapp über den Ohren, oliv-heller Teint.",
+  "ruestung": "Baumwollpanzer, Federhaube (Quetzal), Rundschild, Macuahuitl, Mantel (türkis)",
+  "reittier": "keins",
+  "leibwache": "jaguar",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Jaguarkrieger decken den Palast",
+  "stimme": "tief, würdig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Bernal Díaz, Cortés, Sahagún",
+  "hinweis": "Gemeint ist vermutlich Moctezuma II. Xocoyotzin (1466–1520). Anachronismus: Im Szenariojahr 1482 war er 16 und nicht Herrscher (Tlatoani damals Axayácatl/Tízoc). Abgrenzung zu Moctezuma Ilhuicamina (Dreibund)."
+ },
+ {
+  "name": "Atahualpa",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa",
+   "kastilien"
+  ],
+  "rolle": "held",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~32",
+  "aussehen": "Xérez und Pedro Pizarro (1532): etwa dreißigjährig, stattlich, etwas füllig, schönes ernstes Gesicht, blutunterlaufene Augen; kurzes Haar mit roter Wollfranse (Maskaipacha).",
+  "ruestung": "Baumwollpanzer, Goldstirnband mit roter Franse (Maskaipacha), Rundschild, Sternkeule, Mantel (rot, mit Goldfäden)",
+  "reittier": "keins",
+  "leibwache": "orejon",
+  "eigenschaften": [
+   "schnell",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Inka-Heer sammelt sich, Moral +, Sänfte als Zeichen",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Francisco de Xérez, Pedro Pizarro, Cieza de León",
+  "hinweis": "Atahualpa (~1497–1533). Alter ~32 im Jahr 1529; im Szenario „kastilien“ (1482) ein Anachronismus (Atahualpa kam ca. 1497 zur Welt, damals regierte Túpac Yupanqui/Huayna Cápac). SC_LEG „atahualpa“."
+ },
+ {
+  "name": "Chalcuchímac",
+  "aliase": [
+   "Chalcuchímac und Quisquis"
+  ],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Inka-General, Quechua, Wolltunika (Unku), Federkopfschmuck, schwarzer Haarschopf; Chronisten schildern Standhaftigkeit.",
+  "ruestung": "Wollpanzer (gepolstert), Federkrone, Rundschild, Sternkeule, Wollumhang",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Zange: Hauptheer umfasst die Gegner (Cusco-Feldzug)",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Sarmiento de Gamboa",
+  "hinweis": "Eintrag steht für „Chalcuchímac und Quisquis“ (zwei Generäle Atahualpas); Chalcuchímac † 1533 (verbrannt). Alter geschätzt."
+ },
+ {
+  "name": "Quisquis",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Inka-General, Wolltunika, Federkopfschmuck, kräftig.",
+  "ruestung": "Wollpanzer, Federkrone, Rundschild, Sternkeule",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "tapfer",
+   "grausam"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Krieger +Angriff nach Vorstoß",
+  "stimme": "heiser, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Sarmiento de Gamboa",
+  "hinweis": "Zweite Person zu „Chalcuchímac und Quisquis“. Quisquis (Quizquiz, † ~1534)."
+ },
+ {
+  "name": "Atoc",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Huáscar-treuer General, Wolltunika, Federkrone.",
+  "ruestung": "Wollpanzer, Federkrone, Rundschild, Keule",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "ungestuem",
+   "glucklos"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Keulenkrieger greifen an, danach Zusammenbruch",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Sarmiento",
+  "hinweis": "Atoc (Huáscars General, besiegt bei Chimborazo/Ambato ~1530). Alter unsicher."
+ },
+ {
+  "name": "Huanca Auqui",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~35",
+  "aussehen": "unbekannt, plausibel: Huáscar-Bruder, Wolltunika, Federkrone, Ohrpflöcke.",
+  "ruestung": "Wollpanzer, Federkrone, Rundschild, Sternkeule",
+  "reittier": "keins",
+  "leibwache": "orejon",
+  "eigenschaften": [
+   "tapfer",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Orejones halten Passstellung",
+  "stimme": "tief, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Sarmiento",
+  "hinweis": "Huanca Auqui (Inka-Prinz, Hurrikan bei Ambato 1530). Lebensdaten unsicher."
+ },
+ {
+  "name": "Tito Atauchi",
+  "aliase": [],
+  "szenarien": [
+   "atahualpa"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt (~30)",
+  "aussehen": "unbekannt, plausibel: Inka-Prinz, Wolltunika, Ohrpflöcke aus Gold, Federkopfschmuck.",
+  "ruestung": "Wollpanzer, Federkrone, Rundschild, Keule",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Prinz sammelt Verstreute",
+  "stimme": "hoch, jung",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Sarmiento",
+  "hinweis": "Tito Atauchi (Bruder Huáscars); Rolle im Szenario unsicher."
+ },
+ {
+  "name": "Cusi Yupanqui",
+  "aliase": [
+   "Pachacútec"
+  ],
+  "szenarien": [
+   "pachacutec"
+  ],
+  "rolle": "held",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~20",
+  "aussehen": "Betanzos und Sarmiento: Prinz von Cusco, später Pachacútec; Quelle nur Chronik (nach 1550); Guaman Poma (1615) zeigt ihn schematisch mit Federkrone und Ohrpflöcken.",
+  "ruestung": "Wollpanzer, Federkrone, Ohrpflöcke (Gold), Rundschild, Sternkeule",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "ingenieur",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Orejones verteidigen Cusco",
+  "stimme": "hoch, klar",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Juan de Betanzos, Sarmiento de Gamboa, Cieza de León, Guaman Poma",
+  "hinweis": "Cusi Yupanqui = Pachacútec (SC_LEG „pachacutec“, Pachacútec Inka Yupanqui, ~1418–1471); nimmt den Namen Pachacútec nach dem Sieg über die Chanka. Alter ~20 im Jahr 1438 (Geburtsjahr unsicher). WICHTIG: das vorhandene Szenenbild sc_pachacutec_x1 zeigt einen römisch wirkenden Legionär: für Inka unbrauchbar."
+ },
+ {
+  "name": "Uscovilca",
+  "aliase": [],
+  "szenarien": [
+   "pachacutec"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Chanka-Fürst, Wolltunika, Federkrone, Keule; Chroniken nennen nur den Namen.",
+  "ruestung": "Wollpanzer, Federkrone, Rundschild, Sternkeule",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Chanka-Krieger greifen an",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cieza de León, Betanzos, Sarmiento",
+  "hinweis": "Uscovilca (Anco Huallo?): Chanka-Heerführer 1438; Zuordnung unsicher (Ancohuallo/Hastu Huaraca/Uscovilca)."
+ },
+ {
+  "name": "Minchancaman",
+  "aliase": [],
+  "szenarien": [
+   "pachacutec"
+  ],
+  "rolle": "gegner",
+  "kultur": "indigen",
+  "epoche": 3,
+  "alter": "unbekannt",
+  "aussehen": "unbekannt, plausibel: Chimú-König, Goldschmuck, Federn, Baumwolltunika; Chimú-Kunst zeigt stilisierte Gesichter.",
+  "ruestung": "Baumwollpanzer, Federschmuck, Rundschild, Keule, Goldkrone",
+  "reittier": "keins",
+  "leibwache": "inkakeule",
+  "eigenschaften": [
+   "sparsam",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Chimú-Fußvolk hält Mauer",
+  "stimme": "ruhig, hoch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Cabello de Balboa, Garcilaso",
+  "hinweis": "Minchancaman (Chimú-König ~1462–1470): Anachronismus zu 1438. Chimú-Reich fiel ~1470 an die Inka."
+ },
+ {
+  "name": "Süleyman",
+  "aliase": [
+   "Süleyman der Prächtige"
+  ],
+  "szenarien": [
+   "suleiman"
+  ],
+  "rolle": "held",
+  "kultur": "arabisch",
+  "epoche": 3,
+  "alter": "~26",
+  "aussehen": "Venezianische Gesandte (Bragadin, Zorzi): groß, schlank, langer Hals, Adlernase, dünnes Gesicht, helle Haut, Schnurrbart und kurzer Bart; Porträts von Matteo Pasti/Nigari.",
+  "ruestung": "Kaftan (Samt), Turban (Kavuk), Kettenhemd darunter, Säbel (Kilij), Zügelzeug (Gold)",
+  "reittier": "pferd",
+  "leibwache": "janits",
+  "eigenschaften": [
+   "staedte",
+   "ingenieur"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Janitscharen und Artillerie eröffnen Salve",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_suleiman_x1",
+  "quelle": "Venezianische Relazioni, Matrakçı Nasuh, Nigari",
+  "hinweis": "Süleyman I. (1494–1566), Sultan 1520 (Alter ~26). SC_LEG „suleiman“: „Süleyman der Prächtige“. Alias in heroes.json „Süleyman“."
+ },
+ {
+  "name": "Pargalı İbrahim",
+  "aliase": [],
+  "szenarien": [
+   "suleiman"
+  ],
+  "rolle": "feldherr",
+  "kultur": "griechisch",
+  "epoche": 3,
+  "alter": "~27",
+  "aussehen": "unbekannt, plausibel: Grieche aus Parga, schlank, Schnurrbart, Turban, Kaftan; Quellen: Falkner und Freund des Sultans.",
+  "ruestung": "Kaftan, Turban, Kettenhemd, Säbel",
+  "reittier": "pferd",
+  "leibwache": "janits",
+  "eigenschaften": [
+   "staedte",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Artillerie und Janitscharen",
+  "stimme": "weich, höflich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Matrakçı Nasuh, Venezianische Relazioni",
+  "hinweis": "Pargalı İbrahim (1493–1536), Großwesir ab 1523. Im Jahr 1520 noch Kämmerer."
+ },
+ {
+  "name": "Philippe de Villiers",
+  "aliase": [],
+  "szenarien": [
+   "suleiman"
+  ],
+  "rolle": "gegner",
+  "kultur": "keltisch",
+  "epoche": 3,
+  "alter": "~58",
+  "aussehen": "Porträt (Rhodos): alter Mann, kräftiger Vollbart (grau-weiß), Ordensgewand; spätere Bildnisse.",
+  "ruestung": "Plattenharnisch (Halbharnisch), Armet, Ordensmantel (schwarz mit weißem Kreuz), Schwert",
+  "reittier": "pferd",
+  "leibwache": "ritter",
+  "eigenschaften": [
+   "standhaft",
+   "bollwerk"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Johanniter halten Mauer",
+  "stimme": "hart, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Jacques de Bourbon, Bosio",
+  "hinweis": "Philippe de Villiers de L’Isle-Adam (1464–1534), Großmeister der Johanniter, Rhodos 1522 (Alter ~58). Szenariojahr 1520."
+ },
+ {
+  "name": "König Ludwig II.",
+  "aliase": [],
+  "szenarien": [
+   "suleiman"
+  ],
+  "rolle": "gegner",
+  "kultur": "steppe",
+  "epoche": 3,
+  "alter": "20",
+  "aussehen": "unbekannt, plausibel: Jungkönig von Ungarn, bartlos, helles Haar, Harnisch; ertrank 1526 bei Mohács auf der Flucht.",
+  "ruestung": "Plattenharnisch, Sturmhaube, Wams (rot-weiß), Schwert",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "ungestuem",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Ritter und Panzerreiter +Angriff (Mohács)",
+  "stimme": "jung, hell",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Brodarics, Burgio",
+  "hinweis": "Ludwig II. (1506–1526), König von Ungarn und Böhmen; Alter 20 bei Mohács 1526. Kulturstufe „steppe“ hier Platzhalter (Ungarn)."
+ },
+ {
+  "name": "Niklas Salm",
+  "aliase": [],
+  "szenarien": [
+   "suleiman"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 3,
+  "alter": "~70",
+  "aussehen": "Porträt: alter Landsknechtführer, grauer Vollbart, Harnisch, Barett; spätere Bildnisse.",
+  "ruestung": "Plattenharnisch, Barett (Federn), Schwert, Mantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "landsk",
+  "eigenschaften": [
+   "bollwerk",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Landsknechte halten Mauer",
+  "stimme": "tief, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Wiener Chroniken, Paulus Jovius",
+  "hinweis": "Niklas Graf Salm (1459–1530), Verteidiger Wiens 1529 (Alter ~70). Szenariojahr 1520."
+ },
+ {
+  "name": "Gonzalo Fernández de Córdoba",
+  "aliase": [],
+  "szenarien": [
+   "kastilien"
+  ],
+  "rolle": "feldherr",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~29",
+  "aussehen": "Zeitgenossen: stattlich, gutaussehend, hell, sorgfältig gekleidet; Beiname „El Gran Capitán“; Porträt des 16. Jh.",
+  "ruestung": "Halbharnisch, Morion oder Barett, Schwert, Mantel (schwarz), Tercio-Pike",
+  "reittier": "pferd",
+  "leibwache": "tercio",
+  "eigenschaften": [
+   "taktiker",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Arkebusiere hinter Gräben (Cerignola 1503)",
+  "stimme": "ruhig, klar",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Paolo Giovio, Fernández de Oviedo",
+  "hinweis": "Nur als SC_LEG-Held „kastilien“ (Vermächtnisfigur). Gonzalo Fernández de Córdoba (1453–1515), Alter ~29 im Jahr 1482; Tercio erst um 1534 (Anachronismus der Leibwache)."
+ },
+ {
+  "name": "Johann II.",
+  "aliase": [],
+  "szenarien": [
+   "portugal"
+  ],
+  "rolle": "held",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "32",
+  "aussehen": "Zeitgenossen: kräftig, hochgewachsen, dunkles Haar, kurzer Bart, ernst; Beiname „O Príncipe Perfeito“; Porträt (Museu Nacional de Arte Antiga).",
+  "ruestung": "Halbharnisch, Barett (Feder), Schwert, Mantel (schwarz-rot)",
+  "reittier": "pferd",
+  "leibwache": "pikenier",
+  "eigenschaften": [
+   "sparsam",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Hofritter sammeln sich, Moral +",
+  "stimme": "tief, kühl",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Garcia de Resende (Crónica), Rui de Pina",
+  "hinweis": "João II. (1455–1495), König ab 1481, Alter 32 im Jahr 1487. Held des Portugal-Szenarios; SC_LEG dort: Vasco da Gama."
+ },
+ {
+  "name": "Afonso de Albuquerque",
+  "aliase": [],
+  "szenarien": [
+   "portugal"
+  ],
+  "rolle": "feldherr",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "~56",
+  "aussehen": "Spätere Bildnisse: langer weißer Bart (bis zum Gürtel, Gelübde nach Goa), Halbharnisch, Barett.",
+  "ruestung": "Halbharnisch, Morion, Schwert, Mantel (schwarz mit rotem Kreuz)",
+  "reittier": "keins",
+  "leibwache": "arkebus",
+  "eigenschaften": [
+   "belagerer",
+   "staedte"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Schiffsartillerie beschießt Hafen",
+  "stimme": "rau, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Comentários de Afonso de Albuquerque, João de Barros",
+  "hinweis": "Afonso de Albuquerque (1453–1515), Goa 1510 (Alter ~56 im Jahr 1509). Hook „portugal“, nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Vasco da Gama",
+  "aliase": [],
+  "szenarien": [
+   "portugal"
+  ],
+  "rolle": "feldherr",
+  "kultur": "iberisch",
+  "epoche": 3,
+  "alter": "18",
+  "aussehen": "Porträt (Museu de Arte Antiga, 1524): dunkles Haar, kurzer Bart, ernster Ausdruck; keine zeitgenössische Beschreibung.",
+  "ruestung": "Wams, Barett, Schwert, Mantel (rot, Christusorden)",
+  "reittier": "keins",
+  "leibwache": "arkebus",
+  "eigenschaften": [
+   "schnell",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Mannschaft sammelt sich, Navigation +",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Álvaro Velho (Roteiro), Barros",
+  "hinweis": "Nur als SC_LEG-Held „portugal“ (Vermächtnisfigur): Vasco da Gama (~1469–1524), Alter ~18 im Jahr 1487 (Anachronismus: erste Indienfahrt 1497)."
+ },
+ {
+  "name": "Robert Clive",
+  "aliase": [],
+  "szenarien": [
+   "ostindien"
+  ],
+  "rolle": "held",
+  "kultur": "britisch",
+  "epoche": 3,
+  "alter": "32",
+  "aussehen": "Gainsborough/Dance-Porträts: schwere Brauen, dunkles Haar (Perücke), ernstes, grüblerisches Gesicht, kräftiges Kinn.",
+  "ruestung": "Roter Uniformrock (Kompanie) mit Goldborte, Dreispitz, Schwert, Pistolen",
+  "reittier": "pferd",
+  "leibwache": "sepoy",
+  "eigenschaften": [
+   "ungestuem",
+   "pluenderer"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Sepoys und Artillerie, Salven aus der Linie (Plassey)",
+  "stimme": "trocken, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Malcolm (Life of Clive), Orme",
+  "hinweis": "Robert Clive (1725–1774), Plassey 1757 (Alter 32). SC_LEG „ostindien“. Alter in anderen Quellen 31 (Geburt 29. Sept 1725)."
+ },
+ {
+  "name": "Eyre Coote",
+  "aliase": [],
+  "szenarien": [
+   "ostindien"
+  ],
+  "rolle": "feldherr",
+  "kultur": "britisch",
+  "epoche": 3,
+  "alter": "~31",
+  "aussehen": "unbekannt, plausibel: britischer Offizier, Perücke, roter Rock; Quellen: Pflichtbewusst.",
+  "ruestung": "Roter Uniformrock, Dreispitz, Schwert",
+  "reittier": "pferd",
+  "leibwache": "sepoy",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Bajonettangriff: Sepoys stürmen mit gefälltem Bajonett",
+  "stimme": "trocken, kurz",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Orme, Wilks",
+  "hinweis": "Sir Eyre Coote (1726–1783), Wandiwash 1760. Szenariojahr 1757."
+ },
+ {
+  "name": "Siraj ud-Daula",
+  "aliase": [],
+  "szenarien": [
+   "ostindien"
+  ],
+  "rolle": "gegner",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "~24",
+  "aussehen": "Miniatur (Murshidabad, 18. Jh.): schmaler Schnurrbart, Turban, Jama; Quelle: junger, stolzer Nawab.",
+  "ruestung": "Jama (Seide), Turban mit Kleinod, Säbel (Tulwar), Rundschild",
+  "reittier": "pferd",
+  "leibwache": "sowar",
+  "eigenschaften": [
+   "ungestuem",
+   "grausam"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter +Angriff, danach Zerfall",
+  "stimme": "hoch, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Orme, Holwell (Schwarzes Loch von Kalkutta)",
+  "hinweis": "Siraj ud-Daula (1733–1757), Nawab von Bengalen; Plassey 1757."
+ },
+ {
+  "name": "Lally",
+  "aliase": [],
+  "szenarien": [
+   "ostindien"
+  ],
+  "rolle": "gegner",
+  "kultur": "keltisch",
+  "epoche": 3,
+  "alter": "~55",
+  "aussehen": "unbekannt, plausibel: Franzose irischer Herkunft, rotes Gesicht, Perücke, Uniform; Quellen: jähzornig.",
+  "ruestung": "Weißer Rock (Royal-Roussillon), Dreispitz, Schwert",
+  "reittier": "pferd",
+  "leibwache": "grenad",
+  "eigenschaften": [
+   "ungestuem",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Bajonettangriff: stürmt Mauer",
+  "stimme": "laut, schroff",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Orme, Wilks",
+  "hinweis": "Thomas Arthur, Comte de Lally (1702–1766), Pondicherry 1758–1761; Szenariojahr 1757: Ankunft erst 1758 (Anachronismus)."
+ },
+ {
+  "name": "Haidar Ali",
+  "aliase": [],
+  "szenarien": [
+   "ostindien"
+  ],
+  "rolle": "gegner",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "~37",
+  "aussehen": "Mysore-Bildnisse: kräftig, großer Schnurrbart, Turban, wache Augen; Quelle (Wilks): untersetzt, derb.",
+  "ruestung": "Jama, Turban, Rüstung (Steppwams), Tulwar, Rundschild",
+  "reittier": "pferd",
+  "leibwache": "sowar",
+  "eigenschaften": [
+   "taktiker",
+   "reiter"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter, Raketen +Angriff",
+  "stimme": "rau, scharf",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Wilks (Historical Sketches of the South of India), Orme",
+  "hinweis": "Haidar Ali (1720–1782). Alter ~37 im Jahr 1757 (damals Heerführer, Sultan erst 1761)."
+ },
+ {
+  "name": "Akbar",
+  "aliase": [
+   "Akbar der Große"
+  ],
+  "szenarien": [
+   "akbar"
+  ],
+  "rolle": "held",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "13",
+  "aussehen": "Abul Fazl und Monserrate: mittelgroß, breite Schultern, dunklerer Teint, große Augen, kleiner Bartansatz (Jugend), Muttermal am Nasenflügel; Miniaturen (Akbarnama).",
+  "ruestung": "Jama (weiß), Turban mit Federkleinod, Kettenhemd, Tulwar, Rundschild",
+  "reittier": "pferd",
+  "leibwache": "mansab",
+  "eigenschaften": [
+   "beliebt",
+   "staedte"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Mansabdars sammeln Reiter, Moral +",
+  "stimme": "kindlich, fest",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_akbar_x1",
+  "quelle": "Abul Fazl (Akbarnama), Monserrate (Commentary)",
+  "hinweis": "Akbar (1542–1605); Alter 13 bei Thronbesteigung 1556. Held-Alter: später Jahre bis ~45. SC_LEG „akbar“."
+ },
+ {
+  "name": "Bairam Khan",
+  "aliase": [],
+  "szenarien": [
+   "akbar"
+  ],
+  "rolle": "feldherr",
+  "kultur": "persisch",
+  "epoche": 3,
+  "alter": "~55",
+  "aussehen": "unbekannt, plausibel: Turkmenischer Heerführer, Vollbart, Turban, Kettenhemd, Kaftan.",
+  "ruestung": "Kettenhemd, Spitzhelm, Turban, Tulwar, Mantel (grün)",
+  "reittier": "pferd",
+  "leibwache": "mansab",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Mansabdar-Reiter decken Rückzug",
+  "stimme": "tief, bestimmt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Abul Fazl (Akbarnama)",
+  "hinweis": "Bairam Khan (1501–1561), Regent Akbars; Panipat II. 1556."
+ },
+ {
+  "name": "Hemu",
+  "aliase": [],
+  "szenarien": [
+   "akbar"
+  ],
+  "rolle": "gegner",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "~55",
+  "aussehen": "Überlieferung: klein von Gestalt, aber wendig; unbekannt, plausibel: Hindu-General, Schnurrbart, Turban, Rüstung.",
+  "ruestung": "Brustplattenpanzer (Char-aina), Turban, Tulwar, Rundschild",
+  "reittier": "elefant",
+  "leibwache": "elef2",
+  "eigenschaften": [
+   "tapfer",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Elefanten lenken: Kriegselefanten brechen die Linie",
+  "stimme": "kräftig, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Abul Fazl, Badauni",
+  "hinweis": "Hemu (Hem Chandra Vikramaditya, ~1501–1556), gefallen bei Panipat II. 1556, saß auf einem Elefanten. Geburtsjahr unsicher."
+ },
+ {
+  "name": "Rana Udai Singh",
+  "aliase": [],
+  "szenarien": [
+   "akbar"
+  ],
+  "rolle": "gegner",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "~34",
+  "aussehen": "unbekannt, plausibel: Rajput-Herrscher, Schnurrbart, Safran-Turban, Kettenhemd; Miniaturen (Mewar).",
+  "ruestung": "Kettenhemd, Spitzhelm (Kulah), Rundschild (Dhal), Tulwar, Mantel (safran)",
+  "reittier": "pferd",
+  "leibwache": "rajput",
+  "eigenschaften": [
+   "zoegerlich",
+   "bollwerk"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Rajputen halten Chittor",
+  "stimme": "hoch, trocken",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Abul Fazl (Akbarnama), Rajput-Chroniken",
+  "hinweis": "Udai Singh II. von Mewar (1522–1572), Chittorgarh fiel 1568; Alter ~34 im Jahr 1556."
+ },
+ {
+  "name": "Man Singh",
+  "aliase": [],
+  "szenarien": [
+   "akbar"
+  ],
+  "rolle": "feldherr",
+  "kultur": "indisch",
+  "epoche": 3,
+  "alter": "~6 (Szenario), später ~20+",
+  "aussehen": "unbekannt, plausibel: Kachwaha-Rajput, Schnurrbart, Turban, Kettenhemd; spätere Miniaturen.",
+  "ruestung": "Kettenhemd, Spitzhelm, Rundschild (Dhal), Tulwar, Mantel (safran)",
+  "reittier": "pferd",
+  "leibwache": "rajput",
+  "eigenschaften": [
+   "tapfer",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Zange: Rajputen und Mansabdars umfassen den Feind",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Abul Fazl, Badauni",
+  "hinweis": "Man Singh I. (1550–1614), Kachwaha-Fürst, Mansabdar Akbars. Hook „akb_heirat“ (Heirat Akbars mit Jodha, ~1562). Nicht in heroes.json; ergänzt."
+ },
+ {
+  "name": "Napoleon Bonaparte",
+  "aliase": [
+   "Napoleon"
+  ],
+  "szenarien": [
+   "napoleon",
+   "hundert"
+  ],
+  "rolle": "held",
+  "kultur": "franzoesisch",
+  "epoche": 4,
+  "alter": "26 (1796) / 45 (1815)",
+  "aussehen": "Zeitgenossen: klein (ca. 1,68 m), schlank in jungen Jahren, später beleibt; blasser Teint, graublaue Augen, kastanienbraunes Haar, scharfe Züge; Gemälde von Gros (Arcole) und David.",
+  "ruestung": "Oberst- bzw. General-Uniform (blau), Bicorne quer, grauer Mantel (Redingote), Degen",
+  "reittier": "pferd",
+  "leibwache": "garde",
+  "eigenschaften": [
+   "taktiker",
+   "sieggewohnt"
+  ],
+  "faehigkeit_schlacht": "Zange: Artillerie bindet, Reservekavallerie fällt in die Flanke",
+  "stimme": "tief, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_napoleon_x1",
+  "quelle": "Las Cases (Mémorial), Bourrienne, Gros, David",
+  "hinweis": "Napoleon Bonaparte (1769–1821). Zwei Szenarien: „napoleon“ (1796, Alter 26, Italienfeldzug, General) und „hundert“ (1815, Alter 45, Kaiser). Beide Szenarien teilen eine Person. SC_LEG „napoleon“ ist derselbe. 1796 trug er noch keine Kaiseruniform."
+ },
+ {
+  "name": "Marschall Ney",
+  "aliase": [],
+  "szenarien": [
+   "hundert"
+  ],
+  "rolle": "feldherr",
+  "kultur": "franzoesisch",
+  "epoche": 4,
+  "alter": "46",
+  "aussehen": "Zeitgenössische Porträts: kräftig, rötliches Haar, kurz geschnitten, breites Gesicht; Beiname „le Rougeaud“ (der Rotgesicht).",
+  "ruestung": "Marschallsuniform (blau, Goldstickerei), Bicorne, Säbel, Reitstiefel",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Kürassiere und Lanciers +Angriff, ohne Infanteriestütze",
+  "stimme": "laut, derb",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Marbot, Memoiren; Porträts (Gérard)",
+  "hinweis": "Michel Ney (1769–1815), Prince de la Moskowa, Waterloo 1815 (Alter 46)."
+ },
+ {
+  "name": "Wellington",
+  "aliase": [
+   "Wellesley"
+  ],
+  "szenarien": [
+   "napoleon",
+   "hundert"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 4,
+  "alter": "~27 (1796) / 46 (1815)",
+  "aussehen": "Porträts (Lawrence, 1815): Adlernase, hohe Stirn, helle Augen, mittelgroß, hager, kurzes Haar.",
+  "ruestung": "Roter Rock (Offizier), Bicorne mit Federbusch, Pallasch, dunkler Mantel (blau)",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Infanterie als Karree hinter dem Hang, Moral +",
+  "stimme": "trocken, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Gurwood (Dispatches), Lawrence, Porträts",
+  "hinweis": "Arthur Wellesley, Duke of Wellington (1769–1852). Napoleon-Szenario 1796: er stand damals in Indien (Anachronismus, Rolle Gegner); 1815 Waterloo."
+ },
+ {
+  "name": "Blücher",
+  "aliase": [],
+  "szenarien": [
+   "hundert"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 4,
+  "alter": "72",
+  "aussehen": "Porträts: schlank, großer Schnurrbart, kurze weiße Haare, wache Augen; „Marschall Vorwärts“.",
+  "ruestung": "Preußische Husarenuniform (dunkelblau), Pelzmütze, Säbel, Mantel (grau)",
+  "reittier": "pferd",
+  "leibwache": "husar",
+  "eigenschaften": [
+   "ungestuem",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Reiter und Landwehr +Angriff, Marschall Vorwärts",
+  "stimme": "heiser, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Gneisenau, Müffling, Porträts",
+  "hinweis": "Gebhard Leberecht von Blücher (1742–1819), Waterloo 1815 (Alter 72)."
+ },
+ {
+  "name": "Jourdan",
+  "aliase": [],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "gegner",
+  "kultur": "franzoesisch",
+  "epoche": 4,
+  "alter": "34",
+  "aussehen": "Zeitgenössisch: kräftig, rundes Gesicht, dunkles Haar, republikanischer Stil (ohne Perücke).",
+  "ruestung": "Blauer Rock (Nationalgarde), Dreispitz oder Bicorne mit Kokarde, Säbel",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Revolutionsheere sammeln sich unter Trikolore",
+  "stimme": "sachlich, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Lazare Carnot, Porträts",
+  "hinweis": "Jean-Baptiste Jourdan (1762–1833), kommandierte die Sambre-Maas-Armee 1796. Auf österreichischer Seite gegen Erzherzog Karl, nicht gegen Napoleon (Anachronismus in der Gegnerrolle)."
+ },
+ {
+  "name": "Kellermann",
+  "aliase": [],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "gegner",
+  "kultur": "franzoesisch",
+  "epoche": 4,
+  "alter": "~61",
+  "aussehen": "Porträts: älterer Mann, graues Haar, markante Nase, Offizier alter Schule.",
+  "ruestung": "Blauer Rock (General), Dreispitz, Degen",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Valmy-Kanonade, Moral +",
+  "stimme": "heiser, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Porträts (Gautherot)",
+  "hinweis": "François Christophe Kellermann (1735–1820) und Sohn François Étienne (1770–1835): Hier vermutlich der Vater (Valmy 1792, später Oberbefehl in Italien 1795). Nicht eindeutig. Szenariojahr 1796."
+ },
+ {
+  "name": "Masséna",
+  "aliase": [],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "feldherr",
+  "kultur": "franzoesisch",
+  "epoche": 4,
+  "alter": "38",
+  "aussehen": "Zeitgenossen: kräftig, dunkles Haar, scharfe Nase, Einäugigkeit erst später (1807); Porträts von Gros: markantes Profil.",
+  "ruestung": "Blauer Rock (Divisionsgeneral), Bicorne, Säbel",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "tapfer",
+   "pluenderer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Divisionen stürmen im Sturmschritt",
+  "stimme": "rau, rasch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Porträts (Gros), Memoiren (Koch)",
+  "hinweis": "André Masséna (1758–1817), Rivoli 1797, Alter 38 im Jahr 1796."
+ },
+ {
+  "name": "Beaulieu",
+  "aliase": [],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 4,
+  "alter": "~70",
+  "aussehen": "unbekannt, plausibel: älterer österreichischer General, Perücke bzw. Haarbeutel, weißer Rock.",
+  "ruestung": "Österreichischer Weißrock, Dreispitz, Degen",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "zoegerlich",
+   "zauderer"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Linie hält, bewegt sich aber langsam",
+  "stimme": "hoch, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Memoiren von Zeitgenossen",
+  "hinweis": "Johann Peter Beaulieu (1725–1819), österreichischer Feldzeugmeister in Norditalien 1796 (Alter ~70). Leibwache nutzt „kontin“ als Platzhalter (österreichische Linie fehlt im Code)."
+ },
+ {
+  "name": "Erzherzog Karl",
+  "aliase": [],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 4,
+  "alter": "25",
+  "aussehen": "Porträts: schlank, mittelgroß, blasse Gesichtsfarbe, dunkelblondes Haar, ernst, kränklich (Epilepsie).",
+  "ruestung": "Weißer Rock (Feldmarschall), grüne Feder am Hut, Degen",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Fahne in der Hand, sammelt Regimenter bei Aspern",
+  "stimme": "sanft, bestimmt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Porträts, Clausewitz (Hinterlassene Werke)",
+  "hinweis": "Erzherzog Karl von Österreich (1771–1847), Alter 25 im Jahr 1796. Aspern 1809 ist anachronistisch zum Szenario."
+ },
+ {
+  "name": "Kutusow",
+  "aliase": [
+   "Kutuzov"
+  ],
+  "szenarien": [
+   "napoleon"
+  ],
+  "rolle": "gegner",
+  "kultur": "russisch",
+  "epoche": 4,
+  "alter": "~51",
+  "aussehen": "Zeitgenossen und Porträts: massig, ein Auge verloren (Krim, 1774), graues Haar, freundliches Gesicht; später Fürst Smolenski.",
+  "ruestung": "Grüner Rock (Generalfeldmarschall), Epauletten, Dreispitz, Säbel",
+  "reittier": "pferd",
+  "leibwache": "kosak",
+  "eigenschaften": [
+   "zoegerlich",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Rückzug, abgewartete Reserve, Moral hoch",
+  "stimme": "tief, väterlich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Tolstoi (nur Fiktion), Porträts (Dawe)",
+  "hinweis": "Michail Kutusow (1745–1813), Alter ~51 im Jahr 1796 (damals Gouverneur, nicht in Italien: Anachronismus). Austerlitz 1805, Borodino 1812."
+ },
+ {
+  "name": "George Washington",
+  "aliase": [
+   "Washington"
+  ],
+  "szenarien": [
+   "usa"
+  ],
+  "rolle": "held",
+  "kultur": "britisch",
+  "epoche": 4,
+  "alter": "43",
+  "aussehen": "Zeitgenossen: sehr groß (ca. 1,88 m), kräftig gebaut, ernst, reserviert, helle Augen, Pockennarben, schlechte Zähne.",
+  "ruestung": "Blau-gelber Uniformrock (Kontinentalarmee), Dreispitz, Degen, Schärpe (hellblau)",
+  "reittier": "pferd",
+  "leibwache": "minute",
+  "eigenschaften": [
+   "standhaft",
+   "beliebt"
+  ],
+  "faehigkeit_schlacht": "Sammeln: reitet ins Feuer und sammelt Regimenter (Princeton)",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": "sc_usa_x1",
+  "quelle": "Stuart (Porträts), Jefferson, Marshall",
+  "hinweis": "George Washington (1732–1799), Alter 43 im Jahr 1775 (Bunker Hill / Boston). SC_LEG „usa“."
+ },
+ {
+  "name": "Nathanael Greene",
+  "aliase": [],
+  "szenarien": [
+   "usa"
+  ],
+  "rolle": "feldherr",
+  "kultur": "britisch",
+  "epoche": 4,
+  "alter": "33",
+  "aussehen": "Peale-Porträt: kräftiges Gesicht, lange Nase, hinkt leicht (Bein), Quäker-Herkunft.",
+  "ruestung": "Blauer Rock (Kontinentalarmee), Dreispitz, Degen",
+  "reittier": "pferd",
+  "leibwache": "kontin",
+  "eigenschaften": [
+   "taktiker",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: geordneter Rückzug mit Gegenangriff (Guilford)",
+  "stimme": "ruhig, nüchtern",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Peale, Greene (Papers)",
+  "hinweis": "Nathanael Greene (1742–1786), Alter 33 im Jahr 1775."
+ },
+ {
+  "name": "William Howe",
+  "aliase": [],
+  "szenarien": [
+   "usa"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 4,
+  "alter": "46",
+  "aussehen": "Zeitgenössische Stiche: massig, dunkles Haar, breit, Gesicht streng, schwarze Augenbrauen.",
+  "ruestung": "Roter Rock (Generalmajor), Dreispitz, Degen, Schärpe (rot)",
+  "reittier": "pferd",
+  "leibwache": "grenad",
+  "eigenschaften": [
+   "zoegerlich",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Bajonettangriff: Rotröcke stürmen den Hügel",
+  "stimme": "tief, träge",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Stiche, Dokumente (Howe Papers)",
+  "hinweis": "William Howe (1729–1814), Bunker Hill 1775, Alter 46."
+ },
+ {
+  "name": "John Burgoyne",
+  "aliase": [],
+  "szenarien": [
+   "usa"
+  ],
+  "rolle": "gegner",
+  "kultur": "britisch",
+  "epoche": 4,
+  "alter": "53",
+  "aussehen": "Porträt (Reynolds): elegant, schmal, feine Nase, Perücke, geistvoller Ausdruck; auch Dramatiker.",
+  "ruestung": "Roter Rock (Generalleutnant), Dreispitz, Degen, Epauletten",
+  "reittier": "pferd",
+  "leibwache": "grenad",
+  "eigenschaften": [
+   "redner",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Bajonettangriff: Grenadiere vorn, Artillerie dahinter (Saratoga)",
+  "stimme": "weich, gewählt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Reynolds, Burgoyne (State of the Expedition)",
+  "hinweis": "John Burgoyne (1722–1792), Alter 53 im Jahr 1775; Saratoga 1777."
+ },
+ {
+  "name": "Friedrich Wilhelm",
+  "aliase": [],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "held",
+  "kultur": "germanisch",
+  "epoche": 3,
+  "alter": "20",
+  "aussehen": "Porträt (Honthorst/Hanneman): schlank, ernste Augen, Schnurrbart und Spitzbart, Locken, dunkelblond.",
+  "ruestung": "Halbharnisch (Kürass), Hut mit Federn, Degen, Spitzenkragen, Schärpe (orange)",
+  "reittier": "pferd",
+  "leibwache": "landsk",
+  "eigenschaften": [
+   "taktiker",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Kurfürst sammelt Regimenter",
+  "stimme": "klar, ernst",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Honthorst/Hanneman, Zeitgenössische Chroniken",
+  "hinweis": "Friedrich Wilhelm von Brandenburg (1620–1688), „Großer Kurfürst“, Regierungsantritt 1640 (Alter 20). Nicht zu verwechseln mit Friedrich Wilhelm I. (Soldatenkönig)."
+ },
+ {
+  "name": "Konrad von Burgsdorff",
+  "aliase": [],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "germanisch",
+  "epoche": 3,
+  "alter": "~50",
+  "aussehen": "unbekannt, plausibel: brandenburgischer Oberst, Schnurrbart, Harnisch, Spitzenkragen.",
+  "ruestung": "Halbharnisch, Hut mit Federn, Degen",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "zoegerlich",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Landsknecht-Reste decken Berlin",
+  "stimme": "rau, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chroniken, Landesarchiv",
+  "hinweis": "Konrad von Burgsdorff (1595–1652), Kurbrandenburger Geheimer Rat; Lebensdaten geschätzt."
+ },
+ {
+  "name": "Johan Banér",
+  "aliase": [],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "gegner",
+  "kultur": "nordisch",
+  "epoche": 3,
+  "alter": "44",
+  "aussehen": "Porträts: breites Gesicht, derb, Schnurrbart, schwedischer Harnisch; Hinken (Gicht).",
+  "ruestung": "Brustharnisch, Hut, Degen, Lederkoller (gelb), Schärpe (blau)",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "ungestuem",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Ansturm: schwedische Brigaden gegen die Linie",
+  "stimme": "rau, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chemnitz (Königlich Schwedischer Krieg)",
+  "hinweis": "Johan Banér (1596–1641), schwedischer Feldmarschall (Alter 44 im Jahr 1640)."
+ },
+ {
+  "name": "Ottavio Piccolomini",
+  "aliase": [],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "gegner",
+  "kultur": "italisch",
+  "epoche": 3,
+  "alter": "~41",
+  "aussehen": "Porträt: schlanker Italiener, dunkles Haar, Bart, kaiserlicher Harnisch.",
+  "ruestung": "Kürass (Halbharnisch), Hut, Degen, Schärpe (rot)",
+  "reittier": "pferd",
+  "leibwache": "kuerass",
+  "eigenschaften": [
+   "taktiker",
+   "schnell"
+  ],
+  "faehigkeit_schlacht": "Zange: Kürassiere umfassen den Flügel",
+  "stimme": "weich, rasch",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Wallenstein-Berichte, Briefwechsel",
+  "hinweis": "Ottavio Piccolomini (1599–1656), Alter ~41 im Jahr 1640. Leibwache: „kuerass“ für kaiserliche Reiter."
+ },
+ {
+  "name": "Johann Georg I.",
+  "aliase": [],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "gegner",
+  "kultur": "germanisch",
+  "epoche": 3,
+  "alter": "~55",
+  "aussehen": "Porträt: wohlbeleibt, Bart, kräftiges Gesicht, lutherischer Fürst, Trinker.",
+  "ruestung": "Halbharnisch, Hut, Degen, Samtmantel (rot)",
+  "reittier": "pferd",
+  "leibwache": "landsk",
+  "eigenschaften": [
+   "trinker",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: sächsische Regimenter verteidigen",
+  "stimme": "tief, schwer",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Porträts, Chroniken",
+  "hinweis": "Johann Georg I. von Sachsen (1585–1656), Alter 55 im Jahr 1640."
+ },
+ {
+  "name": "Friedrich der Große",
+  "aliase": [
+   "Friedrich der Große"
+  ],
+  "szenarien": [
+   "berlin"
+  ],
+  "rolle": "held",
+  "kultur": "germanisch",
+  "epoche": 4,
+  "alter": "~28 (1740) / 74 (1786)",
+  "aussehen": "Porträts (Pesne, Graff): mittelgroß, schlank, große blaue Augen, scharfe Adlernase, dunkelbraunes Haar, später tabaksgelb im Rock, gebückt.",
+  "ruestung": "Blauer Uniformrock (Infanterieregiment), Dreispitz, Degen, Stern (Schwarzer Adlerorden)",
+  "reittier": "pferd",
+  "leibwache": "grenad",
+  "eigenschaften": [
+   "taktiker",
+   "ausbilder"
+  ],
+  "faehigkeit_schlacht": "Zange: schiefe Schlachtordnung (Leuthen)",
+  "stimme": "scharf, knapp",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Pesne, Graff, Werke Friedrichs, Zimmermann",
+  "hinweis": "Friedrich II. von Preußen (1712–1786), SC_LEG „berlin“. Szenario „berlin“ (1640) ist früher (Anachronismus: Friedrich war Held der Legende). Nicht verwechseln mit Friedrich Wilhelm I."
+ },
+ {
+  "name": "Oda Nobunaga",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "held",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "26",
+  "aussehen": "Shinchō-kōki: mittelgroß, schlank, Stimme hoch und klar, Kinn kaum bebartet, kurzgeschnittenes Haar; Gemälde (Chōkō-ji, 17. Jh.).",
+  "ruestung": "Tosei-gusoku (lackierte Rüstung), Kabuto mit Maedate, Katana, Jinbaori (rot)",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "taktiker",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Ashigaru-Salven abwechselnd, Gewehr-Blöcke (Nagashino)",
+  "stimme": "hoch, klar",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Shinchō-kōki (Ōta Gyūichi), Chōkō-ji-Porträt",
+  "hinweis": "Oda Nobunaga (1534–1582), Okehazama 1560, Alter 26. Nagashino 1575 liegt später."
+ },
+ {
+  "name": "Shibata Katsuie",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "feldherr",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "~38",
+  "aussehen": "unbekannt, plausibel: kräftig, kurzer Bart, Kabuto, Jinbaori; Beiname „Oni Shibata“ (der Dämon Shibata).",
+  "ruestung": "Tosei-gusoku, Kabuto, Yari, Jinbaori (weiß)",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "tapfer",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Speerträger +Angriff",
+  "stimme": "laut, rau",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Shinchō-kōki",
+  "hinweis": "Shibata Katsuie (1522–1583), Oda-Vasall; Alter ~38 im Jahr 1560."
+ },
+ {
+  "name": "Imagawa Yoshimoto",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "41",
+  "aussehen": "Zeitgenössische Berichte: Hofstil, geschminkte Augenbrauen (Kuge-Stil), zeigt rundliches Gesicht; Gemälde (Tokyo).",
+  "ruestung": "Haramaki, Kabuto, Katana; Hofkleidung (Jinbaori purpur)",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_cav",
+  "eigenschaften": [
+   "staedte",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Sammeln: Banner Imagawa sammeln sich am Lager",
+  "stimme": "weich, hochmütig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Shinchō-kōki, Ōta Gyūichi",
+  "hinweis": "Imagawa Yoshimoto (1519–1560), fiel bei Okehazama 1560 mit 41."
+ },
+ {
+  "name": "Matsudaira Motoyasu",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "18",
+  "aussehen": "unbekannt, plausibel: junger Samurai, Rüstung dunkel; später Tokugawa Ieyasu (Porträt als Greis, ungeeignet).",
+  "ruestung": "Tosei-gusoku, Kabuto, Katana",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Mikawa-Samurai halten Position",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Mikawa Go-fudoki, Tokugawa Jikki",
+  "hinweis": "Matsudaira Motoyasu (1543–1616) = Tokugawa Ieyasu; Name 1560 (Alter 18). Später Mitregent in der Allianz mit Nobunaga."
+ },
+ {
+  "name": "Asakura Yoshikage",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "27",
+  "aussehen": "unbekannt, plausibel: Samurai, Rüstung blau, Kabuto.",
+  "ruestung": "Haramaki, Kabuto, Katana, Banner (blau)",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_cav",
+  "eigenschaften": [
+   "zoegerlich",
+   "trinker"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Hauptkontingent hält Position",
+  "stimme": "ruhig, träge",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Shinchō-kōki",
+  "hinweis": "Asakura Yoshikage (1533–1573), Alter ~27 im Jahr 1560 (Anachronismus: Anegawa 1570)."
+ },
+ {
+  "name": "Miyoshi Nagayoshi",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "~38",
+  "aussehen": "unbekannt, plausibel: Samurai, Haramaki, Kabuto mit Maedate.",
+  "ruestung": "Tosei-gusoku, Kabuto, Yari",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "taktiker",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Speere",
+  "stimme": "hoch, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Shinchō-kōki",
+  "hinweis": "Miyoshi Nagayoshi (1522–1564), Shōgun-Gegner in Kyōto; Alter ~38 im Jahr 1560."
+ },
+ {
+  "name": "Mōri Motonari",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "63",
+  "aussehen": "Gemälde (Tōkyō Univ.): älter, hager, ausgeprägte Nase, kurzer Bart; Kriegsherr der Chūgoku-Region.",
+  "ruestung": "Haramaki, Kabuto mit Maedate, Katana, Jinbaori (grün)",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_missile",
+  "eigenschaften": [
+   "taktiker",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Hinterhalt: Nachtlandung (Itsukushima, 1555)",
+  "stimme": "alt, leise",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Mōri-ke monjo, Chūgoku-Chronik",
+  "hinweis": "Mōri Motonari (1497–1571), Alter 63 im Jahr 1560."
+ },
+ {
+  "name": "Chōsokabe Kunichika",
+  "aliase": [],
+  "szenarien": [
+   "nobunaga"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "~34",
+  "aussehen": "unbekannt, plausibel: Samurai der Tosa-Provinz, Rüstung schlicht.",
+  "ruestung": "Haramaki, Kabuto, Yari",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "standhaft",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chōsokabe-ke ki",
+  "hinweis": "Chōsokabe Kunichika (1504–1560); starb im Jahr 1560, Rolle fraglich. Eventuell Chōsokabe Motochika (1539–1599) gemeint. Nicht eindeutig."
+ },
+ {
+  "name": "Yi Sun-sin",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "held",
+  "kultur": "koreanisch",
+  "epoche": 3,
+  "alter": "47",
+  "aussehen": "Nanjung Ilgi: Beamte-Offizier, stämmig bis mager, Schnurrbart und Bart, ernst; Porträt (Hyeonchungsa) erst posthum.",
+  "ruestung": "Lamellen- oder Schuppenpanzer, Helm (Joseon), Bogen, Mantel (blau)",
+  "reittier": "pferd",
+  "leibwache": "basis_korea_e3_art",
+  "eigenschaften": [
+   "taktiker",
+   "tapfer"
+  ],
+  "faehigkeit_schlacht": "Pfeilhagel: Schiffsgeschütze und Bogenschützen, Kranich-Formation (Hansan)",
+  "stimme": "leise, fest",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Nanjung Ilgi (Kriegstagebuch), Seonjo Sillok",
+  "hinweis": "Yi Sun-sin (1545–1598), Alter 47 im Jahr 1592. Schildkrötenschiff (Geobukseon) als Sonderobjekt, Tagebuch als Hauptquelle."
+ },
+ {
+  "name": "Gwon Yul",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "koreanisch",
+  "epoche": 3,
+  "alter": "55",
+  "aussehen": "unbekannt, plausibel: General, älterer Mann, Bart; Porträt posthum.",
+  "ruestung": "Lamellenpanzer, Helm, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_korea_e3_missile",
+  "eigenschaften": [
+   "tapfer",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten: Haengju-Festung",
+  "stimme": "tief, ruhig",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Seonjo Sillok",
+  "hinweis": "Gwon Yul (1537–1599), Alter 55; Haengju 1593."
+ },
+ {
+  "name": "Kim Myeong-won",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "feldherr",
+  "kultur": "koreanisch",
+  "epoche": 3,
+  "alter": "~48",
+  "aussehen": "unbekannt, plausibel: General, Bart.",
+  "ruestung": "Lamellenpanzer, Helm, Bogen",
+  "reittier": "pferd",
+  "leibwache": "basis_korea_e3_spear",
+  "eigenschaften": [
+   "zoegerlich",
+   "standhaft"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten",
+  "stimme": "ruhig, leise",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Seonjo Sillok",
+  "hinweis": "Kim Myeong-won (1534–1602); Alter ~48 (geschätzt)."
+ },
+ {
+  "name": "Konishi Yukinaga",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "~37",
+  "aussehen": "Hofberichte: christlicher Daimyō, getauft (Augustinus), schlank; Jesuiten schildern ihn als gebildet.",
+  "ruestung": "Tosei-gusoku, Kabuto, Rosenkranz",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_missile",
+  "eigenschaften": [
+   "schnell",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Feuer frei: Arkebusiere stürmen zuerst",
+  "stimme": "leise, höflich",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Luís Fróis (Historia de Japam)",
+  "hinweis": "Konishi Yukinaga (1555–1600), Alter ~37 im Jahr 1592."
+ },
+ {
+  "name": "Katō Kiyomasa",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "~30",
+  "aussehen": "Zeitgenössisch: groß, kräftig, Schnurrbart; Porträt mit langer Kabuto (Nagaeboshi), Yari mit Querblättern (Katakama-yari).",
+  "ruestung": "Tosei-gusoku, Kabuto (Nagaeboshi), Yari",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_spear",
+  "eigenschaften": [
+   "tapfer",
+   "belagerer"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Speere +Angriff, Belagerung",
+  "stimme": "laut, tief",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Fróis, Kiyomasa-ki",
+  "hinweis": "Katō Kiyomasa (1562–1611), Alter 30 im Jahr 1592 (Angabe 31 nach ostasiatischer Zählung). Tiger-Legende ist Sage."
+ },
+ {
+  "name": "Kobayakawa Takakage",
+  "aliase": [],
+  "szenarien": [
+   "yisunsin"
+  ],
+  "rolle": "gegner",
+  "kultur": "japanisch",
+  "epoche": 3,
+  "alter": "59",
+  "aussehen": "Porträt: älterer Mann, ernster Blick, Kabuto.",
+  "ruestung": "Haramaki, Kabuto, Katana",
+  "reittier": "pferd",
+  "leibwache": "basis_japan_e3_cav",
+  "eigenschaften": [
+   "standhaft",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten",
+  "stimme": "ruhig, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Kobayakawa-ke monjo",
+  "hinweis": "Kobayakawa Takakage (1533–1597), Alter 59 im Jahr 1592."
+ },
+ {
+  "name": "Naresuan",
+  "aliase": [],
+  "szenarien": [
+   "naresuan"
+  ],
+  "rolle": "held",
+  "kultur": "suedostasiatisch",
+  "epoche": 3,
+  "alter": "29",
+  "aussehen": "unbekannt, plausibel: schlank, dunkel, Hüfttuch, Brokat, Zierhelm; Statuen posthum (Denkmal 20. Jh.).",
+  "ruestung": "Seidengewand (Sampot), Zierhelm (Mongkut), Schwert (Dha), Elefantensitz (Howdah)",
+  "reittier": "elefant",
+  "leibwache": "basis_sea_e3_cav",
+  "eigenschaften": [
+   "tapfer",
+   "taktiker"
+  ],
+  "faehigkeit_schlacht": "Elefanten lenken: Zweikampf zu Elefant (Nong Sarai 1593)",
+  "stimme": "tief, hart",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik von Ayutthaya, Birmanische Chroniken",
+  "hinweis": "Naresuan der Große (1555–1605), Alter 29 im Jahr 1584 (Unabhängigkeit von Birma). Zweikampf 1593 später."
+ },
+ {
+  "name": "Ekathotsarot",
+  "aliase": [],
+  "szenarien": [
+   "naresuan"
+  ],
+  "rolle": "feldherr",
+  "kultur": "suedostasiatisch",
+  "epoche": 3,
+  "alter": "~24",
+  "aussehen": "unbekannt, plausibel: jüngerer Bruder Naresuans, schlank, Brokat, Zierhelm.",
+  "ruestung": "Seidengewand, Zierhelm, Dha",
+  "reittier": "pferd",
+  "leibwache": "basis_sea_e3_spear",
+  "eigenschaften": [
+   "standhaft",
+   "sparsam"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten",
+  "stimme": "ruhig, klar",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik von Ayutthaya",
+  "hinweis": "Ekathotsarot (1560–1620), Alter ~24 (geschätzt)."
+ },
+ {
+  "name": "Phraya Pasein",
+  "aliase": [],
+  "szenarien": [
+   "naresuan"
+  ],
+  "rolle": "gegner",
+  "kultur": "birmanisch",
+  "epoche": 3,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: Mon-Hauptmann, Stirnband, Schwert.",
+  "ruestung": "Baumwollwams, Stirnband, Dha",
+  "reittier": "pferd",
+  "leibwache": "basis_sea_e3_spear",
+  "eigenschaften": [
+   "ungestuem",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Ansturm: Mon-Krieger",
+  "stimme": "rau, laut",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik von Ayutthaya",
+  "hinweis": "Phraya Pasein (Pa-sein): Rolle und Lebensdaten unsicher, vermutlich Mon-Anführer."
+ },
+ {
+  "name": "Nanda Bayin",
+  "aliase": [],
+  "szenarien": [
+   "naresuan"
+  ],
+  "rolle": "gegner",
+  "kultur": "birmanisch",
+  "epoche": 3,
+  "alter": "~45",
+  "aussehen": "unbekannt, plausibel: König von Toungoo, Brokat, Krone, Sitz auf Elefant; Quellen: Grausamkeit.",
+  "ruestung": "Brokatgewand, Krone, Dha",
+  "reittier": "elefant",
+  "leibwache": "basis_sea_e3_cav",
+  "eigenschaften": [
+   "grausam",
+   "ungestuem"
+  ],
+  "faehigkeit_schlacht": "Elefanten lenken: Königselefant in der Mitte",
+  "stimme": "tief, drohend",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Birmanische Chroniken (Hmannan Yazawin)",
+  "hinweis": "Nanda Bayin (1535–1599), König von Toungoo; Alter ~49 im Jahr 1584."
+ },
+ {
+  "name": "Satha",
+  "aliase": [],
+  "szenarien": [
+   "naresuan"
+  ],
+  "rolle": "gegner",
+  "kultur": "khmer",
+  "epoche": 3,
+  "alter": "~40",
+  "aussehen": "unbekannt, plausibel: Satha war ein König von Ayutthaya (Sathatirat), Zeitbezug unklar.",
+  "ruestung": "Brokatgewand, Dha",
+  "reittier": "elefant",
+  "leibwache": "basis_sea_e3_spear",
+  "eigenschaften": [
+   "sparsam",
+   "zoegerlich"
+  ],
+  "faehigkeit_schlacht": "Schildwall halten",
+  "stimme": "ruhig, alt",
+  "rufe": [
+   "sammeln",
+   "angriff",
+   "sieg",
+   "rueckzug"
+  ],
+  "portraet_vorhanden": null,
+  "quelle": "Chronik von Ayutthaya",
+  "hinweis": "Satha: unklare Zuordnung. Möglicherweise Sa-tha (Chao Satha, Khmer-König Satha I., 1576–1594), Gegner in Kambodscha-Feldzug. Sehr unsicher."
+ }
+]
