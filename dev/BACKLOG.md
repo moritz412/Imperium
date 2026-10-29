@@ -1,6 +1,14 @@
-# Backlog – Imperium der Epochen 2 (Stand 28.10.2026 nachts, v215 veröffentlicht)
+# Backlog – Imperium der Epochen 2 (Stand 29.10.2026 morgens, v215 veröffentlicht)
 
-## ÜBERGABE an den nächsten Chat (zuerst lesen)
+## ÜBERGABE 29.10. (zuerst lesen)
+- **Spieltest Wikinger (Moritz 29.10.):** Schiffe nicht selbsterklärend, Wessex in Runde 1 unterwerfbar, Northumbria-Pingpong, fühlt sich nicht wie „Wikinger erobern England“. Ursachen + Umbau-Vorschlag: `dev/docs/wikinger_nachbesserung.md`. Grundsatz neu: **Wer nachfragen muss, für den war es zu kompliziert.**
+- **v216** (Sonnet): Ein-/Ausschiffen per Antippen mit Rückfrage, Wessex vor Wedmore nicht unterwerfbar, Eroberungen halten im Wikinger-Szenario (Garnison 60 %, Unruhe 2, kein Aufstand bei eigenem Heer vor Ort). Veröffentlicht 29.10. Tests (Cloud, Software-Rendering): v216_t 31/31, smoke 4/4, vk_kampagne 36 PASS (1 alter BEFUND Gold-Rang), vk_flotte 7/7, raub 17/17, landnahme 39/39, uebersiedlung 35/35. Nicht getestet: echtes iPad, echte Touch-Ereignisse (nur Funktionsaufrufe), Friedensangebote über mehrere Runden. Hinweis: raub/landnahme/uebersiedlung_t brauchen Argumente `../imperium.html 8772`.
+- **Konzepte neu (warten auf Entscheidungen Moritz):** Wikinger-Umbau in Phasen (Raubzeit nur rauben / Großes Heer + Winterlager + Marionettenkönig / Alfred-Drehbuch + Edington + Danelag-Grenze) → `wikinger_nachbesserung.md` Abschnitt 5. Echtzeitschlacht-Umsetzungsplan → `schlacht_umsetzung.md` Abschnitt 7. Hannibal-Ablauf → `hannibal_ablauf.md` (Kampagne jetzt, Echtzeit-Sonderschlachten später). Lehren/Prüfliste → `lehren_kampagnen.md` (vor jeder neuen Geschichte anwenden).
+- **PC heute Abend:** `dev/pc/auftraege_29_10.md` – Jobs 40 Hannibal-Bilder (106), 41 Schlacht-Ladebilder (54), 42 Wikinger-Umbau-Bilder (22, inkl. Miklagard neu), 43 Hannibal-Kino-Sprecher (7).
+- **Befund Werkzeug:** Blender 5.2 läuft headless in der Cloud (`pip install bpy`), Playwright-Tests laufen in der Cloud mit Chromium aus npm (`@sparticuz/chromium`, `PW_CHROMIUM=/tmp/chromium`). Skelette/Animationen/Backen können in der Cloud gebaut werden; PC nur noch für FLUX/XTTS/TRELLIS. Ausgangsdaten (Grundkörper, Bewegungen) brauchen Freigabe je Quelle.
+- **Befund Hannibal-Code:** Startheer in Latium und Hook 9 heißen beide „Publius Cornelius Scipio“ (Vater/Sohn) → umbenennen beim Hannibal-Paket.
+
+## ÜBERGABE 28.10. (älter)
 - **W2 England fertig und veröffentlicht (v203, 28.10.):** Burh-Gebäude (britisch, Ep 1–2, Abwehr gegen Raubzüge), Wikinger-Szenario mit 4 Königreichen (Wessex usa, Mercia mogul, East Anglia vijaya, Northumbria briten; `caps`), englische Stadtbilder aus `models/c_en.json` (`enPre`, `enCityGeo`; angel/dane). Tests: smoke 4/4, raub 19/19, burh_t 20/20, en_stadt_t 8/8. Echtes iPad nicht getestet, GFX „mittel" nicht angesehen.
   Offen W2: Burh-Bild (Rückfall Grenzwall-Bild) → FLUX; `dane_haus_gross` (Job 23) fehlt → Rückfall angel_haus_gross; Städte wirken im Screenshot eher klein (dev/tests/shot/w2_england.png), Helligkeit gegen Nachbarstädte prüfen; alte Wikinger-Spielstände kennen die neuen Reiche nicht; chkf.sh braucht python3 (auf dem PC nicht im PATH, nur `r3venv`).
 - **W3 fertig und veröffentlicht (v204, 28.10.; Versionsanzeige zeigt weiter v203, da OFF_VER unverändert):** Landnahme (Lager → Siedlung 6 R. → Heimat 14 R., Steuern/Wachstum +10/20/30 %, ab 3 Siedlungen Beute ×0,8 und Bau −10 %), Taufe/Treue-Wahl mit Rückfall (40 %), Danelag-Mischkultur (Angleichung ×1,5 / ×1,2), Wikinger-Kapitel + „Akt II · Landnahme" und „Akt II · Wedmore"; Engländer/Franken im Szenario fest christlich. Alle Werte in Konstante `LN`. Tests: smoke 4/4, raub 19/19, burh 20/20, glaube 7/7, help ok, landnahme_t 42/42. Nicht getestet: echtes iPad, KI-Taufe, Thronstreit-Aufschlag.
@@ -28,7 +36,8 @@
 - Angelsächsische Halle (`angel_halle`) neu: fertig aufbereitet (Dach dicht, Sockel weg, 1760 Dreiecke) in `3d/roh_32/r3/angel_halle_ns.glb`,
   Vorschau `bogen_ns.jpg`. Ins Paket erst mit dem Wikinger-Paket. Alle 12 England-Modelle jetzt lokal aufbereitet: `3d/roh_21/r3/*_ns.glb` (Bogen bogen.jpg);
   Hof-/Lagerflächen bei kloster, markt, lager, mauer bewusst als Boden behalten.
-  r3 auf dem PC: eigene Umgebung `Desktopimperium-bilder3venv` (trimesh usw.), `PYTHONUTF8=1` setzen; shot.js braucht lokale Pfade.
+  r3 auf dem PC: eigene Umgebung `Desktopimperium-bilder
+3venv` (trimesh usw.), `PYTHONUTF8=1` setzen; shot.js braucht lokale Pfade.
 - Technikbilder `tk_<id>` (82 Techniken ohne Einheiten/Eigenes Wissen, 1:1) + Banner aus `assets_design.md` (16:9),
   erzeugt mit `dev/pc/tech_bilder.js`: Probe Job 29_tech_probe (8 Techniken + ev_urkunden) fertig, Bogen in warteschlange/29_tech_probe/bogen.jpg; Hauptauftrag
   31_tech_bilder fertig; Auswahl (81 Techniken + 7 Banner) in warteschlange/31_tech_bilder/auswahl (Liste auswahl.txt).

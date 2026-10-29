@@ -5852,7 +5852,7 @@ Object.assign(SCEN,{
      {l:'Die Schulen fördern',d:'Forschung +20 % für 40 Runden',fx:{rp:0.2}},{l:'Die Marken sichern',d:'Garnison +25 % für 40 Runden',fx:{gar:0.25}},{l:'Das Reich verwalten',d:'Ordnung +2 für 40 Runden',fx:{order:2}}]}},
   hooks:{},
   gold:(f)=>!S.scen.flags.erbe_teilen&&S.turn-S.scen.t0<=65},
- wikinger:{n:'Wikinger',sub:'Von Lindisfarne nach Vinland',ep:1,year:793,ypt:0.5,slot:'nord',startGold:400,rules:{raidUpkeep:0.5,homeUpkeep:0.7,raidLoot:1.1,shield:25},people:'nordleute',turns:80,img:'naval_win',
+ wikinger:{n:'Wikinger',sub:'Von Lindisfarne nach Vinland',ep:1,year:793,ypt:0.5,slot:'nord',startGold:400,rules:{raidUpkeep:0.5,homeUpkeep:0.7,raidLoot:1.1,shield:25,noSubmit:{usa:'Wedmore'},holdConquest:1},people:'nordleute',turns:80,img:'naval_win',
   desc:'793. Ein Jarl aus Vestfold rüstet seine Langschiffe. Im Westen locken Klöster voller Silber, im Süden das Frankenreich, im Osten die Flüsse bis nach Miklagard. Eine Saga über zwei Jahrhunderte, von Lindisfarne bis Vinland.',win:'Die Wikingerzeit endet um das Jahr 1066. Die Nordmänner sind getauft, ihre Könige herrschen über Norwegen, Dänemark und Schweden. Ihre Nachfahren regieren als Normannen in England und Sizilien. In Neufundland fand man die Reste ihrer Häuser: Vinland war keine Erfindung.',lose:'Die Langschiffe kehren leer zurück, das Geschlecht verliert seine Gefolgsleute. Andere Jarle schreiben die Geschichte des Nordens. In keiner Saga wird dieser Name genannt.',
   feats:['Raubzüge mit Beute','Ruhm und Thing','Siedeln über See','Tribut im Frieden','Neue Einheiten: Bondi, Fyrd und vorhandene Huskarle, Berserker, Warägergarde'],
   own:{nord:['viken','vestland','gautar'],polen:['trondelag','haelsingland'],slawen:['kimbern','angeln','skane','seeland'],osmanen:['svear','ostgauten','smaland'],
@@ -6858,6 +6858,11 @@ Object.assign(SC_LEG,{
   atahualpa:{h:'Atahualpa',cul:['indigen'],tr:['schnell','tapfer'],r:{n:'Die rote Quaste',d:'Ordnung +0,5',k:'order',v:0.5}}});
 // Geschichten-Regeln (z. B. noJpUnify: keine automatische Reichseinigung Japans und kein Shōgun-Angebot während der Geschichte)
 function scenRule(k){try{return!!(S&&S.scen&&!S.scen.over&&SCEN[S.scen.id]&&SCEN[S.scen.id].rules&&SCEN[S.scen.id].rules[k]);}catch(e){return false;}}
+// v216: Regel noSubmit:{volk:'Schrittname'} – das Volk lässt sich bis zu diesem Schritt weder unterwerfen noch zu Tribut zwingen. Regel holdConquest – Eroberungen des Spielers halten besser (Garnison 60 %, Unruhe 2, kein Abfall bei eigenem Heer, Hauptstadtfall macht kriegsmüde).
+function scenNoSubmit(f){try{if(!S||!S.scen||S.scen.over)return false;const D=SCEN[S.scen.id],ns=D.rules&&D.rules.noSubmit,t=ns&&ns[f];if(!t)return false;const idx=D.chapter.steps.findIndex(x=>x.t.indexOf(t)>=0);if(idx<0)return false;const s=S.story&&S.story[S.player];return!(s&&(s.done||s.end||s.i>=idx));}catch(e){return false;}}
+function holdConq(f){return f===S.player&&scenRule('holdConquest');}
+// Fällt die Hauptstadt eines KI-Reiches an den Spieler: Kriegsmüdigkeit, damit Frieden wahrscheinlicher wird (ab 60 bietet die KI eher Frieden an)
+function holdCapFall(f,prev,wasCap){try{if(wasCap&&holdConq(f)&&prev&&prev!=='frei'&&prev!==f&&!isHumanP(prev))wwAdd(prev,Math.max(0,60-wwOf(prev)));}catch(e){}}
 // Ziel „vertreiben“: kein Heer des Volks g.fac mehr in den Regionen g.regs (zählt erst, wenn der Auslöser g.flag gesetzt hat)
 Object.assign(SC_COND,{vertreiben:(f,g)=>{if(!S.scen.flags[g.flag])return[1,1];const R=new Set(g.regs);const n=S.armies.filter(a=>a.f===g.fac&&a.units.length&&R.has(PROV_DEF[a.p].reg)).length;return[n?0:1,1];}});
 // Helfer für Auslöser: Volk wiederbeleben bzw. einem Slot ein neues Volk geben, Heer aufstellen
@@ -8613,6 +8618,7 @@ function stanceDef(a){return!a?1:a.st==='fest'?1.25:a.st==='hinter'?1.3:a.st==='
 /* ===== v199: Raubzug, Verwüstung, Danegeld ===== */
 // v206 (Lückenbilder): Pakete pk_lk (55 Völker-Gesandte: _m1/_n1 für 25 Kulturen, _x1 für habescha/indigen/japanisch/koreanisch/suedostasiatisch) und pk_lb (Gebäude b_*, Artillerie u_art_e0–e2, ui_waren, ui_maerkte); heroImg bevorzugt die Epochen-Fassung vor _x1; BPK/upkKey/Wirtschaft-Banner
 // v207 (Kosmetik/Erklärtexte): Reichsvolk-Kachel (.rktile) lässt rechts Platz für den Schließen-Knopf; HELP_ACT/HELP_ATTRS um Handel (Märkte, Routen, Verträge, Kompanien, Anleihe), Forschung (data-tech), Agenten (data-hire/agact/agtgt …) und Geschichte/Szenario (story*, mission, scenbribe) erweitert; Schließen-, Zurück- und ?-Knopf erklärt. Keine Datenpakete geändert, OFF_VER unverändert.
+// v216 (Wikinger-Nachbesserung): Einschiffen/Anlanden per Kartentipp mit Rückfrage (embarkWhy/askEmbark/askLand/landCtx, einmaliger Hinweis landHint), Szenario-Regeln noSubmit (Wessex bis „Wedmore“ nicht unterwerfbar, kein Tribut) und holdConquest (Garnison 60 %, Unruhe 2, kein Abfall mit Heer, Hauptstadtfall macht kriegsmüde); nur Wikinger.
 // v215 (Wikinger-Kino II): Sequenzen k5 „Der Weg der Waräger“ (Beginn Akt III) und k6 „Über das Nordmeer“ (Beginn Akt IV; Bilder pk_vk2, Erzähler audio/x_wikinger_kino2.json, keyPack wikinger_kino5/6), Kapitelbilder Normandie/Waräger/Miklagard/Island/Vinland + Saga-Ende (vk_kap_heimkehr, End-Ereignis nimmt E.img), Schritt-Sprecher wikinger_landnahme/wikinger_wedmore über Schritt-Feld vkey (ki:0 bleibt sonst stumm); neue Pakete pk_vk2, x_wikinger_kino2; OFF_VER v215
 // v214 (Übersiedlung): „Die Heimat verlegen“ für Raubvölker (Block UB; ubCan/ubWindow/ubDo): Hauptstadt in Heimat-Provinz (Landnahme Stufe 3) + Provinzen in der alten Heimat-Region; Wahl behalten (Unruhe +1) / Lehen (pk2Realm + makeVassal, Tribut vassalTribute) / aufgeben (Gold ×5, Gefolge); F.kern (Region) steuert lnCore (Ordnung nach Taufe/Treue), F.home0 merkt die erste Hauptstadt-Region; KI 2 % je Runde; OFF_VER unverändert
 // v213 (Wikinger spielbar; rules raidUpkeep 0,5 / homeUpkeep 0,7 / raidLoot 1,1): canRaub erlaubt Raubzug an Bord für Seeräuber (Landung plündert); Beute-Ziele 100/400, Eroberungs-Plünderung und Danegeld zählen als Beute; Startgold 400, halber Sold im Feindesland/auf See (rules.raidUpkeep); Schonfrist 25 Runden gegen neue KI-Kriegserklärungen (rules.shield, scenShield); Waräger-Ziele um Esten/Karelien/Liven, rus aufgedeckt; stSkip mit Meldung/Haken; Schritt-Jahre (steps[].year, nur Anzeige, kein Epochenwechsel); Paris-Ziel Parisier; Normandie verlegt Franken-Heere; Island/Vinland-Texte ehrlich
@@ -8750,7 +8756,7 @@ function showConquest(){if(!S||!S.capQ||!S.capQ.length||!$('#modal').hidden||BAT
   const d=PROV_DEF[pi];showModal(`${heroHtml('ev_conq',S.turn+'_'+pi,true)}<p class="eyebrow" style="margin:0 0 6px">Eroberung</p><h2>${esc(d.city)} ist gefallen</h2><p class="sub">${esc(d.name)} · ${fmtYear(S.year)}</p><p>Was geschieht mit der Stadt?</p><div class="list">${Object.keys(CONQ).map(k=>`<div class="rcard"><b>${CONQ[k].n}${k!=='besetzen'?` · +${conqGold(pi,k)} Gold`:''}</b><small>${CONQ[k].d}</small></div>`).join('')}</div>`,
     Object.keys(CONQ).map(k=>({label:CONQ[k].n,cls:k==='besetzen'?'primary':'',fn:()=>{applyConquest(S.player,pi,k);AUDIO.sfx(k==='besetzen'?'click':'coin');refreshOwnership();refresh();setTimeout(showConquest,50);}})));}
 function captureBySiege(a,ti){faithReset();const P=S.prov[ti],prev=P.owner,s=S.sieges[ti];try{const _cn=PROV_DEF[ti].city||PROV_DEF[ti].name;if(a.f===S.player)chronAdd('conq',`${_cn} nach Belagerung eingenommen`);else if(prev===S.player)chronAdd('lost',`${_cn} fällt nach Belagerung an ${FACTIONS[a.f].name}`);}catch(e){}stat(a.f,'siege');if(prev!=='frei'){stat(a.f,'conq');a.hold=S.turn+1;const dw=dip(a.f,prev);dw.won=dw.won||{};dw.won[a.f]=(dw.won[a.f]||0)+1;try{warNote(a.f,prev,10);wwAdd(prev,2);fameRefresh(a);}catch(e){}}delete S.sieges[ti];provNews(prev,'lost',ti,a.f);provNews(a.f,'conq',ti,prev);
-  P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.build2=null;P.pop=Math.max(0.6,P.pop*0.9);P.unrest=(hasTech(a.f,'citizenship')?1.5:3)+(!S.scen&&P.cul&&P.cul!==facCul(a.f)?1:0);P.uw='Eroberung';P.rebel=0;
+  const _wc=holdConq(a.f)&&isCapP(ti);P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.build2=null;P.pop=Math.max(0.6,P.pop*0.9);P.unrest=(hasTech(a.f,'citizenship')?1.5:3)+(!S.scen&&P.cul&&P.cul!==facCul(a.f)?1:0);P.uw='Eroberung';P.rebel=0;if(holdConq(a.f)){P.gar=Math.max(2,Math.round(garMax(ti)*0.6));P.unrest=Math.min(P.unrest,2);holdCapFall(a.f,prev,_wc);}
   a.p=ti;a.st=null;a.sieg=null;a.mp=0;const G=S.fac[a.f];G.gains=(G.gains||[]).filter(t=>S.turn-t<12);G.gains.push(S.turn);genXP(a,70);genDeed(a,'c');try{conquestDecide(a,ti);}catch(e){console.warn('Eroberung',e);}
   addLog(`${PROV_DEF[ti].name} ergibt sich nach ${s?s.t:'einigen'} Runden Belagerung ${FACTIONS[a.f].name}.`,a.f===S.player||prev===S.player,a.f===S.player?'good':prev===S.player?'bad':'info');checkElimination();}
 // Mindestbelagerung: Dörfer und Marktflecken ohne Mauern lassen sich direkt stürmen, Städte und ummauerte Orte erst nach Belagerung
@@ -9904,7 +9910,7 @@ function fleetSeaPos(pi){if(FLEETPOS[pi])return FLEETPOS[pi];const c=CAP[pi];let
 function makeFleetTok(fl){const g=new THREE.Group();const ships=[];const fe=clamp(fl.e!=null?fl.e:ep(),0,4),SG0=SHIPLIB.get(fe,false);let SG=SG0;try{if(GFX.q!=='leicht'){const sid=shipOf(fl.f,fe),Q=shipGeo(sid,SG0);if(Q)SG=Q;}}catch(er){}for(let k=0;k<3;k++){const m=new THREE.Group();m.add(new THREE.Mesh(SG.b,VCMAT));m.add(new THREE.Mesh(SG.f,FMAT[fl.f]||FMAT.frei));m.scale.setScalar(k?0.36:0.42);m.position.set([0,-0.24,0.22][k],0.005,[0,0.2,0.16][k]);m.rotation.y=0.6+(k?0.15*k:0);g.add(m);ships.push(m,m);}
   const ring=new THREE.Mesh(new THREE.RingGeometry(0.3,0.35,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#f0d080',transparent:true,opacity:0.85,depthWrite:false}));ring.position.y=0.012;ring.visible=false;g.add(ring);
   scene.add(g);const chip=document.createElement('button');chip.className='achip fchip';chip.style.setProperty('--c',FACTIONS[fl.f].color);
-  chip.addEventListener('click',e=>{e.stopPropagation();if(performance.now()-suppressClick<400)return;onFleetChip(fl.id);});labelsEl.appendChild(chip);return{g,chip,ships,ring,seed:Math.random()*6};}
+  chip.dataset.help='Flotte. Mit gewähltem Heer antippen: einschiffen. Mit Ladung eine Küstenprovinz antippen: anlanden.';chip.addEventListener('click',e=>{e.stopPropagation();if(performance.now()-suppressClick<400)return;onFleetChip(fl.id);});labelsEl.appendChild(chip);return{g,chip,ships,ring,seed:Math.random()*6};}
 // Häfen sichtbar: Mole, Leuchtturm, Kran; blockierte Häfen mit rotem Ring
 const PORTG=new THREE.Group();let PORTSIG='';
 const PORTGEO=(()=>{let G=null;return()=>G||(G=(()=>{const L=[],pm=(geo,x,y,z,sx,sy,sz,col)=>L.push({geo,m:new THREE.Matrix4().compose(new THREE.Vector3(x,y,z),new THREE.Quaternion(),new THREE.Vector3(sx,sy,sz)),col:new THREE.Color(col)});
@@ -9942,6 +9948,24 @@ function syncFleets(){if(!S)return;fleetsInit();const live=new Set((S.fleets||[]
 // Fahrt sichtbar animieren
 function fleetAnim(t){let on=false;for(const[,k]of FLT){if(!k.path)continue;const dur=Math.min(1600,300+k.plen*120),u=Math.min(1,(t-k.pt0)/dur),d=k.plen*(1-(1-u)*(1-u));const q=pathAt(k.path,d),q2=pathAt(k.path,Math.min(k.plen,d+0.05));k.g.position.set(q.x,clamp(heightAt(q.x,q.z)-0.01,0,0.5),q.z);if(Math.hypot(q2.x-q.x,q2.z-q.z)>1e-4)k.g.rotation.y=Math.atan2(-(q2.z-q.z),q2.x-q.x)-0.6+Math.PI/2;if(u>=1){k.path=null;k.g.position.set(k.tx,k.ty||0,k.tz);}on=true;}if(on)needRender=Math.max(needRender,2);}
 // Vorschau des Kurses
+// v216: Ein- und Ausschiffen über die Karte, jeweils mit Rückfrage (Knöpfe in den Blättern bleiben)
+function embarkWhy(a,fl){fleetInit(fl);if(a.mp<=0)return'Dieses Heer hat keine Bewegung mehr.';if(!coastNear(fl.x,fl.z,LAND_R).has(a.p))return`Flotte zu weit weg – erst an die Küste von ${PROV_DEF[a.p].name} segeln.`;if(cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP)return`Kein Platz: ${SHIP_CAP} Einheiten je Schiff.`;return'';}
+function doEmbark(a,fl){if(a&&fl&&embark(a,fl)){AUDIO.sfx('march');toast(`${a.name} ist an Bord von ${fl.name}`);UI.army=null;UI.fleet=fl.id;UI.mode='fleet';UI.sel=fl.p;refresh();return true;}toast('Einschiffen nicht möglich.');return false;}
+function askEmbark(a,fl){showModal(`<h2>Einschiffen?</h2><p>${esc(a.name)} geht an Bord von ${esc(fl.name)}. Restliche Bewegung verfällt.</p><p class="note">${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · Platz ${cargoUnits(fl)+a.units.length}/${fl.n*SHIP_CAP}</p>`,[{label:'Abbrechen'},{label:'Einschiffen',cls:'primary',fn:()=>doEmbark(a,fl)}]);}
+function doLand(a,fl,pi){const r=disembark(a,fl,pi);if(!r)return;if(r.err){toast(r.err);return;}
+  if(r.landed){AUDIO.sfx('march');toast(`${a.name} ist in ${PROV_DEF[pi].name} gelandet${r.unk?' · neues Land erkundet':''}`);UI.army=a.id;UI.mode='army';UI.sel=pi;refreshOwnership();refresh();}
+  else if(r.res){AUDIO.sfx('horn');battleLog(r.res);UI.mode=r.res.captured?'prov':'fleet';UI.sel=r.res.captured?pi:fl.p;refreshOwnership();refresh();showBattle(r.res);}}
+// Lage „etwas anlanden“: eigene Flotte mit Ladung gewählt oder ein Heer an Bord gewählt
+function landCtx(){if(!S)return null;let fl=null,list=[];const a=UI.army!=null?getArmy(UI.army):null;
+  if(a&&a.f===S.player&&a.boat){fl=(S.fleets||[]).find(x=>x.id===a.boat);list=[a];}
+  else if(UI.mode==='fleet'&&UI.fleet!=null){fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl&&fl.f===S.player)list=(fl.cargo||[]).map(id=>getArmy(id)).filter(Boolean);}
+  return fl&&fl.f===S.player&&list.length?{fl,list}:null;}
+function landTapOk(pi){const c=landCtx();return!!(c&&landTargets(c.fl).includes(pi));}
+function askLand(L,fl,pi){const o=S.prov[pi].owner,kn=isKnown(pi),nm=kn?PROV_DEF[pi].name:'unerforschter Küste',a0=L[0],foe=!walkOk(a0.f,pi),raid=!!(a0.rz&&raidKind(a0.f)==='see');
+  const tx=foe?`${o==='frei'?'Die Provinz ist bewacht.':esc(FACTIONS[o].name)+' hält '+(kn?esc(PROV_DEF[pi].name):'diese Küste')+'.'} Das ist ein Landungsangriff${raid?': im Raubzug ohne Abzug.':' (Angriff −20 %).'}`:(o===a0.f?'Eigenes Land, die Landung ist friedlich.':'Die Landung ist friedlich.');
+  showModal(`<h2>Anlanden bei ${esc(nm)}?</h2><p>${tx}</p>`,[{label:'Abbrechen'},...L.map(a=>({label:L.length>1?`${a.name} anlanden`:(foe?'Angreifen':'Anlanden'),cls:'primary',fn:()=>doLand(a,fl,pi)}))]);}
+// Nach dem Segeln einer beladenen Flotte an eine Küste: einmal je Spiel ein Hinweis
+function landHint(fl){try{if(!S||fl.f!==S.player||!cargoUnits(fl)||!landTargets(fl).length)return;if(UI.mode==='fsail')UI.mode='fleet';if(S.hintLand)return;S.hintLand=1;toast('Tippe eine Küstenprovinz an, um anzulanden.');}catch(e){}}
 const FPV=new THREE.Group();FPV.renderOrder=6;const FPVMAT=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:0.9,depthTest:false,side:THREE.DoubleSide});
 function fleetPreview(fl,x,z){if(!FPV.parent)scene.add(FPV);while(FPV.children.length){const m=FPV.children.pop();m.geometry.dispose();}if(!fl||x==null){needRender=3;return null;}
   const path=seaPathXZ(fl.x,fl.z,x,z,Math.max(fl.mp*6,30));if(!path)return null;const pts=[];for(let d=0;d<=path.cost;d+=0.08)pts.push(pathAt(path.pts,d));pts.push(path.pts[path.pts.length-1]);
@@ -9949,13 +9973,14 @@ function fleetPreview(fl,x,z){if(!FPV.parent)scene.add(FPV);while(FPV.children.l
   for(let i=0;i+1<V.length;i+=2)list.push(strip(V.slice(i,i+2),cols.slice(i,i+2),0.05));mergeStrips(list,FPVMAT,FPV);
   const e=new THREE.Mesh(new THREE.RingGeometry(0.16,0.22,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:path.cost<=fl.mp?'#9ad06a':'#e0b040',depthTest:false,transparent:true}));e.position.copy(V[V.length-1]);e.renderOrder=7;FPV.add(e);for(const m of FPV.children)m.renderOrder=7;needRender=3;return path;}
 function onFleetChip(id){if(!S||busy)return;const fl=(S.fleets||[]).find(x=>x.id===id);if(!fl)return;
+  if(UI.mode!=='fsail'&&fl.f===S.player&&UI.army!=null){const a=getArmy(UI.army);if(a&&a.f===fl.f&&!a.boat){const w=embarkWhy(a,fl);if(w){toast(w);return;}AUDIO.sfx('click');askEmbark(a,fl);return;}}
   if(UI.mode==='fsail'){const me=(S.fleets||[]).find(x=>x.id===UI.fleet);if(me&&fl.f!==me.f){if(!atWar(me.f,fl.f)){toast(`Kein Krieg mit ${FACTIONS[fl.f].name}.`);return;}fleetSailTap(me,fl.x,fl.z,fl);return;}}
   AUDIO.sfx('click');UI.fleet=id;UI.army=null;UI.sel=fl.p;UI.mode='fleet';fleetPreview(null);$('#sheet').classList.remove('collapsed');refresh();}
 // Antippen im Segelmodus: erster Tipp zeigt den Kurs, zweiter Tipp an derselben Stelle segelt los
 function fleetSailTap(fl,x,z,foe){if(!fl||fl.f!==S.player)return;
   const id=pidAt(x,z);if(id!==SEA&&id<NOPB&&!foe){const h=fleetSeaPos(id);if(coastal(id)){x=h.x;z=h.z;}else{toast('Kein Zugang zum Meer.');return;}}
   if(UI.fpv&&Math.hypot(UI.fpv.x-x,UI.fpv.z-z)<0.5){UI.fpv=null;fleetPreview(null);if(fl.mp<=0.05){toast('Keine Bewegung mehr in dieser Runde. Das Ziel bleibt gespeichert.');fl.goal={x,z};refresh();return;}
-    fl.ocean=null;const r=moveFleetTo(fl,x,z);AUDIO.sfx('sail');if(!r){toast('Dorthin gibt es keinen Seeweg.');return;}UI.sel=fl.p;UI.mode=fl.mp>0.3&&!fl.goal?'fsail':'fleet';refresh();if(r.p!=null)showNaval(r);return;}
+    fl.ocean=null;const r=moveFleetTo(fl,x,z);AUDIO.sfx('sail');if(!r){toast('Dorthin gibt es keinen Seeweg.');return;}UI.sel=fl.p;UI.mode=fl.mp>0.3&&!fl.goal?'fsail':'fleet';refresh();if(r.p!=null)showNaval(r);landHint(fl);refresh();return;}
   const path=fleetPreview(fl,x,z);if(!path){toast('Dorthin gibt es keinen Seeweg.');return;}UI.fpv={x,z};AUDIO.sfx('click');
   const turns=path.cost<=fl.mp?0:Math.ceil((path.cost-fl.mp)/fleetRange(fl));toast(`${foe?'Angriff auf '+foe.name+' · ':''}Strecke ${path.cost.toFixed(1)} · ${turns?`Ankunft in ${turns} ${turns===1?'Runde':'Runden'}`:'diese Runde'} · nochmal tippen zum Segeln`);}
 function fleetSheetHtml(){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(!fl)return null;fleetInit(fl);const mine=fl.f===S.player,T=SHIP_T[clamp(fl.e,0,4)],P=S.prov[fl.p],hp=homePort(fl),inPort=hp!=null&&Math.hypot(fleetSeaPos(hp).x-fl.x,fleetSeaPos(hp).z-fl.z)<0.9;
@@ -10026,7 +10051,7 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
     if(!(S.sieges&&S.sieges[ti])&&(a.p===ti||ADJ[a.p].has(ti)||a._land)){if(a.st==='belagern'&&a.sieg!==ti)liftSiege(a);S.sieges=S.sieges||{};S.sieges[ti]={f:a.f,aid:a.id,t:0};a.st='belagern';a.sieg=ti;siegeCamp(a,ti);res.siegeStarted=true;}
     if(a.f===S.player||P.owner===S.player)addLog(`${PROV_DEF[ti].city||PROV_DEF[ti].name}: Die Verteidiger sind geschlagen, doch die Stadt hält stand. ${res.siegeStarted?'Die Belagerung beginnt.':''} Sturm erst nach ${minSiege(ti)} Runden Belagerung.`,true,a.f===S.player?'info':'bad');}
   if(rz){try{rzLand(a,ti,res);}catch(e){console.warn('Raubzug',e);}}
-  if(win&&a.units.length&&!rz&&stormOk(a.f,ti,a)){try{const _cn=PROV_DEF[ti].city||PROV_DEF[ti].name;if(a.f===S.player)chronAdd('conq',`${_cn} erobert${P.owner!=='frei'?' (von '+FACTIONS[P.owner].name+')':''}`);else if(P.owner===S.player)chronAdd('lost',`${_cn} an ${FACTIONS[a.f].name} verloren`);}catch(e){}if(P.owner!=='frei'){stat(a.f,'conq');a.hold=S.turn+1;const dw=dip(a.f,P.owner);dw.won=dw.won||{};dw.won[a.f]=(dw.won[a.f]||0)+1;}if(P.owner==='frei')try{leagueStrike(a.f,ti);}catch(e){}P.prot=null;provNews(P.owner,'lost',ti,a.f);P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.pop=Math.max(0.6,P.pop*0.85);P.unrest=hasTech(a.f,'citizenship')?2:4;P.uw='Eroberung';P.rebel=0;a.p=ti;res.captured=true;try{conquestDecide(a,ti);}catch(e){console.warn('Eroberung',e);}const G=S.fac[a.f];G.gains=(G.gains||[]).filter(t=>S.turn-t<12);G.gains.push(S.turn);}
+  if(win&&a.units.length&&!rz&&stormOk(a.f,ti,a)){try{const _cn=PROV_DEF[ti].city||PROV_DEF[ti].name;if(a.f===S.player)chronAdd('conq',`${_cn} erobert${P.owner!=='frei'?' (von '+FACTIONS[P.owner].name+')':''}`);else if(P.owner===S.player)chronAdd('lost',`${_cn} an ${FACTIONS[a.f].name} verloren`);}catch(e){}if(P.owner!=='frei'){stat(a.f,'conq');a.hold=S.turn+1;const dw=dip(a.f,P.owner);dw.won=dw.won||{};dw.won[a.f]=(dw.won[a.f]||0)+1;}if(P.owner==='frei')try{leagueStrike(a.f,ti);}catch(e){}P.prot=null;const _pv=P.owner,_wc=holdConq(a.f)&&isCapP(ti);provNews(P.owner,'lost',ti,a.f);P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.pop=Math.max(0.6,P.pop*0.85);P.unrest=hasTech(a.f,'citizenship')?2:4;P.uw='Eroberung';P.rebel=0;if(holdConq(a.f)){P.gar=Math.max(2,Math.round(garMax(ti)*0.6));P.unrest=Math.min(P.unrest,2);holdCapFall(a.f,_pv,_wc);}a.p=ti;res.captured=true;try{conquestDecide(a,ti);}catch(e){console.warn('Eroberung',e);}const G=S.fac[a.f];G.gains=(G.gains||[]).filter(t=>S.turn-t<12);G.gains.push(S.turn);}
   a.mp=0;if(!(a.st==='belagern'&&a.sieg===ti&&S.prov[ti].owner!==a.f)){clearStance(a);a.st=null;}res.attLost=Math.max(0,res.attMen0-armyMen(a));
   {const dif=clamp(res.def/Math.max(1,res.att),0.3,1.6),dif2=clamp(res.att/Math.max(1,res.def),0.3,1.6);gainXP(a,win?50+60*dif:25);defArmies.forEach(d=>gainXP(d,win?25:50+60*dif2));genXP(a,win?60+80*dif:30);defArmies.forEach(d=>genXP(d,win?30:60+80*dif2));genDeed(a,win?'w':'l');if(win)try{retinueOnWin(a);}catch(e){}if(win&&res.captured)genDeed(a,'c');defArmies.forEach(d=>genDeed(d,win?'l':'d'));try{res.ti=ti;armyWarHook(a,_po,defArmies,win,res);}catch(e){console.warn('Kriegsstand',e);}
    for(const x of[a,...defArmies]){const lost=(x===a)!==win;if(lost&&x.units.length&&Math.random()<0.12){const old=genOf(x).n;x.gen=newGeneral(x.f);if(x.f===S.player)addLog(`${old} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`,true,'bad');}}}
@@ -12311,6 +12336,7 @@ function aiVassals(f){
 }
 // KI-Bewertung eines Angebots von p an ai
 function aiEval(ai,p,type,o={}){
+  if((type==='vassal'||type==='demand')&&p===S.player&&scenNoSubmit(ai))return{ok:false,why:`${FACTIONS[ai].name} beugt sich nicht – noch nicht.`};
   if(type!=='peace'&&!inContact(ai,p))return{ok:false,why:'Kein Kontakt: Eure Reiche kennen sich kaum. Erst eine Grenze, derselbe Kontinent oder ein Seeweg bringt Gesandte zusammen.'};
   const d=dip(ai,p),rel=relation(ai,p),ratio=warPower(p)/Math.max(1,warPower(ai));
   if(type==='peace'){
@@ -12524,11 +12550,11 @@ function openDiplomacy(f,msg){
     acts+=d.trade?btn('untrade',`Handel beenden (Vertrag noch ${Math.max(0,(d.tEnd||S.turn)-S.turn)} Runden)`):btn('trade',embargoBetween(p,f)?'Handel unmöglich: Embargo':'Handelsabkommen vorschlagen · 20 Runden','',tried('trade')||embargoBetween(p,f));
     {const lo=lendOk(p,f);if(lo.ok||lo.why!=='Braucht eine eigene Bank')acts+=btn('lend',lo.ok?`Kredit gewähren · ${lendAmt()} Gold, zurück 10 × ${Math.round(lendAmt()*1.15/10)}`:`Kredit: ${lo.why}`,'',!lo.ok||myGold<lendAmt());}
     acts+=d.emb2&&d.emb2.by===p?btn('unembargo','Embargo aufheben'):d.emb2&&d.emb2.by===f?`<p class="note badc">${esc(F.name)} hat ein Embargo gegen dich verhängt.</p>`:btn('embargo','Embargo verhängen · Beziehung −15, beendet den Handel','danger');
-    acts+=btn('demand','Tribut fordern (15 Gold pro Runde)','',tried('demand')||!!d.trib);
+    acts+=btn('demand','Tribut fordern (15 Gold pro Runde)','',tried('demand')||!!d.trib||scenNoSubmit(f));
     if(!isHuman(f)){const cs=cedeCands(p,f);if(cs.length){acts+=`<h3 class="dsub">Gebiete kaufen</h3>`;for(const pi of cs){const v=provValue(pi);acts+=btn('buy:'+pi,`${esc(PROV_DEF[pi].name)} kaufen (${LVLN[lvlOf(pi)]}) · ${v} Gold`,'',tried('buy')||myGold<v);}}}
     {const mu=mapsUnknown(p,f),mc=mapCost(f),cd=(d.mapT||-99)+15-S.turn;if(mu>0)acts+=btn('maps',cd>0?`Karten kaufen (wieder in ${cd} Runden)`:`Karten kaufen · ${mc} Gold · ${mu} unbekannte Provinzen`,'',cd>0||myGold<mc||relation(f,p)<-20);}
     if(d.vas===f){const cost=40*provsOf(f).length,since=S.turn-d.vasT,ok=since>=10&&rel>=25;acts+=`<p class="note">Vasall seit ${since} Runden, zahlt ${vassalTribute(f)} Gold Tribut pro Runde. Eingliedern geht nach 10 Runden bei Beziehung ab +25.</p>`+btn('integrate',`Friedlich eingliedern (${cost} Gold)`,'primary',!ok||myGold<cost);}
-    else if(!d.vas&&d.st!=='war'&&provsOf(f).length<=3)acts+=btn('vassal','Unterwerfung fordern','',tried('vassal'));
+    else if(!d.vas&&d.st!=='war'&&(provsOf(f).length<=3||scenNoSubmit(f)))acts+=btn('vassal','Unterwerfung fordern','',tried('vassal')||scenNoSubmit(f));
     if(d.st==='ally')acts+=btn('unally',d.vas===f?'Vasallen freigeben':'Bündnis lösen','danger');
     {const cb=cbOf(p,f);acts+=`<p class="note cbline" style="margin:8px 0 4px">${cb.length?`<b class="okc">Kriegsgrund:</b> ${cb.map(c=>`<b>${esc(c.n)}</b> – ${esc(c.d)}`).join(' · ')}`:`<b class="badc">Kein Kriegsgrund.</b> Ein Krieg kostet dich Beziehung bei allen Reichen (−12) und Ruf (−8) und ${NOCB_TURNS} Runden lang Ordnung −1 im ganzen Reich. Gesandte können Ansprüche begründen.`}</p>`;}
     acts+=btn('war',d.truce>0?`Krieg erklären (Waffenstillstand noch ${d.truce} Runden)`:'Krieg erklären','danger',d.truce>0);
@@ -13326,7 +13352,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     const o=provOrder(i);
     if(o<0)P.pop=Math.max(0.5,P.pop*0.99);
     if(o<=-3&&!isHuman(f)&&f!==S.player&&!festOn(P)&&!(P.festCd>S.turn)&&S.fac[f].gold>festCost(i)*2)holdFest(i);
-    const _hA=S.armies.some(a=>a.f===f&&a.p===i);if(o<=-4&&(!_hA||(o<=-6&&!S.scen))){
+    const _hA=S.armies.some(a=>a.f===f&&a.p===i);if(o<=-4&&(!_hA||(o<=-6&&!S.scen&&!holdConq(f)))){
       P.rebel++;
       if(P.rebel===1)provNews(f,'unrest',i);
       if(P.rebel===1&&f===S.player)addLog(_hA?`Unruhen in ${PROV_DEF[i].name}! Selbst die Truppen halten die Lage nicht mehr (Ordnung ${fmtNum(Math.round(o*10)/10)}). Nächste Runde droht ein Aufstand: ${FEST_N[ep()]} oder Steuern senken.`:`Unruhen in ${PROV_DEF[i].name}! Nächste Runde droht ein Aufstand: Truppen hineinschicken, ${FEST_N[ep()]} oder Steuern senken.`,true,'bad');
@@ -15535,7 +15561,7 @@ function tapAt(x,y){
   if(id===SEA){UI.sel=null;UI.army=null;UI.preview=null;UI.previewPt=null;UI.mode='idle';refresh();return;}
   if(id>=NOPB){toast(id-NOPB>ep()?`Dieses Land öffnet sich ${EPOCHS[id-NOPB].gen?'in der Epoche '+EPOCHS[id-NOPB].gen.replace(/^(der|des) /,''):'später'}.`:'Unbewohntes Land.');return;}
   if(!isAct(id)){toast(`${PROV_DEF[id].name} öffnet sich mit der Epoche ${EPOCHS[PROV_DEF[id].ep].gen.replace(/^(der|des) /,'')}.`);return;}
-  if(!isKnown(id)&&!(UI.mode==='move'&&getArmy(UI.army))){toast('Unerforschtes Land. Wähle ein Heer und Marschieren, um es zu erkunden.');return;}
+  if(!isKnown(id)&&!(UI.mode==='move'&&getArmy(UI.army))&&!landTapOk(id)){toast('Unerforschtes Land. Wähle ein Heer und Marschieren, um es zu erkunden.');return;}
   UI.tapPt=hit?{x:hit.point.x,z:hit.point.z}:null;
   onProvinceTap(id);UI.tapPt=null;if(MAPMODE==='dip'&&UI.mode!=='move')try{const o=S.prov[id].owner;if(o&&o!=='frei'&&knows(o)&&S.fac[o])setDipView(o);}catch(e){}if(MAPMODE!=='pol'&&UI.mode!=='move')try{viewTapInfo(x,y,id);}catch(e){}
 }
@@ -17187,12 +17213,10 @@ $('#shBody').addEventListener('click',e=>{
       else if(r&&r.wait)toast('Die Flotte segelt zum Ablegepunkt und setzt dann über.');else if(r&&r.p!=null)showNaval(r);else toast('Kein Seeweg zum Ablegepunkt.');refresh();}}
   else if(act==='fexplore'){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl){const n=fleetExplore(fl);AUDIO.sfx('march');toast(n?`${fl.name} hat ${n} Provinzen erkundet`:'Nichts Neues in Reichweite');refresh();}}
   else if(act==='fsail'){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl){UI.mode='fsail';UI.fpv=null;$('#sheet').classList.add('collapsed');toast('Ziel auf dem Meer antippen, zum Bestätigen nochmal tippen.');refresh();}}
-  else if(act==='fport'){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl){const r=moveFleet(fl,+b.dataset.p);AUDIO.sfx('march');if(!r)toast('Dorthin gibt es keinen Seeweg.');UI.sel=fl.p;refresh();if(r&&r.p!=null)showNaval(r);}}
+  else if(act==='fport'){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl){const r=moveFleet(fl,+b.dataset.p);AUDIO.sfx('march');if(!r)toast('Dorthin gibt es keinen Seeweg.');UI.sel=fl.p;refresh();if(r&&r.p!=null)showNaval(r);landHint(fl);}}
   else if(act==='fattack'){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet),o=(S.fleets||[]).find(x=>x.id===+b.dataset.id);if(fl&&o){const r=moveFleetTo(fl,o.x,o.z);AUDIO.sfx('horn');if(!r)toast('Dorthin gibt es keinen Seeweg.');UI.sel=fl.p;refresh();if(r&&r.p!=null)showNaval(r);}}
-  else if(act==='embark2'){const a=getArmy(+b.dataset.a),fl=(S.fleets||[]).find(x=>x.id===+b.dataset.id);if(a&&fl&&embark(a,fl)){AUDIO.sfx('march');toast(`${a.name} ist an Bord von ${fl.name}`);UI.army=null;UI.fleet=fl.id;UI.mode='fleet';UI.sel=fl.p;refresh();}else toast('Einschiffen nicht möglich.');}
-  else if(act==='land'){const a=getArmy(+b.dataset.a),fl=(S.fleets||[]).find(x=>x.cargo&&x.cargo.includes(+b.dataset.a));const pi=+b.dataset.p;if(a&&fl){const r=disembark(a,fl,pi);if(!r)return;if(r.err){toast(r.err);return;}
-      if(r.landed){AUDIO.sfx('march');toast(`${a.name} ist in ${PROV_DEF[pi].name} gelandet${r.unk?' · neues Land erkundet':''}`);UI.army=a.id;UI.mode='army';UI.sel=pi;refreshOwnership();refresh();}
-      else if(r.res){AUDIO.sfx('horn');battleLog(r.res);UI.mode=r.res.captured?'prov':'fleet';UI.sel=r.res.captured?pi:fl.p;refreshOwnership();refresh();showBattle(r.res);}}}
+  else if(act==='embark2'){const a=getArmy(+b.dataset.a),fl=(S.fleets||[]).find(x=>x.id===+b.dataset.id);doEmbark(a,fl);}
+  else if(act==='land'){const a=getArmy(+b.dataset.a),fl=(S.fleets||[]).find(x=>x.cargo&&x.cargo.includes(+b.dataset.a));const pi=+b.dataset.p;if(a&&fl)doLand(a,fl,pi);}
   else if(act==='stance'&&(()=>{const a=getArmy(UI.army);return a&&a.f===S.player&&a.st==='belagern'&&b.dataset.s!=='belagern'&&siegeAt(a.sieg);})()){const a=getArmy(UI.army),s=b.dataset.s;showModal(`<h2>Belagerung abbrechen?</h2><p>Eine neue Haltung beendet die Belagerung von ${esc(PROV_DEF[a.sieg].name)}. Der Fortschritt geht verloren.</p>`,[{label:'Weiter belagern',cls:'primary'},{label:'Abbrechen und wechseln',fn:()=>{setStance(a,s);refresh();}}]);}
   else if(act==='raub'){const a=getArmy(UI.army);if(a&&a.f===S.player){setRaub(a,!a.rz);AUDIO.sfx(a.rz?'horn':'click');toast(a.rz?'Raubzug begonnen':'Raubzug beendet');}refresh();}
   else if(act==='stance'){const a=getArmy(UI.army);if(a&&a.f===S.player){setStance(a,b.dataset.s);AUDIO.sfx('click');if(a.st)toast(STANCES[a.st].n);}refresh();}
@@ -17299,6 +17323,8 @@ const HELP_ACT={
   'act:undoMove':'Nimmt den letzten Marsch zurück, solange nichts geschehen ist.',
   'act:go':'Bestätigt den Befehl: Das Heer marschiert zum gewählten Ziel oder greift an.',
   'act:embark2':'Das Heer geht an Bord dieser Flotte und fährt mit ihr.',
+  'act:land':'Das Heer geht hier an Land. Bei einem Feind ist es ein Landungsangriff (−20 %, im Raubzug ohne Abzug).',
+  'act:fleet':'Flotte öffnen. Heer wählen und Flotte antippen: einschiffen. Flotte mit Ladung wählen und eine Küstenprovinz antippen: anlanden.',
   'act:fsail':'Wähle ein Ziel auf dem Meer. Die Flotte fährt so weit, wie sie in dieser Runde kommt.',
   'act:bridge':'Das Heer schlägt eine Brücke in die Nachbarprovinz. Braucht mindestens 2 Schwert- oder Speerkämpfer und kostet Gold.',
   // Provinz, Bau, Heer ausheben
@@ -17485,6 +17511,7 @@ function onArmyChip(id){
   selectArmy(id);
 }
 function onProvinceTap(pi){
+  {const c=landCtx();if(c&&landTargets(c.fl).includes(pi)){const L=c.list.filter(x=>x.landT!==S.turn);if(!L.length){toast('Dieses Heer ist in dieser Runde schon gelandet.');return;}AUDIO.sfx('click');askLand(L,c.fl,pi);return;}}
   if(UI.mode==='move'){
     const a=getArmy(UI.army);
     if(a&&pi===a.p){const t=TOK.get(a.id),pt=UI.tapPt;
