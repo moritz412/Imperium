@@ -3,3 +3,5 @@ _build_assets/
 dev/tests/node_modules/
 dev/tests/*.jpg
 __pycache__/
+dev/tests/package-lock.json
+dev/tests/shot/
