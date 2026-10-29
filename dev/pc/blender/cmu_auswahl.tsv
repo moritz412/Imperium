@@ -1,0 +1,45 @@
+stehen	77_2	standing
+stehen	140_6	Idle
+stehen	140_7	Idle
+stehen_bereit	77_3	ready stance
+gehen	02_01	walk
+gehen	143_32	Walk
+marschieren	20_06	soldiers march
+marschieren	21_06	soldiers march
+marschieren	91_19	March
+laufen	02_03	run/jog
+laufen	143_01	Run
+laufen	141_01	Run
+anlaufen	143_03	Start to Run
+abbremsen	143_02	Run to Stop
+vorsichtig	77_10	careful run
+schleichen	77_14	careful creeping
+ducken	77_09	duck to avoid flying object
+treffer	90_17	BannanaPeelSlip
+sterben_vorn	90_16	fall on face
+sterben_hinten	90_18	RugPullFall
+hinlegen	77_16	laying down, getting up
+hinlegen	77_18	laying down on back, getting up
+aufstehen	140_01	Get Up Face Down
+aufstehen	140_08	Get Up From Ground Laying on Back
+verwundet	77_19	limping, hurt right leg
+verwundet	91_26	HurtStomachWalk
+verwundet	139_19	Walk Wounded Leg
+jubeln	79_69	very happy
+winken	143_25	Waving
+schlag	02_05	punch/strike
+schlag	143_23	Punching
+schlag	79_08	boxing
+schwert	02_07	swordplay
+schwert	02_08	swordplay
+schwert	02_09	swordplay
+hieb_oben	79_01	chopping wood
+werfen	141_11	Throw and Catch
+werfen	143_20	Catch And Throw
+werfen	79_91	football
+bogen	79_86	shooting bow and arrow
+muskete	79_96	shooting a gun
+tragen	79_25	moving heavy box
+tragen	143_10	Walk And Pick up Tool Box
+graben	79_04	digging
+sitzen	143_19	Sit On Stool And Get Up
