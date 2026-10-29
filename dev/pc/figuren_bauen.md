@@ -1,8 +1,19 @@
 # Figuren selbst bauen am PC (Blender) – Anleitung und Regeln (29.10.2026)
 
-Entscheidung Moritz 29.10.: Figuren baut Moritz überwiegend selbst am PC. Claude liefert Regeln, Vorlagen und das Back-Skript
-(`dev/pc/blender/backen.py`, in der Cloud mit Blender 5.2 headless prüfbar). Ablauf:
-**Moritz baut in Blender → exportiert eine .glb je Skelett/Kit → Back-Skript macht daraus Spieldaten → Einbau im Spiel.**
+Entscheidung Moritz 29.10., präzisiert 29.10. abends: Figuren werden **am PC gebaut, nicht als fertige Modelle aus dem Netz
+übernommen – und zwar von Claude** (Blender per Skript auf Moritz' PC). Erlaubte Ausgangsdaten: MPFB-Grundkörper (CC0) und
+CMU-Bewegungen (frei, mit Nennung); Rüstung/Ausrüstung eigen (TRELLIS aus eigenen FLUX-Vorlagen oder Blender). Ablauf:
+**Claude baut in Blender am PC → .glb je Skelett/Kit → Back-Skript (`dev/pc/blender/backen.py`) macht daraus Spieldaten → Einbau im Spiel.**
+Wo unten „Moritz“ als Bauender steht, gilt jetzt Claude.
+
+## 0. Stand PC (29.10. abends)
+- Blender 5.2.3 LTS portable: `Desktop\imperium-bilder\blender\blender-5.2.3-windows-x64\blender.exe` (Einstellungen im Unterordner `portable`, nichts systemweit). SHA-256 geprüft.
+- MPFB 2.0.18 (extensions.blender.org, SHA-256 geprüft) + MakeHuman system assets (CC0, 268 MB) installiert. Downloads in `blender\dl`.
+- Headless geprüft (`blender\test_koerper.py`): `HumanService.create_human` + `add_builtin_rig(…, "cmu_mb")` + Proxy über `add_mhclo_asset(<proxy>.proxy, …, asset_type="Proxymeshes")`.
+- **Skelett-Wahl: `cmu_mb`** – 31 Knochen, Namen identisch mit den CMU-BVH-Dateien (Hips, LeftUpLeg … Head), also kein Retarget nötig. Gilt ab jetzt für alle Menschenfiguren.
+- Proxy `proxy741`: 1460 Dreiecke, `male1591`: 3140 (zu viel) → proxy741 als Grundlage, für Nah-Stufe auf ≈ 1000 dezimieren (Platz für Ausrüstung). Standardhöhe 1,66 m → auf 1,72 m skalieren.
+- CMU-Bewegungen: freigegeben, noch nicht geladen.
+- Ausrüstung Antike: 18 Teile als TRELLIS-Rohmodelle in `3d\roh_44` (13) und `3d\roh_45` (5), noch ohne r3-Nachbearbeitung.
 
 ## 1. Werkzeuge (einmalig)
 - Blender 4.x oder 5.x (kostenlos, blender.org).
