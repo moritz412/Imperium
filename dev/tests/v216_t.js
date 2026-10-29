@@ -48,7 +48,7 @@ ok('Anlanden: schon gelandet -> Hinweis statt Rückfrage',/schon gelandet/.test(
 
 // Hinweis nach dem Segeln (einmal je Spiel), Landungsangriff mit Hinweis -20 %
 const C=await p.evaluate(()=>{const f=S.player,a=S.armies.find(x=>x.f===f&&x.boat),fl=S.fleets.find(x=>x.id===a.boat),o={};
- const hp=fleetSeaPos(PI.briganten);fl.mp=fleetRange(fl);UI.army=null;onFleetChip(fl.id);UI.mode='fsail';UI.fleet=fl.id;
+ S.story[f].i=3;/* W5: ab Schritt 3 ist Erobern erlaubt */const hp=fleetSeaPos(PI.briganten);fl.mp=fleetRange(fl);UI.army=null;onFleetChip(fl.id);UI.mode='fsail';UI.fleet=fl.id;
  o.h0=S.hintLand||0;const t0=window.toast;o.n=0;window.toast=m=>{if(m==='Tippe eine Küstenprovinz an, um anzulanden.')o.n++;return t0(m);};
  for(let k=0;k<4;k++){fl.mp=fleetRange(fl);UI.mode='fsail';UI.fleet=fl.id;fleetSailTap(fl,hp.x,hp.z);fleetSailTap(fl,hp.x,hp.z);}
  window.toast=t0;o.h1=S.hintLand||0;o.mode1=UI.mode;o.toast1='Tippe eine Küstenprovinz an, um anzulanden.';o.toast2='';

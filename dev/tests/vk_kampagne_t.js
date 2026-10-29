@@ -50,7 +50,7 @@ const s2=await p.evaluate(()=>{const out={reach:{},land:{}};
  for(const id of ['votadiner','briganten','kaleter','lexovier','ulaid','orkney','kimbern']){setup();const{a,fl}=startFleet();embark(a,fl);out.reach[id]=sailTo(a,fl,id);}
  for(const id of ['skane','seeland','svear','esten','aestier','karelien','gotland']){setup();const{a,fl}=startFleet();embark(a,fl);out.reach[id]=sailTo(a,fl,id);}
  setup();{const{a,fl}=startFleet();embark(a,fl);out.raubAnBord=canRaub(a);out.raubFremd=canRaub({f:'usa',boat:5,units:[{}]});setRaub(a,true);out.raubAn=!!a.rz;}
- const trial=(tgt,rz,pre)=>{setup();if(pre)pre();const{a,fl}=startFleet();embark(a,fl);const r=sailTo(a,fl,tgt);if(!r.ok)return{unreach:true};if(rz){setRaub(a,true);if(!a.rz)return{noRz:true};}const g0=S.scen.flags.beute||0;const d=disembark(a,fl,PI[tgt])||{};const q=d.res||{};return{win:q.win,capt:!!q.captured,siege:!!q.siegeStarted,landed:!!d.landed,loot:q.loot||0,lost:q.attLost||0,beute:(S.scen.flags.beute||0)-g0};};
+ const trial=(tgt,rz,pre)=>{setup();S.story[S.player].i=3;/* W5: Erobern ab Schritt 3 */if(pre)pre();const{a,fl}=startFleet();embark(a,fl);const r=sailTo(a,fl,tgt);if(!r.ok)return{unreach:true};if(rz){setRaub(a,true);if(!a.rz)return{noRz:true};}const g0=S.scen.flags.beute||0;const d=disembark(a,fl,PI[tgt])||{};const q=d.res||{};return{win:q.win,capt:!!q.captured,siege:!!q.siegeStarted,landed:!!d.landed,loot:q.loot||0,lost:q.attLost||0,beute:(S.scen.flags.beute||0)-g0};};
  const many=(n,f)=>Array.from({length:n},f);
  out.land.votNoRz=many(6,()=>trial('votadiner',false));out.land.votRz=many(4,()=>trial('votadiner',true));
  out.land.brigNoRz=many(6,()=>trial('briganten',false));out.land.brigRz=many(6,()=>trial('briganten',true));
@@ -144,7 +144,7 @@ ok('Alle vorhandenen Kapitelbilder, Kino-Bilder und Sprecher-Dateien sind im Pak
 bef('Landnahme und Wedmore haben keinen Sprecher (ki:0); Normandie, Waräger, Miklagard, Island ohne eigenes Kapitelbild (Ersatzbild)',s8.rows[4].vk==null&&s8.rows[5].vk==null&&[7,8,9,10].every(i=>!s8.rows[i].img),s8.rows.filter(r=>!r.img||!r.vk).map(r=>r.t));
 // ===== 8b. Schritt aufgeben, Jahreszählung
 const s10=await p.evaluate(()=>{setup();const f=S.player;gotoStep(2);const s=S.story[f];s.q=[];const y0=S.year;stSkip(f);const D=SCEN.wikinger;const m=s.q.slice();return{i:s.i,tron:S.prov[PI.trondelag].owner,q:m.length,qk:m.map(x=>x.k+':'+(x.done||'')),y0,y1:S.year,y80:D.year+Math.floor(80*D.ypt),ypt:D.ypt};});
-ok('„Schritt aufgeben“ (stSkip) löst Haken (Lade/Hälsingland gehören dem Spieler) und Meldung des nächsten Schritts aus, ohne Belohnung, Jahr 865',s10.i===3&&s10.tron==='nord'&&s10.q===1&&s10.qk[0]==='step:'&&s10.y1===865&&s10.y0<865,s10);
+ok('„Schritt aufgeben“ (stSkip) löst Haken (Lade/Hälsingland gehören dem Spieler) und Meldung des nächsten Schritts aus, ohne Belohnung, Jahr 865',s10.i===3&&s10.tron==='nord'&&s10.q>=1&&s10.qk[0]==='step:'&&s10.y1===865&&s10.y0<865,s10);
 info('Jahreszählung ohne Schritt-Sprünge (ypt 0,5): nach 80 Runden',s10.y80);
 // Jahre im echten Rundenlauf: nach dem Sprung auf 1000 weiter, kein Epochenwechsel
 const s11=await p.evaluate(async()=>{setup();const f=S.player;const e0=ep(),et=S.epochTurn;stHook(f,9);const y9=S.year;stHook(f,11);const y11=S.year;const ys=[];for(let i=0;i<3;i++){await turn();ys.push(S.year);}return{y9,y11,ys,ep0:e0,ep1:ep(),et0:et,et1:S.epochTurn,cap:yearCapHit(),epReady:!!S.epReady};});

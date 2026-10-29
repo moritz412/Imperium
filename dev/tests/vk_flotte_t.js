@@ -19,7 +19,7 @@ const r=await p.evaluate(async()=>{const f=S.player,a=S.armies.find(x=>x.f===f&&
  for(;t<12;t++){moveFleet(fl,PI.briganten);land=landTargets(fl);if(land.includes(PI.briganten))break;try{for(const x of S.fleets)if(x.f===f){x.mp=x.mpv2||1;}fl.mp=fleetRange(fl);}catch(er){}}
  return {e,boat:a.boat,t,land:land.map(i=>PROV_DEF[i].id).slice(0,8)};});
 ok('Einschiffen klappt',r.e&&r.boat,r);ok('Flotte erreicht die Küste Northumbrias',r.land.includes('briganten'),r);
-const d=await p.evaluate(()=>{const f=S.player,fl=S.fleets.find(x=>x.f===f),a=S.armies.find(x=>x.f===f&&x.boat===fl.id);const res=disembark(a,fl,PI.briganten)||{};const q=res.res||{};return {err:res.err||null,landed:!!res.landed,landing:!!q.landing,win:q.win,captured:!!q.captured,siege:!!q.siegeStarted,onBoard:!!a.boat};});
+const d=await p.evaluate(()=>{const f=S.player;storyRound();S.story[f].i=3;/* W5: ab Schritt 3 ist Erobern erlaubt */const fl=S.fleets.find(x=>x.f===f),a=S.armies.find(x=>x.f===f&&x.boat===fl.id);const res=disembark(a,fl,PI.briganten)||{};const q=res.res||{};return {err:res.err||null,landed:!!res.landed,landing:!!q.landing,win:q.win,captured:!!q.captured,siege:!!q.siegeStarted,onBoard:!!a.boat};});
 ok('Anlanden in Northumbria (Landung oder Landungsschlacht)',!d.err&&(d.landed||d.landing),d);
 ok('Keine Seitenfehler',!errs.length,errs.slice(0,2));
 console.log(R.every(x=>x)?'ALLE PASS':'FEHLER '+R.filter(x=>!x).length);await b.close();})();
