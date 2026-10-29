@@ -68,12 +68,12 @@ const D=await p.evaluate(()=>{setup();const f=S.player,o={};o.ns=scenNoSubmit('u
  try{dip(f,'usa').st='peace';openDiplomacy('usa');}catch(e){o.err=e.message;}
  o.btn=[...document.querySelectorAll('#dialog [data-dip="vassal"],#dialog [data-dip="demand"]')].map(x=>({d:x.dataset.dip,dis:x.disabled,t:x.innerText.replace(/\s+/g,' ')}));
  try{closeModal();}catch(e){}
- const i=SCEN.wikinger.chapter.steps.findIndex(x=>/Wedmore/.test(x.t));o.idx=i;gotoStep(i-1);o.before=scenNoSubmit('usa');gotoStep(i);o.at=scenNoSubmit('usa');o.v2=aiEval('usa',f,'vassal');o.d2=aiEval('usa',f,'demand');
+ const i=SCEN.wikinger.chapter.steps.findIndex(x=>/Wedmore/.test(x.t));o.idx=i;gotoStep(i-1);o.before=scenNoSubmit('usa');gotoStep(i);o.at=scenNoSubmit('usa');gotoStep(i+1);o.after=scenNoSubmit('usa');o.v2=aiEval('usa',f,'vassal');o.d2=aiEval('usa',f,'demand');
  S.scen.over=true;o.over=scenNoSubmit('usa');return o;});
 ok('Wessex: vor Wedmore gesperrt (Regel noSubmit), andere Reiche nicht',D.ns===true&&D.nsOther===false&&D.idx>0,{ns:D.ns,other:D.nsOther,idx:D.idx});
 ok('Wessex: Unterwerfung und Tribut lehnt aiEval mit Grund ab',D.v.ok===false&&D.d.ok===false&&D.v.why==='Wessex beugt sich nicht – noch nicht.'&&D.d.why===D.v.why,[D.v,D.d]);
 ok('Wessex: Knöpfe im Diplomatie-Fenster sichtbar, gesperrt, mit Grund',D.btn.length===2&&D.btn.every(x=>x.dis&&/Wessex beugt sich nicht – noch nicht\./.test(x.t)),D.btn);
-ok('Wessex: ab dem Schritt „Wedmore“ nicht mehr gesperrt (Schritt davor noch gesperrt)',D.before===true&&D.at===false&&D.v2.why!=='Wessex beugt sich nicht – noch nicht.'&&D.d2.why!=='Wessex beugt sich nicht – noch nicht.',[D.v2,D.d2]);
+ok('Wessex: nach dem Schritt „Wedmore“ nicht mehr gesperrt (W6: Wedmore selbst noch gesperrt, Alfred-Phase)',D.before===true&&D.at===true&&D.after===false&&D.v2.why!=='Wessex beugt sich nicht – noch nicht.'&&D.d2.why!=='Wessex beugt sich nicht – noch nicht.',[D.v2,D.d2]);
 ok('Wessex: Sperre endet mit der Geschichte',D.over===false);
 
 // (d) Eroberung durch den Spieler im Wikinger-Szenario

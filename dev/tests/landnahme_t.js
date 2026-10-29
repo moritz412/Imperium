@@ -166,7 +166,7 @@ if(k.skip)console.log('SKIP KI '+k.skip);else{
 
 // 9. Wikinger-Schritte
 const w=await p.evaluate(()=>{startScenario('wikinger');loadGame(S);try{closeModal();}catch(e){}window.picMsg=()=>{};const me=S.player;const C=SCEN.wikinger.chapter;
-  const ti=C.steps.map(x=>x.t);const iL=ti.indexOf('Akt II · Landnahme'),iW=ti.indexOf('Akt II · Wedmore'),iG=ti.indexOf('Akt II · Das große Heer'),iP=ti.indexOf('Akt II · Paris');
+  const ti=C.steps.map(x=>x.t);const iL=ti.indexOf('Akt II · Landnahme'),iW=ti.indexOf('Akt II · Wedmore'),iG=ti.indexOf('Akt II · Das große Heer'),iP=ti.indexOf('Akt II · Normandie');
   storyRound();const s=stState(me);const vk=C.steps.map((st,i)=>stVk('wikinger',st,{i}).join());
   s.i=iL;s.g=stResolve(me,C.steps[iL].g);s.t0=S.turn;
   const p0=stProg(me,s.g,s);
@@ -174,9 +174,9 @@ const w=await p.evaluate(()=>{startScenario('wikinger');loadGame(S);try{closeMod
   const p1=stProg(me,s.g,s);
   S.prov[pi].ln=2;const p2=stProg(me,s.g,s);storyRound();const after=s.i;
   const st=C.steps[iW];s.g=stResolve(me,st.g);const q0=stProg(me,s.g,s);scenChoice('wedmore_tauf');const q1=stProg(me,s.g,s);storyRound();
-  return{iG,iL,iW,iP,vk:vk.join(' '),p0,p1,p2,after,q0,q1,after2:s.i,flag:S.scen.flags.wedmore,rel:facRel(me),bapt:S.fac[me].bapt&&S.fac[me].bapt.c,need:scenNeed(me,C.steps[iL].g),ev:typeof stChoiceEv(C.steps[iW],{i:iW},C).E.title==='function'};});
-ok('Reihenfolge: Das große Heer → Landnahme → Wedmore → Paris',w.iL===w.iG+1&&w.iW===w.iL+1&&w.iP===w.iW+1,JSON.stringify({g:w.iG,l:w.iL,w:w.iW,p:w.iP}));
-ok('Sprecher-Nummern der späteren Schritte bleiben (k5…k10), Landnahme/Wedmore seit v215 mit eigenen Clips',/wikinger_k4 wikinger_landnahme wikinger_wedmore wikinger_k5 wikinger_k6 wikinger_k7 wikinger_k8 wikinger_k9 wikinger_k10/.test(w.vk),w.vk);
+  return{iG,iL,iW,iP,vk:vk.join(' '),p0,p1,p2,after,q0,q1,after2:s.i,flag:S.scen.flags.wedmore,rel:facRel(me),bapt:S.fac[me].bapt&&S.fac[me].bapt.c,need:scenNeed(me,C.steps[iL].g),ev:(S.scen.flags.edington='lost',S.scen.flags.wedmore=0,typeof wikEv6('wedmore').E.title==='function')};});
+ok('Reihenfolge: Das große Heer → Landnahme → Wedmore → Normandie (W6: Paris entfallen)',w.iL===w.iG+1&&w.iW===w.iL+1&&w.iP===w.iW+1,JSON.stringify({g:w.iG,l:w.iL,w:w.iW,p:w.iP}));
+ok('Sprecher-Nummern der späteren Schritte bleiben (W6: nur noch Normandie k6, Miklagard k8, Vinland k10), Landnahme mit eigenem Clip, Wedmore-Sprecher hängt seit W6 am Wahl-Ereignis',/wikinger_k4 wikinger_landnahme\s+wikinger_k6 wikinger_k8 wikinger_k10/.test(w.vk),w.vk);
 ok('Schritt Landnahme: Stand 0/1 → Lager 0/1 → Siedlung 1/1, danach nächster Schritt',w.p0[0]===0&&w.p1[0]===0&&w.p2[0]===1&&w.after===w.iW,JSON.stringify([w.p0,w.p1,w.p2,w.after]));
 ok('Schritt Wedmore: Wahl erfüllt das Ziel, Taufe wirkt',w.q0[0]===0&&w.q1[0]===1&&w.flag===1&&w.bapt==='tauf'&&w.after2===w.iP,JSON.stringify({q0:w.q0,q1:w.q1,fl:w.flag,b:w.bapt,i:w.after2}));
 ok('Frist wird für Landnahme verlängert (scenNeed 16)',w.need===16,String(w.need));

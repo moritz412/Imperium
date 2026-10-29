@@ -34,38 +34,38 @@ await sleep(1500);
 ok('keyPack: kino5/Landnahme/Wedmore holen x_wikinger_kino2.json (nicht x_wikinger_kino)',got.some(x=>/^200 x_wikinger_kino2\.json/.test(x))&&!got.some(x=>/x_wikinger_kino\.json/.test(x)),got.join(' '));
 
 // 1. Partie, Akt III
-await p.evaluate(()=>{startScenario('wikinger');try{storyRound();}catch(e){}loadGame(S);try{closeModal();}catch(e){}const me=S.player,s=stState(me);s.i=8;s.cine=1;s.q=[];S.scen.flags.vk_intro=1;S.scen.flags.vk_k2=1;S.scen.flags.vk_k3=1;window.__d=0;stMsg(me,{k:'step'});runEvents(()=>{window.__d=1;});});
+await p.evaluate(()=>{startScenario('wikinger');try{storyRound();}catch(e){}loadGame(S);try{closeModal();}catch(e){}const me=S.player,s=stState(me);s.i=7;s.cine=1;s.q=[];S.scen.flags.vk_intro=1;S.scen.flags.vk_k2=1;S.scen.flags.vk_k3=1;window.__d=0;stMsg(me,{k:'step'});runEvents(()=>{window.__d=1;});});
 const k5=await waitCine('Der Weg der Waräger');
 await p.waitForFunction(()=>{const on=document.querySelector('.cine .ci.on');return PKU['vk_k4_fluss_x1']&&on&&on.style.backgroundImage.includes(PKU['vk_k4_fluss_x1']);},null,{timeout:6000}).catch(()=>{});
 const k5s=await p.evaluate(()=>{const on=document.querySelector('.cine .ci.on');return{i:stState(S.player).i,flag:S.scen.flags.vk_k5,first:!!(PKU['vk_k4_fluss_x1']&&on&&on.style.backgroundImage.includes(PKU['vk_k4_fluss_x1'])),skip:!!document.querySelector('.cine [data-c="skip"]')};});
-ok('Sequenz 5 „Der Weg der Waräger“ beim Schritt Akt III, Merker, erstes Bild vk_k4_fluss, überspringbar',k5&&k5s.i===8&&k5s.flag===1&&k5s.first&&k5s.skip,JSON.stringify(k5s));
+ok('Sequenz 5 „Der Weg der Waräger“ (W6: jetzt beim Schritt Miklagard), Merker, erstes Bild vk_k4_fluss, überspringbar',k5&&k5s.i===7&&k5s.flag===1&&k5s.first&&k5s.skip,JSON.stringify(k5s));
 await p.evaluate(()=>{const g=document.querySelector('.cine .cplay');if(g)g.click();});await sleep(3000);
 await p.screenshot({path:SH+'w6_kino5.png'});
 await skip();await p.waitForSelector('#dialog .evhero',{timeout:10000}).catch(()=>{});
 const h5=await p.evaluate(()=>(document.querySelector('#dialog h2')||{}).textContent);
-ok('Kapitelbild Waräger am Schritt „Der Weg der Waräger“',/Waräger/.test(h5||'')&&await heroIs('vk_kap_waraeger_x1'),h5);
+ok('Kapitelbild Miklagard am Schritt Miklagard (W6, nach Sequenz 5)',/Miklagard/.test(h5||'')&&await heroIs('vk_kap_miklagard_x1'),h5);
 await p.evaluate(()=>{try{closeModal();}catch(e){}});
-const o5=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=8;stMsg(me,{k:'step'});return{c:stEvents(me).map(x=>!!x.E.cine),v:vkCine('k5')};});
+const o5=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=7;stMsg(me,{k:'step'});return{c:stEvents(me).map(x=>!!x.E.cine),v:vkCine('k5')};});
 ok('Sequenz 5 nur einmal',o5.c.every(x=>!x)&&o5.v===null,JSON.stringify(o5));
 
 // 2. Akt IV
-await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=10;window.__d=0;stMsg(me,{k:'step'});runEvents(()=>{window.__d=1;});});
+await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=8;window.__d=0;stMsg(me,{k:'step'});runEvents(()=>{window.__d=1;});});
 const k6=await waitCine('Über das Nordmeer');
 const k6s=await p.evaluate(()=>{const on=document.querySelector('.cine .ci.on');return{i:stState(S.player).i,flag:S.scen.flags.vk_k6,first:!!(PKU['vk_k5_island_x1']&&on&&on.style.backgroundImage.includes(PKU['vk_k5_island_x1'])),last:VK_KINO.k6.ikeys.slice(-1)[0]};});
-ok('Sequenz 6 „Über das Nordmeer“ beim Schritt Akt IV, Merker, erstes Bild vk_k5_island, letztes vk_k5_saga',k6&&k6s.i===10&&k6s.flag===1&&k6s.first&&k6s.last==='vk_k5_saga',JSON.stringify(k6s));
+ok('Sequenz 6 „Über das Nordmeer“ (W6: jetzt beim Schritt Vinland), Merker, erstes Bild vk_k5_island, letztes vk_k5_saga',k6&&k6s.i===8&&k6s.flag===1&&k6s.first&&k6s.last==='vk_k5_saga',JSON.stringify(k6s));
 await skip();await p.waitForSelector('#dialog .evhero',{timeout:10000}).catch(()=>{});
 const h6=await p.evaluate(()=>(document.querySelector('#dialog h2')||{}).textContent);
-ok('Kapitelbild Island am Schritt „Island und Grönland“',/Island/.test(h6||'')&&await heroIs('vk_kap_island_x1'),h6);
+ok('Kapitelbild Vinland am Schritt Vinland (W6: Island ist darin aufgegangen)',/Vinland/.test(h6||'')&&await heroIs('vk_kap_vinland_x1'),h6);
 await p.evaluate(()=>{try{closeModal();}catch(e){}});
-const o6=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=10;stMsg(me,{k:'step'});return{c:stEvents(me).map(x=>!!x.E.cine),v:vkCine('k6')};});
+const o6=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=8;stMsg(me,{k:'step'});return{c:stEvents(me).map(x=>!!x.E.cine),v:vkCine('k6')};});
 ok('Sequenz 6 nur einmal',o6.c.every(x=>!x)&&o6.v===null,JSON.stringify(o6));
 
 // 3. Kapitelbilder und Schritt-Sprecher (Daten)
 const d=await p.evaluate(()=>{const C=SCEN.wikinger.chapter,by=t=>C.steps.find(s=>s.t===t);
-  return{img:Object.fromEntries(['Akt II · Normandie','Akt III · Der Weg der Waräger','Akt III · Miklagard','Akt IV · Island und Grönland','Akt IV · Vinland','Akt II · Paris'].map(t=>[t,by(t).img])),end:C.end.img,
-   vk:['Akt II · Landnahme','Akt II · Wedmore'].map(t=>stVk('wikinger',by(t),{i:0})[0]),k:['Akt II · Paris'].map(t=>stVk('wikinger',by(t),{i:0})[0])};});
-ok('Kapitelbilder gesetzt (Normandie/Waräger/Miklagard/Island/Vinland, Paris unverändert, Saga-Ende Heimkehr)',d.img['Akt II · Normandie']==='vk_kap_normandie'&&d.img['Akt III · Der Weg der Waräger']==='vk_kap_waraeger'&&d.img['Akt III · Miklagard']==='vk_kap_miklagard'&&d.img['Akt IV · Island und Grönland']==='vk_kap_island'&&d.img['Akt IV · Vinland']==='vk_kap_vinland'&&d.img['Akt II · Paris']==='vk_kap_danegeld'&&d.end==='vk_kap_heimkehr',JSON.stringify(d));
-ok('Schritt-Sprecher Landnahme/Wedmore gebunden, andere Schritte unverändert',d.vk[0]==='wikinger_landnahme'&&d.vk[1]==='wikinger_wedmore'&&d.k[0]==='wikinger_k5',JSON.stringify(d.vk)+JSON.stringify(d.k));
+  return{img:Object.fromEntries(['Akt II · Normandie','Akt III · Miklagard','Akt IV · Vinland'].map(t=>[t,by(t).img])),end:C.end.img,
+   vk:['Akt II · Landnahme','Akt II · Wedmore'].map(t=>stVk('wikinger',by(t),{i:0})[0]),k:['Akt II · Normandie'].map(t=>stVk('wikinger',by(t),{i:0})[0])};});
+ok('Kapitelbilder gesetzt (Normandie/Miklagard/Vinland, Saga-Ende Heimkehr; Paris/Waräger/Island entfallen)',d.img['Akt II · Normandie']==='vk_kap_normandie'&&d.img['Akt III · Miklagard']==='vk_kap_miklagard'&&d.img['Akt IV · Vinland']==='vk_kap_vinland'&&d.end==='vk_kap_heimkehr',JSON.stringify(d));
+ok('Schritt-Sprecher Landnahme gebunden, Wedmore (W6) am Ereignis, andere Schritte unverändert',d.vk[0]==='wikinger_landnahme'&&d.vk[1]==null&&/* W6: Wedmore-Sprecher hängt am Wahl-Ereignis */d.k[0]==='wikinger_k6',JSON.stringify(d.vk)+JSON.stringify(d.k));
 // Landnahme-Schritt: Ereignis trägt den Sprecher-Schlüssel
 const ln=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=4;stMsg(me,{k:'step'});const e=stEvents(me).find(x=>x.E.id==='st_step');return e?e.E.vk:null;});
 ok('Ereignis Landnahme: vk = [wikinger_landnahme]',JSON.stringify(ln)==='["wikinger_landnahme"]',JSON.stringify(ln));

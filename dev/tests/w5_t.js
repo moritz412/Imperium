@@ -117,7 +117,7 @@ const F=await p.evaluate(()=>{setup();const f=S.player,a=S.armies.find(x=>x.f===
  const ws=SCEN.wikinger.chapter.steps.findIndex(x=>/Wedmore/.test(x.t));o.ws=ws;
  return o;});
 ok('Schritt 2: England gesperrt (Raubtext), ab Schritt 3 frei für Northumbria/Mercia/East Anglia',F.lock[2].briten&&F.lock[2].mogul&&F.lock[2].vijaya&&F.lock[3].briten==null&&F.lock[3].mogul==null&&F.lock[3].vijaya==null&&F.lock[4].briten==null,F.lock);
-ok('Wessex: Schritt 3 und 4 gesperrt mit „noch zu stark“, ab Schritt 5 (Wedmore) frei',F.ws===5&&F.lock[3].usa===F.lock[4].usa&&/^Wessex ist noch zu stark\. Erst Alfred stellt sich zur Schlacht\.$/.test(F.lock[3].usa)&&F.lock[5].usa==null&&F.lock[6].usa==null,[F.ws,F.lock[3].usa,F.lock[5].usa]);
+ok('Wessex: Schritt 3, 4 und (seit W6, Alfred-Phase bis zur Wedmore-Wahl) 5 gesperrt mit „noch zu stark“, ab Schritt 6 frei',F.ws===5&&F.lock[3].usa===F.lock[4].usa&&F.lock[5].usa===F.lock[4].usa&&/^Wessex ist noch zu stark\. Erst Alfred stellt sich zur Schlacht\.$/.test(F.lock[3].usa)&&F.lock[6].usa==null,[F.ws,F.lock[3].usa,F.lock[5].usa,F.lock[6].usa]);
 ok('Wessex-Rückfrage im Schritt 3 zeigt den Wessex-Text und bietet den Raubzug an; Northumbria dort ohne Rückfrage',/Wessex ist noch zu stark/.test(F.wessexModal)&&F.wessexBtn&&F.wessexBtn.dis===false&&/Angriff auf/.test(F.nordModal),[F.wessexModal.slice(0,90),F.nordModal]);
 ok('Wessex bleibt Raubziel: mit Raubzug keine Sperre',F.rzWessex==null);
 

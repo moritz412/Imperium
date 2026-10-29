@@ -5875,22 +5875,21 @@ Object.assign(SCEN,{
    {t:'Akt I · Das Thing',img:'vk_kap_thronstreit',txt:'Einmal im Jahr treffen sich die freien Männer auf dem Thing. Dort wird Recht gesprochen, Streit geschlichtet und manchmal ein König ausgerufen. Mit genug Ruhm und genug Silber für Geschenke folgen die Jarle eines Tages nicht mehr nur sich selbst.',g:{cond:'ruhm',n:60,txt:'Ruhm 60 erreichen (Siege, Eroberungen, Beute).'},rew:{gold:300}},
    {t:'Akt II · Das große Heer',year:865,img:'vk_kap_jorvik',kino:'k2',txt:'Die Zeit der schnellen Überfälle ist vorbei. Ein großes Heer setzt nach England über, um zu bleiben. Es nimmt die Stadt York, die man nun Jórvík nennt, und überwintert in fremdem Land. Die Könige der Angelsachsen zahlen Danegeld, damit die Nordmänner weiterziehen. Doch sie kommen wieder. Ivar und Halfdan landen mit einem zweiten Heer vor East Anglia: Du führst jetzt zwei Heere, und ab jetzt darfst du in England erobern, außer in Wessex. Fällt eine Hauptstadt, kannst du einen Marionettenkönig einsetzen.',g:{hold:['briganten']},rew:{gold:400}},
    {t:'Akt II · Landnahme',year:876,ki:0,vkey:'wikinger_landnahme',img:'vk_kap_landnahme',txt:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder. Plündere in England mindestens dreimal, halte dort ein Heer in einer eigenen Provinz und siedle dort. Nach sechs Runden wird aus dem Lager eine Siedlung. Später, wenn dein Hof in einer Heimat-Provinz sitzt, kannst du dort „Die Heimat verlegen“ wählen und entscheiden, was aus dem alten Land im Norden wird.',vo:'876. Das große Heer hat England nicht erobert, aber aufgebrochen. Halfdan teilt Northumbria unter seinen Männern auf, und sie pflügen das Land und bauen Höfe. Aus Kriegern werden Bauern. Wer bleiben will, braucht mehr als Schwerter: ein Lager, Höfe, Frauen und Kinder.',g:{cond:'landnahme',txt:'In England mindestens dreimal plündern, mit einem Heer in einer eigenen Provinz „Hier siedeln – Landnahme“ wählen und sechs Runden bis zur Siedlung warten.'},rew:{gold:300,order:1}},
-   {t:'Akt II · Wedmore',year:878,ki:0,vkey:'wikinger_wedmore',img:'vk_kap_burhbau',kino:'k3',txt:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren. Wie hältst du es mit dem Glauben?',vo:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren.',g:{cond:'choice',flag:'wedmore',txt:'Über Taufe oder Treue zu den alten Göttern entscheiden.'},rew:{gold:0},choice:[
-     {l:'Die Taufe annehmen',d:'Frieden und bessere Beziehungen zu den Christen, Beute ×0,8. Ordnung −1 im Kernland (10 Runden), Thronstreit wahrscheinlicher.',act:'wedmore_tauf'},{l:'Den alten Göttern treu bleiben',d:'Ruhm +15, Ordnung +1 im Kernland (10 Runden). Die Christen werden kühler.',act:'wedmore_treue'}]},
-   {t:'Akt II · Paris',year:885,ki:5,img:'vk_kap_danegeld',txt:'Die Seine windet sich tief in das Land der Franken. Rouen liegt am Ufer, weiter flussaufwärts Paris auf seiner Insel. Die Franken sperren den Fluss mit Brücken und Türmen. Doch Langschiffe kann man über Land ziehen, und Mauern kann man aushungern.',g:{hold:['parisier']},rew:{gold:400}},
+   {t:'Akt II · Wedmore',year:878,ki:0,img:'vk_kap_burhbau',edGate:1,txt:'878. Mitten im Winter überfällt das Heer der Dänen den Königshof von Chippenham, wo Alfred das Fest feiert. Wessex ist unvorbereitet, und seine Hauptstadt ist in diesem Winter leicht zu nehmen. Doch Alfred flieht mit wenigen Getreuen in die Sümpfe von Athelney und ruft von dort den Fyrd von Somerset, Wiltshire und Hampshire. Im Frühjahr steht sein Heer bei Edington. Nutze den Winter und stell dich dann der Schlacht. Danach entscheidest du, wie es mit Wessex weitergeht.',vo:'878. Mitten im Winter überfällt das Heer der Dänen den Königshof von Chippenham, wo Alfred das Fest feiert. Wessex ist unvorbereitet. Doch Alfred flieht mit wenigen Getreuen in die Sümpfe von Athelney und ruft von dort den Fyrd von Somerset, Wiltshire und Hampshire. Im Frühjahr steht sein Heer bei Edington.',g:{cond:'choice',flag:'wedmore',txt:'Alfreds Heer bei Edington stellen, dann über Wedmore entscheiden.'},rew:{gold:0},
+    w:{txt:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren. Wie hältst du es mit dem Glauben?',vo:'878. König Alfred von Wessex schlägt das Heer des Dänenkönigs Guthrum bei Edington. Guthrum bittet um Frieden und lässt sich taufen, Alfred selbst wird sein Pate. Im Vertrag von Wedmore teilt man das Land: Im Osten und Norden gilt dänisches Recht, das Danelag. Doch die alten Jarle murren.',vkey:'wikinger_wedmore',txtWon:'878. Bei Edington ist das Heer von Wessex geschlagen. Alfred hat den Fyrd verloren, sein Königreich liegt offen vor dir. In den Sagen ging dieser Tag anders aus: Guthrum musste sich taufen lassen. Hier kannst du Wessex den Frieden diktieren. Wie nutzt du den Sieg?',choice:[
+     {l:'Die Taufe annehmen',d:'Frieden und bessere Beziehungen zu den Christen, Beute ×0,8. Ordnung −1 im Kernland (10 Runden), Thronstreit wahrscheinlicher. Danelag-Vertrag: 12 Runden Frieden mit Wessex, Grenze an der Watling Street.',act:'wedmore_tauf'},{l:'Den alten Göttern treu bleiben',d:'Ruhm +15, Ordnung +1 im Kernland (10 Runden). Die Christen werden kühler. Danelag-Vertrag: 12 Runden Frieden mit Wessex, Grenze an der Watling Street.',act:'wedmore_treue'}],
+     extra:{l:'Wessex unterwerfen',d:'Alternativgeschichte: Wessex wird dein Vasall und zahlt Tribut. Ruhm +25. Es gibt keinen Danelag-Vertrag, das Land bleibt, wie es ist.',act:'wedmore_unterwerfen'}}},
    {t:'Akt II · Normandie',year:911,ki:6,img:'vk_kap_normandie',txt:'Im Jahr 911 lässt der Frankenkönig Karl dem Nordmann Rollo ein Angebot machen. Er soll Land an der Mündung der Seine erhalten, als Lehen, wenn er sich taufen lässt und den Fluss gegen andere Nordmänner schützt. Aus Räubern könnten Herzöge werden.',g:{cond:'choice',flag:'normandie',txt:'Über das Angebot entscheiden.'},rew:{gold:0},choice:[
      {l:'Das Lehen annehmen',d:'Seinemündung und Lexovier werden dein, Frieden mit den Franken.',act:'normandie_ja'},{l:'Weiter plündern',d:'400 Gold Beute, Krieg mit den Franken bleibt.',act:'normandie_nein'}]},
-   {t:'Akt III · Der Weg der Waräger',year:900,ki:7,img:'vk_kap_waraeger',kino:'k5',txt:'Im Osten führen Flüsse durch endlose Wälder nach Süden. Schweden und Nordmänner, die man dort Waräger nennt, fahren über Ladoga und Nowgorod bis Kiew. An den Stromschnellen des Dnepr tragen sie ihre Boote über Land. Am Ende des Weges liegt das Schwarze Meer.',g:{any:[['ilmen','smolensk','neurer','dregowitschen','esten','karelien','liven'],1]},rew:{gold:300}},
-   {t:'Akt III · Miklagard',year:950,ki:8,img:'vk_kap_miklagard',txt:'Am Ende des Ostwegs liegt Miklagard, die große Stadt, die die Griechen Konstantinopel nennen. Ihre Mauern sind höher als alles im Norden, ihr Kaiser trägt Purpur. Er zahlt Nordmännern viel Gold, wenn sie seine Leibwache werden. Andere kommen nur, um Pelze, Wachs und Sklaven gegen Seide und Silber zu tauschen.',g:{cond:'choice',flag:'miklagard',txt:'Über den Dienst in Miklagard entscheiden.'},rew:{gold:0},choice:[
+   {t:'Akt III · Miklagard',year:950,ki:8,img:'vk_kap_miklagard',kino:'k5',txt:'Am Ende des Ostwegs liegt Miklagard, die große Stadt, die die Griechen Konstantinopel nennen. Ihre Mauern sind höher als alles im Norden, ihr Kaiser trägt Purpur. Er zahlt Nordmännern viel Gold, wenn sie seine Leibwache werden. Andere kommen nur, um Pelze, Wachs und Sklaven gegen Seide und Silber zu tauschen.',g:{cond:'choice',flag:'miklagard',txt:'Über den Dienst in Miklagard entscheiden.'},rew:{gold:0},choice:[
      {l:'In die Warägergarde eintreten',d:'Zwei Einheiten Warägergarde und 400 Gold',act:'mikla_garde'},{l:'Nur handeln',d:'Steuern +10 % für 30 Runden',act:'mikla_handel'}]},
-   {t:'Akt IV · Island und Grönland',year:985,ki:9,img:'vk_kap_island',kino:'k6',txt:'Im Westen, weit hinter den Färöern, haben Seefahrer eine Insel aus Feuer und Eis gefunden. Man nennt sie Island. Noch weiter liegt ein Land, das Erik der Rote Grönland nennt, damit mehr Siedler kommen. Es ist eine Fahrt ohne Wiederkehr, für Familien, Vieh und Saatgut.',g:{cond:'choice',flag:'island',txt:'Die Siedlerflotte ausrüsten (300 Gold).'},rew:{gold:0},choice:[
-     {l:'Siedler ausschicken (300 Gold)',d:'Siedler fahren nach Island und Grönland. Ruhm +20.',act:'island'},{l:'Noch warten',d:'Du kannst später über den Geschichte-Knopf entscheiden.',act:'warten'}]},
-   {t:'Akt IV · Vinland',year:1000,ki:10,img:'vk_kap_vinland',txt:'Leif, der Sohn Eriks, erzählt von einem Land jenseits von Grönland, mit Wäldern, Lachs und wildem Wein. Er nennt es Vinland. Niemand weiß, wie weit es reicht und wer dort lebt. Eine Fahrt dorthin ist die kühnste, die ein Nordmann wagen kann.',g:{cond:'choice',flag:'vinland',txt:'Die Fahrt nach Vinland wagen (400 Gold).'},rew:{gold:0},choice:[
-     {l:'Nach Vinland fahren (400 Gold)',d:'Die kühnste Fahrt der Saga. Ruhm +30.',act:'vinland'},{l:'Noch warten',d:'Du kannst später über den Geschichte-Knopf entscheiden.',act:'warten'}]}],
+   {t:'Akt IV · Vinland',year:1000,ki:10,img:'vk_kap_vinland',kino:'k6',txt:'Leif, der Sohn Eriks, erzählt von einem Land jenseits von Grönland, mit Wäldern, Lachs und wildem Wein. Er nennt es Vinland. Niemand weiß, wie weit es reicht und wer dort lebt. Eine Fahrt dorthin ist die kühnste, die ein Nordmann wagen kann.',g:{cond:'choice',flag:'vinland',txt:'Die Fahrt nach Vinland wagen (400 Gold, mit Island und Grönland 700 Gold).'},rew:{gold:0},choice:[
+     {l:'Nach Vinland fahren (400 Gold)',d:'Die kühnste Fahrt der Saga. Ruhm +30.',act:'vinland'},
+     {l:'Erst Island und Grönland besiedeln, dann nach Vinland (700 Gold)',d:'Siedler gründen Höfe auf Island und in Grönland, danach segelt ein Langschiff nach Westen. Ruhm +50.',act:'vinland_island'},{l:'Noch warten',d:'Du kannst später über den Geschichte-Knopf entscheiden.',act:'warten'}]}],
    end:{t:'Saga',img:'vk_kap_heimkehr',txt:'Die Skalden versammeln sich in der Halle und stimmen ihre Lieder an. Zwei Jahrhunderte Fahrten, Kämpfe und Handel sollen zu einer Saga werden. Was soll sie erzählen?',opts:[
      {l:'Vom König des Nordens',d:'Ordnung +2 für 40 Runden',fx:{order:2}},{l:'Vom Schrecken der Küsten',d:'Angriff +12 % für 40 Runden',fx:{atk:0.12}},{l:'Vom Händler zwischen den Welten',d:'Steuern +15 % für 40 Runden',fx:{tax:0.15}}]}},
   christ:['briten','usa','mogul','vijaya','arverner'],
-  hooks:{0:f=>{addLog('Die Nachbarn kennen dich noch nicht: In den ersten 25 Runden erklärt dir kein Reich neu den Krieg. Dein Heer kostet im Feindesland und auf See nur halben Sold.',true,'info');},3:f=>{for(const id of ['trondelag','haelsingland']){const i=PI[id];if(i!=null){S.prov[i].owner=f;}}S.armies.filter(a=>a.f==='polen').forEach(a=>{a.f=f;});try{S.fac.polen.alive=false;}catch(e){}addLog('Das Thing hat entschieden: Die Jarle von Lade folgen dir als König.',true,'good');try{wikGrossesHeer(f);}catch(e){console.warn('Großes Heer',e);}}},
+  hooks:{0:f=>{addLog('Die Nachbarn kennen dich noch nicht: In den ersten 25 Runden erklärt dir kein Reich neu den Krieg. Dein Heer kostet im Feindesland und auf See nur halben Sold.',true,'info');},3:f=>{for(const id of ['trondelag','haelsingland']){const i=PI[id];if(i!=null){S.prov[i].owner=f;}}S.armies.filter(a=>a.f==='polen').forEach(a=>{a.f=f;});try{S.fac.polen.alive=false;}catch(e){}addLog('Das Thing hat entschieden: Die Jarle von Lade folgen dir als König.',true,'good');try{wikGrossesHeer(f);}catch(e){console.warn('Großes Heer',e);}},4:f=>{try{wikAlfred();}catch(e){console.warn('Alfred',e);}},5:f=>{try{wikStep5();}catch(e){console.warn('Wedmore-Phase',e);}}},
   gold:(f)=>(S.scen.flags.beute||0)>=1500&&S.scen.flags.vinland}
 });
 Object.assign(SC_COND,{});
@@ -5904,6 +5903,7 @@ function scenChoice2(act){const Z=S.scen,f=S.player;if(!Z)return;try{scenChoice3
   if(act==='mikla_garde'){Z.flags.miklagard=1;const c=capitalOf(f);if(c!=null)scenArmy(f,c,[['sword','varanger'],['sword','varanger']],'Harald Hardrada');S.fac[f].gold+=400;}
   if(act==='mikla_handel'){Z.flags.miklagard=1;addMod(f,'tax',0.1,30,'Handel mit Miklagard');}
   if(act==='island'){if(S.fac[f].gold>=300){S.fac[f].gold-=300;Z.flags.island=1;scenFame(f,20);addLog('Siedler gründen Höfe auf Island und in Grönland.',true,'good');}else toast('Zu wenig Gold');}
+  if(act==='vinland_island'){if(S.fac[f].gold>=700){S.fac[f].gold-=700;Z.flags.island=1;Z.flags.vinland=1;scenFame(f,50);addLog('Siedler gründen Höfe auf Island und in Grönland, und ein Langschiff erreicht Vinland. Eine kleine Siedlung entsteht am Rand der Welt.',true,'good');}else toast('Zu wenig Gold');}
   if(act==='vinland'){if(S.fac[f].gold>=400){S.fac[f].gold-=400;Z.flags.vinland=1;scenFame(f,30);addLog('Ein Langschiff erreicht Vinland. Eine kleine Siedlung entsteht am Rand der Welt.',true,'good');}else toast('Zu wenig Gold');}}
 
 /* ===================== ZWEITE SIEDLUNGEN: neue Städte beim Epochenwechsel ===================== */
@@ -6860,7 +6860,7 @@ Object.assign(SC_LEG,{
 // Geschichten-Regeln (z. B. noJpUnify: keine automatische Reichseinigung Japans und kein Shōgun-Angebot während der Geschichte)
 function scenRule(k){try{return!!(S&&S.scen&&!S.scen.over&&SCEN[S.scen.id]&&SCEN[S.scen.id].rules&&SCEN[S.scen.id].rules[k]);}catch(e){return false;}}
 // v216: Regel noSubmit:{volk:'Schrittname'} – das Volk lässt sich bis zu diesem Schritt weder unterwerfen noch zu Tribut zwingen. Regel holdConquest – Eroberungen des Spielers halten besser (Garnison 60 %, Unruhe 2, kein Abfall bei eigenem Heer, Hauptstadtfall macht kriegsmüde).
-function scenNoSubmit(f){try{if(!S||!S.scen||S.scen.over)return false;const D=SCEN[S.scen.id],ns=D.rules&&D.rules.noSubmit,t=ns&&ns[f];if(!t)return false;const idx=D.chapter.steps.findIndex(x=>x.t.indexOf(t)>=0);if(idx<0)return false;const s=S.story&&S.story[S.player];return!(s&&(s.done||s.end||s.i>=idx));}catch(e){return false;}}
+function scenNoSubmit(f){try{if(!S||!S.scen||S.scen.over)return false;const D=SCEN[S.scen.id],ns=D.rules&&D.rules.noSubmit,t=ns&&ns[f];if(!t)return false;const idx=D.chapter.steps.findIndex(x=>x.t.indexOf(t)>=0);if(idx<0)return false;const s=S.story&&S.story[S.player];return!(s&&(s.done||s.end||s.i>idx));/* v218: gesperrt, solange der Schritt Wedmore läuft (Alfred-Phase); militärisch öffnet wikOpen */}catch(e){return false;}}
 function holdConq(f){return f===S.player&&scenRule('holdConquest');}
 // Fällt die Hauptstadt eines KI-Reiches an den Spieler: Kriegsmüdigkeit, damit Frieden wahrscheinlicher wird (ab 60 bietet die KI eher Frieden an)
 function holdCapFall(f,prev,wasCap,ti){try{if(wasCap&&holdConq(f)&&prev&&prev!=='frei'&&prev!==f&&!isHumanP(prev))wwAdd(prev,Math.max(0,60-wwOf(prev)));}catch(e){}try{wikMarOffer(f,prev,wasCap,ti);}catch(e){console.warn('Marionette',e);}}
@@ -6881,7 +6881,7 @@ const WIK_TXT_WESSEX='Wessex ist noch zu stark. Erst Alfred stellt sich zur Schl
 function wikRaidLock(a,ti,sieg,land){try{const R=scenRuleV('raubzeit');if(!R||!a||a.f!==S.player)return null;const o=S.prov[ti].owner;if(!R.vol.includes(o))return null;
   const pact=raidPact(a.f,o);if(a.rz&&!sieg&&!pact)return null;if(!sieg&&(land?walkOk(a.f,ti):passOk(a.f,ti)))return null;
   if(scenStepI()<R.bis)return a.rz&&pact&&!sieg?'Das Danegeld ist bezahlt: Gegen dieses Reich ruht euer Raubzug, solange der Vertrag gilt.':WIK_TXT_RAUB;
-  if(scenNoSubmit(o))return a.rz&&pact&&!sieg?'Das Danegeld ist bezahlt: Gegen dieses Reich ruht euer Raubzug, solange der Vertrag gilt.':WIK_TXT_WESSEX;
+  if(scenNoSubmit(o)&&!wikOpen(o))return a.rz&&pact&&!sieg?'Das Danegeld ist bezahlt: Gegen dieses Reich ruht euer Raubzug, solange der Vertrag gilt.':WIK_TXT_WESSEX;
 }catch(e){}return null;}
 // Rückfrage statt Angriff: Raubzug einschalten (wenn möglich) oder abbrechen. go() führt den Angriff aus, sobald der Raubzug läuft.
 function wikLockModal(a,ti,go,land){const why=wikRaidLock(a,ti,false,land)||WIK_TXT_RAUB,c=canRaub(a),can=!a.rz&&c.ok,nm=PROV_DEF[ti].name;
@@ -6923,7 +6923,7 @@ function wikEv(id){
     {label:'Pferde und Winterquartier annehmen',desc:()=>'2 Reiter fürs Große Heer, 10 Runden Waffenstillstand mit East Anglia, freier Durchzug durch sein Land.',fx:()=>wikPferde(true)},
     {label:'Ablehnen und plündern',desc:()=>`Krieg mit East Anglia, sofort ${wikPferdeGold()} Gold Beute.`,fx:()=>wikPferde(false)}]},ctx:{}};}
   if(id==='thron')return{E:{id:'wik_thron',img:wikImg('thronstreit'),eb:'Akt II · Das Große Heer',title:()=>'Zwei Könige in Eoforwic',text:()=>'In Eoforwic, das ihr Jórvík nennt, streiten Osberht und Ælla um den Thron Northumbrias. Das Reich ist gespalten, und beide Könige haben die Hälfte ihrer Krieger verloren, bevor ein Schwert der Nordmänner fiel. Jetzt ist die Zeit, zuzuschlagen.',opts:[{label:'Weiter',desc:()=>'Alle Heere Northumbrias haben die Hälfte ihrer Männer verloren.',fx:()=>null}]},ctx:{}};
-  return null;}
+  return wikEv6(id);}
 
 /* ---- Marionettenkönig: Fällt die Hauptstadt von Northumbria, Mercia oder East Anglia (ab Schritt 3) ---- */
 const WIK_KOENIG={briten:'Ecgberht',mogul:'Ceolwulf',vijaya:'ein gefügiger Thane'};
@@ -6968,6 +6968,173 @@ function lagerRound(){if(!S||!S.prov)return;S.prov.forEach((P,i)=>{if(P.lager==n
   const m=Math.ceil(garMax(i)*0.8);if(P.gar<m)P.gar=m;});}
 // Versorgung: Ein Heer bis zu drei Provinzen von einem Lager entfernt gilt als versorgt
 function lagerReach(a){if(a.f!==S.player||!lagerList().length)return false;const seen=new Set([a.p]);let q=[a.p];for(let d=0;d<=3&&q.length;d++){const nx=[];for(const c of q){if(lagerOn(c))return true;for(const n of ADJ[c])if(!seen.has(n)){seen.add(n);nx.push(n);}}q=nx;}return false;}
+/* ===== v218 (W6): Wikinger Phase C „Alfred“ und Phase D (Kürzung) – Konzept dev/docs/wikinger_nachbesserung.md, Abschnitt 4 =====
+   Ablauf: Hook Schritt 4 (Landnahme) → wikAlfred · Hook Schritt 5 (Wedmore) → wikStep5 · Szenario-Runde wikRound (Burh-Takt, Danegeld, Chippenham-Winter, Fyrd, Marsch, Zeitgrenze).
+   Schritt 5 ist jetzt die Alfred-Phase: Die Wedmore-Wahl (SCEN.wikinger.chapter.steps[5].w) erscheint erst, wenn Edington entschieden ist (flags.edington 'won'|'lost').
+   Alles gilt nur im Wikinger-Szenario (wikOn); Endlosspiel und andere Geschichten bleiben unverändert. Die KI-Angriffslogik ist unverändert: Das Fyrd-Heer wird vom Szenario-Skript bewegt (a.hold hält die allgemeine KI davon fern). */
+Object.assign(WIK_IMG,{alfred:['vk_u_alfred','vk_kap_burhbau'],fyrd:['vk_u_fyrd','vk_k3_schildwall'],danelag:['vk_u_danelag','vk_e1_danelag']});// TODO Job 42: vk_u_alfred, vk_u_fyrd, vk_u_danelag (Alfred-Porträt, Fyrd im Sumpf von Athelney, Grenzlinie Watling Street)
+// Danelag-Linie (Vertrag Alfred–Guthrum, Watling Street): Alle Provinzen Britanniens sind einer Seite zugeordnet, die Zuordnung ist fest.
+// Danelag (nördlich/östlich der Linie): East Anglia (icener), Essex (trinovanten, östlich der Lea), Ost-Mercia mit den Fünf Burgen (corieltauver), Northumbria (briganten, votadiner).
+// Wessex (südlich/westlich): Kernland (belgae_b), Dumnonia (dumnonier), Kent (cantium) und West-Mercia, das schon Alfreds Schwiegersohn hielt (dobunner = Hwicce).
+// Nicht Teil des Vertrags: Powys (silurer) und das schottische Hochland (kaledonier, nordkaledonien).
+const WIK_DANE=['icener','trinovanten','corieltauver','briganten','votadiner'],WIK_WESS=['belgae_b','dumnonier','cantium','dobunner'];
+const WIK={burhT:6,daneAfter:3,fyrdLate:8,fyrdMax:24,fyrdRatio:1.5,fyrdMin:6,peace:12};
+const wikOn=()=>{try{return!!(S&&S.scen&&!S.scen.over&&S.scen.id==='wikinger'&&!S.mp);}catch(e){return false;}};
+const wikFl=()=>S.scen.flags;
+// Wessex ist für Eroberung offen: im Chippenham-Winter, ab dem Aufruf des Fyrd und nach Edington
+function wikOpen(o){try{if(o!=='usa'||!wikOn())return false;const F=wikFl();return!!(F.fyrd||F.edington||F.chipp===S.turn);}catch(e){return false;}}
+// Später (wenn kein Fenster, keine Schlacht und kein Kino läuft) etwas anzeigen
+function wikLater(fn,n){n=n==null?80:n;setTimeout(()=>{try{if(!S||S.over)return;const m=$('#modal');if((m&&!m.hidden)||BATTLE||CINE){if(n>0)wikLater(fn,n-1);return;}fn();}catch(e){console.warn(e);}},300);}
+function wikPath(from,isGoal,pass){const prev=new Map([[from,null]]),q=[from];
+  while(q.length){const c=q.shift();if(c!==from&&isGoal(c)){const path=[];let x=c;while(x!==from){path.unshift(x);x=prev.get(x);}return path;}
+    for(const n of ADJ[c]){if(prev.has(n)||isSeaLink(c,n)||(pass&&!pass(n)))continue;prev.set(n,c);q.push(n);}}
+  return null;}
+const wikQ=(id,x)=>{const s=stState(S.player);if(s){s.q=s.q||[];if(id==='wedmore'&&s.q.some(m=>m.k==='wik'&&m.id==='wedmore'))return;s.q.push(Object.assign({k:'wik',id},x||{}));}};
+
+/* ---- 1) Beginn von Schritt 4: Alfred wird König ---- */
+function wikAlfred(silent){const F=wikFl();if(F.alfred)return null;F.alfred=1;F.wikT0=S.turn;
+  const wl=provsOf('usa');if(!alive('usa')||!wl.length)return null;
+  let a=S.armies.filter(x=>x.f==='usa'&&x.units.length&&!x.boat).sort((p,q)=>q.units.length-p.units.length)[0];
+  if(!a){const cp=capitalOf('usa');a=scenArmy('usa',cp!=null?cp:wl[0],[['spear','fyrd'],['spear','fyrd'],['sword'],['missile']],null);}
+  a.gen={n:'Alfred',lvl:4,xp:GEN_LV[3],tr:['standhaft','beliebt'],e:ep(),face:0};a.alf=1;
+  addLog('Alfred wird König von Wessex. Er schlägt die Dänen nicht im offenen Feld, sondern baut Burhs, zahlt Danegeld und gewinnt Zeit.',true,'info');
+  if(!silent)wikQ('alfred');return a;}
+// Burh in einer Grenzprovinz von Wessex, die noch keinen hat (am liebsten dort, wo der Spieler steht oder angrenzt)
+function wikBurh(){const f=S.player;let best=null,bs=-1;
+  for(const pi of provsOf('usa')){const P=S.prov[pi];if(P.b.burh>0||(P.build&&P.build.k==='burh'))continue;
+    const fr=[...ADJ[pi]].filter(n=>!isSeaLink(pi,n)&&S.prov[n].owner!=='usa');if(!fr.length)continue;
+    const sc=fr.reduce((s,n)=>s+(S.prov[n].owner===f?2:armiesAt(n).some(x=>x.f===f)?1.5:S.prov[n].owner!=='frei'?0.5:0.1),0)+Math.random()*0.01;
+    if(sc>bs){bs=sc;best=pi;}}
+  if(best==null)return null;S.prov[best].b.burh=1;(wikFl().burhN=(wikFl().burhN||0)+1);
+  addLog(`Wessex baut einen Burh in ${PROV_DEF[best].name}: Erdwall und Palisade sichern die Grenze.`,true,'info');return best;}
+// Einmaliges Danegeld-Angebot (vorhandenes System: Vorschlag type 'dane', nur im Krieg mit Wessex)
+function wikDanegeld(){const F=wikFl(),f=S.player;if(F.wxDane||!alive('usa')||!atWar(f,'usa')||raidPact(f,'usa'))return false;
+  if((S.props||[]).some(x=>x.type==='dane'&&x.from==='usa'))return false;
+  const amt=daneAmt('usa');if(S.fac.usa.gold<amt)S.fac.usa.gold=amt+20;
+  (S.props=S.props||[]).push({from:'usa',to:f,type:'dane',amt});F.wxDane=S.turn;return true;}
+
+/* ---- 2) Beginn von Schritt 5: die Alfred-Phase ---- */
+function wikStep5(){const F=wikFl();if(F.s5T==null){F.s5T=S.turn;F.wxP=provsOf('usa');}}
+function wikRound(){if(!wikOn())return;const F=wikFl(),f=S.player,i=scenStepI();
+  // Nach dem Chippenham-Winter: Garnison der Hauptstadt wieder auffüllen
+  if(F.chippGar!=null&&F.chipp!=null&&S.turn>=F.chipp){const P=S.prov[PI.belgae_b];if(P&&P.owner==='usa')P.gar=Math.max(P.gar,F.chippGar);F.chippGar=null;}
+  if(i>5){for(const a of S.armies)if(a.fyrd)delete a.fyrd;return;}
+  if(i<4)return;
+  if(!F.alfred)wikAlfred(true);
+  if(!(alive('usa')&&provsOf('usa').length)){// Wessex ist untergegangen: Edington entfällt, Alfred ist besiegt
+    if(i===5){if(!F.edington){F.fyrd=F.fyrd||-1;wikEdSet('won');}else if(!F.wedmore&&S.turn-(F.wedQ||0)>=3){F.wedQ=S.turn;wikQ('wedmore');}}return;}
+  const dt=S.turn-(F.wikT0==null?(F.wikT0=S.turn):F.wikT0);
+  if(dt>0&&dt%WIK.burhT===0)wikBurh();
+  if(dt>=WIK.daneAfter)wikDanegeld();
+  if(i<5)return;
+  if(F.s5T==null)wikStep5();
+  const nx=((S.turn+1)%4+4)%4;
+  // Chippenham: im ersten Winter dieses Schritts ist die Hauptstadt unvorbereitet (Garnison halbiert, Sperre aufgehoben)
+  if(F.chipp==null&&!F.fyrd){
+    if(nx===2&&!F.chippW){F.chippW=1;addLog('Späher melden: Alfred will das Fest im Winter in Chippenham feiern. Bring ein Heer in die Nähe von Wessex.',true,'info');}
+    if(nx===3){F.chipp=S.turn+1;const P=S.prov[PI.belgae_b];
+      if(P&&P.owner==='usa'){F.chippGar=P.gar;P.gar=Math.max(1,Math.ceil(P.gar/2));}
+      addLog('Alfred feiert Weihnachten in Chippenham – Wessex ist unvorbereitet.',true,'good');}}
+  if(!F.fyrd){const conq=(F.wxP||[]).some(pi=>S.prov[pi].owner===f);
+    if(conq||S.turn-F.s5T>WIK.fyrdLate)wikFyrd(conq?'Eroberung':'Zeit');}
+  else if(!F.edington){
+    if(F.fyrd>0&&!S.armies.some(a=>a.fyrd&&a.units.length)&&S.turn>F.fyrdT){wikEdSet('won');addLog('Alfreds Fyrd hat sich aufgelöst.',true,'good');return;}
+    wikFyrdMarch();
+    if(S.turn-(F.fyrdT||S.turn)>WIK.fyrdMax){wikEdSet('lost');addLog('Alfreds Fyrd hat das Land zurückgewonnen, ohne dass sich dein Heer gestellt hat.',true,'bad');}}
+  else if(!F.wedmore&&S.turn-(F.wedQ||0)>=3){F.wedQ=S.turn;wikQ('wedmore');}}
+/* ---- 3) Athelney/Edington ---- */
+function wikFyrd(why){const F=wikFl(),f=S.player;if(F.fyrd)return null;
+  const wl=provsOf('usa');if(!alive('usa')||!wl.length){F.fyrd=-1;wikEdSet('won');return null;}
+  let pi=PI.dumnonier;if(S.prov[pi].owner!=='usa'){const p=wikPath(pi,x=>S.prov[x].owner==='usa',null);pi=p?p[p.length-1]:wl[0];}
+  const eng=S.armies.filter(a=>a.f===f&&a.units.length&&!a.boat&&PROV_DEF[a.p].reg==='britannien'),pool=eng.length?eng:S.armies.filter(a=>a.f===f&&a.units.length&&!a.boat);
+  const best=pool.reduce((m,a)=>Math.max(m,armyPower(a)),0),pat=[['spear','fyrd'],['spear','fyrd'],['sword'],['missile'],['spear','fyrd'],['cav'],['sword'],['missile'],['spear','fyrd'],['spear','fyrd']];
+  const a=scenArmy('usa',pi,pat.slice(0,Math.min(armyMax('usa'),pat.length)),null);a.name='Alfreds Fyrd';a.fyrd=1;
+  const al=S.armies.find(x=>x.alf&&x.f==='usa'&&x!==a);if(al){a.gen=al.gen;al.gen=newGeneral('usa');delete al.alf;}else a.gen={n:'Alfred',lvl:4,xp:GEN_LV[3],tr:['standhaft','beliebt'],e:ep(),face:0};
+  const tgt=Math.max(best*WIK.fyrdRatio,1);
+  // zu schwach: Veteranen, dann bessere Waffen und Rüstung (höchstens Stufe 3); zu stark (kleines Spielerheer oder grobe Stufe): Einheiten abziehen, aber nie unter fyrdMin
+  for(const L of[[1,0],[1,1],[1,2],[1,3]]){if(armyPower(a)>=tgt)break;for(const u of a.units){u.tier=L[0];u.wpn=L[1];u.arm=L[1];}}
+  while(a.units.length>WIK.fyrdMin&&armyPower(a)*(a.units.length-1)/a.units.length>=tgt)a.units.pop();
+  try{if(!atWar('usa',f)){const R=SCEN.wikinger.rules,sh=R.shield;R.shield=0;try{declareWar('usa',f,true);}finally{R.shield=sh;}}}catch(e){console.warn('Alfred Krieg',e);}// Alfred ruft den Fyrd: Wessex erklärt den Dänen den Krieg (auch in der Schonfrist)
+  a.mp=maxMP(a);a.hold=S.turn+2;F.fyrd=S.turn;F.fyrdT=S.turn;F.fyrdPi=pi;F.fyrdR=best?Math.round(armyPower(a)/best*100)/100:null;
+  addLog(`Alfred sammelt den Fyrd: Ein großes Heer (${a.units.length} Einheiten) erscheint in ${PROV_DEF[pi].name} und marschiert auf dein Heer.`,true,'bad');
+  wikQ('fyrd',{pi});return a;}
+function wikFyrdTarget(a){const f=S.player,hasP=pi=>armiesAt(pi).some(x=>x.f===f&&x.units.length),ok=pi=>{if(!isAct(pi))return false;const o=S.prov[pi].owner;return o===f||o==='usa'||o==='frei'||!atWar('usa',o);};
+  if(hasP(a.p))return null;
+  return wikPath(a.p,hasP,ok)||wikPath(a.p,pi=>S.prov[pi].owner===f&&PROV_DEF[pi].reg==='britannien',ok);}
+// Szenario-Skript: das Fyrd-Heer geht eine Provinz pro Runde auf das nächste Spielerheer zu und greift an, sobald es an eine Spielerprovinz grenzt
+function wikFyrdMarch(){const f=S.player;for(const a of S.armies.filter(x=>x.fyrd&&x.units.length)){
+  a.hold=S.turn+2;if(a.st==='belagern'){try{liftSiege(a);}catch(e){}}
+  const p=wikFyrdTarget(a);if(!p||!p.length)continue;const n=p[0],o=S.prov[n].owner;
+  if(o===f){a.mp=0;if(armiesAt(n).some(x=>x.f===f&&x.units.length))PENDING.push({aid:a.id,ti:n});else battleLog(resolveAttack(a,n));}
+  else{a.p=n;a.pos=null;a.goal=null;a.mp=0;}}}
+// Gilt dieser Angriff als Edington? Erste Schlacht zwischen dem Fyrd-Heer und einem Spielerheer
+function wikEdCtx(a,ti){try{if(!wikOn()||!a||scenStepI()!==5)return false;const F=wikFl();if(!F.fyrd||F.fyrd<0||F.edington)return false;const f=S.player;
+  if(a.fyrd)return S.prov[ti].owner===f&&armiesAt(ti).some(x=>x.f===f&&x.units.length);
+  if(a.f===f)return armiesAt(ti).some(x=>x.fyrd&&x.units.length);return false;}catch(e){return false;}}
+/* Bei Schlachtende sind die Einheiten schon abgezogen (Heer kann ausgelöscht sein): dann zählt der Schlachtkontext statt der Heere auf der Karte. */
+function wikEdCtx2(ctx){try{if(!wikOn()||scenStepI()!==5)return false;const F=wikFl();if(!F.fyrd||F.fyrd<0||F.edington)return false;const f=S.player,a=ctx.a,D=ctx.defArmies||[];
+  if(a.fyrd)return S.prov[ctx.ti].owner===f&&D.some(x=>x.f===f);if(a.f===f)return D.some(x=>x.fyrd);return false;}catch(e){return false;}}
+function wikEdSet(res){const F=wikFl();if(F.edington)return;F.edington=res;for(const a of S.armies)if(a.fyrd)delete a.fyrd;F.wedQ=S.turn;
+  addLog(res==='won'?'Edington: Du hast Alfreds Fyrd geschlagen. In den Sagen ging dieser Tag anders aus – Wessex liegt offen vor dir.':'Edington: Alfreds Fyrd hat dein Heer geschlagen. Die Dänen müssen verhandeln.',true,res==='won'?'good':'bad');
+  try{chronAdd('hist',`Edington: ${res==='won'?'Sieg über Alfreds Fyrd':'Niederlage gegen Alfreds Fyrd'}`);}catch(e){}
+  wikQ('wedmore');}
+function wikK3(a,ti){try{return wikEdCtx(a,ti)?vkCine('k3'):null;}catch(e){return null;}}
+{const _ca=concludeAttack;concludeAttack=function(ctx,win){let ed=false;try{ed=wikEdCtx(ctx.a,ctx.ti)||wikEdCtx2(ctx);}catch(e){}const r=_ca.apply(this,arguments);try{if(ed)wikEdSet((ctx.a.f===S.player?win:!win)?'won':'lost');}catch(e){console.warn('Edington',e);}return r;};}
+// Kino „Edington“ (k3) läuft vor der ersten Schlacht, nicht mehr beim Schrittbeginn
+{const _sb=startBattle;startBattle=function(o){const c=o&&wikK3(o.a,o.ti);if(c){playCine(c,()=>_sb.call(this,o));return;}return _sb.apply(this,arguments);};}
+{const _tk=tokAttack;tokAttack=function(a,ti,cb){const c=wikK3(a,ti);if(c){playCine(c,()=>_tk.call(this,a,ti,cb));return;}return _tk.apply(this,arguments);};}
+{const _pp=processPending;processPending=function(done){try{const n=PENDING[0],a=n&&getArmy(n.aid),c=a&&wikK3(a,n.ti);if(c){playCine(c,()=>processPending(done));return;}}catch(e){console.warn('Edington-Kino',e);}return _pp.apply(this,arguments);};}
+
+/* ---- 4) Wedmore: dritte Wahl und Danelag-Vertrag ---- */
+function wikUnterwerfen(){const Z=S.scen,F=Z.flags,f=S.player;F.wedmore=1;
+  if(!alive('usa')){addLog('Wessex ist untergegangen. Niemand bleibt, den man unterwerfen könnte.',true,'info');return false;}
+  try{if(atWar(f,'usa'))makePeace(f,'usa');}catch(e){}makeVassal(f,'usa');const d=dip(f,'usa');d.truce=Math.max(d.truce||0,WIK.peace);scenFame(f,25);
+  addLog('Alfred beugt das Knie: Wessex wird dein Vasall und zahlt Tribut. Die Geschichte nimmt hier einen anderen Lauf.',true,'good');
+  try{chronAdd('hist','Wessex unterworfen (Alternativgeschichte)');}catch(e){}return true;}
+function wikRelocate(a){if(a.boat||!a.units.length)return;try{if(a.st==='belagern'||a.sieg!=null)liftSiege(a);}catch(e){}
+  const p=wikPath(a.p,pi=>S.prov[pi].owner===a.f&&isAct(pi),isAct);if(p&&p.length){a.p=p[p.length-1];a.pos=null;a.goal=null;a.mp=0;clearStance(a);a.st=null;}}
+function wikDanelag(){const Z=S.scen,F=Z.flags,f=S.player;if(F.danelag!=null)return null;F.danelag=S.turn;
+  if(!alive('usa')){addLog('Wessex ist untergegangen: Es gibt keinen Vertrag, und das ganze Land ist Danelag.',true,'info');return null;}
+  const toMe=WIK_DANE.map(id=>PI[id]).filter(pi=>pi!=null&&S.prov[pi].owner==='usa'),toWes=WIK_WESS.map(id=>PI[id]).filter(pi=>pi!=null&&S.prov[pi].owner===f);
+  // Belagerungen zwischen den Vertragsparteien enden
+  try{for(const a of S.armies.slice())if((a.f===f||a.f==='usa')&&a.st==='belagern'&&a.sieg!=null){const o=S.prov[a.sieg]&&S.prov[a.sieg].owner;if((a.f===f&&o==='usa')||(a.f==='usa'&&o===f))liftSiege(a);}}catch(e){}
+  try{makePeace(f,'usa');}catch(e){}const d=dip(f,'usa');d.truce=WIK.peace;d.nap=S.turn+WIK.peace;
+  const mv=(pi,to)=>{const P=S.prov[pi];if(S.sieges&&S.sieges[pi])delete S.sieges[pi];P.owner=to;P.build=null;P.build2=null;P.q=null;P.prot=null;P.rebel=0;P.unrest=Math.max(P.unrest||0,1);P.uw='Grenzvertrag';P.gar=Math.max(P.gar,2);};
+  toMe.forEach(pi=>mv(pi,f));toWes.forEach(pi=>mv(pi,'usa'));
+  // Heere stehen nicht im Land der anderen Seite
+  for(const a of S.armies.slice()){const o=S.prov[a.p].owner;if(a.boat)continue;if((a.f===f&&o==='usa')||(a.f==='usa'&&o===f))wikRelocate(a);}
+  try{refreshOwnership();}catch(e){}
+  const nm=L=>L.map(pi=>PROV_DEF[pi].name);Z.dane={me:nm(toMe),wes:nm(toWes),t:S.turn};
+  addLog(`Danelag-Vertrag: ${WIK.peace} Runden Frieden mit Wessex, Grenze an der Watling Street.${toMe.length?' An dich fallen: '+nm(toMe).join(', ')+'.':''}${toWes.length?' An Wessex gehen: '+nm(toWes).join(', ')+'.':''}`,true,'good');
+  try{chronAdd('peace','Danelag-Vertrag mit Wessex');}catch(e){}
+  wikLater(wikDaneShow);return{toMe,toWes};}
+function wikDaneShow(){const Z=S.scen,I=Z&&Z.dane;if(!I||I.shown)return;I.shown=1;const L=a=>a.length?a.join(', '):'keine';
+  showModal(`${heroOr(wikImg('danelag'),'ev_thron',S.turn)}<p class="eyebrow" style="margin:0 0 6px">Vertrag von Wedmore</p><h2>Das Danelag</h2><p class="sub">${fmtYear(S.year)}</p>
+    <p>Alfred und der Dänenkönig ziehen eine Grenze entlang der Themse, der Lea und der alten Römerstraße Watling Street. Im Norden und Osten gilt dänisches Recht, im Süden und Westen herrscht Wessex. ${WIK.peace} Runden lang ruht der Krieg.</p>
+    <p class="note">Danelag, an dich: <b>${esc(L(I.me))}</b><br>Wessex, an Wessex: <b>${esc(L(I.wes))}</b><br>Heere ziehen sich aus dem Land der anderen Seite zurück. Die Mischkultur im Danelag bleibt, wie sie ist.</p>`,[{label:'Weiter',cls:'primary'}]);}
+{const _sc=scenChoice;scenChoice=function(act){const r=_sc(act);try{if(wikOn()){if(act==='wedmore_tauf'||act==='wedmore_treue')wikDanelag();else if(act==='wedmore_unterwerfen')wikUnterwerfen();}}catch(e){console.warn('Wedmore W6',e);}return r;};}
+// Ereignisfenster der Alfred-Phase (über stEvents, Meldungen {k:'wik',id})
+function wikEv6(id,m){
+  if(id==='alfred')return{E:{id:'wik_alfred',img:wikImg('alfred'),eb:'Akt II · Landnahme',title:()=>'Alfred wird König',text:()=>'Alfred, der jüngste Sohn des Æthelwulf, ist König von Wessex geworden. Er ist kein Mann für den Schildwall um jeden Preis. Er kauft Zeit mit Danegeld, baut Burhs mit Erdwall und Palisade und sammelt ein Heer, das nicht davonläuft. Wessex ist ab jetzt kein leichtes Ziel mehr.',opts:[{label:'Weiter',desc:()=>`Alle ${WIK.burhT} Runden baut Wessex einen Burh an der Grenze. Wessex stellt sich erst zur Schlacht, wenn Alfred es will.`,fx:()=>null}]},ctx:{}};
+  if(id==='fyrd'){const F=wikFl();return{E:{id:'wik_fyrd',img:wikImg('fyrd'),eb:'Akt II · Wedmore',title:()=>'Alfred sammelt den Fyrd',text:()=>`Im Sumpf von Athelney hat Alfred die Männer von Somerset, Wiltshire und Hampshire gerufen. Sie kommen mit Speer und Schild, die Bauern neben den Thegns. Ein großes Heer marschiert aus ${F.fyrdPi!=null?PROV_DEF[F.fyrdPi].name:'dem Sumpf'} auf dein Heer zu. Die erste Schlacht wird über den Frieden entscheiden: Edington.`,opts:[{label:'Weiter',desc:()=>'Das Heer von Wessex ist etwa anderthalbmal so stark wie dein größtes Heer in England. Stell dich ihm mit allem, was du hast, oder weiche aus.',fx:()=>null}]},ctx:{}};}
+  if(id==='wedmore'){const Z=S.scen,F=Z.flags;if(F.wedmore||!F.edington)return null;const s=stState(S.player),C=stCh(S.player),st=C.steps.find(x=>x.t.indexOf('Wedmore')>=0);if(!st||!st.w)return null;
+    const won=F.edington==='won'&&alive('usa'),W=st.w;
+    const st1=Object.assign({},st,{txt:won?W.txtWon:W.txt,vo:won?W.txtWon:W.vo,vkey:won?undefined:W.vkey,ki:0,kino:undefined,choice:won?W.choice.concat([W.extra]):W.choice});
+    return stChoiceEv(st1,s,C);}
+  return null;}
+
+/* ---- Phase D: gekürzte Schrittfolge und alte Spielstände ----
+   Neue Folge (9 Schritte): 0 Lindisfarne · 1 Ruhm · 2 Thing · 3 Großes Heer · 4 Landnahme · 5 Wedmore (Alfred-Phase) · 6 Normandie · 7 Miklagard · 8 Vinland.
+   Entfallen: Paris (885) und Der Weg der Waräger (900); Island und Grönland ist in den Schritt Vinland eingegangen (zweite Wahl „Erst Island und Grönland besiedeln“, 700 Gold, Ruhm +50).
+   Das Kino k5 „Der Weg der Waräger“ läuft jetzt bei Miklagard, k6 „Über das Nordmeer“ bei Vinland. Sprecher (ki) und Kapitelbilder hängen an den Schritten, nicht am Index, und bleiben gültig.
+   Alte Spielstände: S.story[f].i zeigt auf die alte Folge (12 Schritte). Weil der Index bis Schritt 5 unverändert bleibt und danach nur Schritte entfallen, rechnet wikMigrate beim Laden einmalig um (Marke scen.w6) – robuster und billiger als Schritte mit Kennung, weil die gesamte Geschichten-Maschinerie (stProg, stEvents, Hooks, Tests) am Index hängt. */
+const WIK_OLD=[0,1,2,3,4,5,6,6,7,7,8,8];
+function wikMigrate(){const Z=S&&S.scen;if(!Z||Z.id!=='wikinger'||Z.w6)return;Z.w6=1;Z.flags=Z.flags||{};const F=Z.flags,f=S.player,s=S.story&&S.story[f];if(!s||s.done||s.end)return;
+  const C=SCEN.wikinger.chapter,o=s.i|0,n=o>=WIK_OLD.length?C.steps.length-1:WIK_OLD[o];
+  if(o>=6){s.i=n;s.t0=S.turn;try{s.g=stResolve(f,C.steps[n].g);}catch(e){console.warn(e);}addLog(`Die Geschichte wurde gekürzt (Paris, Waräger und Island entfallen). Du bist jetzt bei „${C.steps[n].t}“.`,true,'info');}
+  if(s.i>=4&&!F.alfred){try{wikAlfred(true);}catch(e){console.warn(e);}}
+  if(s.i===5&&!F.edington&&!F.wedmore){F.s5T=S.turn;F.wxP=[];F.fyrd=-1;F.edington='lost';F.wedQ=S.turn;wikQ('wedmore');}}// Stand mitten in Wedmore: die Wahl kommt sofort, Edington gilt als historisch verloren
+{const _s=startScenario;startScenario=function(id){const r=_s.apply(this,arguments);try{if(id==='wikinger'&&S&&S.scen)S.scen.w6=1;}catch(e){}return r;};}
 // Ziel „vertreiben“: kein Heer des Volks g.fac mehr in den Regionen g.regs (zählt erst, wenn der Auslöser g.flag gesetzt hat)
 Object.assign(SC_COND,{vertreiben:(f,g)=>{if(!S.scen.flags[g.flag])return[1,1];const R=new Set(g.regs);const n=S.armies.filter(a=>a.f===g.fac&&a.units.length&&R.has(PROV_DEF[a.p].reg)).length;return[n?0:1,1];}});
 // Helfer für Auslöser: Volk wiederbeleben bzw. einem Slot ein neues Volk geben, Heer aufstellen
@@ -8723,6 +8890,7 @@ function stanceDef(a){return!a?1:a.st==='fest'?1.25:a.st==='hinter'?1.3:a.st==='
 /* ===== v199: Raubzug, Verwüstung, Danegeld ===== */
 // v206 (Lückenbilder): Pakete pk_lk (55 Völker-Gesandte: _m1/_n1 für 25 Kulturen, _x1 für habescha/indigen/japanisch/koreanisch/suedostasiatisch) und pk_lb (Gebäude b_*, Artillerie u_art_e0–e2, ui_waren, ui_maerkte); heroImg bevorzugt die Epochen-Fassung vor _x1; BPK/upkKey/Wirtschaft-Banner
 // v207 (Kosmetik/Erklärtexte): Reichsvolk-Kachel (.rktile) lässt rechts Platz für den Schließen-Knopf; HELP_ACT/HELP_ATTRS um Handel (Märkte, Routen, Verträge, Kompanien, Anleihe), Forschung (data-tech), Agenten (data-hire/agact/agtgt …) und Geschichte/Szenario (story*, mission, scenbribe) erweitert; Schließen-, Zurück- und ?-Knopf erklärt. Keine Datenpakete geändert, OFF_VER unverändert.
+// v218 (W6, Wikinger Phase C+D): Alfred-Phase. Hook Schritt 4: Wessex bekommt den Feldherrn „Alfred“ (standhaft, beliebt; wikAlfred), Burh-Takt alle 6 Runden (wikBurh) und einmal Danegeld (wikDanegeld, nur im Krieg); Schritt 5 „Wedmore“ ist jetzt die Alfred-Phase (wikRound): Chippenham-Winter (Garnison der Hauptstadt halbiert, Wessex-Sperre aufgehoben, flags.chipp), Fyrd nach erster Wessex-Eroberung oder 8 Runden (wikFyrd, ca. 1,5× größtes Spielerheer, marschiert per Skript wikFyrdMarch), erste Schlacht = Edington (concludeAttack-Hülle, Kino k3 davor, flags.edington 'won'|'lost'), danach erst die Wedmore-Wahl (steps[5].w, bei „won“ dritte Wahl „Wessex unterwerfen"); Danelag-Vertrag nach Taufe/Treue (wikDanelag, feste Provinzlisten WIK_DANE/WIK_WESS, 12 Runden Frieden); Phase D: Paris, Waräger und Island entfallen (9 Schritte), Alt-Stände werden beim Laden umgerechnet (wikMigrate, WIK_OLD). Bilder über WIK_IMG (TODO Job 42: vk_u_alfred, vk_u_fyrd, vk_u_danelag).
 // v217 (W5, Wikinger Phase A+B): Regeln raubzeit/marionette/winterlager im Szenario. Raubsperre in England bis „Das Große Heer“ (Wessex bis „Wedmore“), mit Rückfrage und Grund (wikRaidLock/wikLockModal in orderMove, askLand/doLand/disembark, canSiege); Hook Schritt 3: Heer „Ivar und Halfdan“ mit Flotte vor East Anglia (wikGrossesHeer), Ereignisse Pferde (wikPferde) und Thronstreit (wikThronstreit); Marionettenkönig beim Fall einer Hauptstadt (wikMarOffer/wikMarShow/wikMarDo, über holdCapFall); Winterlager ab Schritt 1 (lagerWhy/setLager/lagerRound, P.lager, Abwehr ×2 in provDefense, Unruhe doppelt, Versorgung lagerReach). Bilder über WIK_IMG (TODO Job 42: vk_u_*).
 // v216 (Wikinger-Nachbesserung): Einschiffen/Anlanden per Kartentipp mit Rückfrage (embarkWhy/askEmbark/askLand/landCtx, einmaliger Hinweis landHint), Szenario-Regeln noSubmit (Wessex bis „Wedmore“ nicht unterwerfbar, kein Tribut) und holdConquest (Garnison 60 %, Unruhe 2, kein Abfall mit Heer, Hauptstadtfall macht kriegsmüde); nur Wikinger.
 // v215 (Wikinger-Kino II): Sequenzen k5 „Der Weg der Waräger“ (Beginn Akt III) und k6 „Über das Nordmeer“ (Beginn Akt IV; Bilder pk_vk2, Erzähler audio/x_wikinger_kino2.json, keyPack wikinger_kino5/6), Kapitelbilder Normandie/Waräger/Miklagard/Island/Vinland + Saga-Ende (vk_kap_heimkehr, End-Ereignis nimmt E.img), Schritt-Sprecher wikinger_landnahme/wikinger_wedmore über Schritt-Feld vkey (ki:0 bleibt sonst stumm); neue Pakete pk_vk2, x_wikinger_kino2; OFF_VER v215
@@ -13467,7 +13635,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     }else P.rebel=0;
     if(P.unrest>0)P.unrest=Math.max(0,P.unrest-((hasTech(f,'citizenship')?1.2:0.75)+techBonus(f,'unrest'))*(lagerOn(i)?2:1));
   }finally{S.player=_pp;}});
-  siegeRound();try{diffRound();}catch(e){console.warn('Wandel',e);}try{ambushRound();}catch(e){console.warn('Hinterhalt',e);}raidRound();attritionRound();faithRound();fleetRound();for(const f of PLAYABLE)if(alive(f)){aiAgents(f);asP(f,()=>agentRound(f));}crisisRound();coalitionRound();try{pk1Round();}catch(e){console.warn('Gegner',e);}missionRound();try{epSysRound();}catch(e){console.warn('Epochensystem',e);}try{ringRound();bundRound();scenRound();}catch(e){console.warn('Geschichte',e);}try{lagerRound();}catch(e){console.warn('Winterlager',e);}try{feat2Round();feat3Round();}catch(e){console.warn('Funktionen',e);}histRound();for(const f of PLAYABLE)if(alive(f))try{polRound(f);}catch(e){console.warn('Politik',e);}
+  siegeRound();try{diffRound();}catch(e){console.warn('Wandel',e);}try{ambushRound();}catch(e){console.warn('Hinterhalt',e);}raidRound();attritionRound();faithRound();fleetRound();for(const f of PLAYABLE)if(alive(f)){aiAgents(f);asP(f,()=>agentRound(f));}crisisRound();coalitionRound();try{pk1Round();}catch(e){console.warn('Gegner',e);}missionRound();try{epSysRound();}catch(e){console.warn('Epochensystem',e);}try{ringRound();bundRound();scenRound();}catch(e){console.warn('Geschichte',e);}try{lagerRound();}catch(e){console.warn('Winterlager',e);}try{wikRound();}catch(e){console.warn('Alfred-Drehbuch',e);}try{feat2Round();feat3Round();}catch(e){console.warn('Funktionen',e);}histRound();for(const f of PLAYABLE)if(alive(f))try{polRound(f);}catch(e){console.warn('Politik',e);}
   try{weltRound();}catch(e){console.warn('Weltgeschehen',e);}
   checkElimination();
   S.armies.forEach(a=>{a.mp=maxMP(a);const P=S.prov[a.p],drill=P.owner===a.f&&P.b.barracks>=3;for(const u of a.units){const mx=unitStat(a.f,u.r,u.v).men,b0=u.men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*0.08));if(u.men>b0&&u.men>0)u.xp=Math.round((u.xp||0)*b0/u.men);if(drill&&(u.xp||0)<300)u.xp=(u.xp||0)+15;}});
@@ -16887,7 +17055,7 @@ function vkCine(id){try{const Z=S&&S.scen;if(!Z||Z.id!=='wikinger'||S.mp||!VK_KI
 function vkEnd(id){try{const c=vkCine(id);if(c)setTimeout(()=>{try{playCine(c,()=>{});}catch(e){console.warn('Kino',e);}},60);}catch(e){}}
 function stVk(sid,st,s){return st.ki===0?(st.vkey?[st.vkey]:[]):[sid+'_k'+(st.ki||s.i+1)];}
 Object.assign(SC_COND,{landnahme:(f,g)=>[provsOf(f).some(pi=>PROV_DEF[pi].reg==='britannien'&&lnOf(pi)>=2)?1:0,1]});
-{const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='landnahme')return 16;return _sn(f,g);};}
+{const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='landnahme')return 16;if(g&&g.cond==='choice'&&g.flag==='wedmore')return 28;/* v218: Alfred-Phase (Chippenham-Winter, Fyrd, Edington) */return _sn(f,g);};}
 /* ===== v214: Übersiedlung – „Die Heimat verlegen“ (Entscheidung Moritz 28.10.) ===== */
 // Stellschrauben: again = Runden bis zur nächsten Übersiedlung/zum erneuten Angebot, unrest = Unruhe in der alten Heimat bei „behalten“,
 // give = Gold je Steuer-Gold bei „aufgeben“ (provIncome schließt den Epochenfaktor schon ein), units/roles = Gefolge bei „aufgeben“,
@@ -17874,7 +18042,7 @@ function mapGate(soft){if(GATE||typeof document==='undefined')return;const L=$('
     setTimeout(step,150);};
   setTimeout(step,150);}
 function loadGame(s,noMp){try{if(KIT_ON&&s&&s.epoch!=null)loadKit(s.epoch);}catch(e){}try{const sw=!$('#start').hidden||GATE_E!==(s&&s.epoch);GATE_E=s&&s.epoch;if(sw&&s)mapGate(false);}catch(e){}try{if(s&&s.scen&&s.scen.id)NARR.pre(s.scen.id);}catch(e){}pkPreload();try{const Z=s&&s.scen;if(Z&&Z.res==='win'&&Z.rank&&Z.id){const W=JSON.parse(localStorage.getItem('imperium.scenWins')||'{}')||{};if(!W[Z.id]||WRANK.indexOf(Z.rank)>WRANK.indexOf(W[Z.id])){W[Z.id]=Z.rank;localStorage.setItem('imperium.scenWins',JSON.stringify(W));setTimeout(()=>{try{winsSync();}catch(e){}},500);}}}catch(e){}
-  S=s;try{contsApply();}catch(e){COFF=null;}try{applyUiTheme();}catch(e){}try{houseFix();}catch(e){}mpUncover();if(!noMp)MPWAIT=null;UI.sel=null;UI.army=null;UI.mode='idle';closeModal();catchUpSpawns();
+  S=s;try{wikMigrate();}catch(e){console.warn('Wikinger-Umrechnung',e);}try{contsApply();}catch(e){COFF=null;}try{applyUiTheme();}catch(e){}try{houseFix();}catch(e){}mpUncover();if(!noMp)MPWAIT=null;UI.sel=null;UI.army=null;UI.mode='idle';closeModal();catchUpSpawns();
   refreshAdj();for(const f of PLAYABLE)applyPeople(f);applyEpochLook();
   $('#start').hidden=true;$('#top').hidden=false;$('#sheet').hidden=false;
   refreshOwnership();refresh();

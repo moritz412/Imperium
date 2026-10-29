@@ -56,11 +56,11 @@ const v2=await p.evaluate(()=>{const me=S.player,s=stState(me);s.i=3;stMsg(me,{k
 ok('Sequenz 2 nur einmal',v2.every(x=>!x),JSON.stringify(v2));
 
 // 3. Edington vor der Wahl in Wedmore
-await p.evaluate(()=>{const me=S.player,s=stState(me),C=stCh(me),pi=PI.briganten;S.prov[pi].owner=me;S.prov[pi].cul='britisch';S.prov[pi].ln=2;S.prov[pi].lnF=me;S.prov[pi].lnT=S.turn-8;s.i=4;s.g=stResolve(me,C.steps[4].g);window.__d=0;runEvents(()=>{window.__d=1;});});
+await p.evaluate(()=>{const me=S.player,s=stState(me),C=stCh(me),pi=PI.briganten;S.prov[pi].owner=me;S.prov[pi].cul='britisch';S.prov[pi].ln=2;S.prov[pi].lnF=me;S.prov[pi].lnT=S.turn-8;s.i=5;s.g=stResolve(me,C.steps[5].g);/* W6: k3 läuft vor der Edington-Schlacht (wikK3), nicht mehr beim Schrittbeginn */const F=S.scen.flags;F.fyrd=1;const fy=S.armies.find(x=>x.f==='usa');fy.fyrd=1;S.prov[PI.dumnonier].owner=me;const pa=S.armies.find(x=>x.f===me);pa.p=PI.dumnonier;window.__d=0;const c=wikK3(fy,PI.dumnonier);window.__k3obj=!!c;playCine(c,()=>{window.__d=1;});});
 const k3=await waitCine('Edington');
 const k3s=await p.evaluate(()=>({i:stState(S.player).i,flag:S.scen.flags.vk_k3,imgs:[...document.querySelectorAll('.cine .ci')].length,sieg:Object.values(VK_KINO.k3.ikeys).includes('vk_k3_sieg')}));
-ok('Sequenz 3 „Edington“ beim Schritt Wedmore, vor der Wahl, ohne Siegbild',k3&&k3s.i===5&&k3s.flag===1&&!k3s.sieg,JSON.stringify(k3s));
-await skip();await p.waitForSelector('#dialog .evopt',{timeout:10000}).catch(()=>{});
+ok('Sequenz 3 „Edington“ vor der Edington-Schlacht (W6, wikK3), ohne Siegbild',k3&&k3s.i===5&&k3s.flag===1&&!k3s.sieg,JSON.stringify(k3s));
+await skip();await p.evaluate(()=>{S.scen.flags.edington='lost';for(const a of S.armies)delete a.fyrd;wikQ('wedmore');runEvents(()=>{});});await p.waitForSelector('#dialog .evopt',{timeout:10000}).catch(()=>{});
 const w=await p.evaluate(()=>({t:(document.querySelector('#dialog h2')||{}).textContent,n:document.querySelectorAll('#dialog .evopt').length,bapt:!!S.fac[S.player].bapt}));
 ok('Wedmore-Wahl nach der Sequenz, Kapitelbild Burhbau, noch nicht entschieden',/Wedmore/.test(w.t||'')&&w.n===2&&!w.bapt&&await heroIs('vk_kap_burhbau_x1'),JSON.stringify(w));
 
