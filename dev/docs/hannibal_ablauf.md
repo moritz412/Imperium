@@ -130,3 +130,7 @@ Wiederverwendung: Indien, Persien, Khmer, Mogul (Panik-Regel allgemein, Kälte n
 2. Cannae-Ziel „Riesenheer schlagen“ statt „Provinz halten“?
 3. Rat von Karthago kann Hannibal abberufen (frühes Ende B) – zu hart?
 4. Hasdrubal-Kopf-Ereignis zeigen (historisch, aber drastisch) – nur als Text, ohne Bild?
+
+## Entscheidung Moritz 29.10. 12:31
+Kampagne jetzt bauen, Echtzeit-Sonderschlachten später: **ja**. Elefant im Schlachtsystem vorziehen: **ja**. Fragen 2–4 oben nicht einzeln beantwortet → Vorschläge gelten (Cannae = Riesenheer schlagen, Abberufung möglich, Hasdrubal-Kopf nur Text), änderbar.
+Reihenfolge: nach Wikinger W5/W6. Pakete: **H1** Akt I + Seeweg-Sperre + Elefanten-Regeln, **H2** Pass-Abschnitt + Kelten-Treue, **H3** Cannae/Fabius/Rat/Winterlager, **H4** Akt IV + Kino + Enden.

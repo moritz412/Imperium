@@ -146,3 +146,8 @@ Alles nach historischen Funden, keine Vorlagen aus Spielen (feste Regel).
 3. Einheitengröße auf „Mittel“: 40 Figuren je Einheit (bis 20 Einheiten je Seite ≈ 1.600 Figuren) – passt zum Messwert.
 4. Hannibal-Kampagne jetzt (Karte), Echtzeit-Sonderschlachten später – einverstanden?
 5. Elefant vorziehen (vor Kamel/Geschützen) – einverstanden?
+
+## 8. Entscheidungen Moritz 29.10. 12:31
+- Elefant vorziehen (S9 direkt nach Pferd): **ja**.
+- Figuren baut **Moritz selbst am PC** (Blender, MPFB, CMU-Mocap). Claude liefert Regeln, Prüf- und Back-Skript: `dev/pc/figuren_bauen.md`. Damit verschieben sich S5/S7/S8/S9 auf Moritz' Zeitplan; Code-Pakete S1–S4, S6 laufen unabhängig davon mit Testfiguren aus Phase 0.
+- Offene Punkte aus Abschnitt 7 (Zeitlimit, Tempo, 40 Figuren je Einheit) → Vorschläge gelten, bis Moritz etwas anderes sagt.

@@ -96,3 +96,7 @@ Bilder: Alfred-Porträt, Winterlager (Repton), Athelney-Sumpf, Marionettenkönig
 2. Marionettenkönig statt Dauerkrieg – einverstanden?
 3. Edington als echte (gewinnbare) Schlacht, Gewinnen öffnet eine Alternativgeschichte?
 4. Phase D auf 3 Schritte kürzen?
+
+## Entscheidung Moritz 29.10. 12:31
+Umbau in Phasen **ja** (Marionettenkönig, echte Edington-Schlacht). Einzelfragen 1–4 nicht einzeln beantwortet → Vorschläge gelten (Phase A nur rauben, Marionettenkönig, Edington gewinnbar mit Alternativgeschichte, Phase D auf 3 Schritte), bis Moritz etwas anderes sagt.
+Umsetzung: **W5** = Phase A + B (Raubsperre, Großes Heer, Thronstreit Northumbria, Pferde East Anglia, Winterlager, Marionettenkönig). **W6** = Phase C + D (Alfred-Drehbuch, Edington, Danelag-Grenze, Kürzung).
