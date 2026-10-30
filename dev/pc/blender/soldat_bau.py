@@ -1,6 +1,6 @@
-# Baut einen kompletten Soldaten (Hastatus, Kit A1) aus eigenen Teilen und exportiert ihn als .glb.
+# Baut einen kompletten Soldaten eines Antike-Kits aus eigenen Teilen und exportiert ihn als .glb.
 # Körper: MPFB (CC0), Skelett cmu_mb; Bewegungen: CMU (ASF/AMC) + Schlag/Stoß/Schild per Skript; Teile: TRELLIS roh_44/45.
-# Aufruf (PC): blender.exe -b -P soldat_bau.py -- <ausgabe.glb> [vorschau.png]
+# Aufruf (PC): blender.exe -b -P soldat_bau.py -- <kit> <ausgabe.glb> [vorschau.png]   kit: siehe KITS
 import bpy, os, sys, math
 import numpy as np
 from mathutils import Matrix, Vector
@@ -9,24 +9,49 @@ import cmu_lib
 from bl_ext.user_default.mpfb.services import HumanService, LocationService, TargetService
 
 a = sys.argv[sys.argv.index("--") + 1:]
-OUT = a[0]; VORSCHAU = a[1] if len(a) > 1 else None
+KIT_NAME = a[0]; OUT = a[1]; VORSCHAU = a[2] if len(a) > 2 else None
 BASE = r"C:\Users\anmel\Desktop\imperium-bilder"
 CMU = os.path.join(BASE, "blender", "cmu")
 FPS = 30
+
+# Kits: Farben linear (Blender), Teile aus 3d/roh_44|45, Größen in Metern.
+# Quellen: dev/schlacht/profile_truppen.json, dev/docs/schlacht_umsetzung.md 5.4
+KITS = {
+    "A1_hastatus": dict(tunika=(0.42, 0.06, 0.04), haut="young_caucasian_male", muskel=0.65,
+                        helm=("roh_44/teil_helm_A1_montefortino.glb", 0.09, 0.31), brust=True,
+                        schild=("roh_45/teil_schild_A1_scutum.glb", 1.05),
+                        waffe=("schwert", "roh_45/teil_schwert_A1_gladius.glb", 0.62)),
+    "A2_libysch": dict(tunika=(0.55, 0.48, 0.34), haut="young_caucasian_male2", muskel=0.6,
+                       helm=("roh_45/teil_helm_A2_libysch.glb", 0.12, 0.29, 0.97), brust=False,
+                       schild=("roh_44/teil_schild_A2_rund.glb", 0.85, 0.05), waffe=("speer", None, 2.4)),
+    "A3_iberisch": dict(tunika=(0.66, 0.63, 0.55), haut="young_caucasian_male", muskel=0.6,
+                        helm=("roh_44/teil_helm_A3_sehnen.glb", 0.15, 0.28), brust=False,
+                        schild=("roh_44/teil_schild_A3_scutum.glb", 1.0, 0.08),
+                        waffe=("schwert", "roh_45/teil_schwert_A3_falcata.glb", 0.6)),
+    "A6_keltisch": dict(tunika=(0.1, 0.22, 0.08), hose=(0.28, 0.16, 0.05), haut="young_caucasian_male2", muskel=0.75,
+                        helm=None, haar_tief=0.86, brust=False,
+                        schild=("roh_44/teil_schild_A6_oval.glb", 1.1, 0.1),
+                        waffe=("schwert", "roh_44/teil_schwert_A6_lang.glb", 0.85)),
+    "A7_hellenistisch": dict(tunika=(0.62, 0.58, 0.45), haut="young_caucasian_male", muskel=0.6,
+                             helm=("roh_44/teil_helm_A7_thraker.glb", 0.0, 0.31), brust=False,
+                             schild=("roh_44/teil_schild_A7_thureos.glb", 0.95, 0.06), waffe=("speer", None, 2.4)),
+}
+KIT = KITS[KIT_NAME]
+KURZ = KIT_NAME.split("_")[0]
 
 # ---------- Körper ----------
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene; sc.render.fps = FPS
 data = LocationService.get_user_data()
 macro = TargetService.get_default_macro_info_dict()
-macro.update({"gender": 1.0, "age": 0.5, "muscle": 0.65, "weight": 0.5, "height": 0.62})
+macro.update({"gender": 1.0, "age": 0.5, "muscle": KIT["muskel"], "weight": 0.5, "height": 0.62})
 basemesh = HumanService.create_human(scale=0.1, macro_detail_dict=macro)
 arm = HumanService.add_builtin_rig(basemesh, "cmu_mb", import_weights=True)
 arm.name = "sk_mensch"
 body = HumanService.add_mhclo_asset(os.path.join(data, "proxymeshes", "proxy741", "proxy741.proxy"), basemesh,
                                     asset_type="Proxymeshes", subdiv_levels=0)
 body.name = "koerper"
-HumanService.set_character_skin(os.path.join(data, "skins", "young_caucasian_male", "young_caucasian_male.mhmat"),
+HumanService.set_character_skin(os.path.join(data, "skins", KIT["haut"], KIT["haut"] + ".mhmat"),
                                 basemesh, bodyproxy=body, skin_type="GAMEENGINE")
 basemesh.hide_render = True; basemesh.hide_set(True)
 bpy.context.view_layer.update()
@@ -35,7 +60,7 @@ bpy.context.view_layer.update()
 TUNIKA_GR = {"Hips", "LowerBack", "Spine", "Spine1", "LHipJoint", "RHipJoint", "LeftShoulder", "RightShoulder",
              "LeftArm", "RightArm", "LeftUpLeg", "RightUpLeg"}
 tun = bpy.data.materials.new("tunika_rot"); tun.use_nodes = True
-tun.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.42, 0.06, 0.04, 1)
+tun.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (*KIT["tunika"], 1)
 tun.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.9
 body.data.materials.append(tun); ti = len(body.data.materials) - 1
 gname = {g.index: g.name for g in body.vertex_groups}
@@ -60,6 +85,10 @@ def mat(name, rgb, metall=0.0, rau=0.85):
     return m
 body.data.materials.append(mat("sandale", (0.16, 0.08, 0.035))); si_ = len(body.data.materials) - 1
 body.data.materials.append(mat("haar", (0.035, 0.022, 0.015))); hi_ = len(body.data.materials) - 1
+if KIT.get("hose"):
+    body.data.materials.append(mat("hose", KIT["hose"])); ho_ = len(body.data.materials) - 1
+HAAR_Z = KIT.get("haar_tief", 0.935)
+BEIN = {"LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg"}
 FUSS = {"LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"}
 kopfv = [i for i, g in enumerate(haupt) if g in ("Head", "Neck1")]
 kopf_y = sum(body.data.vertices[i].co.y for i in kopfv) / max(1, len(kopfv))
@@ -67,7 +96,9 @@ for p in body.data.polygons:
     vs = p.vertices
     if sum(1 for i in vs if haupt[i] in FUSS) >= len(vs) / 2:
         p.material_index = si_
-    elif all(haupt[i] in ("Head",) for i in vs) and all(body.data.vertices[i].co.z > 0.935 * hmax and body.data.vertices[i].co.y > kopf_y - 0.004 * hmax for i in vs):
+    elif KIT.get("hose") and p.material_index != ti and sum(1 for i in vs if haupt[i] in BEIN) >= len(vs) / 2:
+        p.material_index = ho_
+    elif all(haupt[i] in ("Head",) for i in vs) and all(body.data.vertices[i].co.z > HAAR_Z * hmax and body.data.vertices[i].co.y > kopf_y - 0.004 * hmax for i in vs):
         p.material_index = hi_
 
 # ---------- Pose-Werkzeug ----------
@@ -126,6 +157,7 @@ HIEB_OBEN = dict(BEREIT, **{"RightArm": (-0.1, -0.25, 0.96), "RightForeArm": (0,
 HIEB_UNTEN = dict(BEREIT, **{"RightArm": (-0.05, -0.75, -0.66), "RightForeArm": (0, -0.75, -0.66)})
 TRAGEN = {"LeftArm": BEREIT["LeftArm"], "LeftForeArm": BEREIT["LeftForeArm"], "RightArm": (0.02, 0.1, -0.99),
           "RightForeArm": (0.05, -0.6, -0.8)}
+TRAGEN_SPEER = dict(TRAGEN, RightArm=(0.03, 0.05, -1), RightForeArm=(0.02, -0.3, 0.95))
 TREFFER = dict(BEREIT, **{"Spine": (0, 0.2, 0.98), "Spine1": (0, 0.3, 0.95), "Head": (0, 0.35, 0.94)})
 
 def clip_haltung(name, keys):
@@ -224,59 +256,84 @@ haltung(BEREIT)
 koerper_P = np.array([(body.matrix_world @ v.co)[:] for v in body.evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh().vertices])
 kopf_oben = koerper_P[:, 2].max()
 
-helm = lade("roh_44/teil_helm_A1_montefortino.glb", "teil_helm_A1_montefortino", 260, staender=0.09)
-P, c, ax = pca(helm)
-z = P[:, 2]; zb = np.linspace(z.min(), z.max(), 21)
-bx = [np.ptp(P[(z >= zb[k]) & (z <= zb[k + 1])][:, 0]) if ((z >= zb[k]) & (z <= zb[k + 1])).sum() > 3 else 0 for k in range(20)]
-mx = max(bx); k0 = int(np.argmax(bx))
-kt = next((k for k in range(k0, 20) if bx[k] < 0.55 * mx), 19)
-kalotte_oben = zb[kt]
-kal = P[z < kalotte_oben]
-s = 0.31 / max(np.ptp(kal[:, 0]), np.ptp(kal[:, 1]))
-kopf = kp("Head", 0.5)
-cx, cy = kal[:, 0].mean(), kal[:, 1].mean()
-helm.matrix_world = Matrix.Translation((kopf.x, kopf.y + 0.01, kopf_oben + 0.035)) @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(s, 4) @ Matrix.Translation((-cx, -cy, -kalotte_oben)) @ helm.matrix_world
-bpy.context.view_layer.update()
-print("HELM", round(s, 3), "Busch ab Schicht", kt)
-m = helm.matrix_world.copy(); helm.parent = arm; helm.parent_type = "BONE"; helm.parent_bone = "Head"
-bpy.context.view_layer.update(); helm.matrix_world = m
+teile = []
+if KIT["helm"]:
+  hdatei, hst, hbreit = KIT["helm"][:3]; hkal = KIT["helm"][3] if len(KIT["helm"]) > 3 else None
+  helm = lade(hdatei, os.path.basename(hdatei)[:-4], 260, staender=hst)
+  P, c, ax = pca(helm)
+  z = P[:, 2]; zb = np.linspace(z.min(), z.max(), 21)
+  bx = [np.ptp(P[(z >= zb[k]) & (z <= zb[k + 1])][:, 0]) if ((z >= zb[k]) & (z <= zb[k + 1])).sum() > 3 else 0 for k in range(20)]
+  mx = max(bx); k0 = int(np.argmax(bx))
+  kt = next((k for k in range(k0, 20) if bx[k] < 0.55 * mx), 19)
+  kalotte_oben = zb[kt] if hkal is None else z.min() + hkal * (z.max() - z.min())
+  kal = P[z < kalotte_oben]
+  s = hbreit / max(np.ptp(kal[:, 0]), np.ptp(kal[:, 1]))
+  kopf = kp("Head", 0.5)
+  cx, cy = kal[:, 0].mean(), kal[:, 1].mean()
+  helm.matrix_world = Matrix.Translation((kopf.x, kopf.y + 0.01, kopf_oben + 0.035)) @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(s, 4) @ Matrix.Translation((-cx, -cy, -kalotte_oben)) @ helm.matrix_world
+  bpy.context.view_layer.update()
+  print("HELM", round(s, 3), "Busch ab Schicht", kt)
+  m = helm.matrix_world.copy(); helm.parent = arm; helm.parent_type = "BONE"; helm.parent_bone = "Head"
+  bpy.context.view_layer.update(); helm.matrix_world = m
+  teile.append(helm)
 
 # Pectorale: flache viereckige Bronzeplatte (≈ 20 × 20 cm, Funde 3. Jh. v. Chr.), selbst gebaut – 12 Dreiecke
-bpy.ops.mesh.primitive_cube_add(size=1)
-brust = bpy.context.active_object; brust.name = "teil_ruest_A1_pectorale"
-brust.scale = (0.2, 0.012, 0.2); bpy.ops.object.transform_apply(scale=True)
 s1 = kp("Spine1", 0.5)
-vorne = koerper_P[(np.abs(koerper_P[:, 2] - s1.z) < 0.06) & (np.abs(koerper_P[:, 0]) < 0.06)][:, 1].min()
-brust.location = (0, vorne - 0.008, s1.z); bpy.context.view_layer.update()
-m = brust.matrix_world.copy(); brust.parent = arm; brust.parent_type = "BONE"; brust.parent_bone = "Spine1"
-bpy.context.view_layer.update(); brust.matrix_world = m
-brust.data.materials.clear(); brust.data.materials.append(mat("bronze", (0.43, 0.27, 0.09), metall=0.8, rau=0.45))
+if KIT["brust"]:
+  bpy.ops.mesh.primitive_cube_add(size=1)
+  brust = bpy.context.active_object; brust.name = "teil_ruest_A1_pectorale"
+  brust.scale = (0.2, 0.012, 0.2); bpy.ops.object.transform_apply(scale=True)
+  vorne = koerper_P[(np.abs(koerper_P[:, 2] - s1.z) < 0.06) & (np.abs(koerper_P[:, 0]) < 0.06)][:, 1].min()
+  brust.location = (0, vorne - 0.008, s1.z); bpy.context.view_layer.update()
+  m = brust.matrix_world.copy(); brust.parent = arm; brust.parent_type = "BONE"; brust.parent_bone = "Spine1"
+  bpy.context.view_layer.update(); brust.matrix_world = m
+  brust.data.materials.clear(); brust.data.materials.append(mat("bronze", (0.43, 0.27, 0.09), metall=0.8, rau=0.45))
+  teile.append(brust)
 
-schild = lade("roh_45/teil_schild_A1_scutum.glb", "teil_schild_A1_scutum", 200)
+schild = lade(KIT["schild"][0], os.path.basename(KIT["schild"][0])[:-4], 200, staender=KIT["schild"][2] if len(KIT["schild"]) > 2 else False)
 hand_l = kp("LeftHand", 0.5)
-setze_teil(schild, (Vector((0, 0, 1)), Vector((0, -1, 0))), hand_l + Vector((0.02, -0.07, 0.05)), 1.05, "LeftHand", buckel=True)
+setze_teil(schild, (Vector((0, 0, 1)), Vector((0, -1, 0))), hand_l + Vector((0.02, -0.07, 0.05)), KIT["schild"][1], "LeftHand", buckel=True)
 schild.data.materials.append(mat("schild_innen", (0.15, 0.08, 0.04))); ii_ = len(schild.data.materials) - 1
 R3 = schild.matrix_world.to_3x3()
 for p in schild.data.polygons:
     if (R3 @ p.normal).normalized().dot(Vector((0, -1, 0))) < -0.2: p.material_index = ii_
+teile.append(schild)
 
-schwert = lade("roh_45/teil_schwert_A1_gladius.glb", "teil_schwert_A1_gladius", 70)
-P, c, ax = pca(schwert)
-proj = (P - np.array(c[:])) @ np.array(ax[0][:])
-quer = np.linalg.norm((P - np.array(c[:])) - np.outer(proj, np.array(ax[0][:])), axis=1)
-lo, hi = proj.min(), proj.max(); band = 0.2 * (hi - lo)
-breit_lo = quer[proj < lo + band].max(); breit_hi = quer[proj > hi - band].max()
-klinge = ax[0] if breit_lo > breit_hi else -ax[0]   # Griffseite ist breiter (Handschutz, Knauf)
-griff_ende = c + ax[0] * (lo if breit_lo > breit_hi else hi)
+wart, wdatei, wlang = KIT["waffe"]
 hand_r = kp("RightHand", 0.6)
 ziel = Vector((0.02, -1, 0.15)).normalized()
-R = klinge.rotation_difference(ziel).to_matrix().to_4x4()
-s = 0.62 / (hi - lo)
-# Griffmitte (12 % der Länge vom Griffende) in die Hand
-gm = griff_ende + klinge * 0.12 * (hi - lo)
-schwert.matrix_world = Matrix.Translation(hand_r) @ R @ Matrix.Scale(s, 4) @ Matrix.Translation(-gm) @ schwert.matrix_world
-m = schwert.matrix_world.copy(); schwert.parent = arm; schwert.parent_type = "BONE"; schwert.parent_bone = "RightHand"
-bpy.context.view_layer.update(); schwert.matrix_world = m
+if wart == "schwert":
+  schwert = lade(wdatei, os.path.basename(wdatei)[:-4], 70)
+  P, c, ax = pca(schwert)
+  proj = (P - np.array(c[:])) @ np.array(ax[0][:])
+  quer = np.linalg.norm((P - np.array(c[:])) - np.outer(proj, np.array(ax[0][:])), axis=1)
+  lo, hi = proj.min(), proj.max(); band = 0.2 * (hi - lo)
+  breit_lo = quer[proj < lo + band].max(); breit_hi = quer[proj > hi - band].max()
+  klinge = ax[0] if breit_lo > breit_hi else -ax[0]   # Griffseite ist breiter (Handschutz, Knauf)
+  griff_ende = c + ax[0] * (lo if breit_lo > breit_hi else hi)
+  R = klinge.rotation_difference(ziel).to_matrix().to_4x4()
+  s = wlang / (hi - lo)
+  # Griffmitte (12 % der Länge vom Griffende) in die Hand
+  gm = griff_ende + klinge * 0.12 * (hi - lo)
+  schwert.matrix_world = Matrix.Translation(hand_r) @ R @ Matrix.Scale(s, 4) @ Matrix.Translation(-gm) @ schwert.matrix_world
+  m = schwert.matrix_world.copy(); schwert.parent = arm; schwert.parent_type = "BONE"; schwert.parent_bone = "RightHand"
+  bpy.context.view_layer.update(); schwert.matrix_world = m
+  waffe = schwert
+else:
+  # Stoßspeer selbst gebaut: Eschenschaft (3 cm) + Eisenspitze 25 cm, etwa 40 Dreiecke
+  bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.015, depth=wlang - 0.25, location=(0, 0, (wlang - 0.25) / 2))
+  schaft = bpy.context.active_object; schaft.data.materials.append(mat("esche", (0.3, 0.19, 0.08)))
+  bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.028, depth=0.25, location=(0, 0, wlang - 0.125))
+  spitze = bpy.context.active_object; spitze.data.materials.append(mat("eisen", (0.25, 0.25, 0.26), metall=0.9, rau=0.4))
+  bpy.ops.object.select_all(action="DESELECT"); schaft.select_set(True); spitze.select_set(True)
+  bpy.context.view_layer.objects.active = schaft; bpy.ops.object.join()
+  waffe = schaft; waffe.name = "teil_speer_%s_stoss" % KURZ
+  R = Vector((0, 0, 1)).rotation_difference(ziel).to_matrix().to_4x4()
+  waffe.matrix_world = Matrix.Translation(hand_r) @ R @ Matrix.Translation((0, 0, -0.4 * wlang))
+  bpy.context.view_layer.update()
+  m = waffe.matrix_world.copy(); waffe.parent = arm; waffe.parent_type = "BONE"; waffe.parent_bone = "RightHand"
+  bpy.context.view_layer.update(); waffe.matrix_world = m
+teile.append(waffe)
 
 # Körper dezimieren (Nahstufe ≤ 1500 inkl. Teile)
 d = body.modifiers.new("dez", "DECIMATE"); d.ratio = 0.62
@@ -285,6 +342,7 @@ while body.modifiers[0].name != "dez":
 
 # ---------- Clips ----------
 ruhe()
+if KIT["waffe"][0] == "speer": TRAGEN = TRAGEN_SPEER
 clip_cmu("stehen", "140", "06", 0.2, 0.6, dauer=60, arme=TRAGEN)
 clip_cmu("gehen", "02", "01", 0.25, 0.25 + 1.1 * 120 / 343, dauer=33, arme=TRAGEN)
 clip_cmu("laufen", "02", "03", 0.3, 0.3 + 0.75 * 120 / 170, dauer=22, arme=TRAGEN)
@@ -326,7 +384,7 @@ if VORSCHAU:
 # ---------- Export ----------
 nimm("stehen"); sc.frame_set(1)
 bpy.ops.object.select_all(action="DESELECT")
-for o in [arm, body, helm, brust, schild, schwert]: o.hide_set(False); o.select_set(True)
+for o in [arm, body] + teile: o.hide_set(False); o.select_set(True)
 bpy.context.view_layer.objects.active = arm
 bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_animation_mode="ACTIONS",
                           export_apply=True, export_morph=False, export_skins=True)
