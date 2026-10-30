@@ -96,3 +96,61 @@ Je Paket ein Unteragent (Sonnet), Prüfung im Hauptchat. Vorher noch offen in de
 - Balance (Rom verliert die Vorlagen)
 - Sarissa im Kampf nicht zweihändig gesenkt
 - „Lösen“ im dichten Gefecht: Reste werden beim Sammeln wieder gestellt
+
+## 6. Entscheidungen Moritz 30.10. – „Ja, alle vier“
+1. Einbau direkt in `imperium.html`, gleicher Renderer.
+2. Erster Umfang: nur Antike (Epoche 0), ohne Mauern; sonst alte Schlacht.
+3. Schwierigkeitsstufen wie Abschnitt 3.
+4. Mehrspieler: nur „Berechnen“.
+
+Umsetzung I1+I2 beginnt hinter einem Schalter (Einstellung „Neue Echtzeitschlacht (Test)“, vorerst aus), bis der iPad-Test (I0) bestanden ist.
+Assets: das Spiel lädt Figuren und Ton aus `proto/figuren/` und `proto/ton/` (deploy.py kopiert dev/proto nach proto/), keine Doppelablage.
+
+## 7. Stand Umsetzung I1/I2/I4 (30.10.2026)
+
+Die neue Echtzeitschlacht läuft im Hauptspiel hinter dem Schalter. **Auf dem echten iPad nicht getestet** (I0 steht aus), Tests nur mit Software-Rendering am PC.
+
+**Was geht**
+- Schalter: Einstellungen > Grafik > „Neue Echtzeitschlacht (Test)“ (Standard aus, `localStorage imperium.esch`) oder URL `?eschlacht=1`.
+- Bedingung für die neue Schlacht: Schalter an, Epoche 0, kein Mehrspieler, nicht „Mauern mit Garnison“. Sonst läuft `startBattle` wie bisher. Schlägt das Laden fehl (z. B. offline), fällt `eschStart` auf die alte Schlacht zurück.
+- Beide Wege (eigener Angriff, Verteidigung) rufen `startBattle`; dort steht jetzt die Weiche (`eschGeeignet`, `eschStart`).
+- Kampagnen-Einheit → `schlachtEinheit` (`eschDesc`): Volk, Kultur, Rolle, Variante, Ausrüstungs-Epoche, Waffen, Rüstung, Veteranen, Rang. Aufschläge aus dem Spiel wie in `mkUnit` (Techniken `drill`/`iron`/`techBonus`, Feldherr `genFx`), bis zur Kappe. Garnison = Miliz-Speerträger (Werte ×0,85).
+- Figuren = Männer/3, mindestens 8, höchstens 60. Höchstens 9 Einheiten + Leibwache je Seite (Heer zuerst, Garnison, dann Verstärkungen; Überzählige bleiben zu Hause, Hinweis per Toast). `MAXU` im Kern von 16 auf 20.
+- Feldherr (I3 nur teilweise): „Leibwache“ als Reitereinheit mit 20 Figuren (Fußtruppe bei Völkern ohne Pferd), Atk/Def ×1,8 bis zur Kappe. Keine Aura, kein Sammeln/Anfeuern.
+- Ende: Männer = Männer × (Überlebende + Geflohene) / Start-Figuren; unter 18 % der Sollstärke → 0; Garnison zurück in `P.gar` wenn der Verteidiger gewinnt; danach wie bisher `concludeAttack`, `battleLog`, `showBattle`. Speichern vor der Schlacht (`KEY_BATTLE`) wie bisher.
+- Knopf „Rückzug“ (zweimal tippen) = Niederlage mit zusätzlich 12 % Verlust der eigenen Seite (wie `retreat()` der alten Schlacht).
+- Zeitgrenze 600 s Schlachtzeit: wer mehr als 5 % mehr Soldaten auf dem Feld hat, gewinnt; sonst der Verteidiger. (Die alte Schlacht entscheidet nach 480 s immer für den Verteidiger; hier sonst endlose Plänkler-Verfolgungen.)
+- Ton: Kampagnenmusik wird angehalten (`AUDIO.hush`), die Schlacht nutzt ihr eigenes Tonsystem mit den Werten aus der Kampagne (Musik/Effekte an/aus, Lautstärke); danach `AUDIO.setTheme('map')`.
+- Kein zweiter WebGL-Kontext: der Kern bekommt den Renderer und das Canvas der Kampagne, eigene Szene. Eingabe über eine eigene Fläche `#eingabe` (die Kartensteuerung am Canvas bekommt nichts mit). Beim Abbau (`eschAbbau`) werden Zustand des Renderers (Kodierung, Tonwerte, Schatten, Pixelrate), Geometrien, Materialien, Texturen, Instanzen, Zuhörer und Audio freigegeben. Während der Schlacht steht ein Platzhalter in `BATTLE` (`{esch:true,…}`), damit Fenster und Ereignisse der Kampagne warten.
+
+**Schwierigkeit (I4)**
+- `S.bdiff` 0..3 (Leicht/Normal/Schwer/Sehr schwer), Standard Normal; alte Spielstände ohne Wert gelten als Normal (`bdiffNow`). Startbildschirm: Reihe „Schlachten“ unter der Schwierigkeit (`#bdiffSeg`, `renderBDiff`, Wert `imperium.bdiff`, neue Partie übernimmt ihn). Im Spiel: Einstellungen > Grafik.
+- Wirkt nur auf Seite 1 (KI) der neuen Schlacht: Angriff/Abwehr ×0,9 / 1 / 1 / 1,1, Moral −10 / 0 / +5 / +10, Reaktionszeit 2 / 1 / 0,5 / 0,5 s, Taktik (Leicht ohne Flankenmanöver und ohne Lösen, Normal Flanken, Schwer und Sehr schwer zusätzlich Lösen und neu anstürmen und Fernkämpfer gezielt, Sehr schwer hält eine Fußeinheit als Reserve zurück, wenn die KI mindestens 4 Fußeinheiten hat). Leicht: Hinweis „Flankengefahr“. Der Kern kennt die Tabelle (`BDIFF`); ohne `bdiff` (Testseite) laufen die alten Werte.
+
+**Eine Fassung des Kerns, so bleibt sie synchron**
+- Quelle ist `dev/proto/schlacht_spiel.html`: Funktion `schlachtKern(OPT)` (Zeilen zwischen `//ESCH-KERN-BEGIN` und `//ESCH-KERN-END`), dazu gemeinsam `/*ESCH-CSS-BEGIN/END*/` (alle Regeln mit `#esch` vorangestellt), `<!--ESCH-DEFS-…-->` (Symbole) und `<!--ESCH-DOM-…-->` (Oberfläche).
+- `imperium.html` enthält dieselben vier Abschnitte zwischen denselben Markierungen (Kern als eigener `<script>`-Block vor dem Hauptskript, Oberfläche als `<template id="eschTpl">`). **Nach jeder Änderung am Kern in der Testseite abgleichen** (nur Text zwischen den Markierungen wird ersetzt, CRLF der Hauptdatei bleibt):
+
+```js
+// dev/tools/sync_schlacht.js (noch nicht abgelegt): node dev/tools/sync_schlacht.js
+const fs=require('fs'),R='dev/';
+const P=fs.readFileSync(R+'proto/schlacht_spiel.html','utf8');
+let I=fs.readFileSync(R+'imperium.html','utf8');const CR=I.includes('\r\n');I=I.replace(/\r\n/g,'\n');
+const teil=(s,a,b)=>s.slice(s.indexOf(a)+a.length,s.indexOf(b));
+const setze=(a,b,x)=>{const i=I.indexOf(a),j=I.indexOf(b);if(i<0||j<i)throw new Error(a);I=I.slice(0,i+a.length)+x+I.slice(j);};
+for(const[a,b]of[['/*ESCH-CSS-BEGIN*/','/*ESCH-CSS-END*/'],['<!--ESCH-DEFS-BEGIN-->','<!--ESCH-DEFS-END-->'],['<!--ESCH-DOM-BEGIN-->','<!--ESCH-DOM-END-->'],['//ESCH-KERN-BEGIN','//ESCH-KERN-END']])setze(a,b,teil(P,a,b));
+fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
+```
+- Unterschiede der Fassungen nur über `OPT`: Hauptspiel `{root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff,limit,zeitSieg,farben,fps,ton,onEnde}`, Testseite `{standalone:true}` (eigener Renderer, eigene Schleife, `window.SCHLACHT`).
+- Klassen der Oberfläche heißen so, dass sie nicht mit globalen Regeln der Kampagne zusammenstoßen (`.st`/`.bar` der Kampagne → hier `.stz`/`.zbar`). Neue Klassen vorher gegen die Kampagnen-CSS prüfen.
+
+**Geprüft (Software-Rendering, Chromium, kein iPad)** – `dev/tests/eschlacht_integ_t.js` (Rom greift Etrurien an): Schlacht startet, Figuren und Einheiten aus dem Heer, Leibwache und Garnison dabei, KI-Werte Leicht gegen Sehr schwer unterscheiden sich, eigene Werte nicht, Schlacht bis „Weiter“ und per Rückzug, Männer verändert, Modal der Kampagne, Aufräumen, Renderer-Zustand zurückgesetzt, Kampagne läuft weiter, Schalter aus = alte Schlacht. Dazu `smoke.js`, `schlacht_e1_t.js`, `schlacht_reiter_t.js`.
+
+**Nicht getestet / offen**
+- iPad (Leistung, Speicher, Ton), Handy, echte Grafikkarte.
+- Verteidigungsschlacht (`processPending`) und Verstärkungen beider Seiten nur durch Code, nicht im Lauf; Garnison-Rückschreiben im Lauf nur indirekt.
+- Reserve (Sehr schwer), Flankenhinweis (Leicht) und die Taktik-Unterschiede nur durch Code und Werte geprüft, nicht im Spielverlauf.
+- Ton in der integrierten Schlacht: Kontext entsteht erst nach der ersten Berührung; kein Hörtest.
+- Offline (`OFF_MAN`) unberührt (I5): ohne Netz fällt die Schlacht auf die alte zurück, solange `proto/` nicht gecacht ist.
+- Gelände weiter das der Testschlacht (I6); Mauern/Belagerung alte Schlacht; Feldherr-Fähigkeiten (I3) fehlen.
+- Spielgleichgewicht nicht geprüft (im Test verlor Rom gegen den Feind teils deutlich; bekannt aus Abschnitt 5).

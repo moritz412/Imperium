@@ -22,11 +22,14 @@ const PAKETE = {
   // Reiterei (30.10.): Reiterpakete sitzen auf k_P_pferd
   A1_eques: { familien: ['A1_roemisch_manipel', 'A7_hellenistisch', 'A6_keltisch'], rollen: ['cav'] },
   A2_numidisch: { familien: ['A5_numidisch'], rollen: ['cav'] },
+  A1_legion: { familien: [], rollen: [] }, A6_adlig: { familien: [], rollen: [] }, A6_falx: { familien: [], rollen: [] },
+  A8_nubisch: { familien: [], rollen: [] }, A8_aksum: { familien: ['M4_afrika'], rollen: ['spear'] },
 };
 const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_eques', art: 'A1_hastatus' };
 
 // Einzelne Einheiten mit eigenem Paket (E2), vor der Familienregel
-const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler' };
+const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler',
+  legion: 'A1_legion', evocati: 'A1_legion', soldurii: 'A6_adlig', galater: 'A6_adlig', falx: 'A6_falx', nubbow: 'A8_nubisch', habbog: 'A8_nubisch', aksumsp: 'A8_aksum' };
 function paketFuer(kit, rolle, id) {
   if (EIGEN[id]) return { paket: EIGEN[id], genau: true };
   for (const [id, p] of Object.entries(PAKETE)) if (p.familien.includes(kit) && p.rollen.includes(rolle)) return { paket: id, genau: true };

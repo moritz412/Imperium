@@ -31,7 +31,7 @@ def _obj(name, bm, mats):
     return ob
 
 
-def _kugelkappe(bm, r, sy, z0, z1, seg=10, ringe=4, mi=0, spitze=None):
+def _kugelkappe(bm, r, sy, z0, z1, seg=16, ringe=6, mi=0, spitze=None):
     """Kalotte von Höhe z0 (Rand) bis z1 (Scheitel) auf einer Kugel r (y gestreckt mit sy). Liefert Randring."""
     ringe_v = []
     for k in range(ringe + 1):
@@ -68,6 +68,45 @@ def _kasten(bm, mitte, groesse, mi, dreh=None):
     for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = mi
 
 
+def _feder(bm, fuss, hoehe, breite, neig, mi, dicke=0.004):
+    """Aufrechte Feder (Klinge, zur Spitze schmaler), leicht nach hinten geneigt (neig in Grad)."""
+    R = Matrix.Rotation(math.radians(neig), 3, "X"); ringe = []
+    for k, (z, w) in enumerate([(0, 0.25), (0.25, 1.0), (0.6, 0.85), (0.85, 0.5), (1.0, 0.0)]):
+        p = Vector(fuss) + R @ Vector((0, 0, z * hoehe)); b = breite * w / 2
+        ringe.append([bm.verts.new(p + R @ Vector(o)) for o in ((-dicke, -b, 0), (dicke, -b, 0), (dicke, b, 0), (-dicke, b, 0))])
+    for r0, r1 in zip(ringe, ringe[1:]):
+        for i in range(4):
+            j = (i + 1) % 4; bm.faces.new((r0[i], r0[j], r1[j], r1[i])).material_index = mi
+    bm.faces.new(ringe[0]).material_index = mi
+
+
+def _kamm(bm, r, hoehe, mi, von=-70, bis=115, breite=0.022, n=9, versatz=0.0):
+    """Rosshaarkamm als gebogene Finne über die Kalotte (Winkel in Grad, 0 = Scheitel, negativ = vorn)."""
+    ringe = []
+    for k in range(n + 1):
+        a = math.radians(von + (bis - von) * k / n); h = hoehe * (0.55 + 0.45 * math.sin(math.pi * k / n))
+        d = Vector((0, math.sin(a), math.cos(a)))
+        ri = d * (r * 0.98) + Vector((0, 0, versatz)); ra = d * (r + h) + Vector((0, 0, versatz))
+        ringe.append([bm.verts.new(ri + Vector((-breite / 2, 0, 0))), bm.verts.new(ri + Vector((breite / 2, 0, 0))),
+                      bm.verts.new(ra + Vector((breite * 0.7, 0, 0))), bm.verts.new(ra + Vector((-breite * 0.7, 0, 0)))])
+    for r0, r1 in zip(ringe, ringe[1:]):
+        for i in range(4):
+            j = (i + 1) % 4; bm.faces.new((r0[i], r0[j], r1[j], r1[i])).material_index = mi
+    bm.faces.new(ringe[0]).material_index = mi; bm.faces.new(list(reversed(ringe[-1]))).material_index = mi
+
+
+def beinschiene(name, punkte, met=BRONZE):
+    """Beinschiene (Ocrea/Knemis) als Röhre um das Schienbein; punkte = [(mitte, rx, ry), ...] von unten nach oben (Weltlage)."""
+    bm = bmesh.new(); seg = 10; ringe = []
+    for m, rx, ry in punkte:
+        ringe.append([bm.verts.new(Vector(m) + Vector((rx * math.cos(2 * math.pi * i / seg), ry * math.sin(2 * math.pi * i / seg), 0))) for i in range(seg)])
+    for r0, r1 in zip(ringe, ringe[1:]):
+        for i in range(seg):
+            j = (i + 1) % seg; bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+    bm.faces.new(list(reversed(ringe[0]))); bm.faces.new(ringe[-1])
+    return _obj(name, bm, [mat("bronze_schiene", *met)])
+
+
 def helm(art, name):
     """art: montefortino | pilos | thraker | sehnen. Kalottenradius 0,115 m."""
     bm = bmesh.new(); r = 0.115
@@ -81,34 +120,34 @@ def helm(art, name):
         _kasten(bm, Vector((0, 0.0, r + 0.03)), (0.018, 0.14, 0.06), 1)
         return _obj(name, bm, mats), r
     met = BRONZE
-    mats = [mat("bronze", *met), mat("busch_rot", (0.35, 0.03, 0.02), 0, 0.95), mat("busch_schwarz", (0.02, 0.02, 0.02), 0, 0.95)]
+    mats = [mat("bronze", *met), mat("busch_rot", (0.35, 0.03, 0.02) if art != "montefortino" else (0.16, 0.02, 0.12), 0, 0.95), mat("busch_schwarz", (0.02, 0.02, 0.02), 0, 0.95)]
     if art == "pilos":
         # kegelförmiger Pilos mit schmalem Rand
         rand = _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, seg=10, ringe=4, mi=0, spitze=r * 1.06 + 0.08)
         return _obj(name, bm, mats), r
     rand = _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, mi=0)
     # Knauf (Montefortino) bzw. vorgezogener Scheitel (thrakisch)
-    if art == "montefortino":
+    if art in ("montefortino", "knauf"):   # knauf = Montefortino ohne Federn (spätere Legion, keltische Adlige)
         _kasten(bm, Vector((0, 0, r + 0.02)), (0.025, 0.025, 0.04), 0)
         # Nackenschirm hinten, Wangenklappen
         _platte(bm, [(-0.07, 0.11, -0.03), (0.07, 0.11, -0.03), (0.08, 0.15, -0.06), (-0.08, 0.15, -0.06)], 0.006, 0)
         for sx in (-1, 1):
             _platte(bm, [(sx * 0.115, -0.04, -0.03), (sx * 0.115, 0.03, -0.03), (sx * 0.105, 0.02, -0.12), (sx * 0.1, -0.03, -0.11)], 0.0, 0)
         # Rosshaarbusch: senkrechter Fächer schwarz-rot
-        _kasten(bm, Vector((0, 0.01, r + 0.055)), (0.022, 0.17, 0.11), 2)
-        _kasten(bm, Vector((0, -0.005, r + 0.085)), (0.026, 0.13, 0.06), 1)
+        for k, (sx, neig) in enumerate(((-0.022, 8), (0.0, 4), (0.022, 8)) if art == "montefortino" else ()):   # drei Federn (Polybios), außen schwarz, Mitte purpur
+            _feder(bm, (sx, 0.005, r + 0.03), 0.34 if k != 1 else 0.38, 0.055, neig, 2 if k != 1 else 1)
     elif art == "korinth":   # korinthischer Helm: geschlossener Gesichtsschutz mit Augenschlitzen und Nasenschiene, Kamm
         for sx in (-1, 1):   # Wangenplatten vorn, Spalt in der Mitte (Mund), Augenschlitz oben
             _platte(bm, [(sx * 0.02, -0.118, -0.035), (sx * 0.105, -0.085, -0.03), (sx * 0.1, -0.06, -0.15), (sx * 0.03, -0.1, -0.15)], 0.0, 0)
         _platte(bm, [(-0.012, -0.122, 0.01), (0.012, -0.122, 0.01), (0.01, -0.124, -0.075), (-0.01, -0.124, -0.075)], 0.0, 0)  # Nasenschiene
         _platte(bm, [(-0.07, 0.11, -0.03), (0.07, 0.11, -0.03), (0.06, 0.12, -0.13), (-0.06, 0.12, -0.13)], 0.0, 0)   # Nackenschutz
-        _kasten(bm, Vector((0, 0.0, r + 0.045)), (0.02, 0.2, 0.09), 1)   # Rosshaarkamm von vorn nach hinten
+        _kamm(bm, r * 1.06, 0.11, 1)   # Rosshaarkamm von vorn nach hinten
     else:  # thraker
         _kasten(bm, Vector((0, -0.04, r + 0.015)), (0.03, 0.09, 0.05), 0, Matrix.Rotation(math.radians(-25), 3, "X"))
         _platte(bm, [(-0.11, -0.115, -0.01), (0.11, -0.115, -0.01), (0.12, -0.16, -0.035), (-0.12, -0.16, -0.035)], 0.004, 0)  # Stirnschirm
         for sx in (-1, 1):
             _platte(bm, [(sx * 0.118, -0.06, -0.02), (sx * 0.118, 0.03, -0.02), (sx * 0.108, 0.02, -0.14), (sx * 0.1, -0.05, -0.13)], 0.0, 0)
-        _kasten(bm, Vector((0, 0.01, r + 0.06)), (0.016, 0.14, 0.05), 1)
+        _kamm(bm, r * 1.06, 0.07, 1, von=-40, bis=95, breite=0.016)
     return _obj(name, bm, mats), r
 
 
@@ -184,13 +223,13 @@ def schwert(art, name):
     """art: gladius | falcata | lang. Griffmitte im Ursprung, Klinge +Z."""
     bm = bmesh.new()
     mats = [mat("klinge", (0.55, 0.56, 0.58), 0.95, 0.3), mat("griff", *HOLZ), mat("beschlag", *BRONZE)]
-    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05)}[art]
+    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05), "falx": (0.55, 0.05)}[art]
     n = 4
     ringe = []
     for k in range(n + 1):
         t = k / n; z = 0.06 + t * L
         b = B * (1 - t ** 3 * 0.85) if art != "falcata" else B * (0.8 + 0.5 * math.sin(t * math.pi * 0.9)) * (1 - t ** 4)
-        x0 = 0.0 if art != "falcata" else -0.07 * math.sin(t * math.pi * 0.85)   # Falcata: Klinge nach vorn gebogen
+        x0 = -0.07 * math.sin(t * math.pi * 0.85) if art == "falcata" else 0.2 * t ** 2 if art == "falx" else 0.0   # Falcata vorn gebogen, Falx sichelartig nach innen
         if k == n:
             ringe.append([bm.verts.new((x0 + (0.02 if art == "falcata" else 0), 0, z + 0.04))]); continue
         ringe.append([bm.verts.new(p) for p in ((x0 - b / 2, 0, z), (x0, -0.006, z), (x0 + b / 2, 0, z), (x0, 0.006, z))])
@@ -209,6 +248,8 @@ def schwert(art, name):
     elif art == "falcata":
         _kasten(bm, Vector((0, 0, 0.045)), (0.05, 0.02, 0.015), 2)
         _kasten(bm, Vector((0.03, 0, -0.085)), (0.07, 0.015, 0.025), 2, Matrix.Rotation(math.radians(35), 3, "Y"))  # Hakengriff
+    elif art == "falx":
+        _kasten(bm, Vector((0, 0, -0.12)), (0.03, 0.03, 0.3), 1)        # langer Griff (zweihändig)
     else:
         _kasten(bm, Vector((0, 0, 0.045)), (0.09, 0.025, 0.018), 2)      # Parierstange (La Tène, kurz)
         _kasten(bm, Vector((0, 0, -0.085)), (0.04, 0.03, 0.02), 2)

@@ -17,11 +17,12 @@ FPS = 30
 
 # Kits: Farben linear (Blender), Teile aus 3d/roh_44|45, Größen in Metern.
 # Quellen: dev/schlacht/profile_truppen.json, dev/docs/schlacht_umsetzung.md 5.4
+KOERPER = os.environ.get("KOERPER", "male1591")   # Körpernetz: proxy741 (~1000 Dreiecke) oder male1591 (~3100, detaillierter)
 KITS = {
     "A1_hastatus": dict(tunika=(0.42, 0.06, 0.04), haut="young_caucasian_male", muskel=0.65, rock=0.12,
                         helm="montefortino", brust=True,
                         schild=dict(w=0.65, h=1.1, farbe=(0.42, 0.06, 0.04), mittel=(0.2, 0.1, 0.04), zylinder=0.12, eckig=3.0),
-                        waffe=("schwert", "gladius")),
+                        waffe=("schwert", "gladius"), beinschiene=["Left"]),
     "A2_libysch": dict(tunika=(0.55, 0.48, 0.34), haut="young_caucasian_male2", muskel=0.6, rock=0.1,
                        helm="pilos", brust=False,
                        schild=dict(w=0.85, h=0.85, farbe=(0.5, 0.22, 0.05), woelbung=0.03),
@@ -53,7 +54,8 @@ KITS = {
                          schild=dict(w=0.62, h=0.62, farbe=(0.45, 0.3, 0.1), woelbung=0.05), waffe=("speer", 5.5, 0.3)),
     # Hoplit: korinthischer Helm, große Bronze-Aspis, Speer (Dory 2,4 m), Panzer bronzefarben (über die Tunikafarbe)
     "A7_hoplit": dict(tunika=(0.42, 0.28, 0.1), haut="young_caucasian_male", muskel=0.65, rock=0.1, helm="korinth", brust=False,
-                      schild=dict(w=0.92, h=0.92, farbe=(0.45, 0.3, 0.1), woelbung=0.09), waffe=("speer", 2.4)),
+                      schild=dict(w=0.92, h=0.92, farbe=(0.45, 0.3, 0.1), woelbung=0.09), waffe=("speer", 2.4),
+                      beinschiene=["Left", "Right"]),
     # Kretische Bogenschützen: Kompositbogen links, Köcher, kein Helm, kein Schild
     "A7_toxotes": dict(tunika=(0.55, 0.45, 0.3), haut="young_caucasian_male2", muskel=0.5, rock=0.1, helm="haar", haar_tief=0.9, brust=False,
                        schild=None, waffe=("bogen", 1.15), fern="bogen"),
@@ -69,6 +71,19 @@ KITS = {
     "A2_numidisch": dict(tunika=(0.6, 0.55, 0.42), haut="young_caucasian_male2", muskel=0.5, rock=0.08, helm="haar", haar_tief=0.9,
                          brust=False, schild=dict(w=0.55, h=0.55, farbe=(0.45, 0.32, 0.15), woelbung=0.03), waffe=("speer", 1.6),
                          fern="speerwurf", reiter=True),
+    # Sondereinheiten (30.10. abends): Berufslegion (Kettenhemd grau), keltische Adlige (Soldurii/Galater: Kettenhemd, Knaufhelm),
+    # dakische Falxkrieger (Sichelschwert, ohne Schild), Nubier (Bogen), Aksumiten (Speer, Rundschild)
+    "A1_legion": dict(tunika=(0.2, 0.2, 0.21), haut="young_caucasian_male", muskel=0.65, rock=0.12, helm="knauf", brust=False,
+                      schild=dict(w=0.65, h=1.1, farbe=(0.42, 0.06, 0.04), mittel=(0.45, 0.33, 0.08), zylinder=0.12, eckig=3.0),
+                      waffe=("schwert", "gladius")),
+    "A6_adlig": dict(tunika=(0.19, 0.19, 0.2), hose=(0.3, 0.12, 0.05), haut="young_caucasian_male2", muskel=0.75, rock=0.1, helm="knauf",
+                     brust=False, schild=dict(w=0.6, h=1.15, farbe=(0.32, 0.05, 0.04), mittel=(0.45, 0.33, 0.08)), waffe=("schwert", "lang")),
+    "A6_falx": dict(tunika=(0.28, 0.2, 0.12), hose=(0.2, 0.17, 0.12), haut="young_caucasian_male2", muskel=0.75, rock=0.05, helm="haar",
+                    haar_tief=0.86, brust=False, schild=None, waffe=("schwert", "falx")),
+    "A8_nubisch": dict(tunika=(0.62, 0.58, 0.5), haut="young_african_male", muskel=0.55, rock=0.1, helm="haar", haar_tief=0.92, brust=False,
+                       schild=None, waffe=("bogen", 1.3), fern="bogen"),
+    "A8_aksum": dict(tunika=(0.6, 0.55, 0.45), haut="young_african_male", muskel=0.6, rock=0.1, helm="haar", haar_tief=0.92, brust=False,
+                     schild=dict(w=0.7, h=0.7, farbe=(0.3, 0.18, 0.08), woelbung=0.05), waffe=("speer", 2.2)),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -92,7 +107,7 @@ macro.update({"gender": 1.0, "age": 0.5 if VARIANTE != "c" else 0.62, "muscle": 
 basemesh = HumanService.create_human(scale=0.1, macro_detail_dict=macro)
 arm = HumanService.add_builtin_rig(basemesh, "cmu_mb", import_weights=True)
 arm.name = "sk_mensch"
-body = HumanService.add_mhclo_asset(os.path.join(data, "proxymeshes", "proxy741", "proxy741.proxy"), basemesh,
+body = HumanService.add_mhclo_asset(os.path.join(data, "proxymeshes", KOERPER, KOERPER + ".proxy"), basemesh,
                                     asset_type="Proxymeshes", subdiv_levels=0)
 body.name = "koerper"
 HumanService.set_character_skin(os.path.join(data, "skins", KIT["haut"], KIT["haut"] + ".mhmat"),
@@ -402,6 +417,28 @@ if KIT["brust"]:
     bpy.context.view_layer.update(); brust.matrix_world = m
     brust.data.materials.clear(); brust.data.materials.append(mat("bronze_platte", (0.43, 0.27, 0.09), metall=0.8, rau=0.45))
     teile.append(brust)
+
+# Beinschienen (Ocrea der Hastati links, Knemides der Hopliten beidseitig): Röhre um das Schienbein, am Unterschenkel befestigt
+for seite in KIT.get("beinschiene", []):
+    kn, fu = kp(seite + "Leg", 0.0), kp(seite + "Leg", 1.0)
+    ringe = []
+    A = np.array(fu[:]); D = np.array(kn[:]) - A; L2 = D.dot(D)
+    tt = (koerper_P - A).dot(D) / L2; quer = koerper_P - A - np.outer(tt, D)
+    nah = np.linalg.norm(quer, axis=1) < 0.1
+    for t in (0.1, 0.33, 0.58, 0.84):   # Röhre aus Schnitten entlang der Schienbeinachse
+        P = quer[nah & (np.abs(tt - t) < 0.16)]   # Netz am Unterschenkel ist grob: breiter Schnitt, sonst Standardmaß
+        m = A + D * t
+        if len(P) >= 3:
+            rx = np.abs(P[:, 0]).max() * 0.78 + 0.012; ry = np.abs(P[:, 1]).max() * 0.78 + 0.012
+            ringe.append(((m[0] + (P[:, 0].max() + P[:, 0].min()) / 2, m[1] + (P[:, 1].max() + P[:, 1].min()) / 2, m[2]), rx, ry))
+        else:
+            ringe.append(((m[0], m[1], m[2]), 0.05 + 0.02 * t, 0.055 + 0.025 * t))
+    print("BEINSCHIENE", seite, len(ringe), [round(r[1], 3) for r in ringe])
+    if len(ringe) >= 2:
+        bs = TF.beinschiene("teil_ruest_%s_bein_%s" % (KURZ, seite.lower()), ringe)
+        bpy.context.view_layer.update()
+        m = bs.matrix_world.copy(); bs.parent = arm; bs.parent_type = "BONE"; bs.parent_bone = seite + "Leg"
+        bpy.context.view_layer.update(); bs.matrix_world = m; teile.append(bs)
 
 sk = KIT["schild"]
 if sk:

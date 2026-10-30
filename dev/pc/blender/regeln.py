@@ -12,7 +12,7 @@ CLIPS = {
 }
 LOOP = {'stehen', 'gehen', 'laufen', 'stehen_bereit', 'kampf_bereit', 'gehen_b', 'laufen_b', 'stehen_b', 'fliehen', 'schritt', 'trab', 'galopp', 'ansturm', 'reiten', 'panik'}
 MAX_BONES = {'mensch': 55, 'pferd': 40, 'elefant': 40}
-MAX_TRIS = {'mensch': 1500, 'pferd': 2000, 'elefant': 2500}   # Nahstufe inkl. Ausrüstung
+MAX_TRIS = {'mensch': 3000, 'pferd': 2000, 'elefant': 2500}   # Nahstufe inkl. Ausrüstung
 HOEHE = {'mensch': (1.55, 1.95), 'pferd': (1.4, 2.6), 'elefant': (2.2, 3.6)}  # Meter, Gesamthöhe in Ruhe
 FPS = 30
 
