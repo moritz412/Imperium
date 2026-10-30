@@ -93,7 +93,7 @@ def mat(name, rgb, rough=0.85):
     m = bpy.data.materials.new(name); m.use_nodes = True
     b = m.node_tree.nodes["Principled BSDF"]; b.inputs["Base Color"].default_value = (*rgb, 1); b.inputs["Roughness"].default_value = rough
     return m
-for m in (mat("haut", (0.2, 0.18, 0.16)), mat("decke", (0.42, 0.05, 0.03)), mat("elfenbein", (0.75, 0.68, 0.52), 0.5), mat("sohle", (0.07, 0.06, 0.05))):
+for m in (mat("haut", (0.095, 0.088, 0.08)), mat("decke", (0.42, 0.05, 0.03)), mat("elfenbein", (0.75, 0.68, 0.52), 0.5), mat("sohle", (0.07, 0.06, 0.05))):
     me.materials.append(m)
 # Gewichte: je Röhre nur ihre Knochen, zwei nächste, 1/d^4
 segs = {n: (Vector(h), Vector(t)) for n, h, t, p in KN}

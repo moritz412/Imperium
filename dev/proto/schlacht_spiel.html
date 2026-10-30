@@ -1497,8 +1497,8 @@ function pferdZuck(j,ci,dur){pT[j]=dur;setClipP(j,ci,1,true);}   // Sonderclip d
 function elefStampf(i,f){   // Nahkampf: Vorhand hoch, niederstampfen (Wirkung bei 62 % des Clips); der Treiber sitzt
   const dur=setClipP(i,P_STEIG,.95+Math.random()*.1,true);pT[i]=dur+.05;
   setClip(i,C.reiten,1,true);
-  sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.62;sReaT[i]=Math.max(0,dur*.62-.15);sPh[i]=0;sDmg[i]=2.4;sTgt[i]=f;sOut[i]=0;
-  sPer[i]=(1.6+Math.random()*.8)*(1+.4*sFat[i]);sFat[i]=Math.min(1,sFat[i]+.02);zaehler.schlaege++;zaehler.stampfen++;
+  sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.62;sReaT[i]=Math.max(0,dur*.62-.15);sPh[i]=0;sDmg[i]=1.6;sTgt[i]=f;sOut[i]=0;
+  sPer[i]=(2.3+Math.random()*1.0)*(1+.4*sFat[i]);sFat[i]=Math.min(1,sFat[i]+.02);zaehler.schlaege++;zaehler.stampfen++;
 }
 /* Kegel vor dem Tier i (len m lang, am Ende 2·b breit): wirft um oder tötet. eigen = auch die eigene Seite (Panik) */
 function elefTrampel(i,len,b,dmg,eigen){
@@ -1544,7 +1544,7 @@ function panikStart(i,u){
   let a=u.side===0?PI:0;if(e)a=Math.atan2(sX[i]-e.cx,sZ[i]-e.cz);   // weg vom Feind, aber schräg durch die Reihen
   sPA[i]=a+(Math.random()<.5?1:-1)*(.9+Math.random()*.5);
   sAct[i]=A_NIX;sCh[i]=0;sRush[i]=0;sTr[i]=0;sTw[i]=0;pT[i]=0;sTT[i]=0;
-  ereignis('trompeten',sX[i],sZ[i]);u.morale-=2;
+  ereignis('elefant_panik',sX[i],sZ[i]);u.morale-=2;
 }
 function panikEnde(i,u){
   u.panikN=Math.max(0,u.panikN-1);u.panikCool=30;
@@ -1716,7 +1716,7 @@ function sterbeDir(j,dx,dz,ua,fm){   // (dx,dz) zeigt vom Gefallenen zum Angreif
   sSt[j]=S_STIRBT;sAct[j]=0;sFoe[j]=-1;if(!sRt[j])sVX[j]=sVZ[j]=0;
   sActT[j]=setClip(j,Math.random()<.2?C.sterben_knie:(von_vorn?C.sterben_hinten:C.sterben_vorn),1,true);
   if(sRt[j]){   // Pferd stürzt und bleibt liegen, der Reiter wird neben ihm zur Leiche
-    pT[j]=99;sCh[j]=0;sRush[j]=0;if(u.ele&&sPanK[j]===1)u.panikN=Math.max(0,u.panikN-1);sPanK[j]=0;sTr[j]=0;setClipP(j,P_STERB,1,true);if(!u.ele)ereignis('pferd_tod',sX[j],sZ[j]);
+    pT[j]=99;sCh[j]=0;sRush[j]=0;if(u.ele&&sPanK[j]===1)u.panikN=Math.max(0,u.panikN-1);sPanK[j]=0;sTr[j]=0;setClipP(j,P_STERB,1,true);ereignis(u.ele?'elefant_tod':'pferd_tod',sX[j],sZ[j]);
     blutFleck(sX[j]+(Math.random()-.5)*1.2,sZ[j]+(Math.random()-.5)*1.2,1.6);
   }
   slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;
@@ -1762,7 +1762,7 @@ function aufprall(i,f){
   spritzer(sX[f],sZ[f],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[f]+nx*.5,sZ[f]+nz*.5,.6);
   ud.morale-=.45*w*(ua.ele?2.2:1);
   sCool[i]=.35;
-  if(ua.ele){zaehler.elefAnsturm++;sTT[i]=.3;elefTrampel(i,5.5,2.2,1.1*w,false);}
+  if(ua.ele){zaehler.elefAnsturm++;sTT[i]=.3;elefTrampel(i,5.5,2.2,.8*w,false);/* abgeschwächt 30.10., vorher 1,1·w */}
   if(sHP[f]<=0){sterbeDir(f,-nx,-nz,ua,vorn?1:hinten?2:1.5);}
   else if(sSt[f]!==S_FLIEH){
     const kb=2.2+w*1.2,umw=w>1.05||!vorn;
@@ -2252,7 +2252,7 @@ function figuren(dt){
     }
     else if(st===S_KAMPF&&reit&&sRush[i]>0){   // dringt in die Reihen ein
       const sp=sImp[i]*.38;dvx=Math.sin(sR[i])*sp;dvz=Math.cos(sR[i])*sp;face=sR[i];hf=true;
-      if(u.ele){sTT[i]-=dt;if(sTT[i]<=0){sTT[i]=.3;elefTrampel(i,3.4,1.2,.9,false);}}
+      if(u.ele){sTT[i]-=dt;if(sTT[i]<=0){sTT[i]=.3;elefTrampel(i,3.4,1.2,.6,false);}}
     }
     else if(st===S_KAMPF){
       const f=sFoe[i];
@@ -2892,7 +2892,7 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bPause','bTempo','
 const TON=(()=>{
   const DIR=AS+'ton/',KULT='rom',MAXM=7,POLY=12,HOER=60,FADE=3.5;
   const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
-    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
+    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   const KAMPF=['kampf_1','kampf_2','kampf_3','kampf_rom','kampf_karthago'];
   const GR={   // Zustand -> Gruppen in Ausweichreihenfolge (erste Gruppe mit geladenem Stück gewinnt)
     ruhe:[['ruhe_1']],
@@ -2906,7 +2906,7 @@ const TON=(()=>{
     klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.45,t:.9},tod:{a:'tod',v:.42,t:2.2},speer:{a:'speer',v:.8,t:.15},
     pfeil:{a:'pfeil',v:.55,t:.12},wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
     kriegsgeschrei:{a:'kriegsgeschrei',v:.6,t:6,w:140},
-    aufprall:{a:'reiter_aufprall',v:.8,t:.18,w:110},wiehern:{a:'wiehern',v:.5,t:5,w:120},pferd_tod:{a:'pferd_tod',v:.55,t:1.8},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
+    aufprall:{a:'reiter_aufprall',v:.8,t:.18,w:110},wiehern:{a:'wiehern',v:.5,t:5,w:120},pferd_tod:{a:'pferd_tod',v:.55,t:1.8},trompeten:{a:'elefant_trompete',v:.7,t:3.5,w:260},elefant_panik:{a:'elefant_panik',v:.8,t:2.5,w:220},elefant_tod:{a:'elefant_tod',v:.75,t:2},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
   for(const k in EV)EV[k].l=-1e9;
   /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
   const LISTE=[];

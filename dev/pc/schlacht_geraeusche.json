@@ -23,5 +23,9 @@
  {"id": "hufe_trab", "p": "a group of horses trotting on soft ground, rhythmic hoofbeats", "dauer": 8, "n": 1},
  {"id": "wiehern", "p": "a war horse neighing loudly, short", "dauer": 2, "n": 4},
  {"id": "reiter_aufprall", "p": "cavalry crashing into infantry, horses colliding with shields, heavy impact, men shouting", "dauer": 3, "n": 3},
- {"id": "pferd_tod", "p": "a horse screaming and falling heavily to the ground", "dauer": 3, "n": 2}
+ {"id": "pferd_tod", "p": "a horse screaming and falling heavily to the ground", "dauer": 3, "n": 2},
+ {"id": "elefant_trompete", "p": "a single elephant trumpeting loudly, angry war elephant call, outdoors", "dauer": 3, "n": 4},
+ {"id": "elefant_schritte", "p": "heavy elephants walking, deep thudding footsteps on the ground, rumble", "dauer": 8, "n": 1},
+ {"id": "elefant_panik", "p": "a panicked elephant screaming and trumpeting wildly, running", "dauer": 3, "n": 2},
+ {"id": "elefant_tod", "p": "a large elephant groaning and collapsing heavily to the ground, deep thud", "dauer": 3, "n": 2}
 ]
