@@ -1611,14 +1611,14 @@ function kampfTick(dt){
   // --- Kontakt (Raster) : Feind näher als 6 m
   for(let i=0;i<NA;i++){
     if(sSt[i]>S_KAMPF)continue;
-    const u=U[sUnit[i]];if(u.kontakt||!u.nahF||u.state==='flieht'||u.sperre>0)continue;
+    const u=U[sUnit[i]];if(u.kontakt||!u.nahF||u.state==='flieht'||u.sperre>0||(u.loesen&&u.hasDest))continue;   // lösende Reiter reiten durch
     const side=sSide[i],cx=((sX[i]-GX0)/ZELLE)|0,cz=((sZ[i]-GZ0)/ZELLE)|0;
     const g0=Math.max(0,cx-3),g1=Math.min(GW-1,cx+3),h0=Math.max(0,cz-3),h1=Math.min(GH-1,cz+3);
     found:for(let gz=h0;gz<=h1;gz++)for(let gx=g0;gx<=g1;gx++){
       for(let j=cHead[gz*GW+gx];j>=0;j=sNext[j]){
         if(sSide[j]===side||sSt[j]>S_FLIEH)continue;
         const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i];
-        if(dx*dx+dz*dz<KONT_R2){u.kontakt=true;const v=U[sUnit[j]];if(v.state!=='flieht'&&v.sperre<=0)v.kontakt=true;break found;}
+        if(dx*dx+dz*dz<KONT_R2){u.kontakt=true;const v=U[sUnit[j]];if(v.state!=='flieht'&&v.sperre<=0&&!(v.loesen&&v.hasDest))v.kontakt=true;break found;}
       }
     }
   }
@@ -1628,6 +1628,7 @@ function kampfTick(dt){
     if(u.state==='flieht')continue;
     if(u.loesen&&!u.hasDest&&!u.engaged){u.sammelT-=dt;u.morale=Math.min(u.def.mor,u.morale+2*dt);if(u.sammelT<=0)u.loesen=false;}   // Reiterei sammelt sich nach dem Lösen
     if(u.kontakt)u.kT=KONT_HALT;else u.kT-=dt;
+    if(u.loesen&&u.hasDest)u.kT=0;
     const eng=u.kT>0;
     if(eng&&!u.engaged)beginEngage(u);else if(!eng&&u.engaged)endEngage(u);
     u.engaged=eng;
@@ -2074,9 +2075,9 @@ function schritt(dt){
 /* ====================================================================================================
    Darstellung der Figuren, Ringe, Fahnen
    ==================================================================================================== */
-function instSchreiben(K,l,rot,gr,px,py,pz,An,w){   // eine Instanz (Matrix + Clipdaten) in Kit K, Stufe l
-  const m=K.im[l],k=K.n[l]++,M=m.instanceMatrix.array,o=k*16,c=Math.cos(rot)*gr,s=Math.sin(rot)*gr;
-  M[o]=c;M[o+1]=0;M[o+2]=-s;M[o+3]=0;M[o+4]=0;M[o+5]=gr;M[o+6]=0;M[o+7]=0;M[o+8]=s;M[o+9]=0;M[o+10]=c;M[o+11]=0;
+function instSchreiben(K,l,rot,gr,px,py,pz,An,w,p){   // eine Instanz (Matrix + Clipdaten) in Kit K, Stufe l; p = Neigung nach vorn (Pferd am Hang)
+  const m=K.im[l],k=K.n[l]++,M=m.instanceMatrix.array,o=k*16,c=Math.cos(rot)*gr,s=Math.sin(rot)*gr,cp=p?Math.cos(p):1,sp=p?Math.sin(p):0;
+  M[o]=c;M[o+1]=0;M[o+2]=-s;M[o+3]=0;M[o+4]=-sp*s;M[o+5]=cp*gr;M[o+6]=-sp*c;M[o+7]=0;M[o+8]=cp*s;M[o+9]=sp*gr;M[o+10]=cp*c;M[o+11]=0;
   M[o+12]=px;M[o+13]=py;M[o+14]=pz;M[o+15]=1;
   const g=m.geometry.attributes,A=g.aAnim.array,B=g.aAnimAlt.array,L=g.aLoop.array,a=k*4,q=k*3;
   A[a]=An[w];A[a+1]=An[w+1];A[a+2]=An[w+2];A[a+3]=An[w+3];
@@ -2095,11 +2096,12 @@ function baueInstanzen(){
     const gy=H(sX[i],sZ[i]),rt=sRt[i];
     if(rt&&PFK>=0){   // Reiter: Pferd am Platz, Reiter darüber (+0,62 m, 0,05 m nach hinten); gestürzt liegt der Reiter 0,8 m daneben am Boden
       const sn=Math.sin(sR[i]),cs=Math.cos(sR[i]);
-      instSchreiben(KIT[PFK],l,sR[i],gr,sX[i],gy,sZ[i],pAn,i*12);
+      let p=0;if(sSt[i]<S_STIRBT){p=Math.atan2(H(sX[i]+sn*1.1,sZ[i]+cs*1.1)-H(sX[i]-sn*1.1,sZ[i]-cs*1.1),2.2);p=Math.max(-.35,Math.min(.35,p));}
+      instSchreiben(KIT[PFK],l,sR[i],gr,sX[i],gy,sZ[i],pAn,i*12,p);
       let px,py,pz;
       if(sSt[i]>=S_STIRBT){const t=Math.min(1,(spielzeit-sAn[i*12+2])/.5),sd=sSd[i]*.8*t*gr;px=sX[i]+cs*sd;pz=sZ[i]-sn*sd;py=gy+.62*gr*(1-t)*(1-t);}
-      else{px=sX[i]-sn*.05*gr;pz=sZ[i]-cs*.05*gr;py=gy+.62*gr;}
-      instSchreiben(K,l,sR[i],gr,px,py,pz,sAn,i*12);
+      else{const cp=Math.cos(p),sp=Math.sin(p),f=gr*(-.62*sp-.05*cp);px=sX[i]+sn*f;pz=sZ[i]+cs*f;py=gy+gr*(.62*cp-.05*sp);}
+      instSchreiben(K,l,sR[i],gr,px,py,pz,sAn,i*12,sSt[i]>=S_STIRBT?0:p);
     }else instSchreiben(K,l,sR[i],gr,sX[i],gy,sZ[i],sAn,i*12);
     if(bm===1||(bm===2&&l===1)){   // weicher Kontaktschatten, leicht vom Licht weg versetzt
       const q=nb++*16,bs=rt?2.7:1.9;BM[q]=bs;BM[q+1]=0;BM[q+2]=0;BM[q+3]=0;BM[q+4]=0;BM[q+5]=1;BM[q+6]=0;BM[q+7]=0;BM[q+8]=0;BM[q+9]=0;BM[q+10]=bs;BM[q+11]=0;
