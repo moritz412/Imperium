@@ -68,3 +68,53 @@ Rang (`rankOf` → R.b auf Angriff/Abwehr, R.m auf Moral), `u.ep` Epoche der Aus
   2 = Kettenhemd/Schuppenpanzer bzw. epochentypisch besser; Waffen 0–2 = einfachere/bessere Klinge, Speerspitze, Schildbeschlag; Veteranen = Helmbusch/Zier,
   Feldzeichen; veraltete Epoche = Teile der älteren Epoche. Umsetzung: Teile je Stufe als eigene Formteile im Paket (alle Stufen im selben Paket, Auswahl je Einheit
   per Sichtbarkeit/Instanz-Flag im Shader), damit keine zusätzlichen Pakete entstehen.
+
+## Stand E1 (30.10.2026) – gebaut in `dev/proto/schlacht_spiel.html`
+**Was ist drin:** Abschnitt „E1 SCHLACHT-EINHEIT AUS DER KAMPAGNEN-EINHEIT“ (eigenständig, verschiebbar): `schlachtEinheit(e)`, Tabellen `ECHT_ROLLE`, `ECHT_FERN`,
+`ECHT_PAKET`, `ECHT_RANG`, `FERN_PAKET`, Vorlagen `GEFECHTE`. Daten werden beim Laden aus `einheiten_kampagne.json` geholt. Alle Einheiten der Testschlacht entstehen aus
+Kampagnen-Beschreibungen `{volk, kultur, rolle, variante, epoche, mann, waffen, ruestung, tier, rang, ausruestungEpoche}`; es gibt keine frei gesetzten Werte mehr.
+Knopf „Gefecht“ (Aufstellung) öffnet die Auswahl der 3 Vorlagen; Figurenpakete werden nur für die gewählte Vorlage geladen. `SCHLACHT.einheit(desc)`, `SCHLACHT.gefecht(id)`.
+Bilder wie in der Kampagne (`u_sheet.webp` per Index, sonst `u_e<Epoche>_<Rolle>` aus `pb_ui.json`). Einheitenfenster: Kampagnenstärke, Werte, Fähigkeiten, Waffen-/Rüstungsstufe, Rang/Aufwertung,
+Beschreibung, Figurenherkunft („Figuren vorläufig“ bei `paketGenau=false`).
+
+**Formel (endgültige Konstanten):**
+- `str = (UNIT_MOD[volk][rolle].str nur Epoche 0 ohne Variante, sonst ROLES.str) × VARIANTS.m.str × EPOCH_STR[ue] (Fern × FERN_EPOCHE[ue])`, `tier` → `× 1,2` (je Schritt auf 0,1 gerundet wie `unitStat`/`uStat`); `ue` = Epoche der Ausrüstung (höchstens Einheitsepoche)
+- `q = str / (ROLES.str × EPOCH_STR[ue])`
+- Angriff = Grund × √q × b.atk × (1+Rang.b) × (1+0,08·Waffenstufe) · Abwehr = Grund × √q × b.def × (1+Rang.b) × (1+0,08·Rüstungsstufe) · Moral = Grund + 2·b.mor + Rang.m
+- Tempo × b.spd · Ansturm × b.chg · Fern: Reichweite × b.range, Schaden × b.ratk, Vorrat × b.ammo · Pike: Abwehr ×1,5 gegen Ansturm von vorn
+- Grundwerte (Angriff/Abwehr/Leben/Moral/Gehen/Laufen/Ansturm): Speer 9/12/3/65/1,3/3,6/1 · Nahkampf 11/10/3/62/1,35/3,8/1,1 · Fern 6/6/2,5/55/1,4/4,0/0,8 · Reiter 12/9/3,5/70/2/8/1,8 · Artillerie 4/4/2/50/1/2/0
+- Rang (wie `RANKS`): 0 Rekruten 0/0, 1 Erprobt 5 %/+5, 2 Veteranen 10 %/+10, 3 Elite 15 %/+15, 4 Legendär 20 %/+25
+- Waffenart Fernkampf nach Paket: `A1_veles` Wurfspeer (30 m, 5 Speere, Schaden 1,6), `A4_balearisch` Schleuder (70 m, 25 Steine, Schaden 0,8). Fernkämpfer ohne eines dieser Pakete bekommen `A1_veles` (vorläufig).
+- Figuren = round(mann/3), 4–60 (Plätze: 60 je Einheit, Raster 10 breit); KI-Stil: Ansturm ≥ 1,6 stürmt zuerst, Nahkampf sonst läuft zuletzt, Speer marschiert.
+
+**Berechnete Werte der drei Vorlagen** (Angriff/Abwehr/Moral, Tempo Gehen/Laufen m/s; * = Figuren vorläufig; Fern = Reichweite m / Schaden / Vorrat je Mann):
+| Vorlage | Einheit | Kampagnenstärke | Fig. | Angriff | Abwehr | Moral | Tempo | Ansturm | Paket |
+|---|---|---|---|---|---|---|---|---|---|
+| Karthago | Hastati I | 9,6 | 40 | 11,4 | 10,3 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Hastati (Veteranen; Rang 2) | 11,5 | 40 | 13,7 | 12,4 | 72 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Hastati II (Waffen 1, Rüstung 2) | 9,6 | 40 | 12,3 | 12,0 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Velites | 5,5 | 33 | 6,0 | 6,0 | 55 | 1,4/4,0 | 0,8 | A1_veles (Fern 30/1,6/5) |
+| | Schwertkämpfer I, II (keltisch) | 9,0 | 40 | 11,0 | 10,0 | 62 | 1,35/3,8 | 1,1 | A6_keltisch |
+| | Libysche Speerträger I, II | 8,0 | 40 | 9,6 | 14,8 | 73 | 1,3/3,6 | 1,0 | A2_libysch |
+| | Iberische Scutarii | 9,9 | 40 | 11,5 | 11,5 | 62 | 1,35/3,8 | 1,1 | A3_iberisch |
+| | Balearische Schleuderer | 6,1 | 33 | 6,3 | 6,3 | 55 | 1,4/4,0 | 0,8 | A4_balearisch (Fern 84/0,92/25) |
+| Makedonien | Hastati I | 9,6 | 40 | 11,4 | 10,3 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Hastati II (Waffen 1, Rüstung 1) | 9,6 | 40 | 12,3 | 11,2 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Triarii (Grund-Speer) | 7,0 | 40 | 9,0 | 12,0 | 65 | 1,3/3,6 | 1,0 | A1_hastatus |
+| | Velites | 5,5 | 33 | 6,0 | 6,0 | 55 | 1,4/4,0 | 0,8 | A1_veles |
+| | Pikenphalanx I, II | 8,8 | 40 | 9,1 | 18,2 | 65 | 1,1/3,1 | 1,0 | A7_hellenistisch (Pike) |
+| | Hopliten I (Variante hoplit) | 8,0 | 40 | 9,6 | 15,4 | 75 | 1,3/3,6 | 1,0 | A7_hellenistisch |
+| | Hopliten II (Grund-Speer) | 8,2 | 40 | 9,7 | 13,0 | 65 | 1,3/3,6 | 1,0 | A7_hellenistisch |
+| | Epilektoi/Hypaspisten | 9,0 | 40 | 11,0 | 10,0 | 62 | 1,35/3,8 | 1,1 | A7_hellenistisch |
+| | Bogenschützen (Grund-Fern) | 5,5 | 33 | 6,0 | 6,0 | 55 | 1,4/4,0 | 0,8 | A1_veles* (Fern 30/1,6/5) |
+| Kelten | Hastati I, II | 9,6 | 40 | 11,4 | 10,3 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Hastati (Veteranen, Rang 0) | 11,5 | 40 | 12,4 | 11,3 | 62 | 1,35/3,8 | 1,1 | A1_hastatus |
+| | Velites | 5,5 | 33 | 6,0 | 6,0 | 55 | 1,4/4,0 | 0,8 | A1_veles |
+| | Langschwertkrieger I, II | 10,8 | 40 | 15,1 | 9,3 | 70 | 1,35/3,8 | 1,65 | A6_keltisch |
+| | Soldurii | 11,3 | 40 | 13,6 | 11,2 | 98 | 1,35/3,8 | 1,1 | A6_keltisch |
+| | Galatische Leibwache | 11,7 | 40 | 15,1 | 11,4 | 82 | 1,35/3,8 | 1,1 | A6_keltisch |
+| | Speerkrieger (Grund-Speer keltisch) | 7,0 | 40 | 9,0 | 12,0 | 65 | 1,3/3,6 | 1,0 | A6_keltisch |
+| | Plänkler (Grund-Fern keltisch) | 5,5 | 33 | 6,0 | 6,0 | 55 | 1,4/4,0 | 0,8 | A1_veles* (Fern 30/1,6/5) |
+
+**Grenzen E1:** Reiter/Artillerie sind berechenbar, haben aber keine eigenen Figuren/Fernkampf (kein Vorlagen-Einsatz); Fernkampf nur für Rolle „Fernkampf“; Pike nur als Abwehrfaktor
+gegen Ansturm; kein Feldherr, keine Verlust-Rückschreibung in die Kampagne; Gleichgewicht der Vorlagen nicht abgestimmt (Rom ist in „Karthago“ 4 gegen 6 Einheiten).

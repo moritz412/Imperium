@@ -48,6 +48,10 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 .bild .ph{position:absolute;inset:14% 14% 18%;color:#f1d79a;opacity:.92;filter:drop-shadow(0 2px 2px rgba(0,0,0,.65))}
 .bild img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0;transition:opacity .3s}
 .bild img.ok{opacity:1}
+.bild{container-type:size}
+.bild .sh{position:absolute;left:50%;top:50%;width:max(100cqw,100cqh);aspect-ratio:1;transform:translate(-50%,-50%);background:url(../../img/u_sheet.webp) no-repeat;background-size:800% 1400%}
+.bild img.pb{opacity:1;object-position:50% 50%}
+.bild.leer img.pb{display:none}
 
 /* Feindreihe oben: schmale Karten, Bild füllt die Karte, Text auf dunklem Band */
 #feinde{display:flex;gap:5px;width:100%;pointer-events:auto}
@@ -130,6 +134,19 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 #fenster .zl b{font-weight:normal;color:var(--ink);font-variant-numeric:tabular-nums}
 #fenster p{flex-basis:100%;margin:0;font-size:12.5px;font-style:italic;color:var(--mut);line-height:1.3}
 #fenster .x{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:20px;line-height:1}
+#fenster{width:300px;max-height:calc(100vh - 230px);overflow-y:auto;touch-action:pan-y}
+#fenster .sub{font-size:11.5px;color:var(--mut);line-height:1.2;margin:0 0 3px}
+#fenster .fa{flex-basis:100%;margin:0;font-size:12px;color:var(--gold);line-height:1.3;font-style:normal}
+#fenster .vl{flex-basis:100%;margin:0;font-size:11.5px;color:#d9a63a;line-height:1.3;font-style:normal}
+/* Gefecht wählen (Karte links der Befehlsspalte) */
+#gefechte{position:fixed;display:none;width:300px;padding:10px 12px 12px;background:var(--holz);border:2px solid var(--bronze);border-radius:13px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 0 2px rgba(224,180,90,.2),0 6px 20px rgba(0,0,0,.65);z-index:6}
+#gefechte.an{display:block}
+#gefechte h3{margin:0 0 6px;font:19px Marcellus,Georgia,serif;font-weight:normal;color:var(--gold);padding-bottom:4px;border-bottom:1px solid rgba(169,121,58,.6)}
+#gefechte .gf{display:block;width:100%;min-height:58px;margin:0 0 6px;padding:6px 10px;text-align:left;border-radius:10px;background:linear-gradient(#3a2f23,#2a2119);border:1.5px solid var(--bronze2)}
+#gefechte .gf.on{border-color:var(--gold);background:linear-gradient(#5a4526,#3a2c17)}
+#gefechte .gf b{display:block;font:16px Marcellus,Georgia,serif;font-weight:normal}
+#gefechte .gf small{display:block;font-size:11.5px;color:var(--mut);line-height:1.25}
 
 /* schwebende Banner über den Einheiten (DOM, per Transform; höchstens 15 Hz) */
 #banner{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
@@ -204,7 +221,7 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
     <div class="kk"><div class="wap"><svg viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g><use href="#sy-schwert" x="9" y="7" width="26" height="26"/></g></svg></div>
       <span class="kn r" id="kR">0</span><div class="kb"><i id="kBar"></i><b></b></div><span class="kn k" id="kK">0</span>
       <div class="wap k"><svg viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g><use href="#sy-speer" x="9" y="7" width="26" height="26"/></g></svg></div></div>
-    <div class="kz"><span>Rom</span><em><svg class="ic"><use href="#ic-sand"/></svg><span id="kZeit">0:00</span></em><em id="kTempo">1×</em><span>Karthago</span></div>
+    <div class="kz"><span id="kS0">Rom</span><em><svg class="ic"><use href="#ic-sand"/></svg><span id="kZeit">0:00</span></em><em id="kTempo">1×</em><span id="kS1">Karthago</span></div>
   </div>
   <div id="feinde"></div>
   <div id="hinweis"></div>
@@ -212,6 +229,7 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 <div id="fps">– B/s</div>
 <div id="spalte">
   <button class="plak gross" id="bBegin"><svg class="ic"><use href="#ic-speere"/></svg><span><b>Beginnen</b><small>Heere rücken vor</small></span></button>
+  <button class="plak" id="bGefecht"><svg class="ic"><use href="#ic-schild"/></svg><span><b>Gefecht</b><small></small></span></button>
   <button class="plak" id="bHalt"><svg class="ic"><use href="#ic-schild"/></svg><span><b>Halten</b><small></small></span></button>
   <button class="plak" id="bPlaenk"><svg class="ic"><use href="#ic-pfeil"/></svg><span><b>Plänkeln</b><small></small></span></button>
   <button class="plak" id="bForm"><svg class="ic"><use href="#ic-form"/></svg><span><b>Formation</b><small></small></span></button>
@@ -221,6 +239,7 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
   <button class="plak" id="bTon"><svg class="ic"><use href="#ic-ton"/></svg><span><b>Ton</b><small></small></span></button>
 </div>
 <div id="fenster"></div>
+<div id="gefechte"></div>
 <div id="karten"></div>
 <div id="ende"></div>
 <div id="tonkarte"><button class="x" aria-label="Schließen">×</button><h3>Ton</h3>
@@ -242,41 +261,159 @@ const wrap=a=>{while(a>PI)a-=TAU;while(a<-PI)a+=TAU;return a;};
 const fmt=n=>String(Math.round(n*10)/10).replace('.',',');
 
 /* ---------- Daten ---------- */
-/* Zusatzfelder: card = Bildname (karten/<card>.jpg) · sym = Symbol · schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
-   fern = Fernkampf: reich m · nachl [min,max] s · vorrat je Mann · schaden · moral (Zusatzabzug je Treffer) · wurfT Zeitpunkt des Abwurfs im Clip
-   · v Fluggeschwindigkeit m/s · weich = Plänkler weicht, wenn Nahkämpfer näher als m · rueck = so weit weicht er zurück */
-const KITS=[
-  {id:'A1_hastatus',key:'hast',n:'Hastati',card:'hastatus',sym:'schwert',schild:.55,atk:10,def:11,mor:70,hp:3,walk:1.3,run:3.8,ans:1.5,speer:false,
-   info:'Gedrillte römische Linieninfanterie. Hält die Linie, bricht nicht so schnell.'},
-  {id:'A2_libysch',key:'liby',n:'Libysche Speerträger',card:'libyer',sym:'speer',schild:.45,atk:9,def:12,mor:65,hp:3,walk:1.3,run:3.6,ans:1.5,speer:true,
-   info:'Dichte Speerreihen. Stark in der Abwehr, träge im Angriff.'},
-  {id:'A3_iberisch',key:'iber',n:'Iberische Scutarii',card:'iberer',sym:'schwert',schild:.45,atk:11,def:9,mor:60,hp:2.5,walk:1.4,run:4.0,ans:1.5,speer:false,
-   info:'Wendige Schwertkämpfer mit großem Schild. Kräftig im Angriff, verwundbar in der Abwehr.'},
-  {id:'A6_keltisch',key:'kelt',n:'Keltische Krieger',card:'kelte',sym:'schwert',schild:.35,bloss:true,atk:12,def:8,mor:55,hp:2.5,walk:1.4,run:4.2,ans:2,speer:false,
-   info:'Furchtbarer Ansturm in den ersten Augenblicken – doch wer ihn übersteht, sieht sie bald wanken.'},
-  {id:'A1_veles',key:'vel',n:'Velites',card:'veles',sym:'wurfspeer',schild:.4,atk:6,def:6,mor:55,hp:2.5,walk:1.5,run:4.3,ans:1,speer:false,
-   fern:{typ:'speer',reich:30,nachl:[4,6],vorrat:5,schaden:1.6,moral:.5,clip:'speerwurf',wurfT:.55,v:24,weich:14,rueck:22},
-   info:'Leichte Wurfspeerwerfer vor der Linie. Fünf Speere je Mann; ein Treffer erschüttert die Moral. Im Nahkampf schwach.'},
-  {id:'A4_balearisch',key:'bal',n:'Balearische Schleuderer',card:'balearer',sym:'schleuder',schild:0,bloss:true,atk:6,def:6,mor:50,hp:2,walk:1.5,run:4.4,ans:1,speer:false,
-   fern:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
-   info:'Weitreichende Schleuderer ohne Schild. Steine schlagen vor allem Ungeschützte nieder. Weichen dem Nahkampf aus.'},
+/* ====================================================================================================
+   E1  SCHLACHT-EINHEIT AUS DER KAMPAGNEN-EINHEIT                        (30.10.2026)
+   Eigenständiger Abschnitt: schlachtEinheit() und ihre Tabellen hängen nur an den Kampagnendaten (KAMP =
+   dev/proto/einheiten_kampagne.json) und lassen sich später unverändert ins Spiel verschieben.
+
+   Eingabe  {volk, kultur, rolle, variante, epoche, mann, waffen, ruestung, tier, rang, ausruestungEpoche}
+            wie eine Einheit auf der Kampagnenkarte (volk = Schlüssel in UNIT_MOD, z. B. 'rom').
+   Kampagnenstärke  str  = ROLES[rolle].str  (Epoche 0, keine Variante: UNIT_MOD[volk][rolle].str)
+                          × VARIANTS[v].m.str × EPOCH_STR[ue] (Fernkampf zusätzlich × FERN_EPOCHE[ue]);  tier: × 1,2
+                          (ue = Epoche der Ausrüstung, höchstens die Epoche der Einheit)
+   Verhältnis       q    = str / (ROLES[rolle].str × EPOCH_STR[ue])
+   Angriff = Grund-Angriff(Rolle) × √q × b.atk × (1+Rang.b) × (1+0,08·Waffenstufe)
+   Abwehr  = Grund-Abwehr(Rolle)  × √q × b.def × (1+Rang.b) × (1+0,08·Rüstungsstufe)
+   Moral   = Grund-Moral(Rolle) + 2·b.mor + Rang.m
+   Tempo   = Grundtempo × b.spd · Ansturm = Grund-Ansturm × b.chg · Leben = Grundwert(Rolle)
+   Fernkampf (nur Rolle missile): Waffenart (Wurfspeer/Schleuder) nach Figurenpaket; Reichweite × b.range,
+            Schaden × b.ratk, Vorrat je Mann × b.ammo · Plänkeln = b.skirm · Pike = b.pike
+   Figuren = round(mann/3), 4 bis 60 · Paket = Profil.paket (Rückfall: paketGenau=false -> „Figuren vorläufig“)
+   ==================================================================================================== */
+let KAMP=null;   // Inhalt von einheiten_kampagne.json
+const ECHT_ROLLE={   // Echtzeit-Grundwerte je Kampagnenrolle (Gehen/Laufen in m/s)
+  spear:{atk:9,def:12,hp:3,mor:65,walk:1.3,run:3.6,ans:1,sym:'speer'},
+  sword:{atk:11,def:10,hp:3,mor:62,walk:1.35,run:3.8,ans:1.1,sym:'schwert'},
+  missile:{atk:6,def:6,hp:2.5,mor:55,walk:1.4,run:4.0,ans:.8,sym:'wurfspeer'},
+  cav:{atk:12,def:9,hp:3.5,mor:70,walk:2,run:8,ans:1.8,sym:'schwert'},
+  art:{atk:4,def:4,hp:2,mor:50,walk:1,run:2,ans:0,sym:'schwert'},
+};
+/* Waffenarten des Fernkampfs (reich m · nachl [min,max] s · vorrat je Mann · schaden · moral = Zusatzabzug je Treffer · wurfT Zeitpunkt des Abwurfs im Clip
+   · v Fluggeschwindigkeit m/s · weich = Plänkler weicht, wenn Nahkämpfer näher als m · rueck = so weit weicht er zurück) */
+const ECHT_FERN={
+  speer:{typ:'speer',reich:30,nachl:[4,6],vorrat:5,schaden:1.6,moral:.5,clip:'speerwurf',wurfT:.55,v:24,weich:14,rueck:22},
+  stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
+};
+const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein'};   // nur diese Pakete haben Wurf-Clips; andere Fernkämpfer bekommen A1_veles
+const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
+  A1_hastatus:{schild:.55},A1_veles:{schild:.4},A2_libysch:{schild:.45},A3_iberisch:{schild:.45},
+  A4_balearisch:{schild:0,bloss:true},A6_keltisch:{schild:.35,bloss:true},A7_hellenistisch:{schild:.5},
+};
+const ECHT_RANG=[{n:'Rekruten',b:0,m:0},{n:'Erprobt',b:.05,m:5},{n:'Veteranen',b:.1,m:10},{n:'Elite',b:.15,m:15},{n:'Legendär',b:.2,m:25}];   // wie RANKS der Kampagne
+const STUFE_NAME=['einfach','verbessert','beste'];
+const r1=x=>Math.round(x*10)/10;
+function profilFinden(e,ue){   // Sondereinheit -> ihr Profil; Grundeinheit -> erstes Profil mit passender Kultur und Epoche, sonst irgendeines der Rolle
+  const D=KAMP,P=D.profile;
+  if(e.variante&&P[e.variante])return e.variante;
+  let s1=null,s2=null;
+  for(const id in P){
+    if(id.slice(0,6)!=='basis_')continue;const p=P[id];if(p.rolle!==e.rolle)continue;
+    const ep=p.epochen.indexOf(ue)>=0;
+    if(ep&&p.kulturen.indexOf(e.kultur)>=0)return id;
+    if(ep&&!s1)s1=id;if(!s2)s2=id;
+  }
+  return s1||s2;
+}
+function schlachtEinheit(e){
+  const D=KAMP;if(!D)throw new Error('Kampagnendaten nicht geladen');
+  const ep=e.epoche|0,ue=e.ausruestungEpoche==null?ep:Math.min(ep,e.ausruestungEpoche|0);
+  const V=e.variante?D.VARIANTS[e.variante]:null,rolle=V?V.role:e.rolle,R0=D.ROLES[rolle],B=V?V.b:{},M=V?V.m:{};
+  const pid=profilFinden({variante:e.variante,rolle,kultur:e.kultur},ue),P=D.profile[pid];
+  const tier=e.tier?1:0,wpn=e.waffen|0,arm=e.ruestung|0,rk=Math.max(0,Math.min(4,(e.rang!=null?e.rang:e.erfahrung||0)|0)),RG=ECHT_RANG[rk];
+  // Kampagnenstärke (wie unitStat/uStat der Kampagne)
+  const mod=(ep===0&&!V)?((D.UNIT_MOD[e.volk]||{})[rolle]||{}):{};
+  let str=(mod.str||R0.str)*(M.str||1);
+  str=Math.round(str*EP_STR(ue,rolle)*10)/10;
+  if(tier)str=Math.round(str*1.2*10)/10;
+  const q=str/(R0.str*D.EPOCH_STR[ue]),sq=Math.sqrt(q);
+  const G=ECHT_ROLLE[rolle],atkM=(1+RG.b)*(1+.08*wpn),defM=(1+RG.b)*(1+.08*arm),spd=B.spd||1;
+  // Figurenpaket (Fernkämpfer brauchen ein Paket mit Wurf-Clips)
+  let pak=P.paket,genau=P.paketGenau!==false;
+  if(rolle==='missile'&&!FERN_PAKET[pak]){pak='A1_veles';genau=false;}
+  const PK=ECHT_PAKET[pak]||{schild:.4};
+  let fern=null;
+  if(rolle==='missile'){
+    const W=ECHT_FERN[FERN_PAKET[pak]];
+    fern=Object.assign({},W,{reich:W.reich*(B.range||1),schaden:W.schaden*(B.ratk||1),vorrat:Math.max(1,Math.round(W.vorrat*(B.ammo||1)))});
+  }
+  // Kappen (30.10.): einzelne Kampagnen-Boni kumulieren sonst zu Ausreißern (Pikenphalanx Abwehr 18,2, Soldurii Moral 98)
+  const kap=(v,g)=>Math.min(v,g*1.6);
+  const werte={atk:kap(G.atk*sq*(B.atk||1)*atkM,G.atk),def:kap(G.def*sq*(B.def||1)*defM,G.def),mor:Math.min(90,G.mor+2*(B.mor||0)+RG.m),hp:G.hp,
+    walk:G.walk*spd,run:G.run*spd,ans:G.ans*(B.chg||1),pike:B.pike||0,skirm:B.skirm?1:(rolle==='missile'?1:0),
+    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sym:fern?(fern.typ==='stein'?'schleuder':'wurfspeer'):G.sym,fern,pakId:pak};
+  const f=[];
+  if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':'Wurfspeere: kurze Reichweite');
+  if(B.skirm)f.push('Plänkeln: weicht dem Nahkampf aus');else if(rolle==='missile')f.push('Plänkeln (Fernkämpfer weichen aus)');
+  if(B.pike)f.push('Pike: Abwehr ×1,5 gegen Ansturm von vorn');
+  if(werte.ans>=1.6)f.push('Wuchtiger Ansturm');
+  if(spd>1.05)f.push('Schnell');else if(spd<.95)f.push('Langsam');
+  const mann=e.mann!=null?e.mann|0:Math.round(R0.men*(M.men||1));
+  const bild=P.sheet>=0?{typ:'sheet',sheet:P.sheet}:{typ:'ui',key:'u_e'+ue+'_'+rolle};
+  return{id:pid,name:P.n+(tier?' (Veteranen)':''),rolle,epoche:ep,ausruestungEpoche:ue,kit:P.kit,paket:pak,paketGenau:genau,
+    figuren:Math.max(4,Math.min(60,Math.round(mann/3))),mann,bild,str,q,werte,faehigkeiten:f,beschreibung:V?V.d:'',
+    waffen:wpn,ruestung:arm,tier,rang:rk,rangName:RG.n,sondereinheit:!!V};
+}
+function EP_STR(ue,rolle){return KAMP.EPOCH_STR[ue]*(rolle==='missile'?KAMP.FERN_EPOCHE[ue]:1);}
+
+/* ---- Gefechte (Vorlagen): jede Einheit ist eine Kampagnen-Einheit; Seite 0 = Spieler, Seite 1 = Gegner; x/z = Platz in Metern ---- */
+const GEFECHTE=[
+  {id:'karthago',n:'Rom gegen Karthago',seiten:['Rom','Karthago'],text:'Gedrillte Legionäre gegen Libyer, Iberer und keltische Söldner.',
+   einheiten:[
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60,tier:1,rang:2},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-30,z:-60,waffen:1,ruestung:2},
+    {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
+    {s:1,volk:'karthago',kultur:'keltisch',rolle:'sword',epoche:0,x:48,z:60},
+    {s:1,volk:'karthago',kultur:'punisch',rolle:'spear',variante:'libyer',epoche:0,x:24,z:60},
+    {s:1,volk:'karthago',kultur:'iberisch',rolle:'sword',variante:'scutar',epoche:0,x:0,z:60},
+    {s:1,volk:'karthago',kultur:'punisch',rolle:'spear',variante:'libyer',epoche:0,x:-24,z:60},
+    {s:1,volk:'karthago',kultur:'keltisch',rolle:'sword',epoche:0,x:-48,z:60},
+    {s:1,volk:'karthago',kultur:'iberisch',rolle:'missile',variante:'balear',epoche:0,x:-8,z:40},
+  ]},
+  {id:'makedonien',n:'Rom gegen Makedonien',seiten:['Rom','Makedonien'],text:'Die Legion gegen Pikenphalanx und Hopliten; Fernkämpfer mit vorläufigen Figuren.',
+   einheiten:[
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60,waffen:1,ruestung:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:-30,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'spear',variante:'phalanx',epoche:0,x:36,z:60},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'spear',variante:'phalanx',epoche:0,x:12,z:60},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'spear',variante:'hoplit',epoche:0,x:-12,z:60},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'spear',epoche:0,x:-36,z:60},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'sword',epoche:0,x:-60,z:60},
+    {s:1,volk:'makedonien',kultur:'griechisch',rolle:'missile',epoche:0,x:0,z:40},
+  ]},
+  {id:'kelten',n:'Rom gegen Kelten',seiten:['Rom','Kelten'],text:'Wilder Ansturm gegen die Schildwand: Langschwertkrieger, Soldurii, Galater.',
+   einheiten:[
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-30,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'sword',variante:'langschw',epoche:0,x:48,z:60},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'sword',variante:'langschw',epoche:0,x:24,z:60},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'sword',variante:'soldurii',epoche:0,x:0,z:60},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'sword',variante:'galater',epoche:0,x:-24,z:60},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'spear',epoche:0,x:-48,z:60},
+    {s:1,volk:'arverner',kultur:'keltisch',rolle:'missile',epoche:0,x:-8,z:40},
+  ]},
 ];
-const KIT_VEL=4,KIT_BAL=5;
-const ROSTER=[   // fest für den Test: Rom (Spieler) 0–3, Karthago 4–9; Fernkämpfer stehen vor der Linie
-  {side:0,kit:0,name:'Hastati I',x:30,z:-60},{side:0,kit:0,name:'Hastati II',x:0,z:-60},{side:0,kit:0,name:'Hastati III',x:-30,z:-60},
-  {side:0,kit:4,name:'Velites',x:0,z:-38},
-  {side:1,kit:3,name:'Keltische Krieger I',x:48,z:60},{side:1,kit:1,name:'Libysche Speerträger I',x:24,z:60},
-  {side:1,kit:2,name:'Iberische Scutarii',x:0,z:60},{side:1,kit:1,name:'Libysche Speerträger II',x:-24,z:60},
-  {side:1,kit:3,name:'Keltische Krieger II',x:-48,z:60},
-  {side:1,kit:5,name:'Balearische Schleuderer',x:-8,z:40},
-];
-const SEITE=['Rom','Karthago'];
-const PRO=40,BREIT=10,TIEF=4,ABST=1.2;     // Figuren je Einheit, Formation 10 × 4, Abstand 1,2 m
-const NU=ROSTER.length,N=NU*PRO;
+let GEFECHT=GEFECHTE[0],ROSTER=[],SEITE=['Rom','Karthago'];
+function gefechtAufloesen(g){   // Beschreibungen -> Einheiten mit Echtzeitwerten; gleiche Namen bekommen römische Ziffern
+  const zaehl={},anz={},R=[];
+  for(const d of g.einheiten){const r=schlachtEinheit(d);r.werte.bild=r.bild;r.s=d.s;r.x=d.x;r.z=d.z;R.push(r);const k=d.s+r.name;anz[k]=(anz[k]||0)+1;}
+  const ZIF=['','I','II','III','IV','V','VI'];
+  for(const r of R){const k=r.s+r.name;zaehl[k]=(zaehl[k]||0)+1;r.anzeige=anz[k]>1?r.name+' '+ZIF[zaehl[k]]:r.name;}
+  return R;
+}
+const PRO=60,BREIT=10,ABST=1.2;            // höchstens 60 Figuren je Einheit (Platz-Raster 10 breit), Abstand 1,2 m
+const MAXU=12;                              // höchstens 12 Einheiten im Gefecht
+let NU=0,NA=0;                              // NU Einheiten, NA = NU × PRO belegte Soldaten-Plätze
+const N=MAXU*PRO;
+;
 const FELD_X=200,FELD_Z=150;               // Feld 400 × 300 m
 const NAH=60;                              // Meter: nähere Figuren in voller Stufe
 const FLIEH_MORAL=25;
-/* Fernkampf (alle Werte hier; Waffenwerte stehen in KITS[].fern) */
+/* Fernkampf (Waffenarten: ECHT_FERN) */
 const GN=300;               // Ringpuffer je Geschossart (Speere / Steine)
 const GRAV=9.8;             // m/s²
 const TREFF_R=.6;           // Geschoss trifft eine Figur, die beim Aufprall näher als 0,6 m steht
@@ -368,8 +505,8 @@ function material(pk){
   m.userData.depth=d;
   return m;
 }
-const KIT=[];   // je Kit: {pk, mat, im:[nah,mittel], clip:{name:{row,len,loop}}, n:[0,0]}
-function kitBauen(i,pk){
+const KIT=[],KITIX={};   // KITIX: Paket-Id -> Index in KIT   // je Kit: {pk, mat, im:[nah,mittel], clip:{name:{row,len,loop}}, n:[0,0]}
+function kitBauen(i,pk,id){
   const mat=material(pk),im=[];
   for(const stufe of ['nah','mittel']){
     const g=geometrie(pk,stufe);
@@ -380,6 +517,7 @@ function kitBauen(i,pk){
   }
   const clip={};pk.clips.forEach((c,k)=>{c.k=k;clip[c.n]=c;});
   GMATS.push(mat,mat.userData.depth);
+  KITIX[id]=i;
   KIT[i]={pk,mat,im,clip,cl:CN.map(n=>clip[n]||clip[CN_ERSATZ[n]]||clip.stehen||pk.clips[0]),tris:im[0].geometry.userData.tris};
 }
 
@@ -875,28 +1013,30 @@ const TON_ANTEIL={tod:.25,treffer:.3};   // 30.10. Moritz: viel zu viele Schreie
 function ereignis(typ,x,z){evZ[typ]=(evZ[typ]||0)+1;if(tonAn&&!(TON_ANTEIL[typ]&&Math.random()>TON_ANTEIL[typ]))TON.ereignis(typ,x,z);}
 
 function einheitenAnlegen(){
-  U.length=0;cHead.fill(-1);sCell.fill(-1);
+  U.length=0;cHead.fill(-1);sCell.fill(-1);sSt.fill(S_WEG);
   for(const k in zaehler)zaehler[k]=0;for(const k in G)G[k]=0;for(const k in evZ)evZ[k]=0;gA.fill(0);sAmmo.fill(0);
+  NU=ROSTER.length;NA=NU*PRO;
   ROSTER.forEach((r,i)=>{
-    const K=KITS[r.kit];
-    const u={i,side:r.side,kit:K.key,k:r.kit,name:r.name,def:K,
-      strength:PRO,morale:K.mor,state:'steht',
-      cx:r.x,cz:r.z,f:r.side===0?0:PI,destX:0,destZ:0,hasDest:false,run:false,atkT:-1,stance:r.side===0?'halten':'angreifen',
-      occ:new Int16Array(PRO),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
-      fx:0,fz:(r.side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
-      mx:r.x,mz:r.z,sn:PRO,ax:0,az:0,an:0,nF:0,fatS:0,nL:PRO,cnt:new Int16Array(NU),
-      lebend:PRO,kaempfend:0,muede:0,hoehe:0,dAcc:0,
-      fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*PRO:0,munS:0,eng:true,fk:1,gef:0,weichT:0};
+    const K=r.werte,np=r.figuren,side=r.s;
+    const u={i,side,name:r.anzeige,def:K,ein:r,np,tief:Math.ceil(np/BREIT),ai:K.ans>=1.6?'sturm':K.speer?'linie':r.rolle==='sword'?'spaet':'linie',
+      strength:np,morale:K.mor,state:'steht',
+      cx:r.x,cz:r.z,f:side===0?0:PI,destX:0,destZ:0,hasDest:false,run:false,atkT:-1,stance:side===0?'halten':'angreifen',
+      occ:new Int16Array(PRO).fill(-1),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
+      fx:0,fz:(side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
+      mx:r.x,mz:r.z,sn:np,ax:0,az:0,an:0,nF:0,fatS:0,nL:np,cnt:new Int16Array(NU),
+      lebend:np,kaempfend:0,muede:0,hoehe:0,dAcc:0,
+      fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*np:0,munS:0,eng:true,fk:1,gef:0,weichT:0};
     U.push(u);
-    for(let s=0;s<PRO;s++){
+    for(let s=0;s<np;s++){
       const id=i*PRO+s;
-      sKit[id]=r.kit;sUnit[id]=i;sSide[id]=r.side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
+      sKit[id]=KITIX[r.paket];sUnit[id]=i;sSide[id]=side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
       sJit[id]=.88+Math.random()*.24;sJX[id]=(Math.random()-.5)*.5;sJZ[id]=(Math.random()-.5)*.5;sJR[id]=(Math.random()-.5)*.14;
       sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=K.fern?Math.random()*K.fern.nachl[1]:Math.random()*.8;sAmmo[id]=K.fern?K.fern.vorrat:0;sVar[id]=Math.random()<.5?1:0;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
       sPX[id]=NOGOAL;sPZ[id]=0;sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sJub[id]=0;sNAtt[id]=0;sFOff[id]=0;sFA[id]=0;sFSp[id]=1;
       slotPos(u,s,id);sX[id]=_tx;sZ[id]=_tz;sR[id]=u.f+sJR[id];sCur[id]=-1;
       initClip(id,C.stehen_bereit);
     }
+    for(let s=np;s<PRO;s++){const id=i*PRO+s;sUnit[id]=i;sSt[id]=S_WEG;sHP[id]=0;}   // freie Plätze
   });
 }
 let _tx=0,_tz=0;
@@ -904,7 +1044,7 @@ function slotPos(u,s,id){   // Weltposition des Platzes s -> _tx,_tz ; lockert s
   const col=s%BREIT,row=(s/BREIT)|0,L=u.loose;
   const fk=u.fk;
   const lx=(col-(BREIT-1)/2)*ABST*fk*(1+.10*L)+((row&1)?.3:-.3)+sJX[id];
-  const lz=((TIEF-1)/2-row)*ABST*fk*(1+.35*L)-row*.25*L+sJZ[id];
+  const lz=((u.tief-1)/2-row)*ABST*fk*(1+.35*L)-row*.25*L+sJZ[id];
   const c=Math.cos(u.f),sn=Math.sin(u.f);
   _tx=u.cx+lx*c+lz*sn;_tz=u.cz-lx*sn+lz*c;
 }
@@ -931,8 +1071,8 @@ const aktiv=u=>!gone(u)&&u.state!=='flieht';
 function slotFrei(u,id){   // Hintermann der Spalte rückt nach
   const slot=sSlot[id];if(u.occ[slot]!==id)return;
   const c=slot%BREIT;
-  for(let r=(slot/BREIT)|0;r<TIEF-1;r++){const s1=r*BREIT+c,s2=(r+1)*BREIT+c;u.occ[s1]=u.occ[s2];if(u.occ[s1]>=0)sSlot[u.occ[s1]]=s1;u.occ[s2]=-1;}
-  u.occ[(TIEF-1)*BREIT+c]=-1;
+  for(let r=(slot/BREIT)|0;r<u.tief-1;r++){const s1=r*BREIT+c,s2=(r+1)*BREIT+c;u.occ[s1]=u.occ[s2];if(u.occ[s1]>=0)sSlot[u.occ[s1]]=s1;u.occ[s2]=-1;}
+  u.occ[(u.tief-1)*BREIT+c]=-1;
 }
 
 /* ====================================================================================================
@@ -943,8 +1083,8 @@ function flankF(b,a){   // Angriff von Einheit a auf b: Front 1, Seite 1,5, Rüc
   return d<1.05?1:d<2.35?1.5:2;
 }
 function hashBauen(){
-  for(let i=0;i<N;i++){const c=sCell[i];if(c>=0){cHead[c]=-1;sCell[i]=-1;}}
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){const c=sCell[i];if(c>=0){cHead[c]=-1;sCell[i]=-1;}}
+  for(let i=0;i<NA;i++){
     if(sSt[i]===S_WEG)continue;
     let ix=((sX[i]-GX0)/ZELLE)|0,iz=((sZ[i]-GZ0)/ZELLE)|0;
     ix=ix<0?0:ix>=GW?GW-1:ix;iz=iz<0?0:iz>=GH?GH-1:iz;
@@ -961,7 +1101,7 @@ function floh(u){
     sSt[id]=S_FLIEH;sFoe[id]=-1;sAct[id]=0;sKX[id]=sKZ[id]=0;sDelay[id]=Math.random()*.7;
     sFOff[id]=(Math.random()-.5)*.87;sFSp[id]=.9+Math.random()*.25;sFA[id]=u.fAng+sFOff[id];zaehler.fliehende++;}
   // Nachbarflucht nur, wenn die Nachbareinheit selbst schon Verluste hat oder bedrängt ist
-  for(const v of U)if(v.side===u.side&&v!==u&&!gone(v)&&v.state!=='flieht'&&(v.strength<PRO||v.engaged)&&Math.hypot(v.cx-u.cx,v.cz-u.cz)<70)v.morale-=4;
+  for(const v of U)if(v.side===u.side&&v!==u&&!gone(v)&&v.state!=='flieht'&&(v.strength<v.np||v.engaged)&&Math.hypot(v.cx-u.cx,v.cz-u.cz)<70)v.morale-=4;
   if(sel===u.i)uiAuswahl();
 }
 function soldatWeg(i){   // Flüchtling verlässt das Feld
@@ -1003,7 +1143,7 @@ function suche(i){   // Gegner für Soldat i; setzt sFoe oder das Drängel-Ziel 
   else{const e=naechster(U[sUnit[i]],false)||naechster(U[sUnit[i]],true);if(e){sPX[i]=e.mx;sPZ[i]=e.mz;}else sPX[i]=NOGOAL;}
 }
 function startSwing(i,f){
-  const K=KITS[sKit[i]];let ci,dm=1;const r=Math.random();
+  const K=U[sUnit[i]].def;let ci,dm=1;const r=Math.random();
   if(K.speer){if(r<.9){ci=C.stoss_speer;dm=1.2;}else{ci=C.schild_stoss;dm=.5;}}
   else if(r<.35){ci=Math.random()<.4?C.schlag_a_b:C.schlag_a;dm=1;}else if(r<.6){ci=Math.random()<.4?C.schlag_b_b:C.schlag_b;dm=1.5;}else if(r<.85){ci=C.schlag_c;dm=1.1;}else{ci=C.schild_stoss;dm=.5;}
   const dur=setClip(i,ci,sJit[i]*(1-.15*sFat[i]),true);
@@ -1015,12 +1155,13 @@ function startSwing(i,f){
 function reaktion(i){
   const j=sTgt[i];
   if(j<0||sSt[j]>S_FLIEH){sOut[i]=0;return;}
-  const A=KITS[sKit[i]],D=KITS[sKit[j]],UA=U[sUnit[i]];
+  const UA=U[sUnit[i]],A=UA.def,D=U[sUnit[j]].def;
   const dh=H(sX[i],sZ[i])-H(sX[j],sZ[j]);                       // Höhenunterschied Angreifer − Verteidiger
   const hang=Math.max(-.12,Math.min(.15,dh*.03));                // bergab +, bergauf −  (höchstens +15 % / −12 %)
   const ansF=UA.charge>0?1+(A.ans-1)*.7*(1+(dh>0?Math.min(.35,dh*.06):0)):1;   // Ansturm bergab wuchtiger
-  const atkE=A.atk*(1-.4*sFat[i])*ansF*(1+hang),defE=D.def*(1-.4*sFat[j]),ratio=atkE/defE;
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
+  const pikeF=(D.pike&&UA.charge>0&&ang<1.15)?1.5:1;      // Pike: Abwehr gegen Ansturm von vorn ×1,5
+  const atkE=A.atk*(1-.4*sFat[i])*ansF*(1+hang),defE=D.def*pikeF*(1-.4*sFat[j]),ratio=atkE/defE;
   const fliehend=sSt[j]===S_FLIEH,steif=sAct[j]===A_TREFFER,busy=sAct[j]===A_SCHLAG;
   const pP=(ang<1.15&&!fliehend&&!steif)?Math.max(.08,Math.min(.65,.42/ratio))*(busy?.5:1):0;     // Parade nur von vorn
   const pD=(ang<2.4&&!fliehend&&!steif)?Math.max(.02,Math.min(.3,.16/ratio*(1-sFat[j])))*(busy?.6:1):0;   // Ausweichen nicht von hinten
@@ -1036,11 +1177,11 @@ function reaktion(i){
 }
 function wirkung(i){
   const j=sTgt[i];if(j<0||sSt[j]>S_FLIEH)return;
-  const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],r=(KITS[sKit[i]].speer?2.0:1.6)+.8;
+  const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],r=(U[sUnit[i]].def.speer?2.0:1.6)+.8;
   if(dx*dx+dz*dz>r*r)return;   // Ziel weggetreten: Fehlschlag
   let out=sOut[i];
   if(out!==3&&sAct[j]===A_TREFFER)out=3;   // inzwischen von anderem getroffen: keine Abwehr mehr
-  if(out===1){zaehler.parade++;sCool[i]+=.12;ereignis(KITS[sKit[j]].speer||sKit[j]===0?'schild':'klirren',sX[j],sZ[j]);return;}
+  if(out===1){zaehler.parade++;sCool[i]+=.12;{const dd=U[sUnit[j]].def;ereignis(dd.speer||dd.pakId==='A1_hastatus'?'schild':'klirren',sX[j],sZ[j]);}return;}
   if(out===2){zaehler.ausweich++;return;}
   if(out===0)return;
   trefferWirkung(i,j);
@@ -1051,7 +1192,7 @@ function trefferWirkung(i,j){
   const fm=ang<1.15?1:ang<2.4?1.5:2;
   const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1);
   sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01);
-  if(sHP[j]>0)ereignis(sDmg[i]<.9?'schildstoss':KITS[sKit[i]].speer?'speer':'treffer',sX[j],sZ[j]);
+  if(sHP[j]>0)ereignis(sDmg[i]<.9?'schildstoss':U[sUnit[i]].def.speer?'speer':'treffer',sX[j],sZ[j]);
   if(Math.random()<.18)staub(sX[j],sZ[j],1,.9,.3);
   {const ex=sX[j]-sX[i],ez=sZ[j]-sZ[i],el=Math.hypot(ex,ez)+1e-6;spritzer(sX[j],sZ[j],ex/el,ez/el,3+(Math.random()*4|0));if(Math.random()<.55)blutFleck(sX[j]+ex/el*.4,sZ[j]+ez/el*.4,.55);}
   if(fm>1)UD.morale-=.4*(fm-1);
@@ -1102,7 +1243,7 @@ function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reic
 function wurfStart(i,u){
   const F=u.def.fern,T=U[u.fZ];
   if(sVX[i]*sVX[i]+sVZ[i]*sVZ[i]>.25){sCool[i]=.3;return;}   // nur im Stehen
-  let j=-1;for(let k=0;k<6;k++){const id=T.occ[(Math.random()*PRO)|0];if(id>=0&&sSt[id]<=S_FLIEH){j=id;break;}}   // Zielpunkt: eine zufällige Figur der Zieleinheit
+  let j=-1;for(let k=0;k<6;k++){const id=T.occ[(Math.random()*T.np)|0];if(id>=0&&sSt[id]<=S_FLIEH){j=id;break;}}   // Zielpunkt: eine zufällige Figur der Zieleinheit
   let tx,tz;if(j>=0){tx=sX[j];tz=sZ[j];}else{tx=T.mx;tz=T.mz;}
   const dx=tx-sX[i],dz=tz-sZ[i],d=Math.hypot(dx,dz);
   if(d>F.reich||d<3){sCool[i]=.4+Math.random()*.4;return;}
@@ -1145,7 +1286,7 @@ function geschossAufprall(q){
     }else staub(tx,tz,1,.6,.22);
     return;
   }
-  const j=best,Kd=KITS[sKit[j]],Ud=U[sUnit[j]];
+  const j=best,Ud=U[sUnit[j]],Kd=Ud.def;
   const von=Math.abs(wrap(Math.atan2(gSX[q]-sX[j],gSZ[q]-sZ[j])-sR[j]));
   if(Kd.schild>0&&von<SCHILD_WINKEL&&sSt[j]!==S_FLIEH&&sAct[j]!==A_TREFFER&&Math.random()<Kd.schild){   // Schild fängt es ab
     G.abgewehrt++;ereignis('abgewehrt',sX[j],sZ[j]);
@@ -1178,7 +1319,7 @@ function kampfTick(dt){
   for(const u of U){if(gone(u)||u.state==='flieht')continue;
     for(const v of U){if(v.side===u.side||gone(v))continue;if(Math.hypot(u.mx-v.mx,u.mz-v.mz)<55){u.nahF=true;break;}}}
   // --- Kontakt (Raster) : Feind näher als 6 m
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     if(sSt[i]>S_KAMPF)continue;
     const u=U[sUnit[i]];if(u.kontakt||!u.nahF||u.state==='flieht'||u.sperre>0)continue;
     const side=sSide[i],cx=((sX[i]-GX0)/ZELLE)|0,cz=((sZ[i]-GZ0)/ZELLE)|0;
@@ -1203,7 +1344,7 @@ function kampfTick(dt){
   }
   // --- Ziele prüfen, Angreifer zählen
   sNAtt.fill(0);
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     const j=sFoe[i];if(j<0)continue;
     if(sSt[i]!==S_KAMPF||sSt[j]>S_FLIEH){sFoe[i]=-1;continue;}
     const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i];
@@ -1211,7 +1352,7 @@ function kampfTick(dt){
     sNAtt[j]++;sAtt[j]=i;
   }
   // --- Soldaten
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     const st=sSt[i];if(st>S_FLIEH)continue;
     const u=U[sUnit[i]];
     u.nL++;u.fatS+=sFat[i];
@@ -1241,7 +1382,7 @@ function kampfTick(dt){
     if(f>=0&&sRet[i]<=0){const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i];if(dx*dx+dz*dz>12.25){sNAtt[f]--;sFoe[i]=-1;f=-1;}}
     if(f<0&&sRet[i]<=0){suche(i);f=sFoe[i];sRet[i]=.2+Math.random()*.2;}
     if(f<0)continue;
-    const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i],d2=dx*dx+dz*dz,K=KITS[sKit[i]],rg=K.speer?2.0:1.6;
+    const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i],d2=dx*dx+dz*dz,K=u.def,rg=K.speer?2.0:1.6;
     if(sCool[i]<=0&&d2<rg*rg){startSwing(i,f);continue;}
     if(u.pr>.12&&sBackT[i]<=0&&d2<4){   // unterlegene Seite weicht Schritt für Schritt zurück
       sBackT[i]=(1.6+Math.random()*2.4)/(.6+u.pr*1.5);rueckweichen(i,f);
@@ -1252,7 +1393,7 @@ function kampfTick(dt){
     if(gone(u))continue;
     u.lebend=u.strength;u.muede=u.nL?u.fatS/u.nL:0;if(u.fern)u.mun=u.munS;
   }
-  for(let i=0;i<N;i++){const j=sFoe[i];if(j>=0&&sSt[i]===S_KAMPF)U[sUnit[i]].cnt[sUnit[j]]++;}
+  for(let i=0;i<NA;i++){const j=sFoe[i];if(j>=0&&sSt[i]===S_KAMPF)U[sUnit[i]].cnt[sUnit[j]]++;}
   for(const u of U){
     if(gone(u))continue;
     let best=0;u.foeU=-1;for(let k=0;k<NU;k++)if(u.cnt[k]>best){best=u.cnt[k];u.foeU=k;}
@@ -1277,7 +1418,7 @@ function kampfTick(dt){
     const e=naechster(u,true);let dx=u.fx,dz=u.fz;
     if(e){dx=u.cx-e.cx;dz=u.cz-e.cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;}
     u.fx=dx;u.fz=dz;u.fAng=Math.atan2(dx,dz);}
-  for(let i=0;i<N;i++)if(sSt[i]===S_FLIEH)sFA[i]=U[sUnit[i]].fAng+sFOff[i];
+  for(let i=0;i<NA;i++)if(sSt[i]===S_FLIEH)sFA[i]=U[sUnit[i]].fAng+sFOff[i];
   // --- Ende?
   if(phase==='schlacht'){
     const r=U.some(u=>u.side===0&&aktiv(u)),k=U.some(u=>u.side===1&&aktiv(u));
@@ -1287,7 +1428,7 @@ function kampfTick(dt){
 function ende(was){
   phase='ende';ergebnis=was;gA.fill(0);G.fliegend=0;if(was==='sieg')ereignis('sieg_jubel',ziel.x,ziel.z);
   const gew=was==='sieg'?0:1;
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     const st=sSt[i];if(st!==S_FORM&&st!==S_KAMPF)continue;
     sSt[i]=S_FORM;sFoe[i]=-1;sAct[i]=A_NIX;sKX[i]=sKZ[i]=0;sVX[i]=sVZ[i]=0;
     if(sSide[i]===gew){sJub[i]=1;setClip(i,C.jubeln,sJit[i],true);}
@@ -1353,12 +1494,12 @@ function ki(u){
   if(u.engaged)return;
   const T=naechster(u,false)||naechster(u,true);if(!T)return;
   const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
-  if(u.k===3){auftrag(u,T.i,true);return;}                // Kelten stürmen zuerst
+  if(u.ai==='sturm'){auftrag(u,T.i,true);return;}                // Kelten stürmen zuerst
   // geschlossene Linie: nicht weit vor den anderen
-  let dm=1e9;for(const v of U){if(v.side!==1||v===u||v.k===3||v.fern||gone(v)||v.state==='flieht')continue;
+  let dm=1e9;for(const v of U){if(v.side!==1||v===u||v.ai==='sturm'||v.fern||gone(v)||v.state==='flieht')continue;
     const e=naechster(v,false);if(e)dm=Math.min(dm,Math.hypot(e.cx-v.cx,e.cz-v.cz));}
   if(d>40&&d<dm-8){halt(u);return;}
-  auftrag(u,T.i,d<35&&u.k===2);                           // Iberer laufen zuletzt, Libyer marschieren
+  auftrag(u,T.i,d<35&&u.ai==='spaet');                           // Iberer laufen zuletzt, Libyer marschieren
 }
 
 /* ====================================================================================================
@@ -1406,7 +1547,7 @@ function bewegen(dt){
 function figuren(dt){
   hashBauen();
   for(let k=0;k<NU;k++){const u=U[k];u.ax=0;u.az=0;u.an=0;}
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     const st=sSt[i];
     if(st>=S_STIRBT){if(st===S_STIRBT){sActT[i]-=dt;if(sActT[i]<=0)sSt[i]=S_TOT;}continue;}
     const u=U[sUnit[i]],K=u.def,act=sAct[i];
@@ -1536,7 +1677,7 @@ function baueInstanzen(){
   const cx=camera.position.x,cz=camera.position.z,cy=camera.position.y;
   for(const k of KIT){k.n=[0,0];}
   let nb=0;const BM=blobMesh.instanceMatrix.array,bm=STUFE.blob;
-  for(let i=0;i<N;i++){
+  for(let i=0;i<NA;i++){
     if(sSt[i]===S_WEG)continue;
     const K=KIT[sKit[i]];
     const dx=sX[i]-cx,dz=sZ[i]-cz,l=(dx*dx+dz*dz+cy*cy)<NAH*NAH?0:1;
@@ -1792,10 +1933,22 @@ const txt=(e,v)=>{if(e._v!==v){e._v=v;e.textContent=v;}};          // DOM nur sc
 const wid=(e,v)=>{v=Math.round(v);if(e._w!==v){e._w=v;e.style.width=v+'%';}};
 const hrefSet=(e,v)=>{if(e._h!==v){e._h=v;e.setAttribute('href','#'+v);}};
 const klasse=(e,c,an)=>{if(e['_c'+c]!==an){e['_c'+c]=an;e.classList.toggle(c,an);}};
-/* Einheitenbild: karten/<card>.jpg über gemaltem Platzhalter (Wappenfarbe + Einheitenzeichen); fehlt die Datei, bleibt der Platzhalter */
-function bildHTML(K,side){
-  return '<div class="bild s'+side+'"><div class="ph"><svg class="sy"><use href="#sy-'+K.sym+'"/></svg></div>'
-    +'<img alt="" src="karten/'+K.card+'.jpg" onload="this.classList.add(\'ok\')" onerror="this.remove()"></div>';
+/* Einheitenbild wie in der Kampagne: Sondereinheit aus dem Bogen img/u_sheet.webp (8 Spalten × 192 px), Grundeinheit u_e<Epoche>_<Rolle> aus img/pb_ui.json (Daten-URLs, einmal bei Bedarf geladen);
+   darunter ein gemalter Platzhalter (Wappenfarbe + Einheitenzeichen) */
+let PBUI=null,PBUI_L=false;
+function pbLaden(){
+  if(PBUI_L)return;PBUI_L=true;
+  fetch('../../img/pb_ui.json').then(r=>r.json()).then(j=>{PBUI=j;pbAnwenden();}).catch(()=>{PBUI={};pbAnwenden();});
+}
+function pbAnwenden(){
+  if(!PBUI)return;
+  document.querySelectorAll('img.pb[data-pb]').forEach(im=>{const d=PBUI[im.dataset.pb];if(d){im.src=d;im.removeAttribute('data-pb');}else{im.parentNode.classList.add('leer');im.removeAttribute('data-pb');}});
+}
+function bildHTML(K,side,B){
+  B=B||K.bild;let in_='';
+  if(B&&B.typ==='sheet')in_='<div class="sh" style="background-position:'+((B.sheet%8)/7*100)+'% '+(Math.floor(B.sheet/8)/13*100)+'%"></div>';
+  else if(B&&B.typ==='ui'){in_='<img class="pb" alt="" data-pb="'+B.key+'">';pbLaden();setTimeout(pbAnwenden,0);}
+  return '<div class="bild s'+side+'"><div class="ph"><svg class="sy"><use href="#sy-'+K.sym+'"/></svg></div>'+in_+'</div>';
 }
 function selListe(){   // gewählte, einsatzfähige Einheiten (die Hauptauswahl zuerst)
   const L=[];if(sel>=0&&selM.has(sel)&&!gone(U[sel]))L.push(U[sel]);
@@ -1850,12 +2003,19 @@ function zustand(u){   // -> [Zeichen, Text]
 }
 function moralFarbe(m){return m>55?'#7bbf5a':m>35?'#d9a63a':'#c4503f';}
 function fensterBauen(u){
-  const K=u.def,e=$('fenster');
-  e.innerHTML='<button class="x" aria-label="Schließen">×</button>'+bildHTML(K,u.side)+'<div class="w"><h3></h3>'
+  const K=u.def,E=u.ein,e=$('fenster');
+  const gear=(E.waffen||E.ruestung||E.tier||E.rang)?'Waffen: '+STUFE_NAME[E.waffen]+' · Rüstung: '+STUFE_NAME[E.ruestung]+(E.rang?' · Rang: '+E.rangName:'')+(E.tier?' · aufgewertet (Stärke ×1,2)':''):'Waffen und Rüstung: einfach';
+  e.innerHTML='<button class="x" aria-label="Schließen">×</button>'+bildHTML(K,u.side)+'<div class="w"><h3></h3><div class="sub"></div>'
     +'<div class="zl"><span>Mannschaft</span><b data-k="m"></b></div><div class="zl"><span>Angriff</span><b data-k="a"></b></div>'
     +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div>'
-    +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div><p></p>';
-  e.querySelector('h3').textContent=u.name;e.querySelector('p').textContent=K.info;
+    +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div>'
+    +'<p class="fa"></p><p class="sub" style="flex-basis:100%;margin:0"></p><p class="bs"></p><p class="vl"></p>';
+  e.querySelector('h3').textContent=u.name;
+  e.querySelector('.w .sub').textContent='Kampagnenstärke '+fmt(E.str)+' · '+E.mann+' Mann';
+  e.querySelector('.fa').textContent=(E.faehigkeiten.length?E.faehigkeiten.join(' · ')+'. ':'')+gear;
+  e.querySelector('p.sub').textContent=E.paketGenau?'Figuren: eigenes Paket ('+E.paket+')':'Figuren vorläufig ('+E.paket+' als Ersatz)';
+  e.querySelector('p.bs').textContent=E.beschreibung||'';
+  e.querySelector('.vl').textContent=E.paketGenau?'':'Für diese Einheit gibt es noch keine eigenen Figuren.';
   fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
   e.querySelector('.x').onclick=()=>select(-1);
   e.querySelector('.x').addEventListener('pointerdown',ev=>ev.stopPropagation());
@@ -1870,7 +2030,7 @@ function uiAktualisieren(){
   for(const k of karten){
     const u=U[k.i],g=gone(u),zs=zustand(u),m=Math.max(0,Math.min(100,u.morale));
     klasse(k.d,'sel',selM.has(u.i));klasse(k.d,'multi',selM.size>1&&selM.has(u.i));klasse(k.d,'weg',g);
-    wid(k.bar,u.strength/PRO*100);txt(k.sn,String(u.strength));
+    wid(k.bar,u.strength/u.np*100);txt(k.sn,String(u.strength));
     hrefSet(k.zi,zs[0]);txt(k.zt,zs[1]);
     wid(k.mu,Math.min(1,u.muede*1.6)*100);
     if(k.m!==Math.round(m)){k.m=Math.round(m);k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));k.num.textContent=k.m;}
@@ -1879,11 +2039,11 @@ function uiAktualisieren(){
   for(const f of feinde){
     const u=U[f.i],g=gone(u);
     klasse(f.d,'weg',g);klasse(f.d,'fl',u.state==='flieht');klasse(f.d,'kampf',u.engaged&&!g);
-    wid(f.bar,u.strength/PRO*100);txt(f.sn,g?'–':String(u.strength));
+    wid(f.bar,u.strength/u.np*100);txt(f.sn,g?'–':String(u.strength));
     txt(f.zt,u.state==='flieht'?'flieht':g?(u.state==='geflohen'?'geflohen':'gefallen'):u.engaged?'kämpft':u.fern&&u.schiessT>0?'schießt':'');
   }
   // Banner: Stärke, Wahl
-  for(let i=0;i<NU;i++){const u=U[i],b=BN[i];if(!b)continue;wid(b.bar,u.strength/PRO*100);klasse(b.el,'sel',selM.has(i));klasse(b.el,'fl',u.state==='flieht');}
+  for(let i=0;i<NU;i++){const u=U[i],b=BN[i];if(!b)continue;wid(b.bar,u.strength/u.np*100);klasse(b.el,'sel',selM.has(i));klasse(b.el,'fl',u.state==='flieht');}
   // Kräftevergleich
   {let p0=0,p1=0,m0=0,m1=0;
    for(const u of U){if(gone(u))continue;const m=u.strength;if(u.side===0)m0+=m;else m1+=m;
@@ -1896,12 +2056,14 @@ function uiAktualisieren(){
     if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
     fe.classList.add('an');
     const K=h.def;
-    txt(fw.m,h.strength+' von '+PRO);txt(fw.a,fmt(K.atk));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
+    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
     txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
   }else{fe.classList.remove('an');fensterId=-2;}
   // Knöpfe
   const L=selListe(),hz=L.length?L[0]:null;
   $('bBegin').hidden=phase!=='aufstellung';
+  $('bGefecht').hidden=phase!=='aufstellung';btnText('bGefecht','Gefecht',GEFECHT.n.replace('Rom gegen ',''));
+  if(phase!=='aufstellung')gefechteZu();
   $('bPause').hidden=$('bTempo').hidden=phase!=='schlacht';
   $('bPlaenk').hidden=!(hz&&hz.fern);
   $('bHalt').style.opacity=$('bForm').style.opacity=hz?1:.55;
@@ -1918,7 +2080,7 @@ function uiAktualisieren(){
   // Hinweiszeile (blendet nach 6 s aus)
   let z;
   if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Beginnen.';
-  else if(phase==='ende')z=ergebnis==='sieg'?'Das Feld gehört Rom.':'Rom ist geschlagen.';
+  else if(phase==='ende')z=ergebnis==='sieg'?'Das Feld gehört '+SEITE[0]+'.':SEITE[0]+' ist geschlagen.';
   else if(pausiert)z='Pause';
   else z=hz?(hz.name+(selM.size>1?' und '+(selM.size-1)+' weitere':'')+' gewählt – '+(hz.fern?'Feind antippen: beschießen · Gelände: marschieren':'Gelände: marschieren, doppelt: laufen · Feind: angreifen')):'Wähle eine Einheit (Karte unten oder auf dem Feld).';
   if(z!==lastZ){lastZ=z;hinweis(z);}
@@ -1948,13 +2110,13 @@ function bannerSchritt(){
 function uiEnde(){
   const e=$('ende'),sieg=ergebnis==='sieg',fl=[0,0],rest=[0,0];
   for(const u of U){fl[u.side]+=u.fled||0;rest[u.side]+=u.strength;}
-  let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(sieg?'Karthago weicht. Rom behauptet das Feld.':'Deine Legion ist zerschlagen.')+'</p>';
+  let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(sieg?SEITE[1]+' weicht. '+SEITE[0]+' behauptet das Feld.':'Dein Heer ist zerschlagen.')+'</p>';
   for(const u of U){if(u.side!==0)continue;
-    h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+'</div><div class="v"><i style="width:'+(u.strength/PRO*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/PRO*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/PRO*100)+'%;background:#9c2a20"></i></div>'
+    h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+'</div><div class="v"><i style="width:'+(u.strength/u.np*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/u.np*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/u.np*100)+'%;background:#9c2a20"></i></div>'
       +'<small>Rest '+u.strength+' · geflohen '+u.fled+' · gefallen '+u.gef+'</small></div></div>';}
-  h+='<div class="zl" style="margin-top:6px"><span>Gefallene Rom / Karthago</span><b>'+gefallen[0]+' / '+gefallen[1]+'</b></div>'
-    +'<div class="zl"><span>Geflohen Rom / Karthago</span><b>'+fl[0]+' / '+fl[1]+'</b></div>'
-    +'<div class="zl"><span>Auf dem Feld Rom / Karthago</span><b>'+rest[0]+' / '+rest[1]+'</b></div>'
+  h+='<div class="zl" style="margin-top:6px"><span>Gefallene '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+gefallen[0]+' / '+gefallen[1]+'</b></div>'
+    +'<div class="zl"><span>Geflohen '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+fl[0]+' / '+fl[1]+'</b></div>'
+    +'<div class="zl"><span>Auf dem Feld '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+rest[0]+' / '+rest[1]+'</b></div>'
     +'<div class="zl"><span>Wurfgeschosse: Treffer / abgewehrt</span><b>'+G.treffer+' / '+G.abgewehrt+'</b></div>'
     +'<button class="plak gross" id="bNoch"><svg class="ic"><use href="#ic-speere"/></svg><span><b>Noch einmal</b><small>Neue Aufstellung</small></span></button>';
   e.className=sieg?'sieg':'nied';e.innerHTML=h;e.style.display='block';$('bNoch').onclick=neu;
@@ -1998,7 +2160,8 @@ const TON=(()=>{
   const LISTE=[];
   const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'],id,art:null,ok:false});
   LISTE.push(mItem('kampf_1'));
-  for(const a in SFX)for(let n=1;n<=SFX[a];n++)LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
+  const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
+  for(const a in SFX)for(let n=1;n<=SFX[a];n++)if(!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
   for(const id of ['ruhe_1','aufmarsch_rom','kampf_2','hoehepunkt_1','sieg_1','niederlage_1','kampf_3','hoehepunkt_2','sieg_2','kampf_rom','kampf_karthago'])LISTE.push(mItem(id));
   const MB={},SB={};          // geladene Puffer: Musik je Stück · Geräusche je Art (Liste)
   let ctx=null,master=null,busM=null,busS=null,aktiv=false,figFertig=false,laedt=false,nM=0,nS=0,gespielt=0,retryT=0,tT=0;
@@ -2082,7 +2245,7 @@ const TON=(()=>{
   function zaehlen(){
     nahK=fernK=marschK=sturmK=kampfGes=0;
     const zx=ziel.x,zz=ziel.z;
-    for(let i=0;i<N;i++){
+    for(let i=0;i<NA;i++){
       const st=sSt[i];if(st>S_FLIEH)continue;
       const dx=sX[i]-zx,dz=sZ[i]-zz,d2=dx*dx+dz*dz;
       if(st===S_KAMPF&&sFoe[i]>=0){kampfGes++;if(d2<2500)nahK++;else if(d2<25600)fernK++;}
@@ -2255,7 +2418,7 @@ function staubEmission(dt){
     u.dAcc+=rate*pf*dt;
     while(u.dAcc>=1){
       u.dAcc-=1;
-      for(let tr=0;tr<4;tr++){const id=u.i*PRO+((Math.random()*PRO)|0);if(sSt[id]<=S_FLIEH){staub(sX[id],sZ[id],1,u.kaempfend>0?1.2:1.5,.28);break;}}
+      for(let tr=0;tr<4;tr++){const id=u.i*PRO+((Math.random()*u.np)|0);if(sSt[id]<=S_FLIEH){staub(sX[id],sZ[id],1,u.kaempfend>0?1.2:1.5,.28);break;}}
     }
   }
 }
@@ -2286,23 +2449,68 @@ function schleife(t){
   if(t-ft>=2000){const f=fz*1000/(t-ft);$('fps').textContent=fmt(f)+' B/s';fpsLog.push(Math.round(f*10)/10);fz=0;ft=t;}
 }
 
+const GELADEN={};   // Paket-Id -> true (Figurenpakete werden nur für das gewählte Gefecht geladen)
+async function paketLaden(id,i,n,ladeBar){
+  $('ladez').textContent=id+' ('+(i+1)+'/'+n+')';
+  const r=await fetch('figuren/k_'+id+'.json');
+  if(!r.ok)throw new Error('Paket fehlt: k_'+id+'.json');
+  const tot=+r.headers.get('content-length')||0;let got=0;
+  const rd=r.body.getReader(),parts=[];
+  for(;;){const{done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;
+    ladeBar((i+(tot?Math.min(1,got/tot):.5)*.85)/n);}
+  const all=new Uint8Array(got);let o=0;for(const p of parts){all.set(p,o);o+=p.length;}
+  const pk=JSON.parse(new TextDecoder().decode(all));
+  $('ladez').textContent=id+' wird aufgestellt …';
+  await new Promise(r=>setTimeout(r,16));   // nicht auf Bilder warten: bei verdecktem Fenster bliebe das Laden sonst stehen
+  kitBauen(KIT.length,pk,id);GELADEN[id]=true;ladeBar((i+1)/n);
+}
+async function paketeFuer(R,ladeBar){
+  const need=[...new Set(R.map(r=>r.paket))].filter(id=>!GELADEN[id]);
+  for(let i=0;i<need.length;i++)await paketLaden(need[i],i,need.length,ladeBar);
+}
+function markerWeg(){for(const u of U){for(const o of [u.ring,u.flag])if(o){scene.remove(o);o.traverse(c=>{if(c.geometry&&c.geometry!==FAHNEGEO)c.geometry.dispose();});}}}
+let gefechtBusy=false;
+async function gefechtWaehlen(name){   // Vorlage wählen, fehlende Figurenpakete laden, Aufstellung neu bauen
+  const g=GEFECHTE.find(x=>x.id===name||x.n===name);if(!g||gefechtBusy)return false;
+  if(phase!=='aufstellung'&&phase!=='ende')return false;
+  gefechtBusy=true;const alt=phase;phase='laden';
+  try{
+    const R=gefechtAufloesen(g);
+    const ld=$('lade');ld.style.display='flex';const bar=f=>$('balki').style.width=Math.round(f*100)+'%';
+    await paketeFuer(R,bar);
+    ld.style.display='none';
+    GEFECHT=g;ROSTER=R;SEITE=g.seiten;
+    $('kS0').textContent=SEITE[0];$('kS1').textContent=SEITE[1];
+    markerWeg();$('ende').style.display='none';
+    blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;fensterId=-2;
+    einheitenAnlegen();marker();uiBauen();
+    setGrafik(grafikName);
+    phase='aufstellung';tickAcc=0;lastZ='';uiAktualisieren();
+    return true;
+  }catch(e){phase=alt;$('lade').style.display='none';console.error(e);return false;}
+  finally{gefechtBusy=false;}
+}
+function gefechteAuf(){
+  const e=$('gefechte');
+  e.innerHTML='<h3>Gefecht wählen</h3>'+GEFECHTE.map(g=>'<button class="gf'+(g===GEFECHT?' on':'')+'" data-g="'+g.id+'"><b>'+g.n+'</b><small>'+g.text+'</small></button>').join('');
+  e.classList.add('an');
+  const b=$('bGefecht').getBoundingClientRect(),h=e.offsetHeight,w=e.offsetWidth;
+  e.style.left=Math.max(8,b.left-w-10)+'px';e.style.top=Math.max(8,Math.min(innerHeight-h-8,b.top))+'px';
+  e.querySelectorAll('.gf').forEach(k=>{k.onclick=()=>{gefechteZu();if(GEFECHTE.find(g=>g.id===k.dataset.g)!==GEFECHT)gefechtWaehlen(k.dataset.g);};k.addEventListener('pointerdown',ev=>ev.stopPropagation());});
+}
+function gefechteZu(){$('gefechte').classList.remove('an');}
+$('bGefecht').onclick=()=>{if($('gefechte').classList.contains('an'))gefechteZu();else gefechteAuf();};
+$('bGefecht').addEventListener('pointerdown',e=>e.stopPropagation());
+document.addEventListener('pointerdown',e=>{if($('gefechte').classList.contains('an')&&!$('gefechte').contains(e.target)&&!$('bGefecht').contains(e.target))gefechteZu();},true);
+
 async function laden(){
   groesse();
   const ladeBar=f=>$('balki').style.width=Math.round(f*100)+'%';
-  for(let i=0;i<KITS.length;i++){
-    $('ladez').textContent=KITS[i].n+' ('+(i+1)+'/'+KITS.length+')';
-    const r=await fetch('figuren/k_'+KITS[i].id+'.json');
-    if(!r.ok)throw new Error('Paket fehlt: k_'+KITS[i].id+'.json');
-    const tot=+r.headers.get('content-length')||0;let got=0;
-    const rd=r.body.getReader(),parts=[];
-    for(;;){const{done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;
-      ladeBar((i+(tot?Math.min(1,got/tot):.5)*.85)/KITS.length);}
-    const all=new Uint8Array(got);let o=0;for(const p of parts){all.set(p,o);o+=p.length;}
-    const pk=JSON.parse(new TextDecoder().decode(all));
-    $('ladez').textContent=KITS[i].n+' wird aufgestellt …';
-    await new Promise(r=>setTimeout(r,16));   // nicht auf Bilder warten: bei verdecktem Fenster bliebe das Laden sonst stehen
-    kitBauen(i,pk);ladeBar((i+1)/KITS.length);
-  }
+  $('ladez').textContent='Kampagnendaten …';
+  KAMP=await (await fetch('einheiten_kampagne.json')).json();
+  GEFECHT=GEFECHTE[0];ROSTER=gefechtAufloesen(GEFECHT);SEITE=GEFECHT.seiten;
+  $('kS0').textContent=SEITE[0];$('kS1').textContent=SEITE[1];
+  await paketeFuer(ROSTER,ladeBar);
   einheitenAnlegen();marker();uiBauen();
   {let g=null;try{const q=new URLSearchParams(location.search).get('g');g=STUFEN[q]?q:localStorage.getItem('schlachtGrafik');}catch(e){}
    if(!STUFEN[g])g=(('ontouchstart' in window)||navigator.maxTouchPoints>0)?'mittel':'hoch';   // iPad: Mittel; PC: Hoch
@@ -2328,6 +2536,8 @@ window.SCHLACHT={
   stellen(i,x,z){if(phase==='aufstellung'&&U[i])platziere(U[i],x,z);},
   bildPos(x,z){const v=new THREE.Vector3(x,H(x,z),z).project(camera);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight];},
   haltung(i,s){if(U[i])U[i].stance=s;},
+  einheit(d){return schlachtEinheit(d);},gefecht(n){return gefechtWaehlen(n);},get gefechte(){return GEFECHTE.map(g=>g.id);},get aktuellesGefecht(){return GEFECHT.id;},
+  get pakete(){return Object.keys(GELADEN);},
 };
 </script>
 </body>
