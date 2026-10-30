@@ -66,8 +66,8 @@ const boden=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshLamb
 boden.rotation.x=-Math.PI/2;scene.add(boden);
 
 function geometrie(pk,stufe){
-  // Körper (Stufe nah/mittel) + starre Teile zu einer Geometrie
-  const teile=[{d:pk.koerper[Object.keys(pk.koerper)[0]][stufe],k:null}];
+  // Körper-Meshes (Körper, Kleidung; Stufe nah/mittel) + starre Teile zu einer Geometrie
+  const teile=Object.values(pk.koerper).map(k=>({d:k[stufe],k:null}));
   for(const t of Object.values(pk.teile))teile.push({d:t.nah,k:t.knochen});
   let n=0,m=0;teile.forEach(t=>{n+=t.d.n;m+=new Uint16Array(b64(t.d.idx)).length;});
   const P=new Float32Array(n*3),N=new Float32Array(n*3),C=new Float32Array(n*3),B=new Float32Array(n*4),W=new Float32Array(n*4),I=new Uint32Array(m);
@@ -95,7 +95,7 @@ function material(pk){
   const tex=new THREE.DataTexture(new Float32Array(b64(pk.anim.f32)),pk.anim.w,pk.anim.h,THREE.RGBAFormat,THREE.FloatType);
   tex.minFilter=tex.magFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.flipY=false;tex.needsUpdate=true;
   const U={uTime:{value:0},uAnimTex:{value:tex},uTexSize:{value:new THREE.Vector2(pk.anim.w,pk.anim.h)}};
-  const m=new THREE.MeshLambertMaterial({vertexColors:true});
+  const m=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});   // Rock und Platten sind offen
   m.onBeforeCompile=sh=>{
     Object.assign(sh.uniforms,U);
     sh.vertexShader=sh.vertexShader
