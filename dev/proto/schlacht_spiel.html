@@ -96,6 +96,8 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 .karte:active{filter:brightness(1.08)}
 .karte.weg{opacity:.5;filter:saturate(.25)}
 .karte .ring{position:absolute;right:6px;top:6px;z-index:2}
+.karte .info{position:absolute;left:0;top:0;width:44px;height:44px;z-index:3;border:0;background:none;padding:6px;display:flex;align-items:flex-start;justify-content:flex-start}
+.karte .info span{width:22px;height:22px;border-radius:50%;background:rgba(20,15,10,.75);border:1px solid var(--bronze);color:var(--gold);font:italic 14px Georgia,serif;line-height:20px;text-align:center}
 .karte .zst{position:absolute;left:6px;right:6px;bottom:56px;z-index:2;display:flex;align-items:center;gap:4px;padding:2px 7px;border-radius:9px;background:rgba(20,16,12,.72);border:1px solid rgba(169,121,58,.4);font-size:11px;color:#f1d79a;white-space:nowrap;overflow:hidden}
 .karte .zst svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .karte .band{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 7px 6px;background:linear-gradient(transparent,rgba(16,12,9,.93) 40%)}
@@ -1928,7 +1930,7 @@ function angriff(i,t){
    ==================================================================================================== */
 const karten=[],feinde=[],BN=[],selM=new Set();   // Kartenleiste (eigene), Feindliste, Banner über den Einheiten (Index = Einheit), Auswahl
 const kz={on:false,x:0,z:0};                  // Kamera gleitet zu einer Einheit
-let schlachtZ=0,lastZ='',hinweisTm=0,fensterId=-2,fw=null,bannerT=0;
+let schlachtZ=0,lastZ='',hinweisTm=0,fensterId=-2,fw=null,bannerT=0,infoId=-1;   // 30.10. Moritz: Fenster nur auf Wunsch (i auf der Karte), nicht bei jeder Auswahl
 const txt=(e,v)=>{if(e._v!==v){e._v=v;e.textContent=v;}};          // DOM nur schreiben, wenn sich der Wert ändert
 const wid=(e,v)=>{v=Math.round(v);if(e._w!==v){e._w=v;e.style.width=v+'%';}};
 const hrefSet=(e,v)=>{if(e._h!==v){e._h=v;e.setAttribute('href','#'+v);}};
@@ -1972,13 +1974,15 @@ function uiBauen(){
     bn.appendChild(b);BN[i]={el:b,bar:b.querySelector('.bb i'),vis:false,tf:'',op:-1};
     if(u.side===0){
       const d=document.createElement('div');d.className='karte';
-      d.innerHTML=bildHTML(K,0)+'<div class="ring"><i></i></div><div class="mk">✓</div><div class="zst"><svg><use href="#zs-steht"/></svg><span></span></div>'
+      d.innerHTML=bildHTML(K,0)+'<button class="info" aria-label="Einzelheiten"><span>i</span></button><div class="ring"><i></i></div><div class="mk">✓</div><div class="zst"><svg><use href="#zs-steht"/></svg><span></span></div>'
         +'<div class="band"><div class="n"></div><div class="st"><div class="bar"><i></i></div><b></b></div><div class="mud"><i></i></div></div>';
       kb.appendChild(d);
       d.querySelector('.n').textContent=u.name;
       karten.push({i,d,ring:d.querySelector('.ring'),num:d.querySelector('.ring i'),zi:d.querySelector('.zst use'),zt:d.querySelector('.zst span'),
         bar:d.querySelector('.bar i'),sn:d.querySelector('.st b'),mu:d.querySelector('.mud i'),mk:d.querySelector('.mk')});
       langDruck(d,()=>select(i),()=>select(i,true));
+      {const ib=d.querySelector('.info');const auf=ev=>{ev.stopPropagation();ev.preventDefault();infoId=infoId===i?-1:i;};
+       ib.addEventListener('pointerdown',ev=>ev.stopPropagation());ib.addEventListener('pointerup',auf);ib.addEventListener('click',ev=>{ev.stopPropagation();ev.preventDefault();});}
     }else{
       const d=document.createElement('div');d.className='fk';
       d.innerHTML=bildHTML(K,1)+'<div class="t"><div class="n"></div><div class="b"><i></i></div><div class="z"><span></span><b></b></div></div>';
@@ -2017,7 +2021,7 @@ function fensterBauen(u){
   e.querySelector('p.bs').textContent=E.beschreibung||'';
   e.querySelector('.vl').textContent=E.paketGenau?'':'Für diese Einheit gibt es noch keine eigenen Figuren.';
   fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
-  e.querySelector('.x').onclick=()=>select(-1);
+  e.querySelector('.x').onclick=()=>{infoId=-1;};
   e.querySelector('.x').addEventListener('pointerdown',ev=>ev.stopPropagation());
 }
 function fmtZeit(s){s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
@@ -2051,7 +2055,7 @@ function uiAktualisieren(){
    txt($('kR'),String(m0));txt($('kK'),String(m1));wid($('kBar'),p0+p1>0?p0/(p0+p1)*100:50);
    txt($('kZeit'),fmtZeit(schlachtZ));txt($('kTempo'),pausiert?'Pause':fmt(tempoV)+'× Tempo');}
   // Einheitenfenster
-  const h=sel>=0?U[sel]:null,fe=$('fenster');
+  const h=infoId>=0?U[infoId]:null,fe=$('fenster');
   if(h&&phase!=='ende'){
     if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
     fe.classList.add('an');
@@ -2182,7 +2186,22 @@ const TON=(()=>{
     master.gain.value=tonAn?1:0;busM.gain.value=kurve(volM);busS.gain.value=kurve(volG);
     ctx.onstatechange=()=>{aktiv=ctx.state==='running';};
   }
+  // iPhone: Web Audio ist bei eingeschaltetem Stummschalter still (iPad hat keinen). Abhilfe (30.10.): Audio-Profil „Wiedergabe“ melden
+  // (Safari 16.4+) und beim ersten Tippen ein stilles, endloses <audio> starten – dann behandelt iOS den Ton wie Videoton.
+  let stillAudio=null;
+  function iosWiedergabe(){
+    try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback';}catch(e){}
+    if(stillAudio)return;
+    try{
+      const sr=8000,n=sr/2,b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+      w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+      v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+      stillAudio=new Audio(URL.createObjectURL(new Blob([b],{type:'audio/wav'})));stillAudio.loop=true;stillAudio.setAttribute('playsinline','');
+      const p=stillAudio.play();if(p&&p.catch)p.catch(()=>{stillAudio=null;});
+    }catch(e){stillAudio=null;}
+  }
   function gestik(){   // erste Berührung (iOS): Kontext anlegen / fortsetzen
+    iosWiedergabe();
     ctxMachen();if(!ctx)return;
     if(ctx.state!=='running'){try{const p=ctx.resume();if(p&&p.then)p.then(()=>{aktiv=ctx.state==='running';lade();},()=>{});}catch(e){}}
     aktiv=ctx.state==='running';lade();
@@ -2482,7 +2501,7 @@ async function gefechtWaehlen(name){   // Vorlage wählen, fehlende Figurenpaket
     GEFECHT=g;ROSTER=R;SEITE=g.seiten;
     $('kS0').textContent=SEITE[0];$('kS1').textContent=SEITE[1];
     markerWeg();$('ende').style.display='none';
-    blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;fensterId=-2;
+    blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;fensterId=-2;infoId=-1;
     einheitenAnlegen();marker();uiBauen();
     setGrafik(grafikName);
     phase='aufstellung';tickAcc=0;lastZ='';uiAktualisieren();
