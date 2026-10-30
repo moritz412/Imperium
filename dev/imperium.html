@@ -12044,6 +12044,7 @@ function surSync(f,D){const c=facCul(f);if(!['japanisch','chinesisch','koreanisc
 let SCEN_NM=null;function scenNameBad(n){try{if(!S||!S.scen||!n)return false;if(!SCEN_NM||SCEN_NM.id!==S.scen.id)SCEN_NM={id:S.scen.id,t:JSON.stringify(SCEN[S.scen.id]||{})};const g=String(n).split(' ').pop();return SCEN_NM.t.includes(n)||(g.length>3&&SCEN_NM.t.includes(g));}catch(e){return false;}}
 function cGiven(f,sex,e){for(let k=0;k<12;k++){const n=cGiven0(f,sex,e);if(!scenNameBad(n)||k===11)return n;}}
 function cGiven0(f,sex,e){{const c=facCul(f),X=(c==='japanisch'||c==='chinesisch'||c==='koreanisch'||c==='suedostasiatisch')?asiaName(f,c,sex,e):null;if(X)return X;}const P=cpool(f,e);if(!P)return null;return rnd1x(sex==='f'?P.f:P.m);}
+// v220 (30.10.): Neue Schlacht: Kriegselefanten mit Treiber (Trampeln, Furcht, Panik), Umgebung (Felsen, Gehöft, Rundhäuser) als Hindernisse.
 function cFull(f,e){const P=cpool(f,e);if(!P)return null;const s=rnd1x(P.s);return rnd1x(P.m)+' '+s;}
 CUL_NAMES.habescha=[0,1,2,3,4].map(e=>({e:[e,e],m:HAB_M[e],f:HAB_F[e],s:['von Aksum','von Adulis','Negus','Ras','Dejazmach','von Lalibela']}));
 Object.assign(CUL_NAMES,{
