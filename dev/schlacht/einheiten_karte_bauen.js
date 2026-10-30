@@ -19,8 +19,11 @@ const PAKETE = {
   A6_plaenkler: { familien: ['A6_keltisch'], rollen: ['missile'] },
   A7_phalangit: { familien: [], rollen: [] },
   A7_hoplit: { familien: [], rollen: [] },
+  // Reiterei (30.10.): Reiterpakete sitzen auf k_P_pferd
+  A1_eques: { familien: ['A1_roemisch_manipel', 'A7_hellenistisch', 'A6_keltisch'], rollen: ['cav'] },
+  A2_numidisch: { familien: ['A5_numidisch'], rollen: ['cav'] },
 };
-const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_hastatus', art: 'A1_hastatus' };
+const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_eques', art: 'A1_hastatus' };
 
 // Einzelne Einheiten mit eigenem Paket (E2), vor der Familienregel
 const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler' };

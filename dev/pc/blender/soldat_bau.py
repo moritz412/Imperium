@@ -61,6 +61,14 @@ KITS = {
     "A6_plaenkler": dict(tunika=(0.3, 0.22, 0.1), hose=(0.22, 0.2, 0.12), haut="young_caucasian_male2", muskel=0.55, rock=0.05,
                          helm="haar", haar_tief=0.86, brust=False, schild=dict(w=0.55, h=0.55, farbe=(0.12, 0.25, 0.1)),
                          waffe=("speer", 1.6), fern="speerwurf"),
+    # Reiterei (30.10.): reiter=True -> zusätzliche Sitz-Clips (reiten, schlag_reiter, lanze_gesenkt, stoss_reiter, treffer_reiter)
+    # Equites: Montefortino, Kettenhemd, Rundschild (parma equestris ~0,75 m), Lanze ~2,6 m
+    "A1_eques": dict(tunika=(0.42, 0.06, 0.04), haut="young_caucasian_male", muskel=0.6, rock=0.1, helm="montefortino", brust=True,
+                     schild=dict(w=0.75, h=0.75, farbe=(0.42, 0.06, 0.04), woelbung=0.04), waffe=("speer", 2.6), reiter=True),
+    # Numidische Reiter: leicht, ohne Helm und Rüstung, kleiner Rundschild, Wurfspeere
+    "A2_numidisch": dict(tunika=(0.6, 0.55, 0.42), haut="young_caucasian_male2", muskel=0.5, rock=0.08, helm="haar", haar_tief=0.9,
+                         brust=False, schild=dict(w=0.55, h=0.55, farbe=(0.45, 0.32, 0.15), woelbung=0.03), waffe=("speer", 1.6),
+                         fern="speerwurf", reiter=True),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -510,6 +518,23 @@ BOGEN_LOS = dict(BOGEN_ZUG, RightArm=(-0.4, 0.1, -0.9), RightForeArm=(0.2, 0.5, 
 clip_haltung("bogen", [(1, BEREIT), (7, BOGEN_HOCH), (15, BOGEN_ZUG), (21, BOGEN_ZUG), (23, BOGEN_LOS), (32, BEREIT)])
 if KIT.get("fern") == "schleuder" or True:
     clip_haltung("schleuder", [(1, BEREIT), (4, K1), (7, K2), (10, K3), (13, K4), (16, K1), (19, K2), (22, K3), (24, ABWURF), (28, ABWURF), (36, BEREIT)])
+if KIT.get("reiter"):
+    # Sitz: Oberschenkel nach vorn und außen (rittlings), Unterschenkel hängen; linke Hand am Zügel
+    SITZ = {"LeftUpLeg": (0.38, -0.62, -0.69), "LeftLeg": (0.14, 0.12, -0.98), "RightUpLeg": (-0.38, -0.62, -0.69), "RightLeg": (-0.14, 0.12, -0.98),
+            "LeftArm": (0.12, -0.45, -0.88), "LeftForeArm": (-0.15, -0.97, -0.05)}
+    REIT = dict(SITZ, RightArm=TRAGEN["RightArm"], RightForeArm=TRAGEN["RightForeArm"])
+    REIT_B = dict(REIT, Spine=(0, -0.1, 0.99), Spine1=(0, -0.08, 1))
+    clip_haltung("reiten", [(1, REIT), (6, REIT_B, -0.03), (11, REIT), (16, REIT_B, -0.03), (21, REIT)])
+    S_AUS = dict(SITZ, RightArm=(-0.45, 0.05, 0.89), RightForeArm=(-0.3, -0.25, 0.92), Spine1=(-0.05, 0.08, 0.99))
+    S_END = dict(SITZ, RightArm=(-0.6, -0.5, -0.62), RightForeArm=(-0.35, -0.75, -0.56), Spine1=(-0.18, -0.12, 0.97))
+    clip_haltung("schlag_reiter", [(1, REIT), (8, S_AUS), (13, S_END), (17, S_END), (26, REIT)])
+    LANZE = dict(SITZ, RightArm=(-0.12, 0.3, -0.95), RightForeArm=(0.0, -1, 0.03), Spine1=(0, -0.18, 0.98))
+    clip_haltung("lanze_gesenkt", [(1, LANZE), (11, dict(LANZE, Spine=(0, -0.12, 0.99)), -0.03), (21, LANZE)])
+    L_VOR = dict(LANZE, RightArm=(-0.08, -0.55, -0.83), RightForeArm=(0.0, -1, 0.0), Spine1=(0, -0.3, 0.95))
+    clip_haltung("stoss_reiter", [(1, REIT), (7, LANZE), (12, L_VOR), (16, L_VOR), (24, REIT)])
+    clip_haltung("treffer_reiter", [(1, REIT), (5, dict(REIT, Spine=(0, 0.25, 0.97), Spine1=(0, 0.3, 0.95), Head=(0, 0.35, 0.94))), (14, REIT)])
+    if KIT.get("fern") == "speerwurf":
+        clip_haltung("wurf_reiter", [(1, REIT), (9, dict(WURF_AUS, **SITZ)), (13, dict(WURF_AUS, **SITZ)), (17, dict(WURF_END, **SITZ)), (21, dict(WURF_END, **SITZ)), (30, REIT)])
 clip_cmu("sterben_vorn", "90", "16", 0.42, 0.75, dauer=40, am_platz=False)
 clip_cmu("sterben_hinten", "90", "18", 0.35, 0.75, dauer=40, am_platz=False)
 clip_cmu("jubeln", "79", "69", 0.1, 0.5, dauer=60)

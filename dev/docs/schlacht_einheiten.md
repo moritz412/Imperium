@@ -118,3 +118,24 @@ Beschreibung, Figurenherkunft („Figuren vorläufig“ bei `paketGenau=false`).
 
 **Grenzen E1:** Reiter/Artillerie sind berechenbar, haben aber keine eigenen Figuren/Fernkampf (kein Vorlagen-Einsatz); Fernkampf nur für Rolle „Fernkampf“; Pike nur als Abwehrfaktor
 gegen Ansturm; kein Feldherr, keine Verlust-Rückschreibung in die Kampagne; Gleichgewicht der Vorlagen nicht abgestimmt (Rom ist in „Karthago“ 4 gegen 6 Einheiten).
+
+## Stand Reiterei (30.10.)
+
+**Was geht** (`dev/proto/schlacht_spiel.html`, Test `dev/tests/schlacht_reiter_t.js`):
+- **Darstellung:** je Reiter ein Platz im Soldatenfeld, aber zwei Instanzen: Pferd (`P_pferd`, Clip nach Tempo: stehen / schritt / trab / galopp / ansturm, Abspielrate = Tempo ÷ Clip-Tempo,
+  Sonderclips steigen / treffer / sterben) und Reiter (`A1_eques`, `A2_numidisch`; Sitzclips `reiten`, `lanze_gesenkt`, `stoss_reiter`, `schlag_reiter`, `treffer_reiter`, `wurf_reiter`).
+  Die Fußclips der Reiterpakete werden in `kitBauen` über die Tabelle `RIT` auf Sitzclips umgelegt, der übrige Kampfcode blieb unverändert. Reiter sitzt +0,62 m hoch, 0,05 m hinter dem Pferdepunkt,
+  beide gleich skaliert (`gr`). Nur Instanzen (keine Einzel-Meshes). Tod: Pferd stürzt und bleibt liegen, der Reiter liegt nach 0,5 s 0,8 m daneben (Blutfleck beider).
+- **Bewegung:** Formation 1,6 m × 3,0 m, Kollisionsradius je Figur (`sRad`: Fuß 0,375, Reiter 0,75), trägeres Beschleunigen (3,2) und Bremsen (4,5), Wenderadius (Drehrate wächst mit dem Tempo),
+  Pferde laufen nur in Blickrichtung.
+- **Ansturm:** Reiter mit > 6 m/s beim Kontakt werden „scharf“ (`sCh`), steuern den nächsten Gegner im Weg an und lösen beim ersten Gegner in 2 m `aufprall()` aus: Schaden nach Tempo × Ansturmwert
+  × Richtung (Front 1, Flanke 1,6, Rücken 2), Rückstoß oder Sturz (`stolpern`), Moralschock, Umstehende werden gestoßen; der Reiter dringt 0,9 s weiter ein (ohne Blockwand), dann gewöhnlicher
+  Nahkampf (Angriff ×0,8, ohne Schwung). Speerträger (Pike 78 %, Hoplit 66 %, sonst 52 %) wehren von vorn und im Stehen/Gehen ab: Reiter nimmt Schaden, Pferd steigt.
+- **Befehl „Lösen“** (Knopf in der Spalte, nur bei Reiterei): Nahkampf abbrechen, 40 m zurück, 3,5 s sammeln, dann neu stürmen. **KI** (`reitKI`): Feind-Reiterei meidet Speere von vorn (Umweg um die Flanke),
+  bevorzugt Fernkämpfer, löst sich nach ≥ 5 s Nahkampf, wenn sie verliert. Numider (`fernKI`): reiten in Wurfweite, werfen (`wurf_reiter`), weichen früh (22 m) und weit (45 m) aus.
+- **Karte/UI:** Symbol `sy-reiter`. **Gefechte:** je Vorlage 2 Reitereinheiten je Seite an den Flügeln (Equites; Numider und keltische Reiter / Hippeis und Thraker / `auxreit` und keltische Reiter);
+  `MAXU` jetzt 16. **Ton:** Einträge für `hufe_galopp`, `hufe_trab`, `wiehern`, `reiter_aufprall`, `pferd_tod` (fehlende Dateien werden still übergangen), Hufteppich je bewegter Reitereinheit, Wiehern und Pferdetod nur anteilig.
+
+**Offen:** Ton nicht gehört/geprüft (Dateien fehlen noch); echtes iPad nicht getestet; Gleichgewicht nur grob (Reiter sterben im Nahkampf schnell, wenn man sie nicht löst);
+Elefanten, Wagen, Kamele laufen vorläufig als Pferd + A1_eques; Reiter ohne Lanzen-Modell bei `A2_numidisch` (kein `lanze_gesenkt`); Pferd kippt nicht mit dem Gelände; Kavallerie-Bogenschützen (`harch`) werfen Speere statt zu schießen;
+Numider haben nur 3 Wurfspeere je Reiter (Varianten-Boni), danach greifen sie nach der Reiter-KI an; Spieler-Reiterei wird nicht automatisch gelöst.

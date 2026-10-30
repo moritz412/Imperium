@@ -3,7 +3,7 @@ CLIPS = {
     'mensch': ['stehen', 'gehen', 'laufen', 'stehen_bereit', 'schlag_a', 'schlag_b', 'stoss_speer', 'abwehr_schild',
                'treffer', 'sterben_vorn', 'sterben_hinten', 'jubeln', 'fliehen'],
     'mensch_fern': ['bogen', 'schleuder', 'speerwurf', 'armbrust', 'muskete'],   # je nach Einheit, mindestens einer bei Schützen
-    'mensch_reiter': ['reiten', 'schlag_reiter', 'lanze_gesenkt'],
+    'mensch_reiter': ['reiten', 'schlag_reiter', 'lanze_gesenkt', 'stoss_reiter', 'treffer_reiter', 'wurf_reiter'],
     'mensch_kampf': ['kampf_bereit', 'schlag_c', 'schild_stoss', 'ausweichen', 'parade',
                      'nachsetzen', 'stolpern', 'sterben_knie', 'schild_hoch'],   # Zweikampf (30.10.), freiwillig
     'mensch_varianten': ['gehen_b', 'laufen_b', 'stehen_b', 'schlag_a_b', 'schlag_b_b'],   # P1: weniger Gleichtakt
