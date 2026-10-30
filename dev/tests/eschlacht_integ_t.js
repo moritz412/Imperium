@@ -62,7 +62,7 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
     console.log('KI bdiff ' + bd, JSON.stringify(ki[bd]));
     if (bd === 0) {
       ok('Figuren geladen, Einheiten aus dem Heer', await p.evaluate(() => ESCH.api.units.filter(u => u.side === 0).length >= 5 && ESCH.api.pakete.length >= 3), JSON.stringify(ki[0].eigene));
-      ok('Leibwache des Feldherrn dabei', ki[0].eigene.some(n => /Leibwache/.test(n)));
+      ok('Leibwache des Feldherrn dabei (Name „Leibwache des …“)', ki[0].eigene.some(n => /Leibwache des /.test(n)));
       ok('Garnison beim Verteidiger', ki[0].gegner.some(n => /Garnison/.test(n)), JSON.stringify(ki[0].gegner));
     }
     if (bd === 0) memIn = await p.evaluate(() => ({ g: renderer.info.memory.geometries, t: renderer.info.memory.textures }));
@@ -110,6 +110,8 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   console.log('NACH SCHLACHT', JSON.stringify(fin));
   ok('Zurück in der Kampagne, aufgeräumt', !fin.esch && !fin.battle && fin.hidden && fin.kinder === 0 && fin.top);
   ok('Männer der Einheiten verändert', JSON.stringify(fin.men1) !== JSON.stringify(fin.men2), fin.men1.join(',') + ' -> ' + fin.men2.join(','));
+  const fe = await p.evaluate(() => eschFeldherr);
+  ok('Feldherr-Ergebnis kommt in der Kampagne an (je Seite name/lebt/verwundet)', Array.isArray(fe) && fe[0] && fe[0].name && typeof fe[0].lebt === 'boolean' && typeof fe[0].verwundet === 'boolean' && fe[1] && typeof fe[1].lebt === 'boolean', JSON.stringify(fe));
   ok('Schlussmodal der Kampagne (showBattle)', /Sieg|Niederlage/.test(fin.modal), fin.modal);
   ok('Renderer-Zustand wiederhergestellt', fin.r.enc === mem0.enc && fin.r.tm === mem0.tm && fin.r.sh === mem0.sh && fin.ratio === fin.pratio, JSON.stringify(fin.r) + ' Pixelrate ' + fin.ratio + '/' + fin.pratio);
   ok('Speicher: Geometrien/Texturen der Schlacht freigegeben', fin.r.g <= mem0.g + 80 && fin.r.t <= mem0.t + 4, `Geometrien ${mem0.g} -> ${fin.r.g}, Texturen ${mem0.t} -> ${fin.r.t}`);

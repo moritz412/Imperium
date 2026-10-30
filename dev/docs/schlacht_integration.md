@@ -154,3 +154,28 @@ fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
 - Offline (`OFF_MAN`) unberührt (I5): ohne Netz fällt die Schlacht auf die alte zurück, solange `proto/` nicht gecacht ist.
 - Gelände weiter das der Testschlacht (I6); Mauern/Belagerung alte Schlacht; Feldherr-Fähigkeiten (I3) fehlen.
 - Spielgleichgewicht nicht geprüft (im Test verlor Rom gegen den Feind teils deutlich; bekannt aus Abschnitt 5).
+
+## 8. Stand Feldherr (30.10.) – Paket I3
+
+**Auf dem echten iPad nicht getestet.** Tests nur am PC mit Software-Rendering (`dev/tests/schlacht_feldherr_t.js`, `eschlacht_integ_t.js`).
+
+**Figur und Marke**
+- Die Leibwache (Tag `gen`, Reitereinheit mit 20 Figuren, Fußtruppe bei Völkern ohne Pferd) enthält einen Feldherrn: eine Figur der zweiten Reihe (`u.genId`), 10 % größer, goldener Farbstich (Instanzfarbe `instanceColor` im Kit, nur für diese Figur gesetzt), dreifaches Leben (`GEN_HP`), Standarte (höher, goldenes Tuch) steht über ihm.
+- Name „Leibwache des …“ (Hauptspiel: Name des Feldherrn aus `ga.gen.n`; Testseite: Konsul, Feldherr der Punier, König, Stammesfürst). Im Einheitenfenster steht „Feldherr: … · Aura 40 m“.
+
+**Regeln (Zahlen)**
+- Aura 40 m um die Figur, nur solange er nicht selbst flieht: Moralverlust der eigenen Einheiten × (1 − 0,35 · Stärke), also × 0,65 bei Stärke 1; Erholung +0,9 · Stärke je Sekunde (nicht im Kampf). Stärke = 1 + `genFx(mor)` / 50, höchstens 1,6 (Hauptspiel); Testseite 1. Bei Auswahl der Leibwache zeigt ein dünner Ring am Boden den Umkreis.
+- **Sammeln** (Knopf in der Befehlsspalte): Fliehende eigene Einheiten im Umkreis 60 m kehren um, wenn ihre Moral mindestens 8 beträgt (Moral +30, mindestens 35; 8 s standfest). Andere Einheiten im Umkreis mit Moral unter Höchstwert −8 bekommen +12. Abklingzeit 45 s (wie alte Schlacht). Ohne Wirkung wird der Befehl abgelehnt (Hinweis), die Abklingzeit startet dann nicht.
+- **Anfeuern**: eigene Einheiten (nicht fliehend) im Umkreis 60 m: Moral +12 (höchstens Höchstwert +8), Angriff ×1,2 für 20 s (Faktor in der Kampfformel `reaktion`, Grundwert bleibt). Abklingzeit 60 s. (Alte Schlacht: +25 %, 28 m.)
+- Knöpfe nur sichtbar, solange der eigene Feldherr auf dem Feld ist; die Abklingzeit steht im Knopf („noch 43 s“).
+- **Tod** (Figur fällt): eigene Seite Moral −18 (Aura mildert das nicht), Gegner +4; Meldung oben, Ton `horn`. Die Leibwache bleibt als normale Reitereinheit. (Alte Schlacht: −15.) Flieht nur die Einheit, lebt der Feldherr weiter.
+- Ton: `horn` (Sammeln, Tod), `kriegsgeschrei` (Anfeuern); keine neuen Klänge.
+- **KI** (nur Feind-Feldherr, vorsichtig): bleibt an seinem Startplatz hinter der Linie; greift nur schwache (Verluste > 50 %, Moral < 30) oder fliehende Ziele bis 90 m an, nach 150 s auch andere Nicht-Speerträger bis 60 m; ist er die letzte aktive Einheit seiner Seite (oder nach 300 s), greift er das nächste Ziel an (sonst endete die Schlacht nicht); unter 60 % Stärke zieht er sich zurück/löst sich. Sammeln ab Schwierigkeit Leicht (Flieht eine Einheit im Umkreis), Anfeuern ab Normal (mindestens zwei Einheiten im Nahkampf, nach 20 s). Reaktionszeit wie `BDIFF.iv`.
+
+**Ergebnis an die Kampagne**
+- `ergebnisDaten` liefert `feldherr:[Seite 0, Seite 1]`, je `{name, lebt, verwundet}` oder `null` (kein Feldherr). `lebt` = nicht gefallen (auch wenn er mit der Einheit floh); `verwundet` = lebt mit weniger als 60 % Leben.
+- Die alte Schlacht wertet Tod/Verwundung des Feldherrn nicht aus (nur Moral −15 in der Schlacht); die Kampagne entscheidet in `concludeAttack` über `genDeed` (Sieg/Niederlage) und Ersatz des Verlierer-Feldherrn mit 12 %. `eschEnde` benutzt denselben Weg unverändert und legt das Ergebnis in `eschFeldherr` und `res.feldherr` ab (bisher ohne Wirkung auf Regeln; Auswertung wäre eine Entscheidung für Moritz, z. B. gefallener Feldherr = sicherer Ersatz).
+
+**Test-Haken im Kern** (nur für Tests): `SCHLACHT.druck`, `feldherr`, `feldherrLeben`, `tötefeldherr`, `sammeln`, `anfeuern`, `abklingzeit`.
+
+**Offen / nicht getestet**: iPad, Anfeuern-KI und Leicht-Variante (nur Sammeln) nur durch Code, nicht im Spielverlauf; Verhalten des Feind-Feldherrn über eine ganze Schlacht nur stichprobenartig; Flucht des Feldherrn mit der Einheit (Aura aus, Standarte bleibt bei ihm); Balance der Zahlen ungeprüft; Elefanten-Panik und Aura nicht zusammen geprüft.
