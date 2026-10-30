@@ -214,7 +214,7 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
   <symbol id="sy-schwert" viewBox="0 0 64 64"><path d="M32 6c11 3 19 6 19 6v20c0 12-8 20-19 26C21 52 13 44 13 32V12s8-3 19-6z"/><path d="M32 14v34M22 26h20"/></symbol>
   <symbol id="sy-wurfspeer" viewBox="0 0 64 64"><circle cx="24" cy="40" r="14"/><circle cx="24" cy="40" r="4"/><path d="M12 58L56 8M56 8l-9 1M56 8l-2 9"/></symbol>
   <symbol id="sy-speer" viewBox="0 0 64 64"><path d="M32 3v58M32 3l-6 11h12z"/><circle cx="32" cy="42" r="14"/><circle cx="32" cy="42" r="3.5"/></symbol>
-  <symbol id="sy-schleuder" viewBox="0 0 64 64"><path d="M14 54C6 38 14 18 34 14"/><path d="M14 54c8-2 16-8 20-18"/><circle cx="46" cy="16" r="7"/><path d="M34 14l6 0M52 8l6-3M54 22l6 2"/></symbol>
+  <symbol id="sy-schleuder" viewBox="0 0 64 64"><path d="M14 54C6 38 14 18 34 14"/><path d="M14 54c8-2 16-8 20-18"/><circle cx="46" cy="16" r="7"/><path d="M34 14l6 0M52 8l6-3M54 22l6 2"/></symbol><symbol id="sy-bogen" viewBox="0 0 24 24"><path d="M7 3c7 3 7 15 0 18" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 3v18" stroke="currentColor" stroke-width="1"/><path d="M4 12h15M16 9l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
 </defs></svg>
 <canvas id="cv"></canvas>
 <div id="banner"></div>
@@ -294,12 +294,14 @@ const ECHT_ROLLE={   // Echtzeit-Grundwerte je Kampagnenrolle (Gehen/Laufen in m
    · v Fluggeschwindigkeit m/s · weich = Plänkler weicht, wenn Nahkämpfer näher als m · rueck = so weit weicht er zurück) */
 const ECHT_FERN={
   speer:{typ:'speer',reich:30,nachl:[4,6],vorrat:5,schaden:1.6,moral:.5,clip:'speerwurf',wurfT:.55,v:24,weich:14,rueck:22},
+  pfeil:{typ:'pfeil',reich:110,nachl:[3,4.5],vorrat:20,schaden:1.0,moral:.3,clip:'bogen',wurfT:.72,v:55,weich:20,rueck:30},   // Kompositbogen (E2, 30.10.)
   stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
 };
-const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein'};   // nur diese Pakete haben Wurf-Clips; andere Fernkämpfer bekommen A1_veles
+const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
 const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
   A1_hastatus:{schild:.55},A1_veles:{schild:.4},A2_libysch:{schild:.45},A3_iberisch:{schild:.45},
   A4_balearisch:{schild:0,bloss:true},A6_keltisch:{schild:.35,bloss:true},A7_hellenistisch:{schild:.5},
+  A7_phalangit:{schild:.3},A7_hoplit:{schild:.6},A7_toxotes:{schild:0,bloss:true},A6_plaenkler:{schild:.3,bloss:true},
 };
 const ECHT_RANG=[{n:'Rekruten',b:0,m:0},{n:'Erprobt',b:.05,m:5},{n:'Veteranen',b:.1,m:10},{n:'Elite',b:.15,m:15},{n:'Legendär',b:.2,m:25}];   // wie RANKS der Kampagne
 const STUFE_NAME=['einfach','verbessert','beste'];
@@ -342,9 +344,9 @@ function schlachtEinheit(e){
   const kap=(v,g)=>Math.min(v,g*1.6);
   const werte={atk:kap(G.atk*sq*(B.atk||1)*atkM,G.atk),def:kap(G.def*sq*(B.def||1)*defM,G.def),mor:Math.min(90,G.mor+2*(B.mor||0)+RG.m),hp:G.hp,
     walk:G.walk*spd,run:G.run*spd,ans:G.ans*(B.chg||1),pike:B.pike||0,skirm:B.skirm?1:(rolle==='missile'?1:0),
-    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sym:fern?(fern.typ==='stein'?'schleuder':'wurfspeer'):G.sym,fern,pakId:pak};
+    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sym:fern?(fern.typ==='stein'?'schleuder':fern.typ==='pfeil'?'bogen':'wurfspeer'):G.sym,fern,pakId:pak};
   const f=[];
-  if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':'Wurfspeere: kurze Reichweite');
+  if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':fern.typ==='pfeil'?'Bogenschützen: größte Reichweite':'Wurfspeere: kurze Reichweite');
   if(B.skirm)f.push('Plänkeln: weicht dem Nahkampf aus');else if(rolle==='missile')f.push('Plänkeln (Fernkämpfer weichen aus)');
   if(B.pike)f.push('Pike: Abwehr ×1,5 gegen Ansturm von vorn');
   if(werte.ans>=1.6)f.push('Wuchtiger Ansturm');
@@ -693,41 +695,145 @@ function teil(P,geo,px,py,pz,sx,sy,sz,colFn,lumpA){
   g.scale(sx,sy,sz);g.translate(px,py,pz);g.computeVertexNormals();
   const p=g.attributes.position.array,n=g.attributes.normal.array;
   for(let f=0;f<p.length;f+=9){
-    const c=colFn((p[f+1]+p[f+4]+p[f+7])/3);
+    const c=colFn((p[f+1]+p[f+4]+p[f+7])/3,(p[f]+p[f+3]+p[f+6])/3,(p[f+2]+p[f+5]+p[f+8])/3);
     for(let k=0;k<3;k++){P.pos.push(p[f+k*3],p[f+k*3+1],p[f+k*3+2]);P.nrm.push(n[f+k*3],n[f+k*3+1],n[f+k*3+2]);P.col.push(c[0],c[1],c[2]);}
   }
 }
 function geoVon(P){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P.pos,3));
   g.setAttribute('normal',new THREE.Float32BufferAttribute(P.nrm,3));g.setAttribute('color',new THREE.Float32BufferAttribute(P.col,3));return g;}
-const VEGGEO={};
+/* Röhren (Stämme/Äste): Punktfolge + Radien, N Seiten, Flächen nach außen; je Fläche eine Farbe */
+function tube(P,pts,rad,N,colFn){
+  const n=pts.length,R=[];
+  for(let i=0;i<n;i++){
+    const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)];
+    let tx=b[0]-a[0],ty=b[1]-a[1],tz=b[2]-a[2];const tl=Math.hypot(tx,ty,tz)||1;tx/=tl;ty/=tl;tz/=tl;
+    let ux,uy,uz;if(Math.abs(tz)<.9){ux=ty;uy=-tx;uz=0;}else{ux=0;uy=tz;uz=-ty;}
+    const ul=Math.hypot(ux,uy,uz)||1;ux/=ul;uy/=ul;uz/=ul;
+    const vx=ty*uz-tz*uy,vy=tz*ux-tx*uz,vz=tx*uy-ty*ux,ring=[];
+    for(let j=0;j<=N;j++){const an=j/N*TAU,c=Math.cos(an)*rad[i],s=Math.sin(an)*rad[i];
+      ring.push([pts[i][0]+ux*c+vx*s,pts[i][1]+uy*c+vy*s,pts[i][2]+uz*c+vz*s]);}
+    R.push(ring);
+  }
+  const tri=(a,b,c)=>{
+    const e1x=b[0]-a[0],e1y=b[1]-a[1],e1z=b[2]-a[2],e2x=c[0]-a[0],e2y=c[1]-a[1],e2z=c[2]-a[2];
+    let nx=e1y*e2z-e1z*e2y,ny=e1z*e2x-e1x*e2z,nz=e1x*e2y-e1y*e2x;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;
+    const col=colFn((a[1]+b[1]+c[1])/3,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3);
+    for(const q of[a,b,c]){P.pos.push(q[0],q[1],q[2]);P.nrm.push(nx,ny,nz);P.col.push(col[0],col[1],col[2]);}
+  };
+  for(let i=0;i<n-1;i++)for(let j=0;j<N;j++){tri(R[i][j],R[i][j+1],R[i+1][j]);tri(R[i][j+1],R[i+1][j+1],R[i+1][j]);}
+}
+/* Blattballen: verformte Ikosaeder; Farbe nach Höhe in der Krone, innen dunkler, außen heller */
+function kron(lo,hi,rad,r,g,b,gelb){
+  return(y,x,z)=>{
+    const h=Math.max(0,Math.min(1,(y-lo)/(hi-lo))),d=Math.min(1,Math.hypot(x,z)/rad),k=(.5+.5*h+.22*d)*(.8+rnd()*.36),m=h*(gelb||.3);
+    return srgbL(r+(118-r)*m,g+(132-g)*m,b+(50-b)*m,k);
+  };
+}
+function blob(P,x,y,z,r,sy,det,cf,lp){teil(P,new THREE.IcosahedronGeometry(r,det),x,y,z,1,sy,1,cf,lp===undefined?.34:lp);}
+const rindF=y=>srgbL(84,66,50,.7+rnd()*.35);
+const rindO=y=>srgbL(98,86,70,.7+rnd()*.35);
+const VEGGEO={},NEARGEO={laub:[],pinie:[],zypresse:[],olive:[],busch:[]};
 (function(){
   const rb=()=>({pos:[],nrm:[],col:[]});
-  const rind=y=>srgbL(78,56,38,.8+rnd()*.3);
   const blatt=(lo,hi,r,g,b)=>y=>srgbL(r,g,b,(.62+.5*Math.max(0,Math.min(1,(y-lo)/(hi-lo))))*(.82+rnd()*.34));
-  let P=rb();   // Laubbaum
-  teil(P,new THREE.CylinderGeometry(.28,.5,4.6,6,1),0,2.3,0,1,1,1,rind,0);
+  /* ---- Fernstufe: die einfachen Formen ---- */
+  let P=rb();
+  teil(P,new THREE.CylinderGeometry(.28,.5,4.6,6,1),0,2.3,0,1,1,1,rindF,0);
   teil(P,new THREE.IcosahedronGeometry(3.7,1),0,6.9,0,1,.85,1,blatt(3.5,10,62,98,38),.32);
   teil(P,new THREE.IcosahedronGeometry(2.5,0),2.3,5.6,.8,1,.9,1,blatt(3.5,10,66,100,40),.3);
   teil(P,new THREE.IcosahedronGeometry(2.4,0),-2.0,5.9,-1.2,1,.9,1,blatt(3.5,10,58,92,36),.3);
   VEGGEO.laub=geoVon(P);
-  P=rb();       // Schirmpinie
-  teil(P,new THREE.CylinderGeometry(.22,.4,8.2,6,1),0,4.1,0,1,1,1,rind,0);
+  P=rb();
+  teil(P,new THREE.CylinderGeometry(.22,.4,8.2,6,1),0,4.1,0,1,1,1,rindF,0);
   teil(P,new THREE.IcosahedronGeometry(4.4,1),0,9.0,0,1,.36,1,blatt(7.5,10.6,44,84,40),.28);
   teil(P,new THREE.IcosahedronGeometry(2.6,0),2.4,7.6,.6,1,.4,1,blatt(7.5,10.6,48,88,42),.28);
   VEGGEO.pinie=geoVon(P);
-  P=rb();       // Zypresse
+  P=rb();
   teil(P,new THREE.ConeGeometry(1.35,11,7,3),0,5.8,0,1,1,1,blatt(0,11,26,56,32),.18);
   VEGGEO.zypresse=geoVon(P);
-  P=rb();       // Busch
+  P=rb();
+  teil(P,new THREE.CylinderGeometry(.2,.35,2.2,5,1),0,1.1,0,1,1,1,rindF,0);
+  teil(P,new THREE.IcosahedronGeometry(2.2,1),0,3.5,0,1.1,.7,1.1,blatt(2,5,98,116,78),.32);
+  VEGGEO.olive=geoVon(P);
+  P=rb();
   teil(P,new THREE.IcosahedronGeometry(1.1,1),0,.62,0,1,.72,1,blatt(0,1.4,76,98,44),.4);
   VEGGEO.busch=geoVon(P);
-  P=rb();       // Fels
-  teil(P,new THREE.IcosahedronGeometry(1.2,0),0,.55,0,1.1,.7,.95,y=>srgbL(132,126,116,.75+rnd()*.4),.5);
+  /* ---- Nahstufe: je Art 3 Formvarianten ---- */
+  for(let v=0;v<3;v++){
+    // Steineiche / Laubbaum: gekrümmter Stamm, 3–4 Äste, 6–8 Blattballen
+    P=rb();{
+      const l=[.5,-.7,.2][v],H=[6.6,7.3,6.1][v],R=[3.4,3.9,3.0][v],ns=[3,4,3][v],a0=v*1.3,cx=l*.55;
+      tube(P,[[0,0,0],[l*.2,1.7,l*.1],[l*.45,3.3,-l*.1],[cx,4.9,0]],[.58,.46,.36,.27],6,rindF);
+      const cf=kron(H-R*.9,H+R*.8,R,[62,70,56][v],[98,104,92][v],[38,36,34][v],.3);
+      blob(P,cx,H,0,R*.82,.82,1,cf);
+      for(let k=0;k<ns;k++){
+        const a=a0+k*(TAU/ns)+(rnd()-.5)*.5,rr=R*.64,bx=cx+Math.cos(a)*rr,bz=Math.sin(a)*rr,by=H+(rnd()-.35)*1.1-.4;
+        tube(P,[[cx,4.2+k*.3,0],[(cx+bx)*.5,(4.4+by)*.5-.3,bz*.45],[bx*.9+cx*.1,by-R*.35,bz*.85]],[.2,.16,.11],5,rindF);
+        blob(P,bx,by,bz,R*.55*(.9+rnd()*.25),.82,1,cf);
+      }
+      for(let k=0;k<3;k++){const a=rnd()*TAU;blob(P,cx+Math.cos(a)*R*.55,H+R*(.45+rnd()*.25),Math.sin(a)*R*.55,R*.36,.85,0,cf,.4);}
+      NEARGEO.laub.push(geoVon(P));
+    }
+    // Schirmpinie: langer, geschwungener Stamm, flacher Schirm aus mehreren Lagen
+    P=rb();{
+      const l=[1.0,-1.3,.5][v],H=[8.2,9.0,7.5][v],R=[4.4,4.8,4.0][v],cx=l*1.3;
+      const pts=[];for(let k=0;k<6;k++){const t=k/5;pts.push([l*t*t*1.3+Math.sin(t*3+v)*.25,t*H,Math.sin(t*2.2+v*2)*.3*t]);}
+      tube(P,pts,[.5,.42,.36,.3,.25,.21],6,rindO);
+      const cf=kron(H-.6,H+1.6,R,[44,50,40][v],[84,88,78][v],[40,38,36][v],.22);
+      blob(P,cx,H+.7,0,R,.34,1,cf,.3);
+      for(let k=0;k<4;k++){const a=v*.9+k*1.57+(rnd()-.5)*.4,rr=R*.55;
+        tube(P,[[cx*.8,H*.78,0],[cx+Math.cos(a)*rr*.5,H*.86,Math.sin(a)*rr*.5],[cx+Math.cos(a)*rr,H*.93,Math.sin(a)*rr]],[.16,.13,.1],5,rindO);}
+      for(let k=0;k<3;k++){const a=v*.9+k*2.1+.6,rr=R*.62;blob(P,cx+Math.cos(a)*rr,H+.1+rnd()*.7,Math.sin(a)*rr,R*.48,.42,1,cf,.3);}
+      NEARGEO.pinie.push(geoVon(P));
+    }
+    // Zypresse: schlank, 5 Lagen
+    P=rb();{
+      const H=[11,12.6,9.5][v],w=[1.35,1.1,1.65][v],lean=[.0,.25,-.2][v];
+      tube(P,[[0,0,0],[0,1.4,0]],[.3,.24],5,rindF);
+      const cf=kron(.5,H,w,[26,30,24][v],[56,60,52][v],[32,34,30][v],.12);
+      for(let k=0;k<5;k++){
+        const t=k/4,y=1.9+t*(H-2.8),rr=w*(1-.5*t*t-.1*t)*(.92+rnd()*.16);
+        blob(P,lean*t+(rnd()-.5)*.18,y,(rnd()-.5)*.18,rr,(H-2.4)/4/rr*.95,1,cf,.3);
+      }
+      NEARGEO.zypresse.push(geoVon(P));
+    }
+    // Olivenbaum: knorrige, gedrehte Stämme, flache silbrig-grüne Krone
+    P=rb();{
+      const ns=[2,3,2][v],R=[1.9,2.1,1.7][v];
+      const cf=kron(2.2,5,R,[104,112,98][v],[124,130,116][v],[88,92,84][v],.14);
+      for(let k=0;k<ns;k++){
+        const a=k*TAU/ns+v*.8,ex=Math.cos(a)*.9,ez=Math.sin(a)*.9;
+        tube(P,[[Math.cos(a)*.12,0,Math.sin(a)*.12],[ex*.3+Math.sin(a)*.25,1.0,ez*.3-Math.cos(a)*.25],[ex*.7-Math.sin(a)*.2,2.0,ez*.7+Math.cos(a)*.2],[ex,2.9,ez]],[.4,.3,.24,.17],6,rindO);
+      }
+      blob(P,0,3.6,0,R*.82,.62,1,cf);
+      for(let k=0;k<4;k++){const a=v+k*1.57+rnd()*.4;blob(P,Math.cos(a)*R*.62,3.4+rnd()*.7,Math.sin(a)*R*.62,R*.55,.62,1,cf);}
+      NEARGEO.olive.push(geoVon(P));
+    }
+    // Busch: 4 Ballen
+    P=rb();{
+      const cf=kron(0,1.5,1.3,[76,70,84][v],[98,96,100][v],[44,42,50][v],.25);
+      blob(P,0,.7,0,.95,.75,1,cf,.4);
+      for(let k=0;k<3;k++){const a=v*1.1+k*2.1+rnd()*.5;blob(P,Math.cos(a)*.75,.5+rnd()*.3,Math.sin(a)*.75,.62+rnd()*.15,.8,1,cf,.4);}
+      NEARGEO.busch.push(geoVon(P));
+    }
+  }
+  /* ---- Fels mit Moos: Hauptblock + zwei Brocken, Oberseiten (Normale nach oben) bemoost ---- */
+  P=rb();
+  const gr=y=>srgbL(132,126,116,.7+rnd()*.4);
+  teil(P,new THREE.IcosahedronGeometry(1.2,1),0,.55,0,1.1,.7,.95,gr,.5);
+  teil(P,new THREE.IcosahedronGeometry(.62,1),1.15,.28,.4,1,.75,1,gr,.5);
+  teil(P,new THREE.IcosahedronGeometry(.45,1),-.9,.2,-.7,1,.7,1,gr,.5);
+  for(let f=0;f<P.pos.length/9;f++){
+    const ny=P.nrm[f*9+1],m=sst(.3,.8,ny)*(.55+.45*rnd());
+    const c=srgbL(70+rnd()*20,98+rnd()*14,44,.75+rnd()*.3);
+    for(let k=0;k<3;k++){const o=f*9+k*3;P.col[o]=P.col[o]*(1-m)+c[0]*m;P.col[o+1]=P.col[o+1]*(1-m)+c[1]*m;P.col[o+2]=P.col[o+2]*(1-m)+c[2]*m;}
+  }
   VEGGEO.stein=geoVon(P);
 })();
-const VEG={};   // Name -> {m, n (Anzahl gesamt)}
+const VEG={};     // Steine: {m,n,f}
+const LODV=[];    // Bäume/Büsche mit Fern-/Nahstufe
 (function(){
-  const L={laub:[],pinie:[],zypresse:[],busch:[],stein:[]},CAP={laub:520,pinie:190,zypresse:150,busch:360,stein:90};
+  const L={laub:[],pinie:[],zypresse:[],olive:[],busch:[],stein:[]},CAP={laub:560,pinie:190,zypresse:150,olive:110,busch:560,stein:90};
   const zone=(x,z)=>Math.abs(x)<78&&Math.abs(z)<96;   // Aufstellungszone bleibt frei
   const add=(t,x,z,s)=>{if(L[t].length<CAP[t])L[t].push([x,z,s,rnd()*TAU]);};
   for(let k=0;k<WALD.length;k++){
@@ -745,6 +851,24 @@ const VEG={};   // Name -> {m, n (Anzahl gesamt)}
     if(rnd()>.28)continue;const r=rnd();add(r<.5?'laub':r<.8?'pinie':'zypresse',x,z,.9+rnd()*.5);
   }
   for(let x=-310;x<=-190;x+=13){const z=24+18*Math.sin(x*.011)+6*Math.sin(x*.037);add('zypresse',x,z+5.5,1.1);add('zypresse',x+6,z-5.5,1.05);}   // Zypressenallee
+  // Olivenhaine auf freiem, flachem Gelände
+  for(let g=0,tries=0;g<5&&tries<400;tries++){
+    const cx=(rnd()*2-1)*(HX-40),cz=(rnd()*2-1)*(HZ-40);
+    if(zone(cx,cz)||wald(cx,cz)>.02||wegD(cx,cz)<12||H(cx,cz)>5)continue;grad(cx,cz);if(Math.hypot(_gx,_gz)>.12)continue;
+    g++;for(let k=0;k<22;k++){const a=rnd()*TAU,d=Math.sqrt(rnd())*26,x=cx+Math.cos(a)*d,z=cz+Math.sin(a)*d;
+      if(zone(x,z)||wald(x,z)>.1||wegD(x,z)<5)continue;add('olive',x,z,.85+rnd()*.45);}
+  }
+  // weiche Waldränder: kleine Bäume und Büsche im Randbereich, Unterholz im Inneren
+  for(let k=0;k<WALD.length;k++){
+    const p=WALD[k];
+    for(let x=p[0]-p[2]*1.3;x<=p[0]+p[2]*1.3;x+=4.2)for(let z=p[1]-p[3]*1.3;z<=p[1]+p[3]*1.3;z+=4.2){
+      const xx=x+(rnd()-.5)*4,zz=z+(rnd()-.5)*4,w=wald(xx,zz);
+      if(zone(xx,zz)||wegD(xx,zz)<3.2||w<.06)continue;
+      if(w<.5){
+        const r=rnd();if(r<.14)add('laub',xx,zz,.5+rnd()*.3);else if(r<.2)add('olive',xx,zz,.6+rnd()*.3);else if(r<.55)add('busch',xx,zz,.8+rnd()*.8);
+      }else if(rnd()<.2)add('busch',xx,zz,.6+rnd()*.6);
+    }
+  }
   for(let k=0;k<4000&&L.busch.length<CAP.busch;k++){
     const x=(rnd()*2-1)*(HX-6),z=(rnd()*2-1)*(HZ-6),w=wald(x,z);
     if(wegD(x,z)<2.6)continue;if(zone(x,z)&&rnd()>.1)continue;
@@ -757,15 +881,60 @@ const VEG={};   // Name -> {m, n (Anzahl gesamt)}
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),ps=new THREE.Vector3(),ax=new THREE.Vector3(0,1,0),cl=new THREE.Color();
   for(const t in L){
     const a=L[t];for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0,tmp=a[i];a[i]=a[j];a[j]=tmp;}   // mischen -> Ausdünnen je Stufe gleichmäßig
-    const im=new THREE.InstancedMesh(VEGGEO[t],matVeg,Math.max(1,a.length));
-    for(let i=0;i<a.length;i++){
-      const e=a[i],y=t==='laub'||t==='pinie'||t==='zypresse'?e[2]*(.92+rnd()*.2):e[2];
+    const n=a.length,tree=t==='laub'||t==='pinie'||t==='zypresse'||t==='olive',M=new Float32Array(16*Math.max(1,n)),C=new Float32Array(3*Math.max(1,n));
+    const X=new Float32Array(n),Y=new Float32Array(n),Z=new Float32Array(n),V=new Uint8Array(n);
+    for(let i=0;i<n;i++){
+      const e=a[i],y=tree?e[2]*(.92+rnd()*.2):e[2];
       q.setFromAxisAngle(ax,e[3]);sc.set(e[2]*(t==='zypresse'?.9:1),y,e[2]*(t==='zypresse'?.9:1));ps.set(e[0],H(e[0],e[1])-.15,e[1]);
-      m4.compose(ps,q,sc);im.setMatrixAt(i,m4);const v=.8+rnd()*.2;cl.setRGB(v,v*(.94+rnd()*.06),v*(.88+rnd()*.1));im.setColorAt(i,cl);
+      m4.compose(ps,q,sc);for(let k=0;k<16;k++)M[i*16+k]=m4.elements[k];
+      const v=.8+rnd()*.2;C[i*3]=v;C[i*3+1]=v*(.94+rnd()*.06);C[i*3+2]=v*(.88+rnd()*.1);
+      X[i]=e[0];Y[i]=ps.y;Z[i]=e[1];V[i]=(rnd()*3)|0;   // Formvariante: fest je Baum
     }
-    im.frustumCulled=false;scene.add(im);VEG[t]={m:im,n:a.length,f:t==='stein'?'stein':t==='busch'?'busch':'baum'};
+    if(t==='stein'){
+      const im=new THREE.InstancedMesh(VEGGEO[t],matVeg,Math.max(1,n));
+      for(let i=0;i<n;i++){m4.fromArray(M,i*16);im.setMatrixAt(i,m4);cl.setRGB(C[i*3],C[i*3+1],C[i*3+2]);im.setColorAt(i,cl);}
+      im.frustumCulled=false;scene.add(im);VEG[t]={m:im,n,f:'stein'};continue;
+    }
+    const mk=(geo,cap)=>{const im=new THREE.InstancedMesh(geo,matVeg,Math.max(1,cap));im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      im.setColorAt(0,cl.setRGB(1,1,1));im.instanceColor.setUsage(THREE.DynamicDrawUsage);im.count=0;im.frustumCulled=false;scene.add(im);return im;};
+    const cap=Math.min(n,t==='busch'?260:200);
+    LODV.push({t,n,M,C,X,Y,Z,V,st:new Uint8Array(n),far:mk(VEGGEO[t],n),near:NEARGEO[t].map(g=>mk(g,cap)),act:n,busch:t==='busch',cap,cv:[0,0,0]});
   }
 })();
+/* Fern-/Nahstufe: Zuordnung je Baum alle ~0,5 s (Hysterese 22 %); nur bei Änderung werden die Instanzpuffer neu beschrieben; keine Zuweisungen */
+let lodR=0;
+function lodUpdate(force){
+  const R=lodR,R2=R*R,Rl=R*1.22,L2=Rl*Rl,cx=camera.position.x,cy=camera.position.y,cz=camera.position.z;
+  for(let s=0;s<LODV.length;s++){
+    const sp=LODV[s],n=sp.n,st=sp.st,V=sp.V,cv=sp.cv,cap=sp.cap;let ch=force;
+    cv[0]=cv[1]=cv[2]=0;
+    for(let i=0;i<n;i++){
+      let nr=0;
+      if(R>0&&i<sp.act){const dx=sp.X[i]-cx,dy=sp.Y[i]-cy,dz=sp.Z[i]-cz,d2=dx*dx+dy*dy+dz*dz;nr=st[i]?(d2<L2?1:0):(d2<R2?1:0);
+        if(nr){if(cv[V[i]]>=cap)nr=0;else cv[V[i]]++;}}
+      if(nr!==st[i]){st[i]=nr;ch=true;}
+    }
+    if(!ch)continue;
+    cv[0]=cv[1]=cv[2]=0;let kf=0;
+    const fm=sp.far.instanceMatrix.array,fc=sp.far.instanceColor.array,M=sp.M,C=sp.C;
+    for(let i=0;i<sp.act;i++){
+      let dm,dc,k;
+      if(st[i]){const v=V[i],im=sp.near[v];k=cv[v]++;dm=im.instanceMatrix.array;dc=im.instanceColor.array;}
+      else{k=kf++;dm=fm;dc=fc;}
+      const o=i*16,p=k*16;for(let j=0;j<16;j++)dm[p+j]=M[o+j];
+      dc[k*3]=C[i*3];dc[k*3+1]=C[i*3+1];dc[k*3+2]=C[i*3+2];
+    }
+    sp.far.count=kf;sp.far.instanceMatrix.needsUpdate=true;sp.far.instanceColor.needsUpdate=true;
+    for(let v=0;v<3;v++){const im=sp.near[v];im.count=cv[v];im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
+  }
+}
+function vegInfo(){   // Dreiecke je Art/Stufe und aktuelle Instanzzahlen
+  const o={},tr=g=>g.attributes.position.count/3;
+  for(const sp of LODV){let nn=0;for(let v=0;v<3;v++)nn+=sp.near[v].count;
+    o[sp.t]={fern:tr(VEGGEO[sp.t]),nah:sp.near.map(m=>tr(m.geometry)),aktiv:sp.act,instFern:sp.far.count,instNah:nn,gesamt:sp.n};}
+  o.stein={tris:tr(VEGGEO.stein),n:VEG.stein.m.count};
+  return o;
+}
 
 /* ---- Gras: Halmbüschel als Instanzen um das Blickziel, Wind im Vertex-Shader ---- */
 const WIND=new THREE.Vector2(.8,.6);
@@ -985,7 +1154,7 @@ const NOGOAL=-99999;
 const GX0=-(FELD_X+30),GZ0=-(FELD_Z+30),GW=Math.ceil(2*(FELD_X+30)/ZELLE),GH=Math.ceil(2*(FELD_Z+30)/ZELLE);
 const CN=['stehen','gehen','laufen','fliehen','stehen_bereit','kampf_bereit','schlag_a','schlag_b','schlag_c','stoss_speer','schild_stoss',
   'abwehr_schild','parade','ausweichen','treffer','sterben_vorn','sterben_hinten','jubeln',
-  'speerwurf','schleuder','schild_hoch','gehen_b','laufen_b','stehen_b','schlag_a_b','schlag_b_b','sterben_knie'];
+  'speerwurf','schleuder','bogen','schild_hoch','gehen_b','laufen_b','stehen_b','schlag_a_b','schlag_b_b','sterben_knie'];
 const CN_ERSATZ={gehen_b:'gehen',laufen_b:'laufen',stehen_b:'stehen_bereit',schlag_a_b:'schlag_a',schlag_b_b:'schlag_b',sterben_knie:'sterben_vorn',schild_hoch:'stehen_bereit'};   // fehlt ein Clip im Paket
 const C={};CN.forEach((n,i)=>C[n]=i);
 const S_FORM=0,S_KAMPF=1,S_FLIEH=2,S_STIRBT=3,S_TOT=4,S_WEG=5;
@@ -1233,7 +1402,7 @@ const gA=new Uint8Array(GN*2);   // 0 frei · 1 fliegt · 2 steckt im Boden (Spe
 const gO=new Float32Array(GN*6),gV=new Float32Array(GN*6),gT=new Float32Array(GN*2),gL=new Float32Array(GN*2);
 const gTX=new Float32Array(GN*2),gTZ=new Float32Array(GN*2),gSX=new Float32Array(GN*2),gSZ=new Float32Array(GN*2);
 const gS=new Uint8Array(GN*2),gUq=new Uint8Array(GN*2),gUz=new Uint8Array(GN*2);
-const gHead=[0,0];
+const gHead=[0,0],gSk=new Float32Array(GN*2).fill(1);   // gSk: Größe je Geschoss (Pfeil = verkleinerter Speer)
 function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reichweite
   const F=u.def.fern;u.fZ=-1;
   if(!F||u.mun<=0||gone(u)||u.state==='flieht'||u.engaged)return;
@@ -1258,7 +1427,7 @@ function wurfStart(i,u){
 function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst mit der Entfernung
   const u=U[sUnit[i]],F=u.def.fern;if(!F||sAmmo[i]<=0)return;
   sAmmo[i]--;
-  const k=F.typ==='speer'?0:1,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;
+  const k=F.typ==='stein'?1:0,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;gSk[q]=F.typ==='pfeil'?.55:1;
   if(gA[q]===1)G.fliegend--;
   const fx=Math.sin(sR[i]),fz=Math.cos(sR[i]),ox=sX[i]+fx*.35,oz=sZ[i]+fz*.35,oy=H(sX[i],sZ[i])+1.65;
   const d=Math.hypot(sAX[i]-ox,sAZ[i]-oz),T=Math.max(.35,d/F.v);
@@ -1268,8 +1437,8 @@ function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst m
   gV[o3]=(tx-ox)/T;gV[o3+1]=(ty-oy)/T+.5*GRAV*T;gV[o3+2]=(tz-oz)/T;
   gT[q]=0;gL[q]=T;gA[q]=1;gTX[q]=tx;gTZ[q]=tz;gSX[q]=sX[i];gSZ[q]=sZ[i];gS[q]=sSide[i];gUq[q]=sUnit[i];gUz[q]=u.fZ>=0?u.fZ:255;
   if(u.fZ>=0){const V=U[u.fZ];V.beschuss=Math.max(V.beschuss,T+.8);}
-  G.gesamt++;G.fliegend++;if(k)G.steine++;else G.speere++;
-  u.schiessT=1.3;ereignis(k?'schleuder':'wurf',sX[i],sZ[i]);
+  G.gesamt++;G.fliegend++;if(k)G.steine++;else if(F.typ==='pfeil')G.pfeile=(G.pfeile||0)+1;else G.speere++;
+  u.schiessT=1.3;ereignis(k?'schleuder':F.typ==='pfeil'?'pfeil':'wurf',sX[i],sZ[i]);
 }
 function geschossAufprall(q){
   const tx=gTX[q],tz=gTZ[q],side=gS[q],k=q>=GN?1:0,u0=U[gUq[q]],F=u0.def.fern;
@@ -1733,6 +1902,7 @@ function baueGeschosse(){   // Speere liegen in Flugrichtung (Bahn-Tangente), St
         M[o]=rx;M[o+1]=0;M[o+2]=rz;M[o+3]=0;                      // rechts = hoch × vorwärts
         M[o+4]=fy*rz;M[o+5]=fz*rx-fx*rz;M[o+6]=-fy*rx;M[o+7]=0;   // oben = vorwärts × rechts
         M[o+8]=fx;M[o+9]=fy;M[o+10]=fz;M[o+11]=0;
+        const sk=gSk[q];if(sk!==1)for(let e=0;e<11;e++)M[o+e]*=sk;
       }
       M[o+12]=px;M[o+13]=py;M[o+14]=pz;M[o+15]=1;n++;
     }
@@ -2157,7 +2327,7 @@ const TON=(()=>{
   /* Spielereignis -> Geräuschart · v Lautstärke · t Mindestabstand (s) je Ereignisart · w Hörweite (m) */
   const EV={
     klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.45,t:.9},tod:{a:'tod',v:.42,t:2.2},speer:{a:'speer',v:.8,t:.15},
-    wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
+    pfeil:{a:'pfeil',v:.55,t:.12},wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
     kriegsgeschrei:{a:'kriegsgeschrei',v:.6,t:6,w:140},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
   for(const k in EV)EV[k].l=-1e9;
   /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
@@ -2384,9 +2554,9 @@ function neu(){
 /* ---- Grafikstufen ---- */
 const GRAFIK_ORDNUNG=['niedrig','mittel','hoch'];
 const STUFEN={   // pr Pixeldichte-Grenze · schatten Kartengröße (0 = aus) · Gras nah/fern · baum/busch Anteil · staub Wölkchen · figS 0 keine, 1 nahe, 2 alle Figuren werfen Schatten · blob 1 alle, 2 ferne, 0 keine
-  niedrig:{n:'Niedrig',pr:1,schatten:0,grasN:1800,grasF:1200,baum:.4,busch:.4,staub:80,figS:0,blob:1},
-  mittel:{n:'Mittel',pr:1.5,schatten:2048,grasN:5000,grasF:3200,baum:.75,busch:.7,staub:200,figS:1,blob:2},
-  hoch:{n:'Hoch',pr:2,schatten:2048,grasN:9000,grasF:6000,baum:1,busch:1,staub:320,figS:2,blob:0},
+  niedrig:{n:'Niedrig',nahR:0,pr:1,schatten:0,grasN:1800,grasF:1200,baum:.4,busch:.4,staub:80,figS:0,blob:1},
+  mittel:{n:'Mittel',nahR:45,pr:1.5,schatten:2048,grasN:5000,grasF:3200,baum:.75,busch:.7,staub:200,figS:1,blob:2},
+  hoch:{n:'Hoch',nahR:70,pr:2,schatten:2048,grasN:9000,grasF:6000,baum:1,busch:1,staub:320,figS:2,blob:0},
 };
 let grafikName='mittel',STUFE=STUFEN.mittel,shExt=0;
 function setGrafik(nm){
@@ -2401,6 +2571,10 @@ function setGrafik(nm){
   gelNetz.castShadow=sh;gelNetz.receiveShadow=sh;gelAussen.receiveShadow=sh;
   for(const k in VEG){const v=VEG[k],fr=v.f==='baum'?S.baum:v.f==='busch'?S.busch:Math.max(.5,S.busch);
     v.m.count=Math.round(v.n*fr);v.m.castShadow=sh&&v.f!=='busch';v.m.receiveShadow=sh;}
+  lodR=S.nahR;
+  for(const sp of LODV){sp.act=Math.round(sp.n*(sp.busch?S.busch:S.baum));const cs=sh&&!sp.busch;
+    sp.far.castShadow=cs;sp.far.receiveShadow=sh;for(const m of sp.near){m.castShadow=cs;m.receiveShadow=sh;}}
+  lodUpdate(true);
   GRAS[0].m.geometry.instanceCount=Math.min(GRAS[0].max,S.grasN);GRAS[1].m.geometry.instanceCount=Math.min(GRAS[1].max,S.grasF);
   for(const g of GRAS)g.m.receiveShadow=sh;
   for(const K of KIT){K.im[0].castShadow=sh&&S.figS>=1;K.im[1].castShadow=sh&&S.figS>=2;K.im[0].receiveShadow=K.im[1].receiveShadow=sh;}
@@ -2441,7 +2615,7 @@ function staubEmission(dt){
     }
   }
 }
-let letzt=0,fz=0,ft=0,uiT=0;const fpsLog=[];
+let letzt=0,fz=0,ft=0,uiT=0,lodT=0;const fpsLog=[];
 function schleife(t){
   requestAnimationFrame(schleife);
   const dt=Math.min(.25,(t-letzt)/1000);letzt=t;
@@ -2457,6 +2631,7 @@ function schleife(t){
   himmel.position.copy(camera.position);
   GRAS[0].uni.uCen.value.set(ziel.x,ziel.z);GRAS[1].uni.uCen.value.set(ziel.x,ziel.z);
   sonneNachfuehren();
+  if(t-lodT>=500){lodT=t;lodUpdate(false);}
   baueInstanzen();baueGeschosse();markerUpdate(t);
   if(!pausiert&&phase!=='aufstellung')staubEmission(Math.min(.1,dt));
   if(!pausiert){staubSchritt(Math.min(.1,dt));spritzSchritt(Math.min(.1,dt)*tempoV);}
@@ -2548,7 +2723,7 @@ window.SCHLACHT={
   get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id]};},
   get ton(){return TON.info();},get geschosse(){return G;},get ereignisse(){return evZ;},get auswahl(){return[...selM];},get schlachtZeit(){return schlachtZ;},
-  start,befehl,angriff,neu,waehle:select,setGrafik,get grafik(){return grafikName;},hoehe:H,wald:WF,
+  start,befehl,angriff,neu,waehle:select,setGrafik,get grafik(){return grafikName;},hoehe:H,wald:WF,vegInfo,lodUpdate,
   kamera(a,e,d,x,z){az=a;el=e;dist=d;ziel.x=x;ziel.z=z;camSetzen();},
   tempo(n){tempoV=Math.max(.1,Math.min(30,+n||1));uiAktualisieren();},
   pause(p){pausiert=p===undefined?!pausiert:!!p;uiAktualisieren();},

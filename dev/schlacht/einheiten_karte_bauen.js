@@ -15,10 +15,17 @@ const PAKETE = {
   A4_balearisch: { familien: ['A4_balearisch'], rollen: ['missile'] },
   A6_keltisch: { familien: ['A6_keltisch'], rollen: ['sword', 'spear'] },
   A7_hellenistisch: { familien: ['A7_hellenistisch'], rollen: ['spear', 'sword'] },
+  A7_toxotes: { familien: ['A7_hellenistisch'], rollen: ['missile'] },
+  A6_plaenkler: { familien: ['A6_keltisch'], rollen: ['missile'] },
+  A7_phalangit: { familien: [], rollen: [] },
+  A7_hoplit: { familien: [], rollen: [] },
 };
 const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_hastatus', art: 'A1_hastatus' };
 
-function paketFuer(kit, rolle) {
+// Einzelne Einheiten mit eigenem Paket (E2), vor der Familienregel
+const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler' };
+function paketFuer(kit, rolle, id) {
+  if (EIGEN[id]) return { paket: EIGEN[id], genau: true };
   for (const [id, p] of Object.entries(PAKETE)) if (p.familien.includes(kit) && p.rollen.includes(rolle)) return { paket: id, genau: true };
   for (const [id, p] of Object.entries(PAKETE)) if (p.familien.includes(kit)) return { paket: id, genau: false };
   return { paket: ROLLE_RUECKFALL[rolle] || 'A1_hastatus', genau: false };
@@ -28,7 +35,7 @@ const profile = {};
 for (const t of P) {
   const sonder = !t.id.startsWith('basis_');
   const bild = sonder && SHEET.includes(t.id) ? t.id : null;   // Kampagnenbild aus u_sheet (Sondereinheiten); Grundeinheiten: u_e<N>_<rolle>
-  const pk = paketFuer(t.kit, t.rolle);
+  const pk = paketFuer(t.kit, t.rolle, t.id);
   profile[t.id] = { n: t.n, rolle: t.rolle, kit: t.kit, kulturen: t.kulturen, epochen: t.epochen, figuren: t.figuren, formation: t.standard,
     bild, sheet: bild ? SHEET.indexOf(bild) : -1, paket: pk.paket, paketGenau: pk.genau };
 }

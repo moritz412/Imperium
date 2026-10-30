@@ -97,6 +97,12 @@ def helm(art, name):
         # Rosshaarbusch: senkrechter Fächer schwarz-rot
         _kasten(bm, Vector((0, 0.01, r + 0.055)), (0.022, 0.17, 0.11), 2)
         _kasten(bm, Vector((0, -0.005, r + 0.085)), (0.026, 0.13, 0.06), 1)
+    elif art == "korinth":   # korinthischer Helm: geschlossener Gesichtsschutz mit Augenschlitzen und Nasenschiene, Kamm
+        for sx in (-1, 1):   # Wangenplatten vorn, Spalt in der Mitte (Mund), Augenschlitz oben
+            _platte(bm, [(sx * 0.02, -0.118, -0.035), (sx * 0.105, -0.085, -0.03), (sx * 0.1, -0.06, -0.15), (sx * 0.03, -0.1, -0.15)], 0.0, 0)
+        _platte(bm, [(-0.012, -0.122, 0.01), (0.012, -0.122, 0.01), (0.01, -0.124, -0.075), (-0.01, -0.124, -0.075)], 0.0, 0)  # Nasenschiene
+        _platte(bm, [(-0.07, 0.11, -0.03), (0.07, 0.11, -0.03), (0.06, 0.12, -0.13), (-0.06, 0.12, -0.13)], 0.0, 0)   # Nackenschutz
+        _kasten(bm, Vector((0, 0.0, r + 0.045)), (0.02, 0.2, 0.09), 1)   # Rosshaarkamm von vorn nach hinten
     else:  # thraker
         _kasten(bm, Vector((0, -0.04, r + 0.015)), (0.03, 0.09, 0.05), 0, Matrix.Rotation(math.radians(-25), 3, "X"))
         _platte(bm, [(-0.11, -0.115, -0.01), (0.11, -0.115, -0.01), (0.12, -0.16, -0.035), (-0.12, -0.16, -0.035)], 0.004, 0)  # Stirnschirm
@@ -143,6 +149,34 @@ def schild(w, h, name, farbe, rand_farbe=BRONZE, mittel=None, woelbung=0.0, zyli
             p0 = umriss(abs(z0) / (0.5 * h), math.pi / 2 * (1 if z0 > 0 else -1)); p1 = umriss(abs(z1) / (0.5 * h), math.pi / 2 * (1 if z1 > 0 else -1))
             _kasten(bm, Vector((0, (p0.y + p1.y) / 2 - 0.012, (z0 + z1) / 2)), (0.05, 0.02, abs(z1 - z0)), 4)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return _obj(name, bm, mats)
+
+
+def bogen(name, laenge=1.15):
+    """Kompositbogen (Reflexbogen): Griff im Ursprung, Wurfarme entlang ±Z, Bauch nach −Y (Sehne liegt bei +Y)."""
+    bm = bmesh.new()
+    mats = [mat("bogen_horn", (0.16, 0.09, 0.04), 0, 0.6), mat("sehne", (0.6, 0.55, 0.45), 0, 0.9)]
+    n = 6; pts = []
+    for k in range(-n, n + 1):
+        t = k / n; z = t * laenge / 2
+        y = -0.07 * (1 - t * t) + 0.05 * abs(t) ** 3   # Bogen nach vorn gewölbt, Enden zurückgebogen (Reflex)
+        pts.append(Vector((0, y, z)))
+    for a, b in zip(pts, pts[1:]):
+        m = (a + b) / 2; d = b - a; L = d.length
+        R = Vector((0, 0, 1)).rotation_difference(d.normalized()).to_matrix()
+        _kasten(bm, m, (0.018, 0.022, L * 1.05), 0, R)
+    _kasten(bm, Vector((0, pts[0].y + 0.002, 0)), (0.004, 0.004, laenge * 0.98), 1)   # Sehne (gerade, zwischen den Enden)
+    return _obj(name, bm, mats)
+
+
+def koecher(name):
+    """Köcher mit Pfeilen: Unterkante im Ursprung, entlang +Z (0,6 m)."""
+    bm = bmesh.new()
+    mats = [mat("koecher_leder", (0.22, 0.12, 0.05), 0, 0.85), mat("pfeil_feder", (0.55, 0.5, 0.42), 0, 0.9)]
+    r = bmesh.ops.create_cone(bm, cap_ends=True, segments=6, radius1=0.045, radius2=0.055, depth=0.6, matrix=Matrix.Translation((0, 0, 0.3)))
+    for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = 0
+    for dx, dy in ((-0.02, 0), (0.02, 0.01), (0, -0.02)):
+        _kasten(bm, Vector((dx, dy, 0.66)), (0.012, 0.03, 0.12), 1)   # Federn
     return _obj(name, bm, mats)
 
 

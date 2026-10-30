@@ -47,6 +47,20 @@ KITS = {
     "A4_balearisch": dict(tunika=(0.58, 0.52, 0.42), haut="young_caucasian_male2", muskel=0.5, rock=0.08,
                           helm="haar", haar_tief=0.86, brust=False, schild=None,
                           waffe=("schleuder", 0.9), fern="schleuder"),
+    # E2 (30.10.): eigene Figuren für die Vorlage-Gefechte
+    # Phalangit: Sarissa ~5,5 m (Griff bei 30 % vom Ende), kleiner Rundschild (Pelte ~0,6 m), thrakischer Helm, Leinenpanzer weiß
+    "A7_phalangit": dict(tunika=(0.66, 0.62, 0.5), haut="young_caucasian_male", muskel=0.6, rock=0.12, helm="thraker", brust=False,
+                         schild=dict(w=0.62, h=0.62, farbe=(0.45, 0.3, 0.1), woelbung=0.05), waffe=("speer", 5.5, 0.3)),
+    # Hoplit: korinthischer Helm, große Bronze-Aspis, Speer (Dory 2,4 m), Panzer bronzefarben (über die Tunikafarbe)
+    "A7_hoplit": dict(tunika=(0.42, 0.28, 0.1), haut="young_caucasian_male", muskel=0.65, rock=0.1, helm="korinth", brust=False,
+                      schild=dict(w=0.92, h=0.92, farbe=(0.45, 0.3, 0.1), woelbung=0.09), waffe=("speer", 2.4)),
+    # Kretische Bogenschützen: Kompositbogen links, Köcher, kein Helm, kein Schild
+    "A7_toxotes": dict(tunika=(0.55, 0.45, 0.3), haut="young_caucasian_male2", muskel=0.5, rock=0.1, helm="haar", haar_tief=0.9, brust=False,
+                       schild=None, waffe=("bogen", 1.15), fern="bogen"),
+    # Keltische Plänkler: Wurfspeere, kleiner Rundschild, ohne Helm, Hose
+    "A6_plaenkler": dict(tunika=(0.3, 0.22, 0.1), hose=(0.22, 0.2, 0.12), haut="young_caucasian_male2", muskel=0.55, rock=0.05,
+                         helm="haar", haar_tief=0.86, brust=False, schild=dict(w=0.55, h=0.55, farbe=(0.12, 0.25, 0.1)),
+                         waffe=("speer", 1.6), fern="speerwurf"),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -398,6 +412,19 @@ if KIT["waffe"][0] == "schwert":
     waffe = TF.schwert(KIT["waffe"][1], "teil_schwert_%s_%s" % (KURZ, KIT["waffe"][1]))
     R = Vector((0, 0, 1)).rotation_difference(ziel).to_matrix().to_4x4()
     waffe.matrix_world = Matrix.Translation(hand_r) @ R
+elif KIT["waffe"][0] == "bogen":
+    waffe = TF.bogen("teil_bogen_%s_kompositbogen" % KURZ, KIT["waffe"][1])
+    hand_l2 = kp("LeftHand", 0.6)
+    waffe.matrix_world = Matrix.Translation(hand_l2)   # aufrecht, Bauch nach vorn (−Y)
+    bpy.context.view_layer.update()
+    m = waffe.matrix_world.copy(); waffe.parent = arm; waffe.parent_type = "BONE"; waffe.parent_bone = "LeftHand"
+    bpy.context.view_layer.update(); waffe.matrix_world = m
+    kk = TF.koecher("teil_koecher_%s_pfeile" % KURZ)
+    s1k = kp("Spine1", 0.5)
+    kk.matrix_world = Matrix.Translation(s1k + Vector((0.08, 0.16, -0.25))) @ Matrix.Rotation(math.radians(-20), 4, "Y")
+    bpy.context.view_layer.update()
+    mk = kk.matrix_world.copy(); kk.parent = arm; kk.parent_type = "BONE"; kk.parent_bone = "Spine1"
+    bpy.context.view_layer.update(); kk.matrix_world = mk; teile.append(kk)
 elif KIT["waffe"][0] == "schleuder":
     import bmesh as _b
     bm = _b.new()
@@ -425,7 +452,8 @@ else:
     bpy.context.view_layer.objects.active = schaft; bpy.ops.object.join()
     waffe = schaft; waffe.name = "teil_speer_%s_stoss" % KURZ
     R = Vector((0, 0, 1)).rotation_difference(ziel).to_matrix().to_4x4()
-    waffe.matrix_world = Matrix.Translation(hand_r) @ R @ Matrix.Translation((0, 0, -0.4 * wlang))
+    griff = KIT["waffe"][2] if len(KIT["waffe"]) > 2 else 0.4
+    waffe.matrix_world = Matrix.Translation(hand_r) @ R @ Matrix.Translation((0, 0, -griff * wlang))
 bpy.context.view_layer.update()
 m = waffe.matrix_world.copy(); waffe.parent = arm; waffe.parent_type = "BONE"; waffe.parent_bone = "RightHand"
 bpy.context.view_layer.update(); waffe.matrix_world = m
@@ -476,6 +504,10 @@ OBEN = {"RightArm": (-0.25, 0.0, 0.97)}
 K1 = dict(BEREIT, **OBEN, RightForeArm=(-0.7, 0.0, 0.7)); K2 = dict(BEREIT, **OBEN, RightForeArm=(0.0, -0.7, 0.7))
 K3 = dict(BEREIT, **OBEN, RightForeArm=(0.7, 0.0, 0.7)); K4 = dict(BEREIT, **OBEN, RightForeArm=(0.0, 0.7, 0.7))
 ABWURF = dict(BEREIT, RightArm=(-0.1, -0.9, 0.35), RightForeArm=(0, -1, 0.05), Spine1=(0.05, -0.2, 0.98))
+BOGEN_HOCH = dict(BEREIT, LeftArm=(0.15, -0.45, -0.88), LeftForeArm=(-0.1, -0.9, 0.42), RightArm=(-0.2, -0.5, -0.84), RightForeArm=(0.3, -0.85, 0.42))
+BOGEN_ZUG = dict(BOGEN_HOCH, RightArm=(-0.3, -0.25, -0.92), RightForeArm=(0.55, -0.2, 0.81), Spine1=(-0.06, 0.0, 1))
+BOGEN_LOS = dict(BOGEN_ZUG, RightArm=(-0.4, 0.1, -0.9), RightForeArm=(0.2, 0.5, 0.84))
+clip_haltung("bogen", [(1, BEREIT), (7, BOGEN_HOCH), (15, BOGEN_ZUG), (21, BOGEN_ZUG), (23, BOGEN_LOS), (32, BEREIT)])
 if KIT.get("fern") == "schleuder" or True:
     clip_haltung("schleuder", [(1, BEREIT), (4, K1), (7, K2), (10, K3), (13, K4), (16, K1), (19, K2), (22, K3), (24, ABWURF), (28, ABWURF), (36, BEREIT)])
 clip_cmu("sterben_vorn", "90", "16", 0.42, 0.75, dauer=40, am_platz=False)
