@@ -1,0 +1,16 @@
+[
+ {"id": "ruhe_1", "p": "dark cinematic ambient before a battle, wind over an open plain, distant slow war drums, low sustained strings, quiet tension, orchestral film score, no vocals"},
+ {"id": "aufmarsch_rom", "p": "epic orchestral march, ancient Roman legion advancing, steady heavy war drums, bold low brass horns, building tension, cinematic film score, no vocals"},
+ {"id": "aufmarsch_karthago", "p": "epic orchestral march with Mediterranean and North African percussion, frame drums, low brass and ney flute, armies advancing, building tension, cinematic film score, no vocals"},
+ {"id": "aufmarsch_kelt", "p": "epic orchestral march with Celtic war drums and deep horns, bodhran, low strings, tribal army advancing, building tension, cinematic film score, no vocals"},
+ {"id": "kampf_1", "p": "epic orchestral battle music, full symphony orchestra, massive choir chanting, pounding war drums, heroic brass, fast driving strings, intense, cinematic film score"},
+ {"id": "kampf_2", "p": "intense epic battle music, thundering taiko and timpani drums, aggressive low brass, staccato strings, dark choir, relentless rhythm, cinematic film score"},
+ {"id": "kampf_3", "p": "heroic epic battle theme, soaring french horns, choir, fast strings ostinato, big percussion hits, triumph and danger, cinematic film score"},
+ {"id": "kampf_rom", "p": "epic ancient Roman battle music, powerful brass fanfares, war drums, male choir, driving strings, grand and martial, cinematic film score"},
+ {"id": "kampf_karthago", "p": "epic battle music with North African percussion, darbuka and frame drums, exotic woodwinds, low brass, choir, fierce and driving, cinematic film score"},
+ {"id": "hoehepunkt_1", "p": "climactic epic orchestral music, the decisive moment of a great battle, huge choir, full orchestra at full power, timpani rolls, soaring brass, cinematic film score"},
+ {"id": "hoehepunkt_2", "p": "desperate climactic battle music, dark choir, pounding drums, dissonant brass swells, racing strings, overwhelming intensity, cinematic film score"},
+ {"id": "sieg_1", "p": "triumphant victory music after a battle, majestic brass fanfare, choir, warm strings, glorious and proud, cinematic film score, no vocals"},
+ {"id": "sieg_2", "p": "noble victorious orchestral theme, slow majestic horns and strings, choir swelling, relief and glory, cinematic film score"},
+ {"id": "niederlage_1", "p": "sorrowful orchestral lament after a lost battle, solo cello, slow mournful strings, distant choir, grief, cinematic film score, no vocals"}
+]

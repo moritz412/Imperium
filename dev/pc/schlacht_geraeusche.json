@@ -1,0 +1,22 @@
+[
+ {"id": "klirren", "p": "two iron swords clashing together, sharp metallic clang, close", "dauer": 2, "n": 8},
+ {"id": "schild", "p": "a sword striking a wooden shield, heavy wooden thud with metal, close", "dauer": 2, "n": 6},
+ {"id": "schildstoss", "p": "heavy wooden shields slamming into each other, dull thump", "dauer": 2, "n": 4},
+ {"id": "treffer", "p": "a man grunting in pain as he is hit in a fight, short", "dauer": 2, "n": 6},
+ {"id": "tod", "p": "a man screaming and falling to the ground in battle, short scream", "dauer": 3, "n": 6},
+ {"id": "speer", "p": "a spear thrust hitting a shield, wooden knock and scrape", "dauer": 2, "n": 4},
+ {"id": "ruestung", "p": "armor and weapons rattling as a soldier moves, metal clinking", "dauer": 2, "n": 4},
+ {"id": "kriegsgeschrei", "p": "a large army of men shouting a loud battle cry and charging", "dauer": 4, "n": 4},
+ {"id": "horn", "p": "a single long ancient war horn blast, deep brass horn signal outdoors", "dauer": 4, "n": 4},
+ {"id": "sieg_jubel", "p": "a crowd of soldiers cheering and shouting in victory outdoors", "dauer": 5, "n": 2},
+ {"id": "marsch", "p": "hundreds of soldiers marching in step on grass, rhythmic footsteps, armor rattling", "dauer": 10, "n": 2},
+ {"id": "sturm", "p": "a large crowd of soldiers running and yelling, many footsteps, charging", "dauer": 10, "n": 2},
+ {"id": "kampflaerm_nah", "p": "a big medieval battle nearby, many swords clashing, men shouting and screaming, shields hit", "dauer": 10, "n": 3},
+ {"id": "kampflaerm_fern", "p": "distant battle noise, muffled clash of weapons and shouting of an army far away", "dauer": 10, "n": 2},
+ {"id": "wind", "p": "gentle wind blowing over an open grassy plain, outdoor ambience", "dauer": 10, "n": 2},
+ {"id": "wiese", "p": "quiet meadow ambience, birds singing in the distance, insects, light breeze", "dauer": 10, "n": 1},
+ {"id": "pfeil", "p": "an arrow whooshing past quickly", "dauer": 1, "n": 4},
+ {"id": "pfeil_treffer", "p": "an arrow hitting a wooden shield with a thud", "dauer": 1, "n": 4},
+ {"id": "schleuder", "p": "a sling whirling and releasing a stone, whoosh", "dauer": 2, "n": 3},
+ {"id": "wurf", "p": "a javelin thrown hard, whoosh through the air", "dauer": 1, "n": 3}
+]

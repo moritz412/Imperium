@@ -15,74 +15,185 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 .titel{font-family:Marcellus,"Palatino Linotype",Palatino,Georgia,serif;letter-spacing:.02em}
 
-/* Oberfläche: dunkles Holz für Karten, Bronze für Knöpfe, Pergament für Tafeln */
-#zeile{position:fixed;left:50%;top:var(--st);transform:translateX(-50%);max-width:46vw;text-align:center;padding:7px 16px;
-  background:var(--holz);border:1px solid var(--bronze2);border-radius:10px;box-shadow:inset 0 0 0 1px rgba(224,180,90,.25),0 3px 10px rgba(0,0,0,.5);
-  font-size:15px;pointer-events:none}
-#fps{position:fixed;right:var(--sr);top:var(--st);background:rgba(28,24,18,.8);border-radius:6px;padding:4px 9px;font:12px monospace;color:var(--mut);pointer-events:none}
-#feinde{position:fixed;left:var(--sl);top:var(--st);display:flex;flex-direction:column;gap:5px;width:170px}
-.chip{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:8px;background:var(--holz);border:1px solid #5a3f1f;font-size:13px;min-height:34px}
-.chip b{font-weight:normal;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chip span{color:var(--gold);font-variant-numeric:tabular-nums}
-.chip i{width:10px;height:10px;border-radius:50%;background:#7a3fa0;border:1px solid #000;flex:none}
-.chip.weg{opacity:.45;filter:saturate(.3)}
-#spalte{position:fixed;right:var(--sr);top:calc(var(--st) + 34px);display:flex;flex-direction:column;gap:8px;width:188px}
-.plak{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:9px 14px;border-radius:10px;
-  background:linear-gradient(#cfa05a,#8f6429);border:1px solid #5a3f17;color:#20170c;box-shadow:inset 0 1px 0 rgba(255,235,190,.5),0 3px 8px rgba(0,0,0,.45);min-height:50px}
-.plak b{font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:17px}
-.plak small{font-size:12px;opacity:.78}
+/* Oberfläche: dunkles Holz für Karten, Bronze für Knöpfe, Pergament für Tafeln (Vorgabe 30.10.: eigene Gestaltung) */
+svg.ic{width:26px;height:26px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#fps{position:fixed;right:var(--sr);top:var(--st);background:rgba(28,24,18,.8);border-radius:6px;padding:4px 9px;font:12px monospace;color:var(--mut);pointer-events:none;z-index:3}
+
+/* oben Mitte: Kräftevergleich + Hinweiszeile */
+#oben{position:fixed;left:50%;top:var(--st);transform:translateX(-50%);width:min(440px,calc(100vw - 380px));display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;z-index:2}
+#kraft{width:100%;padding:6px 12px 5px;background:var(--holz);border:1px solid var(--bronze2);border-radius:11px;box-shadow:inset 0 0 0 1px rgba(224,180,90,.25),0 3px 10px rgba(0,0,0,.5)}
+#kraft .kk{display:flex;align-items:center;gap:8px}
+#kraft .kn{font:600 17px Marcellus,Georgia,serif;font-variant-numeric:tabular-nums;min-width:34px}
+#kraft .kn.r{color:#e78a7e;text-align:right}#kraft .kn.k{color:#c79be6}
+#kraft .kb{flex:1;height:13px;border-radius:7px;background:#7a3fa0;overflow:hidden;position:relative;border:1px solid #14110d;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+#kraft .kb i{position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(#d4503f,#8e241a);transition:width .6s}
+#kraft .kb b{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--gold);opacity:.8}
+#kraft .kz{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);margin-top:2px}
+#kraft .kz em{font-style:normal;color:var(--gold);font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:4px}
+#kraft svg.ic{width:13px;height:13px}
+#hinweis{max-width:100%;text-align:center;padding:4px 14px;font-size:13px;border-radius:8px;background:rgba(28,24,18,.78);border:1px solid rgba(169,121,58,.55);opacity:0;transition:opacity 1.2s;min-height:24px}
+#hinweis.an{opacity:1;transition:opacity .25s}
+
+/* Bilder der Einheiten: echtes Bild (karten/<id>.jpg) über gemaltem Platzhalter */
+.bild{position:relative;overflow:hidden;--c1:#c9473a;--c2:#3f100c;
+  background:radial-gradient(circle at 28% 18%,rgba(255,226,160,.38),transparent 52%),repeating-linear-gradient(112deg,rgba(0,0,0,.07) 0 3px,transparent 3px 8px),linear-gradient(165deg,var(--c1),var(--c2))}
+.bild.s1{--c1:#a56bd0;--c2:#240f33}
+.bild::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 22px 4px rgba(0,0,0,.55);pointer-events:none}
+.bild .ph{position:absolute;inset:14% 14% 18%;color:#f1d79a;opacity:.92;filter:drop-shadow(0 2px 2px rgba(0,0,0,.65))}
+.bild img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0;transition:opacity .3s}
+.bild img.ok{opacity:1}
+
+/* Feindliste links */
+#feinde{position:fixed;left:var(--sl);top:var(--st);display:flex;flex-direction:column;gap:5px;width:176px;z-index:2}
+.fk{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:9px;background:var(--holz);border:1px solid #5a3f1f;min-height:52px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.45)}
+.fk .bild{width:38px;height:46px;border-radius:5px;flex:none;border:1px solid rgba(0,0,0,.6)}
+.fk .t{flex:1;min-width:0}
+.fk .n{font:13px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fk .b{height:6px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden;margin:3px 0 2px}
+.fk .b i{display:block;height:100%;width:100%;background:linear-gradient(#b47be0,#6f3a95)}
+.fk .z{font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
+.fk .z b{font-weight:normal;color:var(--gold)}
+.fk.weg{opacity:.4;filter:saturate(.2)}
+.fk.fl .bild{filter:grayscale(.7)}
+
+/* Befehle rechts: immer EINE Spalte */
+#spalte{position:fixed;right:var(--sr);top:calc(var(--st) + 30px);display:flex;flex-direction:column;gap:6px;width:150px;z-index:2}
+.plak{display:flex;align-items:center;gap:9px;text-align:left;padding:7px 11px;border-radius:10px;
+  background:linear-gradient(#cfa05a,#8f6429);border:1px solid #5a3f17;color:#20170c;box-shadow:inset 0 1px 0 rgba(255,235,190,.5),0 3px 8px rgba(0,0,0,.45);min-height:48px}
+.plak span{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.plak b{font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:16px}
+.plak small{font-size:11.5px;opacity:.78;min-height:13px}
 .plak:active{filter:brightness(.88)}
-.plak.gross{background:linear-gradient(#e6bd6c,#a8722a);min-height:62px}
-.plak.gross b{font-size:20px}
+.plak.gross{background:linear-gradient(#e6bd6c,#a8722a);min-height:60px}
+.plak.gross b{font-size:18px}
 .plak.rot{background:linear-gradient(#c4503f,#7e231a);color:#fbeee0}
-#ausw{display:none}
-#karten{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--sb);display:flex;gap:10px}
-.karte{display:flex;align-items:center;gap:10px;width:178px;padding:8px 10px;border-radius:12px;background:var(--holz);border:2px solid #5a3f1f;
-  box-shadow:0 3px 10px rgba(0,0,0,.5);cursor:pointer}
-.karte.sel{border-color:var(--gold);box-shadow:0 0 14px rgba(224,180,90,.65),0 3px 10px rgba(0,0,0,.5)}
+.plak.an{background:linear-gradient(#f0cf86,#b9812f);box-shadow:inset 0 0 0 2px var(--gold),0 3px 8px rgba(0,0,0,.45)}
+.plak[hidden]{display:none}
+
+/* Einheitenleiste unten */
+#karten{position:fixed;left:calc(var(--sl) + 276px);right:calc(var(--sr) + 160px);bottom:var(--sb);display:flex;gap:10px;justify-content:center;align-items:flex-end;z-index:2}
+.karte{position:relative;width:116px;padding:5px 5px 6px;border-radius:12px;background:var(--holz);border:2px solid #5a3f1f;
+  box-shadow:0 3px 10px rgba(0,0,0,.55);cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+.karte .bild{height:118px;border-radius:7px;border:1px solid rgba(0,0,0,.7)}
+.karte.sel{border-color:var(--gold);transform:translateY(-10px);box-shadow:0 0 16px rgba(224,180,90,.7),0 5px 12px rgba(0,0,0,.55)}
 .karte.weg{opacity:.5;filter:saturate(.25)}
-.karte .t{flex:1;min-width:0}
-.karte .n{font-family:Marcellus,Georgia,serif;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.karte .s{font-size:13px;color:var(--mut)}
-.karte .s b{color:var(--gold);font-weight:normal}
-.karte .z{font-size:11.5px;color:#d9b36a;min-height:14px}
-.karte .mud{height:4px;border-radius:2px;background:rgba(0,0,0,.45);margin-top:2px;overflow:hidden}
+.karte .ring{position:absolute;right:8px;top:8px;z-index:2}
+.karte .zst{position:absolute;left:7px;right:7px;bottom:50px;z-index:2;display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:9px;background:rgba(20,16,12,.72);font-size:11px;color:#f1d79a;white-space:nowrap;overflow:hidden}
+.karte .zst svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.karte .n{font:14px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px 2px 2px}
+.karte .st{display:flex;align-items:center;gap:6px;margin:0 2px}
+.karte .st .bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.55);overflow:hidden}
+.karte .st .bar i{display:block;height:100%;width:100%;background:linear-gradient(#e46a58,#a22d22)}
+.karte .st b{font:600 13px Georgia,serif;color:var(--gold);min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.karte .mud{height:3px;border-radius:2px;background:rgba(0,0,0,.45);margin:4px 2px 0;overflow:hidden}
 .karte .mud i{display:block;height:100%;width:0;background:#c9a24a}
-.ring{width:48px;height:48px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.5) 0);display:grid;place-items:center}
-.ring i{width:35px;height:35px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 12px Georgia,serif;color:var(--ink)}
-#erkl,#ende{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:var(--perg);color:var(--tinte);
-  border:3px solid var(--bronze2);border-radius:14px;box-shadow:inset 0 0 0 2px rgba(255,240,200,.6),0 10px 40px rgba(0,0,0,.65);padding:18px 24px;min-width:300px;max-width:420px}
-#erkl{top:46%}
-#erkl h2,#ende h2{margin:0 0 4px;font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:24px;border-bottom:2px solid var(--bronze);padding-bottom:4px}
-#erkl .zl{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted rgba(90,63,23,.4)}
-#erkl .zl b{color:#7a4a10;font-weight:normal}
-#erkl p{margin:8px 0 0;font-style:italic;font-size:14px}
-#ende{text-align:center;padding:24px 34px;z-index:5}
-#ende h2{font-size:44px;border:0;margin-bottom:2px}
+.ring{width:38px;height:38px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.6) 0);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.7)}
+.ring i{width:28px;height:28px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 11px Georgia,serif;color:var(--ink)}
+.karte .mk{position:absolute;left:8px;top:8px;z-index:2;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#20170c;font:700 11px/18px Georgia,serif;text-align:center;display:none}
+.karte.sel.multi .mk{display:block}
+
+/* Einheitenfenster links unten */
+#fenster{position:fixed;left:var(--sl);bottom:var(--sb);width:262px;padding:8px 10px 9px;display:none;gap:10px;flex-wrap:wrap;
+  background:var(--holz);border:2px solid var(--bronze2);border-radius:12px;box-shadow:inset 0 0 0 1px rgba(224,180,90,.25),0 4px 14px rgba(0,0,0,.6);z-index:2}
+#fenster.an{display:flex}
+#fenster .bild{width:90px;height:120px;border-radius:7px;border:1px solid rgba(0,0,0,.7);flex:none}
+#fenster .w{flex:1;min-width:0}
+#fenster h3{margin:0 0 3px;font:17px Marcellus,Georgia,serif;font-weight:normal;color:var(--gold);line-height:1.15}
+#fenster .zl{display:flex;justify-content:space-between;font-size:13px;padding:1.5px 0;border-bottom:1px dotted rgba(184,171,144,.25)}
+#fenster .zl b{font-weight:normal;color:var(--ink);font-variant-numeric:tabular-nums}
+#fenster p{flex-basis:100%;margin:0;font-size:12.5px;font-style:italic;color:var(--mut);line-height:1.3}
+#fenster .x{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:20px;line-height:1}
+
+/* schwebende Banner über den Einheiten (DOM, per Transform; höchstens 15 Hz) */
+#banner{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.bnr{position:absolute;left:0;top:0;width:44px;margin-left:0;transform-origin:50% 100%;will-change:transform,opacity;display:none;--c:#b02a22}
+.bnr.s1{--c:#7a3fa0}
+.bnr svg.bs{display:block;width:44px;height:52px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.bnr svg.bs path{fill:var(--c);stroke:#e0b45a;stroke-width:2.5}
+.bnr.sel svg.bs path{stroke:#fff3c4;stroke-width:4}
+.bnr.fl{filter:grayscale(.8);opacity:.7}
+.bnr .sym{fill:none;stroke:#f6e4b4;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.bnr .bb{height:6px;margin:1px 5px 0;border-radius:3px;background:rgba(0,0,0,.7);overflow:hidden;border:1px solid rgba(0,0,0,.8)}
+.bnr .bb i{display:block;height:100%;width:100%;background:#e0b45a}
+
+/* Tafeln */
+#ende{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:var(--perg);color:var(--tinte);
+  border:3px solid var(--bronze2);border-radius:14px;box-shadow:inset 0 0 0 2px rgba(255,240,200,.6),0 10px 40px rgba(0,0,0,.65);padding:18px 26px 20px;width:min(520px,94vw);max-height:94vh;overflow:auto;text-align:center;z-index:5}
+#ende h2{margin:0 0 2px;font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:44px}
 #ende.sieg h2{color:#8a5a0e}#ende.nied h2{color:#8c2018}
-#ende .u{margin:0 0 12px;font-style:italic}
+#ende .u{margin:0 0 10px;font-style:italic}
+#ende .eh{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:1px dotted rgba(90,63,23,.45);text-align:left}
+#ende .eh .bild{width:42px;height:56px;border-radius:5px;flex:none;border:1px solid rgba(60,40,10,.7)}
+#ende .eh .t{flex:1;min-width:0}
+#ende .eh .n{font:16px Marcellus,Georgia,serif}
+#ende .eh .v{height:7px;border-radius:4px;background:rgba(60,40,10,.25);overflow:hidden;display:flex;margin:4px 0 2px}
+#ende .eh .v i{display:block;height:100%}
+#ende .eh small{font-size:12.5px;color:#5a4220}
 #ende .zl{display:flex;justify-content:space-between;gap:30px;padding:4px 0;border-bottom:1px dotted rgba(90,63,23,.4)}
-#ende .plak{margin:16px auto 0;align-items:center;width:200px;text-align:center}
+#ende .plak{margin:16px auto 0;justify-content:center;width:220px;text-align:center}
+#ende .plak span{align-items:center}
 #lade{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(#2e261d,#14110d);flex-direction:column;gap:12px;z-index:9;font-size:20px}
 #lade .z{color:var(--mut);font-size:14px;min-height:18px}
 .balken{width:min(320px,70vw);height:12px;border-radius:7px;background:#14110d;border:1px solid var(--bronze2);overflow:hidden}
 .balken i{display:block;height:100%;width:0;background:linear-gradient(#e6bd6c,#a8722a)}
+
+/* Hochformat: Fenster über die Leiste */
+@media (max-aspect-ratio:1/1){
+  #karten{left:var(--sl);right:calc(var(--sr) + 160px)}
+  #fenster{bottom:calc(var(--sb) + 190px)}
+}
+@media (max-height:640px){.karte .bild{height:92px}.karte .zst{bottom:46px}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- Befehlssymbole (32 × 32) -->
+  <symbol id="ic-schild" viewBox="0 0 32 32"><path d="M16 3l11 4v9c0 7-5 11-11 14C10 27 5 23 5 16V7z"/><path d="M16 8v17M10 14h12"/></symbol>
+  <symbol id="ic-speere" viewBox="0 0 32 32"><path d="M5 27L26 6M27 27L6 6"/><path d="M26 6h-6M26 6v6M6 6h6M6 6v6"/></symbol>
+  <symbol id="ic-pfeil" viewBox="0 0 32 32"><path d="M3 16h23M19 8l8 8-8 8"/><path d="M5 10v12" /></symbol>
+  <symbol id="ic-pause" viewBox="0 0 32 32"><path d="M11 6v20M21 6v20" stroke-width="4.2"/></symbol>
+  <symbol id="ic-play" viewBox="0 0 32 32"><path d="M10 6l16 10-16 10z"/></symbol>
+  <symbol id="ic-sand" viewBox="0 0 32 32"><path d="M8 4h16M8 28h16M10 4c0 9 12 8 12 24M22 4c0 9-12 8-12 24"/></symbol>
+  <symbol id="ic-zahn" viewBox="0 0 32 32"><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="9.5"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6 6l3 3M23 23l3 3M26 6l-3 3M9 23l-3 3"/></symbol>
+  <symbol id="ic-ton" viewBox="0 0 32 32"><path d="M4 12h5l7-6v20l-7-6H4z"/><path d="M21 11c3 3 3 7 0 10M25 7c5 5 5 13 0 18"/></symbol>
+  <symbol id="ic-stumm" viewBox="0 0 32 32"><path d="M4 12h5l7-6v20l-7-6H4z"/><path d="M22 12l7 8M29 12l-7 8"/></symbol>
+  <symbol id="ic-form" viewBox="0 0 32 32"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><circle cx="24" cy="9" r="2.4"/><circle cx="8" cy="18" r="2.4"/><circle cx="16" cy="18" r="2.4"/><circle cx="24" cy="18" r="2.4"/><path d="M5 26h22"/></symbol>
+  <!-- Zustandszeichen (klein) -->
+  <symbol id="zs-marsch" viewBox="0 0 32 32"><path d="M5 16h20M17 8l8 8-8 8"/></symbol>
+  <symbol id="zs-kampf" viewBox="0 0 32 32"><path d="M6 26L26 6M26 26L6 6"/></symbol>
+  <symbol id="zs-schuss" viewBox="0 0 32 32"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3"/><path d="M16 2v6M16 24v6M2 16h6M24 16h6"/></symbol>
+  <symbol id="zs-flucht" viewBox="0 0 32 32"><path d="M27 16H8M15 8l-8 8 8 8"/></symbol>
+  <symbol id="zs-steht" viewBox="0 0 32 32"><path d="M16 4l10 4v8c0 6-4 9-10 12C10 25 6 22 6 16V8z"/></symbol>
+  <!-- Einheitenzeichen (64 × 64) für Platzhalterbilder und Banner -->
+  <symbol id="sy-schwert" viewBox="0 0 64 64"><path d="M32 6c11 3 19 6 19 6v20c0 12-8 20-19 26C21 52 13 44 13 32V12s8-3 19-6z"/><path d="M32 14v34M22 26h20"/></symbol>
+  <symbol id="sy-wurfspeer" viewBox="0 0 64 64"><circle cx="24" cy="40" r="14"/><circle cx="24" cy="40" r="4"/><path d="M12 58L56 8M56 8l-9 1M56 8l-2 9"/></symbol>
+  <symbol id="sy-speer" viewBox="0 0 64 64"><path d="M32 3v58M32 3l-6 11h12z"/><circle cx="32" cy="42" r="14"/><circle cx="32" cy="42" r="3.5"/></symbol>
+  <symbol id="sy-schleuder" viewBox="0 0 64 64"><path d="M14 54C6 38 14 18 34 14"/><path d="M14 54c8-2 16-8 20-18"/><circle cx="46" cy="16" r="7"/><path d="M34 14l6 0M52 8l6-3M54 22l6 2"/></symbol>
+</defs></svg>
 <canvas id="cv"></canvas>
-<div id="zeile" class="titel"></div>
+<div id="banner"></div>
+<div id="oben">
+  <div id="kraft">
+    <div class="kk"><span class="kn r" id="kR">0</span><div class="kb"><i id="kBar"></i><b></b></div><span class="kn k" id="kK">0</span></div>
+    <div class="kz"><span>Rom</span><em><svg class="ic"><use href="#ic-sand"/></svg><span id="kZeit">0:00</span></em><em id="kTempo">1×</em><span>Karthago</span></div>
+  </div>
+  <div id="hinweis"></div>
+</div>
 <div id="fps">– B/s</div>
 <div id="feinde"></div>
 <div id="spalte">
-  <button class="plak gross" id="bBegin"><b>Schlacht beginnen</b><small>Die Heere rücken vor</small></button>
-  <button class="plak" id="bHalt"><b>Halten</b><small>Haltung der gewählten Einheit</small></button>
-  <button class="plak" id="bPause"><b>Pause</b><small>Schlacht anhalten</small></button>
-  <button class="plak" id="bTempo"><b>Tempo 1×</b><small>Antippen: schneller</small></button>
-  <button class="plak" id="bGrafik"><b>Grafik: Mittel</b><small>Antippen: wechseln</small></button>
+  <button class="plak gross" id="bBegin"><svg class="ic"><use href="#ic-speere"/></svg><span><b>Beginnen</b><small>Heere rücken vor</small></span></button>
+  <button class="plak" id="bHalt"><svg class="ic"><use href="#ic-schild"/></svg><span><b>Halten</b><small></small></span></button>
+  <button class="plak" id="bPlaenk"><svg class="ic"><use href="#ic-pfeil"/></svg><span><b>Plänkeln</b><small></small></span></button>
+  <button class="plak" id="bForm"><svg class="ic"><use href="#ic-form"/></svg><span><b>Formation</b><small></small></span></button>
+  <button class="plak" id="bPause"><svg class="ic"><use href="#ic-pause"/></svg><span><b>Pause</b><small></small></span></button>
+  <button class="plak" id="bTempo"><svg class="ic"><use href="#ic-sand"/></svg><span><b>Tempo</b><small></small></span></button>
+  <button class="plak" id="bGrafik"><svg class="ic"><use href="#ic-zahn"/></svg><span><b>Grafik</b><small></small></span></button>
+  <button class="plak" id="bTon"><svg class="ic"><use href="#ic-ton"/></svg><span><b>Ton</b><small></small></span></button>
 </div>
+<div id="fenster"></div>
 <div id="karten"></div>
-<div id="erkl"></div>
 <div id="ende"></div>
 <div id="lade"><div class="titel">Das Heer sammelt sich …</div><div class="balken"><i id="balki"></i></div><div class="z" id="ladez"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -99,21 +210,33 @@ const wrap=a=>{while(a>PI)a-=TAU;while(a<-PI)a+=TAU;return a;};
 const fmt=n=>String(Math.round(n*10)/10).replace('.',',');
 
 /* ---------- Daten ---------- */
+/* Zusatzfelder: card = Bildname (karten/<card>.jpg) · sym = Symbol · schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
+   fern = Fernkampf: reich m · nachl [min,max] s · vorrat je Mann · schaden · moral (Zusatzabzug je Treffer) · wurfT Zeitpunkt des Abwurfs im Clip
+   · v Fluggeschwindigkeit m/s · weich = Plänkler weicht, wenn Nahkämpfer näher als m · rueck = so weit weicht er zurück */
 const KITS=[
-  {id:'A1_hastatus',key:'hast',n:'Hastati',atk:10,def:11,mor:70,hp:3,walk:1.3,run:3.8,ans:1.5,speer:false,
+  {id:'A1_hastatus',key:'hast',n:'Hastati',card:'hastatus',sym:'schwert',schild:.55,atk:10,def:11,mor:70,hp:3,walk:1.3,run:3.8,ans:1.5,speer:false,
    info:'Gedrillte römische Linieninfanterie. Hält die Linie, bricht nicht so schnell.'},
-  {id:'A2_libysch',key:'liby',n:'Libysche Speerträger',atk:9,def:12,mor:65,hp:3,walk:1.3,run:3.6,ans:1.5,speer:true,
+  {id:'A2_libysch',key:'liby',n:'Libysche Speerträger',card:'libyer',sym:'speer',schild:.45,atk:9,def:12,mor:65,hp:3,walk:1.3,run:3.6,ans:1.5,speer:true,
    info:'Dichte Speerreihen. Stark in der Abwehr, träge im Angriff.'},
-  {id:'A3_iberisch',key:'iber',n:'Iberische Scutarii',atk:11,def:9,mor:60,hp:2.5,walk:1.4,run:4.0,ans:1.5,speer:false,
+  {id:'A3_iberisch',key:'iber',n:'Iberische Scutarii',card:'iberer',sym:'schwert',schild:.45,atk:11,def:9,mor:60,hp:2.5,walk:1.4,run:4.0,ans:1.5,speer:false,
    info:'Wendige Schwertkämpfer mit großem Schild. Kräftig im Angriff, verwundbar in der Abwehr.'},
-  {id:'A6_keltisch',key:'kelt',n:'Keltische Krieger',atk:12,def:8,mor:55,hp:2.5,walk:1.4,run:4.2,ans:2,speer:false,
+  {id:'A6_keltisch',key:'kelt',n:'Keltische Krieger',card:'kelte',sym:'schwert',schild:.35,bloss:true,atk:12,def:8,mor:55,hp:2.5,walk:1.4,run:4.2,ans:2,speer:false,
    info:'Furchtbarer Ansturm in den ersten Augenblicken – doch wer ihn übersteht, sieht sie bald wanken.'},
+  {id:'A1_veles',key:'vel',n:'Velites',card:'veles',sym:'wurfspeer',schild:.4,atk:6,def:6,mor:55,hp:2.5,walk:1.5,run:4.3,ans:1,speer:false,
+   fern:{typ:'speer',reich:30,nachl:[4,6],vorrat:5,schaden:1.6,moral:.5,clip:'speerwurf',wurfT:.55,v:24,weich:14,rueck:22},
+   info:'Leichte Wurfspeerwerfer vor der Linie. Fünf Speere je Mann; ein Treffer erschüttert die Moral. Im Nahkampf schwach.'},
+  {id:'A4_balearisch',key:'bal',n:'Balearische Schleuderer',card:'balearer',sym:'schleuder',schild:0,bloss:true,atk:6,def:6,mor:50,hp:2,walk:1.5,run:4.4,ans:1,speer:false,
+   fern:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
+   info:'Weitreichende Schleuderer ohne Schild. Steine schlagen vor allem Ungeschützte nieder. Weichen dem Nahkampf aus.'},
 ];
-const ROSTER=[   // fest für den Test: Rom (Spieler) 0–2, Karthago 3–7
+const KIT_VEL=4,KIT_BAL=5;
+const ROSTER=[   // fest für den Test: Rom (Spieler) 0–3, Karthago 4–9; Fernkämpfer stehen vor der Linie
   {side:0,kit:0,name:'Hastati I',x:30,z:-60},{side:0,kit:0,name:'Hastati II',x:0,z:-60},{side:0,kit:0,name:'Hastati III',x:-30,z:-60},
+  {side:0,kit:4,name:'Velites',x:0,z:-38},
   {side:1,kit:3,name:'Keltische Krieger I',x:48,z:60},{side:1,kit:1,name:'Libysche Speerträger I',x:24,z:60},
   {side:1,kit:2,name:'Iberische Scutarii',x:0,z:60},{side:1,kit:1,name:'Libysche Speerträger II',x:-24,z:60},
   {side:1,kit:3,name:'Keltische Krieger II',x:-48,z:60},
+  {side:1,kit:5,name:'Balearische Schleuderer',x:-8,z:40},
 ];
 const SEITE=['Rom','Karthago'];
 const PRO=40,BREIT=10,TIEF=4,ABST=1.2;     // Figuren je Einheit, Formation 10 × 4, Abstand 1,2 m
@@ -121,6 +244,13 @@ const NU=ROSTER.length,N=NU*PRO;
 const FELD_X=200,FELD_Z=150;               // Feld 400 × 300 m
 const NAH=60;                              // Meter: nähere Figuren in voller Stufe
 const FLIEH_MORAL=25;
+/* Fernkampf (alle Werte hier; Waffenwerte stehen in KITS[].fern) */
+const GN=300;               // Ringpuffer je Geschossart (Speere / Steine)
+const GRAV=9.8;             // m/s²
+const TREFF_R=.6;           // Geschoss trifft eine Figur, die beim Aufprall näher als 0,6 m steht
+const STREU0=.45,STREU1=.05; // Streuung (m) = STREU0 + STREU1 × Entfernung
+const SCHILD_WINKEL=1.3;    // Schild wirkt, wenn das Geschoss aus ±75° vor der Figur kommt
+const FORM_K={eng:1,locker:1.5};   // Abstand der Formation (Faktor auf ABST)
 
 /* ====================================================================================================
    1  FIGURENMOTOR  (GPU-Skinning aus Animations-Textur, wie dev/proto/schlacht_figuren.html)
@@ -218,7 +348,7 @@ function kitBauen(i,pk){
   }
   const clip={};pk.clips.forEach((c,k)=>{c.k=k;clip[c.n]=c;});
   GMATS.push(mat,mat.userData.depth);
-  KIT[i]={pk,mat,im,clip,cl:CN.map(n=>clip[n]||clip.stehen||pk.clips[0]),tris:im[0].geometry.userData.tris};
+  KIT[i]={pk,mat,im,clip,cl:CN.map(n=>clip[n]||clip[CN_ERSATZ[n]]||clip.stehen||pk.clips[0]),tris:im[0].geometry.userData.tris};
 }
 
 /* ====================================================================================================
@@ -682,10 +812,12 @@ const MAXANG=2;             // höchstens 2 Angreifer je Verteidiger
 const NOGOAL=-99999;
 const GX0=-(FELD_X+30),GZ0=-(FELD_Z+30),GW=Math.ceil(2*(FELD_X+30)/ZELLE),GH=Math.ceil(2*(FELD_Z+30)/ZELLE);
 const CN=['stehen','gehen','laufen','fliehen','stehen_bereit','kampf_bereit','schlag_a','schlag_b','schlag_c','stoss_speer','schild_stoss',
-  'abwehr_schild','parade','ausweichen','treffer','sterben_vorn','sterben_hinten','jubeln'];
+  'abwehr_schild','parade','ausweichen','treffer','sterben_vorn','sterben_hinten','jubeln',
+  'speerwurf','schleuder','schild_hoch','gehen_b','laufen_b','stehen_b','schlag_a_b','schlag_b_b','sterben_knie'];
+const CN_ERSATZ={gehen_b:'gehen',laufen_b:'laufen',stehen_b:'stehen_bereit',schlag_a_b:'schlag_a',schlag_b_b:'schlag_b',sterben_knie:'sterben_vorn',schild_hoch:'stehen_bereit'};   // fehlt ein Clip im Paket
 const C={};CN.forEach((n,i)=>C[n]=i);
 const S_FORM=0,S_KAMPF=1,S_FLIEH=2,S_STIRBT=3,S_TOT=4,S_WEG=5;
-const A_NIX=0,A_SCHLAG=1,A_REAKT=2,A_TREFFER=3;
+const A_NIX=0,A_SCHLAG=1,A_REAKT=2,A_TREFFER=3,A_WURF=4;
 
 // Soldaten (SoA), Index = Einheit*PRO + laufende Nummer
 const sX=new Float32Array(N),sZ=new Float32Array(N),sVX=new Float32Array(N),sVZ=new Float32Array(N),sR=new Float32Array(N);
@@ -696,17 +828,22 @@ const sActT=new Float32Array(N),sAT=new Float32Array(N),sDur=new Float32Array(N)
 const sKit=new Uint8Array(N),sUnit=new Uint8Array(N),sSide=new Uint8Array(N),sSt=new Uint8Array(N),sAct=new Uint8Array(N),sSlot=new Uint8Array(N),sMov=new Uint8Array(N);
 const sDeath=new Uint8Array(N),sOut=new Uint8Array(N),sPh=new Uint8Array(N),sNAtt=new Uint8Array(N),sJub=new Uint8Array(N);
 const sCur=new Int8Array(N),sFoe=new Int16Array(N),sAtt=new Int16Array(N),sTgt=new Int16Array(N),sFace=new Int16Array(N),sCell=new Int32Array(N),sNext=new Int16Array(N);
+const sAmmo=new Uint8Array(N),sVar=new Uint8Array(N),sAX=new Float32Array(N),sAZ=new Float32Array(N);   // Fernkampf: Vorrat, Clip-Variante (b), Zielpunkt des Wurfs
 const sAn=new Float32Array(N*12);   // je Soldat: [row,len,start,spd, rowAlt,lenAlt,startAlt,spdAlt, loop,loopAlt,blendStart, -]
 const cHead=new Int16Array(GW*GH).fill(-1);
 let spielzeit=0;
 const U=[];   // Einheiten
 let phase='laden',pausiert=false,tempoV=1,sel=-1,ergebnis=null;
 const gefallen=[0,0];
-const zaehler={schlaege:0,parade:0,ausweich:0,treffer:0,kills:0,umgeworfen:0,rueckweich:0,fliehende:0};
+const zaehler={schlaege:0,parade:0,ausweich:0,treffer:0,kills:0,umgeworfen:0,rueckweich:0,fliehende:0,fernTreffer:0};
+const G={gesamt:0,fliegend:0,treffer:0,abgewehrt:0,verfehlt:0,speere:0,steine:0};   // Geschosszähler (SCHLACHT.geschosse)
+const evZ={wurf:0,schleuder:0,treffer_fern:0,abgewehrt:0,verfehlt:0};              // Geräusch-Ereignisse (gezählt; Tonanbindung: window.SCHLACHT_TON.ereignis(typ,x,z))
+let tonAn=true;
+function ereignis(typ,x,z){evZ[typ]++;if(tonAn){const T=window.SCHLACHT_TON;if(T&&T.ereignis)T.ereignis(typ,x,z);}}
 
 function einheitenAnlegen(){
   U.length=0;cHead.fill(-1);sCell.fill(-1);
-  for(const k in zaehler)zaehler[k]=0;
+  for(const k in zaehler)zaehler[k]=0;for(const k in G)G[k]=0;for(const k in evZ)evZ[k]=0;gA.fill(0);sAmmo.fill(0);
   ROSTER.forEach((r,i)=>{
     const K=KITS[r.kit];
     const u={i,side:r.side,kit:K.key,k:r.kit,name:r.name,def:K,
@@ -715,13 +852,14 @@ function einheitenAnlegen(){
       occ:new Int16Array(PRO),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
       fx:0,fz:(r.side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
       mx:r.x,mz:r.z,sn:PRO,ax:0,az:0,an:0,nF:0,fatS:0,nL:PRO,cnt:new Int16Array(NU),
-      lebend:PRO,kaempfend:0,muede:0,hoehe:0,dAcc:0};
+      lebend:PRO,kaempfend:0,muede:0,hoehe:0,dAcc:0,
+      fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*PRO:0,munS:0,eng:true,fk:1,gef:0,weichT:0};
     U.push(u);
     for(let s=0;s<PRO;s++){
       const id=i*PRO+s;
       sKit[id]=r.kit;sUnit[id]=i;sSide[id]=r.side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
       sJit[id]=.88+Math.random()*.24;sJX[id]=(Math.random()-.5)*.5;sJZ[id]=(Math.random()-.5)*.5;sJR[id]=(Math.random()-.5)*.14;
-      sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=Math.random()*.8;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
+      sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=K.fern?Math.random()*K.fern.nachl[1]:Math.random()*.8;sAmmo[id]=K.fern?K.fern.vorrat:0;sVar[id]=Math.random()<.5?1:0;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
       sPX[id]=NOGOAL;sPZ[id]=0;sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sJub[id]=0;sNAtt[id]=0;sFOff[id]=0;sFA[id]=0;sFSp[id]=1;
       slotPos(u,s,id);sX[id]=_tx;sZ[id]=_tz;sR[id]=u.f+sJR[id];sCur[id]=-1;
       initClip(id,C.stehen_bereit);
@@ -731,8 +869,9 @@ function einheitenAnlegen(){
 let _tx=0,_tz=0;
 function slotPos(u,s,id){   // Weltposition des Platzes s -> _tx,_tz ; lockert sich beim Marsch (u.loose 0..1)
   const col=s%BREIT,row=(s/BREIT)|0,L=u.loose;
-  const lx=(col-(BREIT-1)/2)*ABST*(1+.10*L)+((row&1)?.3:-.3)+sJX[id];
-  const lz=((TIEF-1)/2-row)*ABST*(1+.35*L)-row*.25*L+sJZ[id];
+  const fk=u.fk;
+  const lx=(col-(BREIT-1)/2)*ABST*fk*(1+.10*L)+((row&1)?.3:-.3)+sJX[id];
+  const lz=((TIEF-1)/2-row)*ABST*fk*(1+.35*L)-row*.25*L+sJZ[id];
   const c=Math.cos(u.f),sn=Math.sin(u.f);
   _tx=u.cx+lx*c+lz*sn;_tz=u.cz-lx*sn+lz*c;
 }
@@ -833,7 +972,7 @@ function suche(i){   // Gegner für Soldat i; setzt sFoe oder das Drängel-Ziel 
 function startSwing(i,f){
   const K=KITS[sKit[i]];let ci,dm=1;const r=Math.random();
   if(K.speer){if(r<.9){ci=C.stoss_speer;dm=1.2;}else{ci=C.schild_stoss;dm=.5;}}
-  else if(r<.35){ci=C.schlag_a;dm=1;}else if(r<.6){ci=C.schlag_b;dm=1.5;}else if(r<.85){ci=C.schlag_c;dm=1.1;}else{ci=C.schild_stoss;dm=.5;}
+  else if(r<.35){ci=Math.random()<.4?C.schlag_a_b:C.schlag_a;dm=1;}else if(r<.6){ci=Math.random()<.4?C.schlag_b_b:C.schlag_b;dm=1.5;}else if(r<.85){ci=C.schlag_c;dm=1.1;}else{ci=C.schild_stoss;dm=.5;}
   const dur=setClip(i,ci,sJit[i]*(1-.15*sFat[i]),true);
   sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.5;sReaT[i]=Math.max(0,dur*.5-.15);sPh[i]=0;sDmg[i]=dm;sTgt[i]=f;sOut[i]=0;
   sPer[i]=(1.1+Math.random()*.7)*(1+.4*sFat[i]);
@@ -892,17 +1031,18 @@ function trefferWirkung(i,j){
   sAct[j]=A_TREFFER;sActT[j]=Math.max(dur,hold);sFace[j]=i;sKX[j]=sKZ[j]=0;
   sVX[j]+=dx/d*kb;sVZ[j]+=dz/d*kb;
 }
-function sterbe(j,i,fm){
-  const u=U[sUnit[j]],dx=sX[i]-sX[j],dz=sZ[i]-sZ[j];
+function sterbe(j,i,fm){sterbeDir(j,sX[i]-sX[j],sZ[i]-sZ[j],U[sUnit[i]],fm);}
+function sterbeDir(j,dx,dz,ua,fm){   // (dx,dz) zeigt vom Gefallenen zum Angreifer / Schützen; ua = Einheit des Angreifers
+  const u=U[sUnit[j]];
   const von_vorn=(Math.sin(sR[j])*dx+Math.cos(sR[j])*dz)>=0;   // Schlag von vorn -> fällt nach hinten
   sDeath[j]=von_vorn?1:0;
   sSt[j]=S_STIRBT;sAct[j]=0;sFoe[j]=-1;sVX[j]=sVZ[j]=0;
-  sActT[j]=setClip(j,von_vorn?C.sterben_hinten:C.sterben_vorn,1,true);
-  slotFrei(u,j);u.strength--;gefallen[u.side]++;zaehler.kills++;
+  sActT[j]=setClip(j,Math.random()<.2?C.sterben_knie:(von_vorn?C.sterben_hinten:C.sterben_vorn),1,true);
+  slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;
   staub(sX[j],sZ[j],2,1.3,.4);
   {const ex=-dx,ez=-dz,el=Math.hypot(ex,ez)+1e-6,f=von_vorn?1:-1;blutFleck(sX[j]+ex/el*.7*f,sZ[j]+ez/el*.7*f,1.4);}   // Lache unter dem Körper (fällt vom Schlag weg)
   u.morale-=0.6*fm;                       // je Gefallenem (30.10.: 1,2 brach zu schnell)
-  const ua=U[sUnit[i]];ua.morale=Math.min(ua.def.mor,ua.morale+.25);
+  ua.morale=Math.min(ua.def.mor,ua.morale+.25);
   if(u.strength<=0){u.strength=0;u.state=u.fled>0?'geflohen':'aufgerieben';}
 }
 function rueckweichen(i,f){
@@ -911,9 +1051,96 @@ function rueckweichen(i,f){
   sAct[i]=A_REAKT;sActT[i]=dur;sFace[i]=f;sKX[i]=dx/d*1.6;sKZ[i]=dz/d*1.6;zaehler.rueckweich++;
 }
 
+/* ---- Fernkampf (30.10.): Zielwahl je Einheit, Wurfbeginn je Figur, Abwurf, Flug (Ringpuffer), Aufprall ---- */
+const gA=new Uint8Array(GN*2);   // 0 frei · 1 fliegt · 2 steckt im Boden (Speere)   Index: Art*GN + Platz  (Art 0 Speer, 1 Stein)
+const gO=new Float32Array(GN*6),gV=new Float32Array(GN*6),gT=new Float32Array(GN*2),gL=new Float32Array(GN*2);
+const gTX=new Float32Array(GN*2),gTZ=new Float32Array(GN*2),gSX=new Float32Array(GN*2),gSZ=new Float32Array(GN*2);
+const gS=new Uint8Array(GN*2),gUq=new Uint8Array(GN*2),gUz=new Uint8Array(GN*2);
+const gHead=[0,0];
+function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reichweite
+  const F=u.def.fern;u.fZ=-1;
+  if(!F||u.mun<=0||gone(u)||u.state==='flieht'||u.engaged)return;
+  const R=F.reich+3;
+  if(u.fBef>=0){const T=U[u.fBef];if(T.side!==u.side&&!gone(T)&&T.sn>0){if(Math.hypot(T.mx-u.mx,T.mz-u.mz)<=R){u.fZ=u.fBef;return;}}else u.fBef=-1;}
+  let bd=R;
+  for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;u.fZ=v.i;}}
+}
+function wurfStart(i,u){
+  const F=u.def.fern,T=U[u.fZ];
+  if(sVX[i]*sVX[i]+sVZ[i]*sVZ[i]>.25){sCool[i]=.3;return;}   // nur im Stehen
+  let j=-1;for(let k=0;k<6;k++){const id=T.occ[(Math.random()*PRO)|0];if(id>=0&&sSt[id]<=S_FLIEH){j=id;break;}}   // Zielpunkt: eine zufällige Figur der Zieleinheit
+  let tx,tz;if(j>=0){tx=sX[j];tz=sZ[j];}else{tx=T.mx;tz=T.mz;}
+  const dx=tx-sX[i],dz=tz-sZ[i],d=Math.hypot(dx,dz);
+  if(d>F.reich||d<3){sCool[i]=.4+Math.random()*.4;return;}
+  if(j>=0){const tf=d/F.v;tx+=sVX[j]*tf;tz+=sVZ[j]*tf;}   // Vorhalt
+  sAX[i]=tx;sAZ[i]=tz;sTgt[i]=-1;
+  const dur=setClip(i,C[F.clip],sJit[i],true);
+  sAct[i]=A_WURF;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*F.wurfT;sPh[i]=0;
+  sPer[i]=F.nachl[0]+Math.random()*(F.nachl[1]-F.nachl[0]);
+}
+function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst mit der Entfernung
+  const u=U[sUnit[i]],F=u.def.fern;if(!F||sAmmo[i]<=0)return;
+  sAmmo[i]--;
+  const k=F.typ==='speer'?0:1,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;
+  if(gA[q]===1)G.fliegend--;
+  const fx=Math.sin(sR[i]),fz=Math.cos(sR[i]),ox=sX[i]+fx*.35,oz=sZ[i]+fz*.35,oy=H(sX[i],sZ[i])+1.65;
+  const d=Math.hypot(sAX[i]-ox,sAZ[i]-oz),T=Math.max(.35,d/F.v);
+  const sg=STREU0+STREU1*d,a=Math.random()*TAU,r=sg*Math.sqrt(Math.random());
+  const tx=sAX[i]+Math.cos(a)*r,tz=sAZ[i]+Math.sin(a)*r,ty=H(tx,tz)+.9;
+  const o3=q*3;gO[o3]=ox;gO[o3+1]=oy;gO[o3+2]=oz;
+  gV[o3]=(tx-ox)/T;gV[o3+1]=(ty-oy)/T+.5*GRAV*T;gV[o3+2]=(tz-oz)/T;
+  gT[q]=0;gL[q]=T;gA[q]=1;gTX[q]=tx;gTZ[q]=tz;gSX[q]=sX[i];gSZ[q]=sZ[i];gS[q]=sSide[i];gUq[q]=sUnit[i];gUz[q]=u.fZ>=0?u.fZ:255;
+  if(u.fZ>=0){const V=U[u.fZ];V.beschuss=Math.max(V.beschuss,T+.8);}
+  G.gesamt++;G.fliegend++;if(k)G.steine++;else G.speere++;
+  u.schiessT=1.3;ereignis(k?'schleuder':'wurf',sX[i],sZ[i]);
+}
+function geschossAufprall(q){
+  const tx=gTX[q],tz=gTZ[q],side=gS[q],k=q>=GN?1:0,u0=U[gUq[q]],F=u0.def.fern;
+  gA[q]=0;G.fliegend--;
+  const cx=((tx-GX0)/ZELLE)|0,cz=((tz-GZ0)/ZELLE)|0;let best=-1,bd=TREFF_R*TREFF_R;
+  for(let gz=Math.max(0,cz-1);gz<=Math.min(GH-1,cz+1);gz++)for(let gx=Math.max(0,cx-1);gx<=Math.min(GW-1,cx+1);gx++)
+    for(let j=cHead[gz*GW+gx];j>=0;j=sNext[j]){
+      if(sSide[j]===side||sSt[j]>S_FLIEH)continue;
+      const dx=sX[j]-tx,dz=sZ[j]-tz,d2=dx*dx+dz*dz;if(d2<bd){bd=d2;best=j;}
+    }
+  if(best<0){   // Fehlschuss: Speere bleiben kurz im Boden stecken, Steine verschwinden
+    G.verfehlt++;ereignis('verfehlt',tx,tz);
+    if(k===0){
+      const t=gL[q],o3=q*3,vx=gV[o3],vy=gV[o3+1]-GRAV*t,vz=gV[o3+2],l=Math.hypot(vx,vy,vz)||1,dx=vx/l,dy=vy/l,dz=vz/l,gy=H(tx,tz);
+      gO[o3]=tx-dx*.75;gO[o3+1]=gy-.1-dy*.75;gO[o3+2]=tz-dz*.75;gV[o3]=dx;gV[o3+1]=dy;gV[o3+2]=dz;gA[q]=2;gT[q]=7;
+    }else staub(tx,tz,1,.6,.22);
+    return;
+  }
+  const j=best,Kd=KITS[sKit[j]],Ud=U[sUnit[j]];
+  const von=Math.abs(wrap(Math.atan2(gSX[q]-sX[j],gSZ[q]-sZ[j])-sR[j]));
+  if(Kd.schild>0&&von<SCHILD_WINKEL&&sSt[j]!==S_FLIEH&&sAct[j]!==A_TREFFER&&Math.random()<Kd.schild){   // Schild fängt es ab
+    G.abgewehrt++;ereignis('abgewehrt',sX[j],sZ[j]);
+    if(sAct[j]===A_NIX){const dur=setClip(j,C.abwehr_schild,sJit[j],true);sAct[j]=A_REAKT;sActT[j]=dur;sFace[j]=-1;sKX[j]=sKZ[j]=0;}
+    return;
+  }
+  const ex=sX[j]-gSX[q],ez=sZ[j]-gSZ[q],el=Math.hypot(ex,ez)+1e-6,nx=ex/el,nz=ez/el;
+  const dmg=F.schaden*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1);
+  sHP[j]-=dmg;G.treffer++;zaehler.fernTreffer++;sFat[j]=Math.min(1,sFat[j]+.01);ereignis('treffer_fern',sX[j],sZ[j]);
+  spritzer(sX[j],sZ[j],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[j]+nx*.4,sZ[j]+nz*.4,.5);
+  if(F.moral)Ud.morale-=F.moral;
+  if(sHP[j]<=0){sterbeDir(j,-nx,-nz,u0,1);return;}
+  if(sSt[j]===S_FLIEH)return;
+  const dur=setClip(j,C.treffer,sJit[j],true);
+  if(sAct[j]===A_SCHLAG)sCool[j]=.3;
+  sAct[j]=A_TREFFER;sActT[j]=dur;sFace[j]=-1;sKX[j]=sKZ[j]=0;sVX[j]+=nx*.9;sVZ[j]+=nz*.9;
+}
+function geschossSchritt(dt){
+  for(let q=0;q<GN*2;q++){
+    const a=gA[q];if(!a)continue;
+    if(a===2){gT[q]-=dt;if(gT[q]<=0)gA[q]=0;continue;}
+    gT[q]+=dt;if(gT[q]>=gL[q])geschossAufprall(q);
+  }
+}
+
 function kampfTick(dt){
   // --- Einheitswerte, Nähe
-  for(const u of U){u.kontakt=false;u.nahF=false;u.nF=0;u.fatS=0;u.nL=0;u.kaempfend=0;u.cnt.fill(0);}
+  for(const u of U){u.kontakt=false;u.nahF=false;u.nF=0;u.fatS=0;u.nL=0;u.kaempfend=0;u.cnt.fill(0);u.munS=0;
+    if(u.beschuss>0)u.beschuss-=dt;if(u.schiessT>0)u.schiessT-=dt;if(u.fern)fernZiel(u);}
   for(const u of U){if(gone(u)||u.state==='flieht')continue;
     for(const v of U){if(v.side===u.side||gone(v))continue;if(Math.hypot(u.mx-v.mx,u.mz-v.mz)<55){u.nahF=true;break;}}}
   // --- Kontakt (Raster) : Feind näher als 6 m
@@ -957,7 +1184,12 @@ function kampfTick(dt){
     if(sCool[i]>0)sCool[i]-=dt;
     sRet[i]-=dt;sBackT[i]-=dt;
     const act=sAct[i];
-    if(act===A_SCHLAG){
+    if(u.fern)u.munS+=sAmmo[i];
+    if(act===A_WURF){
+      sAT[i]+=dt;
+      if(sPh[i]===0&&sAT[i]>=sHitT[i]){sPh[i]=1;abwurf(i);}
+      if(sAT[i]>=sDur[i]){sAct[i]=A_NIX;sCool[i]=Math.max(.3,sPer[i]-sDur[i]);}
+    }else if(act===A_SCHLAG){
       sAT[i]+=dt;
       if(sPh[i]===0&&sAT[i]>=sReaT[i]){sPh[i]=1;reaktion(i);}
       if(sPh[i]===1&&sAT[i]>=sHitT[i]){sPh[i]=2;wirkung(i);}
@@ -965,7 +1197,10 @@ function kampfTick(dt){
     }else if(act!==A_NIX){
       sActT[i]-=dt;if(sActT[i]<=0){sAct[i]=A_NIX;sKX[i]=sKZ[i]=0;}
     }
-    if(sSt[i]!==S_KAMPF)continue;
+    if(sSt[i]!==S_KAMPF){
+      if(u.fZ>=0&&st===S_FORM&&sAct[i]===A_NIX&&sCool[i]<=0&&sDelay[i]<=0&&sAmmo[i]>0&&phase==='schlacht')wurfStart(i,u);
+      continue;
+    }
     let f=sFoe[i];
     if(f>=0){u.nF++;const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i];if(dx*dx+dz*dz<4.5)u.kaempfend++;}
     if(sAct[i]!==A_NIX||sDelay[i]>0)continue;
@@ -981,7 +1216,7 @@ function kampfTick(dt){
   // --- Einheiten: Druck, Moral
   for(const u of U){
     if(gone(u))continue;
-    u.lebend=u.strength;u.muede=u.nL?u.fatS/u.nL:0;
+    u.lebend=u.strength;u.muede=u.nL?u.fatS/u.nL:0;if(u.fern)u.mun=u.munS;
   }
   for(let i=0;i<N;i++){const j=sFoe[i];if(j>=0&&sSt[i]===S_KAMPF)U[sUnit[i]].cnt[sUnit[j]]++;}
   for(const u of U){
@@ -1016,7 +1251,7 @@ function kampfTick(dt){
   }
 }
 function ende(was){
-  phase='ende';ergebnis=was;
+  phase='ende';ergebnis=was;gA.fill(0);G.fliegend=0;
   const gew=was==='sieg'?0:1;
   for(let i=0;i<N;i++){
     const st=sSt[i];if(st!==S_FORM&&st!==S_KAMPF)continue;
@@ -1047,15 +1282,46 @@ function autoZiel(u){   // Haltung „Angreifen“
   else{const F=naechster(u,true);if(F&&F.state==='flieht'&&Math.hypot(F.cx-u.cx,F.cz-u.cz)<80)tgt=F;}
   if(tgt)auftrag(u,tgt.i,run);
 }
+/* Plänkler (Velites, Balearen): schießen im Stehen, weichen Nahkämpfern aus; der Spieler kann sie näher an ein Ziel führen */
+let _nv=null,_nd=0;
+function naechsterNahk(u){   // nächste feindliche Einheit, die im Nahkampf gefährlich ist -> _nv,_nd
+  _nv=null;_nd=1e9;
+  for(const v of U){if(v.side===u.side||gone(v)||v.state==='flieht')continue;if(v.fern&&v.mun>0)continue;const d=Math.hypot(v.cx-u.cx,v.cz-u.cz);if(d<_nd){_nd=d;_nv=v;}}
+}
+function fernKI(u){   // true = Fernkampf-Verhalten führt die Einheit (Aufruf alle 0,5 s)
+  const F=u.fern;if(!F||u.mun<=0)return false;
+  if(gone(u)||u.state==='flieht'||u.engaged)return true;
+  if(u.weichT>0)u.weichT-=.5;
+  const eigen=u.side===0;
+  naechsterNahk(u);
+  if(u.plaenk&&_nv&&_nd<F.weich&&u.weichT<=0&&(u.rueck||!(eigen&&u.hasDest))){   // Nahkämpfer zu nah: zurückweichen (nicht, wenn der Spieler marschieren lässt)
+    const ax=u.cx-_nv.cx,az=u.cz-_nv.cz,l=Math.hypot(ax,az)||1;
+    u.destX=Math.max(-FELD_X+4,Math.min(FELD_X-4,u.cx+ax/l*F.rueck));u.destZ=Math.max(-FELD_Z+4,Math.min(FELD_Z-4,u.cz+az/l*F.rueck));
+    u.hasDest=true;u.atkT=-1;u.run=true;u.rueck=true;u.zurueck=true;u.weichT=7;
+    return true;
+  }
+  if(u.rueck&&u.hasDest)return true;
+  if(!eigen){   // Feind-KI: nach dem Ausweichen zurück auf den Platz vor der Linie
+    if(u.zurueck&&!u.hasDest&&(!_nv||_nd>F.weich*2.2)){u.destX=u.startX;u.destZ=u.startZ;u.hasDest=true;u.run=false;u.atkT=-1;u.zurueck=false;}
+    return true;
+  }
+  if(!u.hasDest&&(u.fBef>=0||u.stance==='angreifen')){   // Spieler: in Schussweite an das Ziel heranführen
+    const T=u.fBef>=0?U[u.fBef]:naechster(u,false);
+    if(T&&!gone(T)){const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
+      if(d>F.reich*.85){const l=d||1;u.destX=T.cx+(u.cx-T.cx)/l*F.reich*.75;u.destZ=T.cz+(u.cz-T.cz)/l*F.reich*.75;u.hasDest=true;u.atkT=-1;u.run=false;}}
+  }
+  return true;
+}
 function ki(u){
   if(gone(u)||u.state==='flieht')return;
+  if(u.fern&&fernKI(u))return;
   if(u.side===0){if(u.stance==='angreifen'&&!u.engaged&&u.atkT<0)autoZiel(u);return;}
   if(u.engaged)return;
   const T=naechster(u,false)||naechster(u,true);if(!T)return;
   const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
   if(u.k===3){auftrag(u,T.i,true);return;}                // Kelten stürmen zuerst
   // geschlossene Linie: nicht weit vor den anderen
-  let dm=1e9;for(const v of U){if(v.side!==1||v===u||v.k===3||gone(v)||v.state==='flieht')continue;
+  let dm=1e9;for(const v of U){if(v.side!==1||v===u||v.k===3||v.fern||gone(v)||v.state==='flieht')continue;
     const e=naechster(v,false);if(e)dm=Math.min(dm,Math.hypot(e.cx-v.cx,e.cz-v.cz));}
   if(d>40&&d<dm-8){halt(u);return;}
   auftrag(u,T.i,d<35&&u.k===2);                           // Iberer laufen zuletzt, Libyer marschieren
@@ -1096,7 +1362,7 @@ function bewegen(dt){
         if(u.run&&u.curSpeed>2)u.runT=.7;
       }
     }
-    if(!moving)u.curSpeed=0;
+    if(!moving){u.curSpeed=0;u.rueck=false;}
     u.hoehe=H(u.cx,u.cz);
     {const wd=WF(u.cx,u.cz),lz=Math.max(moving?1:0,.85*wd);u.loose+=(lz-u.loose)*Math.min(1,dt*(lz>u.loose?.6:.9));}   // Wald lockert die Formation
     u.cx=Math.max(-FELD_X,Math.min(FELD_X,u.cx));u.cz=Math.max(-FELD_Z,Math.min(FELD_Z,u.cz));
@@ -1117,6 +1383,7 @@ function figuren(dt){
       if(sDelay[i]<=0){const sp=K.run*sJit[i]*sFSp[i]*(1-.2*sFat[i]);dvx=Math.sin(sFA[i])*sp;dvz=Math.cos(sFA[i])*sp;am=6;hf=true;face=sFA[i];}
       else am=8;
     }
+    else if(act===A_WURF){am=7;face=Math.atan2(sAX[i]-sX[i],sAZ[i]-sZ[i]);hf=true;}
     else if(act!==A_NIX){
       am=7;
       if(act===A_REAKT&&(sKX[i]!==0||sKZ[i]!==0)){dvx=sKX[i];dvz=sKZ[i];}
@@ -1169,12 +1436,16 @@ function figuren(dt){
       if(st===S_FLIEH){
         if(sDelay[i]>0)setClip(i,C.kampf_bereit,sJit[i]);else setClip(i,C.fliehen,Math.max(.7,Math.min(1.5,sp/(K.run*.9))));
       }else{
-        const cur=sCur[i],laeuft=cur===C.gehen||cur===C.laufen;
+        const cur=sCur[i],laeuft=cur===C.gehen||cur===C.laufen||cur===C.gehen_b||cur===C.laufen_b;
         if(sp>(laeuft?.12:.3)){
-          const lauf=sp>2.7||(cur===C.laufen&&sp>2.2);
-          const ci=lauf?C.laufen:C.gehen,ref=KIT[sKit[i]].cl[ci].speed||(lauf?K.run:K.walk);   // gemessenes Schritttempo des Clips (Paket), sonst Einheitentempo
+          const lauf=sp>2.7||((cur===C.laufen||cur===C.laufen_b)&&sp>2.2),cl=KIT[sKit[i]].cl;
+          let ci=lauf?C.laufen:C.gehen,ref=cl[ci].speed||(lauf?K.run:K.walk);   // gemessenes Schritttempo des Clips (Paket), sonst Einheitentempo
+          if(sVar[i]){   // Variante _b für weniger Gleichschritt – nur, wenn ihr Schritttempo ungefähr passt
+            const cb=lauf?C.laufen_b:C.gehen_b,rb=cl[cb].speed||(lauf?K.run:K.walk),r=sp/rb,war=cur===cb;
+            if(cl[cb]!==cl[ci]&&r>(war?.6:.75)&&r<(war?1.7:1.4)){ci=cb;ref=rb;}
+          }
           setClip(i,ci,Math.max(.55,Math.min(1.6,sp/ref)));
-        }else setClip(i,st===S_KAMPF?C.kampf_bereit:C.stehen_bereit,sJit[i]);
+        }else setClip(i,st===S_KAMPF?C.kampf_bereit:(st===S_FORM&&u.beschuss>0&&K.schild>0?C.schild_hoch:(phase==='aufstellung'&&sVar[i]?C.stehen_b:C.stehen_bereit)),sJit[i]);
       }
     }
     // Ermüdung
@@ -1213,6 +1484,7 @@ let tickAcc=0,kiAcc=0;
 function schritt(dt){
   spielzeit+=dt;
   if(phase==='schlacht'){
+    schlachtZ+=dt;
     tickAcc+=dt;
     while(tickAcc>=TICK){tickAcc-=TICK;kampfTick(TICK);}
     kiAcc+=dt;
@@ -1220,6 +1492,7 @@ function schritt(dt){
   }
   bewegen(dt);
   figuren(dt);
+  if(phase==='schlacht')geschossSchritt(dt);
 }
 
 /* ====================================================================================================
@@ -1251,6 +1524,60 @@ function baueInstanzen(){
   for(const K of KIT)for(let l=0;l<2;l++){const m=K.im[l],g=m.geometry.attributes;m.count=K.n[l];m.instanceMatrix.needsUpdate=true;
     g.aAnim.needsUpdate=true;g.aAnimAlt.needsUpdate=true;g.aLoop.needsUpdate=true;}
 }
+/* ---- Geschosse (30.10.): ein InstancedMesh je Art (Speer, Stein), Ringpuffer GN; Matrizen werden ohne Zuweisungen in die Instanz-Arrays geschrieben ---- */
+function fuse(parts){   // mehrere Teile mit Einzelfarbe zu einer Geometrie
+  const gs=parts.map(p=>p.g.index?p.g.toNonIndexed():p.g);let n=0;gs.forEach(g=>n+=g.attributes.position.count);
+  const P=new Float32Array(n*3),Nr=new Float32Array(n*3),Co=new Float32Array(n*3);let o=0;
+  gs.forEach((g,k)=>{const c=g.attributes.position.count,col=parts[k].col;P.set(g.attributes.position.array,o*3);Nr.set(g.attributes.normal.array,o*3);
+    for(let i=0;i<c;i++){Co[(o+i)*3]=col.r;Co[(o+i)*3+1]=col.g;Co[(o+i)*3+2]=col.b;}o+=c;});
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('normal',new THREE.BufferAttribute(Nr,3));g.setAttribute('color',new THREE.BufferAttribute(Co,3));return g;
+}
+const gMesh=(function(){
+  const schaft=new THREE.CylinderGeometry(.03,.03,1.45,5,1);schaft.rotateX(PI/2);   // Stab entlang +Z (Flugrichtung)
+  const spitze=new THREE.ConeGeometry(.07,.28,5,1);spitze.rotateX(PI/2);spitze.translate(0,0,.86);
+  const sg=fuse([{g:schaft,col:lin(122,88,52)},{g:spitze,col:lin(170,170,176)}]);
+  const st=new THREE.SphereGeometry(.13,6,5);
+  const mk=(g,vc,col)=>{const m=new THREE.InstancedMesh(g,new THREE.MeshLambertMaterial(vc?{vertexColors:true}:{color:col}),GN);
+    m.frustumCulled=false;m.count=0;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);scene.add(m);return m;};
+  return[mk(sg,true),mk(st,false,lin(44,40,36))];
+})();
+function baueGeschosse(){   // Speere liegen in Flugrichtung (Bahn-Tangente), Steine nur als Punkt
+  for(let k=0;k<2;k++){
+    const m=gMesh[k],M=m.instanceMatrix.array;let n=0;
+    for(let s=0;s<GN;s++){
+      const q=k*GN+s,a=gA[q];if(!a)continue;
+      const o3=q*3,o=n*16;let px,py,pz,vx,vy,vz;
+      if(a===1){const t=gT[q];px=gO[o3]+gV[o3]*t;py=gO[o3+1]+gV[o3+1]*t-.5*GRAV*t*t;pz=gO[o3+2]+gV[o3+2]*t;vx=gV[o3];vy=gV[o3+1]-GRAV*t;vz=gV[o3+2];}
+      else{px=gO[o3];py=gO[o3+1];pz=gO[o3+2];vx=gV[o3];vy=gV[o3+1];vz=gV[o3+2];}
+      if(k===1){M[o]=1;M[o+1]=0;M[o+2]=0;M[o+3]=0;M[o+4]=0;M[o+5]=1;M[o+6]=0;M[o+7]=0;M[o+8]=0;M[o+9]=0;M[o+10]=1;M[o+11]=0;}
+      else{
+        const l=Math.sqrt(vx*vx+vy*vy+vz*vz)||1,fx=vx/l,fy=vy/l,fz=vz/l;let rl=Math.sqrt(fx*fx+fz*fz),rx,rz;
+        if(rl<1e-4){rx=1;rz=0;}else{rx=fz/rl;rz=-fx/rl;}
+        M[o]=rx;M[o+1]=0;M[o+2]=rz;M[o+3]=0;                      // rechts = hoch × vorwärts
+        M[o+4]=fy*rz;M[o+5]=fz*rx-fx*rz;M[o+6]=-fy*rx;M[o+7]=0;   // oben = vorwärts × rechts
+        M[o+8]=fx;M[o+9]=fy;M[o+10]=fz;M[o+11]=0;
+      }
+      M[o+12]=px;M[o+13]=py;M[o+14]=pz;M[o+15]=1;n++;
+    }
+    m.count=n;m.instanceMatrix.needsUpdate=true;
+  }
+}
+/* gemalte Pfeil-Marken (Sprites) für Marschziel und Angriffsziel */
+function pfeilTextur(c1,c2){
+  const D=128,cv=document.createElement('canvas');cv.width=cv.height=D;const x=cv.getContext('2d');
+  x.translate(64,0);x.lineJoin='round';x.lineCap='round';
+  const pfad=()=>{x.beginPath();x.moveTo(-15,8);x.lineTo(15,8);x.lineTo(15,70);x.lineTo(38,70);x.lineTo(0,120);x.lineTo(-38,70);x.lineTo(-15,70);x.closePath();};
+  pfad();x.fillStyle='rgba(0,0,0,.35)';x.save();x.translate(4,5);x.fill();x.restore();
+  const gr=x.createLinearGradient(0,8,0,120);gr.addColorStop(0,c1);gr.addColorStop(1,c2);
+  pfad();x.fillStyle=gr;x.fill();x.lineWidth=6;x.strokeStyle='#2a1d0c';x.stroke();
+  x.lineWidth=2;x.strokeStyle='rgba(255,245,210,.55)';x.beginPath();x.moveTo(-8,14);x.lineTo(-8,66);x.stroke();   // Pinselglanz
+  const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;return t;
+}
+function pfeilSprite(c1,c2){
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:pfeilTextur(c1,c2),transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));
+  s.scale.set(5,5,1);s.renderOrder=6;s.visible=false;scene.add(s);return s;
+}
+const destPfeil=pfeilSprite('#f3d27a','#b9812f'),zielPfeil=pfeilSprite('#e8705e','#8e241a');
 const FARBE=[0xb02a22,0x7a3fa0];
 const ringGeo=new THREE.RingGeometry(.9,1,56);ringGeo.rotateX(-PI/2);
 function ringBauen(farbe,op){   // Ring, dessen Punkte dem Gelände folgen (eigene Geometrie, Weltkoordinaten)
@@ -1263,7 +1590,6 @@ function ringSetzen(m,cx,cz,rot,sx,sz,dy){
   for(let i=0;i<a.length;i+=3){const lx=b[i]*sx,lz=b[i+2]*sz,x=cx+lx*c+lz*s,z=cz-lx*s+lz*c;a[i]=x;a[i+1]=H(x,z)+dy;a[i+2]=z;}
   p.needsUpdate=true;
 }
-const destRing=ringBauen(0xe0b45a,.9);destRing.visible=false;scene.add(destRing);
 function marker(){
   U.forEach(u=>{
     u.ring=ringBauen(FARBE[u.side],.35);scene.add(u.ring);
@@ -1279,15 +1605,18 @@ function markerUpdate(t){
   U.forEach(u=>{
     const sichtbar=!gone(u);u.ring.visible=sichtbar;u.flag.visible=sichtbar&&u.state!=='flieht';
     if(!sichtbar)return;
-    ringSetzen(u.ring,u.cx,u.cz,u.f,7.4,4.4,.3);
-    const s=sel===u.i;
+    ringSetzen(u.ring,u.cx,u.cz,u.f,7.4*u.fk,4.4*u.fk,.3);
+    const s=selM.has(u.i);
     u.ring.material.color.setHex(s?0xe0b45a:FARBE[u.side]);
     u.ring.material.opacity=s?.65+.3*Math.sin(t*.006):(u.state==='flieht'?.12:.2);   // nicht gewählte Ringe zurückhaltender
     const c=Math.cos(u.f),sn=Math.sin(u.f),fx=u.cx-3.4*sn,fz=u.cz-3.4*c;u.flag.position.set(fx,H(fx,fz),fz);u.flag.rotation.y=u.f;
   });
-  const S=sel>=0?U[sel]:null;
-  if(S&&S.hasDest&&!gone(S)&&S.atkT<0&&phase!=='aufstellung'){destRing.visible=true;ringSetzen(destRing,S.destX,S.destZ,0,1.6,1.6,.3);}
-  else destRing.visible=false;
+  const S=sel>=0?U[sel]:null,wipp=Math.sin(t*.008)*.35;
+  if(S&&S.hasDest&&!gone(S)&&S.atkT<0&&!S.rueck&&phase!=='aufstellung'){destPfeil.visible=true;destPfeil.position.set(S.destX,H(S.destX,S.destZ)+2.5+wipp,S.destZ);}
+  else destPfeil.visible=false;
+  const Z=S&&!gone(S)?(S.atkT>=0?U[S.atkT]:(S.fBef>=0?U[S.fBef]:null)):null;
+  if(Z&&!gone(Z)&&phase==='schlacht'){zielPfeil.visible=true;zielPfeil.position.set(Z.cx,H(Z.cx,Z.cz)+9.5+wipp,Z.cz);}
+  else zielPfeil.visible=false;
 }
 
 /* ====================================================================================================
@@ -1328,7 +1657,7 @@ const zeiger=new Map();let gest=null,letzterTipp={t:0,x:0,y:0,boden:false};
 const cv=$('cv');
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{
-  cv.setPointerCapture(e.pointerId);
+  cv.setPointerCapture(e.pointerId);kz.on=false;
   zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY,btn:e.button});
   if(zeiger.size===1){
     gest={mode:'tipp',x0:e.clientX,y0:e.clientY,t0:performance.now(),bewegt:false,u:null};
@@ -1388,117 +1717,226 @@ function tippen(px,py){
   if(phase!=='schlacht')return;
   if(u&&u.side===0){select(u.i);return;}
   if(sel<0||U[sel].state==='flieht'||gone(U[sel]))return;
-  if(u&&u.side===1){angriff(sel,u.i);return;}
+  if(u&&u.side===1){for(const a of selListe())angriff(a.i,u.i);return;}
   letzterTipp.boden=true;
-  befehl(sel,_g.x,_g.z,dop);
+  gruppenBefehl(_g.x,_g.z,dop);
 }
-function select(i){sel=i;uiAuswahl();}
+function select(i,add){   // add (langer Druck auf eine zweite Karte): zur Auswahl hinzufügen / entfernen
+  if(add&&i>=0&&sel>=0){if(selM.has(i)){selM.delete(i);if(sel===i)sel=selM.size?[...selM][0]:-1;}else{selM.add(i);sel=i;}}
+  else{selM.clear();if(i>=0)selM.add(i);sel=i;}
+  uiAuswahl();
+}
+function gruppenBefehl(x,z,laufen){   // mehrere gewählte Einheiten: nebeneinander an das Ziel
+  const L=selListe();if(!L.length)return;
+  if(L.length===1){befehl(L[0].i,x,z,laufen);return;}
+  let cx=0,cz=0;for(const u of L){cx+=u.cx;cz+=u.cz;}cx/=L.length;cz/=L.length;
+  let dx=x-cx,dz=z-cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;const px=-dz,pz=dx;
+  L.sort((p,q)=>((p.cx-cx)*px+(p.cz-cz)*pz)-((q.cx-cx)*px+(q.cz-cz)*pz));
+  L.forEach((u,k)=>{const o=(k-(L.length-1)/2)*16;befehl(u.i,x+px*o,z+pz*o,laufen);});
+}
 
 /* Befehle (auch für Tests) */
 function befehl(i,x,z,laufen){
   const u=U[i];if(!u||gone(u)||u.state==='flieht')return false;
-  u.atkT=-1;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));u.hasDest=true;u.run=!!laufen;
+  u.atkT=-1;u.fBef=-1;u.rueck=false;u.zurueck=false;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));u.hasDest=true;u.run=!!laufen;
   if(u.engaged){u.sperre=2.5;u.kT=0;}   // Marschbefehl im Gefecht: löst sich vom Feind
   return true;
 }
 function angriff(i,t){
   const u=U[i],T=U[t];if(!u||!T||T.side===u.side||gone(u)||gone(T)||u.state==='flieht')return false;
+  if(u.fern&&u.mun>0){u.fBef=t;u.atkT=-1;u.hasDest=false;u.rueck=false;fernKI(u);return true;}   // Schützen: feuern auf das Ziel, rücken in Schussweite vor
   auftrag(u,t,true);return true;
 }
 
 /* ====================================================================================================
    7  OBERFLÄCHE
    ==================================================================================================== */
-const karten=[],chips=[];
+const karten=[],feinde=[],BN=[],selM=new Set();   // Kartenleiste (eigene), Feindliste, Banner über den Einheiten (Index = Einheit), Auswahl
+const kz={on:false,x:0,z:0};                  // Kamera gleitet zu einer Einheit
+let schlachtZ=0,lastZ='',hinweisTm=0,fensterId=-2,fw=null,bannerT=0;
+const txt=(e,v)=>{if(e._v!==v){e._v=v;e.textContent=v;}};          // DOM nur schreiben, wenn sich der Wert ändert
+const wid=(e,v)=>{v=Math.round(v);if(e._w!==v){e._w=v;e.style.width=v+'%';}};
+const hrefSet=(e,v)=>{if(e._h!==v){e._h=v;e.setAttribute('href','#'+v);}};
+const klasse=(e,c,an)=>{if(e['_c'+c]!==an){e['_c'+c]=an;e.classList.toggle(c,an);}};
+/* Einheitenbild: karten/<card>.jpg über gemaltem Platzhalter (Wappenfarbe + Einheitenzeichen); fehlt die Datei, bleibt der Platzhalter */
+function bildHTML(K,side){
+  return '<div class="bild s'+side+'"><div class="ph"><svg class="sy"><use href="#sy-'+K.sym+'"/></svg></div>'
+    +'<img alt="" src="karten/'+K.card+'.jpg" onload="this.classList.add(\'ok\')" onerror="this.remove()"></div>';
+}
+function selListe(){   // gewählte, einsatzfähige Einheiten (die Hauptauswahl zuerst)
+  const L=[];if(sel>=0&&selM.has(sel)&&!gone(U[sel]))L.push(U[sel]);
+  for(const i of selM)if(i!==sel&&!gone(U[i]))L.push(U[i]);return L;
+}
+function kameraZu(u){kz.on=true;kz.x=u.cx;kz.z=u.cz;}
+function langDruck(el,kurz,lang){
+  let tm=0,l=false;
+  el.addEventListener('pointerdown',e=>{e.stopPropagation();l=false;clearTimeout(tm);tm=setTimeout(()=>{l=true;lang();},450);});
+  const ab=()=>clearTimeout(tm);
+  el.addEventListener('pointerleave',ab);el.addEventListener('pointercancel',ab);
+  el.addEventListener('pointerup',e=>{e.stopPropagation();ab();if(!l)kurz();});
+}
 function uiBauen(){
-  const kb=$('karten'),fb=$('feinde');
+  const kb=$('karten'),fb=$('feinde'),bn=$('banner');
+  kb.innerHTML=fb.innerHTML=bn.innerHTML='';karten.length=feinde.length=BN.length=0;
   U.forEach(u=>{
+    const K=u.def,i=u.i;
+    const b=document.createElement('div');b.className='bnr s'+u.side;
+    b.innerHTML='<svg class="bs" viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g class="sym"><use href="#sy-'+K.sym+'" x="9" y="7" width="26" height="26"/></g></svg><div class="bb"><i></i></div>';
+    bn.appendChild(b);BN[i]={el:b,bar:b.querySelector('.bb i'),vis:false,tf:'',op:-1};
     if(u.side===0){
       const d=document.createElement('div');d.className='karte';
-      d.innerHTML='<div class="ring"><i></i></div><div class="t"><div class="n"></div><div class="s"></div><div class="z"></div><div class="mud"><i></i></div></div>';
-      kb.appendChild(d);karten.push({u,d,ring:d.querySelector('.ring'),num:d.querySelector('i'),n:d.querySelector('.n'),s:d.querySelector('.s'),z:d.querySelector('.z'),mu:d.querySelector('.mud i')});
+      d.innerHTML=bildHTML(K,0)+'<div class="ring"><i></i></div><div class="mk">✓</div><div class="zst"><svg><use href="#zs-steht"/></svg><span></span></div>'
+        +'<div class="n"></div><div class="st"><div class="bar"><i></i></div><b></b></div><div class="mud"><i></i></div>';
+      kb.appendChild(d);
       d.querySelector('.n').textContent=u.name;
-      langDruck(d,u,()=>select(u.i));
+      karten.push({i,d,ring:d.querySelector('.ring'),num:d.querySelector('.ring i'),zi:d.querySelector('.zst use'),zt:d.querySelector('.zst span'),
+        bar:d.querySelector('.bar i'),sn:d.querySelector('.st b'),mu:d.querySelector('.mud i'),mk:d.querySelector('.mk')});
+      langDruck(d,()=>select(i),()=>select(i,true));
     }else{
-      const d=document.createElement('div');d.className='chip';
-      d.innerHTML='<i></i><b></b><span></span>';fb.appendChild(d);
-      d.querySelector('b').textContent=u.name;
-      chips.push({u,d,sp:d.querySelector('span')});
-      langDruck(d,u,()=>{if(phase==='schlacht'&&sel>=0)angriff(sel,u.i);});
+      const d=document.createElement('div');d.className='fk';
+      d.innerHTML=bildHTML(K,1)+'<div class="t"><div class="n"></div><div class="b"><i></i></div><div class="z"><span></span><b></b></div></div>';
+      fb.appendChild(d);d.querySelector('.n').textContent=u.name;
+      feinde.push({i,d,bar:d.querySelector('.b i'),zt:d.querySelector('.z span'),sn:d.querySelector('.z b')});
+      langDruck(d,()=>{const v=U[i];kameraZu(v);if(phase==='schlacht')for(const a of selListe())angriff(a.i,i);},()=>kameraZu(U[i]));
     }
   });
 }
-function langDruck(el,u,kurz){
-  let tm=0,lang=false;
-  el.addEventListener('pointerdown',e=>{e.stopPropagation();lang=false;clearTimeout(tm);tm=setTimeout(()=>{lang=true;erklaerung(u);},500);});
-  const ab=()=>clearTimeout(tm);
-  el.addEventListener('pointerleave',ab);el.addEventListener('pointercancel',ab);
-  el.addEventListener('pointerup',e=>{e.stopPropagation();ab();if(!lang)kurz();});
+function zustand(u){   // -> [Zeichen, Text]
+  if(u.state==='geflohen')return['zs-flucht','geflohen'];
+  if(u.state==='aufgerieben')return['zs-kampf','aufgerieben'];
+  if(u.state==='flieht')return['zs-flucht','flieht!'];
+  if(u.engaged||u.state==='kampf')return['zs-kampf','kämpft'];
+  if(u.rueck)return['zs-flucht','weicht aus'];
+  if(u.fern&&u.mun>0&&u.schiessT>0)return['zs-schuss','schießt · '+u.mun];
+  if(u.state==='lauf')return['zs-marsch','stürmt'];
+  if(u.state==='marsch')return['zs-marsch','marschiert'];
+  if(u.fern)return u.mun>0?['zs-schuss','bereit · '+u.mun]:['zs-steht','Vorrat leer'];
+  return['zs-steht','bereit'];
 }
-function erklaerung(u){
-  const K=u.def,e=$('erkl');
-  e.innerHTML='<h2>'+u.name+'</h2>'
-   +'<div class="zl"><span>Mannstärke</span><b>'+u.strength+' von '+PRO+'</b></div>'
-   +'<div class="zl"><span>Angriff</span><b>'+fmt(K.atk)+'</b></div>'
-   +'<div class="zl"><span>Abwehr</span><b>'+fmt(K.def)+'</b></div>'
-   +'<div class="zl"><span>Leben je Mann</span><b>'+fmt(K.hp)+'</b></div>'
-   +'<div class="zl"><span>Müdigkeit</span><b>'+fmt(u.muede*100)+' %</b></div>'
-   +'<div class="zl"><span>Im Zweikampf</span><b>'+u.kaempfend+'</b></div>'
-   +'<div class="zl"><span>Moral</span><b>'+fmt(u.morale)+' (Start '+fmt(K.mor)+')</b></div>'
-   +'<div class="zl"><span>Gehen / Laufen</span><b>'+fmt(K.walk)+' / '+fmt(K.run)+' m/s</b></div>'
-   +'<div class="zl"><span>Ansturm</span><b>'+(K.ans>1.6?'furchtbar (×2)':'wuchtig (×1,5)')+'</b></div>'
-   +'<p>'+K.info+'</p><p style="font-style:normal;font-size:12px;opacity:.7">Antippen schließt die Karte.</p>';
-  e.style.display='block';
-}
-document.addEventListener('pointerdown',e=>{if($('erkl').style.display==='block'&&!e.target.closest('.karte,.chip'))$('erkl').style.display='none';},true);
 function moralFarbe(m){return m>55?'#7bbf5a':m>35?'#d9a63a':'#c4503f';}
-const ZUSTAND={steht:'steht bereit',marsch:'marschiert',lauf:'stürmt',kampf:'im Nahkampf',flieht:'flieht!',geflohen:'geflohen',aufgerieben:'aufgerieben'};
+function fensterBauen(u){
+  const K=u.def,e=$('fenster');
+  e.innerHTML='<button class="x" aria-label="Schließen">×</button>'+bildHTML(K,u.side)+'<div class="w"><h3></h3>'
+    +'<div class="zl"><span>Mannschaft</span><b data-k="m"></b></div><div class="zl"><span>Angriff</span><b data-k="a"></b></div>'
+    +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div>'
+    +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div><p></p>';
+  e.querySelector('h3').textContent=u.name;e.querySelector('p').textContent=K.info;
+  fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
+  e.querySelector('.x').onclick=()=>select(-1);
+  e.querySelector('.x').addEventListener('pointerdown',ev=>ev.stopPropagation());
+}
+function fmtZeit(s){s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function hinweis(t){
+  const e=$('hinweis');e.textContent=t;e.classList.add('an');clearTimeout(hinweisTm);hinweisTm=setTimeout(()=>e.classList.remove('an'),6000);
+}
+function btnText(id,b,s){const e=$(id);txt(e.querySelector('b'),b);txt(e.querySelector('small'),s);}
 function uiAktualisieren(){
+  // Karten (eigene)
   for(const k of karten){
-    const u=k.u;k.d.classList.toggle('sel',sel===u.i);k.d.classList.toggle('weg',gone(u));
-    k.n.textContent=u.name;k.s.innerHTML='<b>'+u.strength+'</b> Mann';k.z.textContent=ZUSTAND[u.state]||'';k.mu.style.width=Math.round(Math.min(1,u.muede*1.6)*100)+'%';
-    const m=Math.max(0,Math.min(100,u.morale));k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));
-    k.num.textContent=Math.round(m);
+    const u=U[k.i],g=gone(u),zs=zustand(u),m=Math.max(0,Math.min(100,u.morale));
+    klasse(k.d,'sel',selM.has(u.i));klasse(k.d,'multi',selM.size>1&&selM.has(u.i));klasse(k.d,'weg',g);
+    wid(k.bar,u.strength/PRO*100);txt(k.sn,String(u.strength));
+    hrefSet(k.zi,zs[0]);txt(k.zt,zs[1]);
+    wid(k.mu,Math.min(1,u.muede*1.6)*100);
+    if(k.m!==Math.round(m)){k.m=Math.round(m);k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));k.num.textContent=k.m;}
   }
-  for(const c of chips){c.d.classList.toggle('weg',gone(c.u));c.sp.textContent=c.u.state==='flieht'?'flieht':(gone(c.u)?'–':c.u.strength);}
-  const h=sel>=0?U[sel]:null;
-  $('bHalt').firstChild.textContent=h&&h.stance==='angreifen'?'Angreifen':'Halten';
-  $('bHalt').lastChild.textContent=h&&h.stance==='angreifen'?'Stürmt auf nahe Feinde. Antippen: Halten':'Steht fest. Antippen: Angreifen';
-  $('bHalt').style.opacity=h?1:.55;
-  $('bBegin').style.display=phase==='aufstellung'?'':'none';
-  $('bPause').style.display=$('bTempo').style.display=phase==='schlacht'?'':'none';
-  $('bPause').firstChild.textContent=pausiert?'Weiter':'Pause';
-  $('bPause').lastChild.textContent=pausiert?'Schlacht geht weiter':'Schlacht anhalten';
-  $('bTempo').firstChild.textContent='Tempo '+fmt(tempoV)+'×';
-  $('bTempo').lastChild.textContent=tempoV>1?'Antippen: normal':'Antippen: schneller';
+  // Feindliste
+  for(const f of feinde){
+    const u=U[f.i],g=gone(u);
+    klasse(f.d,'weg',g);klasse(f.d,'fl',u.state==='flieht');
+    wid(f.bar,u.strength/PRO*100);txt(f.sn,g?'–':String(u.strength));
+    txt(f.zt,u.state==='flieht'?'flieht':g?(u.state==='geflohen'?'geflohen':'gefallen'):u.engaged?'kämpft':u.fern&&u.schiessT>0?'schießt':'');
+  }
+  // Banner: Stärke, Wahl
+  for(let i=0;i<NU;i++){const u=U[i],b=BN[i];if(!b)continue;wid(b.bar,u.strength/PRO*100);klasse(b.el,'sel',selM.has(i));klasse(b.el,'fl',u.state==='flieht');}
+  // Kräftevergleich
+  {let p0=0,p1=0,m0=0,m1=0;
+   for(const u of U){if(gone(u))continue;const m=u.strength;if(u.side===0)m0+=m;else m1+=m;
+     if(u.state==='flieht')continue;const w=m*(.4+.6*Math.max(0,u.morale)/u.def.mor);if(u.side===0)p0+=w;else p1+=w;}
+   txt($('kR'),String(m0));txt($('kK'),String(m1));wid($('kBar'),p0+p1>0?p0/(p0+p1)*100:50);
+   txt($('kZeit'),fmtZeit(schlachtZ));txt($('kTempo'),pausiert?'Pause':fmt(tempoV)+'× Tempo');}
+  // Einheitenfenster
+  const h=sel>=0?U[sel]:null,fe=$('fenster');
+  if(h&&phase!=='ende'){
+    if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
+    fe.classList.add('an');
+    const K=h.def;
+    txt(fw.m,h.strength+' von '+PRO);txt(fw.a,fmt(K.atk));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
+    txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+' Stk.':'Nahkampf');
+  }else{fe.classList.remove('an');fensterId=-2;}
+  // Knöpfe
+  const L=selListe(),hz=L.length?L[0]:null;
+  $('bBegin').hidden=phase!=='aufstellung';
+  $('bPause').hidden=$('bTempo').hidden=phase!=='schlacht';
+  $('bPlaenk').hidden=!(hz&&hz.fern);
+  $('bHalt').style.opacity=$('bForm').style.opacity=hz?1:.55;
+  if(hz){
+    const ang=hz.stance==='angreifen';
+    btnText('bHalt',ang?'Angreifen':'Halten',hz.fern?(ang?'rückt in Schussweite':'schießt vom Platz'):(ang?'stürmt auf Feinde':'steht fest'));
+    hrefSet($('bHalt').querySelector('use'),ang?'ic-speere':'ic-schild');
+    btnText('bForm','Formation',hz.eng?'eng':'locker');
+    btnText('bPlaenk','Plänkeln',hz.plaenk?'an: weicht aus':'aus: bleibt stehen');klasse($('bPlaenk'),'an',!!hz.plaenk);
+  }else{btnText('bHalt','Halten','Einheit wählen');btnText('bForm','Formation','Einheit wählen');}
+  btnText('bPause',pausiert?'Weiter':'Pause',pausiert?'geht weiter':'anhalten');hrefSet($('bPause').querySelector('use'),pausiert?'ic-play':'ic-pause');
+  btnText('bTempo','Tempo',fmt(tempoV)+'×');
+  btnText('bTon','Ton',tonAn?'an':'aus');hrefSet($('bTon').querySelector('use'),tonAn?'ic-ton':'ic-stumm');
+  // Hinweiszeile (blendet nach 6 s aus)
   let z;
-  if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Schlacht beginnen.';
+  if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Beginnen.';
   else if(phase==='ende')z=ergebnis==='sieg'?'Das Feld gehört Rom.':'Rom ist geschlagen.';
   else if(pausiert)z='Pause';
-  else z=h?(h.name+' gewählt – Gelände antippen: marschieren, doppelt: laufen, Feind: angreifen'):'Wähle eine Einheit (Karte unten oder auf dem Feld).';
-  $('zeile').textContent=z;
+  else z=hz?(hz.name+(selM.size>1?' und '+(selM.size-1)+' weitere':'')+' gewählt – '+(hz.fern?'Feind antippen: beschießen · Gelände: marschieren':'Gelände: marschieren, doppelt: laufen · Feind: angreifen')):'Wähle eine Einheit (Karte unten oder auf dem Feld).';
+  if(z!==lastZ){lastZ=z;hinweis(z);}
 }
 function uiAuswahl(){uiAktualisieren();}
+/* Banner über den Einheiten: höchstens 15 Hz, nur Transform/Opacity */
+const _bnp=new THREE.Vector3();
+function bannerSchritt(){
+  const W=innerWidth,Hh=innerHeight;
+  for(let i=0;i<NU;i++){
+    const u=U[i],b=BN[i];if(!b)continue;
+    let op=0,x=0,y=0,s=1;
+    if(!gone(u)&&phase!=='laden'){
+      _bnp.set(u.cx,H(u.cx,u.cz)+9,u.cz);const dist=camera.position.distanceTo(_bnp);_bnp.project(camera);
+      x=(_bnp.x+1)*.5*W;y=(1-_bnp.y)*.5*Hh;
+      op=_bnp.z>1?0:Math.max(0,Math.min(1,(dist-26)/22));        // in der Nähe ausblenden
+      if(x<-60||x>W+60||y<-80||y>Hh+60)op=0;
+      s=Math.max(.45,Math.min(.95,95/dist));                    // mit Entfernung kleiner
+    }
+    if(op<=0){if(b.vis){b.el.style.display='none';b.vis=false;}continue;}
+    if(!b.vis){b.el.style.display='block';b.vis=true;}
+    const tf='translate3d('+(x-22).toFixed(1)+'px,'+(y-64).toFixed(1)+'px,0) scale('+s.toFixed(2)+')';
+    if(tf!==b.tf){b.tf=tf;b.el.style.transform=tf;}
+    const o=Math.round(op*20)/20;if(o!==b.op){b.op=o;b.el.style.opacity=o;}
+  }
+}
 function uiEnde(){
-  const e=$('ende'),r=[0,0];for(const u of U)if(!gone(u)||u.state==='geflohen')r[u.side]+=u.state==='geflohen'?0:u.strength;
-  const fl=[0,0];for(const u of U)fl[u.side]+=u.fled||0;
-  const lebt=[0,0];for(const u of U)lebt[u.side]+=(u.state==='aufgerieben'||u.state==='geflohen')?0:u.strength;
-  e.className=ergebnis==='sieg'?'sieg':'nied';
-  e.innerHTML='<h2 class="titel">'+(ergebnis==='sieg'?'Sieg':'Niederlage')+'</h2>'
-    +'<p class="u">'+(ergebnis==='sieg'?'Karthago weicht. Rom behauptet das Feld.':'Deine Legion ist zerschlagen.')+'</p>'
-    +'<div class="zl"><span>Gefallene Rom</span><b>'+gefallen[0]+'</b></div>'
-    +'<div class="zl"><span>Gefallene Karthago</span><b>'+gefallen[1]+'</b></div>'
+  const e=$('ende'),sieg=ergebnis==='sieg',fl=[0,0],rest=[0,0];
+  for(const u of U){fl[u.side]+=u.fled||0;rest[u.side]+=u.strength;}
+  let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(sieg?'Karthago weicht. Rom behauptet das Feld.':'Deine Legion ist zerschlagen.')+'</p>';
+  for(const u of U){if(u.side!==0)continue;
+    h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+'</div><div class="v"><i style="width:'+(u.strength/PRO*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/PRO*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/PRO*100)+'%;background:#9c2a20"></i></div>'
+      +'<small>Rest '+u.strength+' · geflohen '+u.fled+' · gefallen '+u.gef+'</small></div></div>';}
+  h+='<div class="zl" style="margin-top:6px"><span>Gefallene Rom / Karthago</span><b>'+gefallen[0]+' / '+gefallen[1]+'</b></div>'
     +'<div class="zl"><span>Geflohen Rom / Karthago</span><b>'+fl[0]+' / '+fl[1]+'</b></div>'
-    +'<div class="zl"><span>Auf dem Feld Rom / Karthago</span><b>'+lebt[0]+' / '+lebt[1]+'</b></div>'
-    +'<button class="plak gross" id="bNoch"><b>Noch einmal</b><small>Neue Aufstellung</small></button>';
-  e.style.display='block';$('bNoch').onclick=neu;
+    +'<div class="zl"><span>Auf dem Feld Rom / Karthago</span><b>'+rest[0]+' / '+rest[1]+'</b></div>'
+    +'<div class="zl"><span>Wurfgeschosse: Treffer / abgewehrt</span><b>'+G.treffer+' / '+G.abgewehrt+'</b></div>'
+    +'<button class="plak gross" id="bNoch"><svg class="ic"><use href="#ic-speere"/></svg><span><b>Noch einmal</b><small>Neue Aufstellung</small></span></button>';
+  e.className=sieg?'sieg':'nied';e.innerHTML=h;e.style.display='block';$('bNoch').onclick=neu;
 }
 $('bBegin').onclick=()=>start();
-$('bHalt').onclick=()=>{if(sel<0)return;const u=U[sel];u.stance=u.stance==='angreifen'?'halten':'angreifen';if(u.stance==='angreifen'&&!u.engaged&&u.atkT<0&&phase==='schlacht')autoZiel(u);uiAktualisieren();};
+$('bHalt').onclick=()=>{
+  const L=selListe();if(!L.length)return;const s=L[0].stance==='angreifen'?'halten':'angreifen';
+  for(const u of L){u.stance=s;if(s==='angreifen'&&!u.fern&&!u.engaged&&u.atkT<0&&phase==='schlacht')autoZiel(u);}uiAktualisieren();};
+$('bPlaenk').onclick=()=>{const L=selListe();if(!L.length)return;const s=!L[0].plaenk;for(const u of L)if(u.fern)u.plaenk=s;uiAktualisieren();};
+$('bForm').onclick=()=>{const L=selListe();if(!L.length)return;const e=!L[0].eng;for(const u of L){u.eng=e;u.fk=e?FORM_K.eng:FORM_K.locker;}uiAktualisieren();};
 $('bPause').onclick=()=>{pausiert=!pausiert;uiAktualisieren();};
-$('bTempo').onclick=()=>{tempoV=tempoV>1?1:2;uiAktualisieren();};
+$('bTempo').onclick=()=>{const T=[1,2,4];tempoV=T[(T.indexOf(tempoV)+1)%T.length]||1;uiAktualisieren();};
 $('bGrafik').onclick=()=>setGrafik(GRAFIK_ORDNUNG[(GRAFIK_ORDNUNG.indexOf(grafikName)+1)%3]);
-for(const id of['bBegin','bHalt','bPause','bTempo','bGrafik'])$(id).addEventListener('pointerdown',e=>e.stopPropagation());
+$('bTon').onclick=()=>{tonAn=!tonAn;try{localStorage.setItem('schlachtTon',tonAn?'1':'0');}catch(e){}uiAktualisieren();};
+try{tonAn=localStorage.getItem('schlachtTon')!=='0';}catch(e){}
+for(const id of['bBegin','bHalt','bPlaenk','bForm','bPause','bTempo','bGrafik','bTon'])$(id).addEventListener('pointerdown',e=>e.stopPropagation());
+
 
 /* ====================================================================================================
    8  ABLAUF, HAUPTSCHLEIFE, TEST-SCHNITTSTELLE
@@ -1510,12 +1948,11 @@ function start(){
   uiAktualisieren();return true;
 }
 function neu(){
-  $('ende').style.display='none';$('erkl').style.display='none';
-  blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;
+  $('ende').style.display='none';
+  blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;
   const alt=U.map(u=>({ring:u.ring,flag:u.flag}));
   einheitenAnlegen();U.forEach((u,i)=>{u.ring=alt[i].ring;u.flag=alt[i].flag;});
-  for(const k of karten)k.u=U[k.u.i];for(const c of chips)c.u=U[c.u.i];
-  phase='aufstellung';tickAcc=0;uiAktualisieren();
+  phase='aufstellung';tickAcc=0;lastZ='';uiAktualisieren();
 }
 /* ---- Grafikstufen ---- */
 const GRAFIK_ORDNUNG=['niedrig','mittel','hoch'];
@@ -1543,7 +1980,7 @@ function setGrafik(nm){
   pMax=S.staub;pHead=0;
   for(const m of GMATS)m.needsUpdate=true;
   blobMesh.visible=S.blob>0;
-  const b=$('bGrafik');if(b){b.firstChild.textContent='Grafik: '+S.n;b.lastChild.textContent=sh?(nm==='hoch'?'Schatten, dichtes Gras':'Schatten, Gras'):'Weiche Kontaktschatten';}
+  btnText('bGrafik','Grafik',S.n);
   try{localStorage.setItem('schlachtGrafik',nm);}catch(e){}
   groesse();
   return true;
@@ -1588,15 +2025,17 @@ function schleife(t){
   }
   for(const K of KIT)K.mat.userData.U.uTime.value=spielzeit;
   UWT.value=t/1000;
+  if(kz.on){const k=1-Math.exp(-dt*7);ziel.x+=(kz.x-ziel.x)*k;ziel.z+=(kz.z-ziel.z)*k;if(Math.hypot(kz.x-ziel.x,kz.z-ziel.z)<.4)kz.on=false;}
   camSetzen();   // Kamera folgt dem Gelände (auch wenn Ziel sich nicht bewegt hat: billig)
   himmel.position.copy(camera.position);
   GRAS[0].uni.uCen.value.set(ziel.x,ziel.z);GRAS[1].uni.uCen.value.set(ziel.x,ziel.z);
   sonneNachfuehren();
-  baueInstanzen();markerUpdate(t);
+  baueInstanzen();baueGeschosse();markerUpdate(t);
   if(!pausiert&&phase!=='aufstellung')staubEmission(Math.min(.1,dt));
   if(!pausiert){staubSchritt(Math.min(.1,dt));spritzSchritt(Math.min(.1,dt)*tempoV);}
   renderer.render(scene,camera);
   if(t-uiT>250){uiT=t;uiAktualisieren();}
+  if(t-bannerT>66){bannerT=t;bannerSchritt();}   // ~15 Hz
   fz++;if(!ft)ft=t;
   if(t-ft>=2000){const f=fz*1000/(t-ft);$('fps').textContent=fmt(f)+' B/s';fpsLog.push(Math.round(f*10)/10);fz=0;ft=t;}
 }
@@ -1635,6 +2074,7 @@ window.SCHLACHT={
   get units(){return U;},get gefallen(){return gefallen.slice();},get ergebnis(){return ergebnis;},get fps(){return fpsLog;},
   get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id]};},
+  get geschosse(){return G;},get ereignisse(){return evZ;},get auswahl(){return[...selM];},get schlachtZeit(){return schlachtZ;},
   start,befehl,angriff,neu,waehle:select,setGrafik,get grafik(){return grafikName;},hoehe:H,wald:WF,
   kamera(a,e,d,x,z){az=a;el=e;dist=d;ziel.x=x;ziel.z=z;camSetzen();},
   tempo(n){tempoV=Math.max(.1,Math.min(30,+n||1));uiAktualisieren();},

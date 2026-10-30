@@ -38,6 +38,15 @@ KITS = {
                              helm="thraker", brust=False,
                              schild=dict(w=0.6, h=0.95, farbe=(0.6, 0.55, 0.42), mittel=(0.3, 0.19, 0.08)),
                              waffe=("speer", 2.4)),
+    # Fernkampf (30.10.): Velites – leichte Plänkler Roms (Parma ~0,9 m, Wurfspeere hasta velitaris), Kopfbedeckung dunkel (Fell)
+    "A1_veles": dict(tunika=(0.47, 0.36, 0.24), haut="young_caucasian_male", muskel=0.5, rock=0.1,
+                     helm="sehnen", brust=False,
+                     schild=dict(w=0.9, h=0.9, farbe=(0.38, 0.08, 0.05), woelbung=0.04),
+                     waffe=("speer", 1.6), fern="speerwurf"),
+    # Balearische Schleuderer (Söldner Karthagos): ohne Rüstung und Schild, Schleuder, Steinbeutel
+    "A4_balearisch": dict(tunika=(0.58, 0.52, 0.42), haut="young_caucasian_male2", muskel=0.5, rock=0.08,
+                          helm="haar", haar_tief=0.86, brust=False, schild=None,
+                          waffe=("schleuder", 0.9), fern="schleuder"),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -373,14 +382,15 @@ if KIT["brust"]:
     teile.append(brust)
 
 sk = KIT["schild"]
-schild = TF.schild(sk["w"], sk["h"], "teil_schild_%s_%s" % (KURZ, KIT_NAME.split("_")[1]), sk["farbe"], mittel=sk.get("mittel"),
-                   woelbung=sk.get("woelbung", 0.0), zylinder=sk.get("zylinder", 0.0), eckig=sk.get("eckig", 2.0))
-hand_l = kp("LeftHand", 0.5)
-schild.matrix_world = Matrix.Translation(hand_l + Vector((0.0, -0.05, 0.04)))
-bpy.context.view_layer.update()
-m = schild.matrix_world.copy(); schild.parent = arm; schild.parent_type = "BONE"; schild.parent_bone = "LeftHand"
-bpy.context.view_layer.update(); schild.matrix_world = m
-teile.append(schild)
+if sk:
+  schild = TF.schild(sk["w"], sk["h"], "teil_schild_%s_%s" % (KURZ, KIT_NAME.split("_")[1]), sk["farbe"], mittel=sk.get("mittel"),
+                     woelbung=sk.get("woelbung", 0.0), zylinder=sk.get("zylinder", 0.0), eckig=sk.get("eckig", 2.0))
+  hand_l = kp("LeftHand", 0.5)
+  schild.matrix_world = Matrix.Translation(hand_l + Vector((0.0, -0.05, 0.04)))
+  bpy.context.view_layer.update()
+  m = schild.matrix_world.copy(); schild.parent = arm; schild.parent_type = "BONE"; schild.parent_bone = "LeftHand"
+  bpy.context.view_layer.update(); schild.matrix_world = m
+  teile.append(schild)
 
 hand_r = kp("RightHand", 0.6)
 ziel = Vector((0.02, -1, 0.15)).normalized()
@@ -388,6 +398,22 @@ if KIT["waffe"][0] == "schwert":
     waffe = TF.schwert(KIT["waffe"][1], "teil_schwert_%s_%s" % (KURZ, KIT["waffe"][1]))
     R = Vector((0, 0, 1)).rotation_difference(ziel).to_matrix().to_4x4()
     waffe.matrix_world = Matrix.Translation(hand_r) @ R
+elif KIT["waffe"][0] == "schleuder":
+    import bmesh as _b
+    bm = _b.new()
+    for dx in (-0.012, 0.012):   # zwei Riemen, hängend 0,9 m, Lederschlaufe unten
+        r = _b.ops.create_cube(bm, size=1.0, matrix=Matrix.Translation((dx, 0, -0.42)) @ Matrix.Diagonal((0.008, 0.006, 0.84, 1)))
+    r = _b.ops.create_cube(bm, size=1.0, matrix=Matrix.Translation((0, 0, -0.86)) @ Matrix.Diagonal((0.06, 0.03, 0.05, 1)))
+    me = bpy.data.meshes.new("schleuder"); bm.to_mesh(me); bm.free()
+    waffe = bpy.data.objects.new("teil_schleuder_%s_riemen" % KURZ, me); bpy.context.collection.objects.link(waffe)
+    waffe.data.materials.append(mat("leder_riemen", (0.2, 0.12, 0.05)))
+    waffe.matrix_world = Matrix.Translation(hand_r)
+    # Steinbeutel an der rechten Hüfte
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=6, ring_count=4, radius=0.07, location=kp("RightUpLeg", 0.15) + Vector((-0.08, 0.02, 0.05)))
+    beutel = bpy.context.active_object; beutel.name = "teil_beutel_%s_steine" % KURZ; beutel.scale = (1, 0.7, 1.2)
+    beutel.data.materials.append(mat("leder_beutel", (0.25, 0.15, 0.07)))
+    bpy.context.view_layer.update(); mb = beutel.matrix_world.copy(); beutel.parent = arm; beutel.parent_type = "BONE"; beutel.parent_bone = "Hips"
+    bpy.context.view_layer.update(); beutel.matrix_world = mb; teile.append(beutel)
 else:
     wlang = KIT["waffe"][1]
     # Stoßspeer: Eschenschaft (3 cm) + Eisenspitze 25 cm, etwa 40 Dreiecke
@@ -442,6 +468,16 @@ KNIEN = dict(TREFFER, LeftUpLeg=(0.08, -0.15, -0.99), LeftLeg=(0, 0.97, -0.2), R
 clip_haltung("sterben_knie", [(1, BEREIT), (5, TREFFER), (14, KNIEN, -0.42), (26, dict(KNIEN, Spine=(0, -0.55, 0.83), Spine1=(0, -0.7, 0.7), Head=(0, -0.8, 0.6)), -0.46), (40, dict(KNIEN, Spine=(0, -0.75, 0.66), Spine1=(0, -0.85, 0.5), Head=(0, -0.9, 0.4), LeftArm=(0.2, -0.3, -0.93), RightArm=(-0.2, -0.3, -0.93)), -0.5)])
 SCHILD_HOCH = dict(KAMPF, LeftArm=(0.12, -0.3, 0.94), LeftForeArm=(-0.45, -0.45, 0.77), Spine=(0, -0.05, 1))
 clip_haltung("schild_hoch", [(1, KAMPF), (6, SCHILD_HOCH), (20, SCHILD_HOCH), (26, KAMPF)])
+# Fernkampf: Speerwurf (Ausholen hinter dem Kopf, Wurf nach vorn, Schritt) und Schleudern (zwei Kreise über dem Kopf, Abwurf)
+WURF_AUS = dict(BEREIT, RightArm=(-0.25, 0.55, 0.8), RightForeArm=(-0.05, 0.75, 0.66), Spine1=(-0.05, 0.12, 0.99), LeftArm=(0.3, -0.75, 0.0), LeftForeArm=(0.1, -1, 0.1))
+WURF_END = dict(BEREIT, RightArm=(-0.1, -0.85, 0.5), RightForeArm=(0, -0.95, -0.25), Spine1=(0.05, -0.25, 0.97), LeftUpLeg=(0.08, -0.5, -0.86))
+clip_haltung("speerwurf", [(1, BEREIT), (9, WURF_AUS), (13, WURF_AUS), (17, WURF_END), (21, WURF_END), (30, BEREIT)])
+OBEN = {"RightArm": (-0.25, 0.0, 0.97)}
+K1 = dict(BEREIT, **OBEN, RightForeArm=(-0.7, 0.0, 0.7)); K2 = dict(BEREIT, **OBEN, RightForeArm=(0.0, -0.7, 0.7))
+K3 = dict(BEREIT, **OBEN, RightForeArm=(0.7, 0.0, 0.7)); K4 = dict(BEREIT, **OBEN, RightForeArm=(0.0, 0.7, 0.7))
+ABWURF = dict(BEREIT, RightArm=(-0.1, -0.9, 0.35), RightForeArm=(0, -1, 0.05), Spine1=(0.05, -0.2, 0.98))
+if KIT.get("fern") == "schleuder" or True:
+    clip_haltung("schleuder", [(1, BEREIT), (4, K1), (7, K2), (10, K3), (13, K4), (16, K1), (19, K2), (22, K3), (24, ABWURF), (28, ABWURF), (36, BEREIT)])
 clip_cmu("sterben_vorn", "90", "16", 0.42, 0.75, dauer=40, am_platz=False)
 clip_cmu("sterben_hinten", "90", "18", 0.35, 0.75, dauer=40, am_platz=False)
 clip_cmu("jubeln", "79", "69", 0.1, 0.5, dauer=60)
