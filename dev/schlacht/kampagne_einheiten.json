@@ -1,0 +1,2714 @@
+{
+ "quelle": "dev/imperium.html (ROLES, VARIANTS, UNIT_MOD, EPOCH_STR, EPOCH_COST)",
+ "erstellt": "2026-10-30",
+ "ROLES": {
+  "spear": {
+   "cost": 60,
+   "str": 7,
+   "men": 120,
+   "upk": 6,
+   "label": "Speerträger"
+  },
+  "sword": {
+   "cost": 85,
+   "str": 9,
+   "men": 120,
+   "upk": 8,
+   "label": "Nahkampf"
+  },
+  "missile": {
+   "cost": 65,
+   "str": 5.5,
+   "men": 100,
+   "upk": 6,
+   "label": "Fernkampf"
+  },
+  "cav": {
+   "cost": 120,
+   "str": 11,
+   "men": 60,
+   "upk": 11,
+   "label": "Reiterei"
+  },
+  "art": {
+   "cost": 220,
+   "str": 13,
+   "men": 40,
+   "upk": 18,
+   "label": "Artillerie"
+  }
+ },
+ "VARIANTS": {
+  "schleud": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 1,
+   "n": "Schleuderer",
+   "m": {
+    "str": 0.85,
+    "cost": 0.7,
+    "upk": 0.75
+   },
+   "b": {
+    "range": 0.8,
+    "ratk": 0.85,
+    "spd": 1.1,
+    "skirm": 1
+   },
+   "d": "Billige Plänkler mit kurzer Reichweite.",
+   "up": [
+    "bogen"
+   ]
+  },
+  "speerw": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 1,
+   "n": "Speerwerfer",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "b": {
+    "range": 0.55,
+    "ratk": 1.35,
+    "ammo": 0.5,
+    "spd": 1.15,
+    "skirm": 1
+   },
+   "d": "Wenige, aber wuchtige Würfe aus kurzer Distanz, dann zurück.",
+   "up": [
+    "bogen"
+   ]
+  },
+  "bogen": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 2,
+   "tech": "bogenbau",
+   "n": "Kompositbogenschützen",
+   "m": {
+    "str": 1.15,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "range": 1.15,
+    "ratk": 1.1
+   },
+   "d": "Größere Reichweite als einfache Schützen.",
+   "up": [
+    "armbr",
+    "lang"
+   ]
+  },
+  "hoplit": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "griechisch",
+    "latein",
+    "semitisch",
+    "punisch"
+   ],
+   "n": "Hopliten",
+   "m": {
+    "str": 1.15,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "def": 1.2,
+    "mor": 5
+   },
+   "d": "Schwerer Speerkämpfer mit großem Schild.",
+   "up": [
+    "phalanx"
+   ]
+  },
+  "phalanx": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "griechisch",
+    "thrakisch",
+    "persisch",
+    "aegyptisch"
+   ],
+   "tech": "iron",
+   "n": "Pikenphalanx",
+   "m": {
+    "str": 1.25,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "b": {
+    "def": 1.35,
+    "atk": 0.9,
+    "spd": 0.85,
+    "pike": 2.6
+   },
+   "d": "Lange Piken: Reiterei läuft frontal ins Leere.",
+   "up": [
+    "pikenier"
+   ]
+  },
+  "legion": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "tech": "legion",
+   "n": "Berufslegion",
+   "m": {
+    "str": 1.3,
+    "cost": 1.35,
+    "upk": 1.2
+   },
+   "b": {
+    "def": 1.1
+   },
+   "d": "Stehende Berufsinfanterie, stark im Nahkampf.",
+   "up": [
+    "husk",
+    "hellebarde"
+   ]
+  },
+  "langschw": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "keltisch",
+    "germanisch",
+    "britisch",
+    "iberisch"
+   ],
+   "n": "Langschwertkrieger",
+   "m": {
+    "str": 1.2,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "atk": 1.25,
+    "def": 0.85,
+    "chg": 1.5,
+    "mor": 4
+   },
+   "d": "Wilder Ansturm, schwache Abwehr.",
+   "up": [
+    "berserker",
+    "husk"
+   ]
+  },
+  "falx": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "thrakisch",
+    "slawisch"
+   ],
+   "n": "Falxkrieger",
+   "m": {
+    "str": 1.25,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "atk": 1.4,
+    "def": 0.8
+   },
+   "d": "Zweihändige Sichelschwerter zerschneiden Schilde.",
+   "up": [
+    "husk"
+   ]
+  },
+  "leichtr": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 2,
+   "g": [
+    "berber",
+    "punisch",
+    "iberisch",
+    "thrakisch",
+    "arabisch",
+    "griechisch"
+   ],
+   "n": "Leichte Reiter",
+   "m": {
+    "str": 0.85,
+    "cost": 0.75,
+    "upk": 0.75
+   },
+   "b": {
+    "spd": 1.25,
+    "atk": 0.85,
+    "range": 0.5,
+    "ratk": 0.7,
+    "ammo": 0.4,
+    "skirm": 1
+   },
+   "d": "Schnelle Speerreiter, werfen und ziehen sich zurück.",
+   "up": [
+    "husar"
+   ]
+  },
+  "harch": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 3,
+   "g": [
+    "steppe",
+    "persisch",
+    "kaukasisch"
+   ],
+   "n": "Berittene Bogenschützen",
+   "m": {
+    "str": 1.05,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "spd": 1.2,
+    "atk": 0.75,
+    "def": 0.8,
+    "range": 0.75,
+    "ratk": 0.8,
+    "ammo": 0.7,
+    "skirm": 1
+   },
+   "d": "Schießen vom Pferd und weichen dem Nahkampf aus.",
+   "up": []
+  },
+  "kamel": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 2,
+   "g": [
+    "arabisch",
+    "berber",
+    "aegyptisch",
+    "semitisch"
+   ],
+   "n": "Kamelreiter",
+   "m": {
+    "str": 1.05,
+    "cost": 0.95,
+    "upk": 0.95
+   },
+   "b": {
+    "spd": 1.05,
+    "chg": 0.9,
+    "def": 1.1
+   },
+   "d": "Ausdauernd in Wüste und Hitze, Pferde scheuen sie.",
+   "up": [
+    "mamluk"
+   ]
+  },
+  "wagen": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 0,
+   "g": [
+    "britisch",
+    "persisch",
+    "keltisch"
+   ],
+   "n": "Sichelwagen",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1,
+    "men": 0.6
+   },
+   "b": {
+    "chg": 2,
+    "def": 0.65,
+    "atk": 1.1
+   },
+   "d": "Furchtbarer Aufprall, danach verwundbar.",
+   "up": []
+  },
+  "elef": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "punisch",
+    "indisch",
+    "persisch",
+    "griechisch",
+    "afrikanisch",
+    "aegyptisch"
+   ],
+   "tech": "elefanten",
+   "n": "Kriegselefanten",
+   "m": {
+    "str": 1.6,
+    "cost": 1.7,
+    "upk": 1.6,
+    "men": 0.5
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.6,
+    "def": 1.2,
+    "mor": 10,
+    "spd": 0.9
+   },
+   "d": "Brechen jede Linie, aber teuer und wenige Tiere.",
+   "up": []
+  },
+  "torsion": {
+   "role": "art",
+   "ep": 0,
+   "e1": 1,
+   "tech": "torsion",
+   "n": "Torsionsgeschütze",
+   "m": {
+    "str": 0.75,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "bar": 2,
+   "b": {
+    "range": 0.85
+   },
+   "d": "Ballisten und Katapulte: Geschütze schon vor dem Schießpulver.",
+   "up": [
+    "bombarde"
+   ]
+  },
+  "manipel": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 0,
+   "g": [
+    "latein"
+   ],
+   "n": "Manipellegion",
+   "m": {
+    "str": 1.15,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "def": 1.15,
+    "mor": 6
+   },
+   "d": "Hastati, Principes und Triarier in drei Treffen; die Triarier halten jeden Durchbruch.",
+   "up": [
+    "legion"
+   ]
+  },
+  "evocati": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "latein"
+   ],
+   "tech": "legion",
+   "n": "Evocati",
+   "m": {
+    "str": 1.45,
+    "cost": 1.6,
+    "upk": 1.4
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.15,
+    "def": 1.15,
+    "mor": 12
+   },
+   "d": "Ausgediente Veteranen, die für ihren Feldherrn zurückkehren.",
+   "up": []
+  },
+  "socii": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 0,
+   "g": [
+    "latein"
+   ],
+   "n": "Socii",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "b": {},
+   "d": "Italische Bundesgenossen: günstig, aber nach Niederlagen wankelmütig.",
+   "up": [
+    "hoplit"
+   ]
+  },
+  "auxreit": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "latein",
+    "keltisch"
+   ],
+   "n": "Gallische Hilfsreiter",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.85
+   },
+   "b": {
+    "spd": 1.1
+   },
+   "d": "Reiter aus unterworfenen Stämmen, billig und schnell.",
+   "up": []
+  },
+  "soldurii": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "keltisch"
+   ],
+   "n": "Soldurii",
+   "m": {
+    "str": 1.25,
+    "cost": 1.25,
+    "upk": 1.15
+   },
+   "b": {
+    "atk": 1.1,
+    "mor": 18
+   },
+   "d": "Eidgefolge eines Fürsten, kämpft bis zum Letzten.",
+   "up": []
+  },
+  "streitw": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "britisch"
+   ],
+   "n": "Britannische Streitwagen",
+   "m": {
+    "str": 1,
+    "cost": 0.95,
+    "upk": 0.95,
+    "men": 0.6
+   },
+   "b": {
+    "spd": 1.3,
+    "range": 0.5,
+    "ratk": 0.8,
+    "ammo": 0.5,
+    "skirm": 1,
+    "def": 0.8
+   },
+   "d": "Schnelle Wagen, die Speere werfen und wieder abdrehen.",
+   "up": []
+  },
+  "germreit": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "germanisch"
+   ],
+   "n": "Reiter mit Fußkämpfern",
+   "m": {
+    "str": 1.15,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "def": 1.15,
+    "pike": 1.2
+   },
+   "d": "Germanische Reiter, zwischen denen Fußkrieger mitlaufen.",
+   "up": []
+  },
+  "balear": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "punisch",
+    "iberisch"
+   ],
+   "n": "Balearische Schleuderer",
+   "m": {
+    "str": 1.1,
+    "cost": 1.05,
+    "upk": 1
+   },
+   "b": {
+    "range": 1.2,
+    "ratk": 1.15,
+    "skirm": 1
+   },
+   "d": "Die besten Schleuderer der Welt, mit großer Reichweite.",
+   "up": [
+    "bogen"
+   ]
+  },
+  "numid": {
+   "role": "cav",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "punisch",
+    "berber"
+   ],
+   "n": "Numidische Reiter",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "b": {
+    "spd": 1.4,
+    "atk": 0.85,
+    "range": 0.5,
+    "ratk": 0.75,
+    "ammo": 0.5,
+    "skirm": 1
+   },
+   "d": "Ohne Zaum und Sattel, unerreicht schnell im Hinterhalt und bei der Verfolgung.",
+   "up": []
+  },
+  "scutar": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "iberisch",
+    "punisch"
+   ],
+   "n": "Iberische Scutarii",
+   "m": {
+    "str": 1.1,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "def": 1.1
+   },
+   "d": "Kurzschwert und Langschild, vielseitig.",
+   "up": [
+    "husk"
+   ]
+  },
+  "libyer": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 0,
+   "g": [
+    "punisch",
+    "berber"
+   ],
+   "n": "Libysche Speerträger",
+   "m": {
+    "str": 1.15,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "def": 1.15,
+    "mor": 4
+   },
+   "d": "Kernfußvolk Karthagos, rüstet sich mit Beute aus.",
+   "up": [
+    "phalanx"
+   ]
+  },
+  "scara": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "latein"
+   ],
+   "n": "Scara",
+   "m": {
+    "str": 1.3,
+    "cost": 1.35,
+    "upk": 1.3
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.3,
+    "def": 1.15
+   },
+   "d": "Fränkische Panzerreiter, dauerhaft unter Waffen.",
+   "up": [
+    "feudal"
+   ]
+  },
+  "heerbann": {
+   "role": "spear",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "latein",
+    "britisch"
+   ],
+   "n": "Heerbann",
+   "m": {
+    "str": 0.8,
+    "cost": 0.6,
+    "upk": 0.6
+   },
+   "b": {},
+   "d": "Das Aufgebot der freien Bauern: viele, billig, schlecht gerüstet.",
+   "up": [
+    "speermil"
+   ]
+  },
+  "paladin": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "latein"
+   ],
+   "tech": "kataphrakten",
+   "n": "Paladine",
+   "m": {
+    "str": 1.5,
+    "cost": 1.7,
+    "upk": 1.5
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.4,
+    "def": 1.3,
+    "mor": 15
+   },
+   "d": "Die Getreuen um den König.",
+   "up": [
+    "ritter"
+   ]
+  },
+  "sachs": {
+   "role": "sword",
+   "ep": 1,
+   "e1": 1,
+   "g": [
+    "germanisch"
+   ],
+   "n": "Sächsische Krieger",
+   "m": {
+    "str": 1.05,
+    "cost": 0.9,
+    "upk": 0.9
+   },
+   "b": {
+    "atk": 1.15,
+    "spd": 1.1
+   },
+   "d": "Mit dem Sax, stark im Wald und im Hinterhalt.",
+   "up": [
+    "husk"
+   ]
+  },
+  "langobr": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "latein"
+   ],
+   "n": "Langobardische Lanzenreiter",
+   "m": {
+    "str": 1.15,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "chg": 1.25
+   },
+   "d": "Lanze und Schild, Kern des langobardischen Heeres.",
+   "up": [
+    "feudal"
+   ]
+  },
+  "baske": {
+   "role": "missile",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "iberisch"
+   ],
+   "n": "Baskische Bergkrieger",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "b": {
+    "range": 0.6,
+    "ratk": 1.05,
+    "spd": 1.2,
+    "skirm": 1
+   },
+   "d": "Plänkler, die in Pässen und Bergen unschlagbar sind.",
+   "up": [
+    "armbr"
+   ]
+  },
+  "bondi": {
+   "role": "spear",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "nordisch"
+   ],
+   "n": "Bondi",
+   "m": {
+    "str": 0.85,
+    "cost": 0.65,
+    "upk": 0.65
+   },
+   "b": {
+    "def": 1.05
+   },
+   "d": "Freie Bauern des Nordens, zu Hause zäh.",
+   "up": [
+    "speerwall"
+   ]
+  },
+  "fyrd": {
+   "role": "spear",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "britisch",
+    "germanisch"
+   ],
+   "n": "Fyrd",
+   "m": {
+    "str": 0.9,
+    "cost": 0.7,
+    "upk": 0.7
+   },
+   "b": {
+    "def": 1.15
+   },
+   "d": "Angelsächsisches Aufgebot, das seine Grafschaft verteidigt.",
+   "up": [
+    "speerwall"
+   ]
+  },
+  "speerwall": {
+   "role": "spear",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch",
+    "keltisch"
+   ],
+   "n": "Schildwall",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "def": 1.35,
+    "spd": 0.9,
+    "pike": 1.4
+   },
+   "d": "Dicht geschlossene Schilde, schwer zu durchbrechen.",
+   "up": [
+    "pikenier"
+   ]
+  },
+  "husk": {
+   "role": "sword",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch"
+   ],
+   "tech": "huskarle",
+   "n": "Huskarle",
+   "m": {
+    "str": 1.3,
+    "cost": 1.35,
+    "upk": 1.2
+   },
+   "b": {
+    "atk": 1.2
+   },
+   "d": "Gefolgsleute mit Dänenaxt.",
+   "up": [
+    "hellebarde"
+   ]
+  },
+  "berserker": {
+   "role": "sword",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "nordisch",
+    "germanisch"
+   ],
+   "n": "Berserker",
+   "m": {
+    "str": 1.25,
+    "cost": 1.2,
+    "upk": 1.1
+   },
+   "b": {
+    "atk": 1.5,
+    "def": 0.65,
+    "mor": 15,
+    "chg": 1.6
+   },
+   "d": "Kennen keine Furcht und keinen Schild.",
+   "up": []
+  },
+  "kata": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "griechisch",
+    "persisch",
+    "semitisch",
+    "kaukasisch",
+    "steppe",
+    "aegyptisch"
+   ],
+   "tech": "kataphrakten",
+   "n": "Kataphrakten",
+   "m": {
+    "str": 1.4,
+    "cost": 1.5,
+    "upk": 1.4
+   },
+   "bar": 2,
+   "b": {
+    "def": 1.35,
+    "spd": 0.9
+   },
+   "d": "Schwer gepanzerte Reiter.",
+   "up": [
+    "kuerass"
+   ]
+  },
+  "foeder": {
+   "role": "sword",
+   "ep": 1,
+   "e1": 1,
+   "g": [
+    "keltisch",
+    "germanisch",
+    "britisch",
+    "iberisch",
+    "thrakisch",
+    "slawisch",
+    "baltisch",
+    "nordisch",
+    "ungarisch",
+    "latein"
+   ],
+   "n": "Foederaten",
+   "m": {
+    "str": 1.1,
+    "cost": 0.95,
+    "upk": 0.95
+   },
+   "b": {
+    "atk": 1.15
+   },
+   "d": "Verbündete Krieger im Dienst des Reiches.",
+   "up": [
+    "husk",
+    "hellebarde"
+   ]
+  },
+  "varanger": {
+   "role": "sword",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "griechisch",
+    "nordisch",
+    "slawisch"
+   ],
+   "n": "Warägergarde",
+   "m": {
+    "str": 1.35,
+    "cost": 1.4,
+    "upk": 1.3
+   },
+   "b": {
+    "atk": 1.25,
+    "mor": 10
+   },
+   "d": "Nordische Leibwache mit Langäxten.",
+   "up": []
+  },
+  "nubbow": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 2,
+   "g": [
+    "afrikanisch",
+    "aegyptisch"
+   ],
+   "n": "Nubische Bogenschützen",
+   "m": {
+    "str": 1.15,
+    "cost": 1.05,
+    "upk": 1
+   },
+   "b": {
+    "range": 1.15,
+    "ratk": 1.1
+   },
+   "d": "Berühmte Schützen vom Nil.",
+   "up": [
+    "armbr"
+   ]
+  },
+  "ritter": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "latein",
+    "keltisch",
+    "iberisch",
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch"
+   ],
+   "tech": "ritterorden",
+   "n": "Ordensritter",
+   "m": {
+    "str": 1.45,
+    "cost": 1.55,
+    "upk": 1.4
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.4,
+    "def": 1.2
+   },
+   "d": "Die stärkste Reiterei des Mittelalters.",
+   "up": [
+    "kuerass"
+   ]
+  },
+  "mamluk": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "arabisch",
+    "aegyptisch",
+    "semitisch",
+    "persisch",
+    "berber",
+    "steppe"
+   ],
+   "n": "Mamluken",
+   "m": {
+    "str": 1.35,
+    "cost": 1.45,
+    "upk": 1.35
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.15,
+    "range": 0.6,
+    "ratk": 0.6,
+    "ammo": 0.4
+   },
+   "d": "Elitereiter mit Bogen und Säbel.",
+   "up": []
+  },
+  "armbr": {
+   "role": "missile",
+   "ep": 2,
+   "e1": 3,
+   "tech": "armbrust",
+   "nog": [
+    "indigen"
+   ],
+   "n": "Armbrustschützen",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "ratk": 1.35,
+    "range": 0.95,
+    "def": 1.1
+   },
+   "d": "Durchschlagen auch schwere Rüstung.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "lang": {
+   "role": "missile",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "britisch",
+    "keltisch"
+   ],
+   "tech": "langbogen",
+   "n": "Langbogenschützen",
+   "m": {
+    "str": 1.35,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "b": {
+    "range": 1.3,
+    "ratk": 1.2
+   },
+   "d": "Große Reichweite und Durchschlagskraft.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "pikenier": {
+   "role": "spear",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "latein",
+    "keltisch",
+    "iberisch",
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch"
+   ],
+   "tech": "plattenpanzer",
+   "n": "Pikeniere",
+   "m": {
+    "str": 1.25,
+    "cost": 1.25,
+    "upk": 1.15
+   },
+   "b": {
+    "def": 1.3,
+    "spd": 0.85,
+    "pike": 2.6
+   },
+   "d": "Ein Wald aus Piken gegen jede Reiterei.",
+   "up": [
+    "tercio"
+   ]
+  },
+  "hellebarde": {
+   "role": "sword",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "latein",
+    "keltisch",
+    "iberisch",
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch"
+   ],
+   "tech": "plattenpanzer",
+   "n": "Hellebardiere",
+   "m": {
+    "str": 1.25,
+    "cost": 1.25,
+    "upk": 1.15
+   },
+   "b": {
+    "atk": 1.15,
+    "pike": 1.7
+   },
+   "d": "Hieben Reiter vom Pferd.",
+   "up": [
+    "landsk"
+   ]
+  },
+  "bombarde": {
+   "role": "art",
+   "ep": 2,
+   "e1": 3,
+   "tech": "bombarden",
+   "n": "Bombarden",
+   "m": {
+    "str": 0.9,
+    "cost": 0.9,
+    "upk": 0.9
+   },
+   "bar": 2,
+   "b": {},
+   "d": "Frühe Pulvergeschütze gegen Mauern.",
+   "up": [
+    "feldkan"
+   ]
+  },
+  "speermil": {
+   "role": "spear",
+   "ep": 2,
+   "e1": 2,
+   "n": "Speermiliz",
+   "m": {
+    "str": 0.85,
+    "cost": 0.7,
+    "upk": 0.7
+   },
+   "b": {},
+   "d": "Billiges Aufgebot der Städte und Dörfer.",
+   "up": [
+    "pikenier"
+   ]
+  },
+  "sergeant": {
+   "role": "spear",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "latein",
+    "keltisch",
+    "iberisch",
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch",
+    "griechisch"
+   ],
+   "n": "Speersergeanten",
+   "m": {
+    "str": 1.15,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "def": 1.15
+   },
+   "d": "Geübte Fußsoldaten mit Kettenhemd.",
+   "up": [
+    "pikenier"
+   ]
+  },
+  "feudal": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "latein",
+    "keltisch",
+    "iberisch",
+    "germanisch",
+    "nordisch",
+    "britisch",
+    "slawisch"
+   ],
+   "n": "Feudalritter",
+   "m": {
+    "str": 1.25,
+    "cost": 1.3,
+    "upk": 1.25
+   },
+   "b": {
+    "chg": 1.3
+   },
+   "d": "Adlige Panzerreiter mit Lanze.",
+   "up": [
+    "ritter",
+    "kuerass"
+   ]
+  },
+  "ghazi": {
+   "role": "sword",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "arabisch",
+    "persisch",
+    "steppe",
+    "berber"
+   ],
+   "n": "Ghazi-Krieger",
+   "m": {
+    "str": 1.2,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "atk": 1.25,
+    "mor": 8
+   },
+   "d": "Glaubenskrieger mit Säbel.",
+   "up": []
+  },
+  "elef2": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "indisch",
+    "afrikanisch"
+   ],
+   "n": "Gepanzerte Kriegselefanten",
+   "m": {
+    "str": 1.7,
+    "cost": 1.8,
+    "upk": 1.7,
+    "men": 0.5
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.6,
+    "def": 1.3,
+    "mor": 10,
+    "spd": 0.85
+   },
+   "d": "Elefanten mit Panzerplatten und Schützentürmen.",
+   "up": []
+  },
+  "jaguar": {
+   "role": "sword",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "azteken",
+    "tarasken",
+    "maya"
+   ],
+   "n": "Jaguarkrieger",
+   "m": {
+    "str": 1.3,
+    "cost": 1.2,
+    "upk": 1.1
+   },
+   "b": {
+    "atk": 1.3,
+    "spd": 1.1
+   },
+   "d": "Elitekrieger mit Obsidianschwert.",
+   "up": []
+  },
+  "tercio": {
+   "role": "spear",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "iberisch",
+    "latein"
+   ],
+   "n": "Tercio",
+   "m": {
+    "str": 1.4,
+    "cost": 1.45,
+    "upk": 1.3
+   },
+   "b": {
+    "def": 1.4,
+    "pike": 2.6,
+    "mor": 8
+   },
+   "d": "Pikenblock mit Musketenflügeln.",
+   "up": [
+    "garde"
+   ]
+  },
+  "landsk": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "germanisch",
+    "keltisch",
+    "latein"
+   ],
+   "n": "Landsknechte",
+   "m": {
+    "str": 1.3,
+    "cost": 1.3,
+    "upk": 1.25
+   },
+   "b": {
+    "atk": 1.25,
+    "mor": 6
+   },
+   "d": "Söldner mit Zweihänder und Hellebarde.",
+   "up": [
+    "grenad"
+   ]
+  },
+  "janits": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "arabisch",
+    "steppe",
+    "persisch",
+    "semitisch",
+    "aegyptisch",
+    "griechisch"
+   ],
+   "pp": [
+    "osmanen"
+   ],
+   "n": "Janitscharen",
+   "m": {
+    "str": 1.35,
+    "cost": 1.35,
+    "upk": 1.25
+   },
+   "b": {
+    "ratk": 1.25,
+    "def": 1.25,
+    "mor": 8
+   },
+   "d": "Disziplinierte Musketen-Elite.",
+   "up": []
+  },
+  "kosak": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "slawisch",
+    "steppe"
+   ],
+   "n": "Kosaken",
+   "m": {
+    "str": 1,
+    "cost": 0.85,
+    "upk": 0.85
+   },
+   "b": {
+    "spd": 1.3,
+    "atk": 1.05
+   },
+   "d": "Schnelle, unermüdliche Steppenreiter.",
+   "up": [
+    "ulan"
+   ]
+  },
+  "dragoner": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "tech": "stehendesheer",
+   "n": "Dragoner",
+   "m": {
+    "str": 1.15,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "range": 0.5,
+    "ratk": 0.8,
+    "ammo": 0.6
+   },
+   "d": "Reiten zur Stelle und schießen aus dem Sattel.",
+   "up": [
+    "husar"
+   ]
+  },
+  "kuerass": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "tech": "kuerassiere",
+   "n": "Kürassiere",
+   "m": {
+    "str": 1.35,
+    "cost": 1.45,
+    "upk": 1.35
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.3,
+    "def": 1.2
+   },
+   "d": "Gepanzerte Reiter mit Pistolen.",
+   "up": []
+  },
+  "grenad": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 4,
+   "tech": "grenadiere",
+   "n": "Grenadiere",
+   "m": {
+    "str": 1.35,
+    "cost": 1.4,
+    "upk": 1.25
+   },
+   "b": {
+    "atk": 1.2,
+    "mor": 8
+   },
+   "d": "Elite-Sturmtruppen.",
+   "up": [
+    "garde"
+   ]
+  },
+  "feldkan": {
+   "role": "art",
+   "ep": 3,
+   "e1": 4,
+   "n": "Feldkanonen",
+   "m": {
+    "str": 0.9,
+    "cost": 0.85,
+    "upk": 0.85
+   },
+   "b": {
+    "spd": 1.35
+   },
+   "d": "Leichter und beweglicher als schwere Geschütze.",
+   "up": [
+    "haubitze"
+   ]
+  },
+  "sowar": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indisch"
+   ],
+   "n": "Sowar-Reiter",
+   "m": {
+    "str": 1.2,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "spd": 1.15,
+    "atk": 1.1
+   },
+   "d": "Indische Reiterei mit Lanze und Säbel.",
+   "up": []
+  },
+  "garde": {
+   "role": "spear",
+   "ep": 4,
+   "e1": 4,
+   "tech": "garde",
+   "n": "Kaiserliche Garde",
+   "m": {
+    "str": 1.4,
+    "cost": 1.5,
+    "upk": 1.35
+   },
+   "b": {
+    "mor": 15,
+    "def": 1.15
+   },
+   "d": "Kampferprobte Elite, wankt kaum.",
+   "up": []
+  },
+  "jaeger": {
+   "role": "missile",
+   "ep": 4,
+   "e1": 4,
+   "tech": "jaeger",
+   "n": "Jäger",
+   "m": {
+    "str": 1.35,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "b": {
+    "range": 1.2,
+    "ratk": 1.15,
+    "skirm": 1
+   },
+   "d": "Scharfschützen in lockerer Ordnung.",
+   "up": []
+  },
+  "voltig": {
+   "role": "missile",
+   "ep": 4,
+   "e1": 4,
+   "n": "Voltigeure",
+   "m": {
+    "str": 0.95,
+    "cost": 0.8,
+    "upk": 0.8
+   },
+   "b": {
+    "spd": 1.2,
+    "skirm": 1
+   },
+   "d": "Leichte Infanterie, schnell und wendig.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "husar": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "n": "Husaren",
+   "m": {
+    "str": 0.95,
+    "cost": 0.85,
+    "upk": 0.85
+   },
+   "b": {
+    "spd": 1.3,
+    "atk": 1.05
+   },
+   "d": "Leichte Reiterei für Aufklärung und Verfolgung.",
+   "up": []
+  },
+  "ulan": {
+   "role": "cav",
+   "ep": 4,
+   "e1": 4,
+   "g": [
+    "slawisch",
+    "germanisch",
+    "keltisch"
+   ],
+   "n": "Ulanen",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "chg": 1.5
+   },
+   "d": "Lanzenreiter mit gewaltigem Angriff.",
+   "up": []
+  },
+  "haubitze": {
+   "role": "art",
+   "ep": 4,
+   "e1": 4,
+   "tech": "haubitzen",
+   "n": "Haubitzen",
+   "m": {
+    "str": 1.3,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "range": 1.1
+   },
+   "d": "Steilfeuer über Mauern hinweg.",
+   "up": []
+  },
+  "machimoi": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "aegyptisch"
+   ],
+   "n": "Machimoi",
+   "m": {
+    "str": 1.1,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "def": 1.15
+   },
+   "d": "Ägyptische Phalanx aus den Kriegerfamilien des Nils.",
+   "up": [
+    "phalanx"
+   ]
+  },
+  "galater": {
+   "role": "sword",
+   "ep": 0,
+   "e1": 1,
+   "g": [
+    "aegyptisch",
+    "griechisch"
+   ],
+   "n": "Galatische Leibwache",
+   "m": {
+    "str": 1.3,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.2,
+    "mor": 10
+   },
+   "d": "Keltische Söldner im Dienst der Ptolemäer.",
+   "up": []
+  },
+  "aksumsp": {
+   "role": "spear",
+   "ep": 0,
+   "e1": 2,
+   "g": [
+    "habescha"
+   ],
+   "n": "Aksumitische Speerträger",
+   "m": {
+    "str": 1.1,
+    "cost": 0.95,
+    "upk": 0.9
+   },
+   "b": {
+    "def": 1.1,
+    "spd": 1.1
+   },
+   "d": "Hochlandkrieger mit Rundschild und Speer.",
+   "up": [
+    "sergeant"
+   ]
+  },
+  "habbog": {
+   "role": "missile",
+   "ep": 0,
+   "e1": 2,
+   "g": [
+    "habescha",
+    "afrikanisch"
+   ],
+   "n": "Habescha-Bogenschützen",
+   "m": {
+    "str": 1.05,
+    "cost": 0.95,
+    "upk": 0.9
+   },
+   "b": {
+    "range": 1.05,
+    "ratk": 1.05,
+    "spd": 1.1
+   },
+   "d": "Schützen aus den Bergen am Roten Meer.",
+   "up": [
+    "armbr"
+   ]
+  },
+  "himkav": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "arabisch"
+   ],
+   "n": "Himjaritische Reiter",
+   "m": {
+    "str": 1.1,
+    "cost": 1.05,
+    "upk": 1
+   },
+   "b": {
+    "atk": 1.1,
+    "spd": 1.1
+   },
+   "d": "Reiter der südarabischen Könige.",
+   "up": [
+    "mamluk"
+   ]
+  },
+  "khurasani": {
+   "role": "cav",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "persisch",
+    "arabisch"
+   ],
+   "n": "Chorasanische Garde",
+   "m": {
+    "str": 1.35,
+    "cost": 1.4,
+    "upk": 1.3
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.2,
+    "def": 1.15,
+    "mor": 8
+   },
+   "d": "Die Reiter aus dem Osten, die die Abbasiden auf den Thron brachten.",
+   "up": [
+    "mamluk"
+   ]
+  },
+  "naffat": {
+   "role": "missile",
+   "ep": 1,
+   "e1": 2,
+   "g": [
+    "arabisch",
+    "persisch",
+    "griechisch"
+   ],
+   "n": "Naphthawerfer",
+   "m": {
+    "str": 1,
+    "cost": 1.1,
+    "upk": 1.05
+   },
+   "b": {
+    "range": 0.7,
+    "ratk": 1.4,
+    "mor": 4
+   },
+   "d": "Werfen Töpfe mit brennendem Naphtha, gefürchtet vor Mauern und gegen Elefanten.",
+   "up": []
+  },
+  "halqa": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "aegyptisch",
+    "semitisch",
+    "arabisch",
+    "kaukasisch",
+    "steppe"
+   ],
+   "n": "Halqa-Reiter",
+   "m": {
+    "str": 1.3,
+    "cost": 1.35,
+    "upk": 1.25
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.1,
+    "def": 1.1,
+    "range": 0.5,
+    "ratk": 0.7,
+    "ammo": 0.4
+   },
+   "d": "Die Leibreiterei Saladins: Bogen, Lanze und Kettenhemd.",
+   "up": []
+  },
+  "templer": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "latein",
+    "keltisch",
+    "germanisch"
+   ],
+   "tech": "ritterorden",
+   "n": "Templer",
+   "m": {
+    "str": 1.5,
+    "cost": 1.6,
+    "upk": 1.45
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.4,
+    "def": 1.25,
+    "mor": 15
+   },
+   "d": "Ein Ritterorden, der nie um Gnade bittet.",
+   "up": [
+    "kuerass"
+   ]
+  },
+  "mongbog": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "steppe"
+   ],
+   "n": "Mongolische Bogenreiter",
+   "m": {
+    "str": 1.15,
+    "cost": 1.05,
+    "upk": 0.95
+   },
+   "b": {
+    "spd": 1.35,
+    "range": 0.85,
+    "ratk": 0.95,
+    "ammo": 0.8,
+    "skirm": 1,
+    "mor": 6
+   },
+   "d": "Mehrere Pferde je Reiter, schießen im Galopp und täuschen Flucht vor.",
+   "up": [
+    "kosak"
+   ]
+  },
+  "mongpanz": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "steppe"
+   ],
+   "n": "Mongolische Lanzenreiter",
+   "m": {
+    "str": 1.35,
+    "cost": 1.35,
+    "upk": 1.25
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.35,
+    "def": 1.15,
+    "mor": 8
+   },
+   "d": "Schwere Reiter, die vollenden, was die Schützen begonnen haben.",
+   "up": [
+    "kosak"
+   ]
+  },
+  "chinkat": {
+   "role": "art",
+   "ep": 2,
+   "e1": 2,
+   "g": [
+    "steppe"
+   ],
+   "n": "Belagerungsingenieure",
+   "m": {
+    "str": 0.95,
+    "cost": 0.95,
+    "upk": 0.9
+   },
+   "bar": 2,
+   "b": {
+    "range": 0.95
+   },
+   "d": "Chinesische und persische Meister mit Bliden und Brandgeschossen.",
+   "up": [
+    "bombarde"
+   ]
+  },
+  "mandinka": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "afrikanisch"
+   ],
+   "n": "Mandinka-Lanzenreiter",
+   "m": {
+    "str": 1.25,
+    "cost": 1.25,
+    "upk": 1.15
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.25,
+    "spd": 1.05
+   },
+   "d": "Adelige Reiter Malis mit Lanze und Kettenhemd aus dem Saharahandel.",
+   "up": []
+  },
+  "malibog": {
+   "role": "missile",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "afrikanisch"
+   ],
+   "n": "Mandé-Bogenschützen",
+   "m": {
+    "str": 1.05,
+    "cost": 0.9,
+    "upk": 0.85
+   },
+   "b": {
+    "ratk": 1.1,
+    "range": 1
+   },
+   "d": "Fußschützen aus den Dörfern am Niger.",
+   "up": []
+  },
+  "balestr": {
+   "role": "missile",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "latein"
+   ],
+   "n": "Galeerenarmbruster",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "ratk": 1.35,
+    "range": 0.95,
+    "def": 1.1
+   },
+   "d": "Venezianische Seesoldaten mit Armbrust und Setzschild.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "condott": {
+   "role": "cav",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "latein"
+   ],
+   "n": "Condottieri",
+   "m": {
+    "str": 1.35,
+    "cost": 1.5,
+    "upk": 1.45
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.3,
+    "def": 1.2
+   },
+   "d": "Gepanzerte Söldnerreiter, so treu wie ihr Sold.",
+   "up": [
+    "kuerass"
+   ]
+  },
+  "sipahi": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "griechisch",
+    "steppe",
+    "arabisch",
+    "semitisch",
+    "aegyptisch",
+    "persisch",
+    "thrakisch"
+   ],
+   "pp": [
+    "osmanen"
+   ],
+   "n": "Sipahi",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.05
+   },
+   "b": {
+    "atk": 1.1,
+    "spd": 1.15
+   },
+   "d": "Reiter, die für ihr Lehen in den Krieg ziehen.",
+   "up": []
+  },
+  "azab": {
+   "role": "spear",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "griechisch",
+    "steppe",
+    "arabisch",
+    "thrakisch"
+   ],
+   "n": "Azaben",
+   "m": {
+    "str": 0.9,
+    "cost": 0.75,
+    "upk": 0.7
+   },
+   "b": {
+    "def": 1.05
+   },
+   "d": "Leichtes Fußvolk aus der Landbevölkerung.",
+   "up": [
+    "tercio"
+   ]
+  },
+  "topcu": {
+   "role": "art",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "griechisch",
+    "steppe",
+    "arabisch",
+    "thrakisch",
+    "persisch"
+   ],
+   "n": "Osmanische Großgeschütze",
+   "m": {
+    "str": 1.25,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "range": 1.05,
+    "spd": 0.8
+   },
+   "d": "Riesige Bronzekanonen, gegossen vor den Mauern der Stadt.",
+   "up": [
+    "haubitze"
+   ]
+  },
+  "conquist": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "iberisch",
+    "latein"
+   ],
+   "n": "Konquistadoren",
+   "m": {
+    "str": 1.3,
+    "cost": 1.35,
+    "upk": 1.25
+   },
+   "b": {
+    "atk": 1.25,
+    "def": 1.2,
+    "mor": 10
+   },
+   "d": "Abenteurer in Stahl, mit Schwert, Arkebuse und Pferd.",
+   "up": [
+    "grenad"
+   ]
+  },
+  "tlaxcal": {
+   "role": "spear",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "tarasken",
+    "maya"
+   ],
+   "n": "Tlaxcalteken",
+   "m": {
+    "str": 1,
+    "cost": 0.75,
+    "upk": 0.7
+   },
+   "b": {
+    "atk": 1.1
+   },
+   "d": "Erzfeinde der Azteken, die mit den Fremden ziehen.",
+   "up": []
+  },
+  "arkebus": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "iberisch",
+    "latein",
+    "germanisch",
+    "keltisch"
+   ],
+   "n": "Arkebusiere",
+   "m": {
+    "str": 1.15,
+    "cost": 1.05,
+    "upk": 1
+   },
+   "b": {
+    "ratk": 1.3,
+    "range": 0.8
+   },
+   "d": "Frühe Feuerwaffen: langsam zu laden, aber durchschlagend.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "sepoy": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indisch"
+   ],
+   "fac": [
+    "usa"
+   ],
+   "n": "Sepoys",
+   "m": {
+    "str": 1.15,
+    "cost": 0.95,
+    "upk": 0.9
+   },
+   "b": {
+    "ratk": 1.15,
+    "def": 1.1,
+    "mor": 4
+   },
+   "d": "Indische Soldaten in europäischem Drill.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "mansab": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indisch"
+   ],
+   "n": "Mansabdar-Reiter",
+   "m": {
+    "str": 1.3,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "chg": 1.2,
+    "atk": 1.1
+   },
+   "d": "Reiterei der Reichsbeamten, nach Rang und Zahl gestellt.",
+   "up": []
+  },
+  "rajput": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indisch"
+   ],
+   "n": "Radschputen",
+   "m": {
+    "str": 1.3,
+    "cost": 1.25,
+    "upk": 1.15
+   },
+   "b": {
+    "atk": 1.25,
+    "mor": 14
+   },
+   "d": "Kriegeradel, der lieber stirbt als flieht.",
+   "up": []
+  },
+  "inkaschl": {
+   "role": "missile",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "inka",
+    "chimu",
+    "chanka",
+    "colla",
+    "quitu",
+    "muisca",
+    "mapuche"
+   ],
+   "n": "Inka-Schleuderer",
+   "m": {
+    "str": 1,
+    "cost": 0.85,
+    "upk": 0.8
+   },
+   "b": {
+    "range": 1.1,
+    "ratk": 1.05,
+    "skirm": 1
+   },
+   "d": "Hirten mit Wollschleudern, gefährlich auf Bergpfaden.",
+   "up": []
+  },
+  "inkakeule": {
+   "role": "sword",
+   "ep": 2,
+   "e1": 3,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "inka",
+    "chimu",
+    "chanka",
+    "colla",
+    "quitu"
+   ],
+   "n": "Sternkeulenkrieger",
+   "m": {
+    "str": 1.15,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "atk": 1.15,
+    "def": 1.05
+   },
+   "d": "Fußkrieger mit Bronzekeule und gestepptem Panzer.",
+   "up": []
+  },
+  "adlerkr": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "azteken"
+   ],
+   "n": "Adlerkrieger",
+   "m": {
+    "str": 1.35,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.2,
+    "spd": 1.15,
+    "mor": 12
+   },
+   "d": "Die Cuauhpipiltin: Adelskrieger mit Federhelm, die Gefangene für die Götter nehmen.",
+   "up": []
+  },
+  "atlatl": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "maya",
+    "azteken",
+    "tarasken"
+   ],
+   "n": "Atlatl-Werfer",
+   "m": {
+    "str": 1,
+    "cost": 0.9,
+    "upk": 0.85
+   },
+   "b": {
+    "range": 0.75,
+    "ratk": 1.35,
+    "skirm": 1
+   },
+   "d": "Speerschleuderer: kurze Reichweite, aber Wurfspeere, die Baumwollpanzer durchschlagen.",
+   "up": []
+  },
+  "holkan": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "maya"
+   ],
+   "n": "Holkan-Krieger",
+   "m": {
+    "str": 1.15,
+    "cost": 1.05,
+    "upk": 1
+   },
+   "b": {
+    "atk": 1.15,
+    "def": 1.05,
+    "spd": 1.1
+   },
+   "d": "Berufskrieger der Maya-Städte unter ihrem Nacom.",
+   "up": []
+  },
+  "tarbog": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "tarasken"
+   ],
+   "n": "Purépecha-Bogenschützen",
+   "m": {
+    "str": 1.1,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "ratk": 1.2,
+    "range": 1.05
+   },
+   "d": "Schützen mit Kupferspitzen, die selbst die Azteken zurückschlugen.",
+   "up": []
+  },
+  "orejon": {
+   "role": "sword",
+   "ep": 3,
+   "e1": 3,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "inka"
+   ],
+   "n": "Orejones",
+   "m": {
+    "str": 1.35,
+    "cost": 1.3,
+    "upk": 1.2
+   },
+   "bar": 2,
+   "b": {
+    "atk": 1.2,
+    "def": 1.2,
+    "mor": 12
+   },
+   "d": "Inka-Adlige mit goldenen Ohrpflöcken, die Leibwache des Sapa Inka.",
+   "up": []
+  },
+  "guecha": {
+   "role": "spear",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "muisca"
+   ],
+   "n": "Güecha-Wächter",
+   "m": {
+    "str": 1.1,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "def": 1.15,
+    "mor": 6
+   },
+   "d": "Grenzkrieger der Muisca, berühmt für ihre Tapferkeit.",
+   "up": []
+  },
+  "mapulanz": {
+   "role": "spear",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "mapuche"
+   ],
+   "n": "Mapuche-Lanzenträger",
+   "m": {
+    "str": 1.15,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "def": 1.2,
+    "chg": 1.1,
+    "mor": 10
+   },
+   "d": "Lange Coligüe-Lanzen in dichten Reihen: Hier endete das Vordringen der Inka und der Spanier.",
+   "up": []
+  },
+  "mapureit": {
+   "role": "cav",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "mapuche"
+   ],
+   "n": "Mapuche-Reiter",
+   "m": {
+    "str": 1.2,
+    "cost": 1.1,
+    "upk": 1
+   },
+   "b": {
+    "spd": 1.25,
+    "chg": 1.15,
+    "atk": 1.1
+   },
+   "d": "Die Mapuche wurden zu meisterhaften Reitern und schlugen die Spanier mit deren eigenen Pferden.",
+   "up": []
+  },
+  "waldkr": {
+   "role": "missile",
+   "ep": 3,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "irokesen_v"
+   ],
+   "n": "Waldkrieger",
+   "m": {
+    "str": 1.05,
+    "cost": 0.95,
+    "upk": 0.9
+   },
+   "b": {
+    "ratk": 1.1,
+    "spd": 1.2,
+    "skirm": 1,
+    "mor": 6
+   },
+   "d": "Kämpfen aus dem Hinterhalt im Wald, zuerst mit Bogen, später mit Musketen.",
+   "up": []
+  },
+  "comreit": {
+   "role": "cav",
+   "ep": 4,
+   "e1": 4,
+   "g": [
+    "indigen"
+   ],
+   "pp": [
+    "komantschen"
+   ],
+   "n": "Komantschen-Reiter",
+   "m": {
+    "str": 1.25,
+    "cost": 1.15,
+    "upk": 1
+   },
+   "bar": 2,
+   "b": {
+    "spd": 1.45,
+    "range": 0.7,
+    "ratk": 0.85,
+    "ammo": 0.6,
+    "skirm": 1,
+    "mor": 8
+   },
+   "d": "Die besten Reiter der Prärie: Pfeile im vollen Galopp, von der Seite des Pferdes aus geschossen.",
+   "up": []
+  },
+  "minute": {
+   "role": "missile",
+   "ep": 4,
+   "e1": 4,
+   "g": [
+    "britisch"
+   ],
+   "fac": [
+    "usa"
+   ],
+   "n": "Minutemen",
+   "m": {
+    "str": 0.95,
+    "cost": 0.7,
+    "upk": 0.65
+   },
+   "b": {
+    "ratk": 1.15,
+    "range": 1.05,
+    "skirm": 1
+   },
+   "d": "Siedler, die in einer Minute bereit sind und aus der Deckung schießen.",
+   "up": [
+    "jaeger"
+   ]
+  },
+  "kontin": {
+   "role": "spear",
+   "ep": 4,
+   "e1": 4,
+   "g": [
+    "britisch"
+   ],
+   "fac": [
+    "usa"
+   ],
+   "n": "Kontinentalarmee",
+   "m": {
+    "str": 1.2,
+    "cost": 1.15,
+    "upk": 1.1
+   },
+   "b": {
+    "def": 1.15,
+    "mor": 6
+   },
+   "d": "Gedrillte Linieninfanterie mit Bajonett.",
+   "up": [
+    "garde"
+   ]
+  },
+  "chasseur": {
+   "role": "cav",
+   "ep": 4,
+   "e1": 4,
+   "g": [
+    "keltisch",
+    "latein"
+   ],
+   "n": "Chasseurs à cheval",
+   "m": {
+    "str": 1.1,
+    "cost": 1,
+    "upk": 0.95
+   },
+   "b": {
+    "spd": 1.3,
+    "atk": 1.1
+   },
+   "d": "Leichte Reiter für Aufklärung und Verfolgung.",
+   "up": []
+  }
+ },
+ "UNIT_MOD": {
+  "rom": {
+   "sword": {
+    "str": 9.6
+   }
+  },
+  "karthago": {
+   "cav": {
+    "cost": 100,
+    "upk": 9
+   }
+  },
+  "makedonien": {
+   "spear": {
+    "str": 8.2
+   },
+   "cav": {
+    "str": 12.4
+   }
+  },
+  "arverner": {
+   "sword": {
+    "cost": 74
+   },
+   "spear": {
+    "cost": 52
+   }
+  },
+  "epirus": {
+   "cav": {
+    "str": 14,
+    "cost": 150,
+    "upk": 13
+   }
+  },
+  "odrysen": {
+   "cav": {
+    "cost": 96,
+    "upk": 9,
+    "str": 11.6
+   }
+  },
+  "keltiberer": {
+   "sword": {
+    "str": 9.8
+   }
+  },
+  "samniten": {
+   "spear": {
+    "str": 7.6
+   }
+  }
+ },
+ "EPOCH_STR": [
+  1,
+  1.2,
+  1.45,
+  1.75,
+  2.1
+ ],
+ "EPOCH_COST": [
+  1,
+  1.1,
+  1.2,
+  1.35,
+  1.5
+ ],
+ "GRUPPEN": {
+  "STEPPE": [
+   "steppe",
+   "persisch",
+   "kaukasisch"
+  ],
+  "NORD": [
+   "germanisch",
+   "nordisch",
+   "britisch",
+   "slawisch"
+  ],
+  "BARB": [
+   "keltisch",
+   "germanisch",
+   "britisch",
+   "iberisch",
+   "thrakisch",
+   "slawisch",
+   "baltisch",
+   "nordisch",
+   "ungarisch"
+  ],
+  "WEST": [
+   "latein",
+   "keltisch",
+   "iberisch",
+   "germanisch",
+   "nordisch",
+   "britisch",
+   "slawisch"
+  ],
+  "ORIENT": [
+   "arabisch",
+   "aegyptisch",
+   "semitisch",
+   "persisch",
+   "berber"
+  ]
+ },
+ "FERN_EPOCHE": [
+  1,
+  1,
+  1,
+  1.25,
+  1.4
+ ]
+}
