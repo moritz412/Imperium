@@ -20,19 +20,24 @@ svg.ic{width:26px;height:26px;flex:none;fill:none;stroke:currentColor;stroke-wid
 svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 #fps{position:fixed;right:var(--sr);top:var(--st);background:rgba(28,24,18,.8);border-radius:6px;padding:4px 9px;font:12px monospace;color:var(--mut);pointer-events:none;z-index:3}
 
-/* oben Mitte: Kräftevergleich + Hinweiszeile */
-#oben{position:fixed;left:50%;top:var(--st);transform:translateX(-50%);width:min(440px,calc(100vw - 380px));display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;z-index:2}
-#kraft{width:100%;padding:6px 12px 5px;background:var(--holz);border:1px solid var(--bronze2);border-radius:11px;box-shadow:inset 0 0 0 1px rgba(224,180,90,.25),0 3px 10px rgba(0,0,0,.5)}
-#kraft .kk{display:flex;align-items:center;gap:8px}
-#kraft .kn{font:600 17px Marcellus,Georgia,serif;font-variant-numeric:tabular-nums;min-width:34px}
+/* oben Mitte: Kräftevergleich, Feindreihe, Hinweiszeile (Feinde oben, eigene Einheiten unten) */
+#oben{position:fixed;left:50%;top:var(--st);transform:translateX(-50%);width:min(640px,calc(100vw - 400px));display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;z-index:2}
+#kraft{width:100%;padding:6px 10px 5px;background:var(--holz);border:1.5px solid var(--bronze);border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.55),inset 0 0 0 2px rgba(224,180,90,.22),0 4px 12px rgba(0,0,0,.55)}
+#kraft .kk{display:flex;align-items:center;gap:7px}
+#kraft .wap{width:30px;height:35px;flex:none;position:relative;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6));--c:#b02a22}
+#kraft .wap.k{--c:#7a3fa0}
+#kraft .wap svg{width:100%;height:100%;display:block}
+#kraft .wap path{fill:var(--c);stroke:#e0b45a;stroke-width:2.5}
+#kraft .wap g{fill:none;stroke:#f6e4b4;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+#kraft .kn{font:600 19px Marcellus,Georgia,serif;font-variant-numeric:tabular-nums;min-width:36px}
 #kraft .kn.r{color:#e78a7e;text-align:right}#kraft .kn.k{color:#c79be6}
-#kraft .kb{flex:1;height:13px;border-radius:7px;background:#7a3fa0;overflow:hidden;position:relative;border:1px solid #14110d;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+#kraft .kb{flex:1;height:14px;border-radius:7px;background:#7a3fa0;overflow:hidden;position:relative;border:1px solid #14110d;box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 0 0 1px rgba(169,121,58,.45)}
 #kraft .kb i{position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(#d4503f,#8e241a);transition:width .6s}
 #kraft .kb b{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--gold);opacity:.8}
-#kraft .kz{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);margin-top:2px}
+#kraft .kz{display:flex;justify-content:space-between;align-items:center;font:13px Marcellus,Georgia,serif;color:var(--mut);margin-top:1px;padding:0 4px}
 #kraft .kz em{font-style:normal;color:var(--gold);font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:4px}
 #kraft svg.ic{width:13px;height:13px}
-#hinweis{max-width:100%;text-align:center;padding:4px 14px;font-size:13px;border-radius:8px;background:rgba(28,24,18,.78);border:1px solid rgba(169,121,58,.55);opacity:0;transition:opacity 1.2s;min-height:24px}
+#hinweis{max-width:100%;text-align:center;padding:5px 16px;font-size:13.5px;border-radius:9px;background:var(--holz);border:1.5px solid var(--bronze);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5),0 3px 8px rgba(0,0,0,.45);opacity:0;transition:opacity 1.2s;min-height:28px}
 #hinweis.an{opacity:1;transition:opacity .25s}
 
 /* Bilder der Einheiten: echtes Bild (karten/<id>.jpg) über gemaltem Platzhalter */
@@ -44,54 +49,75 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 .bild img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0;transition:opacity .3s}
 .bild img.ok{opacity:1}
 
-/* Feindliste links */
-#feinde{position:fixed;left:var(--sl);top:var(--st);display:flex;flex-direction:column;gap:5px;width:176px;z-index:2}
-.fk{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:9px;background:var(--holz);border:1px solid #5a3f1f;min-height:52px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.45)}
-.fk .bild{width:38px;height:46px;border-radius:5px;flex:none;border:1px solid rgba(0,0,0,.6)}
-.fk .t{flex:1;min-width:0}
-.fk .n{font:13px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fk .b{height:6px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden;margin:3px 0 2px}
+/* Feindreihe oben: schmale Karten, Bild füllt die Karte, Text auf dunklem Band */
+#feinde{display:flex;gap:5px;width:100%;pointer-events:auto}
+.fk{position:relative;flex:1 1 0;min-width:0;height:72px;border-radius:9px;background:#241d16;border:1.5px solid var(--bronze);cursor:pointer;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 3px 8px rgba(0,0,0,.55);transition:transform .12s,border-color .15s}
+.fk:active{transform:scale(.96)}
+.fk .bild{position:absolute;inset:0;border-radius:0}
+.fk .t{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:12px 5px 3px;background:linear-gradient(transparent,rgba(16,12,9,.92) 52%)}
+.fk .n{font:11.5px/1.1 Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
+.fk .b{height:5px;border-radius:3px;background:rgba(0,0,0,.6);overflow:hidden;margin:3px 0 1px;border:1px solid rgba(0,0,0,.6)}
 .fk .b i{display:block;height:100%;width:100%;background:linear-gradient(#b47be0,#6f3a95)}
-.fk .z{font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
+.fk .z{font-size:10.5px;line-height:1.1;color:var(--mut);display:flex;justify-content:space-between;gap:3px;white-space:nowrap;min-height:11px}
+.fk .z span{overflow:hidden;text-overflow:ellipsis;min-width:0}
 .fk .z b{font-weight:normal;color:var(--gold)}
-.fk.weg{opacity:.4;filter:saturate(.2)}
+.fk.weg{opacity:.45;filter:saturate(.2)}
 .fk.fl .bild{filter:grayscale(.7)}
+.fk.kampf{border-color:var(--gold)}
 
 /* Befehle rechts: immer EINE Spalte */
-#spalte{position:fixed;right:var(--sr);top:calc(var(--st) + 30px);display:flex;flex-direction:column;gap:6px;width:150px;z-index:2}
-.plak{display:flex;align-items:center;gap:9px;text-align:left;padding:7px 11px;border-radius:10px;
-  background:linear-gradient(#cfa05a,#8f6429);border:1px solid #5a3f17;color:#20170c;box-shadow:inset 0 1px 0 rgba(255,235,190,.5),0 3px 8px rgba(0,0,0,.45);min-height:48px}
-.plak span{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+#spalte{position:fixed;right:var(--sr);top:calc(var(--st) + 30px);display:flex;flex-direction:column;gap:5px;width:152px;z-index:2}
+.plak{display:flex;align-items:center;gap:8px;text-align:left;padding:4px 10px 4px 8px;border-radius:11px;
+  background:linear-gradient(#d4a65c,#8f6429);border:1.5px solid #4e3513;color:#20170c;box-shadow:inset 0 1px 0 rgba(255,235,190,.55),inset 0 -2px 0 rgba(60,35,8,.28),0 3px 8px rgba(0,0,0,.5);min-height:46px;
+  transition:transform .1s,filter .12s}
+.plak svg.ic{width:30px;height:30px;stroke-width:2}
+.plak span{display:flex;flex-direction:column;line-height:1.12;min-width:0}
 .plak b{font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:16px}
-.plak small{font-size:11.5px;opacity:.78;min-height:13px}
-.plak:active{filter:brightness(.88)}
-.plak.gross{background:linear-gradient(#e6bd6c,#a8722a);min-height:60px}
+.plak small{font-size:11px;opacity:.78;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (hover:hover){.plak:hover{filter:brightness(1.1)}}
+.plak:active{filter:brightness(.86);transform:scale(.965)}
+.plak.gross{background:linear-gradient(#ecc374,#a8722a);min-height:58px}
 .plak.gross b{font-size:18px}
 .plak.rot{background:linear-gradient(#c4503f,#7e231a);color:#fbeee0}
 .plak.an{background:linear-gradient(#f0cf86,#b9812f);box-shadow:inset 0 0 0 2px var(--gold),0 3px 8px rgba(0,0,0,.45)}
 .plak[hidden]{display:none}
 
-/* Einheitenleiste unten */
-#karten{position:fixed;left:calc(var(--sl) + 276px);right:calc(var(--sr) + 160px);bottom:var(--sb);display:flex;gap:10px;justify-content:center;align-items:flex-end;z-index:2}
-.karte{position:relative;width:116px;padding:5px 5px 6px;border-radius:12px;background:var(--holz);border:2px solid #5a3f1f;
-  box-shadow:0 3px 10px rgba(0,0,0,.55);cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
-.karte .bild{height:118px;border-radius:7px;border:1px solid rgba(0,0,0,.7)}
-.karte.sel{border-color:var(--gold);transform:translateY(-10px);box-shadow:0 0 16px rgba(224,180,90,.7),0 5px 12px rgba(0,0,0,.55)}
+/* Einheitenleiste unten: Bild füllt die Karte, Name und Stärke auf dunklem Band */
+#karten{position:fixed;left:calc(var(--sl) + 276px);right:calc(var(--sr) + 162px);bottom:var(--sb);display:flex;gap:10px;justify-content:center;align-items:flex-end;z-index:2}
+.karte{position:relative;width:122px;height:158px;border-radius:13px;background:#241d16;border:2px solid var(--bronze);overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.65),0 4px 12px rgba(0,0,0,.6);cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+.karte .bild{position:absolute;inset:0;border-radius:0}
+.karte.sel{border-color:var(--gold);transform:translateY(-10px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.65),0 0 16px rgba(224,180,90,.75),0 5px 12px rgba(0,0,0,.55)}
+.karte:active{filter:brightness(1.08)}
 .karte.weg{opacity:.5;filter:saturate(.25)}
-.karte .ring{position:absolute;right:8px;top:8px;z-index:2}
-.karte .zst{position:absolute;left:7px;right:7px;bottom:50px;z-index:2;display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:9px;background:rgba(20,16,12,.72);font-size:11px;color:#f1d79a;white-space:nowrap;overflow:hidden}
+.karte .ring{position:absolute;right:6px;top:6px;z-index:2}
+.karte .zst{position:absolute;left:6px;right:6px;bottom:56px;z-index:2;display:flex;align-items:center;gap:4px;padding:2px 7px;border-radius:9px;background:rgba(20,16,12,.72);border:1px solid rgba(169,121,58,.4);font-size:11px;color:#f1d79a;white-space:nowrap;overflow:hidden}
 .karte .zst svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.karte .n{font:14px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px 2px 2px}
-.karte .st{display:flex;align-items:center;gap:6px;margin:0 2px}
-.karte .st .bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.55);overflow:hidden}
+.karte .band{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 7px 6px;background:linear-gradient(transparent,rgba(16,12,9,.93) 40%)}
+.karte .n{font:14.5px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 1px 3px;text-shadow:0 1px 2px #000}
+.karte .st{display:flex;align-items:center;gap:6px;margin:0 1px}
+.karte .st .bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.6);overflow:hidden;border:1px solid rgba(0,0,0,.6)}
 .karte .st .bar i{display:block;height:100%;width:100%;background:linear-gradient(#e46a58,#a22d22)}
-.karte .st b{font:600 13px Georgia,serif;color:var(--gold);min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
-.karte .mud{height:3px;border-radius:2px;background:rgba(0,0,0,.45);margin:4px 2px 0;overflow:hidden}
+.karte .st b{font:600 14px Marcellus,Georgia,serif;color:var(--gold);min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.karte .mud{height:3px;border-radius:2px;background:rgba(0,0,0,.5);margin:4px 1px 0;overflow:hidden}
 .karte .mud i{display:block;height:100%;width:0;background:#c9a24a}
 .ring{width:38px;height:38px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.6) 0);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.7)}
 .ring i{width:28px;height:28px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 11px Georgia,serif;color:var(--ink)}
-.karte .mk{position:absolute;left:8px;top:8px;z-index:2;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#20170c;font:700 11px/18px Georgia,serif;text-align:center;display:none}
+.karte .mk{position:absolute;left:7px;top:7px;z-index:2;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#20170c;font:700 11px/20px Georgia,serif;text-align:center;display:none}
 .karte.sel.multi .mk{display:block}
+
+/* Tonkarte (langer Druck auf „Ton“) */
+#tonkarte{position:fixed;display:none;width:262px;padding:10px 14px 12px;background:var(--holz);border:2px solid var(--bronze);border-radius:13px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 0 2px rgba(224,180,90,.2),0 6px 20px rgba(0,0,0,.65);z-index:6}
+#tonkarte.an{display:block}
+#tonkarte h3{margin:0 0 4px;font:19px Marcellus,Georgia,serif;font-weight:normal;color:var(--gold);padding-bottom:4px;border-bottom:1px solid rgba(169,121,58,.6)}
+#tonkarte .rg{display:block;margin:6px 0 0}
+#tonkarte .rg span{display:flex;justify-content:space-between;font-size:14px}
+#tonkarte .rg b{font-weight:normal;color:var(--gold);font-variant-numeric:tabular-nums}
+#tonkarte input[type=range]{width:100%;height:44px;margin:0;accent-color:#d4a65c;touch-action:pan-x;-webkit-user-select:auto;user-select:auto}
+#tonkarte .info{font-size:12px;color:var(--mut);line-height:1.35;margin:2px 0 0}
+#tonkarte .x{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:20px;line-height:1}
 
 /* Einheitenfenster links unten */
 #fenster{position:fixed;left:var(--sl);bottom:var(--sb);width:262px;padding:8px 10px 9px;display:none;gap:10px;flex-wrap:wrap;
@@ -100,7 +126,7 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 #fenster .bild{width:90px;height:120px;border-radius:7px;border:1px solid rgba(0,0,0,.7);flex:none}
 #fenster .w{flex:1;min-width:0}
 #fenster h3{margin:0 0 3px;font:17px Marcellus,Georgia,serif;font-weight:normal;color:var(--gold);line-height:1.15}
-#fenster .zl{display:flex;justify-content:space-between;font-size:13px;padding:1.5px 0;border-bottom:1px dotted rgba(184,171,144,.25)}
+#fenster .zl{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;font-size:13px;padding:1.5px 0;border-bottom:1px dotted rgba(184,171,144,.25)}
 #fenster .zl b{font-weight:normal;color:var(--ink);font-variant-numeric:tabular-nums}
 #fenster p{flex-basis:100%;margin:0;font-size:12.5px;font-style:italic;color:var(--mut);line-height:1.3}
 #fenster .x{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:20px;line-height:1}
@@ -140,10 +166,10 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 
 /* Hochformat: Fenster über die Leiste */
 @media (max-aspect-ratio:1/1){
-  #karten{left:var(--sl);right:calc(var(--sr) + 160px)}
-  #fenster{bottom:calc(var(--sb) + 190px)}
+  #karten{left:var(--sl);right:calc(var(--sr) + 162px)}
+  #fenster{bottom:calc(var(--sb) + 180px)}
 }
-@media (max-height:640px){.karte .bild{height:92px}.karte .zst{bottom:46px}}
+@media (max-height:640px){.karte{height:128px}.karte .zst{bottom:50px}.fk{height:62px}}
 </style>
 </head>
 <body>
@@ -175,13 +201,15 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 <div id="banner"></div>
 <div id="oben">
   <div id="kraft">
-    <div class="kk"><span class="kn r" id="kR">0</span><div class="kb"><i id="kBar"></i><b></b></div><span class="kn k" id="kK">0</span></div>
+    <div class="kk"><div class="wap"><svg viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g><use href="#sy-schwert" x="9" y="7" width="26" height="26"/></g></svg></div>
+      <span class="kn r" id="kR">0</span><div class="kb"><i id="kBar"></i><b></b></div><span class="kn k" id="kK">0</span>
+      <div class="wap k"><svg viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g><use href="#sy-speer" x="9" y="7" width="26" height="26"/></g></svg></div></div>
     <div class="kz"><span>Rom</span><em><svg class="ic"><use href="#ic-sand"/></svg><span id="kZeit">0:00</span></em><em id="kTempo">1×</em><span>Karthago</span></div>
   </div>
+  <div id="feinde"></div>
   <div id="hinweis"></div>
 </div>
 <div id="fps">– B/s</div>
-<div id="feinde"></div>
 <div id="spalte">
   <button class="plak gross" id="bBegin"><svg class="ic"><use href="#ic-speere"/></svg><span><b>Beginnen</b><small>Heere rücken vor</small></span></button>
   <button class="plak" id="bHalt"><svg class="ic"><use href="#ic-schild"/></svg><span><b>Halten</b><small></small></span></button>
@@ -195,6 +223,10 @@ svg.sy{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;str
 <div id="fenster"></div>
 <div id="karten"></div>
 <div id="ende"></div>
+<div id="tonkarte"><button class="x" aria-label="Schließen">×</button><h3>Ton</h3>
+  <label class="rg"><span>Musik <b id="tMv">60</b></span><input type="range" id="tM" min="0" max="100" step="1"></label>
+  <label class="rg"><span>Geräusche <b id="tGv">80</b></span><input type="range" id="tG" min="0" max="100" step="1"></label>
+  <p class="info" id="tInfo"></p></div>
 <div id="lade"><div class="titel">Das Heer sammelt sich …</div><div class="balken"><i id="balki"></i></div><div class="z" id="ladez"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -837,9 +869,9 @@ let phase='laden',pausiert=false,tempoV=1,sel=-1,ergebnis=null;
 const gefallen=[0,0];
 const zaehler={schlaege:0,parade:0,ausweich:0,treffer:0,kills:0,umgeworfen:0,rueckweich:0,fliehende:0,fernTreffer:0};
 const G={gesamt:0,fliegend:0,treffer:0,abgewehrt:0,verfehlt:0,speere:0,steine:0};   // Geschosszähler (SCHLACHT.geschosse)
-const evZ={wurf:0,schleuder:0,treffer_fern:0,abgewehrt:0,verfehlt:0};              // Geräusch-Ereignisse (gezählt; Tonanbindung: window.SCHLACHT_TON.ereignis(typ,x,z))
+const evZ={wurf:0,schleuder:0,treffer_fern:0,abgewehrt:0,verfehlt:0,klirren:0,schild:0,schildstoss:0,treffer:0,tod:0,speer:0,kriegsgeschrei:0,horn:0,sieg_jubel:0};              // Geräusch-Ereignisse (gezählt; Tonanbindung: window.SCHLACHT_TON.ereignis(typ,x,z))
 let tonAn=true;
-function ereignis(typ,x,z){evZ[typ]++;if(tonAn){const T=window.SCHLACHT_TON;if(T&&T.ereignis)T.ereignis(typ,x,z);}}
+function ereignis(typ,x,z){evZ[typ]=(evZ[typ]||0)+1;if(tonAn)TON.ereignis(typ,x,z);}
 
 function einheitenAnlegen(){
   U.length=0;cHead.fill(-1);sCell.fill(-1);
@@ -920,7 +952,7 @@ function hashBauen(){
 }
 function floh(u){
   if(u.state==='flieht'||gone(u))return;
-  u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;u.kT=0;
+  ereignis('horn',u.mx,u.mz);u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;u.kT=0;
   const e=naechster(u,true);let dx=0,dz=u.side===0?-1:1;
   if(e){dx=u.cx-e.cx;dz=u.cz-e.cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;}
   u.fx=dx;u.fz=dz;u.fAng=Math.atan2(dx,dz);
@@ -938,7 +970,7 @@ function soldatWeg(i){   // Flüchtling verlässt das Feld
 function beginEngage(u){
   let foe=null,bd=1e9;
   for(const v of U){if(v.side===u.side||gone(v))continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;foe=v;}}
-  if(u.runT>0&&foe){u.charge=2;foe.morale-=3+(u.def.ans>1.6?4:0);}   // Ansturm
+  if(u.runT>0&&foe){ereignis('kriegsgeschrei',u.mx,u.mz);u.charge=2;foe.morale-=3+(u.def.ans>1.6?4:0);}   // Ansturm
   for(let s=0;s<PRO;s++){const id=u.occ[s];if(id<0||sSt[id]!==S_FORM)continue;
     sSt[id]=S_KAMPF;sDelay[id]=Math.random()*.3;sRet[id]=Math.random()*.2;sPX[id]=NOGOAL;}
 }
@@ -1007,7 +1039,7 @@ function wirkung(i){
   if(dx*dx+dz*dz>r*r)return;   // Ziel weggetreten: Fehlschlag
   let out=sOut[i];
   if(out!==3&&sAct[j]===A_TREFFER)out=3;   // inzwischen von anderem getroffen: keine Abwehr mehr
-  if(out===1){zaehler.parade++;sCool[i]+=.12;return;}
+  if(out===1){zaehler.parade++;sCool[i]+=.12;ereignis(KITS[sKit[j]].speer||sKit[j]===0?'schild':'klirren',sX[j],sZ[j]);return;}
   if(out===2){zaehler.ausweich++;return;}
   if(out===0)return;
   trefferWirkung(i,j);
@@ -1018,6 +1050,7 @@ function trefferWirkung(i,j){
   const fm=ang<1.15?1:ang<2.4?1.5:2;
   const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1);
   sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01);
+  if(sHP[j]>0)ereignis(sDmg[i]<.9?'schildstoss':KITS[sKit[i]].speer?'speer':'treffer',sX[j],sZ[j]);
   if(Math.random()<.18)staub(sX[j],sZ[j],1,.9,.3);
   {const ex=sX[j]-sX[i],ez=sZ[j]-sZ[i],el=Math.hypot(ex,ez)+1e-6;spritzer(sX[j],sZ[j],ex/el,ez/el,3+(Math.random()*4|0));if(Math.random()<.55)blutFleck(sX[j]+ex/el*.4,sZ[j]+ez/el*.4,.55);}
   if(fm>1)UD.morale-=.4*(fm-1);
@@ -1033,7 +1066,7 @@ function trefferWirkung(i,j){
 }
 function sterbe(j,i,fm){sterbeDir(j,sX[i]-sX[j],sZ[i]-sZ[j],U[sUnit[i]],fm);}
 function sterbeDir(j,dx,dz,ua,fm){   // (dx,dz) zeigt vom Gefallenen zum Angreifer / Schützen; ua = Einheit des Angreifers
-  const u=U[sUnit[j]];
+  const u=U[sUnit[j]];ereignis('tod',sX[j],sZ[j]);
   const von_vorn=(Math.sin(sR[j])*dx+Math.cos(sR[j])*dz)>=0;   // Schlag von vorn -> fällt nach hinten
   sDeath[j]=von_vorn?1:0;
   sSt[j]=S_STIRBT;sAct[j]=0;sFoe[j]=-1;sVX[j]=sVZ[j]=0;
@@ -1251,7 +1284,7 @@ function kampfTick(dt){
   }
 }
 function ende(was){
-  phase='ende';ergebnis=was;gA.fill(0);G.fliegend=0;
+  phase='ende';ergebnis=was;gA.fill(0);G.fliegend=0;if(was==='sieg')ereignis('sieg_jubel',ziel.x,ziel.z);
   const gew=was==='sieg'?0:1;
   for(let i=0;i<N;i++){
     const st=sSt[i];if(st!==S_FORM&&st!==S_KAMPF)continue;
@@ -1699,7 +1732,7 @@ function zeigerEnde(e){
 cv.addEventListener('pointerup',zeigerEnde);cv.addEventListener('pointercancel',zeigerEnde);
 cv.addEventListener('wheel',e=>{dist*=1+Math.sign(e.deltaY)*.1;camSetzen();e.preventDefault();},{passive:false});
 ['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
-document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{if(!(e.target.closest&&e.target.closest('#tonkarte')))e.preventDefault();},{passive:false});
 
 function platziere(u,x,z){   // Aufstellung
   u.cx=Math.max(-FELD_X+8,Math.min(FELD_X-8,x));u.cz=Math.max(-FELD_Z+8,Math.min(-20,z));
@@ -1745,7 +1778,7 @@ function befehl(i,x,z,laufen){
 function angriff(i,t){
   const u=U[i],T=U[t];if(!u||!T||T.side===u.side||gone(u)||gone(T)||u.state==='flieht')return false;
   if(u.fern&&u.mun>0){u.fBef=t;u.atkT=-1;u.hasDest=false;u.rueck=false;fernKI(u);return true;}   // Schützen: feuern auf das Ziel, rücken in Schussweite vor
-  auftrag(u,t,true);return true;
+  ereignis('kriegsgeschrei',u.mx,u.mz);auftrag(u,t,true);return true;
 }
 
 /* ====================================================================================================
@@ -1769,11 +1802,11 @@ function selListe(){   // gewählte, einsatzfähige Einheiten (die Hauptauswahl 
 }
 function kameraZu(u){kz.on=true;kz.x=u.cx;kz.z=u.cz;}
 function langDruck(el,kurz,lang){
-  let tm=0,l=false;
-  el.addEventListener('pointerdown',e=>{e.stopPropagation();l=false;clearTimeout(tm);tm=setTimeout(()=>{l=true;lang();},450);});
+  let tm=0,l=false,t0=0;   // Zeitstempel zusätzlich zum Timer: bei langsamen Bildern kommt pointerup sonst vor dem Timer
+  el.addEventListener('pointerdown',e=>{e.stopPropagation();l=false;t0=performance.now();clearTimeout(tm);tm=setTimeout(()=>{if(!l){l=true;lang();}},450);});
   const ab=()=>clearTimeout(tm);
   el.addEventListener('pointerleave',ab);el.addEventListener('pointercancel',ab);
-  el.addEventListener('pointerup',e=>{e.stopPropagation();ab();if(!l)kurz();});
+  el.addEventListener('pointerup',e=>{e.stopPropagation();ab();if(!l){if(performance.now()-t0>=450){l=true;lang();}else kurz();}});
 }
 function uiBauen(){
   const kb=$('karten'),fb=$('feinde'),bn=$('banner');
@@ -1786,7 +1819,7 @@ function uiBauen(){
     if(u.side===0){
       const d=document.createElement('div');d.className='karte';
       d.innerHTML=bildHTML(K,0)+'<div class="ring"><i></i></div><div class="mk">✓</div><div class="zst"><svg><use href="#zs-steht"/></svg><span></span></div>'
-        +'<div class="n"></div><div class="st"><div class="bar"><i></i></div><b></b></div><div class="mud"><i></i></div>';
+        +'<div class="band"><div class="n"></div><div class="st"><div class="bar"><i></i></div><b></b></div><div class="mud"><i></i></div></div>';
       kb.appendChild(d);
       d.querySelector('.n').textContent=u.name;
       karten.push({i,d,ring:d.querySelector('.ring'),num:d.querySelector('.ring i'),zi:d.querySelector('.zst use'),zt:d.querySelector('.zst span'),
@@ -1795,6 +1828,7 @@ function uiBauen(){
     }else{
       const d=document.createElement('div');d.className='fk';
       d.innerHTML=bildHTML(K,1)+'<div class="t"><div class="n"></div><div class="b"><i></i></div><div class="z"><span></span><b></b></div></div>';
+      d.title=u.name;
       fb.appendChild(d);d.querySelector('.n').textContent=u.name;
       feinde.push({i,d,bar:d.querySelector('.b i'),zt:d.querySelector('.z span'),sn:d.querySelector('.z b')});
       langDruck(d,()=>{const v=U[i];kameraZu(v);if(phase==='schlacht')for(const a of selListe())angriff(a.i,i);},()=>kameraZu(U[i]));
@@ -1843,7 +1877,7 @@ function uiAktualisieren(){
   // Feindliste
   for(const f of feinde){
     const u=U[f.i],g=gone(u);
-    klasse(f.d,'weg',g);klasse(f.d,'fl',u.state==='flieht');
+    klasse(f.d,'weg',g);klasse(f.d,'fl',u.state==='flieht');klasse(f.d,'kampf',u.engaged&&!g);
     wid(f.bar,u.strength/PRO*100);txt(f.sn,g?'–':String(u.strength));
     txt(f.zt,u.state==='flieht'?'flieht':g?(u.state==='geflohen'?'geflohen':'gefallen'):u.engaged?'kämpft':u.fern&&u.schiessT>0?'schießt':'');
   }
@@ -1862,7 +1896,7 @@ function uiAktualisieren(){
     fe.classList.add('an');
     const K=h.def;
     txt(fw.m,h.strength+' von '+PRO);txt(fw.a,fmt(K.atk));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
-    txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+' Stk.':'Nahkampf');
+    txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
   }else{fe.classList.remove('an');fensterId=-2;}
   // Knöpfe
   const L=selListe(),hz=L.length?L[0]:null;
@@ -1879,7 +1913,7 @@ function uiAktualisieren(){
   }else{btnText('bHalt','Halten','Einheit wählen');btnText('bForm','Formation','Einheit wählen');}
   btnText('bPause',pausiert?'Weiter':'Pause',pausiert?'geht weiter':'anhalten');hrefSet($('bPause').querySelector('use'),pausiert?'ic-play':'ic-pause');
   btnText('bTempo','Tempo',fmt(tempoV)+'×');
-  btnText('bTon','Ton',tonAn?'an':'aus');hrefSet($('bTon').querySelector('use'),tonAn?'ic-ton':'ic-stumm');
+  TON.karte();btnText('bTon','Ton',tonAn?'an':'aus');hrefSet($('bTon').querySelector('use'),tonAn?'ic-ton':'ic-stumm');
   // Hinweiszeile (blendet nach 6 s aus)
   let z;
   if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Beginnen.';
@@ -1933,17 +1967,227 @@ $('bForm').onclick=()=>{const L=selListe();if(!L.length)return;const e=!L[0].eng
 $('bPause').onclick=()=>{pausiert=!pausiert;uiAktualisieren();};
 $('bTempo').onclick=()=>{const T=[1,2,4];tempoV=T[(T.indexOf(tempoV)+1)%T.length]||1;uiAktualisieren();};
 $('bGrafik').onclick=()=>setGrafik(GRAFIK_ORDNUNG[(GRAFIK_ORDNUNG.indexOf(grafikName)+1)%3]);
-$('bTon').onclick=()=>{tonAn=!tonAn;try{localStorage.setItem('schlachtTon',tonAn?'1':'0');}catch(e){}uiAktualisieren();};
 try{tonAn=localStorage.getItem('schlachtTon')!=='0';}catch(e){}
 for(const id of['bBegin','bHalt','bPlaenk','bForm','bPause','bTempo','bGrafik','bTon'])$(id).addEventListener('pointerdown',e=>e.stopPropagation());
 
+
+/* ====================================================================================================
+   7b  TON  (Web Audio; Vorgabe dev/docs/schlacht_ton.md). Dateien: ton/m_<id>_<a|b>.mp3 (Musik), ton/s_<art>_<n>.mp3 (Geräusche).
+   Alles optional: fehlende Dateien werden still übergangen und beim Schlachtbeginn sowie alle 60 s erneut versucht.
+   Kein Knoten pro Bild: Teppiche sind Dauerschleifen mit gleitender Lautstärke, Einzelgeräusche kurzlebige Quellen (≤ 12), Zählung 5 Hz.
+   ==================================================================================================== */
+const TON=(()=>{
+  const DIR='ton/',KULT='rom',MAXM=7,POLY=12,HOER=60,FADE=3.5;
+  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3};
+  const KAMPF=['kampf_1','kampf_2','kampf_3','kampf_rom','kampf_karthago'];
+  const GR={   // Zustand -> Gruppen in Ausweichreihenfolge (erste Gruppe mit geladenem Stück gewinnt)
+    ruhe:[['ruhe_1']],
+    aufmarsch:[['aufmarsch_'+KULT],['aufmarsch_rom','aufmarsch_karthago','aufmarsch_kelt'],KAMPF],
+    kampf:[KAMPF],
+    hoehepunkt:[['hoehepunkt_1','hoehepunkt_2'],KAMPF],
+    sieg:[['sieg_1','sieg_2']],niederlage:[['niederlage_1']]};
+  const FAC={ruhe:.8,aufmarsch:.8,kampf:1,hoehepunkt:1,sieg:.9,niederlage:.8};
+  /* Spielereignis -> Geräuschart · v Lautstärke · t Mindestabstand (s) je Ereignisart · w Hörweite (m) */
+  const EV={
+    klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.9,t:.11},tod:{a:'tod',v:1,t:.14},speer:{a:'speer',v:.8,t:.15},
+    wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
+    kriegsgeschrei:{a:'kriegsgeschrei',v:1,t:2.5,w:140},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
+  for(const k in EV)EV[k].l=-1e9;
+  /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
+  const LISTE=[];
+  const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'],id,art:null,ok:false});
+  LISTE.push(mItem('kampf_1'));
+  for(const a in SFX)for(let n=1;n<=SFX[a];n++)LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
+  for(const id of ['ruhe_1','aufmarsch_rom','kampf_2','hoehepunkt_1','sieg_1','niederlage_1','kampf_3','hoehepunkt_2','sieg_2','kampf_rom','kampf_karthago'])LISTE.push(mItem(id));
+  const MB={},SB={};          // geladene Puffer: Musik je Stück · Geräusche je Art (Liste)
+  let ctx=null,master=null,busM=null,busS=null,aktiv=false,figFertig=false,laedt=false,nM=0,nS=0,gespielt=0,retryT=0,tT=0;
+  let volM=60,volG=80;
+  try{const a=localStorage.getItem('schlachtTonM'),b=localStorage.getItem('schlachtTonG');if(a!==null&&!isNaN(+a))volM=Math.max(0,Math.min(100,+a));if(b!==null&&!isNaN(+b))volG=Math.max(0,Math.min(100,+b));}catch(e){}
+  const kurve=v=>Math.pow(v/100,1.5);
+
+  function lautstaerke(){
+    if(!ctx)return;const n=ctx.currentTime;
+    master.gain.setTargetAtTime(tonAn?1:0,n,.05);busM.gain.setTargetAtTime(kurve(volM),n,.05);busS.gain.setTargetAtTime(kurve(volG),n,.05);
+  }
+  function ctxMachen(){
+    if(ctx)return;
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    try{ctx=new AC();}catch(e){ctx=null;return;}
+    const comp=ctx.createDynamicsCompressor();master=ctx.createGain();busM=ctx.createGain();busS=ctx.createGain();
+    busM.connect(master);busS.connect(master);master.connect(comp);comp.connect(ctx.destination);
+    master.gain.value=tonAn?1:0;busM.gain.value=kurve(volM);busS.gain.value=kurve(volG);
+    ctx.onstatechange=()=>{aktiv=ctx.state==='running';};
+  }
+  function gestik(){   // erste Berührung (iOS): Kontext anlegen / fortsetzen
+    ctxMachen();if(!ctx)return;
+    if(ctx.state!=='running'){try{const p=ctx.resume();if(p&&p.then)p.then(()=>{aktiv=ctx.state==='running';lade();},()=>{});}catch(e){}}
+    aktiv=ctx.state==='running';lade();
+  }
+  for(const t of['pointerdown','pointerup','touchend','click','keydown'])addEventListener(t,gestik,{capture:true,passive:true});
+  document.addEventListener('visibilitychange',()=>{if(ctx&&!document.hidden&&ctx.state!=='running'&&ctx.state!=='closed'){try{ctx.resume().catch(()=>{});}catch(e){}}});
+
+  /* ---- Laden: nacheinander, alles in try/catch, Puffer einmal dekodiert ---- */
+  async function lade(){
+    if(laedt||!ctx||!figFertig)return;laedt=true;
+    try{
+      for(const it of LISTE){
+        if(it.ok)continue;
+        if(it.id&&nM>=MAXM)continue;
+        for(const name of it.alt){
+          try{
+            const r=await fetch(DIR+name+'.mp3');
+            if(!r.ok)continue;
+            const ab=await r.arrayBuffer();
+            const b=await new Promise((ok,no)=>{try{const p=ctx.decodeAudioData(ab,ok,no);if(p&&p.catch)p.catch(no);}catch(e){no(e);}});
+            if(it.id){MB[it.id]=b;nM++;}else{(SB[it.art]||(SB[it.art]=[])).push(b);nS++;}
+            it.ok=true;break;
+          }catch(e){}
+        }
+      }
+    }catch(e){}
+    laedt=false;
+  }
+
+  /* ---- Einzelgeräusche im Raum ---- */
+  let nAkt=0;const lastV={};
+  function spiele(typ,x,z){
+    if(!aktiv||!tonAn)return;
+    const e=EV[typ];if(!e)return;
+    const now=ctx.currentTime;if(now-e.l<e.t||nAkt>=POLY)return;
+    const dx=x-ziel.x,dz=z-ziel.z,d=Math.sqrt(dx*dx+dz*dz),R=(e.w||HOER)+.3*dist;
+    if(d>R)return;
+    const arr=SB[e.a];if(!arr)return;
+    e.l=now;
+    let k=(Math.random()*arr.length)|0;if(arr.length>1&&k===lastV[e.a])k=(k+1)%arr.length;lastV[e.a]=k;
+    const f=1-d/R,gv=e.v*Math.pow(f<0?0:f,1.4)*(.45+.55/(1+dist/120));
+    if(gv<.01)return;
+    let pan=(dx*Math.cos(az)-dz*Math.sin(az))/(d+10);pan=pan>.85?.85:pan<-.85?-.85:pan;   // rechts der Kamera = positiv
+    const src=ctx.createBufferSource(),g=ctx.createGain();let p=null;
+    src.buffer=arr[k];src.playbackRate.value=.92+Math.random()*.16;g.gain.value=gv;
+    src.connect(g);
+    if(ctx.createStereoPanner){p=ctx.createStereoPanner();p.pan.value=pan;g.connect(p);p.connect(busS);}else g.connect(busS);
+    nAkt++;gespielt++;
+    src.onended=()=>{nAkt--;try{src.disconnect();g.disconnect();if(p)p.disconnect();}catch(er){}};
+    src.start();
+  }
+
+  /* ---- Teppiche: Dauerschleifen, Lautstärke folgt der Zahl nahe kämpfender / marschierender Soldaten ---- */
+  const AMB={};let nahK=0,fernK=0,marschK=0,sturmK=0,kampfGes=0;
+  function ambStart(name){
+    const arr=SB[name];if(AMB[name]||!arr||!arr.length)return;
+    const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=arr[(Math.random()*arr.length)|0];src.loop=true;g.gain.value=0;
+    src.connect(g);g.connect(busS);src.start(0,Math.random()*src.buffer.duration);AMB[name]={g,src};
+  }
+  function zaehlen(){
+    nahK=fernK=marschK=sturmK=kampfGes=0;
+    const zx=ziel.x,zz=ziel.z;
+    for(let i=0;i<N;i++){
+      const st=sSt[i];if(st>S_FLIEH)continue;
+      const dx=sX[i]-zx,dz=sZ[i]-zz,d2=dx*dx+dz*dz;
+      if(st===S_KAMPF&&sFoe[i]>=0){kampfGes++;if(d2<2500)nahK++;else if(d2<25600)fernK++;}
+      else if(d2<3600){const v2=sVX[i]*sVX[i]+sVZ[i]*sVZ[i];if(v2>9)sturmK++;else if(v2>.8)marschK++;}
+    }
+  }
+  const mn=(a,b)=>a<b?a:b;
+  function teppiche(){
+    const n=ctx.currentTime,sz=.5+.5/(1+dist/140),ruhig=phase==='schlacht'&&!pausiert;
+    const nah=ruhig?mn(1,nahK/40):0,fern=ruhig?mn(1,fernK/70)*(1-.7*nah):0,mar=ruhig?mn(1,marschK/50)*(1-.6*nah):0,stu=ruhig?mn(1,sturmK/40)*(1-.5*nah):0;
+    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:.3,wiese:.25*(1-.8*nah)};
+    for(const k in T){if(!AMB[k])ambStart(k);const a=AMB[k];if(a)a.g.gain.setTargetAtTime(T[k],n,.6);}
+  }
+
+  /* ---- Musik: ruhe → aufmarsch → kampf → hoehepunkt → sieg / niederlage; Überblendung FADE s ---- */
+  let zust='ruhe',cur=null,letzteId='',kampfT=-1e9,wankT=0,hoeheT=-1e9;
+  function zielZustand(t){
+    if(phase==='ende')return ergebnis==='sieg'?'sieg':'niederlage';
+    if(phase!=='schlacht')return'ruhe';
+    if(kampfGes>=4)kampfT=t;
+    const z=t-kampfT<15000?'kampf':'aufmarsch';
+    let wank=zaehler.fliehende>=30;
+    if(!wank)for(const u of U){if(!gone(u)&&u.strength>0&&u.morale<.35*u.def.mor&&(u.engaged||u.state==='flieht')){wank=true;break;}}
+    if(wank){if(!wankT)wankT=t;}else wankT=0;
+    if(zust==='hoehepunkt'){if(wank||t-hoeheT<25000)return'hoehepunkt';}
+    else if(wank&&t-wankT>=1500){hoeheT=t;return'hoehepunkt';}
+    return z;
+  }
+  function waehle(z){
+    for(const g of GR[z]){
+      const c=g.filter(id=>MB[id]);
+      if(c.length){const c2=c.filter(id=>id!==letzteId),L=c2.length?c2:c;return L[(Math.random()*L.length)|0];}
+    }
+    return null;
+  }
+  function ausblenden(s,sek){
+    const n=ctx.currentTime;
+    try{s.g.gain.cancelScheduledValues(n);s.g.gain.setValueAtTime(s.g.gain.value,n);s.g.gain.linearRampToValueAtTime(0,n+sek);s.src.stop(n+sek+.1);}catch(e){}
+    s.src.onended=()=>{try{s.src.disconnect();s.g.disconnect();}catch(e){}};
+  }
+  function spielen(id){
+    const n=ctx.currentTime,b=MB[id],fa=FAC[zust]||1,src=ctx.createBufferSource(),g=ctx.createGain();
+    const fi=cur?FADE:1.5;if(cur)ausblenden(cur,FADE);
+    src.buffer=b;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(fa,n+fi);src.connect(g);g.connect(busM);src.start();
+    cur={src,g,id,t0:n,dur:b.duration};letzteId=id;
+  }
+  function neuWaehlen(wechsel){
+    const id=waehle(zust);
+    if(id===null){if(cur){ausblenden(cur,FADE);cur=null;}return;}
+    if(cur&&wechsel&&cur.id===id){   // dasselbe Stück passt auch zum neuen Zustand: weiterspielen
+      const n=ctx.currentTime;try{cur.g.gain.cancelScheduledValues(n);cur.g.gain.setValueAtTime(cur.g.gain.value,n);cur.g.gain.linearRampToValueAtTime(FAC[zust]||1,n+FADE);}catch(e){}
+      return;
+    }
+    spielen(id);
+  }
+
+  /* ---- Takt 5 Hz (aus der Hauptschleife) ---- */
+  function schritt(t){
+    if(!aktiv||t-tT<200)return;tT=t;
+    zaehlen();
+    const w=zielZustand(t);
+    if(w!==zust){zust=w;neuWaehlen(true);}
+    else if(cur&&ctx.currentTime>cur.t0+cur.dur-FADE-.2)neuWaehlen(false);
+    else if(!cur)neuWaehlen(false);
+    teppiche();
+    if(t-retryT>60000){retryT=t;lade();}   // fehlende Dateien später nachholen (ok-Marken bleiben, nur Fehlendes wird erneut angefragt)
+  }
+  function start(){ereignis('horn',ziel.x,ziel.z);lade();retryT=performance.now();}
+  function bereit(){figFertig=true;lade();}
+
+  /* ---- Bedienung: Knopf „Ton“ (kurz: an/aus · lang: Tonkarte mit Reglern) ---- */
+  const kt=$('tonkarte');
+  function karteInfo(){
+    const z={ruhe:'Ruhe',aufmarsch:'Aufmarsch',kampf:'Kampf',hoehepunkt:'Höhepunkt',sieg:'Sieg',niederlage:'Niederlage'}[zust];
+    $('tInfo').textContent=!ctx||!aktiv?'Tippe aufs Feld, dann startet der Ton.':(cur?'Es spielt: '+z+' ('+cur.id+'). ':'Musik: '+z+' (noch kein Stück). ')+'Geladen: '+nM+' Musikstücke, '+nS+' Geräusche.';
+  }
+  function karteOffen(){return kt.classList.contains('an');}
+  function karteZu(){kt.classList.remove('an');}
+  function karteAuf(){
+    $('tM').value=volM;$('tG').value=volG;$('tMv').textContent=volM;$('tGv').textContent=volG;karteInfo();
+    kt.classList.add('an');
+    const b=$('bTon').getBoundingClientRect(),h=kt.offsetHeight,w=kt.offsetWidth;
+    kt.style.left=Math.max(8,b.left-w-10)+'px';kt.style.top=Math.max(8,Math.min(innerHeight-h-8,b.top+b.height/2-h/2))+'px';
+  }
+  function umschalten(){tonAn=!tonAn;try{localStorage.setItem('schlachtTon',tonAn?'1':'0');}catch(e){}lautstaerke();uiAktualisieren();}
+  langDruck($('bTon'),umschalten,karteAuf);
+  const regler=(id,lab,set,key)=>$(id).addEventListener('input',()=>{const v=+$(id).value;set(v);$(lab).textContent=v;try{localStorage.setItem(key,String(v));}catch(e){}lautstaerke();});
+  regler('tM','tMv',v=>{volM=v;},'schlachtTonM');regler('tG','tGv',v=>{volG=v;},'schlachtTonG');
+  kt.querySelector('.x').onclick=karteZu;
+  document.addEventListener('pointerdown',e=>{if(karteOffen()&&!kt.contains(e.target)&&!$('bTon').contains(e.target))karteZu();},true);
+
+  return{
+    ereignis:spiele,schritt,start,bereit,lautstaerke,
+    karte(){if(karteOffen())karteInfo();},
+    info(){return{zustand:zust,stueck:cur?cur.id:null,geladen:{musik:nM,geraeusche:nS},aktiv:!!(aktiv&&tonAn),kontext:ctx?ctx.state:'keiner',gespielt,
+      teppiche:Object.keys(AMB),zaehl:{nah:nahK,fern:fernK,marsch:marschK,sturm:sturmK,kampf:kampfGes},musikPuffer:Object.keys(MB)};}
+  };
+})();
+window.SCHLACHT_TON={ereignis:TON.ereignis};
 
 /* ====================================================================================================
    8  ABLAUF, HAUPTSCHLEIFE, TEST-SCHNITTSTELLE
    ==================================================================================================== */
 function start(){
   if(phase!=='aufstellung')return false;
-  phase='schlacht';pausiert=false;tickAcc=0;kiAcc=.5;
+  phase='schlacht';pausiert=false;tickAcc=0;kiAcc=.5;TON.start();
   for(const u of U)if(u.side===0&&u.stance==='angreifen')u.aiT=0;
   uiAktualisieren();return true;
 }
@@ -2035,6 +2279,7 @@ function schleife(t){
   if(!pausiert){staubSchritt(Math.min(.1,dt));spritzSchritt(Math.min(.1,dt)*tempoV);}
   renderer.render(scene,camera);
   if(t-uiT>250){uiT=t;uiAktualisieren();}
+  TON.schritt(t);
   if(t-bannerT>66){bannerT=t;bannerSchritt();}   // ~15 Hz
   fz++;if(!ft)ft=t;
   if(t-ft>=2000){const f=fz*1000/(t-ft);$('fps').textContent=fmt(f)+' B/s';fpsLog.push(Math.round(f*10)/10);fz=0;ft=t;}
@@ -2061,7 +2306,7 @@ async function laden(){
   {let g=null;try{const q=new URLSearchParams(location.search).get('g');g=STUFEN[q]?q:localStorage.getItem('schlachtGrafik');}catch(e){}
    if(!STUFEN[g])g=(('ontouchstart' in window)||navigator.maxTouchPoints>0)?'mittel':'hoch';   // iPad: Mittel; PC: Hoch
    setGrafik(g);}
-  phase='aufstellung';
+  phase='aufstellung';TON.bereit();
   $('lade').style.display='none';
   uiAktualisieren();
   requestAnimationFrame(schleife);
@@ -2074,7 +2319,7 @@ window.SCHLACHT={
   get units(){return U;},get gefallen(){return gefallen.slice();},get ergebnis(){return ergebnis;},get fps(){return fpsLog;},
   get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id]};},
-  get geschosse(){return G;},get ereignisse(){return evZ;},get auswahl(){return[...selM];},get schlachtZeit(){return schlachtZ;},
+  get ton(){return TON.info();},get geschosse(){return G;},get ereignisse(){return evZ;},get auswahl(){return[...selM];},get schlachtZeit(){return schlachtZ;},
   start,befehl,angriff,neu,waehle:select,setGrafik,get grafik(){return grafikName;},hoehe:H,wald:WF,
   kamera(a,e,d,x,z){az=a;el=e;dist=d;ziel.x=x;ziel.z=z;camSetzen();},
   tempo(n){tempoV=Math.max(.1,Math.min(30,+n||1));uiAktualisieren();},
