@@ -4,10 +4,13 @@ CLIPS = {
                'treffer', 'sterben_vorn', 'sterben_hinten', 'jubeln', 'fliehen'],
     'mensch_fern': ['bogen', 'schleuder', 'speerwurf', 'armbrust', 'muskete'],   # je nach Einheit, mindestens einer bei Schützen
     'mensch_reiter': ['reiten', 'schlag_reiter', 'lanze_gesenkt'],
+    'mensch_kampf': ['kampf_bereit', 'schlag_c', 'schild_stoss', 'ausweichen', 'parade',
+                     'nachsetzen', 'stolpern', 'sterben_knie', 'schild_hoch'],   # Zweikampf (30.10.), freiwillig
+    'mensch_varianten': ['gehen_b', 'laufen_b', 'stehen_b', 'schlag_a_b', 'schlag_b_b'],   # P1: weniger Gleichtakt
     'pferd': ['stehen', 'schritt', 'trab', 'galopp', 'ansturm', 'steigen', 'treffer', 'sterben'],
     'elefant': ['stehen', 'gehen', 'ansturm', 'stampfen', 'treffer', 'panik', 'sterben', 'trompeten'],
 }
-LOOP = {'stehen', 'gehen', 'laufen', 'stehen_bereit', 'fliehen', 'schritt', 'trab', 'galopp', 'ansturm', 'reiten', 'panik'}
+LOOP = {'stehen', 'gehen', 'laufen', 'stehen_bereit', 'kampf_bereit', 'gehen_b', 'laufen_b', 'stehen_b', 'fliehen', 'schritt', 'trab', 'galopp', 'ansturm', 'reiten', 'panik'}
 MAX_BONES = {'mensch': 55, 'pferd': 40, 'elefant': 40}
 MAX_TRIS = {'mensch': 1500, 'pferd': 2000, 'elefant': 2500}   # Nahstufe inkl. Ausrüstung
 HOEHE = {'mensch': (1.55, 1.95), 'pferd': (1.4, 2.6), 'elefant': (2.2, 3.6)}  # Meter, Gesamthöhe in Ruhe

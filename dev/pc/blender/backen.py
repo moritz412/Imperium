@@ -173,6 +173,8 @@ def backen(ein, aus, pruefen=False):
     inv_rest = [(arm.matrix_world @ b.matrix_local).inverted() for b in bones]
     clips, rows, daten = [], 0, []
     acts = sorted({a for a in bpy.data.actions}, key=lambda a: a.name)
+    tp = ein + '.clips.json'
+    TEMPO = json.load(open(tp)).get('tempo', {}) if os.path.exists(tp) else {}
     for act in acts:
         name = act.name.split('|')[-1]
         s, e = int(round(act.frame_range[0])), int(round(act.frame_range[1]))
@@ -184,7 +186,9 @@ def backen(ein, aus, pruefen=False):
             for i, b in enumerate(bones):
                 M = C @ (arm.matrix_world @ arm.pose.bones[b.name].matrix) @ inv_rest[i] @ CI
                 daten += [M[r][c] for c in range(4) for r in range(4)]   # spaltenweise
-        clips.append({'n': name, 'row': rows, 'len': len(frames), 'loop': loop})
+        c = {'n': name, 'row': rows, 'len': len(frames), 'loop': loop}
+        if name in TEMPO: c['speed'] = TEMPO[name]   # m/s der Aufnahme: Spiel passt Abspieltempo an die Bewegung an
+        clips.append(c)
         rows += len(frames)
     pack = {'v': 1, 'art': skelett_art(os.path.basename(ein)), 'fps': FPS,
             'bones': [{'n': b.name, 'p': bidx[b.parent.name] if b.parent else -1} for b in bones],

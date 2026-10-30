@@ -10,7 +10,7 @@ import teile_form as TF
 from bl_ext.user_default.mpfb.services import HumanService, LocationService, TargetService
 
 a = sys.argv[sys.argv.index("--") + 1:]
-KIT_NAME = a[0]; OUT = a[1]; VORSCHAU = a[2] if len(a) > 2 else None
+KIT_NAME, _, VARIANTE = a[0].partition(":"); VARIANTE = VARIANTE or "a"; OUT = a[1]; VORSCHAU = a[2] if len(a) > 2 else None
 BASE = r"C:\Users\anmel\Desktop\imperium-bilder"
 CMU = os.path.join(BASE, "blender", "cmu")
 FPS = 30
@@ -39,7 +39,16 @@ KITS = {
                              schild=dict(w=0.6, h=0.95, farbe=(0.6, 0.55, 0.42), mittel=(0.3, 0.19, 0.08)),
                              waffe=("speer", 2.4)),
 }
-KIT = KITS[KIT_NAME]
+KIT = dict(KITS[KIT_NAME])
+# Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
+# Körpergröße: MPFB height 0,5 ≈ 1,66 m, 0,62 ≈ 1,88 m (gemessen). Ziel antik: 1,64 / 1,70 / 1,74 m
+VAR = {"a": dict(muskel=0.0, gewicht=0.5, groesse=0.52, haut=None, ton=1.0),
+       "b": dict(muskel=-0.15, gewicht=0.4, groesse=0.49, haut="young_caucasian_male2", ton=0.9),
+       "c": dict(muskel=0.15, gewicht=0.64, groesse=0.54, haut="middleage_caucasian_male", ton=1.08)}[VARIANTE]
+if VAR["haut"] and KIT["haut"] != VAR["haut"]: KIT["haut"] = VAR["haut"]
+elif VAR["haut"]: KIT["haut"] = "young_caucasian_male"
+KIT["tunika"] = tuple(min(1.0, c * VAR["ton"]) for c in KIT["tunika"])
+TEMPO = {}
 KURZ = KIT_NAME.split("_")[0]
 
 # ---------- Körper ----------
@@ -47,7 +56,8 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene; sc.render.fps = FPS
 data = LocationService.get_user_data()
 macro = TargetService.get_default_macro_info_dict()
-macro.update({"gender": 1.0, "age": 0.5, "muscle": KIT["muskel"], "weight": 0.5, "height": 0.62})
+macro.update({"gender": 1.0, "age": 0.5 if VARIANTE != "c" else 0.62, "muscle": max(0.0, min(1.0, KIT["muskel"] + VAR["muskel"])),
+              "weight": VAR["gewicht"], "height": VAR["groesse"]})
 basemesh = HumanService.create_human(scale=0.1, macro_detail_dict=macro)
 arm = HumanService.add_builtin_rig(basemesh, "cmu_mb", import_weights=True)
 arm.name = "sk_mensch"
@@ -213,19 +223,47 @@ HIEB_UNTEN = dict(BEREIT, **{"RightArm": (-0.05, -0.75, -0.66), "RightForeArm": 
 TRAGEN = {"LeftArm": BEREIT["LeftArm"], "LeftForeArm": BEREIT["LeftForeArm"], "RightArm": (0.02, 0.1, -0.99),
           "RightForeArm": (0.05, -0.6, -0.8)}
 TRAGEN_SPEER = dict(TRAGEN, RightArm=(0.03, 0.05, -1), RightForeArm=(0.02, -0.3, 0.95))
+# Zweikampf (30.10.): geduckte Kampfhaltung, seitlicher Hieb, Schildstoß, Ausweichen, Parade
+KNIE = {"LeftUpLeg": (0.08, -0.35, -0.93), "LeftLeg": (0, 0.2, -0.98), "RightUpLeg": (-0.08, 0.3, -0.95), "RightLeg": (0, 0.3, -0.95)}
+KAMPF = dict(BEREIT, **KNIE, **{"Spine": (0, -0.12, 0.99), "LeftArm": (0.15, -0.4, -0.9)})
+KAMPF_B = dict(KAMPF, Spine=(0.03, -0.16, 0.99), RightForeArm=(0.08, -0.95, 0.2))
+SEITE_AUS = dict(KAMPF, RightArm=(-0.85, 0.15, -0.5), RightForeArm=(-0.55, -0.45, 0.7), Spine1=(-0.1, 0.05, 0.99))
+SEITE_END = dict(KAMPF, RightArm=(0.25, -0.88, -0.4), RightForeArm=(0.65, -0.72, -0.1), Spine1=(0.12, -0.12, 0.98))
+SCHILD_STOSS = dict(KAMPF, Spine=(0, -0.3, 0.95), LeftArm=(0.05, -0.88, -0.47), LeftForeArm=(-0.15, -0.97, 0.18))
+RUECK = dict(BEREIT, LeftUpLeg=(0.06, 0.15, -0.99), RightUpLeg=(-0.06, 0.35, -0.94), RightLeg=(0, 0.1, -1), Spine=(0, 0.15, 0.99),
+             LeftArm=(0.12, -0.55, -0.75), LeftForeArm=(-0.25, -0.95, 0.2))
+PARADE = dict(KAMPF, LeftArm=(0.1, -0.75, -0.3), LeftForeArm=(-0.3, -0.9, 0.3), Head=(0, -0.05, 1))
 TREFFER = dict(BEREIT, **{"Spine": (0, 0.2, 0.98), "Spine1": (0, 0.3, 0.95), "Head": (0, 0.35, 0.94)})
 
 def clip_haltung(name, keys):
     """keys: Liste (bild, haltung) – lineare Übergänge zwischen gesetzten Haltungen."""
     act = bpy.data.actions.new(name); act.use_fake_user = True
     arm.animation_data.action = act
-    for f, h in keys:
-        haltung(h); taste(f)
+    for k in keys:
+        f, h = k[0], k[1]
+        haltung(h, k[2] if len(k) > 2 else 0.0); taste(f)
     return act
 
-def clip_cmu(name, subj, trial, von=0.0, bis=1.0, dauer=None, am_platz=True, arme=None):
+def zyklus(auf, i0, i1):
+    """Einen ganzen Schrittzyklus finden: zwei aufeinanderfolgende Aufsätze des linken Fußes (Tiefpunkte der Fußhöhe)."""
+    h = [auf.punkte(i)[0]["lfoot"].y for i in range(i0, i1)]
+    lo, hi_ = min(h), max(h); grenze = lo + 0.35 * (hi_ - lo)
+    tiefe = [k for k in range(6, len(h) - 6) if h[k] <= min(h[k - 6:k + 7]) and h[k] < grenze]
+    for a_, b_ in zip(tiefe, tiefe[1:]):
+        if 45 <= b_ - a_ <= 220: return i0 + a_, i0 + b_
+    return None
+
+def clip_cmu(name, subj, trial, von=0.0, bis=1.0, dauer=None, am_platz=True, arme=None, schleife=False):
     auf = cmu_lib.Aufnahme(os.path.join(CMU, subj, subj + ".asf"), os.path.join(CMU, subj, "%s_%s.amc" % (subj, trial)))
     n = len(auf.frames); i0, i1 = int(n * von), int(n * bis) - 1
+    if schleife:
+        z = zyklus(auf, i0, i1)
+        if z:
+            i0, i1 = z; dauer = max(8, round((i1 - i0) / 4)) + 1   # letztes Bild = erstes (backen lässt es bei Schleifen weg)
+            p0, p1 = auf.welt(auf.frames[i0])[1], auf.welt(auf.frames[i1])[1]
+            TEMPO[name] = round(math.hypot(p1.x - p0.x, p1.z - p0.z) / ((i1 - i0) / 120.0), 2)
+        if not z: i0 = int(n * 0.3); i1 = min(n - 1, i0 + 90); dauer = 23   # Rückfall: festes Fenster wie bisher
+        print("ZYKLUS", name, z, TEMPO.get(name))
     act = bpy.data.actions.new(name); act.use_fake_user = True
     arm.animation_data.action = act
     ruhe()
@@ -335,7 +373,7 @@ if KIT["brust"]:
     teile.append(brust)
 
 sk = KIT["schild"]
-schild = TF.schild(sk["w"], sk["h"], "teil_schild_%s" % KURZ, sk["farbe"], mittel=sk.get("mittel"),
+schild = TF.schild(sk["w"], sk["h"], "teil_schild_%s_%s" % (KURZ, KIT_NAME.split("_")[1]), sk["farbe"], mittel=sk.get("mittel"),
                    woelbung=sk.get("woelbung", 0.0), zylinder=sk.get("zylinder", 0.0), eckig=sk.get("eckig", 2.0))
 hand_l = kp("LeftHand", 0.5)
 schild.matrix_world = Matrix.Translation(hand_l + Vector((0.0, -0.05, 0.04)))
@@ -376,15 +414,34 @@ while body.modifiers[0].name != "dez":
 ruhe()
 if KIT["waffe"][0] == "speer": TRAGEN = TRAGEN_SPEER
 clip_cmu("stehen", "140", "06", 0.2, 0.6, dauer=60, arme=TRAGEN)
-clip_cmu("gehen", "02", "01", 0.25, 0.25 + 1.1 * 120 / 343, dauer=33, arme=TRAGEN)
-clip_cmu("laufen", "02", "03", 0.3, 0.3 + 0.75 * 120 / 170, dauer=22, arme=TRAGEN)
-clip_cmu("fliehen", "02", "03", 0.3, 0.3 + 0.75 * 120 / 170, dauer=22, arme=TRAGEN)
+clip_cmu("gehen", "02", "01", 0.1, 0.9, arme=TRAGEN, schleife=True)
+clip_cmu("laufen", "02", "03", 0.15, 0.95, arme=TRAGEN, schleife=True)
+clip_cmu("fliehen", "02", "03", 0.15, 0.95, arme=TRAGEN, schleife=True)
+clip_cmu("gehen_b", "143", "32", 0.15, 0.85, arme=TRAGEN, schleife=True)
+clip_cmu("laufen_b", "143", "01", 0.15, 0.85, arme=TRAGEN, schleife=True)
+clip_cmu("stehen_b", "140", "07", 0.2, 0.6, dauer=60, arme=TRAGEN)
 clip_haltung("stehen_bereit", [(1, BEREIT), (30, dict(BEREIT, Spine1=(0, -0.05, 1))), (60, BEREIT)])
 clip_haltung("schlag_a", [(1, BEREIT), (7, AUSHOLEN), (12, STOSS), (16, STOSS), (24, BEREIT)])
 clip_haltung("schlag_b", [(1, BEREIT), (9, HIEB_OBEN), (14, HIEB_UNTEN), (24, BEREIT)])
 clip_haltung("stoss_speer", [(1, BEREIT), (7, AUSHOLEN), (12, SPEER), (16, SPEER), (24, BEREIT)])
 clip_haltung("abwehr_schild", [(1, BEREIT), (6, SCHILD_VOR), (14, SCHILD_VOR), (20, BEREIT)])
 clip_haltung("treffer", [(1, BEREIT), (5, TREFFER), (14, BEREIT)])
+clip_haltung("kampf_bereit", [(1, KAMPF), (20, KAMPF_B), (40, KAMPF)])
+clip_haltung("schlag_c", [(1, KAMPF), (8, SEITE_AUS), (13, SEITE_END), (16, SEITE_END), (24, KAMPF)])
+clip_haltung("schild_stoss", [(1, KAMPF), (5, SCHILD_VOR), (9, SCHILD_STOSS), (12, SCHILD_STOSS), (20, KAMPF)])
+clip_haltung("ausweichen", [(1, KAMPF), (7, RUECK), (12, RUECK), (20, KAMPF)])
+clip_haltung("parade", [(1, KAMPF), (4, PARADE), (10, PARADE), (16, KAMPF)])
+# P1: Varianten im Tempo und weitere Kampfbewegungen
+clip_haltung("schlag_a_b", [(1, BEREIT), (5, AUSHOLEN), (9, STOSS), (12, STOSS), (19, BEREIT)])
+clip_haltung("schlag_b_b", [(1, BEREIT), (11, HIEB_OBEN), (17, HIEB_UNTEN), (28, BEREIT)])
+VOR_BEIN = {"LeftUpLeg": (0.08, -0.55, -0.83), "LeftLeg": (0, 0.05, -1), "RightUpLeg": (-0.06, 0.4, -0.92), "RightLeg": (0, 0.2, -0.98)}
+clip_haltung("nachsetzen", [(1, KAMPF), (6, dict(AUSHOLEN, **KNIE)), (11, dict(STOSS, **VOR_BEIN)), (15, dict(STOSS, **VOR_BEIN)), (24, KAMPF)])
+STOLPER = dict(TREFFER, Spine=(0, 0.35, 0.94), RightUpLeg=(-0.06, 0.45, -0.89), LeftArm=(0.5, -0.1, -0.85))
+clip_haltung("stolpern", [(1, BEREIT), (4, TREFFER), (9, STOLPER), (20, BEREIT)])
+KNIEN = dict(TREFFER, LeftUpLeg=(0.08, -0.15, -0.99), LeftLeg=(0, 0.97, -0.2), RightUpLeg=(-0.08, -0.1, -0.99), RightLeg=(0, 0.97, -0.25))
+clip_haltung("sterben_knie", [(1, BEREIT), (5, TREFFER), (14, KNIEN, -0.42), (26, dict(KNIEN, Spine=(0, -0.55, 0.83), Spine1=(0, -0.7, 0.7), Head=(0, -0.8, 0.6)), -0.46), (40, dict(KNIEN, Spine=(0, -0.75, 0.66), Spine1=(0, -0.85, 0.5), Head=(0, -0.9, 0.4), LeftArm=(0.2, -0.3, -0.93), RightArm=(-0.2, -0.3, -0.93)), -0.5)])
+SCHILD_HOCH = dict(KAMPF, LeftArm=(0.12, -0.3, 0.94), LeftForeArm=(-0.45, -0.45, 0.77), Spine=(0, -0.05, 1))
+clip_haltung("schild_hoch", [(1, KAMPF), (6, SCHILD_HOCH), (20, SCHILD_HOCH), (26, KAMPF)])
 clip_cmu("sterben_vorn", "90", "16", 0.42, 0.75, dauer=40, am_platz=False)
 clip_cmu("sterben_hinten", "90", "18", 0.35, 0.75, dauer=40, am_platz=False)
 clip_cmu("jubeln", "79", "69", 0.1, 0.5, dauer=60)
@@ -420,4 +477,6 @@ for o in [arm, body] + ([rock] if rock else []) + teile: o.hide_set(False); o.se
 bpy.context.view_layer.objects.active = arm
 bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_animation_mode="ACTIONS",
                           export_apply=True, export_morph=False, export_skins=True)
-print("EXPORT", OUT, os.path.getsize(OUT) // 1024, "KB")
+import json as _json
+_json.dump({"tempo": TEMPO, "variante": VARIANTE}, open(OUT + ".clips.json", "w"))
+print("EXPORT", OUT, os.path.getsize(OUT) // 1024, "KB", "TEMPO", TEMPO)

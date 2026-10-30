@@ -64,6 +64,18 @@ class Aufnahme:
         P = Vector(fr["root"][0:3]) * CM if fr else None
         return W, P
 
+    def punkte(self, i):
+        """Endpunkte aller Segmente (CMU-Koordinaten, y oben, Meter) für Bild i."""
+        W, P = self.welt(self.frames[i])
+        out = {}
+        def go(n, start):
+            b = self.bones[n]
+            ende = start + W[n] @ (b["dir"] * b["len"])
+            out[n] = ende
+            for k in self.kids.get(n, []): go(k, ende)
+        go("root", P.copy())
+        return out, P
+
 
 class Uebertrag:
     """Bindet eine Aufnahme an eine Armatur (cmu_mb). setze(i) stellt die Pose für CMU-Bild i ein."""
