@@ -51,6 +51,25 @@ for p in body.data.polygons:
         if all(body.data.vertices[i].co.z > 0.47 * hmax for i in vs):
             p.material_index = ti
 
+# Sandalen (Füße) und Haare (Oberkopf/Hinterkopf)
+def mat(name, rgb, metall=0.0, rau=0.85):
+    m = bpy.data.materials.new(name); m.use_nodes = True
+    b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Base Color"].default_value = (*rgb, 1); b.inputs["Metallic"].default_value = metall
+    b.inputs["Roughness"].default_value = rau
+    return m
+body.data.materials.append(mat("sandale", (0.16, 0.08, 0.035))); si_ = len(body.data.materials) - 1
+body.data.materials.append(mat("haar", (0.035, 0.022, 0.015))); hi_ = len(body.data.materials) - 1
+FUSS = {"LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"}
+kopfv = [i for i, g in enumerate(haupt) if g in ("Head", "Neck1")]
+kopf_y = sum(body.data.vertices[i].co.y for i in kopfv) / max(1, len(kopfv))
+for p in body.data.polygons:
+    vs = p.vertices
+    if sum(1 for i in vs if haupt[i] in FUSS) >= len(vs) / 2:
+        p.material_index = si_
+    elif all(haupt[i] in ("Head",) for i in vs) and all(body.data.vertices[i].co.z > 0.935 * hmax and body.data.vertices[i].co.y > kopf_y - 0.004 * hmax for i in vs):
+        p.material_index = hi_
+
 # ---------- Pose-Werkzeug ----------
 for pb in arm.pose.bones:
     pb.rotation_mode = "QUATERNION"
@@ -205,7 +224,7 @@ haltung(BEREIT)
 koerper_P = np.array([(body.matrix_world @ v.co)[:] for v in body.evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh().vertices])
 kopf_oben = koerper_P[:, 2].max()
 
-helm = lade("roh_44/teil_helm_A1_montefortino.glb", "teil_helm_A1_montefortino", 160, staender=0.09)
+helm = lade("roh_44/teil_helm_A1_montefortino.glb", "teil_helm_A1_montefortino", 260, staender=0.09)
 P, c, ax = pca(helm)
 z = P[:, 2]; zb = np.linspace(z.min(), z.max(), 21)
 bx = [np.ptp(P[(z >= zb[k]) & (z <= zb[k + 1])][:, 0]) if ((z >= zb[k]) & (z <= zb[k + 1])).sum() > 3 else 0 for k in range(20)]
@@ -222,14 +241,24 @@ print("HELM", round(s, 3), "Busch ab Schicht", kt)
 m = helm.matrix_world.copy(); helm.parent = arm; helm.parent_type = "BONE"; helm.parent_bone = "Head"
 bpy.context.view_layer.update(); helm.matrix_world = m
 
-brust = lade("roh_45/teil_ruest_A1_pectorale.glb", "teil_ruest_A1_pectorale", 40)
+# Pectorale: flache viereckige Bronzeplatte (≈ 20 × 20 cm, Funde 3. Jh. v. Chr.), selbst gebaut – 12 Dreiecke
+bpy.ops.mesh.primitive_cube_add(size=1)
+brust = bpy.context.active_object; brust.name = "teil_ruest_A1_pectorale"
+brust.scale = (0.2, 0.012, 0.2); bpy.ops.object.transform_apply(scale=True)
 s1 = kp("Spine1", 0.5)
 vorne = koerper_P[(np.abs(koerper_P[:, 2] - s1.z) < 0.06) & (np.abs(koerper_P[:, 0]) < 0.06)][:, 1].min()
-setze_teil(brust, (Vector((1, 0, 0)), Vector((0, -1, 0))), Vector((0, vorne - 0.012, s1.z)), 0.22, "Spine1")
+brust.location = (0, vorne - 0.008, s1.z); bpy.context.view_layer.update()
+m = brust.matrix_world.copy(); brust.parent = arm; brust.parent_type = "BONE"; brust.parent_bone = "Spine1"
+bpy.context.view_layer.update(); brust.matrix_world = m
+brust.data.materials.clear(); brust.data.materials.append(mat("bronze", (0.43, 0.27, 0.09), metall=0.8, rau=0.45))
 
-schild = lade("roh_45/teil_schild_A1_scutum.glb", "teil_schild_A1_scutum", 260)
+schild = lade("roh_45/teil_schild_A1_scutum.glb", "teil_schild_A1_scutum", 200)
 hand_l = kp("LeftHand", 0.5)
 setze_teil(schild, (Vector((0, 0, 1)), Vector((0, -1, 0))), hand_l + Vector((0.02, -0.07, 0.05)), 1.05, "LeftHand", buckel=True)
+schild.data.materials.append(mat("schild_innen", (0.15, 0.08, 0.04))); ii_ = len(schild.data.materials) - 1
+R3 = schild.matrix_world.to_3x3()
+for p in schild.data.polygons:
+    if (R3 @ p.normal).normalized().dot(Vector((0, -1, 0))) < -0.2: p.material_index = ii_
 
 schwert = lade("roh_45/teil_schwert_A1_gladius.glb", "teil_schwert_A1_gladius", 70)
 P, c, ax = pca(schwert)
@@ -289,6 +318,10 @@ if VORSCHAU:
         cam.location = (hw.x - 2.3, hw.y - 2.9, 1.25)
         sc.render.filepath = VORSCHAU.replace(".png", "_%d.png" % i)
         bpy.ops.render.render(write_still=True)
+    nimm("stehen_bereit"); sc.frame_set(1)
+    kz = arm.matrix_world @ arm.pose.bones["Head"].head
+    cam.location = (kz.x - 0.9, kz.y - 1.0, kz.z + 0.1); cam.rotation_euler = (math.radians(88), 0, math.radians(-42))
+    sc.render.filepath = VORSCHAU.replace(".png", "_kopf.png"); bpy.ops.render.render(write_still=True)
 
 # ---------- Export ----------
 nimm("stehen"); sc.frame_set(1)

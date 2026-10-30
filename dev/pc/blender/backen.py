@@ -6,7 +6,8 @@
 #   anim: Float32-Textur, Breite = Knochen × 4 Pixel (RGBA), Höhe = Summe aller Clip-Bilder.
 #         Je Knochen und Bild eine 4×4-Skinmatrix (Weltpose × inverse Ruhepose), spaltenweise (wie three.js Matrix4.elements).
 #   Koordinaten: three.js (Y oben). Blender (Z oben) wird umgerechnet: (x, y, z) → (x, z, −y).
-#   koerper/teile: Ruhepose-Positionen, Normalen, Dreiecke, je Ecke 4 Knochen + 4 Gewichte (Teile: starr an einem Knochen).
+#   koerper/teile: Ruhepose-Positionen, Normalen, Dreiecke, je Ecke 4 Knochen + 4 Gewichte (Teile: starr an einem Knochen),
+#         'col' je Ecke RGB (u8, sRGB) aus Grundfarb-Textur bzw. Materialfarbe (Mittel der angrenzenden Flächenecken).
 #   Detailstufen: 'nah' (Original) und 'mittel' (Decimate auf ≈ 400 bzw. 27 % Dreiecke).
 # Mit --pruefen wird für jeden Clip ein Bild in Blender ausgewertet und mit der eigenen Rechnung verglichen (max. Abweichung in mm).
 import sys, os, json, base64, struct
@@ -40,6 +41,65 @@ def aktion_setzen(arm, act):
     ad.action = act
     if act is not None and hasattr(ad, 'action_slot') and getattr(act, 'slots', None) and len(act.slots):
         ad.action_slot = act.slots[0]
+
+
+_BILDER = {}
+
+
+def _lin2srgb(c):
+    return c * 12.92 if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
+
+
+def _farbquelle(mat):
+    """Bild (Grundfarb-Textur) oder feste Farbe (sRGB 0..1) eines Materials."""
+    if mat is None or not mat.use_nodes:
+        c = mat.diffuse_color if mat else (0.7, 0.7, 0.7, 1)
+        return None, [_lin2srgb(c[i]) for i in range(3)]
+    nodes = mat.node_tree.nodes
+    bsdf = next((n for n in nodes if n.type == 'BSDF_PRINCIPLED'), None)
+    if bsdf:
+        inp = bsdf.inputs['Base Color']
+        if inp.is_linked:
+            stapel, gesehen = [inp.links[0].from_node], set()
+            while stapel:
+                n = stapel.pop()
+                if n.name in gesehen: continue
+                gesehen.add(n.name)
+                if n.type == 'TEX_IMAGE' and n.image: return n.image, None
+                for i in n.inputs:
+                    for l in i.links: stapel.append(l.from_node)
+        else:
+            return None, [_lin2srgb(inp.default_value[i]) for i in range(3)]
+    tex = next((n for n in nodes if n.type == 'TEX_IMAGE' and n.image), None)
+    return (tex.image, None) if tex else (None, [0.7, 0.7, 0.7])
+
+
+def _pixel(img, uv):
+    if img.name not in _BILDER:
+        import numpy as np
+        w, h = img.size
+        a = np.empty(w * h * 4, dtype=np.float32); img.pixels.foreach_get(a)
+        _BILDER[img.name] = (a.reshape(h, w, 4), w, h)
+    a, w, h = _BILDER[img.name]
+    x = int((uv[0] % 1.0) * (w - 1)); y = int((uv[1] % 1.0) * (h - 1))
+    return a[y, x, :3]
+
+
+def farben(ob, me):
+    """Eine Farbe je Ecke (sRGB, 0..255): Mittel der Grundfarbe aller angrenzenden Flächenecken."""
+    quellen = [_farbquelle(s.material) for s in ob.material_slots] or [(None, [0.7, 0.7, 0.7])]
+    uvl = me.uv_layers.active.data if me.uv_layers.active else None
+    summe = [[0.0, 0.0, 0.0, 0] for _ in me.vertices]
+    for p in me.polygons:
+        img, fest = quellen[min(p.material_index, len(quellen) - 1)]
+        for li in p.loop_indices:
+            vi = me.loops[li].vertex_index
+            c = _pixel(img, uvl[li].uv) if (img and uvl) else fest
+            s = summe[vi]; s[0] += c[0]; s[1] += c[1]; s[2] += c[2]; s[3] += 1
+    out = []
+    for s in summe:
+        k = max(1, s[3]); out += [max(0, min(255, round(255 * s[i] / k))) for i in range(3)]
+    return out
 
 
 def mesh_daten(ob, arm, bidx, starr=None, ziel_tris=None):
@@ -77,11 +137,12 @@ def mesh_daten(ob, arm, bidx, starr=None, ziel_tris=None):
     for t in me.loop_triangles:
         idx += list(t.vertices)
     ntri = len(me.loop_triangles)
+    col = farben(src, me)
     ev.to_mesh_clear()
     if tmp:
         bpy.data.objects.remove(tmp, do_unlink=True)
     return {'n': len(pos) // 3, 'tris': ntri, 'pos': b64f(pos), 'nrm': b64f(nrm), 'idx': b64u16(idx),
-            'si': b64u8(si), 'sw': b64u8(sw)}, (pos, si, sw)
+            'si': b64u8(si), 'sw': b64u8(sw), 'col': b64u8(col)}, (pos, si, sw)
 
 
 def backen(ein, aus, pruefen=False):

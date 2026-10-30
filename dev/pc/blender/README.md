@@ -6,9 +6,14 @@ Regeln: `../figuren_bauen.md`. Gemeinsame Konstanten (Clip-Namen, Grenzen): `reg
 |---|---|---|---|
 | `pruefen.py` | Figur gegen die Regeln prüfen (Skelett, Knochenzahl, Bindung, Teile, Dreiecke, Höhe, Füße, Clips) | `blender -b -P pruefen.py -- sk_mensch.glb` | `python3 pruefen.py sk_mensch.glb` |
 | `backen.py` | Spielpaket bauen: Animations-Textur (Layout wie Prototyp `dev/proto/schlacht_p0.html`), Körper nah/mittel, Teile | `blender -b -P backen.py -- sk_mensch.glb sk_mensch.json --pruefen` | `python3 backen.py sk_mensch.glb sk_mensch.json --pruefen` |
+| `paket_ansehen.py` | Figur nur aus dem Spielpaket nachbauen (Ecken-Farben, eine Pose) und rendern = Spielsicht | `blender -b -P paket_ansehen.py -- paket.json bild.png [clip] [bild]` | – |
+| `soldat_bau.py` | kompletten Soldaten bauen (MPFB-Körper, Haut, Tunika, Sandalen, Teile, 13 Clips) und als .glb exportieren | `blender -b -P soldat_bau.py -- k_A1_hastatus.glb [vorschau.png]` | – |
+| `cmu_lib.py` | CMU ASF/AMC lesen und auf cmu_mb übertragen | (Modul) | – |
 | `testfigur.py` | einfache Testfigur (5 Knochen, 2 Clips) zum Prüfen der Skripte | – | `python3 testfigur.py test.glb` |
 
 `--pruefen` rechnet für jeden Clip ein Bild selbst aus (Skinmatrix × Ruheposition) und vergleicht mit Blenders eigener Verformung.
 
 **Stand 29.10.:** Mit der Testfigur in der Cloud geprüft (Blender 5.2.3): `pruefen.py` „in Ordnung“, `backen.py --pruefen` Abweichung 0,0 mm bei bis zu 47 cm Bewegung.
 Nicht getestet: echte MPFB-Figur, Blender 4.x am PC, Einlesen des Pakets im Spiel (Ladecode kommt mit Schlacht-Paket S3), Decimate an großen Meshes.
+
+**Stand 30.10.:** `backen.py` schreibt jetzt Farben je Ecke (`col`, RGB u8, aus Grundfarb-Textur oder Materialfarbe). Hastatus (Kit A1) gebaut, `pruefen.py` in Ordnung, gebacken 1,3 MB, max. Abweichung 9,8 mm; Nachbau aus dem Paket (`paket_ansehen.py`) zeigt Farben richtig (Bild `hastatus_test.jpg`). Der Schlacht-Prototyp liest `col` noch nicht (kommt mit S3).
