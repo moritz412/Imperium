@@ -46,6 +46,8 @@ button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 .karte .s{font-size:13px;color:var(--mut)}
 .karte .s b{color:var(--gold);font-weight:normal}
 .karte .z{font-size:11.5px;color:#d9b36a;min-height:14px}
+.karte .mud{height:4px;border-radius:2px;background:rgba(0,0,0,.45);margin-top:2px;overflow:hidden}
+.karte .mud i{display:block;height:100%;width:0;background:#c9a24a}
 .ring{width:48px;height:48px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.5) 0);display:grid;place-items:center}
 .ring i{width:35px;height:35px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 12px Georgia,serif;color:var(--ink)}
 #erkl,#ende{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:var(--perg);color:var(--tinte);
@@ -97,13 +99,13 @@ const fmt=n=>String(Math.round(n*10)/10).replace('.',',');
 
 /* ---------- Daten ---------- */
 const KITS=[
-  {id:'A1_hastatus',key:'hast',n:'Hastati',atk:10,def:11,mor:70,walk:1.3,run:3.8,ans:1.5,speer:false,
+  {id:'A1_hastatus',key:'hast',n:'Hastati',atk:10,def:11,mor:70,hp:3,walk:1.3,run:3.8,ans:1.5,speer:false,
    info:'Gedrillte römische Linieninfanterie. Hält die Linie, bricht nicht so schnell.'},
-  {id:'A2_libysch',key:'liby',n:'Libysche Speerträger',atk:9,def:12,mor:65,walk:1.3,run:3.6,ans:1.5,speer:true,
+  {id:'A2_libysch',key:'liby',n:'Libysche Speerträger',atk:9,def:12,mor:65,hp:3,walk:1.3,run:3.6,ans:1.5,speer:true,
    info:'Dichte Speerreihen. Stark in der Abwehr, träge im Angriff.'},
-  {id:'A3_iberisch',key:'iber',n:'Iberische Scutarii',atk:11,def:9,mor:60,walk:1.4,run:4.0,ans:1.5,speer:false,
+  {id:'A3_iberisch',key:'iber',n:'Iberische Scutarii',atk:11,def:9,mor:60,hp:2.5,walk:1.4,run:4.0,ans:1.5,speer:false,
    info:'Wendige Schwertkämpfer mit großem Schild. Kräftig im Angriff, verwundbar in der Abwehr.'},
-  {id:'A6_keltisch',key:'kelt',n:'Keltische Krieger',atk:12,def:8,mor:55,walk:1.4,run:4.2,ans:2,speer:false,
+  {id:'A6_keltisch',key:'kelt',n:'Keltische Krieger',atk:12,def:8,mor:55,hp:2.5,walk:1.4,run:4.2,ans:2,speer:false,
    info:'Furchtbarer Ansturm in den ersten Augenblicken – doch wer ihn übersteht, sieht sie bald wanken.'},
 ];
 const ROSTER=[   // fest für den Test: Rom (Spieler) 0–2, Karthago 3–7
@@ -117,8 +119,6 @@ const PRO=40,BREIT=10,TIEF=4,ABST=1.2;     // Figuren je Einheit, Formation 10 �
 const NU=ROSTER.length,N=NU*PRO;
 const FELD_X=200,FELD_Z=150;               // Feld 400 × 300 m
 const NAH=60;                              // Meter: nähere Figuren in voller Stufe
-const KONTAKT=2.2,KONTAKT2=KONTAKT*KONTAKT;
-const GRUNDRATE=0.03;                      // Verluste/s je Kämpfer im Kontakt bei Angriff = Abwehr
 const FLIEH_MORAL=25;
 
 /* ====================================================================================================
@@ -165,23 +165,28 @@ function material(pk){
     Object.assign(sh.uniforms,U);
     sh.vertexShader=sh.vertexShader
     .replace('#include <common>',`#include <common>
-attribute vec4 aBone;attribute vec4 aWeight;attribute vec4 aAnim;attribute float aLoop;
+attribute vec4 aBone;attribute vec4 aWeight;attribute vec4 aAnim;attribute vec4 aAnimAlt;attribute vec3 aLoop;
 uniform float uTime;uniform highp sampler2D uAnimTex;uniform vec2 uTexSize;
 vec4 bTex(float bone,float row,float k){return texture2D(uAnimTex,vec2((bone*4.0+k+0.5)/uTexSize.x,(row+0.5)/uTexSize.y));}
 mat4 bMat(float bone,float r0,float r1,float fr){
   return mat4(mix(bTex(bone,r0,0.0),bTex(bone,r1,0.0),fr),mix(bTex(bone,r0,1.0),bTex(bone,r1,1.0),fr),
-              mix(bTex(bone,r0,2.0),bTex(bone,r1,2.0),fr),mix(bTex(bone,r0,3.0),bTex(bone,r1,3.0),fr));}`)
+              mix(bTex(bone,r0,2.0),bTex(bone,r1,2.0),fr),mix(bTex(bone,r0,3.0),bTex(bone,r1,3.0),fr));}
+mat4 skinClip(vec4 an,float lp){
+  float fLen=an.y;float fT=max(uTime-an.z,0.0)*an.w*30.0;float fA;float fB;
+  if(lp>0.5){fT=mod(fT,fLen);fA=floor(fT);fB=mod(fA+1.0,fLen);}
+  else{fT=min(fT,fLen-1.0);fA=floor(fT);fB=min(fA+1.0,fLen-1.0);}
+  float fF=fT-fA;float rowA=an.x+fA;float rowB=an.x+fB;
+  mat4 sk=mat4(0.0);
+  for(int i=0;i<4;i++){float w=aWeight[i];if(w>0.0){sk+=w*bMat(aBone[i],rowA,rowB,fF);}}
+  return sk;}`)
     .replace('#include <beginnormal_vertex>',`#include <beginnormal_vertex>
-float fLen=aAnim.y;float fT=max(uTime-aAnim.z,0.0)*aAnim.w*30.0;float fA;float fB;
-if(aLoop>0.5){fT=mod(fT,fLen);fA=floor(fT);fB=mod(fA+1.0,fLen);}
-else{fT=min(fT,fLen-1.0);fA=floor(fT);fB=min(fA+1.0,fLen-1.0);}
-float fF=fT-fA;float rowA=aAnim.x+fA;float rowB=aAnim.x+fB;
-mat4 skM=mat4(0.0);
-for(int i=0;i<4;i++){float w=aWeight[i];if(w>0.0){skM+=w*bMat(aBone[i],rowA,rowB,fF);}}
+mat4 skM=skinClip(aAnim,aLoop.x);
+float blN=clamp((uTime-aLoop.z)/0.2,0.0,1.0);
+if(blN<1.0){mat4 skO=skinClip(aAnimAlt,aLoop.y);skM=skO+(skM-skO)*blN;}
 objectNormal=(skM*vec4(objectNormal,0.0)).xyz;`)
     .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed=(skM*vec4(transformed,1.0)).xyz;');
   };
-  m.customProgramCacheKey=()=>'schlachtspiel1';
+  m.customProgramCacheKey=()=>'schlachtspiel2';
   m.userData.U=U;
   return m;
 }
@@ -191,11 +196,12 @@ function kitBauen(i,pk){
   for(const stufe of ['nah','mittel']){
     const g=geometrie(pk,stufe);
     g.setAttribute('aAnim',new THREE.InstancedBufferAttribute(new Float32Array(N*4),4));
-    g.setAttribute('aLoop',new THREE.InstancedBufferAttribute(new Float32Array(N),1));
+    g.setAttribute('aAnimAlt',new THREE.InstancedBufferAttribute(new Float32Array(N*4),4));
+    g.setAttribute('aLoop',new THREE.InstancedBufferAttribute(new Float32Array(N*3),3));
     const m=new THREE.InstancedMesh(g,mat,N);m.frustumCulled=false;m.count=0;scene.add(m);im.push(m);
   }
   const clip={};pk.clips.forEach((c,k)=>{c.k=k;clip[c.n]=c;});
-  KIT[i]={pk,mat,im,clip,tris:im[0].geometry.userData.tris};
+  KIT[i]={pk,mat,im,clip,cl:CN.map(n=>clip[n]||clip.stehen||pk.clips[0]),tris:im[0].geometry.userData.tris};
 }
 
 /* ====================================================================================================
@@ -221,148 +227,342 @@ function kitBauen(i,pk){
 })();
 
 /* ====================================================================================================
-   3  EINHEITEN / FORMATION  (Figuren als Struktur-von-Feldern, Plätze 10 × 4, Lücken füllen von hinten)
+   3  EINHEITEN / SOLDATEN  (v2: jeder Soldat ein eigener Körper; Formation ist nur Ziel)
    ==================================================================================================== */
-// Figuren (SoA), Index = Einheit*PRO + Platzfolge
-const sX=new Float32Array(N),sZ=new Float32Array(N),sR=new Float32Array(N);
-const sKit=new Uint8Array(N),sUnit=new Uint8Array(N),sState=new Uint8Array(N);   // 0 frei, 1 Aktion, 2 stirbt, 3 tot, 4 weg
-const sTimer=new Float32Array(N),sCool=new Float32Array(N),sSlot=new Uint8Array(N),sMov=new Uint8Array(N),sDeath=new Uint8Array(N);
-const sFoe=new Int16Array(N),sFoeD=new Float32Array(N),sJit=new Float32Array(N),sJX=new Float32Array(N),sJZ=new Float32Array(N),sJR=new Float32Array(N);
-const aRow=new Float32Array(N),aLen=new Float32Array(N),aStart=new Float32Array(N),aSpd=new Float32Array(N),aLoop=new Float32Array(N),sCur=new Int8Array(N);
+/* ---- Abstimmung (alle Werte hier) ---- */
+const TICK=0.05;            // feste Kampfschritte: 20 Hz
+const DREH=4.19;            // max. Drehrate rad/s (240°/s)
+const BESCHL=3;             // Beschleunigung m/s²
+const BREMS=6;              // Bremsen m/s²
+const BLEND=0.2;            // Überblendung der Clips (Sekunden, im Shader)
+const ZELLE=2;              // Raster-Hash, Zellgröße m
+const SEP=0.75,SEP_F=0.85,SEP_L=0.62;   // Mindestabstand: Freund, Feind, Leiche
+const KONT_R=6,KONT_R2=KONT_R*KONT_R;   // Kampfmodus ab 6 m
+const KONT_HALT=1.5;        // Kampfmodus bleibt so lange nach letztem Kontakt
+const SUCH1=4,SUCH2=7;      // Suchradius in Zellen (8 m / 14 m)
+const MAXANG=2;             // höchstens 2 Angreifer je Verteidiger
+const NOGOAL=-99999;
+const GX0=-(FELD_X+30),GZ0=-(FELD_Z+30),GW=Math.ceil(2*(FELD_X+30)/ZELLE),GH=Math.ceil(2*(FELD_Z+30)/ZELLE);
+const CN=['stehen','gehen','laufen','fliehen','stehen_bereit','kampf_bereit','schlag_a','schlag_b','schlag_c','stoss_speer','schild_stoss',
+  'abwehr_schild','parade','ausweichen','treffer','sterben_vorn','sterben_hinten','jubeln'];
+const C={};CN.forEach((n,i)=>C[n]=i);
+const S_FORM=0,S_KAMPF=1,S_FLIEH=2,S_STIRBT=3,S_TOT=4,S_WEG=5;
+const A_NIX=0,A_SCHLAG=1,A_REAKT=2,A_TREFFER=3;
+
+// Soldaten (SoA), Index = Einheit*PRO + laufende Nummer
+const sX=new Float32Array(N),sZ=new Float32Array(N),sVX=new Float32Array(N),sVZ=new Float32Array(N),sR=new Float32Array(N);
+const sHP=new Float32Array(N),sFat=new Float32Array(N),sJit=new Float32Array(N),sJX=new Float32Array(N),sJZ=new Float32Array(N),sJR=new Float32Array(N);
+const sDelay=new Float32Array(N),sCool=new Float32Array(N),sRet=new Float32Array(N),sBackT=new Float32Array(N),sPX=new Float32Array(N),sPZ=new Float32Array(N);
+const sFOff=new Float32Array(N),sFA=new Float32Array(N),sFSp=new Float32Array(N),sKX=new Float32Array(N),sKZ=new Float32Array(N);
+const sActT=new Float32Array(N),sAT=new Float32Array(N),sDur=new Float32Array(N),sHitT=new Float32Array(N),sReaT=new Float32Array(N),sPer=new Float32Array(N),sDmg=new Float32Array(N);
+const sKit=new Uint8Array(N),sUnit=new Uint8Array(N),sSide=new Uint8Array(N),sSt=new Uint8Array(N),sAct=new Uint8Array(N),sSlot=new Uint8Array(N),sMov=new Uint8Array(N);
+const sDeath=new Uint8Array(N),sOut=new Uint8Array(N),sPh=new Uint8Array(N),sNAtt=new Uint8Array(N),sJub=new Uint8Array(N);
+const sCur=new Int8Array(N),sFoe=new Int16Array(N),sAtt=new Int16Array(N),sTgt=new Int16Array(N),sFace=new Int16Array(N),sCell=new Int32Array(N),sNext=new Int16Array(N);
+const sAn=new Float32Array(N*12);   // je Soldat: [row,len,start,spd, rowAlt,lenAlt,startAlt,spdAlt, loop,loopAlt,blendStart, -]
+const cHead=new Int16Array(GW*GH).fill(-1);
 let spielzeit=0;
 const U=[];   // Einheiten
 let phase='laden',pausiert=false,tempoV=1,sel=-1,ergebnis=null;
 const gefallen=[0,0];
+const zaehler={schlaege:0,parade:0,ausweich:0,treffer:0,kills:0,umgeworfen:0,rueckweich:0,fliehende:0};
 
 function einheitenAnlegen(){
-  U.length=0;
+  U.length=0;cHead.fill(-1);sCell.fill(-1);
+  for(const k in zaehler)zaehler[k]=0;
   ROSTER.forEach((r,i)=>{
     const K=KITS[r.kit];
     const u={i,side:r.side,kit:K.key,k:r.kit,name:r.name,def:K,
       strength:PRO,morale:K.mor,state:'steht',
       cx:r.x,cz:r.z,f:r.side===0?0:PI,destX:0,destZ:0,hasDest:false,run:false,atkT:-1,stance:r.side===0?'halten':'angreifen',
-      occ:new Int16Array(PRO),acc:0,charge:0,runT:0,engaged:false,wasEng:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
-      fx:0,fz:0,fled:0,contacts:new Float32Array(NU),flank:1,startX:r.x,startZ:r.z};
+      occ:new Int16Array(PRO),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
+      fx:0,fz:(r.side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
+      mx:r.x,mz:r.z,sn:PRO,ax:0,az:0,an:0,nF:0,fatS:0,nL:PRO,cnt:new Int16Array(NU),
+      lebend:PRO,kaempfend:0,muede:0};
     U.push(u);
     for(let s=0;s<PRO;s++){
       const id=i*PRO+s;
-      sKit[id]=r.kit;sUnit[id]=i;sState[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sCool[id]=Math.random()*.5;
-      sJit[id]=.92+Math.random()*.16;sJX[id]=(Math.random()-.5)*.2;sJZ[id]=(Math.random()-.5)*.2;sJR[id]=(Math.random()-.5)*.14;
+      sKit[id]=r.kit;sUnit[id]=i;sSide[id]=r.side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
+      sJit[id]=.88+Math.random()*.24;sJX[id]=(Math.random()-.5)*.5;sJZ[id]=(Math.random()-.5)*.5;sJR[id]=(Math.random()-.5)*.14;
+      sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=Math.random()*.8;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
+      sPX[id]=NOGOAL;sPZ[id]=0;sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sJub[id]=0;sNAtt[id]=0;sFOff[id]=0;sFA[id]=0;sFSp[id]=1;
       slotPos(u,s,id);sX[id]=_tx;sZ[id]=_tz;sR[id]=u.f+sJR[id];sCur[id]=-1;
-      setClip(id,'stehen_bereit');
+      initClip(id,C.stehen_bereit);
     }
   });
 }
 let _tx=0,_tz=0;
-function slotPos(u,s,id){   // Weltposition des Platzes s der Einheit u -> _tx,_tz
-  const lx=((s%BREIT)-(BREIT-1)/2)*ABST+sJX[id],lz=((TIEF-1)/2-Math.floor(s/BREIT))*ABST+sJZ[id];
+function slotPos(u,s,id){   // Weltposition des Platzes s -> _tx,_tz ; lockert sich beim Marsch (u.loose 0..1)
+  const col=s%BREIT,row=(s/BREIT)|0,L=u.loose;
+  const lx=(col-(BREIT-1)/2)*ABST*(1+.10*L)+((row&1)?.3:-.3)+sJX[id];
+  const lz=((TIEF-1)/2-row)*ABST*(1+.35*L)-row*.25*L+sJZ[id];
   const c=Math.cos(u.f),sn=Math.sin(u.f);
   _tx=u.cx+lx*c+lz*sn;_tz=u.cz-lx*sn+lz*c;
 }
-const CLIPIX={};   // Name -> Nummer (für sCur)
-['stehen_bereit','gehen','laufen','fliehen','schlag_a','schlag_b','stoss_speer','abwehr_schild','treffer','sterben_vorn','sterben_hinten','jubeln','stehen'].forEach((n,i)=>CLIPIX[n]=i);
-function setClip(id,name,spd){
-  const ci=CLIPIX[name];if(sCur[id]===ci&&!spd)return;
-  const c=KIT[sKit[id]].clip[name];if(!c)return;
-  sCur[id]=ci;aRow[id]=c.row;aLen[id]=c.len;aLoop[id]=c.loop?1:0;aSpd[id]=sJit[id]*(spd||1);
-  aStart[id]=spielzeit-(c.loop?Math.random()*c.len/30:0);   // Schleifen mit zufälligem Versatz
+function initClip(id,ci){
+  const o=id*12,c=KIT[sKit[id]].cl[ci];
+  sAn[o]=sAn[o+4]=c.row;sAn[o+1]=sAn[o+5]=c.len;sAn[o+2]=sAn[o+6]=spielzeit-Math.random()*c.len/30;sAn[o+3]=sAn[o+7]=sJit[id];
+  sAn[o+8]=sAn[o+9]=c.loop?1:0;sAn[o+10]=-10;sCur[id]=ci;
+}
+/* Clip wechseln (Überblendung im Shader). sp = absolute Abspielgeschwindigkeit. Gibt Dauer in Sekunden zurück. */
+function setClip(id,ci,sp,force){
+  const A=sAn,o=id*12,c=KIT[sKit[id]].cl[ci],dur=c.len/30/sp;
+  if(sCur[id]===ci&&!force){
+    if(A[o+8]>.5&&Math.abs(sp-A[o+3])>.08*A[o+3]){const ph=(spielzeit-A[o+2])*A[o+3];A[o+3]=sp;A[o+2]=spielzeit-ph/sp;}   // Phase bleibt stetig
+    return dur;
+  }
+  A[o+4]=A[o];A[o+5]=A[o+1];A[o+6]=A[o+2];A[o+7]=A[o+3];A[o+9]=A[o+8];
+  A[o]=c.row;A[o+1]=c.len;A[o+3]=sp;A[o+8]=c.loop?1:0;
+  A[o+2]=spielzeit-(c.loop?Math.random()*c.len/30/sp:0);
+  A[o+10]=spielzeit;sCur[id]=ci;
+  return dur;
 }
 const gone=u=>u.state==='geflohen'||u.state==='aufgerieben';
 const aktiv=u=>!gone(u)&&u.state!=='flieht';
+function slotFrei(u,id){   // Hintermann der Spalte rückt nach
+  const slot=sSlot[id];if(u.occ[slot]!==id)return;
+  const c=slot%BREIT;
+  for(let r=(slot/BREIT)|0;r<TIEF-1;r++){const s1=r*BREIT+c,s2=(r+1)*BREIT+c;u.occ[s1]=u.occ[s2];if(u.occ[s1]>=0)sSlot[u.occ[s1]]=s1;u.occ[s2]=-1;}
+  u.occ[(TIEF-1)*BREIT+c]=-1;
+}
 
 /* ====================================================================================================
-   4  KAMPFREGELN
+   4  KAMPFREGELN  (feste Schritte 20 Hz; Verluste nur aus Zweikämpfen)
    ==================================================================================================== */
 function flankF(b,a){   // Angriff von Einheit a auf b: Front 1, Seite 1,5, Rücken 2
   const d=Math.abs(wrap(Math.atan2(a.cx-b.cx,a.cz-b.cz)-b.f));
   return d<1.05?1:d<2.35?1.5:2;
 }
-function toeten(b,aU,flank){
-  // Kämpfer von b aus dem Kontakt zu aU bevorzugen, sonst nächste lebende Figur
-  let pick=-1,n=0;
-  for(let s=0;s<PRO;s++){const id=b.occ[s];if(id<0)continue;
-    if(sFoe[id]>=0&&sUnit[sFoe[id]]===aU.i){n++;if(Math.random()*n<1)pick=id;}}
-  if(pick<0){let best=1e9;
-    for(let s=0;s<PRO;s++){const id=b.occ[s];if(id<0)continue;const d=(sX[id]-aU.cx)**2+(sZ[id]-aU.cz)**2;if(d<best){best=d;pick=id;}}}
-  if(pick<0)return;
-  // von vorn getroffen -> fällt nach hinten
-  const fo=sFoe[pick]>=0&&sState[sFoe[pick]]<2?sFoe[pick]:-1;
-  const tx=fo>=0?sX[fo]-sX[pick]:aU.cx-sX[pick],tz=fo>=0?sZ[fo]-sZ[pick]:aU.cz-sZ[pick];
-  sDeath[pick]=(Math.sin(sR[pick])*tx+Math.cos(sR[pick])*tz)>=0?1:0;
-  sState[pick]=2;sMov[pick]=0;setClip(pick,'treffer');
-  sTimer[pick]=KIT[sKit[pick]].clip.treffer.len/30/aSpd[pick];
-  // Lücke: Hintermann der Spalte rückt nach
-  const slot=sSlot[pick],c=slot%BREIT;
-  for(let r=Math.floor(slot/BREIT);r<TIEF-1;r++){const s1=r*BREIT+c,s2=(r+1)*BREIT+c;b.occ[s1]=b.occ[s2];if(b.occ[s1]>=0)sSlot[b.occ[s1]]=s1;b.occ[s2]=-1;}
-  b.strength--;gefallen[b.side]++;
-  b.morale-=0.6*flank;   // je Gefallenem (30.10.: 1,2 brach zu schnell)
-  if(b.strength<=0){b.strength=0;b.state='aufgerieben';}
+function hashBauen(){
+  for(let i=0;i<N;i++){const c=sCell[i];if(c>=0){cHead[c]=-1;sCell[i]=-1;}}
+  for(let i=0;i<N;i++){
+    if(sSt[i]===S_WEG)continue;
+    let ix=((sX[i]-GX0)/ZELLE)|0,iz=((sZ[i]-GZ0)/ZELLE)|0;
+    ix=ix<0?0:ix>=GW?GW-1:ix;iz=iz<0?0:iz>=GH?GH-1:iz;
+    const c=iz*GW+ix;sNext[i]=cHead[c];cHead[c]=i;sCell[i]=c;
+  }
 }
 function floh(u){
   if(u.state==='flieht'||gone(u))return;
-  u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;
-  for(const v of U)if(v.side===u.side&&v!==u&&!gone(v)&&Math.hypot(v.cx-u.cx,v.cz-u.cz)<70)v.morale-=4;   // fliehende Nachbarn (30.10.: 8 zu stark)
+  u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;u.kT=0;
+  const e=naechster(u,true);let dx=0,dz=u.side===0?-1:1;
+  if(e){dx=u.cx-e.cx;dz=u.cz-e.cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;}
+  u.fx=dx;u.fz=dz;u.fAng=Math.atan2(dx,dz);
+  for(let s=0;s<PRO;s++){const id=u.occ[s];if(id<0||sSt[id]>S_KAMPF)continue;
+    sSt[id]=S_FLIEH;sFoe[id]=-1;sAct[id]=0;sKX[id]=sKZ[id]=0;sDelay[id]=Math.random()*.7;
+    sFOff[id]=(Math.random()-.5)*.87;sFSp[id]=.9+Math.random()*.25;sFA[id]=u.fAng+sFOff[id];zaehler.fliehende++;}
+  // Nachbarflucht nur, wenn die Nachbareinheit selbst schon Verluste hat oder bedrängt ist
+  for(const v of U)if(v.side===u.side&&v!==u&&!gone(v)&&v.state!=='flieht'&&(v.strength<PRO||v.engaged)&&Math.hypot(v.cx-u.cx,v.cz-u.cz)<70)v.morale-=4;
   if(sel===u.i)uiAuswahl();
 }
-function weg(u){   // Flucht aus dem Feld
-  u.state='geflohen';u.fled=u.strength;
-  for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sState[id]=4;u.occ[s]=-1;}}
+function soldatWeg(i){   // Flüchtling verlässt das Feld
+  const u=U[sUnit[i]];sSt[i]=S_WEG;slotFrei(u,i);u.strength--;u.fled++;
+  if(u.strength<=0){u.strength=0;u.state='geflohen';}
+}
+function beginEngage(u){
+  let foe=null,bd=1e9;
+  for(const v of U){if(v.side===u.side||gone(v))continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;foe=v;}}
+  if(u.runT>0&&foe){u.charge=2;foe.morale-=3+(u.def.ans>1.6?4:0);}   // Ansturm
+  for(let s=0;s<PRO;s++){const id=u.occ[s];if(id<0||sSt[id]!==S_FORM)continue;
+    sSt[id]=S_KAMPF;sDelay[id]=Math.random()*.3;sRet[id]=Math.random()*.2;sPX[id]=NOGOAL;}
+}
+function endEngage(u){
+  for(let s=0;s<PRO;s++){const id=u.occ[s];if(id<0||sSt[id]!==S_KAMPF)continue;
+    sSt[id]=S_FORM;sFoe[id]=-1;sMov[id]=1;sDelay[id]=Math.random()*.4;}
+}
+function suche(i){   // Gegner für Soldat i; setzt sFoe oder das Drängel-Ziel sPX/sPZ
+  const side=sSide[i],cx=((sX[i]-GX0)/ZELLE)|0,cz=((sZ[i]-GZ0)/ZELLE)|0;
+  let best=-1,bs=1e12,near=-1,nd=1e12;
+  const a=sAtt[i];   // bevorzugt der, der mich angreift -> echte Paare
+  if(a>=0&&sSt[a]===S_KAMPF&&sFoe[a]===i&&sNAtt[a]<MAXANG){const dx=sX[a]-sX[i],dz=sZ[a]-sZ[i];if(dx*dx+dz*dz<64)best=a;}
+  for(let pass=0;pass<2&&best<0;pass++){
+    const R=pass?SUCH2:SUCH1,g0=Math.max(0,cx-R),g1=Math.min(GW-1,cx+R),h0=Math.max(0,cz-R),h1=Math.min(GH-1,cz+R);
+    for(let gz=h0;gz<=h1;gz++)for(let gx=g0;gx<=g1;gx++){
+      for(let j=cHead[gz*GW+gx];j>=0;j=sNext[j]){
+        if(sSide[j]===side||sSt[j]>S_FLIEH)continue;
+        const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],d2=dx*dx+dz*dz;
+        if(d2<nd){nd=d2;near=j;}
+        if(sNAtt[j]>=MAXANG)continue;
+        const sc=d2+sNAtt[j]*6+(sSt[j]===S_FLIEH?40:0);
+        if(sc<bs){bs=sc;best=j;}
+      }
+    }
+  }
+  if(best>=0){sFoe[i]=best;sNAtt[best]++;sAtt[best]=i;sPX[i]=NOGOAL;return;}
+  sFoe[i]=-1;
+  if(near>=0){sPX[i]=sX[near];sPZ[i]=sZ[near];}
+  else{const e=naechster(U[sUnit[i]],false)||naechster(U[sUnit[i]],true);if(e){sPX[i]=e.mx;sPZ[i]=e.mz;}else sPX[i]=NOGOAL;}
+}
+function startSwing(i,f){
+  const K=KITS[sKit[i]];let ci,dm=1;const r=Math.random();
+  if(K.speer){if(r<.9){ci=C.stoss_speer;dm=1.2;}else{ci=C.schild_stoss;dm=.5;}}
+  else if(r<.35){ci=C.schlag_a;dm=1;}else if(r<.6){ci=C.schlag_b;dm=1.5;}else if(r<.85){ci=C.schlag_c;dm=1.1;}else{ci=C.schild_stoss;dm=.5;}
+  const dur=setClip(i,ci,sJit[i]*(1-.15*sFat[i]),true);
+  sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.5;sReaT[i]=Math.max(0,dur*.5-.15);sPh[i]=0;sDmg[i]=dm;sTgt[i]=f;sOut[i]=0;
+  sPer[i]=(1.1+Math.random()*.7)*(1+.4*sFat[i]);
+  sFat[i]=Math.min(1,sFat[i]+.02);zaehler.schlaege++;
+}
+/* Ergebnis des Schlags festlegen (kurz vor dem Treffer) und Verteidiger reagieren lassen */
+function reaktion(i){
+  const j=sTgt[i];
+  if(j<0||sSt[j]>S_FLIEH){sOut[i]=0;return;}
+  const A=KITS[sKit[i]],D=KITS[sKit[j]],UA=U[sUnit[i]];
+  const atkE=A.atk*(1-.4*sFat[i])*(UA.charge>0?1+(A.ans-1)*.7:1),defE=D.def*(1-.4*sFat[j]),ratio=atkE/defE;
+  const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
+  const fliehend=sSt[j]===S_FLIEH,steif=sAct[j]===A_TREFFER,busy=sAct[j]===A_SCHLAG;
+  const pP=(ang<1.15&&!fliehend&&!steif)?Math.max(.08,Math.min(.65,.42/ratio))*(busy?.5:1):0;     // Parade nur von vorn
+  const pD=(ang<2.4&&!fliehend&&!steif)?Math.max(.02,Math.min(.3,.16/ratio*(1-sFat[j])))*(busy?.6:1):0;   // Ausweichen nicht von hinten
+  const r=Math.random();
+  const out=r<pP?1:r<pP+pD?2:3;sOut[i]=out;
+  if(out===3)return;
+  if(busy)sCool[j]=.3;
+  let ci;
+  if(out===1)ci=D.speer?C.abwehr_schild:(Math.random()<.5?C.parade:C.abwehr_schild);else ci=C.ausweichen;
+  const dur=setClip(j,ci,sJit[j]*(1-.15*sFat[j]),true);
+  sAct[j]=A_REAKT;sActT[j]=dur;sFace[j]=i;sKX[j]=sKZ[j]=0;
+  if(out===2){const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],d=Math.hypot(dx,dz)+1e-6;sKX[j]=dx/d*1.8;sKZ[j]=dz/d*1.8;}
+}
+function wirkung(i){
+  const j=sTgt[i];if(j<0||sSt[j]>S_FLIEH)return;
+  const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],r=(KITS[sKit[i]].speer?2.0:1.6)+.8;
+  if(dx*dx+dz*dz>r*r)return;   // Ziel weggetreten: Fehlschlag
+  let out=sOut[i];
+  if(out!==3&&sAct[j]===A_TREFFER)out=3;   // inzwischen von anderem getroffen: keine Abwehr mehr
+  if(out===1){zaehler.parade++;sCool[i]+=.12;return;}
+  if(out===2){zaehler.ausweich++;return;}
+  if(out===0)return;
+  trefferWirkung(i,j);
+}
+function trefferWirkung(i,j){
+  const UA=U[sUnit[i]],UD=U[sUnit[j]];
+  const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
+  const fm=ang<1.15?1:ang<2.4?1.5:2;
+  const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1);
+  sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01);
+  if(fm>1)UD.morale-=.4*(fm-1);
+  if(sHP[j]<=0){sterbe(j,i,fm);return;}
+  if(sSt[j]===S_FLIEH)return;   // Fliehende werden nicht umgeworfen
+  const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i],d=Math.hypot(dx,dz)+1e-6;
+  let kb=1.1,hold=0;
+  if(sDmg[i]<.9||(UA.charge>0&&Math.random()<.4)){hold=1.2;kb=2.4;zaehler.umgeworfen++;}   // Schildstoß / Ansturm wirft um
+  const dur=setClip(j,C.treffer,sJit[j],true);
+  if(sAct[j]===A_SCHLAG)sCool[j]=.3;
+  sAct[j]=A_TREFFER;sActT[j]=Math.max(dur,hold);sFace[j]=i;sKX[j]=sKZ[j]=0;
+  sVX[j]+=dx/d*kb;sVZ[j]+=dz/d*kb;
+}
+function sterbe(j,i,fm){
+  const u=U[sUnit[j]],dx=sX[i]-sX[j],dz=sZ[i]-sZ[j];
+  const von_vorn=(Math.sin(sR[j])*dx+Math.cos(sR[j])*dz)>=0;   // Schlag von vorn -> fällt nach hinten
+  sDeath[j]=von_vorn?1:0;
+  sSt[j]=S_STIRBT;sAct[j]=0;sFoe[j]=-1;sVX[j]=sVZ[j]=0;
+  sActT[j]=setClip(j,von_vorn?C.sterben_hinten:C.sterben_vorn,1,true);
+  slotFrei(u,j);u.strength--;gefallen[u.side]++;zaehler.kills++;
+  u.morale-=0.6*fm;                       // je Gefallenem (30.10.: 1,2 brach zu schnell)
+  const ua=U[sUnit[i]];ua.morale=Math.min(ua.def.mor,ua.morale+.25);
+  if(u.strength<=0){u.strength=0;u.state=u.fled>0?'geflohen':'aufgerieben';}
+}
+function rueckweichen(i,f){
+  const dx=sX[i]-sX[f],dz=sZ[i]-sZ[f],d=Math.hypot(dx,dz)+1e-6;
+  const dur=setClip(i,C.ausweichen,sJit[i],true);
+  sAct[i]=A_REAKT;sActT[i]=dur;sFace[i]=f;sKX[i]=dx/d*1.6;sKZ[i]=dz/d*1.6;zaehler.rueckweich++;
 }
 
-/* Engagement + Verluste + Moral, alle ~0.1 s */
-function scan(dt){
-  for(let i=0;i<N;i++){sFoe[i]=-1;sFoeD[i]=KONTAKT2;}
-  for(const u of U){u.contacts.fill(0);u.engaged=false;}
-  for(let a=0;a<NU;a++){const A=U[a];if(gone(A))continue;
-    for(let b=a+1;b<NU;b++){const B=U[b];if(gone(B)||B.side===A.side)continue;
-      if(Math.hypot(A.cx-B.cx,A.cz-B.cz)>24)continue;
-      for(let sa=0;sa<PRO;sa++){const i=A.occ[sa];if(i<0)continue;
-        for(let sb=0;sb<PRO;sb++){const j=B.occ[sb];if(j<0)continue;
-          const dx=sX[i]-sX[j],dz=sZ[i]-sZ[j],d2=dx*dx+dz*dz;
-          if(d2<sFoeD[i]){sFoeD[i]=d2;sFoe[i]=j;}
-          if(d2<sFoeD[j]){sFoeD[j]=d2;sFoe[j]=i;}
-        }}
-    }}
-  for(let i=0;i<N;i++){const j=sFoe[i];if(j<0)continue;
-    if(sState[i]>=2||sState[j]>=2){sFoe[i]=-1;continue;}
-    const ua=U[sUnit[i]],ub=U[sUnit[j]];
-    if(ua.state!=='flieht')ua.contacts[ub.i]++;   // Fliehende schlagen nicht zurück
-    ua.engaged=true;ub.engaged=true;
+function kampfTick(dt){
+  // --- Einheitswerte, Nähe
+  for(const u of U){u.kontakt=false;u.nahF=false;u.nF=0;u.fatS=0;u.nL=0;u.kaempfend=0;u.cnt.fill(0);}
+  for(const u of U){if(gone(u)||u.state==='flieht')continue;
+    for(const v of U){if(v.side===u.side||gone(v))continue;if(Math.hypot(u.mx-v.mx,u.mz-v.mz)<55){u.nahF=true;break;}}}
+  // --- Kontakt (Raster) : Feind näher als 6 m
+  for(let i=0;i<N;i++){
+    if(sSt[i]>S_KAMPF)continue;
+    const u=U[sUnit[i]];if(u.kontakt||!u.nahF||u.state==='flieht'||u.sperre>0)continue;
+    const side=sSide[i],cx=((sX[i]-GX0)/ZELLE)|0,cz=((sZ[i]-GZ0)/ZELLE)|0;
+    const g0=Math.max(0,cx-3),g1=Math.min(GW-1,cx+3),h0=Math.max(0,cz-3),h1=Math.min(GH-1,cz+3);
+    found:for(let gz=h0;gz<=h1;gz++)for(let gx=g0;gx<=g1;gx++){
+      for(let j=cHead[gz*GW+gx];j>=0;j=sNext[j]){
+        if(sSide[j]===side||sSt[j]>S_FLIEH)continue;
+        const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i];
+        if(dx*dx+dz*dz<KONT_R2){u.kontakt=true;const v=U[sUnit[j]];if(v.state!=='flieht'&&v.sperre<=0)v.kontakt=true;break found;}
+      }
+    }
   }
   for(const u of U){
-    let best=0;u.foeU=-1;for(let k=0;k<NU;k++)if(u.contacts[k]>best){best=u.contacts[k];u.foeU=k;}
-    if(u.foeU<0){for(let k=0;k<NU;k++)if(U[k].contacts[u.i]>best){best=U[k].contacts[u.i];u.foeU=k;}}
-    if(u.engaged&&!u.wasEng&&u.runT>0&&u.state!=='flieht'){   // Anlauf: Ansturm
-      u.charge=3;const f=U[u.foeU];if(f)f.morale-=3+(u.def.ans>1.6?4:0);
-    }
-    u.wasEng=u.engaged;
+    if(gone(u))continue;
+    if(u.sperre>0)u.sperre=Math.max(0,u.sperre-dt);
+    if(u.state==='flieht')continue;
+    if(u.kontakt)u.kT=KONT_HALT;else u.kT-=dt;
+    const eng=u.kT>0;
+    if(eng&&!u.engaged)beginEngage(u);else if(!eng&&u.engaged)endEngage(u);
+    u.engaged=eng;
     if(u.charge>0)u.charge=Math.max(0,u.charge-dt);
   }
-  // Verluste
-  for(const B of U){
-    if(gone(B))continue;
-    let rate=0,fl=1,top=-1,topR=0;
-    for(const A of U){
-      const n=A.contacts[B.i];if(n<=0)continue;
-      const f=flankF(B,A),r=GRUNDRATE*n*(A.def.atk/B.def.def)*f*(A.charge>0?A.def.ans:1);
-      rate+=r;if(r>topR){topR=r;top=A.i;}if(f>fl)fl=f;
+  // --- Ziele prüfen, Angreifer zählen
+  sNAtt.fill(0);
+  for(let i=0;i<N;i++){
+    const j=sFoe[i];if(j<0)continue;
+    if(sSt[i]!==S_KAMPF||sSt[j]>S_FLIEH){sFoe[i]=-1;continue;}
+    const dx=sX[j]-sX[i],dz=sZ[j]-sZ[i];
+    if(dx*dx+dz*dz>196){sFoe[i]=-1;continue;}
+    sNAtt[j]++;sAtt[j]=i;
+  }
+  // --- Soldaten
+  for(let i=0;i<N;i++){
+    const st=sSt[i];if(st>S_FLIEH)continue;
+    const u=U[sUnit[i]];
+    u.nL++;u.fatS+=sFat[i];
+    if(sCool[i]>0)sCool[i]-=dt;
+    sRet[i]-=dt;sBackT[i]-=dt;
+    const act=sAct[i];
+    if(act===A_SCHLAG){
+      sAT[i]+=dt;
+      if(sPh[i]===0&&sAT[i]>=sReaT[i]){sPh[i]=1;reaktion(i);}
+      if(sPh[i]===1&&sAT[i]>=sHitT[i]){sPh[i]=2;wirkung(i);}
+      if(sAct[i]===A_SCHLAG&&sAT[i]>=sDur[i]){sAct[i]=A_NIX;sCool[i]=Math.max(.05,sPer[i]-sDur[i]);}
+    }else if(act!==A_NIX){
+      sActT[i]-=dt;if(sActT[i]<=0){sAct[i]=A_NIX;sKX[i]=sKZ[i]=0;}
     }
-    B.flank=fl;
-    if(rate>0){
-      B.acc+=rate*dt;
-      while(B.acc>=1&&B.strength>0){B.acc-=1;toeten(B,U[top],fl);}
-      if(fl>1)B.morale-=1.5*dt;
-    }else if(B.state!=='flieht'){B.morale=Math.min(B.def.mor,B.morale+1.2*dt);}
-    if(B.morale<0)B.morale=0;
-    if(!gone(B)&&B.state!=='flieht'&&B.morale<FLIEH_MORAL)floh(B);
+    if(sSt[i]!==S_KAMPF)continue;
+    let f=sFoe[i];
+    if(f>=0){u.nF++;const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i];if(dx*dx+dz*dz<4.5)u.kaempfend++;}
+    if(sAct[i]!==A_NIX||sDelay[i]>0)continue;
+    if(f>=0&&sRet[i]<=0){const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i];if(dx*dx+dz*dz>12.25){sNAtt[f]--;sFoe[i]=-1;f=-1;}}
+    if(f<0&&sRet[i]<=0){suche(i);f=sFoe[i];sRet[i]=.2+Math.random()*.2;}
+    if(f<0)continue;
+    const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i],d2=dx*dx+dz*dz,K=KITS[sKit[i]],rg=K.speer?2.0:1.6;
+    if(sCool[i]<=0&&d2<rg*rg){startSwing(i,f);continue;}
+    if(u.pr>.12&&sBackT[i]<=0&&d2<4){   // unterlegene Seite weicht Schritt für Schritt zurück
+      sBackT[i]=(1.6+Math.random()*2.4)/(.6+u.pr*1.5);rueckweichen(i,f);
+    }
   }
-  // Fluchtrichtung weg vom nächsten Feind
-  for(const u of U){if(u.state!=='flieht')continue;
-    const e=naechster(u,true);let dx=0,dz=u.side===0?-1:1;
+  // --- Einheiten: Druck, Moral
+  for(const u of U){
+    if(gone(u))continue;
+    u.lebend=u.strength;u.muede=u.nL?u.fatS/u.nL:0;
+  }
+  for(let i=0;i<N;i++){const j=sFoe[i];if(j>=0&&sSt[i]===S_KAMPF)U[sUnit[i]].cnt[sUnit[j]]++;}
+  for(const u of U){
+    if(gone(u))continue;
+    let best=0;u.foeU=-1;for(let k=0;k<NU;k++)if(u.cnt[k]>best){best=u.cnt[k];u.foeU=k;}
+    if(u.foeU<0){for(let k=0;k<NU;k++)if(U[k].cnt[u.i]>best){best=U[k].cnt[u.i];u.foeU=k;}}
+    u.pr=0;u.flank=1;
+    for(let k=0;k<NU;k++)if(U[k].cnt[u.i]>0&&!gone(U[k])){const f=flankF(u,U[k]);if(f>u.flank)u.flank=f;}
+    if(u.state==='flieht')continue;
+    if(u.engaged&&u.foeU>=0){
+      const F=U[u.foeU];
+      const Su=(u.nF+.25*(u.strength-u.nF))*(.4+u.morale/166.7),Sf=(F.nF+.25*(F.strength-F.nF))*(.4+F.morale/166.7);
+      u.pr=Sf>Su?Math.min(1,(Sf-Su)/Math.max(Sf,1)):0;
+      if(u.pr>.3)u.morale-=.35*u.pr*dt;                 // Übermacht im Zweikampf
+      if(u.flank>1)u.morale-=1.5*dt;                     // Flanke / Rücken
+    }else if(!u.engaged){u.morale=Math.min(u.def.mor,u.morale+1.2*dt);}
+    if(u.morale<0)u.morale=0;
+    if(u.morale<FLIEH_MORAL&&u.strength>0)floh(u);
+  }
+  // --- Fluchtrichtung weg vom nächsten Feind (je Soldat gestreut)
+  for(const u of U){if(u.state!=='flieht'||gone(u))continue;
+    const e=naechster(u,true);let dx=u.fx,dz=u.fz;
     if(e){dx=u.cx-e.cx;dz=u.cz-e.cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;}
-    u.fx=dx;u.fz=dz;
-  }
-  // Ende?
+    u.fx=dx;u.fz=dz;u.fAng=Math.atan2(dx,dz);}
+  for(let i=0;i<N;i++)if(sSt[i]===S_FLIEH)sFA[i]=U[sUnit[i]].fAng+sFOff[i];
+  // --- Ende?
   if(phase==='schlacht'){
     const r=U.some(u=>u.side===0&&aktiv(u)),k=U.some(u=>u.side===1&&aktiv(u));
     if(!k)ende('sieg');else if(!r)ende('niederlage');
@@ -371,7 +571,12 @@ function scan(dt){
 function ende(was){
   phase='ende';ergebnis=was;
   const gew=was==='sieg'?0:1;
-  for(const u of U)if(u.side===gew)for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sState[id]=0;sCur[id]=-1;setClip(id,'jubeln');aLoop[id]=1;}}
+  for(let i=0;i<N;i++){
+    const st=sSt[i];if(st!==S_FORM&&st!==S_KAMPF)continue;
+    sSt[i]=S_FORM;sFoe[i]=-1;sAct[i]=A_NIX;sKX[i]=sKZ[i]=0;sVX[i]=sVZ[i]=0;
+    if(sSide[i]===gew){sJub[i]=1;setClip(i,C.jubeln,sJit[i],true);}
+    else{sJub[i]=2;setClip(i,C.stehen_bereit,sJit[i],true);}
+  }
   uiEnde();
 }
 
@@ -410,24 +615,27 @@ function ki(u){
 }
 
 /* ====================================================================================================
-   Bewegung (Einheiten + Figuren)
+   Bewegung: Einheitsanker (Ziel der Formation) und jeder Soldat einzeln, jedes Bild
    ==================================================================================================== */
 function bewegen(dt){
   for(const u of U){
     if(gone(u))continue;
     if(u.runT>0)u.runT-=dt;
     if(u.state==='flieht'){
-      const h=Math.atan2(u.fx,u.fz),sp=u.def.run;
-      u.f+=Math.max(-6*dt,Math.min(6*dt,wrap(h-u.f)));
-      u.cx+=u.fx*sp*dt;u.cz+=u.fz*sp*dt;u.curSpeed=sp;
-      if(Math.abs(u.cx)>FELD_X+14||Math.abs(u.cz)>FELD_Z+14)weg(u);
+      if(u.sn>0){u.cx=u.mx;u.cz=u.mz;}
+      u.f+=Math.max(-6*dt,Math.min(6*dt,wrap(u.fAng-u.f)));u.curSpeed=u.def.run;
       continue;
     }
     if(phase==='ende'){u.curSpeed=0;continue;}
     if(u.atkT>=0){const T=U[u.atkT];
       if(gone(T)){u.atkT=-1;u.hasDest=false;}else{u.destX=T.cx;u.destZ=T.cz;u.hasDest=true;}}
+    if(u.engaged){   // Anker folgt den Kämpfenden
+      if(u.sn>0){const k=Math.min(1,dt*1.5);u.cx+=(u.mx-u.cx)*k;u.cz+=(u.mz-u.cz)*k;}
+      const F=u.foeU>=0?U[u.foeU]:null;
+      if(F)u.f+=Math.max(-2*dt,Math.min(2*dt,wrap(Math.atan2(F.cx-u.cx,F.cz-u.cz)-u.f)));
+      u.curSpeed=0;u.loose=Math.max(0,u.loose-dt*.9);u.state='kampf';continue;
+    }
     let moving=false;
-    if(u.engaged&&u.atkT>=0){u.hasDest=false;}      // am Feind angekommen
     if(u.hasDest){
       const dx=u.destX-u.cx,dz=u.destZ-u.cz,d=Math.hypot(dx,dz);
       if(d<.6&&u.atkT<0)u.hasDest=false;
@@ -435,64 +643,120 @@ function bewegen(dt){
         const h=Math.atan2(dx,dz),df=wrap(h-u.f);
         u.f+=Math.max(-2.5*dt,Math.min(2.5*dt,df));
         let sp=u.run?u.def.run:u.def.walk;if(Math.abs(df)>1)sp*=.35;
+        if(u.sn>0){const lag=Math.hypot(u.cx-u.mx,u.cz-u.mz);sp*=Math.max(.25,Math.min(1,1-(lag-3)/6));}   // wartet auf die Soldaten
         const st=Math.min(sp*dt,d);u.cx+=dx/d*st;u.cz+=dz/d*st;u.curSpeed=st/dt;moving=true;
         if(u.run&&u.curSpeed>2)u.runT=.7;
       }
     }
-    if(!moving){
-      u.curSpeed=0;
-      if(u.engaged&&u.foeU>=0){const F=U[u.foeU];
-        u.f+=Math.max(-2*dt,Math.min(2*dt,wrap(Math.atan2(F.cx-u.cx,F.cz-u.cz)-u.f)));}
-    }
+    if(!moving)u.curSpeed=0;
+    u.loose+=((moving?1:0)-u.loose)*Math.min(1,dt*(moving?.6:.9));
     u.cx=Math.max(-FELD_X,Math.min(FELD_X,u.cx));u.cz=Math.max(-FELD_Z,Math.min(FELD_Z,u.cz));
-    u.state=u.engaged?'kampf':moving?(u.run?'lauf':'marsch'):'steht';
+    u.state=moving?(u.run?'lauf':'marsch'):'steht';
   }
 }
-const AKT_SCHWERT=['schlag_a','schlag_b','abwehr_schild','schlag_a'],AKT_SPEER=['stoss_speer','stoss_speer','abwehr_schild'];
 function figuren(dt){
+  hashBauen();
+  for(let k=0;k<NU;k++){const u=U[k];u.ax=0;u.az=0;u.an=0;}
   for(let i=0;i<N;i++){
-    const st=sState[i];if(st>=3)continue;
-    if(st===2){
-      sTimer[i]-=dt;
-      if(sTimer[i]<=0){sState[i]=3;setClip(i,sDeath[i]?'sterben_hinten':'sterben_vorn');}
-      continue;
+    const st=sSt[i];
+    if(st>=S_STIRBT){if(st===S_STIRBT){sActT[i]-=dt;if(sActT[i]<=0)sSt[i]=S_TOT;}continue;}
+    const u=U[sUnit[i]],K=u.def,act=sAct[i];
+    let dvx=0,dvz=0,am=BESCHL,face=0,hf=false;
+    sDelay[i]-=dt;
+    if(sJub[i]){am=8;hf=true;face=u.f+sJR[i];}
+    else if(st===S_FLIEH){
+      if(sDelay[i]<=0){const sp=K.run*sJit[i]*sFSp[i]*(1-.2*sFat[i]);dvx=Math.sin(sFA[i])*sp;dvz=Math.cos(sFA[i])*sp;am=6;hf=true;face=sFA[i];}
+      else am=8;
     }
-    const u=U[sUnit[i]];
-    if(st===1){sTimer[i]-=dt;if(sTimer[i]<=0){sState[i]=0;sCool[i]=.05+Math.random()*.5;setClip(i,'stehen_bereit');}}
-    // Weg zum Platz
-    slotPos(u,sSlot[i],i);
-    const dx=_tx-sX[i],dz=_tz-sZ[i],d=Math.hypot(dx,dz),fl=u.state==='flieht';
-    if(sMov[i]){if(d<.12)sMov[i]=0;}else if(d>.35||(fl&&d>.05))sMov[i]=1;
-    let rot=u.f+sJR[i];
-    if(sMov[i]){
-      if(sState[i]===1){sState[i]=0;}
-      let v=Math.max(u.curSpeed,u.def.walk)*(d>2.5?1.5:1.08)+(d>.5?.3:0);
-      const stp=Math.min(v*dt,d);sX[i]+=dx/d*stp;sZ[i]+=dz/d*stp;
-      setClip(i,fl?'fliehen':(v>2.7?'laufen':'gehen'));
-      if(d>1.5&&!fl)rot=Math.atan2(dx,dz);
-    }else if(st!==1||sState[i]===0){
-      const j=sFoe[i];
-      if(!fl&&j>=0&&sState[j]<2){
-        rot=Math.atan2(sX[j]-sX[i],sZ[j]-sZ[i]);
-        sCool[i]-=dt;
-        if(sCool[i]<=0&&sState[i]===0&&phase!=='ende'){
-          const L=KITS[sKit[i]].speer?AKT_SPEER:AKT_SCHWERT,nm=L[(Math.random()*L.length)|0];
-          sCur[i]=-1;setClip(i,nm);sState[i]=1;sTimer[i]=KIT[sKit[i]].clip[nm].len/30/aSpd[i];
+    else if(act!==A_NIX){
+      am=7;
+      if(act===A_REAKT&&(sKX[i]!==0||sKZ[i]!==0)){dvx=sKX[i];dvz=sKZ[i];}
+      const f=act===A_SCHLAG?sTgt[i]:sFace[i];
+      if(f>=0&&sSt[f]<=S_FLIEH){face=Math.atan2(sX[f]-sX[i],sZ[f]-sZ[i]);hf=true;}
+    }
+    else if(st===S_KAMPF){
+      const f=sFoe[i];
+      if(sDelay[i]>0){hf=true;face=u.f;}
+      else if(f>=0){
+        const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i],d=Math.sqrt(dx*dx+dz*dz)+1e-6,reach=K.speer?1.45:1.1;
+        face=Math.atan2(dx,dz);hf=true;
+        if(d>reach+.3){
+          let sp=(sSt[f]===S_FLIEH||d>5)?K.run:K.walk*1.3;sp*=sJit[i]*(1-.25*sFat[i]);
+          const ds=Math.min(sp,(d-reach)*2.5+.2);dvx=dx/d*ds;dvz=dz/d*ds;
+        }else if(d<reach-.25){dvx=-dx/d*.5;dvz=-dz/d*.5;}
+      }else if(sPX[i]!==NOGOAL){   // keinen Gegner: nach vorn drängen
+        const dx=sPX[i]-sX[i],dz=sPZ[i]-sZ[i],d=Math.sqrt(dx*dx+dz*dz)+1e-6;
+        face=Math.atan2(dx,dz);hf=true;
+        if(d>1.3){const ds=Math.min(K.walk*1.3*sJit[i]*(1-.25*sFat[i]),d*1.5);dvx=dx/d*ds;dvz=dz/d*ds;}
+      }else{hf=true;face=u.f;}
+    }
+    else{   // Formation: Platz ansteuern
+      slotPos(u,sSlot[i],i);
+      const dx=_tx-sX[i],dz=_tz-sZ[i],d=Math.sqrt(dx*dx+dz*dz)+1e-6;
+      if(sMov[i]){if(d<.12)sMov[i]=0;}else if(d>.45){sMov[i]=1;sDelay[i]=Math.random()*.4;}
+      if(sMov[i]&&sDelay[i]<=0){
+        const base=(u.hasDest&&u.run)||u.runT>0?K.run:K.walk;
+        const vmax=base*sJit[i]*(1-.25*sFat[i])*(d>2.5?1.3:d>1?1.12:1);
+        const ds=Math.min(vmax,2.2*d+.15);dvx=dx/d*ds;dvz=dz/d*ds;
+        if(d>1.5){face=Math.atan2(dx,dz);hf=true;}else{face=u.f+sJR[i];hf=true;}
+      }else{face=u.f+sJR[i];hf=true;}
+    }
+    // Geschwindigkeit (Beschleunigung / Bremsen), Ort
+    const ax=dvx-sVX[i],az=dvz-sVZ[i],al=Math.sqrt(ax*ax+az*az);
+    const lim=((dvx*dvx+dvz*dvz)<(sVX[i]*sVX[i]+sVZ[i]*sVZ[i])?Math.max(am,BREMS):am)*dt;
+    if(al>lim){sVX[i]+=ax/al*lim;sVZ[i]+=az/al*lim;}else{sVX[i]=dvx;sVZ[i]=dvz;}
+    sX[i]+=sVX[i]*dt;sZ[i]+=sVZ[i]*dt;
+    const sp=Math.sqrt(sVX[i]*sVX[i]+sVZ[i]*sVZ[i]);
+    if(!hf&&sp>.5){face=Math.atan2(sVX[i],sVZ[i]);hf=true;}
+    if(hf){const df=wrap(face-sR[i]),mx=DREH*dt;sR[i]+=df>mx?mx:df<-mx?-mx:df;}
+    // Clip nach tatsächlicher Geschwindigkeit
+    if(act===A_NIX&&!sJub[i]){
+      if(st===S_FLIEH){
+        if(sDelay[i]>0)setClip(i,C.kampf_bereit,sJit[i]);else setClip(i,C.fliehen,Math.max(.7,Math.min(1.5,sp/(K.run*.9))));
+      }else{
+        const cur=sCur[i],laeuft=cur===C.gehen||cur===C.laufen;
+        if(sp>(laeuft?.12:.3)){
+          const lauf=sp>2.7||(cur===C.laufen&&sp>2.2);
+          setClip(i,lauf?C.laufen:C.gehen,Math.max(.55,Math.min(1.5,sp/(lauf?K.run:K.walk))));
+        }else setClip(i,st===S_KAMPF?C.kampf_bereit:C.stehen_bereit,sJit[i]);
+      }
+    }
+    // Ermüdung
+    let ft=sFat[i];
+    if(sp>2.7)ft+=.012*dt;else if(sp>.3)ft+=.002*dt;else if(st===S_KAMPF)ft+=.0025*dt;else if(st===S_FORM)ft-=.012*dt;
+    sFat[i]=ft<0?0:ft>1?1:ft;
+    // Abstand halten (Raster-Hash, nur Nachbarzellen)
+    {
+      const c=sCell[i],cx=c%GW,cz=(c/GW)|0,side=sSide[i];
+      const g0=cx>0?cx-1:0,g1=cx<GW-1?cx+1:GW-1,h0=cz>0?cz-1:0,h1=cz<GH-1?cz+1:GH-1;
+      for(let gz=h0;gz<=h1;gz++)for(let gx=g0;gx<=g1;gx++){
+        for(let j=cHead[gz*GW+gx];j>=0;j=sNext[j]){
+          if(j===i)continue;
+          let dx=sX[i]-sX[j],dz=sZ[i]-sZ[j],rr,k;
+          if(sSt[j]>=S_STIRBT){rr=SEP_L;k=.35;}else{rr=sSide[j]===side?SEP:SEP_F;k=.5;}
+          const d2=dx*dx+dz*dz;if(d2>=rr*rr)continue;
+          let d=Math.sqrt(d2);if(d<1e-4){dx=(i&1)?.01:-.01;dz=.005;d=.0112;}
+          const ov=(rr-d)*k/d;sX[i]+=dx*ov;sZ[i]+=dz*ov;
         }
       }
-      if(sState[i]===0&&phase!=='ende')setClip(i,'stehen_bereit');
-      else if(sState[i]===0&&phase==='ende'&&sCur[i]!==CLIPIX.jubeln)setClip(i,'stehen_bereit');
     }
-    if(sState[i]===1&&sFoe[i]>=0&&sState[sFoe[i]]<2)rot=Math.atan2(sX[sFoe[i]]-sX[i],sZ[sFoe[i]]-sZ[i]);
-    sR[i]+=Math.max(-5*dt,Math.min(5*dt,wrap(rot-sR[i])));
+    // Feldgrenzen / Flucht aus dem Feld
+    if(st===S_FLIEH){
+      if(Math.abs(sX[i])>FELD_X+6||Math.abs(sZ[i])>FELD_Z+6){soldatWeg(i);continue;}
+    }else{
+      if(sX[i]<-FELD_X+1.5)sX[i]=-FELD_X+1.5;else if(sX[i]>FELD_X-1.5)sX[i]=FELD_X-1.5;
+      if(sZ[i]<-FELD_Z+1.5)sZ[i]=-FELD_Z+1.5;else if(sZ[i]>FELD_Z-1.5)sZ[i]=FELD_Z-1.5;
+    }
+    u.ax+=sX[i];u.az+=sZ[i];u.an++;
   }
+  for(let k=0;k<NU;k++){const u=U[k];if(u.an>0){u.mx=u.ax/u.an;u.mz=u.az/u.an;u.sn=u.an;}else u.sn=0;}
 }
-let scanAcc=0,kiAcc=0;
+let tickAcc=0,kiAcc=0;
 function schritt(dt){
   spielzeit+=dt;
   if(phase==='schlacht'){
-    scanAcc+=dt;
-    if(scanAcc>=.1){const s=scanAcc;scanAcc=0;scan(s);}
+    tickAcc+=dt;
+    while(tickAcc>=TICK){tickAcc-=TICK;kampfTick(TICK);}
     kiAcc+=dt;
     if(kiAcc>=.5){kiAcc=0;for(const u of U)ki(u);}
   }
@@ -503,22 +767,23 @@ function schritt(dt){
 /* ====================================================================================================
    Darstellung der Figuren, Ringe, Fahnen
    ==================================================================================================== */
-const cnt=[0,0];
 function baueInstanzen(){
   const cx=camera.position.x,cz=camera.position.z,cy=camera.position.y;
   for(const k of KIT){k.n=[0,0];}
   for(let i=0;i<N;i++){
-    if(sState[i]===4)continue;
+    if(sSt[i]===S_WEG)continue;
     const K=KIT[sKit[i]];
     const dx=sX[i]-cx,dz=sZ[i]-cz,l=(dx*dx+dz*dz+cy*cy)<NAH*NAH?0:1;
     const m=K.im[l],k=K.n[l]++,M=m.instanceMatrix.array,o=k*16,c=Math.cos(sR[i]),s=Math.sin(sR[i]);
     M[o]=c;M[o+1]=0;M[o+2]=-s;M[o+3]=0;M[o+4]=0;M[o+5]=1;M[o+6]=0;M[o+7]=0;M[o+8]=s;M[o+9]=0;M[o+10]=c;M[o+11]=0;
     M[o+12]=sX[i];M[o+13]=0;M[o+14]=sZ[i];M[o+15]=1;
-    const A=m.geometry.attributes.aAnim.array,a=k*4;A[a]=aRow[i];A[a+1]=aLen[i];A[a+2]=aStart[i];A[a+3]=aSpd[i];
-    m.geometry.attributes.aLoop.array[k]=aLoop[i];
+    const g=m.geometry.attributes,A=g.aAnim.array,B=g.aAnimAlt.array,L=g.aLoop.array,a=k*4,q=k*3,w=i*12;
+    A[a]=sAn[w];A[a+1]=sAn[w+1];A[a+2]=sAn[w+2];A[a+3]=sAn[w+3];
+    B[a]=sAn[w+4];B[a+1]=sAn[w+5];B[a+2]=sAn[w+6];B[a+3]=sAn[w+7];
+    L[q]=sAn[w+8];L[q+1]=sAn[w+9];L[q+2]=sAn[w+10];
   }
-  for(const K of KIT)for(let l=0;l<2;l++){const m=K.im[l];m.count=K.n[l];m.instanceMatrix.needsUpdate=true;
-    m.geometry.attributes.aAnim.needsUpdate=true;m.geometry.attributes.aLoop.needsUpdate=true;}
+  for(const K of KIT)for(let l=0;l<2;l++){const m=K.im[l],g=m.geometry.attributes;m.count=K.n[l];m.instanceMatrix.needsUpdate=true;
+    g.aAnim.needsUpdate=true;g.aAnimAlt.needsUpdate=true;g.aLoop.needsUpdate=true;}
 }
 const FARBE=[0xb02a22,0x7a3fa0];
 const ringGeo=new THREE.RingGeometry(.9,1,56);ringGeo.rotateX(-PI/2);
@@ -557,7 +822,7 @@ function markerUpdate(t){
 let az=PI,el=.5,dist=85;const ziel=new THREE.Vector3(0,0,-38);
 function camSetzen(){
   ziel.x=Math.max(-FELD_X,Math.min(FELD_X,ziel.x));ziel.z=Math.max(-FELD_Z,Math.min(FELD_Z,ziel.z));
-  el=Math.max(.2,Math.min(1.38,el));dist=Math.max(14,Math.min(300,dist));
+  el=Math.max(.06,Math.min(1.38,el));dist=Math.max(5,Math.min(300,dist));   // nah heran für Zweikämpfe (30.10.)
   camera.position.set(ziel.x+dist*Math.sin(az)*Math.cos(el),ziel.y+dist*Math.sin(el),ziel.z+dist*Math.cos(az)*Math.cos(el));
   camera.lookAt(ziel);camera.updateMatrixWorld();
 }
@@ -646,7 +911,9 @@ function select(i){sel=i;uiAuswahl();}
 /* Befehle (auch für Tests) */
 function befehl(i,x,z,laufen){
   const u=U[i];if(!u||gone(u)||u.state==='flieht')return false;
-  u.atkT=-1;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));u.hasDest=true;u.run=!!laufen;return true;
+  u.atkT=-1;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));u.hasDest=true;u.run=!!laufen;
+  if(u.engaged){u.sperre=2.5;u.kT=0;}   // Marschbefehl im Gefecht: löst sich vom Feind
+  return true;
 }
 function angriff(i,t){
   const u=U[i],T=U[t];if(!u||!T||T.side===u.side||gone(u)||gone(T)||u.state==='flieht')return false;
@@ -662,8 +929,8 @@ function uiBauen(){
   U.forEach(u=>{
     if(u.side===0){
       const d=document.createElement('div');d.className='karte';
-      d.innerHTML='<div class="ring"><i></i></div><div class="t"><div class="n"></div><div class="s"></div><div class="z"></div></div>';
-      kb.appendChild(d);karten.push({u,d,ring:d.querySelector('.ring'),num:d.querySelector('i'),n:d.querySelector('.n'),s:d.querySelector('.s'),z:d.querySelector('.z')});
+      d.innerHTML='<div class="ring"><i></i></div><div class="t"><div class="n"></div><div class="s"></div><div class="z"></div><div class="mud"><i></i></div></div>';
+      kb.appendChild(d);karten.push({u,d,ring:d.querySelector('.ring'),num:d.querySelector('i'),n:d.querySelector('.n'),s:d.querySelector('.s'),z:d.querySelector('.z'),mu:d.querySelector('.mud i')});
       d.querySelector('.n').textContent=u.name;
       langDruck(d,u,()=>select(u.i));
     }else{
@@ -688,6 +955,9 @@ function erklaerung(u){
    +'<div class="zl"><span>Mannstärke</span><b>'+u.strength+' von '+PRO+'</b></div>'
    +'<div class="zl"><span>Angriff</span><b>'+fmt(K.atk)+'</b></div>'
    +'<div class="zl"><span>Abwehr</span><b>'+fmt(K.def)+'</b></div>'
+   +'<div class="zl"><span>Leben je Mann</span><b>'+fmt(K.hp)+'</b></div>'
+   +'<div class="zl"><span>Müdigkeit</span><b>'+fmt(u.muede*100)+' %</b></div>'
+   +'<div class="zl"><span>Im Zweikampf</span><b>'+u.kaempfend+'</b></div>'
    +'<div class="zl"><span>Moral</span><b>'+fmt(u.morale)+' (Start '+fmt(K.mor)+')</b></div>'
    +'<div class="zl"><span>Gehen / Laufen</span><b>'+fmt(K.walk)+' / '+fmt(K.run)+' m/s</b></div>'
    +'<div class="zl"><span>Ansturm</span><b>'+(K.ans>1.6?'furchtbar (×2)':'wuchtig (×1,5)')+'</b></div>'
@@ -700,7 +970,7 @@ const ZUSTAND={steht:'steht bereit',marsch:'marschiert',lauf:'stürmt',kampf:'im
 function uiAktualisieren(){
   for(const k of karten){
     const u=k.u;k.d.classList.toggle('sel',sel===u.i);k.d.classList.toggle('weg',gone(u));
-    k.n.textContent=u.name;k.s.innerHTML='<b>'+u.strength+'</b> Mann';k.z.textContent=ZUSTAND[u.state]||'';
+    k.n.textContent=u.name;k.s.innerHTML='<b>'+u.strength+'</b> Mann';k.z.textContent=ZUSTAND[u.state]||'';k.mu.style.width=Math.round(Math.min(1,u.muede*1.6)*100)+'%';
     const m=Math.max(0,Math.min(100,u.morale));k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));
     k.num.textContent=Math.round(m);
   }
@@ -748,7 +1018,7 @@ for(const id of['bBegin','bHalt','bPause','bTempo'])$(id).addEventListener('poin
    ==================================================================================================== */
 function start(){
   if(phase!=='aufstellung')return false;
-  phase='schlacht';pausiert=false;scanAcc=0;kiAcc=.5;
+  phase='schlacht';pausiert=false;tickAcc=0;kiAcc=.5;
   for(const u of U)if(u.side===0&&u.stance==='angreifen')u.aiT=0;
   uiAktualisieren();return true;
 }
@@ -758,7 +1028,7 @@ function neu(){
   const alt=U.map(u=>({ring:u.ring,flag:u.flag}));
   einheitenAnlegen();U.forEach((u,i)=>{u.ring=alt[i].ring;u.flag=alt[i].flag;});
   for(const k of karten)k.u=U[k.u.i];for(const c of chips)c.u=U[c.u.i];
-  phase='aufstellung';scanAcc=0;uiAktualisieren();
+  phase='aufstellung';tickAcc=0;uiAktualisieren();
 }
 function groesse(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();camSetzen();}
 addEventListener('resize',groesse);
@@ -809,7 +1079,8 @@ laden().catch(e=>{$('ladez').textContent='Fehler: '+e.message;console.error(e);}
 window.SCHLACHT={
   get phase(){return phase;},get pausiert(){return pausiert;},get tempoWert(){return tempoV;},get zeit(){return spielzeit;},
   get units(){return U;},get gefallen(){return gefallen.slice();},get ergebnis(){return ergebnis;},get fps(){return fpsLog;},
-  get tris(){return KIT.map(k=>k.tris);},
+  get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
+  soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id]};},
   start,befehl,angriff,neu,waehle:select,
   tempo(n){tempoV=Math.max(.1,Math.min(30,+n||1));uiAktualisieren();},
   pause(p){pausiert=p===undefined?!pausiert:!!p;uiAktualisieren();},
