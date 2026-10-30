@@ -13846,7 +13846,7 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
   if(win&&a.units.length&&!rz&&stormOk(a.f,ti,a)){try{const _cn=PROV_DEF[ti].city||PROV_DEF[ti].name;if(a.f===S.player)chronAdd('conq',`${_cn} erobert${P.owner!=='frei'?' (von '+FACTIONS[P.owner].name+')':''}`);else if(P.owner===S.player)chronAdd('lost',`${_cn} an ${FACTIONS[a.f].name} verloren`);}catch(e){}if(P.owner!=='frei'){stat(a.f,'conq');a.hold=S.turn+1;const dw=dip(a.f,P.owner);dw.won=dw.won||{};dw.won[a.f]=(dw.won[a.f]||0)+1;}if(P.owner==='frei')try{leagueStrike(a.f,ti);}catch(e){}P.prot=null;const _pv=P.owner,_wc=holdConq(a.f)&&isCapP(ti);provNews(P.owner,'lost',ti,a.f);P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.pop=Math.max(0.6,P.pop*0.85);P.unrest=hasTech(a.f,'citizenship')?2:4;P.uw='Eroberung';P.rebel=0;if(holdConq(a.f)){P.gar=Math.max(2,Math.round(garMax(ti)*0.6));P.unrest=Math.min(P.unrest,2);holdCapFall(a.f,_pv,_wc,ti);}a.p=ti;res.captured=true;try{conquestDecide(a,ti);}catch(e){console.warn('Eroberung',e);}const G=S.fac[a.f];G.gains=(G.gains||[]).filter(t=>S.turn-t<12);G.gains.push(S.turn);}
   a.mp=0;if(!(a.st==='belagern'&&a.sieg===ti&&S.prov[ti].owner!==a.f)){clearStance(a);a.st=null;}res.attLost=Math.max(0,res.attMen0-armyMen(a));
   {const dif=clamp(res.def/Math.max(1,res.att),0.3,1.6),dif2=clamp(res.att/Math.max(1,res.def),0.3,1.6);gainXP(a,win?50+60*dif:25);defArmies.forEach(d=>gainXP(d,win?25:50+60*dif2));genXP(a,win?60+80*dif:30);defArmies.forEach(d=>genXP(d,win?30:60+80*dif2));genDeed(a,win?'w':'l');if(win)try{retinueOnWin(a);}catch(e){}if(win&&res.captured)genDeed(a,'c');defArmies.forEach(d=>genDeed(d,win?'l':'d'));try{res.ti=ti;armyWarHook(a,_po,defArmies,win,res);}catch(e){console.warn('Kriegsstand',e);}
-   for(const x of[a,...defArmies]){const lost=(x===a)!==win;if(lost&&x.units.length&&Math.random()<0.12){const old=genOf(x).n;x.gen=newGeneral(x.f);if(x.f===S.player)addLog(`${old} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`,true,'bad');}}}
+   for(const x of[a,...defArmies]){const lost=(x===a)!==win;if(!ctx.eschGen&&lost&&x.units.length&&Math.random()<0.12){const old=genOf(x).n;x.gen=newGeneral(x.f);if(x.f===S.player)addLog(`${old} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`,true,'bad');}}}
   removeEmpty();checkElimination();try{nemStat(res);}catch(e){}try{pk1Battle(res);}catch(e){}
   return res;
 }
@@ -22460,6 +22460,17 @@ function eschAbbruch(args){   // Laden fehlgeschlagen (z. B. offline): zurück z
   startBattle(Object.assign({alt:true},args));
 }
 let eschFeldherr=null;   // letztes Ergebnis der Feldherren {name,lebt,verwundet} je Seite (Seite 0 = Spieler); die alte Schlacht wertet den Tod nicht aus, daher hier ebenfalls nur über concludeAttack (Ersatz des Verlierers mit 12 %)
+// v221 (Moritz: „Beides kann passieren“): Feldherr in der Schlacht gefallen -> 50 % tot (Nachfolger), 50 % schwer verwundet, überlebt
+function eschGenSchicksal(B,fh){
+  if(!fh)return;
+  for(let s=0;s<2;s++){const f=fh[s];if(!f||f.lebt&&!f.verwundet)continue;
+    const x=(s===0)===(B.attSide===0)?B.ctx.a:B.ctx.defArmies[0];if(!x||!x.gen)continue;
+    const eig=x.f===S.player,G=genOf(x),alt=G.n;
+    if(!f.lebt&&Math.random()<0.5){x.gen=newGeneral(x.f);addLog(eig?`${alt} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`:`Der feindliche Feldherr ${alt} ist in der Schlacht gefallen.`,true,eig?'bad':'good');}
+    else if(!f.lebt)addLog(eig?`${alt} wurde aus der Schlacht getragen – schwer verwundet, aber am Leben.`:`Der feindliche Feldherr ${alt} wurde schwer verwundet vom Feld getragen.`,true);
+    else if(eig)addLog(`${alt} wurde in der Schlacht verwundet.`,false);
+  }
+}
 function eschEnde(r){
   const E=ESCH;if(!E||E.fertig)return;E.fertig=true;eschFeldherr=r.feldherr||null;
   const B=E.B,P=S.prov[B.ti],rz=!!r.rueckzug,winSide=(!rz&&r.sieg)?0:1,attWin=winSide===B.attSide;
@@ -22472,7 +22483,8 @@ function eschEnde(r){
   }
   if(!attWin&&milN)P.gar=clamp(Math.round(gar/120*7),1,PROV_DEF[B.ti].gar);   // Garnison zurück (Verteidiger gewinnt)
   eschAbbau();
-  const res=concludeAttack(B.ctx,attWin);res.feldherr=eschFeldherr;battleLog(res);
+  B.ctx.eschGen=!!eschFeldherr;   // neue Schlacht: Schicksal des Feldherrn aus dem Gefecht statt Würfel 12 %
+  const res=concludeAttack(B.ctx,attWin);res.feldherr=eschFeldherr;eschGenSchicksal(B,eschFeldherr);battleLog(res);
   if(B.attSide===0){UI.mode=res.captured?'prov':'idle';UI.sel=res.captured?B.ti:null;UI.army=null;}
   refreshOwnership();refresh();showBattle(res,B.done);
 }
