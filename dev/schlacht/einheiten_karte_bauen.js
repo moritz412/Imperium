@@ -42,8 +42,10 @@ for (const t of P) {
   const sonder = !t.id.startsWith('basis_');
   const bild = sonder && SHEET.includes(t.id) ? t.id : null;   // Kampagnenbild aus u_sheet (Sondereinheiten); Grundeinheiten: u_e<N>_<rolle>
   const pk = paketFuer(t.kit, t.rolle, t.id);
+  const elef = t.kit === 'A8_elefant_karthagisch';   // Kriegselefanten (30.10.): Treiber = Reiterpaket A2_numidisch, Reittier = Paket E_elefant
+  if (elef) { pk.paket = 'A2_numidisch'; pk.genau = true; }
   profile[t.id] = { n: t.n, rolle: t.rolle, kit: t.kit, kulturen: t.kulturen, epochen: t.epochen, figuren: t.figuren, formation: t.standard,
-    bild, sheet: bild ? SHEET.indexOf(bild) : -1, paket: pk.paket, paketGenau: pk.genau };
+    bild, sheet: bild ? SHEET.indexOf(bild) : -1, paket: pk.paket, paketGenau: pk.genau, ...(elef ? { reittier: 'E_elefant' } : {}) };
 }
 const V = {};
 for (const [k, v] of Object.entries(K.VARIANTS)) V[k] = { role: v.role, ep: v.ep, e1: v.e1, g: v.g, n: v.n, m: v.m, b: v.b || {}, d: v.d };

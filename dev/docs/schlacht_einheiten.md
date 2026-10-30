@@ -139,3 +139,29 @@ gegen Ansturm; kein Feldherr, keine Verlust-Rückschreibung in die Kampagne; Gle
 **Offen:** Ton nicht gehört/geprüft (Dateien fehlen noch); echtes iPad nicht getestet; Gleichgewicht nur grob (Reiter sterben im Nahkampf schnell, wenn man sie nicht löst);
 Elefanten, Wagen, Kamele laufen vorläufig als Pferd + A1_eques; Reiter ohne Lanzen-Modell bei `A2_numidisch` (kein `lanze_gesenkt`); Pferd kippt nicht mit dem Gelände; Kavallerie-Bogenschützen (`harch`) werfen Speere statt zu schießen;
 Numider haben nur 3 Wurfspeere je Reiter (Varianten-Boni), danach greifen sie nach der Reiter-KI an; Spieler-Reiterei wird nicht automatisch gelöst.
+
+## Stand Elefanten/Umgebung (30.10.)
+
+Gebaut in `schlachtKern` (`dev/proto/schlacht_spiel.html`, abgeglichen nach `imperium.html`). Alles nur mit Software-Rendering am PC geprüft, **echtes iPad nicht getestet**, Ton nicht gehört.
+
+**Kriegselefanten**
+- Kampagnen-Profile mit Kit `A8_elefant_karthagisch` (`elef`, `elef2`, `basis_sea_e1..e4_cav`) zeigen jetzt auf Treiber-Paket `A2_numidisch` und tragen `reittier:'E_elefant'` (`einheiten_karte_bauen.js`). Je Figur Elefant (`k_E_elefant.json`) + Treiber (2,45 m hoch, 1,05 m vor dem Nullpunkt, folgt der Hangneigung), Größe ±5 %, Schatten, Kontaktschatten größer.
+- Allgemeiner Reittier-Weg: je Soldat `sMk` = Kit des Reittiers (Pferd `PFK` oder Elefant `EFK`); Clipplätze wie beim Pferd (`P_ST … P_STERB`, neu `P_PANIK`, `P_TRUMP`; Elefant: Steigen = Stampfen, Traben = Gehen, Galopp = Ansturm).
+- Figuren 4–10 je Einheit (Kampagne: Männer/3, gedeckelt auf 10), Raster 5 breit, Abstand 4,2 × 6,4 m, Kollisionsradius 1,6 m, weicht Soldaten kaum aus. Tempo gehen 1,8 m/s, höchstens 5,5 m/s (Ansturm ab 3,8 m/s), träge (Beschleunigung 1,5 m/s², Wenderadius klein im Stand/weit im Lauf).
+- Leben ×4 einer Reiterfigur (18), bis zu 6 Angreifer je Tier (sonst 2), Hiebe prallen teils ab, keine Parade, kein Zurückstoßen; Schlagweite +1,3 m gegen Elefanten.
+- Nahkampf: Stampfen statt Hieb (Wirkung bei 62 % des Clips, Schaden 2,4, wirft das Opfer um). Ansturm: erster Gegner wie bei der Reiterei (Wucht ×Ansturm 2,9), danach **Trampelkegel** (5,5 m lang, bis 4,4 m breit) und beim Eindringen alle 0,3 s ein kleiner Kegel; Moralschock ×2,2 am Aufprall, −7 Moral für die gegnerische Einheit beim Zusammenstoß.
+- Furcht: gegnerisches Fußvolk innerhalb 28 m verliert bis 0,55 Moral/s (nach Zahl der Tiere), gegnerische Reiterei innerhalb 32 m scheut (−0,6 Moral/s, Tempo ×0,82).
+- Verwundbar: Wurfspeere, Pfeile, Steine ×1,5, größere Trefferfläche, kein Schild; jeder Treffer erhöht `sHurt`. Speerträger von vorn halten den Ansturm ab (Wahrscheinlichkeit wie bei der Reiterei, Schaden am Tier ×1,6, das Tier trompetet und verliert Moral).
+- Trompeten: vor einem Angriffslauf (38–95 m Abstand, einmal je 45 s, 70 %) bleiben die Tiere nacheinander kurz stehen. Es gibt noch **keine Elefantenlaute**; Ereignis `trompeten` ist im Ton nicht belegt (stumm), keine Hufe, kein Wiehern.
+- Panik (vorsichtig): nicht in den ersten 10 s, höchstens ein Tier je Einheit gleichzeitig, danach 30 s Ruhe, höchstens zwei je Schlacht und Einheit. Wahrscheinlichkeit je Tier und Sekunde: Moral < 45 (bis 5 %), mehr als 3 Fernkampftreffer kurz hintereinander (4 % je weiterer Treffer), HP < 40 % (+2 %). Das Tier rennt 7–12 s schräg vom Feind weg (4,6 m/s), tritt alles um (auch Eigene, Schaden 3,4), danach stirbt es (40 %, Treiber fällt) oder läuft vom Feld (60 %, trampelt weiter).
+- Kein Lösen für Elefanten (Knopf ausgeblendet). Symbol `sy-elefant`, Karte/Kampagnenbild wie bei jeder Einheit (`elef` hat kein eigenes Kampagnenbild und nimmt `u_e0_cav`; `elef2` hat Bogenbild 102).
+- Gefecht „Rom gegen Karthago“: Kriegselefanten (variante `elef`, punisch) bei (16, 46) vor der Mitte.
+
+**Feste Umgebungsteile** (`figuren/umgebung.json`, ein Fetch über `OPT.assets`)
+- Je Teil ein InstancedMesh (`MeshStandardMaterial`, Vertexfarben, flach), Schatten werfen/empfangen. Ohne Datei läuft die Schlacht ohne Teile weiter. Balliste wird nicht verteilt.
+- Platzierung je Gefecht aus einer Saat (Gefecht-Id, Namen, Einheitenzahl): Felsen (5 groß, 6 Platten, 11 mittel, 24 klein; ±25 %, leicht geneigt, Hügel bevorzugt) außerhalb |x|<118 und |z|<100, nicht im Wald und nicht auf Feldwegen; Gehöft (Haus mittelmeer, Hofmauer, Zaun mit Tor, Heu) an einer Flanke, flachste Stelle aus 48 Versuchen; bei überwiegend keltischem Gegner 2–3 Rundhäuser mit Flechtzäunen und Heu. Teile stehen auf dem tiefsten Punkt ihrer Grundfläche.
+- Gras (Bodenkarte auf Erde gemalt) und Bäume/Büsche/Steine (Matrix auf Größe 0) weichen den Gebäuden; beim nächsten Gefecht wird alles zurückgesetzt.
+- Hindernisse = Kreise (`r` des Teils um den Mittelpunkt der Grundfläche; kleine Felsen < 1 m zählen nicht), Raster 8 m. Soldaten werden herausgeschoben, der Einheitsanker gleitet am Rand entlang, Befehls- und Aufstellungsziele in Teilen werden auf den Rand verschoben. Die Felsen je Grafikstufe (`umw` 0,4 / 0,75 / 1) werden ausgedünnt, nicht mehr sichtbare Felsen sind auch keine Hindernisse.
+- Test: `dev/tests/schlacht_elefant_t.js` (Bilder `dev/tests/shot/elefant_*.png`). Testhilfen im Kern: `SCHLACHT.elefPanik(i[,Winkel])`, `SCHLACHT.versetzen(i,x,z)`, `SCHLACHT.umwelt`.
+
+**Offen:** iPad (Leistung mit 2 Kits mehr + Teilen), Handy, Ton (Elefantenlaute am PC erzeugen: Trompeten, Stampfen/Schritte, Panikschrei, Tod), Gleichgewicht nur grob (eine Elefanteneinheit kann in 40 s über 50 Soldaten töten), Soldaten bleiben an Mauern kleben, statt ums Gehöft zu laufen (Wegfindung nur Abstoßung), Treiber sitzt im Reit-Clip etwas steif, Gehöft-Heuhaufen sind schlichte Kegel, `OFF_MAN` unverändert (`proto/` ist dort insgesamt nicht eingetragen, also auch nicht `k_E_elefant.json`, `umgebung.json`, die geänderte `einheiten_kampagne.json`; ohne Netz fällt die Schlacht auf die alte zurück).
