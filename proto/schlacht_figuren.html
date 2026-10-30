@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Schlacht – Figurentest</title>
+<style>
+:root{--bg:#1c1a16;--ink:#efe6d2;--mut:#b8ab90;--acc:#b0472a;--pan:rgba(28,24,18,.82)}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 Georgia,serif;overflow:hidden;touch-action:none}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));background:var(--pan);border:1px solid #5a4a32;border-radius:8px;padding:10px 12px;max-width:260px}
+#hud h1{font-size:16px;margin:0 0 6px;cursor:pointer}
+#hud.zu #knoepfe,#hud.zu .z,#hud.zu input{display:none}
+#hud .z{color:var(--mut);font-size:13px}
+#knoepfe{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+#knoepfe button{font:inherit;background:#3a3125;color:var(--ink);border:1px solid #6b5a3e;border-radius:6px;padding:7px 10px;text-align:left}
+#knoepfe button.an{background:var(--acc);border-color:var(--acc)}
+#menge{width:100%}
+#fps{position:fixed;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));background:var(--pan);border-radius:6px;padding:6px 10px;font:13px monospace}
+#lade{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;flex-direction:column;gap:8px}
+#lade .z{color:var(--mut);font-size:14px}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="lade"><div>Figuren werden geladen …</div><div class="z" id="ladez"></div></div>
+<div id="hud">
+  <h1 id="titel">Figurentest Antike ▾</h1>
+  <div class="z" id="info"></div>
+  <div id="knoepfe"></div>
+  <div class="z" style="margin-top:8px">Figuren je Einheit: <b id="mengez"></b></div>
+  <input id="menge" type="range" min="20" max="800" step="20" value="120">
+  <div class="z" style="margin-top:6px">Ziehen = drehen · zwei Finger = Zoom</div>
+  <div class="z" style="margin-top:6px;font-size:11px">Bewegungen teils aus der CMU Graphics Lab Motion Capture Database (mocap.cs.cmu.edu). Körper: MakeHuman/MPFB (CC0).</div>
+</div>
+<div id="fps">– B/s</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+/* Lädt gebackene Figurenpakete (dev/pc/blender/backen.py, Format v1 mit Ecken-Farben) und zeigt je Kit eine Einheit.
+   Skinning auf der GPU aus der Animations-Textur wie im Prototyp schlacht_p0.html. */
+const KITS=[
+  {id:'A1_hastatus',n:'Hastati (Rom)'},
+  {id:'A2_libysch',n:'Libysche Speerträger'},
+  {id:'A3_iberisch',n:'Iberische Scutarii'},
+  {id:'A6_keltisch',n:'Keltische Krieger'},
+  {id:'A7_hellenistisch',n:'Thureophoroi'},
+];
+const CLIPS=[['stehen_bereit','Bereit'],['gehen','Marsch'],['laufen','Sturmlauf'],['schlag_a','Angriff'],['abwehr_schild','Schild vor'],
+  ['treffer','Getroffen'],['sterben_vorn','Fallen'],['jubeln','Jubel'],['stehen','Ruhe']];
+const NAH=55;          // Meter: nähere Figuren in voller Stufe
+const ABST=1.2;        // Abstand in der Formation (m)
+
+const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer;};
+const $=id=>document.getElementById(id);
+
+const renderer=new THREE.WebGLRenderer({canvas:$('cv'),antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+renderer.outputEncoding=THREE.sRGBEncoding;   // Ecken-Farben werden linear gerechnet (pow 2.2), Ausgabe wieder sRGB
+const scene=new THREE.Scene();scene.background=new THREE.Color(.74,.80,.88);scene.fog=new THREE.Fog(scene.background,180,700);
+const camera=new THREE.PerspectiveCamera(45,1,.3,2000);
+scene.add(new THREE.HemisphereLight(0xcfe3ff,0x6b6a45,.65));
+const sun=new THREE.DirectionalLight(0xfff0d6,.9);sun.position.set(-.5,.8,.4);scene.add(sun);
+const boden=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshLambertMaterial({color:0x6d7c46}));
+boden.rotation.x=-Math.PI/2;scene.add(boden);
+
+function geometrie(pk,stufe){
+  // Körper-Meshes (Körper, Kleidung; Stufe nah/mittel) + starre Teile zu einer Geometrie
+  const teile=Object.values(pk.koerper).map(k=>({d:k[stufe],k:null}));
+  for(const t of Object.values(pk.teile))teile.push({d:t.nah,k:t.knochen});
+  let n=0,m=0;teile.forEach(t=>{n+=t.d.n;m+=new Uint16Array(b64(t.d.idx)).length;});
+  const P=new Float32Array(n*3),N=new Float32Array(n*3),C=new Float32Array(n*3),B=new Float32Array(n*4),W=new Float32Array(n*4),I=new Uint32Array(m);
+  let o=0,oi=0;
+  for(const t of teile){
+    const d=t.d,p=new Float32Array(b64(d.pos)),nr=new Float32Array(b64(d.nrm)),c=new Uint8Array(b64(d.col)),
+      si=new Uint8Array(b64(d.si)),sw=new Uint8Array(b64(d.sw)),ix=new Uint16Array(b64(d.idx));
+    P.set(p,o*3);N.set(nr,o*3);
+    for(let i=0;i<d.n;i++){
+      for(let k=0;k<3;k++)C[(o+i)*3+k]=Math.pow(c[i*3+k]/255,2.2);
+      for(let k=0;k<4;k++){B[(o+i)*4+k]=si[i*4+k];W[(o+i)*4+k]=sw[i*4+k]/255;}
+    }
+    for(let i=0;i<ix.length;i++)I[oi+i]=ix[i]+o;
+    o+=d.n;oi+=ix.length;
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('normal',new THREE.BufferAttribute(N,3));
+  g.setAttribute('color',new THREE.BufferAttribute(C,3));g.setAttribute('aBone',new THREE.BufferAttribute(B,4));
+  g.setAttribute('aWeight',new THREE.BufferAttribute(W,4));g.setIndex(new THREE.BufferAttribute(I,1));
+  g.userData.tris=m/3;
+  return g;
+}
+
+function material(pk){
+  const tex=new THREE.DataTexture(new Float32Array(b64(pk.anim.f32)),pk.anim.w,pk.anim.h,THREE.RGBAFormat,THREE.FloatType);
+  tex.minFilter=tex.magFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.flipY=false;tex.needsUpdate=true;
+  const U={uTime:{value:0},uAnimTex:{value:tex},uTexSize:{value:new THREE.Vector2(pk.anim.w,pk.anim.h)}};
+  const m=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});   // Rock und Platten sind offen
+  m.onBeforeCompile=sh=>{
+    Object.assign(sh.uniforms,U);
+    sh.vertexShader=sh.vertexShader
+    .replace('#include <common>',`#include <common>
+attribute vec4 aBone;attribute vec4 aWeight;attribute vec4 aAnim;attribute float aLoop;
+uniform float uTime;uniform highp sampler2D uAnimTex;uniform vec2 uTexSize;
+vec4 bTex(float bone,float row,float k){return texture2D(uAnimTex,vec2((bone*4.0+k+0.5)/uTexSize.x,(row+0.5)/uTexSize.y));}
+mat4 bMat(float bone,float r0,float r1,float fr){
+  return mat4(mix(bTex(bone,r0,0.0),bTex(bone,r1,0.0),fr),mix(bTex(bone,r0,1.0),bTex(bone,r1,1.0),fr),
+              mix(bTex(bone,r0,2.0),bTex(bone,r1,2.0),fr),mix(bTex(bone,r0,3.0),bTex(bone,r1,3.0),fr));}`)
+    .replace('#include <beginnormal_vertex>',`#include <beginnormal_vertex>
+float fLen=aAnim.y;float fT=max(uTime-aAnim.z,0.0)*aAnim.w*30.0;float fA;float fB;
+if(aLoop>0.5){fT=mod(fT,fLen);fA=floor(fT);fB=mod(fA+1.0,fLen);}
+else{fT=min(fT,fLen-1.0);fA=floor(fT);fB=min(fA+1.0,fLen-1.0);}
+float fF=fT-fA;float rowA=aAnim.x+fA;float rowB=aAnim.x+fB;
+mat4 skM=mat4(0.0);
+for(int i=0;i<4;i++){float w=aWeight[i];if(w>0.0){skM+=w*bMat(aBone[i],rowA,rowB,fF);}}
+objectNormal=(skM*vec4(objectNormal,0.0)).xyz;`)
+    .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed=(skM*vec4(transformed,1.0)).xyz;');
+  };
+  m.customProgramCacheKey=()=>'figtest1';
+  m.userData.U=U;
+  return m;
+}
+
+const MAX=800;
+const EINH=[];     // je Kit: {pk, im:[nah,mittel], clip, mitte}
+let menge=120,clipName='stehen_bereit',uhr=0;
+
+function einheit(kit,pk,ix){
+  const mat=material(pk),im=[];
+  for(const stufe of ['nah','mittel']){
+    const g=geometrie(pk,stufe);
+    const aA=new THREE.InstancedBufferAttribute(new Float32Array(MAX*4),4),aL=new THREE.InstancedBufferAttribute(new Float32Array(MAX),1);
+    g.setAttribute('aAnim',aA);g.setAttribute('aLoop',aL);
+    const m=new THREE.InstancedMesh(g,mat,MAX);m.frustumCulled=false;m.count=0;scene.add(m);im.push(m);
+  }
+  const zuf=()=>new Float32Array(MAX).map(()=>Math.random());
+  const E={kit,pk,mat,im,ix,mitte:new THREE.Vector3((ix-(KITS.length-1)/2)*22,0,0),phase:zuf(),jx:zuf(),jz:zuf(),jr:zuf(),t0:new Float32Array(MAX)};
+  EINH.push(E);return E;
+}
+
+function stelle(E,neu){
+  // Formation 10 breit, nach hinten aufgefüllt; Blick +Z (Paket: Blender −Y → three.js +Z)
+  const cl=E.pk.clips.find(c=>c.n===clipName)||E.pk.clips[0];
+  const breit=Math.min(40,Math.ceil(Math.sqrt(menge*2.5)));
+  E.mitte.x=(E.ix-(KITS.length-1)/2)*(breit*ABST+8);
+  const dummy=new THREE.Object3D(),cam=camera.position;
+  const n=[0,0];
+  for(let i=0;i<menge;i++){
+    const r=Math.floor(i/breit),s=i%breit;
+    const x=E.mitte.x+(s-(breit-1)/2)*ABST+(E.jx[i]-.5)*.15,z=E.mitte.z-r*ABST+(E.jz[i]-.5)*.15;
+    const lod=Math.hypot(x-cam.x,z-cam.z)<NAH?0:1,m=E.im[lod],k=n[lod]++;
+    dummy.position.set(x,0,z);dummy.rotation.set(0,(E.jr[i]-.5)*.12,0);dummy.updateMatrix();
+    m.setMatrixAt(k,dummy.matrix);
+    if(neu)E.t0[i]=uhr-(cl.loop?E.phase[i]*cl.len/30:E.phase[i]*.4);
+    const a=m.geometry.attributes.aAnim.array;
+    a[k*4]=cl.row;a[k*4+1]=cl.len;a[k*4+2]=E.t0[i];a[k*4+3]=.92+E.phase[i]*.16;
+    m.geometry.attributes.aLoop.array[k]=cl.loop?1:0;
+  }
+  E.im.forEach((m,l)=>{m.count=n[l];m.instanceMatrix.needsUpdate=true;m.geometry.attributes.aAnim.needsUpdate=true;m.geometry.attributes.aLoop.needsUpdate=true;});
+}
+function alleStellen(neu){EINH.forEach(E=>stelle(E,neu));}
+
+/* Kamera: einfache Kreisbahn mit Ziehen/Zoomen */
+let az=-.5,el=.32,dist=60;const ziel=new THREE.Vector3(0,1,-5);
+function camSetzen(){camera.position.set(ziel.x+dist*Math.sin(az)*Math.cos(el),ziel.y+dist*Math.sin(el),ziel.z+dist*Math.cos(az)*Math.cos(el));camera.lookAt(ziel);}
+const zeiger=new Map();let pinch0=0,dist0=0;
+$('cv').addEventListener('pointerdown',e=>{zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY});if(zeiger.size===2){const[a,b]=[...zeiger.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);dist0=dist;}});
+$('cv').addEventListener('pointermove',e=>{const p=zeiger.get(e.pointerId);if(!p)return;
+  if(zeiger.size===1){az-=(e.clientX-p.x)*.006;el=Math.max(.05,Math.min(1.3,el+(e.clientY-p.y)*.004));}
+  p.x=e.clientX;p.y=e.clientY;
+  if(zeiger.size===2){const[a,b]=[...zeiger.values()];dist=Math.max(4,Math.min(400,dist0*pinch0/Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))));}
+  camSetzen();});
+['pointerup','pointercancel','pointerleave'].forEach(t=>$('cv').addEventListener(t,e=>{zeiger.delete(e.pointerId);if(zeiger.size<2)pinch0=0;}));
+$('cv').addEventListener('wheel',e=>{dist=Math.max(4,Math.min(400,dist*(1+e.deltaY*.001)));camSetzen();e.preventDefault();},{passive:false});
+let lodUhr=0;
+
+function groesse(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener('resize',groesse);
+
+/* Bildrate messen (keine Schätzung): Mittel über 2 s */
+let fz=0,ft=performance.now();const fpsLog=[];
+function schleife(t){
+  requestAnimationFrame(schleife);
+  uhr=t/1000;EINH.forEach(E=>E.mat.userData.U.uTime.value=uhr);
+  if(t-lodUhr>800){lodUhr=t;alleStellen(false);}   // Stufen nach Kameraabstand neu verteilen, Startzeiten bleiben
+  renderer.render(scene,camera);
+  fz++;if(t-ft>2000){const f=fz*1000/(t-ft);$('fps').textContent=f.toFixed(1)+' B/s · '+(menge*EINH.length)+' Figuren';fpsLog.push(f);window.FPS_LOG=fpsLog;fz=0;ft=t;}
+}
+
+async function start(){
+  groesse();camSetzen();
+  let tris=0;
+  for(let i=0;i<KITS.length;i++){
+    $('ladez').textContent=KITS[i].n+' ('+(i+1)+'/'+KITS.length+')';
+    const r=await fetch('figuren/k_'+KITS[i].id+'.json');
+    if(!r.ok){$('ladez').textContent='Fehlt: k_'+KITS[i].id+'.json';continue;}
+    const pk=await r.json();const E=einheit(KITS[i],pk,i);tris=E.im[0].geometry.userData.tris;
+  }
+  $('titel').onclick=()=>{const h=$('hud');h.classList.toggle('zu');$('titel').textContent='Figurentest Antike '+(h.classList.contains('zu')?'▸':'▾');};
+  $('info').textContent=EINH.length+' Einheiten · nah '+tris+' Dreiecke je Figur';
+  const kn=$('knoepfe');
+  CLIPS.forEach(([id,n])=>{const b=document.createElement('button');b.textContent=n;b.dataset.c=id;
+    b.onclick=()=>{clipName=id;EINH.forEach(E=>E.phase=E.phase.map(()=>Math.random()));kn.querySelectorAll('button').forEach(x=>x.classList.toggle("an",x===b));alleStellen(true);};
+    if(id===clipName)b.classList.add('an');kn.appendChild(b);});
+  $('menge').oninput=e=>{menge=+e.target.value;$('mengez').textContent=menge+' ('+menge*EINH.length+' gesamt)';alleStellen(true);};
+  $('mengez').textContent=menge+' ('+menge*EINH.length+' gesamt)';
+  alleStellen(true);$("lade").style.display='none';
+  window.FIG_BEREIT=EINH.length;
+  requestAnimationFrame(schleife);
+}
+start().catch(e=>{$('ladez').textContent='Fehler: '+e.message;console.error(e);});
+</script>
+</body>
+</html>
