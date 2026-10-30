@@ -871,7 +871,8 @@ const zaehler={schlaege:0,parade:0,ausweich:0,treffer:0,kills:0,umgeworfen:0,rue
 const G={gesamt:0,fliegend:0,treffer:0,abgewehrt:0,verfehlt:0,speere:0,steine:0};   // Geschosszähler (SCHLACHT.geschosse)
 const evZ={wurf:0,schleuder:0,treffer_fern:0,abgewehrt:0,verfehlt:0,klirren:0,schild:0,schildstoss:0,treffer:0,tod:0,speer:0,kriegsgeschrei:0,horn:0,sieg_jubel:0};              // Geräusch-Ereignisse (gezählt; Tonanbindung: window.SCHLACHT_TON.ereignis(typ,x,z))
 let tonAn=true;
-function ereignis(typ,x,z){evZ[typ]=(evZ[typ]||0)+1;if(tonAn)TON.ereignis(typ,x,z);}
+const TON_ANTEIL={tod:.25,treffer:.3};   // 30.10. Moritz: viel zu viele Schreie -> nur ein Teil der Treffer/Tode wird hörbar
+function ereignis(typ,x,z){evZ[typ]=(evZ[typ]||0)+1;if(tonAn&&!(TON_ANTEIL[typ]&&Math.random()>TON_ANTEIL[typ]))TON.ereignis(typ,x,z);}
 
 function einheitenAnlegen(){
   U.length=0;cHead.fill(-1);sCell.fill(-1);
@@ -1989,9 +1990,9 @@ const TON=(()=>{
   const FAC={ruhe:.8,aufmarsch:.8,kampf:1,hoehepunkt:1,sieg:.9,niederlage:.8};
   /* Spielereignis -> Geräuschart · v Lautstärke · t Mindestabstand (s) je Ereignisart · w Hörweite (m) */
   const EV={
-    klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.9,t:.11},tod:{a:'tod',v:1,t:.14},speer:{a:'speer',v:.8,t:.15},
+    klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.45,t:.9},tod:{a:'tod',v:.42,t:2.2},speer:{a:'speer',v:.8,t:.15},
     wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
-    kriegsgeschrei:{a:'kriegsgeschrei',v:1,t:2.5,w:140},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
+    kriegsgeschrei:{a:'kriegsgeschrei',v:.6,t:6,w:140},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
   for(const k in EV)EV[k].l=-1e9;
   /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
   const LISTE=[];
