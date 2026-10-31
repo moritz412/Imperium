@@ -2048,6 +2048,7 @@ window.OFF=(function(){
   <button class="plak" id="bPlaenk"><svg class="ic"><use href="#ic-pfeil"/></svg><span><b>Plänkeln</b><small></small></span></button>
   <button class="plak" id="bLoesen" hidden><svg class="ic"><use href="#ic-loesen"/></svg><span><b>Lösen</b><small></small></span></button>
   <button class="plak" id="bForm"><svg class="ic"><use href="#ic-form"/></svg><span><b>Formation</b><small></small></span></button>
+  <button class="plak" id="bFaeh"><svg class="ic"><use href="#ic-schild"/></svg><span><b>Fähigkeit</b><small></small></span></button>
   <button class="plak" id="bSammeln" hidden><svg class="ic"><use href="#ic-sammeln"/></svg><span><b>Sammeln</b><small></small></span></button>
   <button class="plak" id="bAnfeuern" hidden><svg class="ic"><use href="#ic-anfeuern"/></svg><span><b>Anfeuern</b><small></small></span></button>
   <button class="plak" id="bPause"><svg class="ic"><use href="#ic-pause"/></svg><span><b>Pause</b><small></small></span></button>
@@ -2144,6 +2145,17 @@ const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss v
   A7_phalangit:{schild:.3},A7_hoplit:{schild:.6},A7_toxotes:{schild:0,bloss:true},A6_plaenkler:{schild:.3,bloss:true},
   A1_legion:{schild:.6},A6_adlig:{schild:.45},A6_falx:{schild:0,bloss:true},A8_nubisch:{schild:0,bloss:true},A8_aksum:{schild:.4},
 };
+/* Fähigkeiten (31.10., R1): je Paket höchstens zwei; ein Knopf „Fähigkeit“ schaltet sie. Schildkröte/Schildwall/Keil sind An/Aus-Haltungen, die Wurfsalve gibt es einmal je Schlacht.
+   Schildkröte: Fernschaden ×0,25 (von allen Seiten, Schilde auch oben), Tempo ×0,4, Angriff ×0,8, enger Verband · Keil (nur berittene Schwerreiter): Ansturm ×1,25, Abwehr ×0,85
+   Schildwall: Abwehr ×1,2 von vorn, Reiteransturm von vorn ×0,6 (31.10. abgeschwächt), kein Laufen · Wurfsalve: eine Pilum-Salve je Mann auf die nächste Einheit in 32 m (wie Plänkler-Speere) */
+const FAEH={A1_hastatus:['schildkroete','salve'],A1_legion:['schildkroete','salve'],A1_eques:['keil'],A6_adlig:['keil'],A7_hoplit:['schildwall'],A7_phalangit:['schildwall'],A2_libysch:['schildwall']};
+const FAEH_NAME={schildkroete:'Schildkröte',keil:'Keil',schildwall:'Schildwall',salve:'Wurfsalve'};
+const FAEH_TEXT={
+  schildkroete:'Schildkröte: die Männer schließen die Schilde über sich. Pfeile und Speere richten nur ein Viertel an, dafür geht es langsam (Tempo ×0,4) und der Angriff sinkt (×0,8).',
+  keil:'Keil: die Reiter formieren sich zur Spitze. Der Ansturm wiegt ein Viertel mehr (×1,25), die Abwehr sinkt (×0,85), solange der Keil steht.',
+  schildwall:'Schildwall: die Einheit hält die Stellung. Abwehr von vorn ×1,2, Reiteransturm von vorn nur noch ×0,6 – aber kein Laufen.',
+  salve:'Wurfsalve: einmal je Schlacht wirft jeder Mann einen Speer auf die nächste Einheit (bis 32 m, nicht im Nahkampf).'};
+const SALVE_F={typ:'speer',reich:32,nachl:[.6,1.8],vorrat:1,schaden:1.3,moral:.4,clip:'speerwurf',wurfT:.55,v:24,weich:0,rueck:0};
 const ECHT_RANG=[{n:'Rekruten',b:0,m:0},{n:'Erprobt',b:.05,m:5},{n:'Veteranen',b:.1,m:10},{n:'Elite',b:.15,m:15},{n:'Legendär',b:.2,m:25}];   // wie RANKS der Kampagne
 const STUFE_NAME=['einfach','verbessert','beste'];
 const r1=x=>Math.round(x*10)/10;
@@ -3371,7 +3383,7 @@ function einheitenAnlegen(){
       wpK:-1,wpS:0,stX:0,stZ:0,feindD:999,sarT:0,fx:0,fz:(side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
       mx:r.x,mz:r.z,sn:np,ax:0,az:0,an:0,nF:0,fatS:0,nL:np,cnt:new Int16Array(NU),
       lebend:np,kaempfend:0,muede:0,hoehe:0,dAcc:0,
-      gen:r.tag==='gen',gname:r.fname||'Feldherr',auraW:Math.max(1,Math.min(1.6,r.aura||1)),genId:-1,genAlive:false,genHP0:1,genWund:false,aura:0,m0:K.mor,anfT:0,festT:0,druck:0,kiW:0,reserve:false,fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*np:0,munS:0,eng:true,fk:1,gef:0,weichT:0};
+      gen:r.tag==='gen',gname:r.fname||'Feldherr',auraW:Math.max(1,Math.min(1.6,r.aura||1)),genId:-1,genAlive:false,genHP0:1,genWund:false,aura:0,m0:K.mor,anfT:0,festT:0,druck:0,kiW:0,reserve:false,fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*np:0,munS:0,eng:true,fk:1,gef:0,weichT:0,fa:null,faV:1,faNoRun:false,salveT:0,salveVerbr:false};
     U.push(u);
     for(let s=0;s<np;s++){
       const id=i*PRO+s;
@@ -3605,7 +3617,7 @@ function reaktion(i){
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
   const pikeF=(D.pike&&UA.charge>0&&ang<1.15)?1.5:1;      // Pike: Abwehr gegen Ansturm von vorn ×1,5
   const reitM=(A.reit&&!(UA.charge>0))?.8:1;   // Reiter im Nahkampf ohne Schwung: schwächer
-  const atkE=A.atk*(UA.anfT>0?1.2:1)*(1-.4*sFat[i])*ansF*(1+hang)*reitM,defE=D.def*pikeF*(D.reit?1.1:1)*(1-.4*sFat[j]),ratio=atkE/defE;
+  const UD=U[sUnit[j]],atkE=A.atk*(UA.anfT>0?1.2:1)*(1-.4*sFat[i])*ansF*(1+hang)*reitM*(UA.fa==='schildkroete'?.8:1)*(UA.fa==='keil'&&UA.charge>0?1.25:1),defE=D.def*pikeF*(D.reit?1.1:1)*(1-.4*sFat[j])*(UD.fa==='schildwall'&&ang<1.15?1.2:UD.fa==='keil'?.85:1),ratio=atkE/defE;
   if(sRad[j]>1){sOut[i]=Math.random()<Math.min(.5,.28/ratio)?0:3;return;}   // Elefant: keine Parade, Hiebe prallen teils ab
   const fliehend=sSt[j]===S_FLIEH,steif=sAct[j]===A_TREFFER,busy=sAct[j]===A_SCHLAG;
   const pP=(ang<1.15&&!fliehend&&!steif)?Math.max(.08,Math.min(.65,.42/ratio))*(busy?.5:1):0;     // Parade nur von vorn
@@ -3690,9 +3702,9 @@ function aufprall(i,f){
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[f],sZ[i]-sZ[f])-sR[f])),vorn=ang<1.15,hinten=ang>2.4;
   const stehend=sSt[f]!==S_FLIEH&&sVX[f]*sVX[f]+sVZ[f]*sVZ[f]<4&&sAct[f]!==A_TREFFER;
   sRush[i]=.9;sImp[i]=v;zaehler.ansturm++;ereignis('aufprall',sX[i],sZ[i]);
-  const w=(v/8)*A.ans*(vorn?1:hinten?2:1.6);
+  const w=(v/8)*A.ans*(vorn?1:hinten?2:1.6)*(ua.fa==='keil'?1.25:1)*(ud.fa==='schildwall'&&vorn?.6:1)*(ud.fa==='keil'?1/.85:1);   // Keil: wuchtiger, aber verwundbar · Schildwall: Ansturm von vorn abgeschwächt
   if(D.speer&&vorn&&stehend){
-    const pw=Math.min(.92,(D.pike?.78:D.pakId==='A7_hoplit'?.66:.52)*(1-.25*sFat[f]));
+    const pw=Math.min(.92,(D.pike?.78:D.pakId==='A7_hoplit'?.66:.52)*(1-.25*sFat[f])+(ud.fa==='schildwall'?.08:0));
     if(Math.random()<pw){   // Speere halten: das Pferd scheut, der Reiter stürzt oder wird getroffen
       zaehler.ansturmAbgewehrt++;
       const ci=setClip(f,C.stoss_speer,sJit[f],true);sAct[f]=A_REAKT;sActT[f]=ci;sFace[f]=i;sKX[f]=sKZ[f]=0;
@@ -3744,7 +3756,7 @@ function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reic
   for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;u.fZ=v.i;}}
 }
 function wurfStart(i,u){
-  const F=u.def.fern,T=U[u.fZ];
+  const F=u.def.fern||SALVE_F,T=U[u.fZ];
   if(sVX[i]*sVX[i]+sVZ[i]*sVZ[i]>.25){sCool[i]=.3;return;}   // nur im Stehen
   let j=-1;for(let k=0;k<6;k++){const id=T.occ[(Math.random()*T.np)|0];if(id>=0&&sSt[id]<=S_FLIEH){j=id;break;}}   // Zielpunkt: eine zufällige Figur der Zieleinheit
   let tx,tz;if(j>=0){tx=sX[j];tz=sZ[j];}else{tx=T.mx;tz=T.mz;}
@@ -3757,7 +3769,7 @@ function wurfStart(i,u){
   sPer[i]=F.nachl[0]+Math.random()*(F.nachl[1]-F.nachl[0]);
 }
 function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst mit der Entfernung
-  const u=U[sUnit[i]],F=u.def.fern;if(!F||sAmmo[i]<=0)return;
+  const u=U[sUnit[i]],F=u.def.fern||(u.salveT>0?SALVE_F:null);if(!F||sAmmo[i]<=0)return;
   sAmmo[i]--;
   const k=F.typ==='stein'?1:0,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;gSk[q]=F.typ==='pfeil'?.55:1;
   if(gA[q]===1)G.fliegend--;
@@ -3773,7 +3785,7 @@ function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst m
   u.schiessT=1.3;ereignis(k?'schleuder':F.typ==='pfeil'?'pfeil':'wurf',sX[i],sZ[i]);
 }
 function geschossAufprall(q){
-  const tx=gTX[q],tz=gTZ[q],side=gS[q],k=q>=GN?1:0,u0=U[gUq[q]],F=u0.def.fern;
+  const tx=gTX[q],tz=gTZ[q],side=gS[q],k=q>=GN?1:0,u0=U[gUq[q]],F=u0.def.fern||SALVE_F;
   gA[q]=0;G.fliegend--;
   const cx=((tx-GX0)/ZELLE)|0,cz=((tz-GZ0)/ZELLE)|0;let best=-1,bq=1;
   for(let gz=Math.max(0,cz-1);gz<=Math.min(GH-1,cz+1);gz++)for(let gx=Math.max(0,cx-1);gx<=Math.min(GW-1,cx+1);gx++)
@@ -3797,7 +3809,7 @@ function geschossAufprall(q){
     return;
   }
   const ex=sX[j]-gSX[q],ez=sZ[j]-gSZ[q],el=Math.hypot(ex,ez)+1e-6,nx=ex/el,nz=ez/el;
-  const dmg=F.schaden*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1)*(Kd.ele?1.5:1);
+  const dmg=F.schaden*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1)*(Kd.ele?1.5:1)*(Ud.fa==='schildkroete'?.25:1);   // Schildkröte: Schilde auch oben
   sHP[j]-=dmg;G.treffer++;zaehler.fernTreffer++;sFat[j]=Math.min(1,sFat[j]+.01);ereignis('treffer_fern',sX[j],sZ[j]);
   spritzer(sX[j],sZ[j],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[j]+nx*.4,sZ[j]+nz*.4,.5);
   if(F.moral)Ud.morale-=F.moral;
@@ -3821,7 +3833,7 @@ let tickN=0;
 function kampfTick(dt){
   // --- Einheitswerte, Nähe
   for(const u of U){u.kontakt=false;u.nahF=false;u.nF=0;u.fatS=0;u.nL=0;u.kaempfend=0;u.cnt.fill(0);u.munS=0;u.scheu=0;
-    if(u.beschuss>0)u.beschuss-=dt;if(u.schiessT>0)u.schiessT-=dt;if(u.fern)fernZiel(u);if(u.panikCool>0)u.panikCool-=dt;
+    if(u.beschuss>0)u.beschuss-=dt;if(u.schiessT>0)u.schiessT-=dt;if(u.fern)fernZiel(u);if(u.salveT>0)salveTick(u,dt);if(u.panikCool>0)u.panikCool-=dt;
     u.m0=u.morale;u.aura=0;}
   for(const g of U){   // Aura des Feldherrn: eigene Einheiten im Umkreis (wirkt nur, solange er nicht selbst flieht)
     if(!g.gen||!g.genAlive||g.genId<0||sSt[g.genId]>S_KAMPF)continue;
@@ -3976,9 +3988,49 @@ function naechster(u,mitFl){
     const d=Math.hypot(v.cx-u.cx,v.cz-u.cz);if(d<bd){bd=d;best=v;}}
   return best;
 }
+/* ---- Fähigkeiten (31.10., R1): Schildkröte, Keil, Schildwall (An/Aus) und Wurfsalve (einmal) ---- */
+function faehigListe(u){const L=FAEH[u.def.pakId]||[];return u.def.ele?[]:L.filter(n=>n==='keil'?u.def.reit:!u.def.reit);}
+function salveZiel(u){let b=-1,bd=30;for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;b=v.i;}}return b;}
+function salveBereit(u){return phase==='schlacht'&&!u.salveVerbr&&u.salveT<=0&&!u.engaged&&!u.fern&&!gone(u)&&u.state!=='flieht'&&u.fa!=='schildkroete'&&salveZiel(u)>=0;}
+function faehigWahl(u){const L=faehigListe(u);if(!L.length)return null;if(L.includes('salve')&&salveBereit(u))return'salve';return L.find(n=>n!=='salve')||'salve';}
+function faehigFk(u){u.fk=u.fa==='schildkroete'?.78:u.fa==='schildwall'?.88:u.eng?FORM_K.eng:FORM_K.locker;}
+function faehigAnwenden(u,n){
+  if(!u||gone(u)||u.state==='flieht'||phase!=='schlacht'||!faehigListe(u).includes(n))return false;
+  if(n==='salve'){
+    if(!salveBereit(u))return false;
+    u.fZ=salveZiel(u);u.salveT=7;u.salveVerbr=true;halt(u);
+    for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_FLIEH){sAmmo[id]=1;sCool[id]=Math.random()*1.2;}}
+    return true;
+  }
+  const an=u.fa!==n;
+  u.fa=an?n:null;u.faV=u.fa==='schildkroete'?.4:1;u.faNoRun=u.fa==='schildkroete'||u.fa==='schildwall';
+  if(u.faNoRun){u.run=false;u.runT=0;}
+  faehigFk(u);return true;
+}
+function salveEnde(u){u.salveT=0;u.fZ=-1;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0)sAmmo[id]=0;}}
+function salveTick(u,dt){
+  u.salveT-=dt;let rest=0;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_FLIEH)rest+=sAmmo[id];}
+  if(u.engaged||u.state==='flieht'||gone(u)||rest===0||u.salveT<=0||(u.fZ>=0&&gone(U[u.fZ])))salveEnde(u);
+}
+function kiFaehig(u){   // vorsichtig: Schildwall gegen anstürmende Reiter von vorn, Schildkröte nur unter Beschuss
+  const L=faehigListe(u);if(!L.length||gone(u)||u.state==='flieht')return;
+  if(L.includes('schildwall')){
+    let drohend=false,nah=false;
+    for(const v of U){if(v.side===u.side||gone(v)||!v.def.reit||v.def.ele||v.state==='flieht')continue;
+      const dx=v.cx-u.cx,dz=v.cz-u.cz,d=Math.hypot(dx,dz);if(d<75)nah=true;
+      if(d<55&&v.hasDest&&v.run&&Math.abs(wrap(Math.atan2(dx,dz)-u.f))<1.3)drohend=true;}
+    if(u.fa!=='schildwall'&&drohend&&!u.engaged)faehigAnwenden(u,'schildwall');
+    else if(u.fa==='schildwall'&&!nah)faehigAnwenden(u,'schildwall');
+    return;
+  }
+  if(L.includes('schildkroete')){
+    if(u.fa!=='schildkroete'&&u.beschuss>0&&!u.engaged&&u.salveT<=0)faehigAnwenden(u,'schildkroete');
+    else if(u.fa==='schildkroete'&&(u.beschuss<=0||u.engaged))faehigAnwenden(u,'schildkroete');
+  }
+}
 function auftrag(u,t,laufen){
-  if(u.atkT===t&&u.run===laufen)return;
-  u.atkT=t;u.run=laufen;u.hasDest=true;u.destX=U[t].cx;u.destZ=U[t].cz;
+  if(u.atkT===t&&u.run===(laufen&&!u.faNoRun))return;
+  u.atkT=t;u.run=laufen&&!u.faNoRun;u.hasDest=true;u.destX=U[t].cx;u.destZ=U[t].cz;
 }
 function halt(u){u.atkT=-1;u.hasDest=false;}
 function autoZiel(u){   // Haltung „Angreifen“
@@ -4138,6 +4190,7 @@ function ki(u){
   if(gone(u)||u.state==='flieht')return;
   if(u.fern&&fernKI(u))return;
   if(!KIS[u.side]){if(u.stance==='angreifen'&&!u.engaged&&u.atkT<0)autoZiel(u);return;}
+  kiFaehig(u);
   if(u.def.reit){reitKI(u);return;}
   if(u.engaged)return;
   if(u.reserve){   // Sehr schwer: eine Einheit bleibt zurück, bis die Linie wankt oder es lange dauert
@@ -4212,7 +4265,7 @@ function bewegen(dt){
         const h=Math.atan2(dx,dz),df=wrap(h-u.f);
         u.f+=Math.max(-2.5*dt,Math.min(2.5*dt,df));
         if(u.ele&&u.run&&u.trumT<=0&&u.atkT>=0&&d>38&&d<95&&phase==='schlacht'){u.trumT=45;if(Math.random()<.7)trompetenEinheit(u);}   // gelegentlich vor dem Ansturm
-        let sp=u.run?u.def.run*(1-.3*u.muede):u.def.walk*(1-.12*u.muede);if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;
+        let sp=(u.run&&!u.faNoRun)?u.def.run*(1-.3*u.muede):u.def.walk*(1-.12*u.muede);if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;sp*=u.faV;
         {grad(u.cx,u.cz);const sl=(_gx*dx+_gz*dz)/d;sp*=sl>0?1-Math.min(.4,sl*2.2):1+Math.min(.12,-sl);sp*=1-.3*WF(u.cx,u.cz);if(FLU)sp*=furtK(u.cx,u.cz);}   // bergauf langsamer, Wald bremst, Furt halbiert
         if(u.sn>0&&!u.loesen){const lag=Math.hypot(u.cx-u.mx,u.cz-u.mz);sp*=Math.max(.25,Math.min(1,1-(lag-3)/6));}   // wartet auf die Soldaten
         const st=Math.min(sp*dt,d);u.cx+=dx/d*st;u.cz+=dz/d*st;u.curSpeed=st/dt;moving=true;
@@ -4329,7 +4382,7 @@ function figuren(dt){
       const dx=_tx-sX[i],dz=_tz-sZ[i],d=Math.sqrt(dx*dx+dz*dz)+1e-6;
       if(sMov[i]){if(d<.12)sMov[i]=0;}else if(d>.45){sMov[i]=1;sDelay[i]=Math.random()*.4;}
       if(sMov[i]&&sDelay[i]<=0){
-        const base=(u.hasDest&&u.run)||u.runT>0?K.run:K.walk;
+        const base=((((u.hasDest&&u.run)||u.runT>0)&&!u.faNoRun)?K.run:K.walk)*u.faV;
         const vmax=base*sJit[i]*(1-.25*sFat[i])*(d>2.5?1.3:d>1?1.12:1);
         const ds=Math.min(vmax,2.2*d+.15);dvx=dx/d*ds;dvz=dz/d*ds;
         if(d>(reit?1:1.5)){face=Math.atan2(dx,dz);hf=true;}else{face=u.f+sJR[i];hf=true;}
@@ -4372,7 +4425,7 @@ function figuren(dt){
           }
           if(K.sar&&!lauf&&u.feindD<40&&phase==='schlacht'){ci=C.gehen_sarissa;ref=cl[ci].speed||K.walk;}   // Vorrücken in Formation nahe am Feind: Pike gesenkt
           setClip(i,ci,Math.max(.55,Math.min(1.6,sp/ref)));
-        }else setClip(i,(K.sar&&phase==='schlacht'&&(st===S_KAMPF||u.feindD<40))?C.sarissa_bereit:st===S_KAMPF?C.kampf_bereit:(st===S_FORM&&u.beschuss>0&&K.schild>0?C.schild_hoch:(phase==='aufstellung'&&sVar[i]?C.stehen_b:C.stehen_bereit)),sJit[i]);
+        }else setClip(i,(K.sar&&phase==='schlacht'&&(st===S_KAMPF||u.feindD<40))?C.sarissa_bereit:st===S_KAMPF?C.kampf_bereit:(st===S_FORM&&((u.beschuss>0&&K.schild>0)||u.fa==='schildkroete'||u.fa==='schildwall')?C.schild_hoch:(phase==='aufstellung'&&sVar[i]?C.stehen_b:C.stehen_bereit)),sJit[i]);
       }
     }
     // Ermüdung
@@ -4714,7 +4767,7 @@ function befehl(i,x,z,laufen){
   u.atkT=-1;u.fBef=-1;u.rueck=false;u.zurueck=false;u.loesen=false;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));
   if(HN){hindPush(u.destX,u.destZ,3.5);u.destX=_hx;u.destZ=_hz;}   // Ziele in Felsen und Häusern auf den Rand verschieben
   if(FLU){flussPush(u.destX,u.destZ,3.5);u.destZ=_hz;}              // Ziele im Tiefwasser ans Ufer
-  u.hasDest=true;u.run=!!laufen;
+  u.hasDest=true;u.run=!!laufen&&!u.faNoRun;
   if(u.engaged){u.sperre=2.5;u.kT=0;u.abzug=true;}   // Marschbefehl im Gefecht: löst sich vom Feind und geht bis zum Ziel durch (Verfolger schlagen in den Rücken)
   return true;
 }
@@ -4797,6 +4850,8 @@ function zustand(u){   // -> [Zeichen, Text]
   if(u.state==='aufgerieben')return['zs-kampf','aufgerieben'];
   if(u.state==='flieht')return['zs-flucht','flieht!'];
   if(u.loesen)return['zs-flucht',u.hasDest?'löst sich':'sammelt sich'];
+  if(u.salveT>0)return['zs-schuss','Wurfsalve'];
+  if(u.fa)return['zs-steht',FAEH_NAME[u.fa]];
   if(u.engaged||u.state==='kampf')return['zs-kampf','kämpft'];
   if(u.rueck)return['zs-flucht','weicht aus'];
   if(u.fern&&u.mun>0&&u.schiessT>0)return['zs-schuss','schießt · '+u.mun];
@@ -4813,12 +4868,13 @@ function fensterBauen(u){
     +'<div class="zl"><span>Mannschaft</span><b data-k="m"></b></div><div class="zl"><span>Angriff</span><b data-k="a"></b></div>'
     +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div><div class="zl"><span>Ausdauer</span><b data-k="f"></b></div>'
     +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div>'
-    +'<p class="fa"></p><p class="sub" style="flex-basis:100%;margin:0"></p><p class="bs"></p><p class="vl"></p>';
+    +'<p class="fa"></p><p class="sub" style="flex-basis:100%;margin:0"></p><p class="bs"></p><p class="bs fh"></p><p class="vl"></p>';
   e.querySelector('h3').textContent=u.name;
   e.querySelector('.w .sub').textContent='Kampagnenstärke '+fmt(E.str)+' · '+E.mann+' Mann';
   e.querySelector('.fa').textContent=(u.gen?'Feldherr: '+u.gname+' · Aura '+AURA_R+' m (Moral hält besser, Sammeln, Anfeuern). ':'')+(E.faehigkeiten.length?E.faehigkeiten.join(' · ')+'. ':'')+gear;
   e.querySelector('p.sub').textContent=E.paketGenau?'Figuren: eigenes Paket ('+E.paket+')':'Figuren vorläufig ('+E.paket+' als Ersatz)';
   e.querySelector('p.bs').textContent=E.beschreibung||'';
+  e.querySelector('p.fh').textContent=faehigListe(u).map(n=>FAEH_TEXT[n]).join(' ');
   e.querySelector('.vl').textContent=E.paketGenau?'':'Für diese Einheit gibt es noch keine eigenen Figuren.';
   fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),f:e.querySelector('[data-k=f]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
   e.querySelector('.x').onclick=()=>{infoId=-1;};
@@ -4860,8 +4916,8 @@ function uiAktualisieren(){
     if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
     fe.classList.add('an');
     const K=h.def;
-    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));txt(fw.f,h.muede>.45?'erschöpft':h.muede>.22?'müde':'frisch');
-    txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
+    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)*(h.fa==='schildkroete'?.8:1)));txt(fw.d,fmt(K.def*(h.fa==='schildwall'?1.2:h.fa==='keil'?.85:1))+(h.fa==='schildwall'?' (Schildwall, von vorn)':h.fa==='keil'?' (Keil)':''));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));txt(fw.f,h.muede>.45?'erschöpft':h.muede>.22?'müde':'frisch');
+    txt(fw.t,h.fa==='schildkroete'?fmt(K.walk*.4)+' m/s (Schildkröte)':h.fa==='schildwall'?fmt(K.walk)+' m/s (kein Laufen)':fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
   }else{fe.classList.remove('an');fensterId=-2;}
   // Knöpfe
   const L=selListe(),hz=L.length?L[0]:null;
@@ -4878,6 +4934,8 @@ function uiAktualisieren(){
      btnText('bSammeln','Sammeln',cs>0?'noch '+cs+' s':'Fliehende kehren um');btnText('bAnfeuern','Anfeuern',ca>0?'noch '+ca+' s':'Moral und Angriff');
      $('bSammeln').style.opacity=cs>0?.55:1;$('bAnfeuern').style.opacity=ca>0?.55:1;}}
   $('bHalt').style.opacity=$('bForm').style.opacity=hz?1:.55;
+  {const wn=hz&&phase==='schlacht'?faehigWahl(hz):null;$('bFaeh').style.opacity=wn?1:.45;$('bFaeh').hidden=phase==='aufstellung';
+   btnText('bFaeh','Fähigkeit',!hz?'Einheit wählen':!wn?'keine':FAEH_NAME[wn]+' · '+(wn==='salve'?'bereit':hz.fa===wn?'an':'aus'));klasse($('bFaeh'),'an',!!(hz&&hz.fa));}
   if(hz){
     const ang=hz.stance==='angreifen';
     btnText('bHalt',ang?'Angreifen':'Halten',hz.fern?(ang?'rückt in Schussweite':'schießt vom Platz'):(ang?'stürmt auf Feinde':'steht fest'));
@@ -4960,12 +5018,13 @@ $('bSammeln').onclick=()=>{sammeln(0);uiAktualisieren();};
 $('bAnfeuern').onclick=()=>{anfeuern(0);uiAktualisieren();};
 $('bLoesen').onclick=()=>{for(const u of selListe())if(u.def.reit&&phase==='schlacht')loesen(u);uiAktualisieren();};
 $('bPlaenk').onclick=()=>{const L=selListe();if(!L.length)return;const s=!L[0].plaenk;for(const u of L)if(u.fern)u.plaenk=s;uiAktualisieren();};
-$('bForm').onclick=()=>{const L=selListe();if(!L.length)return;const e=!L[0].eng;for(const u of L){u.eng=e;u.fk=e?FORM_K.eng:FORM_K.locker;}uiAktualisieren();};
+$('bForm').onclick=()=>{const L=selListe();if(!L.length)return;const e=!L[0].eng;for(const u of L){u.eng=e;faehigFk(u);}uiAktualisieren();};
+$('bFaeh').onclick=()=>{for(const u of selListe()){const n=faehigWahl(u);if(n)faehigAnwenden(u,n);}uiAktualisieren();};
 $('bPause').onclick=()=>{pausiert=!pausiert;uiAktualisieren();};
 $('bTempo').onclick=()=>{const T=[1,2,4];tempoV=T[(T.indexOf(tempoV)+1)%T.length]||1;uiAktualisieren();};
 $('bGrafik').onclick=()=>setGrafik(GRAFIK_ORDNUNG[(GRAFIK_ORDNUNG.indexOf(grafikName)+1)%3]);
 try{tonAn=localStorage.getItem('schlachtTon')!=='0';}catch(e){}
-for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeuern','bPause','bTempo','bGrafik','bTon','bRueck'])$(id).addEventListener('pointerdown',e=>e.stopPropagation());
+for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bFaeh','bSammeln','bAnfeuern','bPause','bTempo','bGrafik','bTon','bRueck'])$(id).addEventListener('pointerdown',e=>e.stopPropagation());
 
 
 /* ====================================================================================================
@@ -4997,7 +5056,8 @@ const TON=(()=>{
   for(const k in EV)EV[k].l=-1e9;
   /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
   const LISTE=[];
-  const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'],id,art:null,ok:false});
+  const M_FEHLT={m_aufmarsch_rom_a:1};   // beim Erzeugen aussortiert: gleich die andere Fassung laden (kein 404)
+  const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'].filter(n=>!M_FEHLT[n]),id,art:null,ok:false});
   LISTE.push(mItem('kampf_1'));
   const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
   const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste),fluss:!!FLU};   // Klima-Teppiche nur laden, wenn gebraucht
@@ -5007,7 +5067,7 @@ const TON=(()=>{
     const z={};for(const u of U){const k=u.side===0&&u.ein&&KMUS[u.ein.kultur];if(k)z[k]=(z[k]||0)+u.np;}
     KULT='rom';for(const k in z)if(z[k]>(z[KULT]||0))KULT=k;
     GR.aufmarsch[0]=['aufmarsch_'+KULT];GR.kampf=[KAMPF.concat('kampf_'+KULT)];GR.hoehepunkt[1]=GR.kampf[0];
-    for(const it of LISTE)if(it.kz&&!it.ok){it.id=it.kz.replace('%',KULT);it.alt=['m_'+it.id+'_a','m_'+it.id+'_b'];}
+    for(const it of LISTE)if(it.kz&&!it.ok){it.id=it.kz.replace('%',KULT);it.alt=['m_'+it.id+'_a','m_'+it.id+'_b'].filter(n=>!M_FEHLT[n]);}
   }
   const MB={},SB={};          // geladene Puffer: Musik je Stück · Geräusche je Art (Liste)
   let abgebaut=false;
@@ -5484,6 +5544,7 @@ return{
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id],pferd:pCur[id]>=0?(U[sUnit[id]].ele?EFN:PFN)[pCur[id]]:null,ch:sCh[id],rush:sRush[id],v:Math.hypot(sVX[id],sVZ[id]),reit:sRt[id],ele:!!(sRt[id]&&U[sUnit[id]].ele),pan:sPanK[id],hurt:sHurt[id],rad:sRad[id]};},
   elefPanik(i,w){const u=U[i];if(!u||!u.ele)return -1;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_KAMPF&&!sPanK[id]){panikStart(id,u);if(w!=null)sPA[id]=w;return id;}}return -1;},   // nur für Tests / Bilder
   get umwelt(){const o={hindernisse:HN,gruppen:HC.slice(),teile:{}};for(const k in UMW)o.teile[k]={n:UMW[k].n,sichtbar:UMW[k].m.count};o.liste=HIND.map(h=>[h.k||'',Math.round(h.x*10)/10,Math.round(h.z*10)/10,h.r]);return o;},
+  faehigkeit(i,n){const u=U[i];return u?faehigAnwenden(u,n||faehigWahl(u)):false;},faehig(i){const u=U[i];return u?{liste:faehigListe(u),wahl:faehigWahl(u),fa:u.fa,salveVerbr:u.salveVerbr,salveT:u.salveT,salveBereit:salveBereit(u)}:null;},
   loesen(i){return loesen(U[i]);},sammeln(s){return sammeln(s==null?0:s);},anfeuern(s){return anfeuern(s==null?0:s);},get abklingzeit(){return FK;},
   feldherr(sd){const g=U.find(u=>u.gen&&u.side===sd);if(!g)return null;const id=g.genId;return Object.assign(feldherrInfo(g),{i:g.i,id,x:sX[id],z:sZ[id],st:sSt[id],hp:sHP[id],hp0:g.genHP0,aura:g.aura,auraW:g.auraW,schritt:sGen[id]});},
   feldherrLeben(sd,f){const g=U.find(u=>u.gen&&u.side===sd&&u.genAlive);if(g)sHP[g.genId]=g.genHP0*f;},   // nur für Tests
@@ -12259,6 +12320,7 @@ const RUL_TRAITS={
 // v222 (31.10.): Neue Schlacht: Gleichgewicht (Speer-Reichweite, keine Doppelzaehlung, kein Seitenvorteil), Wege um Hindernisse, Phalanx mit gesenkter Sarissa, Musik nach Volk, Feldherr-/Anfeuern-/Fluchtlaute; Schlachtdateien in der Offline-Liste (OFF_VER v216)
 // v223 (31.10.): Neue Schlacht: Gelaende aus der Provinz (Ebene/Huegel/Pass, Klima Mittelmeer/Steppe/Wueste/Wald/Schnee, Kueste), Klimafarben, Geraeusche Wald/Wueste/Kueste
 // v224 (31.10.): Neue Schlacht: Fluss mit Furten, Ausdauer (Rennen ermuedet, Erholung, Anzeige), Farben je Volk fuer Kleidung und Schilde, Elefantenschritte; Kampagne: verwundeter Feldherr fuehrt schwaecher (2/5 Runden); OFF_VER v217
+// v225 (31.10.): Neue Schlacht: Faehigkeiten je Einheit (Schildkroete Legion/Hastati, Keil Reiterei, Schildwall Hopliten/Phalanx/Libyer, Wurfsalve einmal je Schlacht), Knopf Faehigkeit, KI nutzt Schildwall und Schildkroete
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
