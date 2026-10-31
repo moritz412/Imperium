@@ -58,6 +58,12 @@ export const GEB = {
   brunnen: { n: 'Brunnen', kat: 'Öffentlich', g: [1, 1], h: 0.35, wand: 0xbfb6a4, wasser: true,
     kosten: { ziegel: 8 }, reichweite: 7,
     text: 'Versorgt Häuser im Umkreis von 7 Feldern mit Wasser.' },
+  ludus: { n: 'Schule', kat: 'Öffentlich', g: [2, 2], h: 0.75, wand: 0xe6d6b4, dach: 0x8a4a2b,
+    kosten: { holz: 25, ziegel: 15 }, arbeiter: 2, wissen: 3,
+    text: 'Ein Lehrer (ludi magister) unterrichtet die Kinder der Stadt: 3 Wissen im Monat für die Forschung.' },
+  schrein: { n: 'Schrein', kat: 'Öffentlich', g: [1, 1], h: 0.6, wand: 0xd8ccb0, dach: 0xa9583a, forschung: 'schreine',
+    kosten: { ziegel: 10, holz: 5 }, reichweite: 9,
+    text: 'Kleiner Schrein der Laren. Häuser im Umkreis von 9 Feldern sind zufriedener.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -156,3 +162,32 @@ export const AUFTRAEGE = [
   { n: 'Brunnen und Markt: Lass eine Hütte zur Casa aufsteigen.', ok: S => S.geb.some(b => b.t === 'huette' && b.stufe === 2), lohn: { denare: 120 } },
   { n: 'Siedle 60 Einwohner an.', ok: S => S.geb.reduce((s, b) => s + (b.bew || 0), 0) >= 60, lohn: { denare: 150 } },
 ];
+
+// Forschung (S3.1): Wissen aus dem Stadtrat (1 im Monat) und Schulen (je 3), ein Ziel gleichzeitig.
+// ep 1 = Frühe Republik (erforschbar), ep 2 = Späte Republik (nur Vorschau, kommt mit dem Amt des Ädils)
+export const WISSEN_GRUND = 1;
+export const ZWEIGE = ['Landwirtschaft', 'Handwerk', 'Bauwesen', 'Verwaltung & Recht', 'Kultur & Glaube'];
+export const FORSCHUNG = {
+  fruchtwechsel:  { n: 'Fruchtwechsel', zweig: 0, ep: 1, kosten: 30, text: 'Bohnen und Getreide im Wechsel: Getreide von Feldern und Gehöften +25 %.' },
+  villa:          { n: 'Villa rustica', zweig: 0, ep: 1, kosten: 60, braucht: 'fruchtwechsel', text: 'Gehöfte im Umland lassen sich zum Gutshof ausbauen: Ertrag +75 %.' },
+  ziegelbrand:    { n: 'Ziegelbrand', zweig: 1, ep: 1, kosten: 30, text: 'Heißere Öfen: Ziegeleien brennen 3 statt 2 Ziegel.' },
+  toepferscheibe: { n: 'Töpferscheibe', zweig: 1, ep: 1, kosten: 40, braucht: 'ziegelbrand', text: 'Amphoren und Dolia für die Vorräte: Lagergrenze +50 je Ware.' },
+  schotter:       { n: 'Schotterwege', zweig: 2, ep: 1, kosten: 40, text: 'Feldwege mit Kies: kein Verlust durch Entfernung, Karren fahren doppelt so schnell.' },
+  bauhuette:      { n: 'Bauhütte', zweig: 2, ep: 1, kosten: 35, text: 'Geübte Zimmerleute: Gebäude in der Stadt brauchen 20 % weniger Holz.' },
+  steuerlisten:   { n: 'Steuerlisten', zweig: 3, ep: 1, kosten: 30, text: 'Der Census erfasst jeden Haushalt: Steuern +20 %.' },
+  landvermessung: { n: 'Landvermessung', zweig: 3, ep: 1, kosten: 25, text: 'Groma und Messkette: Vermessen dauert 1 Monat und kostet 10 Denare.' },
+  schreine:       { n: 'Schreine', zweig: 4, ep: 1, kosten: 30, text: 'Schreine der Laren an den Straßen: Häuser in der Nähe sind zufriedener.' },
+  feste:          { n: 'Erntefest', zweig: 4, ep: 1, kosten: 40, braucht: 'schreine', text: 'Nach der Ernte feiert die Stadt: Stimmung +10, kostet 20 Brot.' },
+  weinbau:        { n: 'Weinbau', zweig: 0, ep: 2, kosten: 80, text: 'Reben an den Hängen, Kelter und Weinkeller.' },
+  olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, text: 'Öl für Küche, Lampen und Thermen.' },
+  weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, text: 'Wolle von den Weiden wird zu Tuch.' },
+  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, text: 'Fischsoße für die Equites – und für den Handel.' },
+  roemerstrasse:  { n: 'Römerstraße', zweig: 2, ep: 2, kosten: 100, text: 'Gepflasterte Fernstraße nach Placentia und Rom.' },
+  aquaedukt:      { n: 'Aquädukt', zweig: 2, ep: 2, kosten: 120, text: 'Frisches Wasser aus den Hügeln für die ganze Stadt.' },
+  archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit Nachbarstädten.' },
+  zoelle:         { n: 'Zölle', zweig: 3, ep: 2, kosten: 90, text: 'Einnahmen von jedem Boot auf dem Padus.' },
+  tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, text: 'Ein Tempel für Jupiter auf dem Forum.' },
+  theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, text: 'Komödien des Plautus für die Plebejer.' },
+};
+export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
+

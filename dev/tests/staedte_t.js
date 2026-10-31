@@ -250,6 +250,37 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Hochwasser im Frühling, Deich schützt', gef.nass === 'hochwasser' && gef.mH && gef.trocken);
   ok('Gallier rauben, Kastell schlägt sie zurück', gef.mG1 && gef.korn < gef.kornK - 15 && gef.mG2, JSON.stringify({ korn: gef.korn, mitKastell: gef.kornK }));
   ok('Wachturm per Knopf gebaut', gef.ui.knopf && gef.ui.turm && gef.ui.zeile, JSON.stringify(gef.ui));
+  // S3.1 Forschung: Ziel wählen, Schule bringt Wissen, Erfindungen wirken, Schrein erst nach Forschung
+  const fo = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, F = sim.forschungS(S), kopie = () => JSON.parse(JSON.stringify(S));
+    const schreinVor = SR.bauen('schrein', 30, 13).grund || 'ok';
+    const villaVor = sim.forschungWaehlen(S, 'villa').grund, ep2 = sim.forschungWaehlen(S, 'weinbau').grund;
+    const w0 = sim.wissenProMonat(S);
+    Object.assign(S.gut, { holz: S.gut.holz + 60, ziegel: S.gut.ziegel + 40 });
+    let schule = null;
+    for (let z = 13; z <= 15 && !schule; z++) for (let x = 2; x <= 36 && !schule; x++) { const r = sim.bauen(S, SR.welt, 'ludus', x, z); if (r.ok) schule = r.b; }
+    const wahl = sim.forschungWaehlen(S, 'fruchtwechsel').ok;
+    SR.monate(2); const w1 = sim.wissenProMonat(S);
+    F.wissen = Math.max(F.wissen, 29); SR.monate(1);
+    const fertig = sim.hat(S, 'fruchtwechsel'), bonus = sim.bonus(S, 'feld', 'getreide');
+    F.fertig.push('schreine', 'landvermessung', 'bauhuette', 'villa');
+    const schreinNach = SR.bauen('schrein', 30, 13).ok || SR.bauen('schrein', 31, 13).ok || SR.bauen('schrein', 32, 13).ok;
+    const verm = sim.vermMonate(S), holzK = sim.baukosten(S, 'markt').holz;
+    // Villa rustica: Gehöft ausbauen bringt mehr Getreide (Kopie, Sommer)
+    const V = kopie(), karte = sim.regionKarte(), hof = karte.find(f => (V.land[sim.landKey(f)] || {}).betrieb === 'gehoeft' && sim.verbunden(V, f));
+    let villa = 'kein Gehöft';
+    if (hof) { V.gut.holz += 50; V.gut.ziegel += 40; V.monat = 4; V.land[sim.landKey(hof)].stoer = 0; const W = JSON.parse(JSON.stringify(V)); villa = sim.villaBauen(V, hof).ok;
+      V.gut.getreide = 0; W.gut.getreide = 0; V.geb = V.geb.filter(b => b.t === 'strasse'); W.geb = V.geb.slice(); sim.monat(V, SR.welt); sim.monat(W, SR.welt); villa = villa && V.gut.getreide > W.gut.getreide ? true : [villa, V.gut.getreide, W.gut.getreide].join(' '); }
+    SR.forschung();
+    const karten = document.querySelectorAll('#forschung .fkarte').length, offen = !document.querySelector('#forschung').hidden;
+    document.querySelector('#forschung .fkarte[data-f="ziegelbrand"]').click();
+    const ziel = F.ziel, zeile = document.querySelector('#forschZeile').textContent;
+    document.querySelector('#forschung [data-f="zu"]').click();
+    return { schreinVor, villaVor, ep2, w0, schule: !!schule, wahl, w1, fertig, bonus, schreinNach, verm, holzK, villa, karten, offen, ziel, zeile, zu: document.querySelector('#forschung').hidden };
+  });
+  ok('Forschung: Ziel, Schule bringt Wissen, Fruchtwechsel wirkt', /erforschen/.test(fo.schreinVor) && /Fruchtwechsel/.test(fo.villaVor) && /Republik/.test(fo.ep2) && fo.schule && fo.wahl && fo.w1 > fo.w0 && fo.fertig && fo.bonus === 1.25, JSON.stringify(fo));
+  ok('Erfindungen: Schrein, Landvermessung, Bauhütte, Villa rustica', fo.schreinNach && fo.verm === 1 && fo.holzK === 28 && fo.villa === true);
+  ok('Forschungsseite: 20 Karten, Ziel per Antippen, Anzeige im Auftrag', fo.offen && fo.karten === 20 && fo.ziel === 'ziegelbrand' && /Ziegelbrand/.test(fo.zeile) && fo.zu);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

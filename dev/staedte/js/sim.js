@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -37,7 +37,7 @@ export function neuesSpiel() {
 
 // ---------- Straßen (S1.3) ----------
 export const START_STRASSE = 12;
-export const OHNE_STRASSE = new Set(['strasse', 'brunnen']);   // brauchen keine Straße vor der Tür
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein']);   // brauchen keine Straße vor der Tür
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export function strassenMaske(S) {
@@ -73,7 +73,7 @@ export const jahreszeit = S => Math.floor((S.monat % 12) / 3);
 export const jahr = S => S.jahr0 + Math.floor(S.monat / 12);
 export const einwohner = S => S.geb.reduce((s, b) => s + (b.bew || 0), 0);
 export const def = b => GEB[b.t];
-export const lagerGrenze = S => LAGER_GRUND + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
+export const lagerGrenze = S => LAGER_GRUND + (hat(S, 'toepferscheibe') ? 50 : 0) + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
 export const groesse = t => GEB[t].g;
 
 export const rang = S => { const e = einwohner(S); let r = 0; RAENGE.forEach((x, i) => { if (e >= x.ab) r = i; }); return Math.max(r, S.rang || 0); };
@@ -115,9 +115,10 @@ export function fehlendeKosten(S, kosten) {
 }
 
 export function bauen(S, welt, t, x, z) {
+  if (gesperrt(S, t)) return { ok: false, grund: 'Erst erforschen: ' + FORSCHUNG[GEB[t].forschung].n };
   const grund = pruefePlatz(S, welt, t, x, z);
   if (grund) return { ok: false, grund };
-  const k = GEB[t].kosten;
+  const k = baukosten(S, t);
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
   const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [] };
@@ -202,7 +203,7 @@ export function monat(S, welt) {
     }
     if (faktor <= 0) continue;
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) S.gut[g] = Math.max(0, S.gut[g] - n * faktor);
-    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor);
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor * bonus(S, b.t, g));
   }
 
   // Umland (S2.2): Vermessung schreitet fort, Betriebe liefern
@@ -242,8 +243,10 @@ export function monat(S, welt) {
   // Stimmung und Steuern
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
+  const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
+  if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += einwohner(S) * STEUER * (S.stimmung / 70);
+  S.gut.denare += einwohner(S) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (S.stimmung / 70);
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
   const a = AUFTRAEGE[S.auftrag];
@@ -258,8 +261,13 @@ export function monat(S, welt) {
   const r = rang(S);
   if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
-  // Handel und Abgaben (S2.5)
+  // Handel und Abgaben (S2.5), Forschung und Erntefest (S3.1)
   handelMonat(S);
+  forschungMonat(S, meld);
+  if (S.monat % 12 === 8 && hat(S, 'feste')) {
+    if (S.gut.brot >= 20) { S.gut.brot -= 20; S.stimmung = Math.min(100, S.stimmung + 10); meld.push('Erntefest! Die Stadt feiert die Ernte (−20 Brot, Stimmung +10).'); }
+    else meld.push('Für ein Erntefest fehlt das Brot.');
+  }
   if (S.monat % 12 === 8 && S.monat >= 12) meld.push(abgabeZahlen(S));
 
   const altJs = js;
@@ -364,7 +372,7 @@ export function landStand(S, f) {
   const l = (S.land || {})[landKey(f)];
   if (f.typ === 'stadt') return 'stadt';
   if (!l) return 'frei';
-  return l.verm < VERMESSEN.monate ? 'vermessung' : l.betrieb ? 'betrieb' : 'vermessen';
+  return l.verm < vermMonate(S) ? 'vermessung' : l.betrieb ? 'betrieb' : 'vermessen';
 }
 export function kannVermessen(S, f) {
   if (landStand(S, f) !== 'frei') return false;
@@ -375,8 +383,9 @@ export function kannVermessen(S, f) {
 }
 export function vermessen(S, f) {
   if (!kannVermessen(S, f)) return { ok: false, grund: 'Nur Land neben der Stadt oder neben vermessenem Land' };
-  if (!kannBezahlen(S, VERMESSEN.kosten)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, VERMESSEN.kosten).join(', ') };
-  for (const [g, n] of Object.entries(VERMESSEN.kosten)) S.gut[g] -= n;
+  const vk = vermKosten(S);
+  if (!kannBezahlen(S, vk)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, vk).join(', ') };
+  for (const [g, n] of Object.entries(vk)) S.gut[g] -= n;
   (S.land = S.land || {})[landKey(f)] = { verm: 0, betrieb: '' };
   return { ok: true };
 }
@@ -428,16 +437,16 @@ export function wegAnlegen(S, f) {
   S.land[landKey(f)].weg = true;
   return { ok: true };
 }
-export const landFaktor = f => Math.max(0.5, 1 - 0.05 * (hexAbstand(f, { q: 0, r: 0 }) - 1));
+export const landFaktor = (f, S) => S && hat(S, 'schotter') ? 1 : Math.max(0.5, 1 - 0.05 * (hexAbstand(f, { q: 0, r: 0 }) - 1));
 function landMonat(S, js, grenze, meld) {
   const netz = wegNetz(S);
   for (const f of regionKarte()) {
     const l = (S.land || {})[landKey(f)]; if (!l) continue;
-    if (l.verm < VERMESSEN.monate) { if (++l.verm === VERMESSEN.monate) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
+    if (l.verm < vermMonate(S)) { if (++l.verm === vermMonate(S)) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
     if (l.stoer > 0) { l.stoer--; continue; }   // geplündert oder überschwemmt (S2.6)
     const d = LAND_BETRIEBE[l.betrieb]; if (!d || !netz.has(landKey(f))) continue;
-    const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
-    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor);
+    const faktor = landFaktor(f, S) * (d.ernte ? JAHRESZEITEN[js].ernte : 1) * (l.villa ? 1.75 : 1);
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
   }
   gefahren(S, meld);
 }
@@ -451,13 +460,13 @@ function wurf(S, salz) {
 }
 const STADT = { q: 0, r: 0 };
 export const amFluss = f => f.typ !== 'fluss' && f.typ !== 'stadt' && nachbarn(f).some(n => n && n.typ === 'fluss');
-const fertig = l => l && l.verm >= VERMESSEN.monate;
+const fertig = (S, l) => l && l.verm >= vermMonate(S);
 export function raeuberSchutz(S, f) {
   if (hexAbstand(f, STADT) < GEFAHR.raeuber.weit) return true;
-  return regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; if (!fertig(l)) return false;
+  return regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; if (!fertig(S, l)) return false;
     const d = hexAbstand(f, g); return (l.turm && d <= 1) || (l.betrieb === 'kastell' && d <= 2); });
 }
-export const hatKastell = S => regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; return fertig(l) && l.betrieb === 'kastell'; });
+export const hatKastell = S => regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; return fertig(S, l) && l.betrieb === 'kastell'; });
 export function schutzBauen(S, f, art) {
   const d = SCHUTZ[art], st = landStand(S, f), l = (S.land || {})[landKey(f)];
   if (!d) return { ok: false, grund: 'Unbekannter Bau' };
@@ -472,7 +481,7 @@ export function schutzBauen(S, f, art) {
 function stoeren(l, art, n) { l.stoer = Math.max(l.stoer || 0, n); l.stoerArt = art; }
 function gefahren(S, meld) {
   const m = S.monat, land = S.land || {}, salz = f => (f.q + 5) * 13 + (f.r + 5);
-  const betriebe = regionKarte().filter(f => { const l = land[landKey(f)]; return fertig(l) && l.betrieb && !['anleger', 'kastell'].includes(l.betrieb); });
+  const betriebe = regionKarte().filter(f => { const l = land[landKey(f)]; return fertig(S, l) && l.betrieb && !['anleger', 'kastell'].includes(l.betrieb); });
   const G = GEFAHR;
   if (m >= G.raeuber.ab) {
     const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance);
@@ -541,3 +550,62 @@ function abgabeZahlen(S) {
   S.gunst = Math.max(0, gunst(S) - ABGABE.minus);
   return `Die Kasse reicht nicht für die Abgaben an Rom (${n} Denare). Der Senat ist verärgert.`;
 }
+
+// ---------- Forschung (S3.1) ----------
+export const forschungS = S => (S.forschung = S.forschung || { ziel: '', wissen: 0, fertig: [] });
+export const hat = (S, id) => !!(S.forschung && S.forschung.fertig.includes(id));
+export const gesperrt = (S, t) => !!GEB[t].forschung && !hat(S, GEB[t].forschung);
+export const vermMonate = S => hat(S, 'landvermessung') ? 1 : VERMESSEN.monate;
+export const vermKosten = S => hat(S, 'landvermessung') ? { denare: 10 } : VERMESSEN.kosten;
+export function baukosten(S, t) {
+  const k = { ...GEB[t].kosten };
+  if (k.holz && hat(S, 'bauhuette')) k.holz = Math.ceil(k.holz * 0.8);
+  return k;
+}
+export function bonus(S, t, g) {
+  let m = 1;
+  if (g === 'getreide' && hat(S, 'fruchtwechsel')) m *= 1.25;
+  if (t === 'ziegelei' && hat(S, 'ziegelbrand')) m *= 1.5;
+  return m;
+}
+export function wissenProMonat(S) {
+  return WISSEN_GRUND + S.geb.filter(b => b.t === 'ludus').reduce((s, b) => s + GEB.ludus.wissen * (b.w || 0) / GEB.ludus.arbeiter, 0);
+}
+export function forschungsStand(S, id) {
+  const d = FORSCHUNG[id], F = forschungS(S);
+  if (F.fertig.includes(id)) return 'fertig';
+  if (d.ep > 1) return 'epoche';
+  if (d.braucht && !F.fertig.includes(d.braucht)) return 'gesperrt';
+  return F.ziel === id ? 'ziel' : 'offen';
+}
+export function forschungWaehlen(S, id) {
+  const st = FORSCHUNG[id] ? forschungsStand(S, id) : '';
+  if (st === 'fertig') return { ok: false, grund: 'Schon erforscht' };
+  if (st === 'epoche') return { ok: false, grund: 'Erst in der ' + (FORSCHUNG[id].ep === 2 ? 'Späten Republik' : 'Kaiserzeit') };
+  if (st === 'gesperrt') return { ok: false, grund: 'Erst erforschen: ' + FORSCHUNG[FORSCHUNG[id].braucht].n };
+  if (st !== 'offen' && st !== 'ziel') return { ok: false, grund: 'Unbekannt' };
+  forschungS(S).ziel = id;
+  return { ok: true };
+}
+function forschungMonat(S, meld) {
+  const F = forschungS(S);
+  F.wissen += wissenProMonat(S);
+  const d = FORSCHUNG[F.ziel];
+  if (d && F.wissen >= d.kosten) {
+    F.wissen -= d.kosten; F.fertig.push(F.ziel); F.ziel = '';
+    meld.push(`Erforscht: ${d.n}. ${d.text}`);
+  }
+}
+// Villa rustica (S3.1): Gehöft ausbauen
+export const VILLA_KOSTEN = { holz: 40, ziegel: 30 };
+export function villaBauen(S, f) {
+  const l = (S.land || {})[landKey(f)];
+  if (!l || l.betrieb !== 'gehoeft') return { ok: false, grund: 'Nur ein Gehöft lässt sich ausbauen' };
+  if (!hat(S, 'villa')) return { ok: false, grund: 'Erst erforschen: Villa rustica' };
+  if (l.villa) return { ok: false, grund: 'Schon eine Villa rustica' };
+  if (!kannBezahlen(S, VILLA_KOSTEN)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, VILLA_KOSTEN).join(', ') };
+  for (const [g, n] of Object.entries(VILLA_KOSTEN)) S.gut[g] -= n;
+  l.villa = true;
+  return { ok: true };
+}
+

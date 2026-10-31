@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -457,11 +457,11 @@ export function erzeugeSzene(leinwand, welt) {
   const landObj = new Map();
   let landS = null;
   function landAbgleichen(S) {
-    landS = S; if (!region) return;
+    landS = S; kTempo = hat(S, 'schotter') ? 2 : 1; if (!region) return;
     for (const f of region.felder) {
       const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k];
       const wegNach = hatWeg(S, f) ? nachbarn(f).map(n => n && hatWeg(S, n) ? 1 : 0).join('') : '';
-      const schl = stand + (l && l.betrieb || '') + wegNach + (l && l.turm ? 'T' : '') + (l && l.deich ? 'D' : '') + (l && l.stoer > 0 ? 'S' + l.stoerArt : '');
+      const schl = stand + (l && l.betrieb || '') + wegNach + (l && l.turm ? 'T' : '') + (l && l.deich ? 'D' : '') + (l && l.stoer > 0 ? 'S' + l.stoerArt : '') + (l && l.villa ? 'V' : '') + (hat(S, 'schotter') ? 'G' : '');
       const alt = landObj.get(k); if (alt && alt.schl === schl) continue;
       if (alt) region.g.remove(alt.g);
       const g = new THREE.Group(), [x, z] = hexMitte(f.q, f.r), top = HOEHE[f.typ] ?? 0.32;
@@ -473,7 +473,7 @@ export function erzeugeSzene(leinwand, welt) {
       [...wegNach].forEach((v, i) => {
         if (v !== '1') return;
         const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, ganz = n.typ === 'nachbar' ? 2 : 1, L = Math.hypot(dx, dz) / 2 * ganz;
-        const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: 0x9c8460 }));
+        const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: hat(S, 'schotter') ? 0xbdb6a6 : 0x9c8460 }));
         st.position.set(x + dx / 4 * ganz, top + 0.03, z + dz / 4 * ganz); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
       if (l) gefahrZeichnen(g, f, l, x, z, top);
@@ -500,7 +500,7 @@ export function erzeugeSzene(leinwand, welt) {
         }
         g.traverse(o => { if (o.isMesh) o.castShadow = true; });
       } else if (stand === 'betrieb') {
-        const t = LAND_BETRIEBE[l.betrieb].modell, mo = modelle && modelle[t];
+        const t = l.villa ? 'casa' : LAND_BETRIEBE[l.betrieb].modell, mo = modelle && modelle[t];
         const m = mo ? new THREE.Mesh(mo.geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1, 0.7, 1), new THREE.MeshLambertMaterial({ color: 0xd8b88a }));
         m.scale.setScalar(mo ? 0.9 : 1); m.position.set(x + 0.9, top, z + 0.9); m.castShadow = true; m.receiveShadow = true; g.add(m);
       }
@@ -558,12 +558,12 @@ export function erzeugeSzene(leinwand, welt) {
         r.position.set(x + 0.9 + i * 0.15, top + 1.2 + i * 0.55, z + 0.9 - i * 0.1); g.add(r); }
     }
   }
-  let karren = [], kzeit = 0;
+  let karren = [], kzeit = 0, kTempo = 1;
   function karrenFahren(dt) {
     kzeit += dt;
     for (const k of karren) {
       if (k.L <= 0) continue;
-      const hin = k.L / 1.6, zyklus = 2 * hin + 3, t = (kzeit + k.ph) % zyklus;
+      const hin = k.L / (1.6 * kTempo), zyklus = 2 * hin + 3, t = (kzeit + k.ph) % zyklus;
       const zurStadt = t < hin + 1.5, s = t < hin ? t * 1.6 : t < hin + 1.5 ? k.L : t < 2 * hin + 1.5 ? k.L - (t - hin - 1.5) * 1.6 : 0;
       let i = 1; while (i < k.c.length - 1 && k.c[i] < s) i++;
       const a = k.pts[i - 1], b = k.pts[i], f = Math.min(1, (s - k.c[i - 1]) / Math.max(1e-6, k.c[i] - k.c[i - 1]));

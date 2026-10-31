@@ -103,6 +103,23 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Bild angesehen. Offen: Balance (Häufigkeit), Räuber/Gallier nicht als Figuren sichtbar, Hochwasser in der Stadt selbst.
       **Nicht getestet:** iPad.
 
+## Stufe 3 – Forschung & volle Bevölkerung (begonnen 1.11.)
+Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
+- [x] S3.1 Forschung (1.11., Cloud): Knopf „Wissen“ (Ansichten-Spalte) öffnet die Forschungsseite: 5 Zweige, je 2 Erfindungen
+      der Frühen Republik (erforschbar) und 2 der Späten Republik (grau, Vorschau). Ein Ziel gleichzeitig, Wissen sammelt sich
+      auch ohne Ziel. Wissen: Stadtrat 1 im Monat + neue **Schule** (Holz 25, Ziegel 15, 2 Arbeiter, 3 Wissen). Wirkungen:
+      Fruchtwechsel (Getreide +25 %), Villa rustica (Gehöft ausbauen, Holz 40/Ziegel 30, Ertrag +75 %, Casa-Modell),
+      Ziegelbrand (Ziegelei 3 statt 2), Töpferscheibe (Lager +50), Schotterwege (kein Entfernungsverlust, Karren ×2, helle
+      Wege), Bauhütte (−20 % Holz in der Stadt), Steuerlisten (+20 %), Landvermessung (1 Monat, 10 Denare), Schreine (neues
+      Gebäude 1×1 ohne Straße, Stimmung bis +10 im Umkreis 9), Erntefest (Ende Herbst −20 Brot, Stimmung +10). Stand der
+      Forschung unter dem Senatsauftrag. Test 44/44 (Cloud, Software-Rendering), Bild angesehen.
+      Offen: Bild/Illustration für die Seite (Leitlinie „Bilder“), Schule und Schrein ohne eigenes Modell (Quader).
+      **Nicht getestet:** iPad.
+- [ ] S3.2 Stände: Insula (Plebejer Stufe 3), Equites in der Domus (brauchen Wein/Öl → mit Epoche II), Sklavenquartier
+      (offene Entscheidung „Sklaven als Stand oder Tagelöhner?“ – Moritz fragen).
+- [ ] S3.3 Feuer und Ordnung: Brandgefahr dichter Häuser, Vigiles-Wache, Ansicht „Feuer“.
+- [ ] S3.4 Epoche II (Späte Republik): Übergang mit Amt/Stadtrang, Weinbau/Öl/Weberei/Garum als Ketten, Römerstraße, Aquädukt.
+
 ## Rückmeldung Moritz 1.11. (nach Spielen)
 „Spielt sich gut, aber sehr schnell und leicht. Man bekommt Lust auf mehr – Manor Lords mit Rom.“ Straßenbau ließ sich nicht korrigieren.
 - [x] Straßen korrigieren: Im Straßen-Baumodus Knopf „Entfernen“ – Felder antippen oder ziehen reißt Straßen ab. Test 41/41.

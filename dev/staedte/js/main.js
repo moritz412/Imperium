@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -51,6 +51,8 @@ function kopfleiste() {
   const a = AUFTRAEGE[S.auftrag];
   $('#auftragText').textContent = a ? a.n : 'Alle Aufträge erfüllt. Die Stadt wächst weiter – bald folgt die Region.';
   $('#auftrag').hidden = !!auswahl;
+  const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
+  $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
 
 // ---------- Bauleiste ----------
@@ -58,10 +60,10 @@ function kostenText(k) { return Object.entries(k).map(([g, n]) => `${WAREN[g].n}
 function bauleiste() {
   $('#reiter').innerHTML = KATEGORIEN.map(k => `<button role="tab" aria-selected="${k === reiter}" class="${k === reiter ? 'an' : ''}" data-k="${k}">${k}</button>`).join('');
   $('#karten').innerHTML = Object.entries(GEB).filter(([, d]) => d.kat === reiter).map(([t, d]) => {
-    const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26);
-    return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, d.kosten) ? '' : ' teuer'}" data-t="${t}" aria-pressed="${t === bauTyp}">
+    const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26), k = sim.baukosten(S, t), zu = sim.gesperrt(S, t);
+    return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, k) ? '' : ' teuer'}${zu ? ' gesperrt' : ''}" data-t="${t}" aria-pressed="${t === bauTyp}">
       <span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>
-      <b>${d.n}</b><small>${kostenText(d.kosten)}</small></button>`;
+      <b>${d.n}</b><small>${zu ? 'Erforschen: ' + FORSCHUNG[d.forschung].n : kostenText(k)}</small></button>`;
   }).join('');
 }
 $('#reiter').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { reiter = b.dataset.k; bauleiste(); } });
@@ -86,6 +88,8 @@ window.addEventListener('pointerup', e => {
     const leiste = $('#leiste').getBoundingClientRect();
     if (e.clientY < leiste.top) bauenAn(z.t, e.clientX, e.clientY);
     if (!bauTyp) szene.vorschau('');
+  } else if (sim.gesperrt(S, z.t)) {
+    melden('Erst erforschen: ' + FORSCHUNG[GEB[z.t].forschung].n); ton.sfx('fehler');
   } else {
     bauTyp = bauTyp === z.t ? '' : z.t; baumodus();
   }
@@ -98,7 +102,7 @@ function platzFuer(t, px, py) {
 }
 function vorschauAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
-  const ok = !sim.pruefePlatz(S, welt, t, p.x, p.z) && sim.kannBezahlen(S, GEB[t].kosten);
+  const ok = !sim.pruefePlatz(S, welt, t, p.x, p.z) && sim.kannBezahlen(S, sim.baukosten(S, t));
   szene.vorschau(t, p.x, p.z, ok);
 }
 function bauenAn(t, px, py) {
@@ -217,8 +221,8 @@ $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
-    else if (a.dataset.a === 'schutz') {
-      const r = sim.schutzBauen(S, hexWahl, a.dataset.t);
+    else if (a.dataset.a === 'schutz' || a.dataset.a === 'villa') {
+      const r = a.dataset.a === 'villa' ? sim.villaBauen(S, hexWahl) : sim.schutzBauen(S, hexWahl, a.dataset.t);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('bauen');
       allesZeichnen(); hexInfo(hexWahl);
     } else if (a.dataset.a === 'handel') {
@@ -260,7 +264,8 @@ $('#menue').addEventListener('click', e => {
       <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li>
       <li>Umland: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.</li>
       <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li>
-      <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li></ol>`;
+      <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li>
+      <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
   }
 });
 
@@ -283,15 +288,16 @@ function hexInfo(f) {
   if (f.typ === 'nachbar') { handelInfo(); return; }
   const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 }), stand = sim.landStand(S, f);
   const l = (S.land || {})[sim.landKey(f)], bt = (l && l.betrieb) || sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
-  const pro = bd ? Object.entries(bd.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ') : '';
+  const ertrag = (t, villa) => Object.entries(LAND_BETRIEBE[t].erzeugt).map(([g, n]) => `${zahl(n * sim.landFaktor(f, S) * sim.bonus(S, t, g) * (villa ? 1.75 : 1))} ${WAREN[g].n}`).join(', ');
+  const pro = bd ? ertrag(bt, l && l.villa) : '';
   let lage = '';
   if (stand === 'frei') lage = sim.kannVermessen(S, f)
-    ? `<button class="knopf haupt" data-a="vermessen">Vermessen lassen (${kostenText(VERMESSEN.kosten)}, ${VERMESSEN.monate} Monate)</button>`
+    ? `<button class="knopf haupt" data-a="vermessen">Vermessen lassen (${kostenText(sim.vermKosten(S))}, ${sim.vermMonate(S)} ${sim.vermMonate(S) === 1 ? 'Monat' : 'Monate'})</button>`
     : '<div class="lage warn">Noch zu weit draußen – erst das Land daneben vermessen.</div>';
-  if (stand === 'vermessung') lage = `<div class="lage warn">Die Landvermesser sind bei der Arbeit (${l.verm} von ${VERMESSEN.monate} Monaten).</div>`;
+  if (stand === 'vermessung') lage = `<div class="lage warn">Die Landvermesser sind bei der Arbeit (${l.verm} von ${sim.vermMonate(S)} Monaten).</div>`;
   if (stand === 'vermessen') lage = bd
     ? '<div class="lage gut">Vermessen</div>' + sim.betriebeFuer(f).map((t, i) => { const b = LAND_BETRIEBE[t];
-        const e = Object.entries(b.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ');
+        const e = ertrag(t);
         return `<p>${b.text}</p>${e ? `<div class="zeile"><span>Ertrag im Monat</span><b>${e}${b.ernte ? ' (Sommer)' : ''}</b></div>` : ''}
         <button class="knopf${i ? '' : ' haupt'}" data-a="landbau" data-t="${t}">${b.n} bauen (${kostenText(b.kosten)})</button>`; }).join('')
     : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
@@ -304,6 +310,8 @@ function hexInfo(f) {
   if ((stand === 'vermessen' || stand === 'betrieb') && !sim.hatWeg(S, f))
     lage += `<button class="knopf${stand === 'betrieb' ? ' haupt' : ''}" data-a="weg">Feldweg anlegen (${kostenText(WEG.kosten)})</button>`;
   else if (sim.hatWeg(S, f)) lage += `<div class="zeile"><span>Feldweg</span><b>${verb ? 'mit der Stadt verbunden' : 'noch nicht bis zur Stadt'}</b></div>`;
+  if (stand === 'betrieb' && bt === 'gehoeft') lage += l.villa ? '<div class="zeile"><span>Ausbau</span><b>Villa rustica</b></div>'
+    : sim.hat(S, 'villa') ? `<button class="knopf" data-a="villa">Zur Villa rustica ausbauen (${kostenText(sim.VILLA_KOSTEN)})</button>` : '';
   if (stand === 'vermessen' || stand === 'betrieb') lage += schutzInfo(f, l, bt);
   if (l && l.stoer > 0) lage = `<div class="lage schlecht">${STOER[l.stoerArt] || 'Gestört'} – noch ${l.stoer} ${l.stoer === 1 ? 'Monat' : 'Monate'} ohne Ertrag</div>` + lage;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -315,6 +323,38 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Forschung (S3.1) ----------
+const STAND_TEXT = { fertig: 'erforscht', ziel: 'wird erforscht', epoche: 'Späte Republik' };
+function forschungZeigen() {
+  const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel];
+  const karte = id => {
+    const d = FORSCHUNG[id], st = sim.forschungsStand(S, id);
+    const unten = st === 'offen' ? `${d.kosten} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : STAND_TEXT[st];
+    return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
+  };
+  const spalten = ZWEIGE.map((z, i) => {
+    const ids = ep => Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].zweig === i && FORSCHUNG[id].ep === ep);
+    return `<div class="fzweig"><h3>${z}</h3>${ids(1).map(karte).join('')}<div class="fepoche">${EPOCHEN[2]}</div>${ids(2).map(karte).join('')}</div>`;
+  }).join('');
+  const rest = ziel ? Math.max(0, ziel.kosten - F.wissen) : 0, mon = Math.ceil(rest / w);
+  $('#forschung').innerHTML = `<div class="feld forschungsseite">
+    <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Forschung</h2><div class="untertitel">Epoche I · ${EPOCHEN[1]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
+      <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
+      : '<b>Wähle ein Ziel</b><small>Wissen sammelt sich auch ohne Ziel. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
+    <div class="fbaum">${spalten}</div></div>`;
+  $('#forschung').hidden = false;
+}
+$('#forschung').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if (!b) { if (e.target.id === 'forschung') $('#forschung').hidden = true; return; }
+  if (b.dataset.f === 'zu') { $('#forschung').hidden = true; return; }
+  const r = sim.forschungWaehlen(S, b.dataset.f);
+  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('klick');
+  forschungZeigen(); kopfleiste();
+});
+
 // ---------- Gefahren (S2.6) ----------
 const STOER = { raeuber: 'Von Räubern geplündert', hochwasser: 'Vom Hochwasser überflutet', gallier: 'Von Galliern verwüstet' };
 function schutzInfo(f, l, bt) {
@@ -368,6 +408,7 @@ function ansichtZeichnen() {
 $('#ansicht').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.hasAttribute('data-umland')) { umland(szene.modus() !== 'region'); return; }
+  if (b.hasAttribute('data-forschung')) { forschungZeigen(); return; }
   ansicht = ansicht === b.dataset.ansicht ? '' : b.dataset.ansicht; ansichtZeichnen();
 });
 function monatAblaufen() {
@@ -380,7 +421,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -409,7 +450,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); },
+  tempo: t => { tempo = t; kopfleiste(); }, forschung: () => forschungZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art) => { const r = sim.handeln(S, g, art); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
