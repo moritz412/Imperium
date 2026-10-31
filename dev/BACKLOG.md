@@ -1,5 +1,7 @@
 # Backlog – Imperium der Epochen 2 (Stand 29.10.2026 morgens, v215 veröffentlicht)
 
+> **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
+
 ## ZUERST (Stand 31.10. 20:30, NICHT veröffentlicht – letzte Version v232)
 - dev enthält zusätzlich: Triarius-Figur mit Hasta (Moritz: Speerträger Roms hielten ein Schwert), 8 Ostasien-Figuren (China/Japan Ep. 1–2, Zuordnung per EIGEN), Paletten chinesisch/japanisch, OFF_VER v221.
 - BLOCKER: eschlacht_integ_t.js hängt beim Rückzug in der Aufstellung (2× Klick auf #bRueck → keine Wirkung, Knopftext bleibt „Rückzug“, keine Seitenfehler; Lauf 1).

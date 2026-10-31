@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Imperium der Epochen: Städte Roms</title>
+<link rel="icon" href="../favicon.ico">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="stil.css">
+</head>
+<body>
+<canvas id="welt" aria-label="Stadtansicht"></canvas>
+
+<header id="oben">
+  <button id="menueKnopf" class="kachel" aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="kachel stadt"><b>CREMONA</b><span id="datum">Frühling · 218 v. Chr.</span></div>
+  <div class="kachel waren" id="waren"></div>
+  <div class="kachel tempo" role="group" aria-label="Tempo">
+    <button data-tempo="0" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+    <button data-tempo="1" aria-label="Normal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg></button>
+    <button data-tempo="3" aria-label="Schnell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l8 6-8 6zM12 6l8 6-8 6z"/></svg></button>
+  </div>
+</header>
+
+<aside id="auftrag" class="feld">
+  <small>AUFTRAG DES SENATS</small>
+  <p id="auftragText"></p>
+</aside>
+
+<aside id="info" class="feld" hidden></aside>
+
+<div id="baumodus" class="feld" hidden>
+  <span id="baumodusText"></span>
+  <button id="baumodusEnde">Fertig</button>
+</div>
+
+<footer id="leiste" class="feld">
+  <div id="reiter" role="tablist"></div>
+  <div id="karten"></div>
+</footer>
+
+<div id="menue" class="schleier" hidden>
+  <div class="feld menuespalte">
+    <h2>Städte Roms</h2>
+    <button data-m="weiter">Weiterspielen</button>
+    <button data-m="speichern">Speichern</button>
+    <button data-m="neu">Neues Spiel</button>
+    <button data-m="hilfe">So wird gespielt</button>
+    <p class="klein">Ableger von Imperium der Epochen · Stufe 1 (Stadtkern)</p>
+  </div>
+</div>
+
+<div id="meldung" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

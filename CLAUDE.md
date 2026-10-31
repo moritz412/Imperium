@@ -55,6 +55,18 @@ wenige Reiter, **Menüknöpfe immer in einer Spalte**, kein Programm-Look). Zahl
   `pk2DynRevolt`, `pk2GovRevolt`, `pk2UmbRound`, Grenzmark `markOpen`), Völkermosaik (`S.vm`, `vmRound`), `EP_FOCUS`.
 - Forschung: `openResearch` (illustrierte Seite). Menüs: `openMenu`, Startmenü `#start .stmenu`.
 
+## Ableger „Städte Roms“ (Stadtaufbau, ab 31.10.2026)
+Eigenständiges Aufbauspiel „Imperium der Epochen: Städte Roms“: römische Provinzstadt in Italien, 60 % Aufbau, 40 % Politik.
+- Quelle `dev/staedte/` – **mehrere Dateien** (`index.html`, `stil.css`, `js/*.js` als ES-Module), Three.js r128 per CDN.
+  Hier gilt die Ein-Datei-Regel des Hauptspiels nicht; trotzdem gezielt ändern statt neu schreiben.
+- Konzept `dev/staedte/docs/konzept.md`, Stand und offene Punkte `dev/staedte/BACKLOG.md` (**zuerst lesen**, wenn es um Städte Roms geht).
+- Veröffentlichen: `python dev/tools/deploy_staedte.py` (kopiert nach `staedte/`, Hauptspiel bleibt unberührt);
+  `deploy.py` macht das automatisch mit. Seite: https://moritz412.github.io/Imperium/staedte/
+- Test: Server aus der Repo-Wurzel, dann in `dev/tests`: `node staedte_t.js [port]` (lädt `dev/staedte/index.html`).
+- Gemeinsame 3D-Modelle beider Spiele liegen in `models/` (Städte Roms lädt sie über `../models/`).
+  Kamera fest schräg (orthografisch) – Modelle für diesen Blickwinkel und für Instancing bauen.
+- Alle festen Regeln oben gelten auch hier (keine erfundenen Tests/FPS, iPad nicht getestet sagen, Spiel statt Software).
+
 ## PC-Pipeline (Moritz' Windows-PC, RTX 4060 8 GB)
 Ordner `Desktop\imperium-bilder`. `warteschlange.bat` läuft dauerhaft und arbeitet `warteschlange\<job>\` ab:
 `items.json` → FLUX-Bilder (`gen.py`), `tts.json` → XTTS-Sprecher, zusätzlich `pruef.json` → Whisper-Prüfung (`tts_pruef.py`).

@@ -32,4 +32,7 @@ shutil.rmtree(B); shutil.rmtree(A)
 # Testseiten (Prototypen) liegen als Quelle in dev/proto und werden nach proto/ kopiert – die Wurzel wird oben geleert!
 P = os.path.join(ROOT, 'dev', 'proto')
 if os.path.isdir(P): shutil.copytree(P, os.path.join(ROOT, 'proto'), dirs_exist_ok=True)
+# Ableger Städte Roms: Quelle dev/staedte → staedte/ (eigene Seite neben dem Hauptspiel)
+sys.path.insert(0, os.path.dirname(__file__))
+import deploy_staedte; deploy_staedte.kopieren()
 print('Fertig. Jetzt: git add -A && git commit -m "..." && git push')
