@@ -1715,7 +1715,7 @@ body{height:100%;min-height:-webkit-fill-available}
 #esch .karte .stz .zbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.6);overflow:hidden;border:1px solid rgba(0,0,0,.6)}
 #esch .karte .stz .zbar i{display:block;height:100%;width:100%;background:linear-gradient(#e46a58,#a22d22)}
 #esch .karte .stz b{font:600 14px Marcellus,Georgia,serif;color:var(--gold);min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
-#esch .karte .mud{height:3px;border-radius:2px;background:rgba(0,0,0,.5);margin:4px 1px 0;overflow:hidden}
+#esch .karte .mud{height:4px;border-radius:2px;background:rgba(0,0,0,.5);margin:4px 1px 0;overflow:hidden}
 #esch .karte .mud i{display:block;height:100%;width:0;background:#c9a24a}
 #esch .ring{width:38px;height:38px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.6) 0);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.7)}
 #esch .ring i{width:28px;height:28px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 11px Georgia,serif;color:var(--ink)}
@@ -3839,6 +3839,7 @@ function kampfTick(dt){
     const st=sSt[i];if(st>S_FLIEH)continue;
     const u=U[sUnit[i]];
     u.nL++;u.fatS+=sFat[i];
+    if(st!==S_KAMPF){const fa=sFat[i];sFat[i]=u.run&&u.curSpeed>u.def.walk*1.2?Math.min(1,fa+(u.def.reit?.002:.003)*dt):u.curSpeed>.2?Math.max(0,fa-.002*dt):Math.max(0,fa-.006*dt);}   // Ausdauer (31.10.): Rennen kostet, Gehen/Stehen erholt
     if(sCool[i]>0)sCool[i]-=dt;
     sRet[i]-=dt;sBackT[i]-=dt;
     const act=sAct[i];
@@ -4171,7 +4172,7 @@ function bewegen(dt){
         const h=Math.atan2(dx,dz),df=wrap(h-u.f);
         u.f+=Math.max(-2.5*dt,Math.min(2.5*dt,df));
         if(u.ele&&u.run&&u.trumT<=0&&u.atkT>=0&&d>38&&d<95&&phase==='schlacht'){u.trumT=45;if(Math.random()<.7)trompetenEinheit(u);}   // gelegentlich vor dem Ansturm
-        let sp=u.run?u.def.run:u.def.walk;if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;
+        let sp=u.run?u.def.run*(1-.3*u.muede):u.def.walk*(1-.12*u.muede);if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;
         {grad(u.cx,u.cz);const sl=(_gx*dx+_gz*dz)/d;sp*=sl>0?1-Math.min(.4,sl*2.2):1+Math.min(.12,-sl);sp*=1-.3*WF(u.cx,u.cz);if(FLU)sp*=furtK(u.cx,u.cz);}   // bergauf langsamer, Wald bremst, Furt halbiert
         if(u.sn>0&&!u.loesen){const lag=Math.hypot(u.cx-u.mx,u.cz-u.mz);sp*=Math.max(.25,Math.min(1,1-(lag-3)/6));}   // wartet auf die Soldaten
         const st=Math.min(sp*dt,d);u.cx+=dx/d*st;u.cz+=dz/d*st;u.curSpeed=st/dt;moving=true;
@@ -4768,7 +4769,7 @@ function fensterBauen(u){
   const gear=(E.waffen||E.ruestung||E.tier||E.rang)?'Waffen: '+STUFE_NAME[E.waffen]+' · Rüstung: '+STUFE_NAME[E.ruestung]+(E.rang?' · Rang: '+E.rangName:'')+(E.tier?' · aufgewertet (Stärke ×1,2)':''):'Waffen und Rüstung: einfach';
   e.innerHTML='<button class="x" aria-label="Schließen">×</button>'+bildHTML(K,u.side)+'<div class="w"><h3></h3><div class="sub"></div>'
     +'<div class="zl"><span>Mannschaft</span><b data-k="m"></b></div><div class="zl"><span>Angriff</span><b data-k="a"></b></div>'
-    +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div>'
+    +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div><div class="zl"><span>Ausdauer</span><b data-k="f"></b></div>'
     +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div>'
     +'<p class="fa"></p><p class="sub" style="flex-basis:100%;margin:0"></p><p class="bs"></p><p class="vl"></p>';
   e.querySelector('h3').textContent=u.name;
@@ -4777,7 +4778,7 @@ function fensterBauen(u){
   e.querySelector('p.sub').textContent=E.paketGenau?'Figuren: eigenes Paket ('+E.paket+')':'Figuren vorläufig ('+E.paket+' als Ersatz)';
   e.querySelector('p.bs').textContent=E.beschreibung||'';
   e.querySelector('.vl').textContent=E.paketGenau?'':'Für diese Einheit gibt es noch keine eigenen Figuren.';
-  fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
+  fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),f:e.querySelector('[data-k=f]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
   e.querySelector('.x').onclick=()=>{infoId=-1;};
   e.querySelector('.x').addEventListener('pointerdown',ev=>ev.stopPropagation());
 }
@@ -4793,7 +4794,7 @@ function uiAktualisieren(){
     klasse(k.d,'sel',selM.has(u.i));klasse(k.d,'multi',selM.size>1&&selM.has(u.i));klasse(k.d,'weg',g);
     wid(k.bar,u.strength/u.np*100);txt(k.sn,String(u.strength));
     hrefSet(k.zi,zs[0]);txt(k.zt,zs[1]);
-    wid(k.mu,Math.min(1,u.muede*1.6)*100);
+    wid(k.mu,Math.min(1,u.muede*1.6)*100);{const ms=u.muede>.45?2:u.muede>.22?1:0;if(k.ms!==ms){k.ms=ms;k.mu.style.background=['#c9a24a','#d97a2b','#c0392b'][ms];k.d.title=['','müde','erschöpft'][ms];}}
     if(k.m!==Math.round(m)){k.m=Math.round(m);k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));k.num.textContent=k.m;}
   }
   // Feindliste
@@ -4817,7 +4818,7 @@ function uiAktualisieren(){
     if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
     fe.classList.add('an');
     const K=h.def;
-    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
+    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));txt(fw.f,h.muede>.45?'erschöpft':h.muede>.22?'müde':'frisch');
     txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
   }else{fe.classList.remove('an');fensterId=-2;}
   // Knöpfe
