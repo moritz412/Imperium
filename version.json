@@ -1,5 +1,5 @@
 {
-"version": "v220-0728f4c6b2",
+"version": "v220-1e70925b5d",
 "files": {
 "img/pk_lk.json": "1e42421565c2d897",
 "img/pk_lb.json": "3c38083e6e69af9f",
@@ -306,6 +306,6 @@
 "proto/ton/s_wurf_1.mp3": "de7bf5abdf6cea59",
 "proto/ton/s_wurf_2.mp3": "88f739c7bad00df0",
 "proto/ton/s_wurf_3.mp3": "b315c140796b30c1",
-"index.html": "5b4b1e7aa75c47c3"
+"index.html": "0524fceb61c8832b"
 }
 }
