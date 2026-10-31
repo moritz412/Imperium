@@ -1926,7 +1926,7 @@ function sterbeDir(j,dx,dz,ua,fm){   // (dx,dz) zeigt vom Gefallenen zum Angreif
     pT[j]=99;sCh[j]=0;sRush[j]=0;if(u.ele&&sPanK[j]===1)u.panikN=Math.max(0,u.panikN-1);sPanK[j]=0;sTr[j]=0;setClipP(j,P_STERB,1,true);ereignis(u.ele?'elefant_tod':'pferd_tod',sX[j],sZ[j]);
     blutFleck(sX[j]+(Math.random()-.5)*1.2,sZ[j]+(Math.random()-.5)*1.2,1.6);
   }
-  slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;
+  slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;if(ua&&ua!==u)ua.kills=(ua.kills||0)+1;   // Abschüsse je Einheit (31.10., R7: Erfahrung in der Kampagne)
   staub(sX[j],sZ[j],2,1.3,.4);
   {const ex=-dx,ez=-dz,el=Math.hypot(ex,ez)+1e-6,f=von_vorn?1:-1;blutFleck(sX[j]+ex/el*.7*f,sZ[j]+ez/el*.7*f,1.4);}   // Lache unter dem Körper (fällt vom Schlag weg)
   u.morale-=0.6*fm;                       // je Gefallenem (30.10.: 1,2 brach zu schnell)
@@ -3762,7 +3762,7 @@ function feldherrInfo(g){   // lebt: nicht gefallen (auch geflohen); verwundet: 
 function ergebnisDaten(rz){   // Ergebnis für das Hauptspiel: je Einheit Start-Figuren, Rest, Geflohene, Gefallene
   return{sieg:ergebnis==='sieg',rueckzug:!!rz,zeit:Math.round(schlachtZ),seiten:SEITE.slice(),
     feldherr:[0,1].map(sd=>{const g=U.find(u=>u.gen&&u.side===sd);return g?feldherrInfo(g):null;}),   // je Seite: {name, lebt, verwundet} (null: kein Feldherr)
-    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef}))};
+    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef,kills:u.kills||0}))};
 }
 function abbau(){   // Szene, Geometrien, Texturen, Ton, Zuhörer freigeben; gemeinsamen Renderer zurücksetzen
   if(abbauT)return;abbauT=true;phase='aus';

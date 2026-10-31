@@ -3721,7 +3721,7 @@ function sterbeDir(j,dx,dz,ua,fm){   // (dx,dz) zeigt vom Gefallenen zum Angreif
     pT[j]=99;sCh[j]=0;sRush[j]=0;if(u.ele&&sPanK[j]===1)u.panikN=Math.max(0,u.panikN-1);sPanK[j]=0;sTr[j]=0;setClipP(j,P_STERB,1,true);ereignis(u.ele?'elefant_tod':'pferd_tod',sX[j],sZ[j]);
     blutFleck(sX[j]+(Math.random()-.5)*1.2,sZ[j]+(Math.random()-.5)*1.2,1.6);
   }
-  slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;
+  slotFrei(u,j);u.strength--;u.gef++;gefallen[u.side]++;zaehler.kills++;if(ua&&ua!==u)ua.kills=(ua.kills||0)+1;   // Abschüsse je Einheit (31.10., R7: Erfahrung in der Kampagne)
   staub(sX[j],sZ[j],2,1.3,.4);
   {const ex=-dx,ez=-dz,el=Math.hypot(ex,ez)+1e-6,f=von_vorn?1:-1;blutFleck(sX[j]+ex/el*.7*f,sZ[j]+ez/el*.7*f,1.4);}   // Lache unter dem Körper (fällt vom Schlag weg)
   u.morale-=0.6*fm;                       // je Gefallenem (30.10.: 1,2 brach zu schnell)
@@ -5557,7 +5557,7 @@ function feldherrInfo(g){   // lebt: nicht gefallen (auch geflohen); verwundet: 
 function ergebnisDaten(rz){   // Ergebnis für das Hauptspiel: je Einheit Start-Figuren, Rest, Geflohene, Gefallene
   return{sieg:ergebnis==='sieg',rueckzug:!!rz,zeit:Math.round(schlachtZ),seiten:SEITE.slice(),
     feldherr:[0,1].map(sd=>{const g=U.find(u=>u.gen&&u.side===sd);return g?feldherrInfo(g):null;}),   // je Seite: {name, lebt, verwundet} (null: kein Feldherr)
-    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef}))};
+    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef,kills:u.kills||0}))};
 }
 function abbau(){   // Szene, Geometrien, Texturen, Ton, Zuhörer freigeben; gemeinsamen Renderer zurücksetzen
   if(abbauT)return;abbauT=true;phase='aus';
@@ -12368,6 +12368,7 @@ const RUL_TRAITS={
 // v224 (31.10.): Neue Schlacht: Fluss mit Furten, Ausdauer (Rennen ermuedet, Erholung, Anzeige), Farben je Volk fuer Kleidung und Schilde, Elefantenschritte; Kampagne: verwundeter Feldherr fuehrt schwaecher (2/5 Runden); OFF_VER v217
 // v225 (31.10.): Neue Schlacht: Faehigkeiten je Einheit (Schildkroete Legion/Hastati, Keil Reiterei, Schildwall Hopliten/Phalanx/Libyer, Wurfsalve einmal je Schlacht), Knopf Faehigkeit, KI nutzt Schildwall und Schildkroete
 // v226 (31.10.): Neue Schlacht: Wetter (Regen/Nebel/Schnee/Hitze, Wirkung auf Fernkampf, Sicht, Tempo, Ermuedung; Niederschlag, Regenton), erste Figuren des Fruehmittelalters (Heerbann, Huskarl, Bogen, Panzerreiter, Skutatos, Thematen, Toxotes, Kataphrakt; Schlacht weiter nur Antike), Kettenhemden ungetoent, Schildwall haelt beim Nachruecken; OFF_VER v218
+// v227 (31.10.): Neue Schlacht zaehlt Abschuesse je Einheit; in der Kampagne +3 Erfahrung je Abschuss (hoechstens 150), Meldung der herausragenden eigenen Einheit mit Rangaufstieg
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -22813,13 +22814,16 @@ function eschGenSchicksal(B,fh){
 function eschEnde(r){
   const E=ESCH;if(!E||E.fertig)return;E.fertig=true;eschFeldherr=r.feldherr||null;
   const B=E.B,P=S.prov[B.ti],rz=!!r.rueckzug,winSide=(!rz&&r.sieg)?0:1,attWin=winSide===B.attSide;
-  let gar=0,milN=0;
+  let gar=0,milN=0,best=null;const rk0=(u,add)=>rankOf({xp:(u.xp||0)-add})<rankOf(u)?u:null;   // Rang gestiegen?
   for(const e of r.einheiten){
     const sp=E.tags[e.tag];if(!sp)continue;
     const frac=e.np>0?Math.max(0,Math.min(1,(e.rest+e.geflohen)/e.np)):0,k=rz&&e.seite===0?0.88:1;   // Rückzug: eigene Seite verliert zusätzlich 12 % (wie bisher)
     if(sp.mil){gar+=Math.max(0,Math.round(sp.men*frac*k));milN++;continue;}
     let m=Math.max(0,Math.round(sp.ref.men*frac*k));if(m<unitStat(sp.f,sp.ref.r,sp.ref.v).men*0.18)m=0;sp.ref.men=m;
+    if(m>0&&e.kills>0){const add=Math.min(150,Math.round(e.kills*3*(1+genFx(sp.ga,'xp'))));sp.ref.xp=(sp.ref.xp||0)+add;   // R7 (31.10.): Abschüsse -> Erfahrung (3 EP je Abschuss, höchstens 150)
+      if(e.seite===0&&(!best||e.kills>best.k))best={k:e.kills,n:e.name,add,r0:rk0(sp.ref,add)};}
   }
+  if(best&&best.k>=5)addLog(`Herausragend in der Schlacht: ${best.n} mit ${best.k} Abschüssen (+${best.add} Erfahrung${best.r0?', jetzt '+RANKS[rankOf(best.r0)].n:''}).`,false,'good');
   if(!attWin&&milN)P.gar=clamp(Math.round(gar/120*7),1,PROV_DEF[B.ti].gar);   // Garnison zurück (Verteidiger gewinnt)
   eschAbbau();
   B.ctx.eschGen=!!eschFeldherr;   // neue Schlacht: Schicksal des Feldherrn aus dem Gefecht statt Würfel 12 %
