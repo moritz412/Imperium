@@ -67,6 +67,9 @@ export const GEB = {
   schrein: { n: 'Schrein', kat: 'Öffentlich', g: [1, 1], h: 0.6, wand: 0xd8ccb0, dach: 0xa9583a, forschung: 'schreine',
     kosten: { ziegel: 10, holz: 5 }, reichweite: 9,
     text: 'Kleiner Schrein der Laren. Häuser im Umkreis von 9 Feldern sind zufriedener.' },
+  wache: { n: 'Feuerwache', kat: 'Öffentlich', g: [2, 2], h: 0.8, wand: 0xc8a888, dach: 0x8a3a2a,
+    kosten: { holz: 30, ziegel: 20 }, arbeiter: 3, reichweite: 12,
+    text: 'Nachtwächter mit Eimern, Haken und Decken (tresviri nocturni) löschen Brände und halten nachts Ordnung. Augustus macht daraus später die Vigiles.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -199,4 +202,13 @@ export const FORSCHUNG = {
   theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, text: 'Komödien des Plautus für die Plebejer.' },
 };
 export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
+
+// Feuer und Ordnung (S3.3). Chance je Gebäude und Monat = basis × Dichte × Schutz (ab dem 2. Jahr).
+// Dichte = 1 + 0,15 je Gebäude (nicht flach) im Umkreis von 3 Feldern. Feuerwache in Reichweite ×0,2, Brunnen ×0,7.
+// Ein Brand ohne Wache greift zu 25 % je Monat auf Nachbarn (bis 3,5 Felder) über und zerstört nach 3 Monaten das Gebäude.
+export const FEUER = {
+  ab: 12, basis: { huette: 0.002, casa: 0.0015, insula: 0.004, baeckerei: 0.006, ziegelei: 0.006, quartier: 0.003 }, sonst: 0.001,
+  dichte: 0.15, umkreis: 3, wache: 0.2, brunnen: 0.7, sommer: 1.5, ueber: 0.25, ueberWache: 0.05, nachbar: 3.5, monate: 3,
+  unruhe: 6,   // Stimmungsziel − bis 6, wenn Häuser ab der Kleinstadt keine Wache in der Nähe haben
+};
 

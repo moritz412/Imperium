@@ -212,7 +212,8 @@ function infoZeichnen() {
       <div class="zeile"><span>Gehen zur Arbeit</span><b>${arbeiten}</b></div>
       <div class="zeile"><span>Brot</span><b>${ja(S.versorgt.brot)}</b></div>
       <div class="zeile"><span>Brunnen in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'brunnen'))}</b></div>
-      <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>`;
+      <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>
+      <div class="zeile"><span>Feuerwache in der Nähe</span><b>${ja(sim.wacheNah(S, b))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
     else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
       ? `<p>Ab der Kleinstadt (${RAENGE[INSULA.rang].ab} Einwohner) kann eine volle Casa zur Insula aufgestockt werden (30 Bewohner).</p>`
@@ -228,6 +229,8 @@ function infoZeichnen() {
       <button class="knopf haupt" data-a="kaufen"${n > 0 ? '' : ' disabled'}>${n > 0 ? `${n} Sklaven kaufen (${n * SKLAVEN.preis} Denare)` : 'Quartier voll'}</button>
       <button class="knopf" data-a="frei"${b.skl > 0 ? '' : ' disabled'}>Freilassen (manumissio): ${Math.min(SKLAVEN.los, b.skl || 0)} werden Plebejer</button>`;
   }
+  const gefahr = sim.brandGefahr(S, b);
+  if (gefahr) html += `<div class="zeile"><span>Brandgefahr</span><b>${gefahr < 0.002 ? 'gering' : gefahr < 0.006 ? 'mittel' : 'hoch'}</b></div>`;
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
   $('#info').innerHTML = html; $('#info').hidden = false;
@@ -287,6 +290,7 @@ $('#menue').addEventListener('click', e => {
       <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li>
       <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li>
       <li>Sklaven: im Sklavenquartier kaufen. Sie arbeiten auf Feldern und in Werkstätten und essen Getreide. Freigelassene werden Plebejer.</li>
+      <li>Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Eine Feuerwache löscht Brände und hält Ordnung. Ansicht „Feuer“ zeigt die Gefahr.</li>
       <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
   }
 });
@@ -419,7 +423,7 @@ function handelInfo() {
 
 // ---------- Ansichten (S1.4) ----------
 let ansicht = '';
-const ANSICHT_NAME = { wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
+const ANSICHT_NAME = { feuer: 'Feuer: Brandgefahr', wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
 function ansichtZeichnen() {
   const d = ansicht ? sim.ansicht(S, welt, ansicht) : null;
   szene.ansicht(d);

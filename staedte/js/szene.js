@@ -190,7 +190,7 @@ export function erzeugeSzene(leinwand, welt) {
   }
 
   // Problem-Symbole als Sprite (gezeichnet, keine Schrift)
-  const FARBE = { arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
+  const FARBE = { brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
   function symbol(art) {
     if (symbolTex.has(art)) return symbolTex.get(art);
     const c = document.createElement('canvas'); c.width = c.height = 64;
@@ -206,6 +206,7 @@ export function erzeugeSzene(leinwand, welt) {
     else if (art === 'voll') { x.rect(20, 18, 24, 22); x.moveTo(20, 26); x.lineTo(44, 26); }
     else if (art === 'wald') { x.moveTo(32, 14); x.lineTo(44, 36); x.lineTo(20, 36); x.closePath(); x.moveTo(32, 36); x.lineTo(32, 44); }
     else if (art === 'hunger') { x.moveTo(20, 38); x.quadraticCurveTo(20, 20, 32, 20); x.quadraticCurveTo(44, 20, 44, 38); x.closePath(); }
+    else if (art === 'brand') { x.moveTo(32, 12); x.quadraticCurveTo(46, 28, 42, 38); x.quadraticCurveTo(38, 46, 32, 46); x.quadraticCurveTo(22, 46, 22, 36); x.quadraticCurveTo(22, 28, 28, 24); x.quadraticCurveTo(30, 30, 33, 30); x.quadraticCurveTo(36, 22, 32, 12); }
     else if (art === 'markt') { x.moveTo(18, 26); x.lineTo(22, 16); x.lineTo(42, 16); x.lineTo(46, 26); x.closePath(); x.moveTo(22, 26); x.lineTo(22, 42); x.lineTo(42, 42); x.lineTo(42, 26); }
     else { x.arc(32, 30, 8, 0, Math.PI * 2); }
     x.stroke();
@@ -242,9 +243,23 @@ export function erzeugeSzene(leinwand, welt) {
         }
         o.art = art;
       }
+      // Brand (S3.3): Flammen und Rauch, Gebäude glüht
+      if ((b.brand > 0) !== !!o.feuer) {
+        if (o.feuer) { o.g.remove(o.feuer); o.feuer = null; }
+        else {
+          const f = new THREE.Group(), [gw, gd] = groesse(b.t), h = o.g.userData.h || 1;
+          for (let i = 0; i < 5; i++) {
+            const fl = new THREE.Mesh(new THREE.ConeGeometry(0.22 + (i % 2) * 0.1, 0.9, 6), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xffb030 : 0xf05a20, transparent: true, opacity: 0.85 }));
+            fl.position.set(((i * 37) % 10 / 10 - 0.5) * gw * 0.7, h * 0.8, ((i * 53) % 10 / 10 - 0.5) * gd * 0.7); fl.userData.flamme = i; f.add(fl);
+          }
+          for (let i = 0; i < 4; i++) { const r = new THREE.Mesh(new THREE.SphereGeometry(0.3 + i * 0.12, 6, 4), new THREE.MeshLambertMaterial({ color: 0x3a3632, transparent: true, opacity: 0.5 - i * 0.09 }));
+            r.position.set(0.1 * i, h + 0.6 + i * 0.5, -0.1 * i); f.add(r); }
+          o.g.add(f); o.feuer = f;
+        }
+      }
       // Auswahl hervorheben
       const an = b.id === auswahlId, af = ansichtGeb.get(b.id);
-      const glanz = an ? 0x3a2a08 : af !== undefined ? new THREE.Color(af).multiplyScalar(0.3).getHex() : 0x000000;
+      const glanz = b.brand > 0 ? 0x5a1e04 : an ? 0x3a2a08 : af !== undefined ? new THREE.Color(af).multiplyScalar(0.3).getHex() : 0x000000;
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
@@ -600,7 +615,8 @@ export function erzeugeSzene(leinwand, welt) {
     zeit += dt;
     laufen(dt * laufTempo);
     if (modus === 'region') karrenFahren(dt * laufTempo);
-    gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY; });
+    gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY;
+      if (o.userData.flamme !== undefined) o.scale.y = 0.75 + 0.35 * Math.abs(Math.sin(zeit * 9 + o.userData.flamme * 1.7)); });
     renderer.render(szene, kamera);
   }
 

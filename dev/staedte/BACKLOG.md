@@ -126,7 +126,15 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       und Schrein in der Nähe, Ziegel 25 + Holz 15; eigenes Modell (Läden unten, 2 Wohngeschosse). Test 47/47 (Cloud),
       Bild angesehen. Offen: Equites/Domus erst mit Wein/Öl (S3.4), Modell für das Quartier, Sklavenaufstand als Ereignis.
       **Nicht getestet:** iPad, Balance (Sklaven sind günstig).
-- [ ] S3.3 Feuer und Ordnung: Brandgefahr dichter Häuser, Vigiles-Wache, Ansicht „Feuer“.
+- [x] S3.3 Feuer und Ordnung (1.11., Cloud; `FEUER` in daten.js): ab dem 2. Jahr kann jedes Gebäude brennen. Chance je Monat =
+      Grundwert (Hütte 0,2 %, Casa 0,15 %, Insula 0,4 %, Bäckerei/Ziegelei 0,6 %) × Dichte (+15 % je Gebäude im Umkreis 3)
+      × Schutz (Feuerwache ×0,2, Brunnen ×0,7) × Sommer 1,5. Brennt es ohne Wache, greift das Feuer zu 25 % je Monat auf
+      Nachbarn bis 3,5 Felder über und das Gebäude ist nach 3 Monaten zerstört (mit Bewohnern). Neues Gebäude **Feuerwache**
+      (Nachtwächter/tresviri nocturni, Holz 30, Ziegel 20, 3 Arbeiter, Reichweite 12): löscht im Folgemonat. Ordnung: ab der
+      Kleinstadt drücken Häuser ohne Wache in der Nähe die Stimmung (bis −6). Flammen + Rauch am Gebäude, Symbol, Ansicht
+      „Feuer“ (Gefahr je Gebäude, Wachbereich), Zeilen im Gebäudefenster. Test 50/50 (Cloud, Zufall im Test gesteuert).
+      Befund: im langen Testspiel ohne Wache brennt jetzt eine Hütte ab (gewollt). Bild angesehen.
+      **Nicht getestet:** iPad, Balance (Häufigkeit).
 - [ ] S3.4 Epoche II (Späte Republik): Übergang mit Amt/Stadtrang, Weinbau/Öl/Weberei/Garum als Ketten, Römerstraße, Aquädukt.
 
 ## Rückmeldung Moritz 1.11. (nach Spielen)

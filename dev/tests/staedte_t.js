@@ -314,6 +314,37 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Sklaven: kaufen, Quartier voll, arbeiten nur auf Feldern/Werkstätten', st3.k1 === 5 && st3.k2 && /voll/.test(st3.voll) && st3.nurErlaubt && st3.kopf, JSON.stringify(st3));
   ok('Sklaven: Hunger, Freilassung mit Steuer, Furcht bei vielen Sklaven', st3.hunger && st3.frei && st3.furcht);
   ok('Insula: volle Casa mit Schrein wird aufgestockt', st3.ins === true, String(st3.ins));
+  // S3.3 Feuer: Brand gezielt auslösen (Zufall gesteuert), ohne Wache greift er über und zerstört, mit Wache gelöscht
+  const fe = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    const ziel = S.geb.find(b => b.t === 'huette' && sim.brandGefahr(S, b) > 0);
+    const nur = (extra = () => 1) => salz => salz === 5000 + ziel.id ? 0 : extra(salz);
+    // ohne Wache: 1 Monat → brennt, dann abbrennen
+    const A = kopie(); A.monat = 14; A.geb = A.geb.filter(b => b.t !== 'wache');
+    sim.setzeZufall(nur()); const m1 = sim.monat(A, SR.welt).join(' | ');
+    const brennt = (A.geb.find(b => b.id === ziel.id) || {}).brand === 1;
+    sim.setzeZufall(() => 1); for (let i = 0; i < 4; i++) sim.monat(A, SR.welt);
+    const weg = !A.geb.some(b => b.id === ziel.id);
+    // Übergreifen
+    const U = kopie(); U.monat = 14; U.geb = U.geb.filter(b => b.t !== 'wache');
+    sim.setzeZufall(nur()); sim.monat(U, SR.welt); sim.setzeZufall(salz => salz >= 7000 ? 0 : 1); sim.monat(U, SR.welt);
+    const ueber = U.geb.filter(b => b.brand > 0 && b.id !== ziel.id).length;
+    // mit Feuerwache: wird gelöscht
+    const W = kopie(); W.monat = 14; W.gut.holz += 60; W.gut.ziegel += 40;
+    let wache = null;
+    for (let r = 2; r <= 9 && !wache; r++) for (let dz = -r; dz <= r && !wache; dz++) for (let dx = -r; dx <= r && !wache; dx++) { const t = sim.bauen(W, SR.welt, 'wache', ziel.x + dx, ziel.z + dz); if (t.ok) wache = t.b; }
+    if (wache) wache.prio = true;
+    sim.setzeZufall(nur()); sim.monat(W, SR.welt); sim.setzeZufall(() => 1);
+    const wz = W.geb.find(b => b.id === ziel.id), vorW = wz.brand, nah = sim.wacheNah(W, wz), m2 = sim.monat(W, SR.welt).join(' | ');
+    sim.setzeZufall(null);
+    const ins = { t: 'huette', stufe: 3, x: ziel.x, z: ziel.z, id: -1 }, hut = { t: 'huette', stufe: 1, x: ziel.x, z: ziel.z, id: -2 };
+    const art = SR.ansicht('feuer'); SR.ansicht('');
+    return { m1: /Feuer/.test(m1), brennt, weg, ueber, wache: !!wache, vorW, nah, geloescht: wz.brand === 0 && /gelöscht/.test(m2),
+      insulaGefaehrlicher: sim.brandGefahr(S, ins) > sim.brandGefahr(S, hut), legende: art && art.legende.length, knopf: !!document.querySelector('#ansicht [data-ansicht="feuer"]') };
+  });
+  ok('Feuer: Brand bricht aus, greift über, brennt ab', fe.m1 && fe.brennt && fe.weg && fe.ueber > 0, JSON.stringify(fe));
+  ok('Feuerwache löscht den Brand', fe.wache && fe.vorW === 1 && fe.nah && fe.geloescht);
+  ok('Brandgefahr Insula höher, Ansicht Feuer', fe.insulaGefaehrlicher && fe.legende === 5 && fe.knopf);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
@@ -334,7 +365,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const ans = await p.evaluate(() => ({ wasser: SR.szene.ansichtZahl(), leg: !document.querySelector('#legende').hidden,
     stimmung: SR.ansicht('stimmung'), arbeit: SR.ansicht('arbeit') }));
   ok('Ansicht Wasser zeigt Brunnenbereich', ans.wasser > 50 && ans.leg, ans.wasser + ' Felder');
-  ok('Ansicht Stimmung zeigt Marktstraßen und Häuser', ans.stimmung.felder.length > 5 && ans.stimmung.geb.length >= 5, ans.stimmung.felder.length + ' Straßenfelder, ' + ans.stimmung.geb.length + ' Häuser');
+  ok('Ansicht Stimmung zeigt Marktstraßen und Häuser', ans.stimmung.felder.length > 5 && ans.stimmung.geb.length >= 4, ans.stimmung.felder.length + ' Straßenfelder, ' + ans.stimmung.geb.length + ' Häuser');
   ok('Ansicht Arbeit färbt Betriebe', ans.arbeit.geb.length >= 8, ans.arbeit.geb.length + ' Gebäude');
   if (BILD) { await p.screenshot({ path: BILD.replace(/\.png$/, '_ansicht.png') }); }
   await p.evaluate(() => SR.ansicht(''));

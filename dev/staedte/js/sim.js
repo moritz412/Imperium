@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, INSULA, SKLAVEN, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
+import { RASTER, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -193,6 +193,7 @@ export function monat(S, welt) {
   // Produktion
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
+    if (b.brand > 0) { b.status.push({ art: 'brand', text: b.brand === 1 ? 'Es brennt!' : `Es brennt seit ${b.brand} Monaten!` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
     if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
@@ -245,6 +246,7 @@ export function monat(S, welt) {
     haeuser++;
     const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske);
     if (wasser) wasserN++; if (markt) marktN++;
+    if (b.brand > 0) continue;
     if (!essen) { b.status.push({ art: 'hunger', text: 'Hunger' }); b.bew = Math.max(0, b.bew - 1); continue; }
     if (b.bew < wohnraum(b) && S.stimmung >= 40) b.bew++;
     if (!wasser) b.status.push({ art: 'wasser', text: 'Kein Brunnen in der Nähe', leicht: true });
@@ -269,7 +271,11 @@ export function monat(S, welt) {
   // Stimmung und Steuern
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
-  if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;   // S3.2: Furcht vor einem Sklavenaufstand
+  if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
+  if (haeuser && rang(S) >= INSULA.rang) {   // S3.3: Ordnung – Häuser ohne Wache in der Nähe
+    const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
+    ziel -= FEUER.unruhe * ohne / haeuser;
+  }   // S3.2: Furcht vor einem Sklavenaufstand
   const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
@@ -287,6 +293,8 @@ export function monat(S, welt) {
   // Stadtrang steigt mit den Einwohnern (fällt nicht zurück)
   const r = rang(S);
   if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
+
+  feuerMonat(S, meld);
 
   // Handel und Abgaben (S2.5), Forschung und Erntefest (S3.1)
   handelMonat(S);
@@ -346,6 +354,19 @@ function ansichtRoh(S, welt, art) {
     }
     for (const h of haeuser) geb.push([h.id, inReichweite(S, h, 'brunnen') ? GRUEN : ROT]);
     return { felder, geb, legende: [[BLAU, 'Brunnen erreicht'], [GRUEN, 'Haus hat Wasser'], [ROT, 'Haus ohne Wasser']] };
+  }
+  if (art === 'feuer') {   // S3.3: Brandgefahr je Gebäude, Bereich der Feuerwachen
+    for (const o of S.geb.filter(b => b.t === 'wache' && b.w > 0)) {
+      const [cx, cz] = mitte(o), r = GEB.wache.reichweite;
+      for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++)
+        if (welt.typ[z * RASTER + x] === GRAS && Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r) felder.push([x, z, BLAU]);
+    }
+    for (const b of S.geb) {
+      if (b.brand > 0) { geb.push([b.id, ROT]); continue; }
+      const p = brandGefahr(S, b); if (!p) continue;
+      geb.push([b.id, p < 0.002 ? GRUEN : p < 0.006 ? GELB : ORANGE]);
+    }
+    return { felder, geb, legende: [[BLAU, 'Feuerwache erreicht'], [GRUEN, 'geringe Brandgefahr'], [GELB, 'mittel'], [ORANGE, 'hoch'], [ROT, 'brennt']] };
   }
   if (art === 'arbeit') {
     const geht = new Map();
@@ -657,5 +678,43 @@ export function freilassen(S, q) {
   const steuer = Math.round(n * SKLAVEN.preis * SKLAVEN.vicesima * 10) / 10;
   S.gut.denare += steuer; S.stimmung = Math.min(100, S.stimmung + 2);
   return { ok: true, n, steuer };
+}
+
+// ---------- Feuer und Ordnung (S3.3) ----------
+const FLACH = t => !!GEB[t].flach;
+export const wacheNah = (S, b) => S.geb.some(o => o.t === 'wache' && (o.w || 0) > 0 && !(o.brand > 0) && abstand(o, b) <= GEB.wache.reichweite);
+export function brandGefahr(S, b) {
+  if (FLACH(b.t) || b.t === 'brunnen' || b.t === 'schrein') return 0;
+  const art = b.t === 'huette' ? (b.stufe === 3 ? 'insula' : b.stufe === 2 ? 'casa' : 'huette') : b.t;
+  let p = FEUER.basis[art] ?? FEUER.sonst;
+  p *= 1 + FEUER.dichte * S.geb.filter(o => o !== b && !FLACH(o.t) && abstand(o, b) <= FEUER.umkreis).length;
+  if (wacheNah(S, b)) p *= FEUER.wache;
+  if (inReichweite(S, b, 'brunnen')) p *= FEUER.brunnen;
+  if (jahreszeit(S) === 1) p *= FEUER.sommer;
+  return p;
+}
+function feuerMonat(S, meld) {
+  // laufende Brände: Wache löscht, sonst greift das Feuer über und zerstört das Gebäude
+  const brennt = S.geb.filter(b => b.brand > 0);
+  for (const b of brennt) {
+    const name = b.t === 'huette' ? (b.stufe === 3 ? INSULA.n : b.stufe === 2 ? CASA.n : GEB.huette.n) : GEB[b.t].n;
+    if (wacheNah(S, b)) { b.brand = 0; meld.push(`Brand gelöscht: ${name}. Die Wache war rechtzeitig da.`); continue; }
+    for (const o of S.geb) {
+      if (o.brand > 0 || brandGefahr(S, o) === 0 || abstand(o, b) > FEUER.nachbar) continue;
+      if (wurf(S, 7000 + o.id * 3 + b.id) < (wacheNah(S, o) ? FEUER.ueberWache : FEUER.ueber)) { o.brand = 1; o.neu = true; }
+    }
+    if (++b.brand > FEUER.monate) {
+      const i = S.geb.indexOf(b); if (i >= 0) S.geb.splice(i, 1);
+      meld.push(`${name} ist abgebrannt.${b.bew ? ' ' + b.bew + ' Bewohner haben ihr Heim verloren.' : ''}`);
+    }
+  }
+  // neue Brände (ab dem 2. Jahr)
+  let neu = 0;
+  for (const b of S.geb) if (b.neu) { delete b.neu; neu++; }
+  if (S.monat >= FEUER.ab) for (const b of S.geb) {
+    if (b.brand > 0) continue;
+    if (wurf(S, 5000 + b.id) < brandGefahr(S, b)) { b.brand = 1; neu++; }
+  }
+  if (neu) meld.push(neu === 1 ? 'Feuer! Ein Gebäude brennt.' : `Feuer! ${neu} Gebäude brennen.`);
 }
 
