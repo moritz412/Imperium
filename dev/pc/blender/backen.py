@@ -8,6 +8,7 @@
 #   Koordinaten: three.js (Y oben). Blender (Z oben) wird umgerechnet: (x, y, z) → (x, z, −y).
 #   koerper/teile: Ruhepose-Positionen, Normalen, Dreiecke, je Ecke 4 Knochen + 4 Gewichte (Teile: starr an einem Knochen),
 #         'col' je Ecke RGB (u8, sRGB) aus Grundfarb-Textur bzw. Materialfarbe (Mittel der angrenzenden Flächenecken).
+#         'msk' (optional) je Ecke u8: 1 Kleidung, 2 Schildvorderseite, 0 fest – für Tönung je Volk im Spiel.
 #   Detailstufen: 'nah' (Original) und 'mittel' (Decimate auf ≈ 400 bzw. 27 % Dreiecke).
 # Mit --pruefen wird für jeden Clip ein Bild in Blender ausgewertet und mit der eigenen Rechnung verglichen (max. Abweichung in mm).
 import sys, os, json, base64, struct
@@ -102,6 +103,28 @@ def farben(ob, me):
     return out
 
 
+def _maskenart(mat):
+    """Tönungsmaske (31.10., Farben je Volk): 1 = Kleidung (Tunika, Hose, Mantel), 2 = Schildvorderseite, 0 = fest."""
+    n = (mat.name if mat else "").lower().split(".")[0]
+    if n.startswith("tunika") or n in ("hose", "mantel", "umhang"):
+        return 1
+    if n.endswith("_vorn"):
+        return 2
+    return 0
+
+
+def maske(ob, me):
+    """Maske je Ecke: Art der Mehrheit der angrenzenden Flächen (u8). None, wenn nichts tönbar ist."""
+    arten = [_maskenart(s.material) for s in ob.material_slots] or [0]
+    z = [[0, 0, 0] for _ in me.vertices]
+    for p in me.polygons:
+        a = arten[min(p.material_index, len(arten) - 1)]
+        for vi in p.vertices:
+            z[vi][a] += 1
+    out = [max(range(3), key=lambda k: c[k]) for c in z]
+    return out if any(out) else None
+
+
 def mesh_daten(ob, arm, bidx, starr=None, ziel_tris=None):
     """Ruhepose-Mesh in three.js-Koordinaten; starr = Knochenindex für Teile."""
     dg = bpy.context.evaluated_depsgraph_get()
@@ -138,11 +161,12 @@ def mesh_daten(ob, arm, bidx, starr=None, ziel_tris=None):
         idx += list(t.vertices)
     ntri = len(me.loop_triangles)
     col = farben(src, me)
+    msk = maske(src, me)
     ev.to_mesh_clear()
     if tmp:
         bpy.data.objects.remove(tmp, do_unlink=True)
     return {'n': len(pos) // 3, 'tris': ntri, 'pos': b64f(pos), 'nrm': b64f(nrm), 'idx': b64u16(idx),
-            'si': b64u8(si), 'sw': b64u8(sw), 'col': b64u8(col)}, (pos, si, sw)
+            'si': b64u8(si), 'sw': b64u8(sw), 'col': b64u8(col), **({'msk': b64u8(msk)} if msk else {})}, (pos, si, sw)
 
 
 def backen(ein, aus, pruefen=False):
