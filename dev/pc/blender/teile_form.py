@@ -119,6 +119,28 @@ def helm(art, name):
         _kugelkappe(bm, r * 1.04, 1.08, -0.02, r * 1.04, mi=0)
         _kasten(bm, Vector((0, 0.0, r + 0.03)), (0.018, 0.14, 0.06), 1)
         return _obj(name, bm, mats), r
+    if art in ("nasal", "spangen", "byz", "kataphrakt"):   # Frühmittelalter (31.10., Vorlagen Job 47): Eisen, kegelförmig
+        mats = [mat("eisen_helm", *EISEN), mat("kette", (0.3, 0.3, 0.31), 0.85, 0.55), mat("beschlag", *BRONZE)]
+        _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, seg=12, ringe=5, mi=0, spitze=r * 1.06 + (0.035 if art != "spangen" else 0.025))
+        if art in ("nasal", "spangen"):
+            _platte(bm, [(-0.012, -0.124, 0.0), (0.012, -0.124, 0.0), (0.01, -0.126, -0.085), (-0.01, -0.126, -0.085)], 0.0, 0)  # Nasenschiene
+        if art == "spangen":   # Spangen (Bronze) und Wangenklappen
+            for a in range(4):
+                w = math.radians(45 + 90 * a)
+                _kasten(bm, Vector((0.075 * math.cos(w), 0.08 * math.sin(w), 0.06)), (0.016, 0.016, 0.1), 2,
+                        Matrix.Rotation(-math.copysign(0.6, math.cos(w)), 3, "Y") @ Matrix.Rotation(math.copysign(0.6, math.sin(w)), 3, "X"))
+            for sx in (-1, 1):
+                _platte(bm, [(sx * 0.115, -0.05, -0.03), (sx * 0.115, 0.03, -0.03), (sx * 0.105, 0.02, -0.13), (sx * 0.1, -0.04, -0.12)], 0.0, 0)
+        if art in ("byz", "kataphrakt"):   # Kettenbehang um Nacken und Seiten; Kataphrakt: auch vor dem Gesicht (nur Augenschlitz)
+            von, bis = (-150, 150) if art == "kataphrakt" else (-115, 115)
+            n = 10
+            for k in range(n):
+                a0 = math.radians(von + (bis - von) * k / n); a1 = math.radians(von + (bis - von) * (k + 1) / n)
+                p = lambda a, z, rr: (rr * math.sin(a), rr * 1.1 * math.cos(a), z)
+                _platte(bm, [p(a0, -0.03, 0.123), p(a1, -0.03, 0.123), p(a1, -0.2, 0.135), p(a0, -0.2, 0.135)], 0.0, 1)
+            if art == "kataphrakt":
+                _platte(bm, [(-0.07, -0.13, -0.075), (0.07, -0.13, -0.075), (0.075, -0.15, -0.2), (-0.075, -0.15, -0.2)], 0.0, 1)
+        return _obj(name, bm, mats), r
     met = BRONZE
     mats = [mat("bronze", *met), mat("busch_rot", (0.35, 0.03, 0.02) if art != "montefortino" else (0.16, 0.02, 0.12), 0, 0.95), mat("busch_schwarz", (0.02, 0.02, 0.02), 0, 0.95)]
     if art == "pilos":
@@ -220,10 +242,10 @@ def koecher(name):
 
 
 def schwert(art, name):
-    """art: gladius | falcata | lang. Griffmitte im Ursprung, Klinge +Z."""
+    """art: gladius | falcata | lang | falx | spatha. Griffmitte im Ursprung, Klinge +Z."""
     bm = bmesh.new()
     mats = [mat("klinge", (0.55, 0.56, 0.58), 0.95, 0.3), mat("griff", *HOLZ), mat("beschlag", *BRONZE)]
-    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05), "falx": (0.55, 0.05)}[art]
+    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05), "falx": (0.55, 0.05), "spatha": (0.8, 0.052)}[art]
     n = 4
     ringe = []
     for k in range(n + 1):
@@ -250,6 +272,9 @@ def schwert(art, name):
         _kasten(bm, Vector((0.03, 0, -0.085)), (0.07, 0.015, 0.025), 2, Matrix.Rotation(math.radians(35), 3, "Y"))  # Hakengriff
     elif art == "falx":
         _kasten(bm, Vector((0, 0, -0.12)), (0.03, 0.03, 0.3), 1)        # langer Griff (zweihändig)
+    elif art == "spatha":   # Frühmittelalter: kurze Eisen-Parierstange, gelappter Knauf
+        _kasten(bm, Vector((0, 0, 0.045)), (0.11, 0.028, 0.02), 0)
+        _kasten(bm, Vector((0, 0, -0.085)), (0.06, 0.03, 0.035), 2)
     else:
         _kasten(bm, Vector((0, 0, 0.045)), (0.09, 0.025, 0.018), 2)      # Parierstange (La Tène, kurz)
         _kasten(bm, Vector((0, 0, -0.085)), (0.04, 0.03, 0.02), 2)

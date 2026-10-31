@@ -24,6 +24,11 @@ const PAKETE = {
   A2_numidisch: { familien: ['A5_numidisch'], rollen: ['cav'] },
   A1_legion: { familien: [], rollen: [] }, A6_adlig: { familien: [], rollen: [] }, A6_falx: { familien: [], rollen: [] },
   A8_nubisch: { familien: [], rollen: [] }, A8_aksum: { familien: ['M4_afrika'], rollen: ['spear'] },
+  // Frühmittelalter (31.10., F4): Nordwest (Heerbann, Huskarl, Bogen, Panzerreiter) und Ostrom/Orient (Skutatos, Thematen, Toxotes, Kataphrakt)
+  M1_heerbann: { familien: ['M1_nordwest_fuss'], rollen: ['spear'] }, M1_huskarl: { familien: ['M1_nordwest_fuss'], rollen: ['sword'] },
+  M1_bogen: { familien: ['M1_nordwest_fuss'], rollen: ['missile'] }, M1_panzerreiter: { familien: ['M1_nordwest_fuss'], rollen: ['cav'] },
+  M3_skutatos: { familien: ['M3_ostrom_orient_steppe'], rollen: ['spear'] }, M3_thematen: { familien: ['M3_ostrom_orient_steppe'], rollen: ['sword'] },
+  M3_toxotes: { familien: ['M3_ostrom_orient_steppe'], rollen: ['missile'] }, M3_kataphrakt: { familien: ['M3_ostrom_orient_steppe'], rollen: ['cav'] },
 };
 const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_eques', art: 'A1_hastatus' };
 

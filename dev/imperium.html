@@ -2124,22 +2124,25 @@ const ECHT_FERN={
   pfeil:{typ:'pfeil',reich:110,nachl:[3,4.5],vorrat:20,schaden:1.0,moral:.3,clip:'bogen',wurfT:.72,v:55,weich:20,rueck:30},   // Kompositbogen (E2, 30.10.)
   stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
 };
-const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
+const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
 const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
   A1_hastatus:{schild:.55},A1_veles:{schild:.4},A2_libysch:{schild:.45},A3_iberisch:{schild:.45},
   A4_balearisch:{schild:0,bloss:true},A6_keltisch:{schild:.35,bloss:true},A7_hellenistisch:{schild:.5},
   A7_phalangit:{schild:.3},A7_hoplit:{schild:.6},A7_toxotes:{schild:0,bloss:true},A6_plaenkler:{schild:.3,bloss:true},
   A1_legion:{schild:.6},A6_adlig:{schild:.45},A6_falx:{schild:0,bloss:true},A8_nubisch:{schild:0,bloss:true},A8_aksum:{schild:.4},
+  M1_heerbann:{schild:.5},M1_huskarl:{schild:.55},M1_bogen:{schild:0,bloss:true},M1_panzerreiter:{schild:.45},   // Frühmittelalter (31.10.)
+  M3_skutatos:{schild:.55},M3_thematen:{schild:.5},M3_toxotes:{schild:0},M3_kataphrakt:{schild:.4},
 };
 /* Fähigkeiten (31.10., R1): je Paket höchstens zwei; ein Knopf „Fähigkeit“ schaltet sie. Schildkröte/Schildwall/Keil sind An/Aus-Haltungen, die Wurfsalve gibt es einmal je Schlacht.
    Schildkröte: Fernschaden ×0,25 (von allen Seiten, Schilde auch oben), Tempo ×0,4, Angriff ×0,8, enger Verband · Keil (nur berittene Schwerreiter): Ansturm ×1,25, Abwehr ×0,85
-   Schildwall: Abwehr ×1,2 von vorn, Reiteransturm von vorn ×0,6 (31.10. abgeschwächt), kein Laufen · Wurfsalve: eine Pilum-Salve je Mann auf die nächste Einheit in 32 m (wie Plänkler-Speere) */
-const FAEH={A1_hastatus:['schildkroete','salve'],A1_legion:['schildkroete','salve'],A1_eques:['keil'],A6_adlig:['keil'],A7_hoplit:['schildwall'],A7_phalangit:['schildwall'],A2_libysch:['schildwall']};
+   Schildwall: Abwehr ×1,2 von vorn, Reiteransturm von vorn ×0,5 (31.10. abgeschwächt), kein Laufen · Wurfsalve: eine Pilum-Salve je Mann auf die nächste Einheit in 32 m (wie Plänkler-Speere) */
+const FAEH={A1_hastatus:['schildkroete','salve'],A1_legion:['schildkroete','salve'],A1_eques:['keil'],A6_adlig:['keil'],A7_hoplit:['schildwall'],A7_phalangit:['schildwall'],A2_libysch:['schildwall'],
+  M1_heerbann:['schildwall'],M3_skutatos:['schildwall'],M1_panzerreiter:['keil'],M3_kataphrakt:['keil']};
 const FAEH_NAME={schildkroete:'Schildkröte',keil:'Keil',schildwall:'Schildwall',salve:'Wurfsalve'};
 const FAEH_TEXT={
   schildkroete:'Schildkröte: die Männer schließen die Schilde über sich. Pfeile und Speere richten nur ein Viertel an, dafür geht es langsam (Tempo ×0,4) und der Angriff sinkt (×0,8).',
   keil:'Keil: die Reiter formieren sich zur Spitze. Der Ansturm wiegt ein Viertel mehr (×1,25), die Abwehr sinkt (×0,85), solange der Keil steht.',
-  schildwall:'Schildwall: die Einheit hält die Stellung. Abwehr von vorn ×1,2, Reiteransturm von vorn nur noch ×0,6 – aber kein Laufen.',
+  schildwall:'Schildwall: die Einheit hält die Stellung. Abwehr von vorn ×1,2, Reiteransturm von vorn nur noch ×0,5 – aber kein Laufen.',
   salve:'Wurfsalve: einmal je Schlacht wirft jeder Mann einen Speer auf die nächste Einheit (bis 32 m, nicht im Nahkampf).'};
 const SALVE_F={typ:'speer',reich:32,nachl:[.6,1.8],vorrat:1,schaden:1.3,moral:.4,clip:'speerwurf',wurfT:.55,v:24,weich:0,rueck:0};
 const ECHT_RANG=[{n:'Rekruten',b:0,m:0},{n:'Erprobt',b:.05,m:5},{n:'Veteranen',b:.1,m:10},{n:'Elite',b:.15,m:15},{n:'Legendär',b:.2,m:25}];   // wie RANKS der Kampagne
@@ -2445,6 +2448,17 @@ const mulberry=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+M
 const KLAUB=(r,g,b,t)=>{   // Laubfarbe nach Klima (31.10.): Schnee dunkel/entsättigt mit weißen Kronen, trocken gelblicher
   if(GKL==='schnee'){const w=Math.max(0,Math.min(1,t))>.55&&Math.random()<.6?.75:0,m=(r+g+b)/3*.75;return[m*.5+r*.35+(220-m)*w,m*.5+g*.4+(224-m)*w,m*.55+b*.45+(230-m)*w];}
   if(GKL==='steppe'||GKL==='wueste')return[r*1.15+12,g*1.02+6,b*.8];return[r,g,b];};
+/* Wetter (R4, 31.10.): OPT.gelaende.wetter bzw. OPT.wetter = 'klar'|'regen'|'nebel'|'schnee'|'hitze'; ohne Angabe 'klar' = unverändert.
+   Regen: Fernkampf-Treffer ×0,7, Reichweite ×0,85 · Nebel: Fernkampf nur ≤ 60 m, Feindbanner nur ≤ 90 m (vom nächsten eigenen Trupp) · Schnee: Tempo ×0,85 · Hitze: Ermüdung ×1,5 */
+const WETTER_LISTE=['klar','regen','nebel','schnee','hitze'];
+const WET=(OPT.gelaende&&WETTER_LISTE.includes(OPT.gelaende.wetter))?OPT.gelaende.wetter:WETTER_LISTE.includes(OPT.wetter)?OPT.wetter:'klar';
+const WTEMPO=WET==='schnee'?.85:1,WFATK=WET==='hitze'?1.5:1,WFERN=WET==='regen'?.7:1,WREICH=WET==='regen'?.85:1,WSICHT=WET==='nebel'?60:1e9,WBANN=WET==='nebel'?90:1e9;
+const WET_TEXT={regen:'Regen: Bögen und Schleudern schwächer, kürzere Reichweite.',nebel:'Nebel: Fernkampf nur auf kurze Entfernung, Feinde schwer zu sehen.',schnee:'Schnee: Heere marschieren langsamer.',hitze:'Hitze: Die Truppen ermüden schneller.'};
+function wetterWerte(w){   // Kopie der Einheitenwerte mit Wettereinfluss (Tempo, Reichweite)
+  if(WTEMPO===1&&WREICH===1)return w;
+  const o=Object.assign({},w);if(WTEMPO!==1){o.walk=w.walk*WTEMPO;o.run=w.run*WTEMPO;}
+  if(WREICH!==1&&w.fern)o.fern=Object.assign({},w.fern,{reich:w.fern.reich*WREICH});return o;
+}
 const GEL=OPT.gelaende||null,GKL=GEL&&GEL.klima||'mittelmeer',GTYP=GEL&&GEL.typ||'plain',GSAAT=GEL?((GEL.saat|0)>>>0):0;
 const KV=({mittelmeer:{b:1,olive:1,busch:1,stein:1,gras:1},steppe:{b:.3,olive:.2,busch:.55,stein:.8,gras:.8},wueste:{b:.04,olive:0,busch:.1,stein:2.4,gras:.12},
   wald:{b:1,olive:0,busch:1,stein:.7,gras:1},schnee:{b:.8,olive:0,busch:.4,stein:1.2,gras:.3}})[GKL]||{b:1,olive:1,busch:1,stein:1,gras:1};
@@ -3119,11 +3133,19 @@ grasSchicht(Math.round(6000*KV.gras),80,.5,1.0);  // fern, größere Büschel
 const SD=new THREE.Vector3(-.60,.50,.45).normalize();   // Richtung zur Sonne (tief, von rechts vorn)
 const HZK=({wueste:[[226,214,194],[104,140,190]],schnee:[[214,220,228],[120,144,178]],wald:[[200,214,226],[78,120,186]],steppe:[[216,220,224],[86,128,194]]})[GKL]||[[206,219,232],[78,124,196]];
 const HOR=disp(...HZK[0]),ZEN=disp(...HZK[1]),SUNC=disp(255,226,170);
-scene.fog=new THREE.Fog(HOR,70,2300);renderer.setClearColor(HOR);
+let FOG_N=70,FOG_F=2300,DECK=0;
+{   // Wetter: Dunst/Himmel/Licht (nur Farb- und Intensitätswerte, keine neue Beleuchtung)
+  const gr=(c,r,g,b,k)=>c.lerp(disp(r,g,b),k);
+  if(WET==='regen'){gr(HOR,120,128,134,.85);gr(ZEN,78,86,96,.85);SUNC.multiplyScalar(.3);FOG_N=30;FOG_F=520;DECK=1;sun.intensity*=.35;hemi.intensity*=.7;}
+  else if(WET==='nebel'){gr(HOR,196,200,200,.85);gr(ZEN,170,176,180,.8);SUNC.multiplyScalar(.3);FOG_N=8;FOG_F=170;DECK=1;sun.intensity*=.45;hemi.intensity*=1.0;}
+  else if(WET==='schnee'){gr(HOR,230,234,240,.6);gr(ZEN,170,182,200,.5);FOG_N=40;FOG_F=900;DECK=.6;sun.intensity*=.75;}
+  else if(WET==='hitze'){gr(HOR,244,224,184,.45);gr(ZEN,110,150,196,.2);FOG_N=60;FOG_F=1500;sun.color.set(0xffd49a);sun.intensity*=1.05;}
+}
+scene.fog=new THREE.Fog(HOR,FOG_N,FOG_F);renderer.setClearColor(HOR);
 const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,depthTest:false,fog:false,
-  uniforms:{uSun:{value:SD},uHor:{value:HOR},uZen:{value:ZEN},uSunCol:{value:SUNC},uTime:UWT,uCloud:{value:cloudTex}},
+  uniforms:{uSun:{value:SD},uHor:{value:HOR},uZen:{value:ZEN},uSunCol:{value:SUNC},uTime:UWT,uCloud:{value:cloudTex},uDeck:{value:DECK},uDeckC:{value:HOR.clone().multiplyScalar(.93)}},
   vertexShader:'varying vec3 vD;void main(){vD=position;vec4 p=projectionMatrix*modelViewMatrix*vec4(position,1.0);gl_Position=p.xyww;}',
-  fragmentShader:`varying vec3 vD;uniform vec3 uSun;uniform vec3 uHor;uniform vec3 uZen;uniform vec3 uSunCol;uniform float uTime;uniform sampler2D uCloud;
+  fragmentShader:`varying vec3 vD;uniform vec3 uSun;uniform vec3 uHor;uniform vec3 uZen;uniform vec3 uSunCol;uniform float uTime;uniform sampler2D uCloud;uniform float uDeck;uniform vec3 uDeckC;
 void main(){
   vec3 d=normalize(vD);float e=d.y;float ep=max(e,0.0);
   vec3 col=mix(uHor,uZen,pow(ep,.55));
@@ -3132,15 +3154,36 @@ void main(){
   if(e>0.0){
     vec2 uv=d.xz/(e+.2)*.5+vec2(uTime*.0035,uTime*.0012);
     float c=texture2D(uCloud,uv).g;float c2=texture2D(uCloud,uv*2.7+.31).g;
-    float cov=smoothstep(.30,.75,c*.7+c2*.35)*smoothstep(.0,.25,e);
+    float cov=smoothstep(.30,.75,c*.7+c2*.35)*smoothstep(.0,.25,e);cov=max(cov,uDeck*smoothstep(.0,.2,e));
     vec3 cc=mix(vec3(.62,.67,.76),vec3(1.0,.97,.92),smoothstep(.35,.95,c));
-    cc+=uSunCol*pow(s,6.0)*.4;
+    cc=mix(cc,uDeckC,uDeck*.85);cc+=uSunCol*pow(s,6.0)*.4;
     col=mix(col,cc,cov*.88);
   }
   if(e<0.0)col=uHor;
   gl_FragColor=vec4(col,1.0);
 }`});
 const himmel=new THREE.Mesh(new THREE.SphereGeometry(2700,32,16),skyMat);himmel.renderOrder=-100;himmel.frustumCulled=false;scene.add(himmel);
+/* ---- Niederschlag (Regen: Striche, Schnee: Punkte) in einem Kasten um die Blickmitte; Wiederholung im Shader, keine CPU-Arbeit pro Tropfen ---- */
+const NIED=(function(){
+  if(WET!=='regen'&&WET!=='schnee')return null;
+  const regen=WET==='regen',N=regen?4200:3200,pos=new Float32Array(N*(regen?2:1)*3),ae=new Float32Array(N*(regen?2:1)),as=new Float32Array(N*(regen?2:1));
+  const BOX=[90,34,90];let sd=77;const rn=()=>{sd=(sd*9301+49297)%233280;return sd/233280;};
+  for(let i=0;i<N;i++){const x=rn()*BOX[0],y=rn()*BOX[1],z=rn()*BOX[2],v=.75+rn()*.5;
+    for(let k=0;k<(regen?2:1);k++){const o=i*(regen?2:1)+k;pos[o*3]=x;pos[o*3+1]=y;pos[o*3+2]=z;ae[o]=k;as[o]=v;}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aE',new THREE.BufferAttribute(ae,1));g.setAttribute('aS',new THREE.BufferAttribute(as,1));
+  const u={uC:{value:new THREE.Vector3()},uT:{value:0},uBox:{value:new THREE.Vector3(...BOX)},uV:{value:regen?new THREE.Vector3(-3,-26,1.5):new THREE.Vector3(-.9,-2.6,.5)},uLen:{value:regen?.055:0},uCol:{value:regen?new THREE.Color(.72,.78,.84):new THREE.Color(1,1,1)},uA:{value:regen?.34:.85},uPx:{value:3},uPt:{value:regen?0:1}};
+  const m=new THREE.ShaderMaterial({uniforms:u,transparent:true,depthWrite:false,fog:false,
+    vertexShader:'uniform vec3 uC;uniform float uT;uniform vec3 uBox;uniform vec3 uV;uniform float uLen;uniform float uPx;attribute float aE;attribute float aS;varying float vF;void main(){vec3 p=position+uV*aS*uT;vec3 r=mod(p-uC+uBox*.5,uBox)-uBox*.5;vec3 w=uC+r-uV*aS*aE*uLen;vec4 c=viewMatrix*vec4(w,1.0);gl_Position=projectionMatrix*c;gl_PointSize=clamp(uPx*(60.0/max(8.0,-c.z)),1.5,5.0);vF=1.0-smoothstep(25.0,46.0,length(r.xz));}',
+    fragmentShader:'uniform vec3 uCol;uniform float uA;uniform float uPt;varying float vF;void main(){float a=1.0;if(uPt>.5){float d=length(gl_PointCoord-.5);if(d>.5)discard;a=smoothstep(.5,.25,d);}gl_FragColor=vec4(uCol,uA*vF*a);}'});
+  const o=regen?new THREE.LineSegments(g,m):new THREE.Points(g,m);o.frustumCulled=false;o.renderOrder=50;scene.add(o);
+  return{o,g,u,per:regen?2:1,N};
+})();
+function nSetzen(){   // Grafikstufe: niedrig 25 %, mittel 60 %, hoch 100 %
+  if(!NIED)return;const f=grafikName==='niedrig'?.25:grafikName==='mittel'?.6:1;NIED.g.setDrawRange(0,Math.floor(NIED.N*f)*NIED.per);NIED.o.visible=f>0;
+}
+function nSchritt(t){   // Kasten folgt dem Blick (Mitte zwischen Kamera und Zielpunkt)
+  if(!NIED)return;const c=NIED.u.uC.value;c.set((camera.position.x+ziel.x)/2,Math.max(ziel.y,camera.position.y*.5)+8,(camera.position.z+ziel.z)/2);NIED.u.uT.value=t/1000;
+}
 (function(){   // zwei Hügelketten
   const ring=(r,hb,hv,seed,c0,c1)=>{
     const seg=180,pos=[],col=[],idx=[];
@@ -3336,6 +3379,7 @@ const KFARB={
   semitisch:{s:[[206,196,172],[150,46,40],[62,62,110]],h:[[160,122,62]]},
   habescha:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]},afrikanisch:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]}};
 for(const k in KFARB){const F=KFARB[k];for(const t of['s','h'])F[t+'i']=F[t].map(c=>{UPAL.value.push(new THREE.Vector3(...c.map(v=>Math.pow(v/255,2.2))));return UPAL.value.length-1;});}   // Palette (linear) für den Figuren-Shader
+KFARB.nordisch=KFARB.slawisch=KFARB.germanisch;KFARB.britisch=KFARB.thrakisch=KFARB.keltisch;   // verwandte Kulturen (Frühmittelalter)
 const tonWahl=(L,h)=>L[Math.floor(h*L.length)%L.length],tonHell=a=>Math.pow(.9+.2*a,2.2);
 function tonSetzen(id,u){
   const F=KFARB[u.ein&&u.ein.kultur];if(!F)return;
@@ -3360,7 +3404,7 @@ function einheitenAnlegen(){
   for(const k in zaehler)zaehler[k]=0;for(const k in G)G[k]=0;for(const k in evZ)evZ[k]=0;gA.fill(0);sAmmo.fill(0);
   NU=ROSTER.length;NA=NU*PRO;
   ROSTER.forEach((r,i)=>{
-    const K=(BD&&r.s===1)?Object.assign({},r.werte,{atk:r.werte.atk*BD.am,def:r.werte.def*BD.am,mor:Math.max(20,Math.min(98,r.werte.mor+BD.mor))}):r.werte,np=r.figuren,side=r.s;
+    const K=wetterWerte((BD&&r.s===1)?Object.assign({},r.werte,{atk:r.werte.atk*BD.am,def:r.werte.def*BD.am,mor:Math.max(20,Math.min(98,r.werte.mor+BD.mor))}):r.werte),np=r.figuren,side=r.s;
     const u={i,side,name:r.anzeige,def:K,ein:r,np,tief:Math.ceil(np/(K.ele?5:BREIT)),br:K.ele?5:BREIT,ele:!!K.ele,mk:K.ele?EFK:PFK,mh:K.ele?2.45:.62,mf:K.ele?1.05:-.05,scheu:0,trumT:0,panikN:0,panikCool:0,panikGes:0,ai:K.reit?'reit':K.ans>=1.6?'sturm':K.speer?'linie':r.rolle==='sword'?'spaet':'linie',
       reit:!!K.reit,abx:K.ele?4.2:K.reit?1.6:ABST,abz:K.ele?6.4:K.reit?3.0:ABST,rx:K.ele?(Math.min(np,5)-1)*2.1+4.2:K.reit?(Math.min(np,BREIT)-1)*.8+2.6:7.4,rz:K.ele?(Math.ceil(np/5)-1)*3.2+5.2:K.reit?(Math.ceil(np/BREIT)-1)*1.5+3.2:4.4,nahT:0,loesen:false,sammelT:0,reitW:null,chF:-1,
       strength:np,morale:K.mor,state:'steht',
@@ -3441,7 +3485,7 @@ function elefStampf(i,f){   // Nahkampf: Vorhand hoch, niederstampfen (Wirkung b
   const dur=setClipP(i,P_STEIG,.95+Math.random()*.1,true);pT[i]=dur+.05;
   setClip(i,C.reiten,1,true);
   sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.62;sReaT[i]=Math.max(0,dur*.62-.15);sPh[i]=0;sDmg[i]=1.6;sTgt[i]=f;sOut[i]=0;
-  sPer[i]=(2.3+Math.random()*1.0)*(1+.4*sFat[i]);sFat[i]=Math.min(1,sFat[i]+.02);zaehler.schlaege++;zaehler.stampfen++;
+  sPer[i]=(2.3+Math.random()*1.0)*(1+.4*sFat[i]);sFat[i]=Math.min(1,sFat[i]+.02*WFATK);zaehler.schlaege++;zaehler.stampfen++;
 }
 /* Kegel vor dem Tier i (len m lang, am Ende 2·b breit): wirft um oder tötet. eigen = auch die eigene Seite (Panik) */
 function elefTrampel(i,len,b,dmg,eigen){
@@ -3589,7 +3633,7 @@ function startSwing(i,f){
   const dur=setClip(i,ci,sJit[i]*(1-.15*sFat[i]),true);
   sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.5;sReaT[i]=Math.max(0,dur*.5-.15);sPh[i]=0;sDmg[i]=dm;sTgt[i]=f;sOut[i]=0;
   sPer[i]=(1.1+Math.random()*.7)*(1+.4*sFat[i]);
-  sFat[i]=Math.min(1,sFat[i]+.02);zaehler.schlaege++;
+  sFat[i]=Math.min(1,sFat[i]+.02*WFATK);zaehler.schlaege++;
 }
 /* Ergebnis des Schlags festlegen (kurz vor dem Treffer) und Verteidiger reagieren lassen */
 function reaktion(i){
@@ -3634,7 +3678,7 @@ function trefferWirkung(i,j){
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
   const fm=ang<1.15?1:ang<2.4?1.5:2;
   const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1)*(FLU&&imFurt(sX[j],sZ[j])?1.25:1);   // Furt: Abwehr ×0,8
-  sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01);
+  sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01*WFATK);
   if(sHP[j]>0)ereignis(sDmg[i]<.9?'schildstoss':U[sUnit[i]].def.speer?'speer':'treffer',sX[j],sZ[j]);
   if(Math.random()<.18)staub(sX[j],sZ[j],1,.9,.3);
   {const ex=sX[j]-sX[i],ez=sZ[j]-sZ[i],el=Math.hypot(ex,ez)+1e-6;spritzer(sX[j],sZ[j],ex/el,ez/el,3+(Math.random()*4|0));if(Math.random()<.55)blutFleck(sX[j]+ex/el*.4,sZ[j]+ez/el*.4,.55);}
@@ -3686,11 +3730,11 @@ function aufprall(i,f){
   if(v<(ua.ele?4.2:5.2)||sSt[f]>S_FLIEH)return;   // zu langsam: gewöhnlicher Nahkampf
   const dx=sX[f]-sX[i],dz=sZ[f]-sZ[i],d=Math.hypot(dx,dz)+1e-6,nx=dx/d,nz=dz/d;
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[f],sZ[i]-sZ[f])-sR[f])),vorn=ang<1.15,hinten=ang>2.4;
-  const stehend=sSt[f]!==S_FLIEH&&sVX[f]*sVX[f]+sVZ[f]*sVZ[f]<4&&sAct[f]!==A_TREFFER;
+  const stehend=sSt[f]!==S_FLIEH&&(ud.fa==='schildwall'||sVX[f]*sVX[f]+sVZ[f]*sVZ[f]<4)&&sAct[f]!==A_TREFFER;   // Schildwall: auch beim Nachrücken in die Reihe fest
   sRush[i]=.9;sImp[i]=v;zaehler.ansturm++;ereignis('aufprall',sX[i],sZ[i]);
-  const w=(v/8)*A.ans*(vorn?1:hinten?2:1.6)*(ua.fa==='keil'?1.25:1)*(ud.fa==='schildwall'&&vorn?.6:1)*(ud.fa==='keil'?1/.85:1);   // Keil: wuchtiger, aber verwundbar · Schildwall: Ansturm von vorn abgeschwächt
+  const w=(v/8)*A.ans*(vorn?1:hinten?2:1.6)*(ua.fa==='keil'?1.25:1)*(ud.fa==='schildwall'&&vorn?.5:1)*(ud.fa==='keil'?1/.85:1);   // Keil: wuchtiger, aber verwundbar · Schildwall: Ansturm von vorn abgeschwächt
   if(D.speer&&vorn&&stehend){
-    const pw=Math.min(.92,(D.pike?.78:D.pakId==='A7_hoplit'?.66:.52)*(1-.25*sFat[f])+(ud.fa==='schildwall'?.08:0));
+    const pw=Math.min(.92,(D.pike?.78:D.pakId==='A7_hoplit'?.66:.52)*(1-.25*sFat[f])+(ud.fa==='schildwall'?.1:0));
     if(Math.random()<pw){   // Speere halten: das Pferd scheut, der Reiter stürzt oder wird getroffen
       zaehler.ansturmAbgewehrt++;
       const ci=setClip(f,C.stoss_speer,sJit[f],true);sAct[f]=A_REAKT;sActT[f]=ci;sFace[f]=i;sKX[f]=sKZ[f]=0;
@@ -3703,7 +3747,7 @@ function aufprall(i,f){
     }
   }
   const dmg=1.25*w;
-  sHP[f]-=dmg;zaehler.treffer++;sFat[f]=Math.min(1,sFat[f]+.03);
+  sHP[f]-=dmg;zaehler.treffer++;sFat[f]=Math.min(1,sFat[f]+.03*WFATK);
   spritzer(sX[f],sZ[f],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[f]+nx*.5,sZ[f]+nz*.5,.6);
   ud.morale-=.45*w*(ua.ele?2.2:1);
   sCool[i]=.35;
@@ -3736,7 +3780,7 @@ const gHead=[0,0],gSk=new Float32Array(GN*2).fill(1);   // gSk: Größe je Gesch
 function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reichweite
   const F=u.def.fern;u.fZ=-1;
   if(!F||u.mun<=0||gone(u)||u.state==='flieht'||u.engaged)return;
-  const R=F.reich+3;
+  const R=Math.min(F.reich+3,WSICHT);
   if(u.fBef>=0){const T=U[u.fBef];if(T.side!==u.side&&!gone(T)&&T.sn>0){if(Math.hypot(T.mx-u.mx,T.mz-u.mz)<=R){u.fZ=u.fBef;return;}}else u.fBef=-1;}
   let bd=R;
   for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;u.fZ=v.i;}}
@@ -3747,7 +3791,7 @@ function wurfStart(i,u){
   let j=-1;for(let k=0;k<6;k++){const id=T.occ[(Math.random()*T.np)|0];if(id>=0&&sSt[id]<=S_FLIEH){j=id;break;}}   // Zielpunkt: eine zufällige Figur der Zieleinheit
   let tx,tz;if(j>=0){tx=sX[j];tz=sZ[j];}else{tx=T.mx;tz=T.mz;}
   const dx=tx-sX[i],dz=tz-sZ[i],d=Math.hypot(dx,dz);
-  if(d>F.reich||d<3){sCool[i]=.4+Math.random()*.4;return;}
+  if(d>F.reich||d>WSICHT||d<3){sCool[i]=.4+Math.random()*.4;return;}
   if(j>=0){const tf=d/F.v;tx+=sVX[j]*tf;tz+=sVZ[j]*tf;}   // Vorhalt
   sAX[i]=tx;sAZ[i]=tz;sTgt[i]=-1;
   const dur=setClip(i,C[F.clip],sJit[i],true);
@@ -3795,8 +3839,8 @@ function geschossAufprall(q){
     return;
   }
   const ex=sX[j]-gSX[q],ez=sZ[j]-gSZ[q],el=Math.hypot(ex,ez)+1e-6,nx=ex/el,nz=ez/el;
-  const dmg=F.schaden*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1)*(Kd.ele?1.5:1)*(Ud.fa==='schildkroete'?.25:1);   // Schildkröte: Schilde auch oben
-  sHP[j]-=dmg;G.treffer++;zaehler.fernTreffer++;sFat[j]=Math.min(1,sFat[j]+.01);ereignis('treffer_fern',sX[j],sZ[j]);
+  const dmg=F.schaden*WFERN*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1)*(Kd.ele?1.5:1)*(Ud.fa==='schildkroete'?.25:1);   // Schildkröte: Schilde auch oben
+  sHP[j]-=dmg;G.treffer++;zaehler.fernTreffer++;sFat[j]=Math.min(1,sFat[j]+.01*WFATK);ereignis('treffer_fern',sX[j],sZ[j]);
   spritzer(sX[j],sZ[j],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[j]+nx*.4,sZ[j]+nz*.4,.5);
   if(F.moral)Ud.morale-=F.moral;
   if(sHP[j]<=0){sterbeDir(j,-nx,-nz,u0,1);return;}
@@ -3877,7 +3921,7 @@ function kampfTick(dt){
     const st=sSt[i];if(st>S_FLIEH)continue;
     const u=U[sUnit[i]];
     u.nL++;u.fatS+=sFat[i];
-    if(st!==S_KAMPF){const fa=sFat[i];sFat[i]=u.run&&u.curSpeed>u.def.walk*1.2?Math.min(1,fa+(u.def.reit?.002:.003)*dt):u.curSpeed>.2?Math.max(0,fa-.002*dt):Math.max(0,fa-.006*dt);}   // Ausdauer (31.10.): Rennen kostet, Gehen/Stehen erholt
+    if(st!==S_KAMPF){const fa=sFat[i];sFat[i]=u.run&&u.curSpeed>u.def.walk*1.2?Math.min(1,fa+(u.def.reit?.002:.003)*WFATK*dt):u.curSpeed>.2?Math.max(0,fa-.002*dt):Math.max(0,fa-.006*dt);}   // Ausdauer (31.10.): Rennen kostet, Gehen/Stehen erholt
     if(sCool[i]>0)sCool[i]-=dt;
     sRet[i]-=dt;sBackT[i]-=dt;
     const act=sAct[i];
@@ -3979,7 +4023,7 @@ function faehigListe(u){const L=FAEH[u.def.pakId]||[];return u.def.ele?[]:L.filt
 function salveZiel(u){let b=-1,bd=30;for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;b=v.i;}}return b;}
 function salveBereit(u){return phase==='schlacht'&&!u.salveVerbr&&u.salveT<=0&&!u.engaged&&!u.fern&&!gone(u)&&u.state!=='flieht'&&u.fa!=='schildkroete'&&salveZiel(u)>=0;}
 function faehigWahl(u){const L=faehigListe(u);if(!L.length)return null;if(L.includes('salve')&&salveBereit(u))return'salve';return L.find(n=>n!=='salve')||'salve';}
-function faehigFk(u){u.fk=u.fa==='schildkroete'?.78:u.fa==='schildwall'?.88:u.eng?FORM_K.eng:FORM_K.locker;}
+function faehigFk(u){u.fk=u.fa==='schildkroete'?.78:u.fa==='schildwall'?FORM_K.eng:u.eng?FORM_K.eng:FORM_K.locker;}
 function faehigAnwenden(u,n){
   if(!u||gone(u)||u.state==='flieht'||phase!=='schlacht'||!faehigListe(u).includes(n))return false;
   if(n==='salve'){
@@ -4050,7 +4094,7 @@ function fernKI(u){   // true = Fernkampf-Verhalten führt die Einheit (Aufruf a
     if(!u.hasDest&&u.fZ<0){
       const T=naechster(u,false);
       if(T){const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
-        if(d>F.reich*.9){const l=d||1;u.destX=T.cx+(u.cx-T.cx)/l*F.reich*.7;u.destZ=T.cz+(u.cz-T.cz)/l*F.reich*.7;u.hasDest=true;u.atkT=-1;u.run=d>40;}}
+        const FR=Math.min(F.reich,WSICHT-8);if(d>FR*.9){const l=d||1;u.destX=T.cx+(u.cx-T.cx)/l*FR*.7;u.destZ=T.cz+(u.cz-T.cz)/l*FR*.7;u.hasDest=true;u.atkT=-1;u.run=d>40;}}
     }
     return true;
   }
@@ -4061,7 +4105,7 @@ function fernKI(u){   // true = Fernkampf-Verhalten führt die Einheit (Aufruf a
   if(!u.hasDest&&(u.fBef>=0||u.stance==='angreifen')){   // Spieler: in Schussweite an das Ziel heranführen
     const T=u.fBef>=0?U[u.fBef]:naechster(u,false);
     if(T&&!gone(T)){const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
-      if(d>F.reich*.85){const l=d||1;u.destX=T.cx+(u.cx-T.cx)/l*F.reich*.75;u.destZ=T.cz+(u.cz-T.cz)/l*F.reich*.75;u.hasDest=true;u.atkT=-1;u.run=false;}}
+      const FR=Math.min(F.reich,WSICHT-8);if(d>FR*.85){const l=d||1;u.destX=T.cx+(u.cx-T.cx)/l*FR*.75;u.destZ=T.cz+(u.cz-T.cz)/l*FR*.75;u.hasDest=true;u.atkT=-1;u.run=false;}}
   }
   return true;
 }
@@ -4416,8 +4460,8 @@ function figuren(dt){
     }
     // Ermüdung
     let ft=sFat[i];
-    if(slope>.04&&sp>.3)ft+=Math.min(.02,slope*.05)*dt;   // Anstieg kostet Kraft
-    if(sp>2.7)ft+=.012*dt;else if(sp>.3)ft+=.002*dt;else if(st===S_KAMPF)ft+=.0025*dt;else if(st===S_FORM)ft-=.012*dt;
+    if(slope>.04&&sp>.3)ft+=Math.min(.02,slope*.05)*dt*WFATK;   // Anstieg kostet Kraft
+    if(sp>2.7)ft+=.012*WFATK*dt;else if(sp>.3)ft+=.002*WFATK*dt;else if(st===S_KAMPF)ft+=.0025*WFATK*dt;else if(st===S_FORM)ft-=.012*dt;
     sFat[i]=ft<0?0:ft>1?1:ft;
     // Abstand halten (Raster-Hash, nur Nachbarzellen)
     {
@@ -4895,7 +4939,7 @@ function uiAktualisieren(){
    for(const u of U){if(gone(u))continue;const m=u.strength;if(u.side===0)m0+=m;else m1+=m;
      if(u.state==='flieht')continue;const w=m*(.4+.6*Math.max(0,u.morale)/u.def.mor);if(u.side===0)p0+=w;else p1+=w;}
    txt($('kR'),String(m0));txt($('kK'),String(m1));wid($('kBar'),p0+p1>0?p0/(p0+p1)*100:50);
-   txt($('kZeit'),fmtZeit(schlachtZ));txt($('kTempo'),pausiert?'Pause':fmt(tempoV)+'× Tempo');}
+   txt($('kZeit'),fmtZeit(schlachtZ));txt($('kTempo'),pausiert?'Pause':(WET!=='klar'?WET[0].toUpperCase()+WET.slice(1)+' · ':'')+fmt(tempoV)+'× Tempo');}
   // Einheitenfenster
   const h=infoId>=0?U[infoId]:null,fe=$('fenster');
   if(h&&phase!=='ende'){
@@ -4935,7 +4979,8 @@ function uiAktualisieren(){
   TON.karte();btnText('bTon','Ton',tonAn?'an':'aus');hrefSet($('bTon').querySelector('use'),tonAn?'ic-ton':'ic-stumm');
   // Hinweiszeile (blendet nach 6 s aus)
   let z;
-  if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Beginnen.';
+  if(phase==='aufstellung')z='Ziehe deine Einheiten. Dann: Beginnen.'+(WET!=='klar'?' '+WET_TEXT[WET]:'');
+  else if(phase==='schlacht'&&WET!=='klar'&&!pausiert&&schlachtZ<7)z=WET_TEXT[WET];
   else if(phase==='ende')z=ergebnis==='sieg'?'Das Feld gehört '+SEITE[0]+'.':SEITE[0]+' ist geschlagen.';
   else if(pausiert)z='Pause';
   else z=hz?(hz.name+(selM.size>1?' und '+(selM.size-1)+' weitere':'')+' gewählt – '+(hz.fern?'Feind antippen: beschießen · Gelände: marschieren':'Gelände: marschieren, doppelt: laufen · Feind: angreifen')):'Wähle eine Einheit (Karte unten oder auf dem Feld).';
@@ -4965,6 +5010,7 @@ function bannerSchritt(){
       _bnp.set(u.cx,H(u.cx,u.cz)+9,u.cz);const dist=camera.position.distanceTo(_bnp);_bnp.project(camera);
       x=(_bnp.x+1)*.5*W;y=(1-_bnp.y)*.5*Hh;
       op=_bnp.z>1?0:Math.max(0,Math.min(1,(dist-26)/22));        // in der Nähe ausblenden
+      if(u.side===1&&WBANN<1e8){let m=1e9;for(const v of U)if(v.side===0&&!gone(v)){const e=Math.hypot(v.cx-u.cx,v.cz-u.cz);if(e<m)m=e;}if(m>WBANN)op=0;else if(m>WBANN-25)op*=(WBANN-m)/25;}   // Nebel: Feind erst nah zu sehen
       if(x<-60||x>W+60||y<-80||y>Hh+60)op=0;
       s=Math.max(.45,Math.min(.95,95/dist));                    // mit Entfernung kleiner
     }
@@ -5020,7 +5066,7 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bFaeh','bSammeln',
    ==================================================================================================== */
 const TON=(()=>{
   const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
-  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,fluss:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
+  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,fluss:1,regen:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
     hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_schritte:1,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
   const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
@@ -5046,7 +5092,7 @@ const TON=(()=>{
   const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'].filter(n=>!M_FEHLT[n]),id,art:null,ok:false});
   LISTE.push(mItem('kampf_1'));
   const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
-  const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste),fluss:!!FLU};   // Klima-Teppiche nur laden, wenn gebraucht
+  const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste),fluss:!!FLU,regen:WET==='regen'};   // Klima-Teppiche nur laden, wenn gebraucht
   for(const a in SFX)for(let n=1;n<=SFX[a];n++)if((!(a in KLB)||KLB[a])&&!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
   for(const id of ['ruhe_1','aufmarsch_%','kampf_%','sieg_1','niederlage_1','hoehepunkt_1','kampf_2','kampf_3','hoehepunkt_2','sieg_2','ruhe_2','niederlage_2']){const m=mItem(id);if(id.endsWith('%'))m.kz=id;LISTE.push(m);}
   function kultSetzen(){   // stärkste Kultur der Spielerseite (nach Figuren); noch nicht geladene Volksstücke umstellen
@@ -5166,7 +5212,7 @@ const TON=(()=>{
   function teppiche(){
     const n=ctx.currentTime,sz=.5+.5/(1+dist/140),ruhig=phase==='schlacht'&&!pausiert;
     const nah=ruhig?mn(1,nahK/40):0,fern=ruhig?mn(1,fernK/70)*(1-.7*nah):0,mar=ruhig?mn(1,marschK/50)*(1-.6*nah):0,stu=ruhig?mn(1,sturmK/40)*(1-.5*nah):0;
-    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:GKL==='schnee'?.4:.3,wiese:(GKL==='mittelmeer'||GKL==='steppe'?.25:GKL==='schnee'?.08:0)*(1-.8*nah),wald:KLB.wald?.3*(1-.8*nah):0,wueste:KLB.wueste?.3*(1-.7*nah):0,kueste:KLB.kueste?.28*(1-.8*nah):0,fluss:KLB.fluss?.22*(1-.8*nah):0};
+    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:GKL==='schnee'?.4:.3,wiese:(GKL==='mittelmeer'||GKL==='steppe'?.25:GKL==='schnee'?.08:0)*(1-.8*nah),wald:KLB.wald?.3*(1-.8*nah):0,wueste:KLB.wueste?.3*(1-.7*nah):0,kueste:KLB.kueste?.28*(1-.8*nah):0,fluss:KLB.fluss?.22*(1-.8*nah):0,regen:KLB.regen?.4*(1-.5*nah):0};
     for(const k in T){if(!AMB[k]&&T[k]>0)ambStart(k);const a=AMB[k];if(a)a.g.gain.setTargetAtTime(T[k],n,.6);}
   }
 
@@ -5329,7 +5375,7 @@ function setGrafik(nm){
   renderer.shadowMap.type=nm==='hoch'?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;
   renderer.shadowMap.enabled=sh;sun.castShadow=sh;
   if(sh&&sun.shadow.mapSize.x!==S.schatten){sun.shadow.mapSize.set(S.schatten,S.schatten);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
-  shExt=0;
+  shExt=0;nSetzen();
   gelNetz.castShadow=sh;gelNetz.receiveShadow=sh;gelAussen.receiveShadow=sh;
   for(const k in VEG){const v=VEG[k],fr=v.f==='baum'?S.baum:v.f==='busch'?S.busch:Math.max(.5,S.busch);
     v.m.count=Math.round(v.n*fr);v.m.castShadow=sh&&v.f!=='busch';v.m.receiveShadow=sh;}
@@ -5396,7 +5442,7 @@ function schleife(t){
   camSetzen();   // Kamera folgt dem Gelände (auch wenn Ziel sich nicht bewegt hat: billig)
   himmel.position.copy(camera.position);
   GRAS[0].uni.uCen.value.set(ziel.x,ziel.z);GRAS[1].uni.uCen.value.set(ziel.x,ziel.z);
-  sonneNachfuehren();
+  sonneNachfuehren();nSchritt(t);
   if(t-lodT>=500){lodT=t;lodUpdate(false);}
   baueInstanzen();baueGeschosse();markerUpdate(t);
   if(!pausiert&&phase!=='aufstellung')staubEmission(Math.min(.1,dt));
@@ -5543,7 +5589,7 @@ return{
   pause(p){pausiert=p===undefined?!pausiert:!!p;uiAktualisieren();},
   stellen(i,x,z){if(phase==='aufstellung'&&U[i])platziere(U[i],x,z);},
   versetzen(i,x,z){const u=U[i];if(!u)return;const dx=x-u.cx,dz=z-u.cz;u.cx=x;u.cz=z;u.mx+=dx;u.mz+=dz;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sX[id]+=dx;sZ[id]+=dz;}}},   // nur für Tests: Einheit samt Soldaten umsetzen
-  hoehe(x,z){return H(x,z);},get gelaende(){return{typ:GTYP,klima:GKL,saat:GSAAT,gesetzt:!!GEL,huegel:GHILL.length,fluss:FLU?{z:FLU.z,fords:FLU.fords.slice()}:null};},
+  hoehe(x,z){return H(x,z);},get wetter(){return WET;},get gelaende(){return{typ:GTYP,klima:GKL,saat:GSAAT,gesetzt:!!GEL,huegel:GHILL.length,fluss:FLU?{z:FLU.z,fords:FLU.fords.slice()}:null};},
   fluss:{aktiv:!!FLU,zAt(x){return FLU?flussZ(x):null;},tief(x,z){return!!FLU&&Math.abs(z-flussZ(x))<FLWB-.6&&!FLU.fords.some(f=>Math.abs(x-f)<FLFW);},furt:imFurt},
   bildPos(x,z){const v=new THREE.Vector3(x,H(x,z),z).project(camera);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight];},
   haltung(i,s){if(U[i])U[i].stance=s;},kiSeiten(a,b){KIS[0]=!!a;KIS[1]=!!b;},   // nur für Tests: true = Computer-Führung, false = Haltung/Befehle (Spielerseite)
@@ -22702,6 +22748,12 @@ function eschStart(args){
     const ty=pter(ti),dry=isAfr(pd.lon,pd.lat)||pd.lat<38.6||ar>0.55;
     const kl=(se===3&&(pd.lat>46||(pd.lat>41&&h<20)))?'schnee':ar>0.7?'wueste':ar>0.4?'steppe':(ty==='rough'&&!dry)?'wald':'mittelmeer';
     gel={typ:ty,klima:kl,saat:ti*131+(S.turn||0),kueste:!!(ft&&ft.coast)};
+    {   // Wetter: gleiche Verteilung wie in der alten Schlacht (nach Klima und Jahreszeit), aber deterministisch aus Provinz und Runde
+      const hh=k=>((Math.sin((ti*57+(S.turn||0)*23)*12.9898+k*78.233)*43758.5453)%1+1)%1,r=hh(1),nth=pd.lat>50;
+      let w=dry?(r<0.6?'klar':r<0.9?'hitze':r<0.95?'nebel':'regen'):nth?(r<0.4?'klar':r<0.65?'regen':r<0.8?'nebel':'schnee'):(r<0.55?'klar':r<0.8?'regen':r<0.93?'nebel':pd.lat>44?'schnee':'regen');
+      const n46=pd.lat>46;if(se===3&&w!=='schnee'&&hh(2)<(n46?0.55:pd.lat>41?0.2:0))w='schnee';if(se===1&&dry&&w==='klar'&&hh(3)<0.35)w='hitze';if(se===1&&w==='schnee')w='klar';
+      gel.wetter=w;
+    }
     if(ty!=='mountain'){   // Fluss wie in der alten Schlacht: Provinz am Fluss (RIVER_PTS nahe der Hauptstadt / Angriff über einen Fluss), sonst 10 % Zufall
       const cap=CAP[ti],nearR=(cap&&RIVER_PTS.some(q=>Math.hypot(q[0]-cap.x,q[1]-cap.z)<0.9))||!!(ctx&&ctx.res&&ctx.res.river);
       if(nearR||((ti*977+(S.turn||0)*31)>>>0)%100<10){const fr=k=>((Math.sin((ti*131+(S.turn||0))*12.9898+k*78.233)*43758.5453)%1+1)%1;gel.fluss={z:(fr(1)-.5)*12,fords:[-(40+fr(2)*70),40+fr(3)*70]};}
@@ -24548,7 +24600,7 @@ try{const _ws=warStandHtml;warStandHtml=function(f){const h=_ws(f);let w=0;try{w
 try{const _dh=dipHouseHtml;dipHouseHtml=function(g){const h=_dh(g);if(!h)return h;let k=null;try{const G=S.fac[g].dyn;if(G&&G.pu&&G.pu.lord===S.player)k='fam_personalunion';else if((S.fac[S.player].exl||[]).length)k='fam_exil';}catch(e){}return k?sysImg(k,'small')+h:h;};}catch(e){}
 
 // ---------- Reisemodus: Oberfläche (Vorladen, Status, Löschen) ----------
-const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101115], ["proto/figuren/k_A1_eques.json", 2831935], ["proto/figuren/k_A1_hastatus.json", 2567582], ["proto/figuren/k_A1_legion.json", 2550322], ["proto/figuren/k_A1_veles.json", 2541309], ["proto/figuren/k_A2_libysch.json", 2528773], ["proto/figuren/k_A2_numidisch.json", 2897875], ["proto/figuren/k_A3_iberisch.json", 2540489], ["proto/figuren/k_A4_balearisch.json", 2528213], ["proto/figuren/k_A6_adlig.json", 2543594], ["proto/figuren/k_A6_falx.json", 2525903], ["proto/figuren/k_A6_keltisch.json", 2541060], ["proto/figuren/k_A6_plaenkler.json", 2534667], ["proto/figuren/k_A7_hellenistisch.json", 2547250], ["proto/figuren/k_A7_hoplit.json", 2565461], ["proto/figuren/k_A7_phalangit.json", 2789874], ["proto/figuren/k_A7_toxotes.json", 2540508], ["proto/figuren/k_A8_aksum.json", 2540291], ["proto/figuren/k_A8_nubisch.json", 2540552], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v217';
+const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101218], ["proto/figuren/k_A1_eques.json", 2831935], ["proto/figuren/k_A1_hastatus.json", 2567582], ["proto/figuren/k_A1_legion.json", 2547746], ["proto/figuren/k_A1_veles.json", 2541309], ["proto/figuren/k_A2_libysch.json", 2528773], ["proto/figuren/k_A2_numidisch.json", 2897875], ["proto/figuren/k_A3_iberisch.json", 2540489], ["proto/figuren/k_A4_balearisch.json", 2528213], ["proto/figuren/k_A6_adlig.json", 2541014], ["proto/figuren/k_A6_falx.json", 2525903], ["proto/figuren/k_A6_keltisch.json", 2541060], ["proto/figuren/k_A6_plaenkler.json", 2534667], ["proto/figuren/k_A7_hellenistisch.json", 2547250], ["proto/figuren/k_A7_hoplit.json", 2565461], ["proto/figuren/k_A7_phalangit.json", 2789874], ["proto/figuren/k_A7_toxotes.json", 2540508], ["proto/figuren/k_A8_aksum.json", 2540291], ["proto/figuren/k_A8_nubisch.json", 2540552], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_M1_bogen.json", 2541316], ["proto/figuren/k_M1_heerbann.json", 2533567], ["proto/figuren/k_M1_huskarl.json", 2535038], ["proto/figuren/k_M1_panzerreiter.json", 2815628], ["proto/figuren/k_M3_kataphrakt.json", 2817509], ["proto/figuren/k_M3_skutatos.json", 2541149], ["proto/figuren/k_M3_thematen.json", 2542481], ["proto/figuren/k_M3_toxotes.json", 2541515], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_regen_1.mp3", 74304], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v218';
 const OFFUI={run:false,stop:false};
 function offSize(set){return OFF_MAN.filter(([p])=>set==='alles'||!/^(audio|proto\/ton)\//.test(p)).reduce((a,[,s])=>a+s,0);}
 function offMB(b){return(b/1048576).toFixed(b<1048576*10?1:0).replace('.',',')+' MB';}

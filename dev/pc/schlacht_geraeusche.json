@@ -35,5 +35,6 @@
  {"id": "kueste", "p": "sea waves breaking on a beach, seagulls, coastal wind", "dauer": 10, "n": 1},
  {"id": "feldherr_ruf", "p": "a commander shouting a loud rallying battle command, soldiers roar in response", "dauer": 3, "n": 3},
  {"id": "anfeuern_jubel", "p": "a large army of soldiers cheering and roaring together, raising spirits, outdoors", "dauer": 4, "n": 2},
- {"id": "flucht", "p": "soldiers fleeing in panic, frightened shouting, many running footsteps", "dauer": 4, "n": 2}
+ {"id": "flucht", "p": "soldiers fleeing in panic, frightened shouting, many running footsteps", "dauer": 4, "n": 2},
+ {"id": "regen", "p": "steady rain falling on grass and a field, light wind, outdoors, no thunder", "dauer": 10, "n": 1}
 ]

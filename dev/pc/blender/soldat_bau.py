@@ -73,10 +73,10 @@ KITS = {
                          fern="speerwurf", reiter=True),
     # Sondereinheiten (30.10. abends): Berufslegion (Kettenhemd grau), keltische Adlige (Soldurii/Galater: Kettenhemd, Knaufhelm),
     # dakische Falxkrieger (Sichelschwert, ohne Schild), Nubier (Bogen), Aksumiten (Speer, Rundschild)
-    "A1_legion": dict(tunika=(0.2, 0.2, 0.21), haut="young_caucasian_male", muskel=0.65, rock=0.12, helm="knauf", brust=False,
+    "A1_legion": dict(kette=True, tunika=(0.2, 0.2, 0.21), haut="young_caucasian_male", muskel=0.65, rock=0.12, helm="knauf", brust=False,
                       schild=dict(w=0.65, h=1.1, farbe=(0.42, 0.06, 0.04), mittel=(0.45, 0.33, 0.08), zylinder=0.12, eckig=3.0),
                       waffe=("schwert", "gladius")),
-    "A6_adlig": dict(tunika=(0.19, 0.19, 0.2), hose=(0.3, 0.12, 0.05), haut="young_caucasian_male2", muskel=0.75, rock=0.1, helm="knauf",
+    "A6_adlig": dict(kette=True, tunika=(0.19, 0.19, 0.2), hose=(0.3, 0.12, 0.05), haut="young_caucasian_male2", muskel=0.75, rock=0.1, helm="knauf",
                      brust=False, schild=dict(w=0.6, h=1.15, farbe=(0.32, 0.05, 0.04), mittel=(0.45, 0.33, 0.08)), waffe=("schwert", "lang")),
     "A6_falx": dict(tunika=(0.28, 0.2, 0.12), hose=(0.2, 0.17, 0.12), haut="young_caucasian_male2", muskel=0.75, rock=0.05, helm="haar",
                     haar_tief=0.86, brust=False, schild=None, waffe=("schwert", "falx")),
@@ -84,6 +84,30 @@ KITS = {
                        schild=None, waffe=("bogen", 1.3), fern="bogen"),
     "A8_aksum": dict(tunika=(0.6, 0.55, 0.45), haut="young_african_male", muskel=0.6, rock=0.1, helm="haar", haar_tief=0.92, brust=False,
                      schild=dict(w=0.7, h=0.7, farbe=(0.3, 0.18, 0.08), woelbung=0.05), waffe=("speer", 2.2)),
+    # Frühmittelalter (31.10., F4, Vorlagen Job 47): Nordwest (Franken, Angelsachsen, Nordleute) und Ostrom/Orient.
+    # Kettenhemd = graue Tunika (wie Legion), Rundschild ~0,85 m mit Eisenbuckel, Ostrom: großer roter Rundschild, Lamellen dunkler.
+    "M1_heerbann": dict(tunika=(0.4, 0.33, 0.22), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male", muskel=0.6, rock=0.1,
+                        helm="nasal", brust=False, schild=dict(w=0.85, h=0.85, farbe=(0.36, 0.24, 0.12), woelbung=0.02),
+                        waffe=("speer", 2.4)),
+    "M1_huskarl": dict(kette=True, tunika=(0.24, 0.24, 0.25), hose=(0.28, 0.2, 0.12), haut="young_caucasian_male2", muskel=0.75, rock=0.14,
+                       helm="nasal", brust=False, schild=dict(w=0.85, h=0.85, farbe=(0.4, 0.12, 0.06), woelbung=0.02),
+                       waffe=("schwert", "spatha")),
+    "M1_bogen": dict(tunika=(0.42, 0.36, 0.26), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male", muskel=0.5, rock=0.08,
+                     helm="haar", haar_tief=0.88, brust=False, schild=None, waffe=("bogen", 1.6), fern="bogen"),
+    "M1_panzerreiter": dict(kette=True, tunika=(0.24, 0.24, 0.25), hose=(0.3, 0.22, 0.14), haut="young_caucasian_male", muskel=0.65, rock=0.14,
+                            helm="spangen", brust=False, schild=dict(w=0.8, h=0.8, farbe=(0.4, 0.3, 0.12), woelbung=0.03),
+                            waffe=("speer", 2.8), reiter=True),
+    "M3_skutatos": dict(tunika=(0.5, 0.12, 0.08), hose=(0.3, 0.25, 0.2), haut="young_caucasian_male2", muskel=0.6, rock=0.12,
+                        helm="byz", brust=False, schild=dict(w=0.9, h=0.9, farbe=(0.5, 0.08, 0.05), woelbung=0.03),
+                        waffe=("speer", 2.6)),
+    "M3_thematen": dict(kette=True, tunika=(0.2, 0.18, 0.16), hose=(0.3, 0.25, 0.2), haut="young_caucasian_male2", muskel=0.65, rock=0.14,
+                        helm="byz", brust=False, schild=dict(w=0.85, h=0.85, farbe=(0.5, 0.08, 0.05), woelbung=0.03),
+                        waffe=("schwert", "spatha")),
+    "M3_toxotes": dict(tunika=(0.55, 0.45, 0.3), hose=(0.3, 0.25, 0.2), haut="young_caucasian_male2", muskel=0.5, rock=0.1,
+                       helm="byz", brust=False, schild=None, waffe=("bogen", 1.2), fern="bogen"),
+    "M3_kataphrakt": dict(kette=True, tunika=(0.18, 0.17, 0.16), hose=(0.25, 0.2, 0.16), haut="young_caucasian_male2", muskel=0.7, rock=0.16,
+                          helm="kataphrakt", brust=False, schild=dict(w=0.6, h=0.6, farbe=(0.5, 0.08, 0.05), woelbung=0.03),
+                          waffe=("speer", 3.2), reiter=True),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -118,7 +142,7 @@ bpy.context.view_layer.update()
 # Tunika: Flächen, deren Hauptgewicht auf Rumpf/Oberarm/Oberschenkel liegt
 TUNIKA_GR = {"Hips", "LowerBack", "Spine", "Spine1", "LHipJoint", "RHipJoint", "LeftShoulder", "RightShoulder",
              "LeftArm", "RightArm", "LeftUpLeg", "RightUpLeg"}
-tun = bpy.data.materials.new("tunika_rot"); tun.use_nodes = True
+tun = bpy.data.materials.new("kettenhemd" if KIT.get("kette") else "tunika_rot"); tun.use_nodes = True   # Kettenhemd: nicht nach Volk getönt (Maske nur „tunika*“)
 tun.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (*KIT["tunika"], 1)
 tun.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.9
 body.data.materials.append(tun); ti = len(body.data.materials) - 1

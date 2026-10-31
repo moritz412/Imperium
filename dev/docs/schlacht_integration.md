@@ -195,3 +195,11 @@ fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
 - Ton: Teppich `s_fluss_1` (nur mit Fluss geladen, Lautstärke 0,22, im Nahkampf gedämpft). Hauptspiel: `eschStart` setzt `gelaende.fluss` wie die alte Schlacht (Provinz am Fluss nahe der Hauptstadt oder Angriff über einen Fluss, sonst 10 % deterministisch; nicht bei Gebirge; Mauern gehen ohnehin in die alte Schlacht), z ±6, Furten bei −(40..110) und +(40..110). `s_fluss_1.mp3` steht noch nicht in `OFF_MAN` (Offline-Liste, bewusst nicht angefasst).
 - Testseite: `schlacht_spiel.html?fluss=1[&saat=N]` (Furten bei −70 und 55). Test `dev/tests/schlacht_fluss_t.js` (Bilder `shot/fluss_aufstellung.png`, `shot/fluss_furt.png`).
 - Offen: Reiter-Ansturm über den Fluss endet am Ufer ohne Treffer; Fernkämpfer schießen über den Fluss (gewollt); Wasser ohne Wellen/Animation; Furtengedränge bei breiten Einheiten nur stichprobenartig geprüft; iPad nicht getestet.
+
+## Stand Wetter R4 (31.10.)
+- `OPT.gelaende.wetter` (oder `OPT.wetter`) = 'klar'|'regen'|'nebel'|'schnee'|'hitze'; fehlt es: 'klar' = unverändert. Testseite: `?wetter=regen` usw. Kern: `WET`, `wetterWerte`, `NIED` (Niederschlag, ein Shader-Objekt, Grafikstufe 25/60/100 %).
+- Wirkung: Regen Fernkampfschaden ×0,7, Reichweite ×0,85 · Nebel Fernkampf nur ≤ 60 m (KI rückt entsprechend heran), Feindbanner nur ≤ 90 m vom nächsten eigenen Trupp · Schnee Tempo ×0,85 · Hitze Ermüdung ×1,5 (Rennen, Gehen, Kampf, Anstieg).
+- Darstellung: Dunst/Himmel/Wolkendecke/Sonne je Wetter (keine neue Lichtquelle); Hinweis bei Aufstellung und in den ersten 7 s, Wetter im Zeitfeld neben dem Tempo.
+- Hauptspiel: `eschStart` würfelt das Wetter wie die alte Schlacht (Klima/Breite/Jahreszeit), deterministisch aus Provinz und Runde (`gel.wetter`).
+- Ton: Teppich `regen` (nur bei Regen geladen) – `s_regen_1.mp3` fehlt noch in dev/proto/ton (wird still übersprungen, 404 nur bei Regen).
+- Offen: Boden bei Schnee/Regen nicht weiß/nass (Klima 'schnee' kommt nur über die Jahreszeit); echtes iPad nicht getestet.
