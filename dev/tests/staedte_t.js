@@ -135,7 +135,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   if (BILD) await p.screenshot({ path: BILD.replace(/\.png$/, '_umland.png') });
   await p.click('#ansicht [data-umland]');
   const um3 = await p.evaluate(() => SR.szene.modus());
-  ok('Umland: 37 Hex-Felder, Stadt in der Mitte, Feldinfo, zurück zur Stadt', um1.n === 37 && um1.modus === 'region' && um1.titel === 'Cremona' && um1.leiste === 'none' && um2 && um2 !== 'Cremona' && um3 === 'stadt', JSON.stringify({ um1, um2, um3 }));
+  ok('Umland: 61 Hex-Felder, Stadt in der Mitte, Feldinfo, zurück zur Stadt', um1.n === 61 && um1.modus === 'region' && um1.titel === 'Cremona' && um1.leiste === 'none' && um2 && um2 !== 'Cremona' && um3 === 'stadt', JSON.stringify({ um1, um2, um3 }));
 
   // S2.2 Vermessen und Betriebe im Umland
   const land = await p.evaluate(() => {
@@ -301,7 +301,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     for (let i = 0; i < 20; i++) B.geb.push({ id: 9000 + i, t: 'quartier', x: 30, z: 30, w: 0, prio: false, stufe: 1, bew: 0, skl: 10, status: [] });
     B.gut.getreide = A.gut.getreide = 999; sim.monat(A, SR.welt); sim.monat(B, SR.welt); const furcht = B.stimmung < A.stimmung;
     // Insula: volle Casa mit Wasser und Markt, Kleinstadt, Schrein daneben
-    const I = kopie(); I.rang = 2; I.gut.brot = 999; I.gut.ziegel += 60; I.gut.holz += 60; sim.forschungS(I).fertig.push('schreine');
+    const I = kopie(); I.rang = 2; I.gut.brot = 999; I.gut.ziegel += 60; I.gut.holz += 60; I.gut.stein = 30; sim.forschungS(I).fertig.push('schreine');
     const casa = I.geb.find(b => b.t === 'huette' && b.stufe === 2 && sim.inReichweite(I, b, 'brunnen') && sim.inReichweite(I, b, 'markt'));
     let ins = 'keine passende Casa';
     if (casa) {
@@ -360,6 +360,28 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { vor, zuFrueh, frei, s0, g1, s1, nach: nach.ok || nach.grund, zwei, g2, drei };
   });
   ok('Stadterweiterung: Senat gibt Land im Osten frei, Landstraße verlängert', /Senat/.test(ew.vor) && /Stadtrang/.test(ew.zuFrueh) && ew.frei && ew.s0 === 0 && ew.g1 === 52 && ew.s1 >= 10 && ew.nach === true && ew.zwei && ew.g2 === 64 && /größte/.test(ew.drei), JSON.stringify(ew));
+  // Ring 4 (1.11.): Stein/Erz, Mantua über Land, Gallier-Geschenke, Schmiede mit Werkzeug
+  const r4 = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, karte = sim.regionKarte(), kopie = () => JSON.parse(JSON.stringify(S)), k = sim.landKey;
+    const stein = karte.find(f => f.typ === 'stein'), erz = karte.find(f => f.typ === 'erz');
+    const M = kopie(); M.land = {}; const zu = sim.handelOffen(M, 'mantua');
+    [[1, 0], [2, -1], [3, -1], [4, -1]].forEach(([q, r]) => { M.land[q + ',' + r] = { verm: 2, betrieb: '', weg: true }; });
+    const offen = sim.handelOffen(M, 'mantua'), plOffen = sim.handelOffen(M, 'placentia');
+    M.gut.erz = 20; M.gut.denare = 500; const v = sim.handeln(M, 'erz', 'verkauf', 'mantua'), kf = sim.handeln(M, 'werkzeug', 'kauf', 'mantua');
+    const G = kopie(); G.gut.brot = 100; G.gut.denare += 100; G.land = {}; const gs = sim.geschenk(G).ok, fr = G.frieden;
+    G.monat = 28; sim.setzeZufall(() => 0); const mG = sim.monat(G, SR.welt).join(' | '); sim.setzeZufall(null);
+    const W = kopie(); W.gut.holz += 80; W.gut.ziegel += 40; W.gut.erz = 40; W.gut.werkzeug = 0; let sm = null;
+    for (let z = 13; z <= 20 && !sm; z++) for (let x = 2; x <= 38 && !sm; x++) { const t = sim.bauen(W, SR.welt, 'schmiede', x, z); if (t.ok) sm = t.b; }
+    if (sm) sm.prio = true;
+    sim.monat(W, SR.welt);
+    SR.umland(true); SR.hexInfo(sim.mantuaFeld); const ui = { titel: document.querySelector('#info h2').textContent, knoepfe: document.querySelectorAll('#info [data-p="mantua"]').length };
+    SR.hexInfo(sim.gallierFeld); ui.geschenk = !!document.querySelector('#info [data-a="geschenk"]'); SR.hexInfo(null); SR.umland(false);
+    return { stein: !!stein && sim.betriebeFuer(stein).includes('steinbruch'), erz: !!erz && sim.betriebeFuer(erz).includes('erzgrube'), zu, offen, plOffen, v: v.ok, kf: kf.ok,
+      gs, fr, friedlich: !/Gallier fallen/.test(mG), schmiede: !!sm, werkzeug: Math.round((W.gut.werkzeug || 0) * 10) / 10, ui };
+  });
+  ok('Ring 4: Steinbruch und Erz, Mantua nur über Land, Handel', r4.stein && r4.erz && !r4.zu && r4.offen && !r4.plOffen && r4.v && r4.kf, JSON.stringify(r4));
+  ok('Gallier: Geschenke bringen Frieden, Schmiede macht Werkzeug', r4.gs && r4.fr === 24 && r4.friedlich && r4.schmiede && r4.werkzeug > 0);
+  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 14 && r4.ui.geschenk, JSON.stringify(r4.ui));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

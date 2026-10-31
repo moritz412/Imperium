@@ -144,6 +144,13 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       dann 52, dann 64 (`GRENZE`, `ERWEITERUNG`): gesperrtes Land dunkel mit Grenzsteinen (cippi); antippen → Fenster
       „Land im Osten“ mit Bedingungen (Dorf/Gunst 50/150 Denare, dann Kleinstadt/Gunst 60/400 Denare) und Antrag beim Senat.
       Die Landstraße wird als Via Postumia bis an die neue Grenze verlängert. Schatten folgen der Kamera. Test 51/51.
+- [x] Umland Ring 4 (61 Felder; innere 37 unverändert): Südufer (Weide/Lehm), Westen Wald, Osten Acker/Weide, Norden
+      **Steinbruch** (Stein 2) und **Erzgrube** (Erz 2) als neue Feldtypen/Betriebe. Neue Waren Stein, Erz, Werkzeug (Kopfleiste
+      erst, wenn vorhanden). **Schmiede** (Handwerk: Erz 1 + Holz 1 → Werkzeug 2); Werkzeug macht Sklaven-Betriebe 15 %
+      schneller (0,1 je Betrieb und Monat). Insula kostet jetzt Ziegel 20 + Stein 10. **Mantua** (Osten, nur über Feldwege,
+      handelt Erz/Werkzeug/Stein), Placentia an den Rand (−5,4) gerückt. **Dorf der Insubrer** im Norden (Palisade,
+      Rundhütten): Geschenke (40 Brot, 60 Denare) → 24 Monate kein Gallierüberfall. Test 54/54, Bild angesehen.
+      Offen: Werkzeug-Bedarf bei Höfen im Umland, Händlerkarren nach Mantua sichtbar.
 ## Plan nächste 2 Stunden (1.11., Vorschlag)
 Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
 Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt

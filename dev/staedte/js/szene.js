@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -412,7 +412,7 @@ export function erzeugeSzene(leinwand, welt) {
     kamera.updateProjectionMatrix();
   }
   function kameraSetzen() {
-    if (modus === 'region') { ziel.x = Math.max(REG_X - 20, Math.min(REG_X + 20, ziel.x)); ziel.z = Math.max(-20, Math.min(20, ziel.z)); }
+    if (modus === 'region') { ziel.x = Math.max(REG_X - 28, Math.min(REG_X + 28, ziel.x)); ziel.z = Math.max(-26, Math.min(26, ziel.z)); }
     else {
       ziel.x = Math.max(welt0, Math.min(welt0 + Math.min(RASTER, grenzeX + 6), ziel.x)); ziel.z = Math.max(welt0, Math.min(-welt0, ziel.z));
       // Schatten folgen dem Blick (Schattenbereich ±30 Felder)
@@ -451,12 +451,12 @@ export function erzeugeSzene(leinwand, welt) {
   let modus = 'stadt', region = null, wahlRing = null;
   const HEX = 3.2, S3 = Math.sqrt(3);
   const hexMitte = (q, r) => [REG_X + 1.5 * HEX * q, S3 * HEX * (r + q / 2)];
-  const HOEHE = { hang: 0.75, fluss: 0.08, stadt: 0.3, nachbar: 0.3 };
+  const HOEHE = { hang: 0.75, fluss: 0.08, stadt: 0.3, nachbar: 0.3, stein: 0.65, erz: 0.6, gallier: 0.36 };
   function regionBauen() {
     const g = new THREE.Group(), felder = erzeugeRegion(), lam = c => new THREE.MeshLambertMaterial({ color: c });
     const hexGeo = h => new THREE.CylinderGeometry(HEX, HEX, h, 6).rotateY(Math.PI / 6).translate(0, h / 2 - 0.2, 0);
     const rand = 0.82 * HEX;
-    [...felder, nachbarFeld].forEach(f => {
+    [...felder, ...sonderFelder()].forEach(f => {
       const [x, z] = hexMitte(f.q, f.r), h = (HOEHE[f.typ] ?? 0.32) + 0.2, top = h - 0.2;
       let k = (f.q * 7 + f.r * 13 + 100) | 0; const zz = () => (k = (k * 16807) % 2147483647) / 2147483647;
       const im = (rr = rand) => { let a, b; do { a = (zz() * 2 - 1) * rr; b = (zz() * 2 - 1) * rr; } while (Math.hypot(a, b) > rr); return [a, b]; };
@@ -475,11 +475,22 @@ export function erzeugeSzene(leinwand, welt) {
       if (f.typ === 'lehm') for (let i = 0; i < 5; i++) { const [a, b] = im(1.6); add(new THREE.CylinderGeometry(0.5 + zz() * 0.4, 0.6, 0.05, 7), i % 2 ? 0x7a4f34 : 0x5e8fb0, a, 0.03, b); }
       if (f.typ === 'hang') { for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(3.4, 0.12, 0.12), 0x4f6a30, 0, 0.08, (i - 2) * 0.6);
         for (let i = 0; i < 3; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.18, 1.4, 6), 0x3f5a2a, a, 0.7, b); } }
+      if (f.typ === 'stein') { for (let i = 0; i < 7; i++) { const [a, b] = im(); add(new THREE.BoxGeometry(0.5 + zz() * 0.6, 0.3 + zz() * 0.5, 0.5 + zz() * 0.5), i % 2 ? 0xc8c2b4 : 0xa8a294, a, 0.2, b, zz() * 3); }
+        add(new THREE.BoxGeometry(1.6, 0.6, 0.12), 0xd8d2c4, 0.4, 0.3, -1.4, 0.3); }
+      if (f.typ === 'erz') { for (let i = 0; i < 6; i++) { const [a, b] = im(); add(new THREE.DodecahedronGeometry(0.3 + zz() * 0.3, 0), i % 3 ? 0x7a5a48 : 0x5a4a44, a, 0.2, b); }
+        add(new THREE.BoxGeometry(0.7, 0.55, 0.12), 0x2a201a, -0.6, 0.27, -0.9); }
+      if (f.typ === 'gallier') {   // Rundhütten mit Strohdach hinter einer Palisade
+        for (let i = 0; i < 28; i++) { const w = i / 28 * Math.PI * 2; add(new THREE.CylinderGeometry(0.06, 0.07, 0.7, 4), 0x6b4a2a, Math.cos(w) * HEX * 0.72, 0.35, Math.sin(w) * HEX * 0.72); }
+        [[0, 0, 0.8], [-1.1, 0.5, 0.55], [1.0, 0.6, 0.6], [0.2, -1.2, 0.55], [-0.8, -0.9, 0.5]].forEach(([a, b, r]) => {
+          add(new THREE.CylinderGeometry(r, r, 0.45, 10), 0xb89a70, a, 0.22, b); add(new THREE.ConeGeometry(r * 1.15, r * 1.1, 10), 0xc8a85a, a, 0.45 + r * 0.55, b); });
+        add(new THREE.CylinderGeometry(0.02, 0.02, 1.4, 4), 0x5a4330, 1.6, 0.7, -0.6); add(new THREE.BoxGeometry(0.02, 0.35, 0.5), 0x3f6e3c, 1.6, 1.25, -0.35);
+      }
       if (f.typ === 'fluss') for (let i = 0; i < 4; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.1, 0.5, 4), 0x7d8a48, a * 1.05, 0.25, b * 1.05); }
       if (f.typ === 'stadt' || f.typ === 'nachbar') {
         add(new THREE.CylinderGeometry(HEX * 0.8, HEX * 0.8, 0.04, 24), 0xc9b48a, 0, 0.02, 0);
         const mauer = new THREE.Mesh(new THREE.TorusGeometry(HEX * 0.8, 0.09, 4, 32).rotateX(Math.PI / 2), lam(0xb8aa8c)); mauer.position.set(x, top + 0.12, z); g.add(mauer);
-        const orte = f.typ === 'nachbar'   // Placentia (S2.5): kleiner, mit Speicher am Fluss
+        const orte = f.id === 'mantua' ? [['speicher', -0.5, 0.9, 0.3], ['casa', 0.8, -0.6, 0.36], ['casa', -0.9, -0.7, 0.36], ['ziegelei', 0.9, 0.8, 0.32], ['huette', 0, 0, 0.36], ['casa', -0.2, -1.4, 0.34]]
+          : f.typ === 'nachbar'   // Placentia (S2.5): kleiner, mit Speicher am Fluss
           ? [['speicher', 0.4, 1.0, 0.3], ['casa', -0.9, -0.4, 0.36], ['casa', 0.7, -0.9, 0.36], ['huette', -0.6, 1.1, 0.36], ['huette', 1.3, 0.1, 0.36], ['brunnen', 0, 0, 0.5]]
           : [['markt', 0, 0, 0.35], ['casa', -1.1, -0.6, 0.38], ['casa', 1.1, -0.5, 0.38], ['casa', -0.3, 1.2, 0.38], ['huette', 1.0, 1.0, 0.38], ['huette', -1.4, 0.6, 0.38], ['speicher', 0.2, -1.5, 0.3]];
         orte.forEach(([t, a, b, sc]) => {
@@ -505,7 +516,7 @@ export function erzeugeSzene(leinwand, welt) {
     let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
     const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
     if (dq > dr && dq > ds) rq = -rr - rs; else if (dr > ds) rr = -rq - rs;
-    const f = region.felder.find(h => h.q === rq && h.r === rr) || (rq === nachbarFeld.q && rr === nachbarFeld.r ? nachbarFeld : null);
+    const f = region.felder.find(h => h.q === rq && h.r === rr) || sonderFelder().find(h => h.q === rq && h.r === rr) || null;
     if (wahlRing) { wahlRing.visible = !!f; if (f) { const [hx, hz] = hexMitte(f.q, f.r); wahlRing.position.set(hx, (HOEHE[f.typ] ?? 0.32) + 0.03, hz); } }
     return f;
   }
@@ -529,7 +540,7 @@ export function erzeugeSzene(leinwand, welt) {
       // Feldweg: halbe Strecke von der Mitte zu jedem Nachbarn mit Weg (der Nachbar zeichnet die andere Hälfte)
       [...wegNach].forEach((v, i) => {
         if (v !== '1') return;
-        const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, ganz = n.typ === 'nachbar' ? 2 : 1, L = Math.hypot(dx, dz) / 2 * ganz;
+        const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, ganz = n.typ === 'nachbar' || n.typ === 'gallier' ? 2 : 1, L = Math.hypot(dx, dz) / 2 * ganz;
         const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: hat(S, 'schotter') ? 0xbdb6a6 : 0x9c8460 }));
         st.position.set(x + dx / 4 * ganz, top + 0.03, z + dz / 4 * ganz); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
@@ -587,7 +598,7 @@ export function erzeugeSzene(leinwand, welt) {
       const g = new THREE.Group(), lam = col => new THREE.MeshLambertMaterial({ color: col });
       const wagen = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.8), lam(0x6b4a2a)); wagen.position.y = 0.22; g.add(wagen);
       for (const sx of [-1, 1]) { const rad = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8).rotateZ(Math.PI / 2), lam(0x3a2a1a)); rad.position.set(sx * 0.28, 0.16, 0); g.add(rad); }
-      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a }[l.betrieb] || 0xd9c26e));
+      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a, steinbruch: 0xd0cabc, erzgrube: 0x6a5048, fischer: 0x9ab8c8 }[l.betrieb] || 0xd9c26e));
       last.position.y = 0.4; g.add(last);
       const ochse = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), lam(0xb8a890)); ochse.position.set(0, 0.3, 0.85); g.add(ochse);
       g.traverse(o => { if (o.isMesh) o.castShadow = true; });

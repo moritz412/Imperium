@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -176,6 +176,7 @@ export function insulaFehlt(S, b, wasser = inReichweite(S, b, 'brunnen'), markt 
 // Ein Monat: Arbeit verteilen, produzieren, essen, wachsen, Steuern, Stimmung, Aufträge
 export function monat(S, welt) {
   const meld = [];
+  for (const g of Object.keys(WAREN)) S.gut[g] = S.gut[g] || 0;   // neue Waren in alten Spielständen
   const js = jahreszeit(S), grenze = lagerGrenze(S);
   const bew = einwohner(S);
 
@@ -217,6 +218,7 @@ export function monat(S, welt) {
       if (S.gut[g] >= grenze) { b.status.push({ art: 'voll', text: `Lager für ${WAREN[g].n} voll` }); faktor = 0; }
     }
     if (faktor <= 0) continue;
+    if (d.sklaven && S.gut.werkzeug >= 0.1) { faktor *= 1.15; S.gut.werkzeug -= 0.1; }   // Werkzeug (1.11.)
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) S.gut[g] = Math.max(0, S.gut[g] - n * faktor);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor * bonus(S, b.t, g));
   }
@@ -401,7 +403,7 @@ function ansichtRoh(S, welt, art) {
 // ---------- Umland (S2.1): Hex-Felder in axialen Koordinaten (q, r), Spitze oben ----------
 export const hexAbstand = (a, b) => (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2;
 export function erzeugeRegion() {
-  const felder = [], R = REGION_RING;
+  const felder = [], R = 3;   // innerer Teil wie vor dem 1.11. (gleiche Zufallsfolge, alte Spielstände passen)
   let s = 11; const zufall = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let q = -R; q <= R; q++) for (let r = Math.max(-R, -q - R); r <= Math.min(R, -q + R); r++) {
     const z = r + q / 2;   // Nord-Süd-Lage (Süden = positiv)
@@ -412,6 +414,19 @@ export function erzeugeRegion() {
     else if (q <= -2 && z < 1) typ = zufall() < 0.75 ? 'wald' : 'acker';             // Wald im Westen
     else if (z > 0.9) typ = zufall() < 0.5 ? 'lehm' : 'weide';                       // Flussaue
     else typ = zufall() < 0.78 ? 'acker' : zufall() < 0.5 ? 'weide' : 'wald';
+    felder.push({ q, r, typ });
+  }
+  // Ring 4 (1.11.): Padus weiter im Süden, Steinbruch und Erz im Norden, Acker/Weide im Osten, Wald im Westen
+  const R4 = REGION_RING; let s4 = 23; const z4 = () => (s4 = (s4 * 16807) % 2147483647) / 2147483647;
+  for (let q = -R4; q <= R4; q++) for (let r = Math.max(-R4, -q - R4); r <= Math.min(R4, -q + R4); r++) {
+    if (Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)) !== R4) continue;
+    const z = r + q / 2, fluss = Math.max(-R4, -q - R4, Math.min(R4, -q + R4, Math.round(2.4 - q / 2)));
+    let typ;
+    if (r === fluss) typ = 'fluss';
+    else if (r > fluss) typ = z4() < 0.5 ? 'weide' : 'lehm';                       // Südufer
+    else if (z < -2.9) typ = (q + r * 3) % 3 === 0 ? 'erz' : z4() < 0.55 ? 'stein' : 'hang';   // Alpenvorland
+    else if (q <= -3) typ = z4() < 0.7 ? 'wald' : 'acker';
+    else typ = z4() < 0.65 ? 'acker' : 'weide';
     felder.push({ q, r, typ });
   }
   return felder;
@@ -457,7 +472,7 @@ export function landBauen(S, f, t = betriebFuer(f)) {
 }
 // Wege (S2.3): Netz ab der Stadt über Felder mit Weg; nur verbundene Betriebe liefern
 const istAnleger = (S, f) => ((S.land || {})[landKey(f)] || {}).betrieb === 'anleger';
-export const hatWeg = (S, f) => f.typ === 'stadt' || f.typ === 'nachbar' || istAnleger(S, f) || !!((S.land || {})[landKey(f)] || {}).weg;
+export const hatWeg = (S, f) => f.typ === 'stadt' || f.typ === 'nachbar' || f.typ === 'gallier' || istAnleger(S, f) || !!((S.land || {})[landKey(f)] || {}).weg;
 export function wegNetz(S) {
   const karte = regionKarte(), da = new Set(['0,0']), q = [{ q: 0, r: 0 }];
   for (let i = 0; i < q.length; i++) {
@@ -481,7 +496,7 @@ export function wegPfad(S, f) {
   return null;
 }
 export const nachbarn = f => HEX_NACHBARN.map(([dq, dr]) => regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr)
-  || (f.q + dq === NACHBAR.q && f.r + dr === NACHBAR.r ? nachbarFeld : null));   // Placentia nur für die Zeichnung
+  || sonderFelder().find(h => h.q === f.q + dq && h.r === f.r + dr) || null);   // Nachbarstädte/Dorf nur für die Zeichnung
 export function wegAnlegen(S, f) {
   const st = landStand(S, f);
   if (st !== 'vermessen' && st !== 'betrieb') return { ok: false, grund: 'Erst vermessen' };
@@ -547,7 +562,8 @@ function gefahren(S, meld) {
     nass.forEach(f => stoeren(land[landKey(f)], 'hochwasser', G.hochwasser.monate));
     meld.push('Hochwasser am Padus! ' + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
   }
-  if (m >= G.gallier.ab && m % 12 === G.gallier.monat && wurf(S, 1002) < G.gallier.chance) {
+  if (S.frieden > 0) S.frieden--;
+  else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && wurf(S, 1002) < G.gallier.chance) {
     if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
     const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
@@ -558,38 +574,56 @@ function gefahren(S, meld) {
 }
 
 // ---------- Nachbarstadt und Handel (S2.5) ----------
-export const nachbarFeld = { q: NACHBAR.q, r: NACHBAR.r, typ: 'nachbar' };
-export function handelOffen(S) {
-  const netz = wegNetz(S);
-  if (regionKarte().some(f => istAnleger(S, f) && netz.has(landKey(f)))) return true;   // Boote fahren flussaufwärts
-  return HEX_NACHBARN.some(([dq, dr]) => netz.has((NACHBAR.q + dq) + ',' + (NACHBAR.r + dr)));
+export const nachbarFeld = { q: NACHBAR.q, r: NACHBAR.r, typ: 'nachbar', id: 'placentia' };
+export const mantuaFeld = { q: MANTUA.q, r: MANTUA.r, typ: 'nachbar', id: 'mantua' };
+export const gallierFeld = { q: GALLIER.q, r: GALLIER.r, typ: 'gallier' };
+export const sonderFelder = () => [nachbarFeld, mantuaFeld, gallierFeld];
+export const GALLIER_GESCHENK = GALLIER.geschenk;
+// Handelspartner: Placentia (Fluss oder Weg) und Mantua (nur Weg)
+export const PARTNER = { placentia: { ...NACHBAR, n: 'Placentia', anleger: true, waren: HANDEL.waren }, mantua: { ...MANTUA, anleger: false } };
+export function handelOffen(S, id = 'placentia') {
+  const p = PARTNER[id], netz = wegNetz(S);
+  if (p.anleger && regionKarte().some(f => istAnleger(S, f) && netz.has(landKey(f)))) return true;   // Boote fahren flussaufwärts
+  return HEX_NACHBARN.some(([dq, dr]) => netz.has((p.q + dq) + ',' + (p.r + dr)));
 }
 const handelS = S => (S.handel = S.handel || { vorrat: {} });
-export const handelVorrat = (S, g) => handelS(S).vorrat[g] ?? HANDEL.waren[g].normal;
-export function preis(S, g) {
-  const w = HANDEL.waren[g], f = Math.pow(w.normal / Math.max(5, handelVorrat(S, g)), 0.7);
+const vorratVon = (S, id) => id === 'placentia' ? handelS(S).vorrat : ((handelS(S).v = handelS(S).v || {})[id] = handelS(S).v[id] || {});
+export const handelVorrat = (S, g, id = 'placentia') => vorratVon(S, id)[g] ?? PARTNER[id].waren[g].normal;
+export function preis(S, g, id = 'placentia') {
+  const w = PARTNER[id].waren[g], f = Math.pow(w.normal / Math.max(5, handelVorrat(S, g, id)), 0.7);
   return w.basis * Math.max(0.4, Math.min(3, f));
 }
 // Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
-export const handelSumme = (S, g, art) => Math.max(1, Math.round(preis(S, g) * HANDEL.menge * (art === 'kauf' ? 1 + HANDEL.aufschlag : 1 - HANDEL.aufschlag)));
-export function handeln(S, g, art) {
-  if (!HANDEL.waren[g]) return { ok: false, grund: 'Diese Ware handelt Placentia nicht' };
-  if (!handelOffen(S)) return { ok: false, grund: 'Noch kein Weg nach Placentia' };
-  const n = HANDEL.menge, summe = handelSumme(S, g, art), v = handelS(S).vorrat;
+export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + HANDEL.aufschlag : 1 - HANDEL.aufschlag)));
+export function handeln(S, g, art, id = 'placentia') {
+  const p = PARTNER[id];
+  if (!p || !p.waren[g]) return { ok: false, grund: `Diese Ware handelt ${p ? p.n : 'niemand'} nicht` };
+  if (!handelOffen(S, id)) return { ok: false, grund: 'Noch kein Weg nach ' + p.n };
+  const n = HANDEL.menge, summe = handelSumme(S, g, art, id), v = vorratVon(S, id);
   if (art === 'verkauf') {
     if ((S.gut[g] || 0) < n) return { ok: false, grund: `Es fehlen ${n - Math.floor(S.gut[g] || 0)} ${WAREN[g].n}` };
-    S.gut[g] -= n; S.gut.denare += summe; v[g] = handelVorrat(S, g) + n;
+    S.gut[g] -= n; S.gut.denare += summe; v[g] = handelVorrat(S, g, id) + n;
   } else {
     if (S.gut.denare < summe) return { ok: false, grund: `Es fehlen ${Math.ceil(summe - S.gut.denare)} Denare` };
-    if (handelVorrat(S, g) < n) return { ok: false, grund: `Placentia hat kaum noch ${WAREN[g].n}` };
+    if (handelVorrat(S, g, id) < n) return { ok: false, grund: `${p.n} hat kaum noch ${WAREN[g].n}` };
     if ((S.gut[g] || 0) + n > lagerGrenze(S)) return { ok: false, grund: `Lager für ${WAREN[g].n} voll` };
-    S.gut.denare -= summe; S.gut[g] = (S.gut[g] || 0) + n; v[g] = handelVorrat(S, g) - n;
+    S.gut.denare -= summe; S.gut[g] = (S.gut[g] || 0) + n; v[g] = handelVorrat(S, g, id) - n;
   }
   return { ok: true, summe };
 }
 function handelMonat(S) {
-  const v = handelS(S).vorrat;
-  for (const g of Object.keys(v)) { const z = HANDEL.waren[g].normal; v[g] += (z - v[g]) * HANDEL.rueck; if (Math.abs(z - v[g]) < 1) delete v[g]; }
+  for (const id of Object.keys(PARTNER)) {
+    const v = vorratVon(S, id);
+    for (const g of Object.keys(v)) { const z = PARTNER[id].waren[g].normal; v[g] += (z - v[g]) * HANDEL.rueck; if (Math.abs(z - v[g]) < 1) delete v[g]; }
+  }
+}
+// Gallier (1.11.): Geschenke an das Dorf der Insubrer bringen 2 Jahre Frieden
+export function geschenk(S) {
+  if (S.frieden > 0) return { ok: false, grund: `Es herrscht noch ${S.frieden} Monate Frieden` };
+  if (!kannBezahlen(S, GALLIER.geschenk)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, GALLIER.geschenk).join(', ') };
+  for (const [g, n] of Object.entries(GALLIER.geschenk)) S.gut[g] -= n;
+  S.frieden = GALLIER.monate;
+  return { ok: true };
 }
 // Abgaben an Rom: am Ende des Herbstes; bezahlt → Gunst steigt, sonst sinkt sie stark
 export const gunst = S => S.gunst ?? ABGABE.gunst;

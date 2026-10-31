@@ -31,14 +31,15 @@ function melden(text) {
 }
 
 // ---------- Kopfleiste ----------
-const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch'];
+const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug'];
+const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug']);   // erscheinen erst, wenn vorhanden
 const rund = n => Math.floor(n || 0).toLocaleString('de-DE');
 function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
   $('#datum').textContent = `${RAENGE[r].n} · ${sim.datumText(S)}`;
   $('#datum').title = naechster ? `${naechster.n} ab ${naechster.ab} Einwohnern` : '';
   const grenze = sim.lagerGrenze(S);
-  const zellen = ANZEIGE.map(g => {
+  const zellen = ANZEIGE.filter(g => !NUR_WENN_DA.has(g) || S.gut[g] >= 1).map(g => {
     const knapp = g !== 'denare' && S.gut[g] < 5 ? ' knapp' : '';
     const voll = WAREN[g].lager && S.gut[g] >= grenze ? ' (voll)' : '';
     return `<div class="ware${knapp}"><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
@@ -248,12 +249,16 @@ $('#info').addEventListener('click', e => {
   if (a.dataset.a === 'zu' && !auswahl && szene.modus() !== 'region') { schliesseInfo(); return; }
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
-    else if (a.dataset.a === 'schutz' || a.dataset.a === 'villa') {
+    else if (a.dataset.a === 'geschenk') {
+      const r = sim.geschenk(S);
+      if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else { ton.sfx('aufstieg'); melden('Der Häuptling nimmt die Geschenke an. Zwei Jahre Frieden.'); }
+      allesZeichnen(); hexInfo(hexWahl);
+    } else if (a.dataset.a === 'schutz' || a.dataset.a === 'villa') {
       const r = a.dataset.a === 'villa' ? sim.villaBauen(S, hexWahl) : sim.schutzBauen(S, hexWahl, a.dataset.t);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('bauen');
       allesZeichnen(); hexInfo(hexWahl);
     } else if (a.dataset.a === 'handel') {
-      const r = sim.handeln(S, a.dataset.g, a.dataset.art);
+      const r = sim.handeln(S, a.dataset.g, a.dataset.art, a.dataset.p);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('klick');
       allesZeichnen(); hexInfo(hexWahl);
     } else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau' || a.dataset.a === 'weg') {
@@ -337,7 +342,8 @@ let hexWahl = null;
 function hexInfo(f) {
   hexWahl = f;
   if (!f) { $('#info').hidden = true; return; }
-  if (f.typ === 'nachbar') { handelInfo(); return; }
+  if (f.typ === 'nachbar') { handelInfo(f.id); return; }
+  if (f.typ === 'gallier') { gallierInfo(); return; }
   const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 }), stand = sim.landStand(S, f);
   const l = (S.land || {})[sim.landKey(f)], bt = (l && l.betrieb) || sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
   const ertrag = (t, villa) => Object.entries(LAND_BETRIEBE[t].erzeugt).map(([g, n]) => `${zahl(n * sim.landFaktor(f, S) * sim.bonus(S, t, g) * (villa ? 1.75 : 1))} ${WAREN[g].n}`).join(', ');
@@ -430,20 +436,32 @@ function romInfo() {
     <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
     <p>Wer pünktlich zahlt, gewinnt die Gunst des Senats – dann fällt auch der Lohn für Aufträge höher aus (jetzt ${Math.round(sim.lohnFaktor(S) * 100)} %).</p>`;
 }
-function handelInfo() {
-  const offen = sim.handelOffen(S), d = REGION_TYPEN.nachbar, n = HANDEL.menge;
-  const zeilen = Object.keys(HANDEL.waren).map(g => {
-    const p = sim.preis(S, g), rel = p / HANDEL.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
-    return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · Placentia: ${zahl(p)} je Stück, ${wort}</small></div>
-      <button class="knopf" data-a="handel" data-art="verkauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} verkaufen<small>+${sim.handelSumme(S, g, 'verkauf')} Denare</small></button>
-      <button class="knopf" data-a="handel" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf')} Denare</small></button></div>`;
+function handelInfo(id = 'placentia') {
+  const P = sim.PARTNER[id], offen = sim.handelOffen(S, id), n = HANDEL.menge;
+  const d = id === 'placentia' ? { n: 'Placentia', unter: 'Nachbarstadt am Padus · Handel', text: REGION_TYPEN.nachbar.text } : P;
+  const zeilen = Object.keys(P.waren).map(g => {
+    const p = sim.preis(S, g, id), rel = p / P.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
+    return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · ${P.n}: ${zahl(p)} je Stück, ${wort}</small></div>
+      <button class="knopf" data-a="handel" data-p="${id}" data-art="verkauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} verkaufen<small>+${sim.handelSumme(S, g, 'verkauf', id)} Denare</small></button>
+      <button class="knopf" data-a="handel" data-p="${id}" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf', id)} Denare</small></button></div>`;
   }).join('');
+  const weg = P.anleger ? 'Lege Feldwege bis an Placentia heran oder baue einen Anleger am Padus – dann fahren die Boote flussaufwärts.'
+    : `Nach ${P.n} kommt man nur über Land: Lege Feldwege bis an die Stadt im Osten heran.`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>${d.n}</h2><div class="unter">Nachbarstadt am Padus · Handel</div><p>${d.text}</p>
-    ${offen ? '<div class="lage gut">Händler fahren zwischen Cremona und Placentia</div>'
-      : '<div class="lage warn">Noch kein Weg nach Placentia</div><p>Lege Feldwege bis an Placentia heran oder baue einen Anleger am Padus – dann fahren die Boote flussaufwärts.</p>'}
-    <p>Was du verkaufst, wird in Placentia billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus.</p>
+    <h2>${d.n}</h2><div class="unter">${d.unter}</div><p>${d.text}</p>
+    ${offen ? `<div class="lage gut">Händler fahren zwischen Cremona und ${P.n}</div>` : `<div class="lage warn">Noch kein Weg nach ${P.n}</div><p>${weg}</p>`}
+    <p>Was du verkaufst, wird dort billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus.</p>
     ${zeilen}`;
+  $('#info').hidden = false;
+}
+function gallierInfo() {
+  const d = REGION_TYPEN.gallier, fr = S.frieden > 0;
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>${d.n}</h2><div class="unter">Gallier im Norden</div><p>${d.text}</p>
+    ${fr ? `<div class="lage gut">Frieden – noch ${S.frieden} Monate</div>` : '<div class="lage warn">Im Sommer können ihre Krieger einfallen</div>'}
+    <div class="zeile"><span>Kastell auf den Hügeln</span><b>${sim.hatKastell(S) ? 'besetzt' : 'keins'}</b></div>
+    <p>Geschenke an den Häuptling – Brot und Silber – sichern zwei Jahre Frieden. Ein Kastell hält sie auch ohne Geschenke ab.</p>
+    <button class="knopf${fr ? '' : ' haupt'}" data-a="geschenk"${fr ? ' disabled' : ''}>Geschenke schicken (${kostenText(sim.GALLIER_GESCHENK)})</button>`;
   $('#info').hidden = false;
 }
 
@@ -504,6 +522,6 @@ window.SR = {
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
-  handeln: (g, art) => { const r = sim.handeln(S, g, art); allesZeichnen(); return r; },
+  handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

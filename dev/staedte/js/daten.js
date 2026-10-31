@@ -24,6 +24,9 @@ export const WAREN = {
   mehl:     { n: 'Mehl',     lager: true },
   brot:     { n: 'Brot',     lager: true },
   fisch:    { n: 'Fisch',    lager: true },
+  stein:    { n: 'Stein',    lager: true },
+  erz:      { n: 'Erz',      lager: true },
+  werkzeug: { n: 'Werkzeug', lager: true },
 };
 
 export const JAHRESZEITEN = [
@@ -63,6 +66,9 @@ export const GEB = {
   lehmgrube: { n: 'Lehmgrube', kat: 'Handwerk', g: [2, 2], flach: true, wand: 0x9a6b4a, sklaven: true,
     kosten: { holz: 10 }, arbeiter: 2, erzeugt: { lehm: 3 },
     text: 'Sticht Lehm für die Ziegelei.' },
+  schmiede: { n: 'Schmiede', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0x8a7a68, dach: 0x5a3a2a, kamin: true, sklaven: true,
+    kosten: { holz: 25, ziegel: 15 }, arbeiter: 3, braucht: { erz: 1, holz: 1 }, erzeugt: { werkzeug: 2 },
+    text: 'Schmiedet Werkzeug aus Erz. Mit Werkzeug arbeiten Felder, Gruben und Werkstätten 15 % schneller.' },
   ziegelei: { n: 'Ziegelei', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0xb9714f, dach: 0x6e3b28, kamin: true, sklaven: true,
     kosten: { holz: 30 }, arbeiter: 3, braucht: { lehm: 2 }, erzeugt: { ziegel: 2 },
     text: 'Brennt Ziegel aus Lehm.' },
@@ -85,14 +91,14 @@ export const GEB = {
 // Casa: ausgebaute Hütte
 export const CASA = { n: 'Casa', h: 1.15, wand: 0xe2c8a0, dach: 0xb5522f, wohnt: 16, kosten: { ziegel: 10 } };
 // Insula (S3.2): mehrstöckiges Mietshaus, ab Kleinstadt; braucht zusätzlich einen Schrein in der Nähe
-export const INSULA = { n: 'Insula', h: 2.1, wand: 0xd9b48a, dach: 0xa9482a, wohnt: 30, kosten: { ziegel: 25, holz: 15 }, rang: 2 };
+export const INSULA = { n: 'Insula', h: 2.1, wand: 0xd9b48a, dach: 0xa9482a, wohnt: 30, kosten: { ziegel: 20, stein: 10 }, rang: 2 };
 
 // Sklaven (S3.2, Moritz 1.11.: „historisch“). Kauf beim Sklavenhändler (servus venalis), Freilassung (manumissio)
 // mit der Freilassungssteuer (vicesima libertatis, 5 % des Werts). Viele Sklaven im Verhältnis zu Freien schüren Furcht.
 export const SKLAVEN = { los: 5, preis: 25, essen: 0.1, furcht: 0.5, vicesima: 0.05 };
 
 // Umland (S2.1): Hex-Felder um die Stadt. Ring 3 = 37 Felder. nutzen = was ab S2.2 dort entstehen kann.
-export const REGION_RING = 3;
+export const REGION_RING = 4;   // 1.11.: Ring 4 dazu (61 Felder); die inneren 37 Felder bleiben wie zuvor erzeugt
 export const REGION_TYPEN = {
   stadt: { n: 'Cremona', farbe: 0x8f9a5c, text: 'Die Stadt innerhalb ihrer Grenzen.', nutzen: '' },
   acker: { n: 'Ackerland', farbe: 0x9aa456, text: 'Fruchtbarer Boden der Po-Ebene.', nutzen: 'Gehöft mit Getreide, später Villa rustica' },
@@ -101,13 +107,23 @@ export const REGION_TYPEN = {
   weide: { n: 'Weide', farbe: 0x86a35a, text: 'Feuchte Wiesen.', nutzen: 'Schafe und Rinder (Wolle, Leder)' },
   hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Kastell gegen die Gallier, später Wein und Oliven' },
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
+  stein: { n: 'Steinbruch', farbe: 0x9a958a, text: 'Kalkstein aus den Ausläufern der Alpen.', nutzen: 'Steinbruch (Stein für Insulae)' },
+  erz:   { n: 'Erzader', farbe: 0x8a6e5a, text: 'Eisenhaltiges Gestein am Hügelrand.', nutzen: 'Erzgrube (Erz für die Schmiede)' },
+  gallier: { n: 'Dorf der Insubrer', farbe: 0x7e8a4e, text: 'Ein keltisches Dorf hinter Palisaden. Die Insubrer haben Rom nicht vergessen, dass es ihr Land nahm.', nutzen: '' },
   nachbar: { n: 'Placentia', farbe: 0x8f9a5c, text: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.', nutzen: '' },
 };
 
 // Nachbarstadt und Handel (S2.5). Placentia liegt westlich vor dem Ring am Padus (Hex-Feld außerhalb der Karte).
 // Handel offen, wenn ein Nachbarfeld von Placentia mit der Stadt verbunden ist oder ein verbundener Anleger besteht.
 // Preis = basis × (normal / Vorrat)^0,7, begrenzt auf 0,4–3 × basis; Vorrat kehrt jeden Monat um 10 % zurück.
-export const NACHBAR = { q: -4, r: 3 };
+export const NACHBAR = { q: -5, r: 4 };   // 1.11.: an den Rand von Ring 4 gerückt
+// Handelspartner (1.11.): Placentia (Fluss oder Weg), Mantua (nur über die Straße nach Osten)
+export const MANTUA = { q: 5, r: -1, n: 'Mantua', unter: 'Stadt am Mincius · Handel',
+  text: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
+  waren: { holz: { basis: 3, normal: 100 }, getreide: { basis: 2.5, normal: 90 }, fisch: { basis: 2, normal: 120 }, ziegel: { basis: 3.5, normal: 80 },
+    stein: { basis: 3, normal: 60 }, erz: { basis: 4, normal: 40 }, werkzeug: { basis: 6, normal: 50 } } };
+// Gallier (1.11.): das Dorf, von dem die Überfälle kommen. Geschenke kaufen Frieden.
+export const GALLIER = { q: -1, r: -4, geschenk: { brot: 40, denare: 60 }, monate: 24 };
 export const HANDEL = {
   menge: 10, aufschlag: 0.15, rueck: 0.1,
   waren: {   // basis = Denare je Einheit, normal = üblicher Vorrat in Placentia
@@ -133,6 +149,10 @@ export const LAND_BETRIEBE = {
     text: 'Fischer werfen ihre Netze im Padus aus. Fisch macht satt wie Brot.' },
   anleger:    { n: 'Anleger', auf: 'fluss', kosten: { holz: 30, ziegel: 10 }, erzeugt: {}, modell: '',
     text: 'Flussboote verbinden alle Anleger am Padus: Was einen Anleger erreicht, kommt über einen anderen in die Stadt.' },
+  steinbruch: { n: 'Steinbruch', auf: 'stein', kosten: { holz: 20 }, erzeugt: { stein: 2 }, modell: 'lehmgrube',
+    text: 'Steinmetze brechen Kalksteinblöcke. Insulae brauchen Stein.' },
+  erzgrube:   { n: 'Erzgrube', auf: 'erz', kosten: { holz: 25, denare: 20 }, erzeugt: { erz: 2 }, modell: 'holzfaeller',
+    text: 'Bergleute fördern Eisenerz für die Schmiede in der Stadt.' },
   kastell:    { n: 'Kastell', auf: 'hang', kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
     text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
 };
