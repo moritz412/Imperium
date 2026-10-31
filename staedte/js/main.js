@@ -169,12 +169,15 @@ function infoZeichnen() {
   }
   if (d.arbeiter) {
     html += `<div class="zeile"><span>Arbeiter</span><b>${b.w} / ${d.arbeiter}</b></div>`;
+    html += `<div class="zeile"><span>Häuser in Laufweite (${sim.EINZUG} Felder)</span><b>${b.einzug ?? '–'}</b></div>`;
     html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}</b></div>`;
     html += `<button class="knopf${b.prio ? ' an' : ''}" data-a="prio" aria-pressed="${b.prio}">${b.prio ? 'Arbeiter gehen zuerst hierher' : 'Arbeiter zuerst hierher schicken'}</button>`;
   }
   if (b.t === 'huette') {
     const ja = v => v ? 'ja' : 'nein';
+    const arbeiten = S.geb.reduce((s, o) => s + (o.von || []).filter(v => v[0] === b.id).reduce((t, v) => t + v[1], 0), 0);
     html += `<div class="zeile"><span>Bewohner</span><b>${b.bew} / ${sim.wohnraum(b)}</b></div>
+      <div class="zeile"><span>Gehen zur Arbeit</span><b>${arbeiten}</b></div>
       <div class="zeile"><span>Brot</span><b>${ja(S.versorgt.brot)}</b></div>
       <div class="zeile"><span>Brunnen in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'brunnen'))}</b></div>
       <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>`;
@@ -210,7 +213,8 @@ $('#menue').addEventListener('click', e => {
       <li>Wischen verschiebt die Karte, zwei Finger zoomen.</li>
       <li>Ein Symbol über einem Gebäude zeigt ein Problem. Antippen zeigt die Ursache.</li>
       <li>Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei.</li>
-      <li>Im Herbst wird geerntet, im Winter wächst nichts – Vorräte anlegen.</li></ol>`;
+      <li>Im Herbst wird geerntet, im Winter wächst nichts – Vorräte anlegen.</li>
+      <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li></ol>`;
   }
 });
 
@@ -226,7 +230,7 @@ let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
   if (tempo && $('#menue').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
-  szene.zeichnen(dt);
+  szene.zeichnen(dt, $('#menue').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
 allesZeichnen();

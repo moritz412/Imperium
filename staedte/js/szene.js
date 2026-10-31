@@ -225,6 +225,71 @@ export function erzeugeSzene(leinwand, welt) {
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(an ? 0x3a2a08 : 0x000000); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
+    laufwege(S);
+  }
+
+  // Laufwege (S1.2): Arbeiter zwischen Haus und Betrieb, Träger vom Erzeuger zum Abnehmer (Instancing, Farbe je Figur)
+  const LMAX = 240, SCHRITT = 1.1;   // Figuren höchstens, Felder je Sekunde bei normalem Tempo
+  const figur = (geo, farbe) => {
+    const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: 0xffffff }), LMAX);
+    for (let i = 0; i < LMAX; i++) m.setColorAt(i, new THREE.Color(farbe));
+    m.count = 0; m.frustumCulled = false; m.castShadow = true; szene.add(m); return m;
+  };
+  const koerper = figur(new THREE.CylinderGeometry(0.055, 0.085, 0.3, 6).translate(0, 0.15, 0), 0xb08a5a);
+  const kopf = figur(new THREE.SphereGeometry(0.055, 6, 4).translate(0, 0.36, 0), 0xc89a78);
+  const sack = figur(new THREE.BoxGeometry(0.15, 0.11, 0.12).translate(0, 0.47, 0), 0xd9c26e);
+  const TUNIKA = [0xb08a5a, 0x8c6f4e, 0xa25a3c, 0x7d7a5c, 0xc4b08a, 0x6f5a48].map(c => new THREE.Color(c));
+  const WARE = { getreide: 0xe0c464, mehl: 0xf0e8d6, brot: 0x9a5a2a, holz: 0x6b4a2a, lehm: 0x8a5a3a, ziegel: 0xa94c2c };
+  // Abnehmer je Ware: wer sie braucht, sonst Markt (Brot) oder Speicher
+  const ABNEHMER = g => Object.keys(GEB).filter(t => GEB[t].braucht && GEB[t].braucht[g]).concat(g === 'brot' ? ['markt'] : [], ['speicher']);
+  let laeufer = [], lzeit = 0;
+  const tuer = b => { const [gw, gd] = groesse(b.t); return [welt0 + b.x + gw / 2, welt0 + b.z + gd + 0.3]; };
+  function weg(a, b, farbe, ware, schluessel) {
+    const p = [a, [b[0], a[1]], b], c = [0];
+    for (let i = 1; i < p.length; i++) c.push(c[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+    let h = 0; for (const z of schluessel) h = (h * 31 + z.charCodeAt(0)) % 9973;
+    return { p, c, L: c[c.length - 1], farbe, ware: ware ? new THREE.Color(WARE[ware] || 0xd9c26e) : null, ph: h / 97 };
+  }
+  function laufwege(S) {
+    const neu = [], nach = new Map(S.geb.map(b => [b.id, b]));
+    const nachste = (von, typen) => {
+      let best = null, bd = 1e9;
+      for (const o of S.geb) if (typen.includes(o.t) && o !== von && (o.w || 0) > 0) {
+        const d = Math.hypot(o.x - von.x, o.z - von.z); if (d < bd) { bd = d; best = o; }
+      }
+      return best;
+    };
+    for (const b of S.geb) {
+      if (!b.von || !b.w) continue;
+      b.von.forEach(([hid, n], k) => {
+        const h = nach.get(hid); if (!h) return;
+        for (let i = 0; i < Math.min(n, 2); i++)
+          neu.push(weg(tuer(h), tuer(b), TUNIKA[(hid + i + k) % TUNIKA.length], '', `${hid}-${b.id}-${i}`));
+      });
+      const d = GEB[b.t];
+      if (d.erzeugt && !b.status.some(s => !s.leicht)) {
+        const g = Object.keys(d.erzeugt)[0], ziel = nachste(b, ABNEHMER(g));
+        if (ziel) neu.push(weg(tuer(b), tuer(ziel), TUNIKA[(b.id + 3) % TUNIKA.length], g, `t${b.id}-${ziel.id}`));
+      }
+    }
+    laeufer = neu.filter(l => l.L > 0.5).slice(0, LMAX);
+  }
+  function laufen(dt) {
+    lzeit += dt;
+    let n = 0, ns = 0;
+    for (const l of laeufer) {
+      const hin = l.L / SCHRITT, zyklus = 2 * hin + 2, t = (lzeit + l.ph * zyklus) % zyklus;
+      const s = t < hin ? t * SCHRITT : t < hin + 1 ? l.L : t < 2 * hin + 1 ? l.L - (t - hin - 1) * SCHRITT : 0;
+      if (s >= l.L - 0.02 || s <= 0.02) continue;   // im Haus/Betrieb
+      let i = 1; while (i < l.c.length - 1 && l.c[i] < s) i++;
+      const f = (s - l.c[i - 1]) / Math.max(1e-6, l.c[i] - l.c[i - 1]), a = l.p[i - 1], b = l.p[i];
+      const x = a[0] + (b[0] - a[0]) * f, z = a[1] + (b[1] - a[1]) * f, y = Math.abs(Math.sin(s * 9)) * 0.025;
+      m4.makeTranslation(x, y, z);
+      koerper.setMatrixAt(n, m4); kopf.setMatrixAt(n, m4); koerper.setColorAt(n, l.farbe); n++;
+      if (l.ware && t < hin) { sack.setMatrixAt(ns, m4); sack.setColorAt(ns, l.ware); ns++; }
+    }
+    koerper.count = kopf.count = n; sack.count = ns;
+    for (const m of [koerper, kopf, sack]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
   }
 
   // Vorschau beim Bauen
@@ -281,8 +346,9 @@ export function erzeugeSzene(leinwand, welt) {
   function zentrieren(x, z) { ziel.copy(weltPos(x, z)); kameraSetzen(); }
 
   let zeit = 0;
-  function zeichnen(dt) {
+  function zeichnen(dt, laufTempo = 1) {
     zeit += dt;
+    laufen(dt * laufTempo);
     gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY; });
     renderer.render(szene, kamera);
   }
@@ -298,5 +364,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { modelleBereit, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { modelleBereit, laeuferZahl: () => koerper.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

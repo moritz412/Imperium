@@ -21,7 +21,13 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       Holzfäller (Blockhütte, Stammstapel), Lehmgrube, Ziegelei (Brennofen, Trockenschuppen), Brunnen (lacus).
       Feld und Straße bleiben gezeichnet. Fehlt die Datei, zeigt das Spiel weiter die Quader. Test 14/14 (PC, `PW_GPU=1`),
       Nahaufnahmen angesehen. **Nicht getestet:** iPad (Bildrate mit vielen Gebäuden), Hauptspiel nutzt die Modelle noch nicht.
-- [ ] S1.2 Laufwege: Bewohner und Träger sichtbar, Einzugsbereich der Arbeit statt globaler Arbeiter.
+- [x] S1.2 Laufwege (31.10. abends): Jeder Betrieb holt Arbeiter aus den nächsten Häusern in Laufweite (`EINZUG` = 16 Felder,
+      Priorität zuerst), sonst Problem „Keine Häuser in Laufweite“. Arbeiter laufen sichtbar zwischen Haus und Betrieb
+      (höchstens 2 Figuren je Haus–Betrieb-Paar), Träger mit Warensack vom Erzeuger zum nächsten Abnehmer (Mühle, Bäckerei,
+      Ziegelei, Markt, sonst Speicher). Wege als L-Form ohne Straßen (kommt mit S1.3), Figuren halten bei Pause an.
+      Gebäudefenster: Häuser in Laufweite, je Haus „Gehen zur Arbeit“. Test 18/18 (PC, `PW_GPU=1`).
+      Offen: Träger sind nur Anzeige (Waren bleiben im gemeinsamen Lager), Figuren laufen noch durch Gebäude.
+      **Nicht getestet:** iPad.
 - [ ] S1.3 Straßen mit Wirkung (Bau nur an Straße, Markt-Reichweite über Straßen).
 - [ ] S1.4 Overlays Wasser, Stimmung, Arbeit.
 - [ ] S1.5 Startbildschirm mit Regionswahl (Mockup „Startregion“), zunächst nur Cremona aktiv.

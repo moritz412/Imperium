@@ -69,6 +69,20 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const gesp = await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('staedte_roms.v1') || 'null'); return s ? s.geb.length : 0; });
   ok('Spielstand gespeichert (Jahreszeitwechsel)', gesp > 0, gesp + ' Gebäude');
 
+  // S1.1 Modelle, S1.2 Einzugsbereich und Laufwege
+  ok('Gebäudemodelle geladen', await p.evaluate(() => SR.modelle()));
+  const lauf2 = await p.evaluate(() => {
+    SR.S.gut.holz += 50; const r = SR.bauen('lehmgrube', 36, 2); SR.monate(1);
+    const fern = SR.S.geb.find(b => b.id === r.b.id);
+    const von = SR.S.geb.filter(b => b.von && b.von.length).length;
+    return { fern: fern.status.map(s => s.text).join(', '), von };
+  });
+  ok('Betrieb ohne Häuser in Laufweite bekommt keine Arbeiter', /Laufweite/.test(lauf2.fern), lauf2.fern);
+  ok('Arbeiter kommen aus Häusern (Laufwege)', lauf2.von >= 5, lauf2.von + ' Betriebe mit Herkunft');
+  await p.evaluate(() => SR.tempo(3)); await p.waitForTimeout(1500);
+  const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
+  ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
+
   if (BILD) { await p.evaluate(() => SR.tempo(0)); await p.waitForTimeout(500); await p.screenshot({ path: BILD }); console.log('  Bild: ' + BILD); }
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);

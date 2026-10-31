@@ -2,6 +2,7 @@
 import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
+export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
 
 // Gelände: Fluss am unteren Rand, Wald links und in einigen Flecken (fest, nicht zufällig je Start)
 export function erzeugeWelt() {
@@ -92,7 +93,7 @@ export function abreissen(S, id) {
 }
 
 export const mitte = b => { const [w, d] = groesse(b.t); return [b.x + w / 2, b.z + d / 2]; };
-const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math.hypot(p[0] - q[0], p[1] - q[1]); };
+export const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math.hypot(p[0] - q[0], p[1] - q[1]); };
 
 export function inReichweite(S, b, typ) {
   return S.geb.some(o => o.t === typ && (typ !== 'markt' || o.w > 0) && abstand(o, b) <= GEB[typ].reichweite);
@@ -114,18 +115,27 @@ export function monat(S, welt) {
   const js = jahreszeit(S), grenze = lagerGrenze(S);
   const bew = einwohner(S);
 
-  // Arbeiter verteilen: Priorität zuerst, dann nach Bauzeit
-  let frei = Math.floor(bew * ARBEIT_ANTEIL);
+  // Arbeiter verteilen (S1.2): Betriebe nach Priorität, dann Bauzeit; jeder holt sich Arbeiter aus den nächsten Häusern
+  // in Laufweite. b.von = [[Haus-Id, Anzahl], …] für die Laufwege in der Szene.
+  const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }));
+  const alle = wohnorte.reduce((s, x) => s + x.frei, 0);
   const betriebe = S.geb.filter(b => GEB[b.t].arbeiter).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
-  for (const b of betriebe) { const n = Math.min(GEB[b.t].arbeiter, frei); b.w = n; frei -= n; }
-  S.letzte = { arbeitslos: frei, arbeiter: Math.floor(bew * ARBEIT_ANTEIL) };
+  for (const b of betriebe) {
+    const brauch = GEB[b.t].arbeiter, nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG);
+    b.w = 0; b.von = []; b.einzug = nah.length;
+    for (const x of nah.filter(x => x.frei > 0).sort((p, q) => abstand(p.h, b) - abstand(q.h, b))) {
+      if (b.w >= brauch) break;
+      const n = Math.min(x.frei, brauch - b.w); x.frei -= n; b.w += n; b.von.push([x.h.id, n]);
+    }
+  }
+  S.letzte = { arbeitslos: wohnorte.reduce((s, x) => s + x.frei, 0), arbeiter: alle };
 
   // Produktion
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
-    if (b.w === 0) { b.status.push({ art: 'arbeiter', text: 'Keine Arbeiter' }); continue; }
+    if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
     if (b.w < d.arbeiter) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${d.arbeiter} Arbeitern`, leicht: true });
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
     if (!d.erzeugt) continue;
