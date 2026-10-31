@@ -329,7 +329,7 @@ const fmt=n=>String(Math.round(n*10)/10).replace('.',',');
    ==================================================================================================== */
 let KAMP=null;   // Inhalt von einheiten_kampagne.json
 const ECHT_ROLLE={   // Echtzeit-Grundwerte je Kampagnenrolle (Gehen/Laufen in m/s)
-  spear:{atk:9,def:12,hp:3,mor:65,walk:1.3,run:3.6,ans:1,sym:'speer'},
+  spear:{atk:8,def:9.4,hp:3,mor:65,walk:1.3,run:3.6,ans:1,sym:'speer'},   // 31.10.: war 9/12 mit Schlagweite 2,0; Speerträger schlugen die Schwertkämpfer (Kampagnenstärke 7 gegen 9) in allen Paarungen, gemessen
   sword:{atk:11,def:10,hp:3,mor:62,walk:1.35,run:3.8,ans:1.1,sym:'schwert'},
   missile:{atk:6,def:6,hp:2.5,mor:55,walk:1.4,run:4.0,ans:.8,sym:'wurfspeer'},
   cav:{atk:12,def:9,hp:4.5,mor:70,walk:2,run:8,ans:1.8,sym:'reiter'},
@@ -375,7 +375,7 @@ function schlachtEinheit(e){
   let str=(mod.str||R0.str)*(M.str||1);
   str=Math.round(str*EP_STR(ue,rolle)*10)/10;
   if(tier)str=Math.round(str*1.2*10)/10;
-  const q=str/(R0.str*D.EPOCH_STR[ue]),sq=Math.sqrt(q);
+  const q=str/(R0.str*D.EPOCH_STR[ue]),sq=Math.sqrt(q/Math.max(.5,(B.atk||1)*(B.def||1)));   // 31.10.: die Kampagnenstärke der Sondereinheit enthält ihre Boni b.atk/b.def bereits; sie nicht noch einmal aufschlagen (Libyer Abwehr ×1,23, Hopliten, Phalanx waren sonst überstark)
   const G=ECHT_ROLLE[rolle],atkM=(1+RG.b)*(1+.08*wpn),defM=(1+RG.b)*(1+.08*arm),spd=B.spd||1;
   // Figurenpaket (Fernkämpfer brauchen ein Paket mit Wurf-Clips)
   let pak=P.paket,genau=P.paketGenau!==false;
@@ -395,8 +395,8 @@ function schlachtEinheit(e){
   const kap=(v,g)=>Math.min(v,g*1.6);
   const werte={atk:kap(G.atk*sq*(B.atk||1)*atkM,G.atk),def:kap(G.def*sq*(B.def||1)*defM,G.def),mor:Math.min(90,G.mor+2*(B.mor||0)+RG.m),hp:ele?G.hp*4:G.hp,
     walk:G.walk*spd,run:ele?Math.min(G.run*spd,5.5):G.run*spd,ans:G.ans*(B.chg||1),pike:B.pike||0,skirm:B.skirm?1:(rolle==='missile'?1:0),
-    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sym:ele?'elefant':reit?G.sym:fern?(fern.typ==='stein'?'schleuder':fern.typ==='pfeil'?'bogen':'wurfspeer'):G.sym,fern,pakId:pak,
-    reit,ele,lanze:reit&&!ele&&pak!=='A2_numidisch',rg:ele?3.0:reit?2.1:rolle==='spear'?2.0:1.6,reach:ele?2.4:reit?1.7:rolle==='spear'?1.45:1.1};   // reit = Reiter (Pferd + Reiter je Figur) · lanze = Ansturm mit gesenkter Lanze · rg Schlagweite · reach Standabstand
+    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sar:rolle==='spear'&&!ele&&pak==='A7_phalangit',sym:ele?'elefant':reit?G.sym:fern?(fern.typ==='stein'?'schleuder':fern.typ==='pfeil'?'bogen':'wurfspeer'):G.sym,fern,pakId:pak,
+    reit,ele,lanze:reit&&!ele&&pak!=='A2_numidisch',rg:ele?3.0:reit?2.1:rolle==='spear'?(B.pike?1.9:1.7):1.6,reach:ele?2.4:reit?1.7:rolle==='spear'?(B.pike?1.35:1.2):1.1};   // Speerlänge: nur wenig weiter als das Schwert (war 2,0/1,45; schon 0,1 m mehr Schlagweite entschied Paargefechte)   // reit = Reiter (Pferd + Reiter je Figur) · lanze = Ansturm mit gesenkter Lanze · rg Schlagweite · reach Standabstand
   const f=[];
   if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':fern.typ==='pfeil'?'Bogenschützen: größte Reichweite':'Wurfspeere: kurze Reichweite');
   if(B.skirm)f.push('Plänkeln: weicht dem Nahkampf aus');else if(rolle==='missile')f.push('Plänkeln (Fernkämpfer weichen aus)');
@@ -418,9 +418,12 @@ function EP_STR(ue,rolle){return KAMP.EPOCH_STR[ue]*(rolle==='missile'?KAMP.FERN
 const GEFECHTE=[
   {id:'karthago',n:'Rom gegen Karthago',seiten:['Rom','Karthago'],text:'Gedrillte Legionäre gegen Libyer, Iberer und keltische Söldner.',
    einheiten:[
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60,tier:1,rang:2},
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-30,z:-60,waffen:1,ruestung:2},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:45,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:15,z:-60,tier:1,rang:2},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-15,z:-60,waffen:1,ruestung:2},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-45,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:30,z:-74},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:-30,z:-74},
     {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:70,z:-66},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:-70,z:-66},
@@ -438,9 +441,12 @@ const GEFECHTE=[
   ]},
   {id:'makedonien',n:'Rom gegen Makedonien',seiten:['Rom','Makedonien'],text:'Die Legion gegen Pikenphalanx und Hopliten; Fernkämpfer mit vorläufigen Figuren.',
    einheiten:[
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60,waffen:1,ruestung:1},
-    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:-30,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:45,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:15,z:-60,waffen:1,ruestung:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-15,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-45,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:30,z:-74},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:-30,z:-74},
     {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:68,z:-66},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:-68,z:-66},
@@ -457,9 +463,11 @@ const GEFECHTE=[
   ]},
   {id:'kelten',n:'Rom gegen Kelten',seiten:['Rom','Kelten'],text:'Wilder Ansturm gegen die Schildwand: Langschwertkrieger, Soldurii, Galater.',
    einheiten:[
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:30,z:-60},
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:0,z:-60},
-    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-30,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:45,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:15,z:-60},
+    {s:0,volk:'rom',kultur:'latein',rolle:'sword',epoche:0,x:-15,z:-60,tier:1},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:30,z:-74},
+    {s:0,volk:'rom',kultur:'latein',rolle:'spear',epoche:0,x:-30,z:-74},
     {s:0,volk:'rom',kultur:'latein',rolle:'missile',epoche:0,x:0,z:-38},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:68,z:-66},
     {s:0,volk:'rom',kultur:'latein',rolle:'cav',epoche:0,x:-68,z:-66},
@@ -489,7 +497,7 @@ function gefechtAufloesen(g){   // Beschreibungen -> Einheiten mit Echtzeitwerte
     if(d.mult)multAnwenden(r,d.mult);
     if(d.name)r.name=d.name;
     if(d.minFig)r.figuren=Math.min(60,Math.max(d.minFig,r.figuren));
-    r.tag=d.tag;r.mil=!!d.mil;r.fname=d.feldherr||null;r.aura=d.aura||1;   // tag 'gen': Leibwache mit Feldherr (feldherr = Name, aura = Stärke ab 1)
+    r.kultur=d.kultur;r.tag=d.tag;r.mil=!!d.mil;r.fname=d.feldherr||null;r.aura=d.aura||1;   // tag 'gen': Leibwache mit Feldherr (feldherr = Name, aura = Stärke ab 1)
     r.werte.bild=r.bild;r.s=d.s;r.x=d.x;r.z=d.z;R.push(r);const k=d.s+r.name;anz[k]=(anz[k]||0)+1;}
   const ZIF=['','I','II','III','IV','V','VI'];
   for(const r of R){const k=r.s+r.name;zaehl[k]=(zaehl[k]||0)+1;r.anzeige=anz[k]>1?r.name+' '+ZIF[zaehl[k]]:r.name;}
@@ -617,6 +625,7 @@ function kitBauen(i,pk,id){
   const clip={};pk.clips.forEach((c,k)=>{c.k=k;clip[c.n]=c;});
   GMATS.push(mat,mat.userData.depth);
   KITIX[id]=i;if(clip.galopp&&clip.sterben)PFK=i;if(clip.stampfen&&clip.trompeten&&clip.ansturm)EFK=i;
+  for(const n of['sarissa_bereit','gehen_sarissa'])if(clip[n])clip[n].loop=true;   // Pike gesenkt: Schleifen (in der Paketdatei als einmalig gekennzeichnet)
   const rit=!!clip.reiten;
   KIT[i]={pk,mat,im,clip,cl:CN.map(n=>(rit&&RIT[n]&&clip[RIT[n]])||clip[n]||clip[CN_ERSATZ[n]]||clip.stehen||pk.clips[0]),pcl:clip.galopp?PFN.map(n=>clip[n]||clip.stehen):(clip.stampfen&&clip.trompeten?EFN.map(n=>clip[n]||clip.stehen):null),tris:im[0].geometry.userData.tris};
 }
@@ -1038,6 +1047,7 @@ const UMW={},UMCAP={fels_gross:10,fels_mittel:24,fels_klein:48,fels_platte:12,ha
 let UMD=null,UMFETCH=false;
 const HIND=[],HIW=Math.ceil(2*HX/8)+2,HIH=Math.ceil(2*HZ/8)+2,HGR=new Array(HIW*HIH).fill(null);   // Hindernisliste und 8-m-Raster
 let HN=0,_hx=0,_hz=0;
+const HC=[];   // Hindernisgruppen (sich berührende Kreise zu einem Umgehungskreis x,z,r zusammengefasst) für die Umgehung der Einheitsanker
 const SPL0=SPL.slice(),UMTREE=[];   // Bodenkarte ohne Gehöft · versteckte Bäume/Büsche/Steine (zum Zurückholen)
 async function umgebungLaden(){
   if(UMD!==null||UMFETCH)return;UMFETCH=true;
@@ -1083,13 +1093,21 @@ function umPaint(x,z,r){   // Bodenkarte: Erde statt Gras im Kreis (Gras und Wal
 }
 function hindAdd(x,z,r,k,o){HIND.push({x,z,r,k,o});}
 function hindGridBauen(){   // Raster der Hindernisse (ausgedünnte Felsen zählen nicht mit)
-  HGR.fill(null);HN=0;
+  HGR.fill(null);HN=0;HC.length=0;const act=[];
   for(const h of HIND){
     if(h.k){const w=UMW[h.k];if(w&&h.o>=w.m.count)continue;}
+    act.push(h);
     const ex=h.r+2.7,i0=Math.max(0,Math.floor((h.x-ex+HX)/8)),i1=Math.min(HIW-1,Math.floor((h.x+ex+HX)/8)),j0=Math.max(0,Math.floor((h.z-ex+HZ)/8)),j1=Math.min(HIH-1,Math.floor((h.z+ex+HZ)/8));
     for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){let L=HGR[j*HIW+i];if(!L)L=HGR[j*HIW+i]=[];L.push(h.x,h.z,h.r);}
     HN++;
   }
+  // Gruppen: Kreise, die sich bis auf 6 m nähern, bilden ein Hindernis (Gehöft mit Mauern und Zäunen); Umgehungskreis = umschließender Kreis
+  const g=act.map((h,i)=>i),fi=i=>{while(g[i]!==i){g[i]=g[g[i]];i=g[i];}return i;};
+  for(let i=0;i<act.length;i++)for(let j=i+1;j<act.length;j++){const a=act[i],b=act[j];if(Math.hypot(a.x-b.x,a.z-b.z)<a.r+b.r+6)g[fi(i)]=fi(j);}
+  const grp={};act.forEach((h,i)=>{(grp[fi(i)]||(grp[fi(i)]=[])).push(h);});
+  for(const k in grp){const L=grp[k];let cx=0,cz=0;for(const h of L){cx+=h.x;cz+=h.z;}cx/=L.length;cz/=L.length;let rr=0;
+    for(let it=0;it<2;it++){rr=0;for(const h of L)rr=Math.max(rr,Math.hypot(h.x-cx,h.z-cz)+h.r);}
+    HC.push(cx,cz,rr);}
 }
 function hindPush(x,z,pad){   // Punkt aus Hindernissen schieben -> _hx,_hz
   _hx=x;_hz=z;if(!HN)return false;
@@ -1381,9 +1399,9 @@ const GX0=-(FELD_X+30),GZ0=-(FELD_Z+30),GW=Math.ceil(2*(FELD_X+30)/ZELLE),GH=Mat
 const CN=['stehen','gehen','laufen','fliehen','stehen_bereit','kampf_bereit','schlag_a','schlag_b','schlag_c','stoss_speer','schild_stoss',
   'abwehr_schild','parade','ausweichen','treffer','sterben_vorn','sterben_hinten','jubeln',
   'speerwurf','schleuder','bogen','schild_hoch','gehen_b','laufen_b','stehen_b','schlag_a_b','schlag_b_b','sterben_knie',
-  'stolpern','reiten','lanze_gesenkt','stoss_reiter','schlag_reiter','treffer_reiter','wurf_reiter'];
+  'stolpern','reiten','lanze_gesenkt','stoss_reiter','schlag_reiter','treffer_reiter','wurf_reiter','sarissa_bereit','sarissa_stoss','gehen_sarissa'];
 const CN_ERSATZ={gehen_b:'gehen',laufen_b:'laufen',stehen_b:'stehen_bereit',schlag_a_b:'schlag_a',schlag_b_b:'schlag_b',sterben_knie:'sterben_vorn',schild_hoch:'stehen_bereit',
-  stolpern:'treffer',reiten:'stehen',lanze_gesenkt:'stehen',stoss_reiter:'schlag_a',schlag_reiter:'schlag_a',treffer_reiter:'treffer',wurf_reiter:'speerwurf'};   // fehlt ein Clip im Paket
+  stolpern:'treffer',reiten:'stehen',lanze_gesenkt:'stehen',stoss_reiter:'schlag_a',schlag_reiter:'schlag_a',treffer_reiter:'treffer',wurf_reiter:'speerwurf',sarissa_bereit:'kampf_bereit',sarissa_stoss:'stoss_speer',gehen_sarissa:'gehen'};   // fehlt ein Clip im Paket
 /* Reiterpakete (haben den Clip „reiten“): die Fußclips werden durch Sitzclips ersetzt, damit der übrige Kampfcode unverändert bleibt */
 const RIT={stehen:'reiten',gehen:'reiten',laufen:'reiten',fliehen:'reiten',stehen_bereit:'reiten',kampf_bereit:'reiten',stehen_b:'reiten',gehen_b:'reiten',laufen_b:'reiten',schild_hoch:'reiten',
   parade:'reiten',abwehr_schild:'reiten',ausweichen:'reiten',jubeln:'reiten',treffer:'treffer_reiter',schlag_a:'stoss_reiter',schlag_a_b:'stoss_reiter',schlag_b:'schlag_reiter',schlag_b_b:'schlag_reiter',
@@ -1440,7 +1458,7 @@ function einheitenAnlegen(){
       strength:np,morale:K.mor,state:'steht',
       cx:r.x,cz:r.z,f:side===0?0:PI,destX:0,destZ:0,hasDest:false,run:false,atkT:-1,stance:side===0?'halten':'angreifen',
       occ:new Int16Array(PRO).fill(-1),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
-      fx:0,fz:(side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
+      wpK:-1,wpS:0,stX:0,stZ:0,feindD:999,sarT:0,fx:0,fz:(side===0?-1:1),fAng:0,fled:0,flank:1,pr:0,loose:0,startX:r.x,startZ:r.z,
       mx:r.x,mz:r.z,sn:np,ax:0,az:0,an:0,nF:0,fatS:0,nL:np,cnt:new Int16Array(NU),
       lebend:np,kaempfend:0,muede:0,hoehe:0,dAcc:0,
       gen:r.tag==='gen',gname:r.fname||'Feldherr',auraW:Math.max(1,Math.min(1.6,r.aura||1)),genId:-1,genAlive:false,genHP0:1,genWund:false,aura:0,m0:K.mor,anfT:0,festT:0,druck:0,kiW:0,reserve:false,fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*np:0,munS:0,eng:true,fk:1,gef:0,weichT:0};
@@ -1601,7 +1619,7 @@ function hashBauen(){
 }
 function floh(u){
   if(u.state==='flieht'||gone(u))return;
-  ereignis('horn',u.mx,u.mz);u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;u.kT=0;
+  ereignis('horn',u.mx,u.mz);ereignis('flucht',u.mx,u.mz);u.state='flieht';u.atkT=-1;u.hasDest=false;u.stance='halten';u.engaged=false;u.kT=0;
   const e=naechster(u,true);let dx=0,dz=u.side===0?-1:1;
   if(e){dx=u.cx-e.cx;dz=u.cz-e.cz;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;}
   u.fx=dx;u.fz=dz;u.fAng=Math.atan2(dx,dz);
@@ -1657,7 +1675,8 @@ function suche(i){   // Gegner für Soldat i; setzt sFoe oder das Drängel-Ziel 
 function startSwing(i,f){
   const K=U[sUnit[i]].def;let ci,dm=1;const r=Math.random();
   if(K.ele){elefStampf(i,f);return;}
-  if(K.speer){if(r<.9){ci=C.stoss_speer;dm=1.2;}else{ci=C.schild_stoss;dm=.5;}}
+  if(K.sar){ci=C.sarissa_stoss;dm=1.2;}   // Pikenphalanx: Stoß mit der gesenkten Sarissa
+  else if(K.speer){if(r<.9){ci=C.stoss_speer;dm=1.2;}else{ci=C.schild_stoss;dm=.5;}}
   else if(r<.35){ci=Math.random()<.4?C.schlag_a_b:C.schlag_a;dm=1;}else if(r<.6){ci=Math.random()<.4?C.schlag_b_b:C.schlag_b;dm=1.5;}else if(r<.85){ci=C.schlag_c;dm=1.1;}else{ci=C.schild_stoss;dm=.5;}
   const dur=setClip(i,ci,sJit[i]*(1-.15*sFat[i]),true);
   sAct[i]=A_SCHLAG;sAT[i]=0;sDur[i]=dur;sHitT[i]=dur*.5;sReaT[i]=Math.max(0,dur*.5-.15);sPh[i]=0;sDmg[i]=dm;sTgt[i]=f;sOut[i]=0;
@@ -1888,6 +1907,7 @@ function geschossSchritt(dt){
   }
 }
 
+let tickN=0;
 function kampfTick(dt){
   // --- Einheitswerte, Nähe
   for(const u of U){u.kontakt=false;u.nahF=false;u.nF=0;u.fatS=0;u.nL=0;u.kaempfend=0;u.cnt.fill(0);u.munS=0;u.scheu=0;
@@ -1942,8 +1962,10 @@ function kampfTick(dt){
     if(dx*dx+dz*dz>196){sFoe[i]=-1;continue;}
     sNAtt[j]++;sAtt[j]=i;
   }
-  // --- Soldaten
-  for(let i=0;i<NA;i++){
+  // --- Soldaten (Reihenfolge je Takt umgekehrt: sonst gewinnt bei gleichzeitigem Treffer immer der Soldat mit dem kleineren Index, also Seite 0; gemessen 69 % Siege in Spiegelgefechten)
+  tickN++;
+  for(let k=0;k<NA;k++){
+    const i=(tickN&1)?NA-1-k:k;
     const st=sSt[i];if(st>S_FLIEH)continue;
     const u=U[sUnit[i]];
     u.nL++;u.fatS+=sFat[i];
@@ -2130,7 +2152,7 @@ function sammeln(side){   // Fliehende im Umkreis kehren um (Moral nicht völlig
     if(v.state==='flieht'){if(v.morale>=8&&v.sn>0){sammelEinheit(v);n++;}}
     else if(v.morale<v.def.mor-8){v.morale=Math.min(v.def.mor,v.morale+12);m++;}}
   if(!n&&!m){if(side===0)hinweis('Niemand in der Nähe braucht Sammeln.');return false;}
-  FK[side].s=schlachtZ+SAMMEL_CD;ereignis('horn',gx,gz);
+  FK[side].s=schlachtZ+SAMMEL_CD;ereignis('horn',gx,gz);ereignis('feldherr_ruf',gx,gz);
   hinweis(side===0?g.gname+' sammelt die Truppen'+(n?' ('+n+' Einheit'+(n>1?'en':'')+' kehr'+(n>1?'en':'t')+' um).':'.'):'Der Feind sammelt seine Truppen.');
   if(sel>=0)uiAuswahl();return true;
 }
@@ -2140,7 +2162,7 @@ function anfeuern(side){   // Moral und Angriff (+20 %, 20 s) im Umkreis
   for(const v of U){if(v.side!==side||gone(v)||v.state==='flieht'||Math.hypot(v.mx-gx,v.mz-gz)>ANF_R)continue;
     v.morale=Math.min(v.def.mor+8,v.morale+12);v.anfT=ANF_DAUER;n++;}
   if(!n)return false;
-  FK[side].a=schlachtZ+ANF_CD;zaehler.angefeuert++;ereignis('kriegsgeschrei',gx,gz);
+  FK[side].a=schlachtZ+ANF_CD;zaehler.angefeuert++;ereignis('anfeuern',gx,gz);
   hinweis(side===0?g.gname+' feuert die Truppen an: Angriff +20 % für '+ANF_DAUER+' s.':'Der Feind wird angefeuert.');
   if(sel>=0)uiAuswahl();return true;
 }
@@ -2199,11 +2221,12 @@ function reitKI(u){
   }
   auftrag(u,best.i,true);
 }
+const KIS=[false,true];   // welche Seite die Computer-Führung hat (Seite 0 = Spieler; nur Tests schalten sie, kiSeiten)
 function ki(u){
-  if(u.gen&&u.side===1&&u.genAlive){genFaehigKI(u);genKI(u);return;}
+  if(u.gen&&KIS[u.side]&&u.genAlive){genFaehigKI(u);genKI(u);return;}
   if(gone(u)||u.state==='flieht')return;
   if(u.fern&&fernKI(u))return;
-  if(u.side===0){if(u.stance==='angreifen'&&!u.engaged&&u.atkT<0)autoZiel(u);return;}
+  if(!KIS[u.side]){if(u.stance==='angreifen'&&!u.engaged&&u.atkT<0)autoZiel(u);return;}
   if(u.def.reit){reitKI(u);return;}
   if(u.engaged)return;
   if(u.reserve){   // Sehr schwer: eine Einheit bleibt zurück, bis die Linie wankt oder es lange dauert
@@ -2214,7 +2237,7 @@ function ki(u){
   const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
   if(u.ai==='sturm'){auftrag(u,T.i,true);return;}                // Kelten stürmen zuerst
   // geschlossene Linie: nicht weit vor den anderen
-  let dm=1e9;for(const v of U){if(v.side!==1||v===u||v.ai==='sturm'||v.ai==='reit'||v.fern||gone(v)||v.state==='flieht')continue;
+  let dm=1e9;for(const v of U){if(v.side!==u.side||v===u||v.ai==='sturm'||v.ai==='reit'||v.fern||gone(v)||v.state==='flieht')continue;
     const e=naechster(v,false);if(e)dm=Math.min(dm,Math.hypot(e.cx-v.cx,e.cz-v.cz));}
   if(d>40&&d<dm-8){halt(u);return;}
   auftrag(u,T.i,d<35&&u.ai==='spaet');                           // Iberer laufen zuletzt, Libyer marschieren
@@ -2223,10 +2246,35 @@ function ki(u){
 /* ====================================================================================================
    Bewegung: Einheitsanker (Ziel der Formation) und jeder Soldat einzeln, jedes Bild
    ==================================================================================================== */
+let _wx=0,_wz=0;
+function wegpunkt(u){   // Liegt ein Hindernis auf der Geraden zum Ziel, steht ein Zwischenpunkt seitlich daran vorbei (Kreis + halbe Einheitsbreite + Abstand; die Seite mit dem kürzeren Umweg, danach beibehalten) -> _wx,_wz
+  const sx=u.cx,sz=u.cz,pad=(Math.min(u.np,BREIT)-1)*ABST*.5+2.5;let tx=u.destX,tz=u.destZ,hit=false,skip=-1;
+  for(let it=0;it<3;it++){
+    const vx=tx-sx,vz=tz-sz,L2=vx*vx+vz*vz;if(L2<64)break;
+    let best=-1,bt=2;
+    for(let k=0;k<HC.length;k+=3){
+      if(k===skip)continue;
+      const ox=HC[k],oz=HC[k+1],rr=HC[k+2]+pad,ex=ox-sx,ez=oz-sz;
+      if(ex*ex+ez*ez<rr*rr*.5||(tx-ox)*(tx-ox)+(tz-oz)*(tz-oz)<rr*rr)continue;   // wir stehen schon darin / das Ziel liegt darin: hindPush regelt das
+      const t=(ex*vx+ez*vz)/L2;if(t<=.02||t>=1||t>=bt)continue;
+      const cx=sx+vx*t-ox,cz=sz+vz*t-oz;if(cx*cx+cz*cz>=rr*rr)continue;
+      best=k;bt=t;
+    }
+    if(best<0)break;
+    const ox=HC[best],oz=HC[best+1],rr=HC[best+2]+pad+2,l=Math.sqrt(L2),nx=-vz/l,nz=vx/l;
+    let sg=u.wpK===best?u.wpS:0;
+    if(!sg){const ax=ox+nx*rr,az=oz+nz*rr,bx=ox-nx*rr,bz=oz-nz*rr;
+      sg=(Math.hypot(ax-sx,az-sz)+Math.hypot(tx-ax,tz-az))<=(Math.hypot(bx-sx,bz-sz)+Math.hypot(tx-bx,tz-bz))?1:-1;u.wpK=best;u.wpS=sg;}
+    tx=Math.max(-FELD_X+3,Math.min(FELD_X-3,ox+nx*rr*sg));tz=Math.max(-FELD_Z+3,Math.min(FELD_Z-3,oz+nz*rr*sg));skip=best;hit=true;
+  }
+  if(!hit){u.wpK=-1;return false;}
+  _wx=tx;_wz=tz;return true;
+}
 function bewegen(dt){
   for(const u of U){
     if(gone(u))continue;
     if(u.runT>0)u.runT-=dt;
+    if(u.def.sar&&(u.sarT-=dt)<=0){u.sarT=.3;const e=naechster(u,false);u.feindD=e?Math.hypot(e.cx-u.cx,e.cz-u.cz):999;}   // Abstand zum nächsten Feind (Pike gesenkt unter 40 m)
     if(u.trumT>0)u.trumT-=dt;
     if(u.state==='flieht'){
       if(u.sn>0){u.cx=u.mx;u.cz=u.mz;}
@@ -2244,9 +2292,11 @@ function bewegen(dt){
     }
     let moving=false;
     if(u.hasDest){
-      const dx=u.destX-u.cx,dz=u.destZ-u.cz,d=Math.hypot(dx,dz);
+      let dx=u.destX-u.cx,dz=u.destZ-u.cz,d=Math.hypot(dx,dz);
       if(d<.6&&u.atkT<0)u.hasDest=false;
       else{
+        if(HC.length&&d>8&&wegpunkt(u)){dx=_wx-u.cx;dz=_wz-u.cz;d=Math.hypot(dx,dz)||1e-3;}   // Hindernis im Weg: erst zum Zwischenpunkt
+        u.stX=u.cx+dx;u.stZ=u.cz+dz;
         const h=Math.atan2(dx,dz),df=wrap(h-u.f);
         u.f+=Math.max(-2.5*dt,Math.min(2.5*dt,df));
         if(u.ele&&u.run&&u.trumT<=0&&u.atkT>=0&&d>38&&d<95&&phase==='schlacht'){u.trumT=45;if(Math.random()<.7)trompetenEinheit(u);}   // gelegentlich vor dem Ansturm
@@ -2257,7 +2307,7 @@ function bewegen(dt){
         if(u.run&&u.curSpeed>2)u.runT=.7;
       }
     }
-    if(!moving){u.curSpeed=0;u.rueck=false;}
+    if(!moving){u.curSpeed=0;u.rueck=false;u.stX=u.cx;u.stZ=u.cz;}
     u.hoehe=H(u.cx,u.cz);
     {const wd=WF(u.cx,u.cz),lz=Math.max(moving?1:0,.85*wd);u.loose+=(lz-u.loose)*Math.min(1,dt*(lz>u.loose?.6:.9));}   // Wald lockert die Formation
     u.cx=Math.max(-FELD_X,Math.min(FELD_X,u.cx));u.cz=Math.max(-FELD_Z,Math.min(FELD_Z,u.cz));
@@ -2398,7 +2448,7 @@ function figuren(dt){
       if(st===S_FLIEH){
         if(sDelay[i]>0)setClip(i,C.kampf_bereit,sJit[i]);else setClip(i,C.fliehen,Math.max(.7,Math.min(1.5,sp/(K.run*.9))));
       }else{
-        const cur=sCur[i],laeuft=cur===C.gehen||cur===C.laufen||cur===C.gehen_b||cur===C.laufen_b;
+        const cur=sCur[i],laeuft=cur===C.gehen||cur===C.laufen||cur===C.gehen_b||cur===C.laufen_b||cur===C.gehen_sarissa;
         if(sp>(laeuft?.12:.3)){
           const lauf=sp>2.7||((cur===C.laufen||cur===C.laufen_b)&&sp>2.2),cl=KIT[sKit[i]].cl;
           let ci=lauf?C.laufen:C.gehen,ref=cl[ci].speed||(lauf?K.run:K.walk);   // gemessenes Schritttempo des Clips (Paket), sonst Einheitentempo
@@ -2406,8 +2456,9 @@ function figuren(dt){
             const cb=lauf?C.laufen_b:C.gehen_b,rb=cl[cb].speed||(lauf?K.run:K.walk),r=sp/rb,war=cur===cb;
             if(cl[cb]!==cl[ci]&&r>(war?.6:.75)&&r<(war?1.7:1.4)){ci=cb;ref=rb;}
           }
+          if(K.sar&&!lauf&&u.feindD<40&&phase==='schlacht'){ci=C.gehen_sarissa;ref=cl[ci].speed||K.walk;}   // Vorrücken in Formation nahe am Feind: Pike gesenkt
           setClip(i,ci,Math.max(.55,Math.min(1.6,sp/ref)));
-        }else setClip(i,st===S_KAMPF?C.kampf_bereit:(st===S_FORM&&u.beschuss>0&&K.schild>0?C.schild_hoch:(phase==='aufstellung'&&sVar[i]?C.stehen_b:C.stehen_bereit)),sJit[i]);
+        }else setClip(i,(K.sar&&phase==='schlacht'&&(st===S_KAMPF||u.feindD<40))?C.sarissa_bereit:st===S_KAMPF?C.kampf_bereit:(st===S_FORM&&u.beschuss>0&&K.schild>0?C.schild_hoch:(phase==='aufstellung'&&sVar[i]?C.stehen_b:C.stehen_bereit)),sJit[i]);
       }
     }
     // Ermüdung
@@ -2436,7 +2487,9 @@ function figuren(dt){
     if(HN){const hx=((sX[i]+HX)*.125)|0,hz=((sZ[i]+HZ)*.125)|0;
       if(hx>=0&&hz>=0&&hx<HIW&&hz<HIH){const L=HGR[hz*HIW+hx];
         if(L)for(let k=0;k<L.length;k+=3){const dx=sX[i]-L[k],dz=sZ[i]-L[k+1],rr=L[k+2]+sRad[i],d2=dx*dx+dz*dz;
-          if(d2<rr*rr){const d=Math.sqrt(d2)||1e-3,nx=dx/d,nz=dz/d;sX[i]=L[k]+nx*rr;sZ[i]=L[k+1]+nz*rr;const vn=sVX[i]*nx+sVZ[i]*nz;if(vn<0){sVX[i]-=vn*nx;sVZ[i]-=vn*nz;}}}}}
+          if(d2<rr*rr){const d=Math.sqrt(d2)||1e-3,nx=dx/d,nz=dz/d;sX[i]=L[k]+nx*rr;sZ[i]=L[k+1]+nz*rr;const vn=sVX[i]*nx+sVZ[i]*nz;if(vn<0){sVX[i]-=vn*nx;sVZ[i]-=vn*nz;
+            const f=st===S_KAMPF?sFoe[i]:-1,gx=(f>=0?sX[f]:u.stX)-sX[i],gz=(f>=0?sZ[f]:u.stZ)-sZ[i],tg=(gx*-nz+gz*nx)>=0?1:-1;   // nicht frontal drücken: seitlich am Hindernis entlanggleiten, auf der Seite des Ziels
+            sX[i]+=-nz*tg*1.8*dt;sZ[i]+=nx*tg*1.8*dt;}}}}}
     // Feldgrenzen / Flucht aus dem Feld
     if(st===S_FLIEH){
       if(Math.abs(sX[i])>FELD_X+6||Math.abs(sZ[i])>FELD_Z+6){soldatWeg(i);continue;}
@@ -2998,22 +3051,25 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeue
    Kein Knoten pro Bild: Teppiche sind Dauerschleifen mit gleitender Lautstärke, Einzelgeräusche kurzlebige Quellen (≤ 12), Zählung 5 Hz.
    ==================================================================================================== */
 const TON=(()=>{
-  const DIR=AS+'ton/',KULT='rom',MAXM=7,POLY=12,HOER=60,FADE=3.5;
+  const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
   const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
-    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
-  const KAMPF=['kampf_1','kampf_2','kampf_3','kampf_rom','kampf_karthago'];
+    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
+  /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
+  const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
+  let KULT='rom';
+  const KAMPF=['kampf_1','kampf_2','kampf_3'];
   const GR={   // Zustand -> Gruppen in Ausweichreihenfolge (erste Gruppe mit geladenem Stück gewinnt)
-    ruhe:[['ruhe_1']],
-    aufmarsch:[['aufmarsch_'+KULT],['aufmarsch_rom','aufmarsch_karthago','aufmarsch_kelt'],KAMPF],
+    ruhe:[['ruhe_1','ruhe_2']],
+    aufmarsch:[['aufmarsch_rom'],['aufmarsch_rom','aufmarsch_karthago','aufmarsch_kelt','aufmarsch_hellen'],KAMPF],
     kampf:[KAMPF],
     hoehepunkt:[['hoehepunkt_1','hoehepunkt_2'],KAMPF],
-    sieg:[['sieg_1','sieg_2']],niederlage:[['niederlage_1']]};
+    sieg:[['sieg_1','sieg_2']],niederlage:[['niederlage_1','niederlage_2']]};
   const FAC={ruhe:.8,aufmarsch:.8,kampf:1,hoehepunkt:1,sieg:.9,niederlage:.8};
   /* Spielereignis -> Geräuschart · v Lautstärke · t Mindestabstand (s) je Ereignisart · w Hörweite (m) */
   const EV={
     klirren:{a:'klirren',v:.8,t:.07},schild:{a:'schild',v:.8,t:.09},schildstoss:{a:'schildstoss',v:.8,t:.2},treffer:{a:'treffer',v:.45,t:.9},tod:{a:'tod',v:.42,t:2.2},speer:{a:'speer',v:.8,t:.15},
     pfeil:{a:'pfeil',v:.55,t:.12},wurf:{a:'wurf',v:.7,t:.2},schleuder:{a:'schleuder',v:.7,t:.15},treffer_fern:{a:'pfeil_treffer',v:.8,t:.15},abgewehrt:{a:'schild',v:.7,t:.2},
-    kriegsgeschrei:{a:'kriegsgeschrei',v:.6,t:6,w:140},
+    kriegsgeschrei:{a:'kriegsgeschrei',v:.6,t:6,w:140},feldherr_ruf:{a:'feldherr_ruf',v:.9,t:4,w:220},anfeuern:{a:'anfeuern_jubel',v:.9,t:4,w:220},flucht:{a:'flucht',v:.6,t:4,w:160},
     aufprall:{a:'reiter_aufprall',v:.8,t:.18,w:110},wiehern:{a:'wiehern',v:.5,t:5,w:120},pferd_tod:{a:'pferd_tod',v:.55,t:1.8},trompeten:{a:'elefant_trompete',v:.7,t:3.5,w:260},elefant_panik:{a:'elefant_panik',v:.8,t:2.5,w:220},elefant_tod:{a:'elefant_tod',v:.75,t:2},horn:{a:'horn',v:1,t:4,w:400},sieg_jubel:{a:'sieg_jubel',v:1,t:5,w:1e5}};
   for(const k in EV)EV[k].l=-1e9;
   /* Ladeliste: Musik (je Stück zuerst Fassung a, sonst b; höchstens MAXM Stück im Speicher) und Geräusche; Reihenfolge = Wichtigkeit */
@@ -3022,7 +3078,13 @@ const TON=(()=>{
   LISTE.push(mItem('kampf_1'));
   const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
   for(const a in SFX)for(let n=1;n<=SFX[a];n++)if(!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
-  for(const id of ['ruhe_1','aufmarsch_rom','kampf_2','hoehepunkt_1','sieg_1','niederlage_1','kampf_3','hoehepunkt_2','sieg_2','kampf_rom','kampf_karthago'])LISTE.push(mItem(id));
+  for(const id of ['ruhe_1','aufmarsch_%','kampf_%','sieg_1','niederlage_1','hoehepunkt_1','kampf_2','kampf_3','hoehepunkt_2','sieg_2','ruhe_2','niederlage_2']){const m=mItem(id);if(id.endsWith('%'))m.kz=id;LISTE.push(m);}
+  function kultSetzen(){   // stärkste Kultur der Spielerseite (nach Figuren); noch nicht geladene Volksstücke umstellen
+    const z={};for(const u of U){const k=u.side===0&&u.ein&&KMUS[u.ein.kultur];if(k)z[k]=(z[k]||0)+u.np;}
+    KULT='rom';for(const k in z)if(z[k]>(z[KULT]||0))KULT=k;
+    GR.aufmarsch[0]=['aufmarsch_'+KULT];GR.kampf=[KAMPF.concat('kampf_'+KULT)];GR.hoehepunkt[1]=GR.kampf[0];
+    for(const it of LISTE)if(it.kz&&!it.ok){it.id=it.kz.replace('%',KULT);it.alt=['m_'+it.id+'_a','m_'+it.id+'_b'];}
+  }
   const MB={},SB={};          // geladene Puffer: Musik je Stück · Geräusche je Art (Liste)
   let abgebaut=false;
   let ctx=null,master=null,busM=null,busS=null,aktiv=false,figFertig=false,laedt=false,nM=0,nS=0,gespielt=0,retryT=0,tT=0;
@@ -3223,7 +3285,7 @@ const TON=(()=>{
     if(t-retryT>60000){retryT=t;lade();}   // fehlende Dateien später nachholen (ok-Marken bleiben, nur Fehlendes wird erneut angefragt)
   }
   function start(){ereignis('horn',ziel.x,ziel.z);lade();retryT=performance.now();}
-  function bereit(){figFertig=true;lade();}
+  function bereit(){kultSetzen();figFertig=true;lade();}
 
   /* ---- Bedienung: Knopf „Ton“ (kurz: an/aus · lang: Tonkarte mit Reglern) ---- */
   const kt=$('tonkarte');
@@ -3399,7 +3461,7 @@ async function paketeFuer(R,ladeBar){
 function markerWeg(){for(const u of U){for(const o of [u.ring,u.flag,u.auraR])if(o){scene.remove(o);o.traverse(c=>{if(c.geometry&&c.geometry!==FAHNEGEO)c.geometry.dispose();});}}}
 let gefechtBusy=false;
 async function gefechtWaehlen(name){   // Vorlage wählen, fehlende Figurenpakete laden, Aufstellung neu bauen
-  const g=GEFECHTE.find(x=>x.id===name||x.n===name);if(!g||gefechtBusy)return false;
+  const g=name&&typeof name==='object'?name:GEFECHTE.find(x=>x.id===name||x.n===name);if(!g||gefechtBusy)return false;   // auch ein Beschreibungsobjekt (Tests: Spiegel- und Paargefechte)
   if(phase!=='aufstellung'&&phase!=='ende')return false;
   gefechtBusy=true;const alt=phase;phase='laden';
   try{
@@ -3497,7 +3559,7 @@ return{
   get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id],pferd:pCur[id]>=0?(U[sUnit[id]].ele?EFN:PFN)[pCur[id]]:null,ch:sCh[id],rush:sRush[id],v:Math.hypot(sVX[id],sVZ[id]),reit:sRt[id],ele:!!(sRt[id]&&U[sUnit[id]].ele),pan:sPanK[id],hurt:sHurt[id],rad:sRad[id]};},
   elefPanik(i,w){const u=U[i];if(!u||!u.ele)return -1;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_KAMPF&&!sPanK[id]){panikStart(id,u);if(w!=null)sPA[id]=w;return id;}}return -1;},   // nur für Tests / Bilder
-  get umwelt(){const o={hindernisse:HN,teile:{}};for(const k in UMW)o.teile[k]={n:UMW[k].n,sichtbar:UMW[k].m.count};o.liste=HIND.map(h=>[h.k||'',Math.round(h.x*10)/10,Math.round(h.z*10)/10,h.r]);return o;},
+  get umwelt(){const o={hindernisse:HN,gruppen:HC.slice(),teile:{}};for(const k in UMW)o.teile[k]={n:UMW[k].n,sichtbar:UMW[k].m.count};o.liste=HIND.map(h=>[h.k||'',Math.round(h.x*10)/10,Math.round(h.z*10)/10,h.r]);return o;},
   loesen(i){return loesen(U[i]);},sammeln(s){return sammeln(s==null?0:s);},anfeuern(s){return anfeuern(s==null?0:s);},get abklingzeit(){return FK;},
   feldherr(sd){const g=U.find(u=>u.gen&&u.side===sd);if(!g)return null;const id=g.genId;return Object.assign(feldherrInfo(g),{i:g.i,id,x:sX[id],z:sZ[id],st:sSt[id],hp:sHP[id],hp0:g.genHP0,aura:g.aura,auraW:g.auraW,schritt:sGen[id]});},
   feldherrLeben(sd,f){const g=U.find(u=>u.gen&&u.side===sd&&u.genAlive);if(g)sHP[g.genId]=g.genHP0*f;},   // nur für Tests
@@ -3511,7 +3573,8 @@ return{
   stellen(i,x,z){if(phase==='aufstellung'&&U[i])platziere(U[i],x,z);},
   versetzen(i,x,z){const u=U[i];if(!u)return;const dx=x-u.cx,dz=z-u.cz;u.cx=x;u.cz=z;u.mx+=dx;u.mz+=dz;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sX[id]+=dx;sZ[id]+=dz;}}},   // nur für Tests: Einheit samt Soldaten umsetzen
   bildPos(x,z){const v=new THREE.Vector3(x,H(x,z),z).project(camera);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight];},
-  haltung(i,s){if(U[i])U[i].stance=s;},
+  haltung(i,s){if(U[i])U[i].stance=s;},kiSeiten(a,b){KIS[0]=!!a;KIS[1]=!!b;},   // nur für Tests: true = Computer-Führung, false = Haltung/Befehle (Spielerseite)
+
   einheit(d){return schlachtEinheit(d);},gefecht(n){return gefechtWaehlen(n);},get gefechte(){return GEFECHTE.map(g=>g.id);},get aktuellesGefecht(){return GEFECHT.id;},
   get pakete(){return Object.keys(GELADEN);},
 };
@@ -3519,7 +3582,7 @@ return{
 //ESCH-KERN-END
 </script>
 <script>
-window.SCHLACHT=schlachtKern({standalone:true,bdiff:(function(){const q=new URLSearchParams(location.search).get('bdiff');return q==null?undefined:+q;})()});
+window.SCHLACHT=schlachtKern({standalone:true,limit:1200,bdiff:(function(){const q=new URLSearchParams(location.search).get('bdiff');return q==null?undefined:+q;})()});
 </script>
 </body>
 </html>
