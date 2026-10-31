@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -27,7 +27,7 @@ export function erzeugeWelt() {
 
 export function neuesSpiel() {
   const S = { v: 1, jahr0: -218, monat: 2, gut: { ...START.gut }, geb: [], naechste: 1, stimmung: START.stimmung,
-    auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true } };
+    auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true }, land: {} };
   // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
   const welt = erzeugeWelt();
   for (let x = 0; x < RASTER; x++) if (welt.typ[START_STRASSE * RASTER + x] === GRAS)
@@ -205,6 +205,9 @@ export function monat(S, welt) {
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor);
   }
 
+  // Umland (S2.2): Vermessung schreitet fort, Betriebe liefern
+  landMonat(S, js, grenze, meld);
+
   // Essen: erst Brot, sonst Getreidebrei
   const bedarf = bew * ESSEN_JE_MONAT;
   let brotAnteil = 1, essen = true;
@@ -342,4 +345,51 @@ export function erzeugeRegion() {
     felder.push({ q, r, typ });
   }
   return felder;
+}
+
+// ---------- Umland: Vermessen und Betriebe (S2.2). S.land[„q,r“] = { verm: Monate, betrieb } ----------
+let regionFelder = null;
+export const regionKarte = () => regionFelder || (regionFelder = erzeugeRegion());
+export const landKey = f => f.q + ',' + f.r;
+const HEX_NACHBARN = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+export function landStand(S, f) {
+  const l = (S.land || {})[landKey(f)];
+  if (f.typ === 'stadt') return 'stadt';
+  if (!l) return 'frei';
+  return l.verm < VERMESSEN.monate ? 'vermessung' : l.betrieb ? 'betrieb' : 'vermessen';
+}
+export function kannVermessen(S, f) {
+  if (landStand(S, f) !== 'frei') return false;
+  return HEX_NACHBARN.some(([dq, dr]) => {
+    const n = regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr);
+    return n && (n.typ === 'stadt' || ['vermessen', 'betrieb'].includes(landStand(S, n)));
+  });
+}
+export function vermessen(S, f) {
+  if (!kannVermessen(S, f)) return { ok: false, grund: 'Nur Land neben der Stadt oder neben vermessenem Land' };
+  if (!kannBezahlen(S, VERMESSEN.kosten)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, VERMESSEN.kosten).join(', ') };
+  for (const [g, n] of Object.entries(VERMESSEN.kosten)) S.gut[g] -= n;
+  (S.land = S.land || {})[landKey(f)] = { verm: 0, betrieb: '' };
+  return { ok: true };
+}
+export const betriebFuer = f => Object.keys(LAND_BETRIEBE).find(t => LAND_BETRIEBE[t].auf === f.typ) || '';
+export function landBauen(S, f) {
+  const t = betriebFuer(f);
+  if (!t) return { ok: false, grund: 'Hier ist noch kein Betrieb möglich' };
+  if (landStand(S, f) !== 'vermessen') return { ok: false, grund: 'Erst vermessen' };
+  const k = LAND_BETRIEBE[t].kosten;
+  if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
+  for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
+  S.land[landKey(f)].betrieb = t;
+  return { ok: true };
+}
+export const landFaktor = f => Math.max(0.25, 1 - 0.15 * (hexAbstand(f, { q: 0, r: 0 }) - 1));
+function landMonat(S, js, grenze, meld) {
+  for (const f of regionKarte()) {
+    const l = (S.land || {})[landKey(f)]; if (!l) continue;
+    if (l.verm < VERMESSEN.monate) { if (++l.verm === VERMESSEN.monate) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
+    const d = LAND_BETRIEBE[l.betrieb]; if (!d) continue;
+    const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor);
+  }
 }

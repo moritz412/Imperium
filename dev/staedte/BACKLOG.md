@@ -64,7 +64,13 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Ansichten-Spalte; im Umland sind Bauleiste, Auftrag und Ansichten ausgeblendet. Feld antippen: Art, Entfernung,
       Nutzen, Hinweis „noch nicht vermessen“. Test 28/28 (PC, `PW_GPU=1`). Noch ohne Spielwirkung und ohne Speichern.
       **Nicht getestet:** iPad.
-- [ ] S2.2 Vermessen und Gehöfte: Feld vermessen (agrimensores, Kosten/Dauer), Gehöft je Feldtyp setzen, Erträge.
+- [x] S2.2 Vermessen und Betriebe (31.10. abends): Feld antippen → „Vermessen lassen“ (20 Denare, 2 Monate, nur neben
+      Stadt oder vermessenem Land; Pflöcke rot/weiß). Danach je Feldtyp ein Betrieb: Gehöft (Acker, 4 Getreide, Ernte wie
+      Stadtfelder), Holzfällerlager (Wald, 3 Holz), Lehmstich (Lehm, 3 Lehm); Modell steht auf dem Feld. Ertrag kommt
+      vorläufig direkt ins Lager, −15 % je Feld Entfernung ab dem zweiten (wird mit S2.3 durch Wege/Karren ersetzt).
+      Gespeichert in `S.land`; alte Stände laden mit leerem Umland. Weide/Hang/Fluss noch ohne Betrieb.
+      Test 30/30 (PC, `PW_GPU=1`, auch per Knopf). Nicht geprüft: Balance (Umland macht Getreide deutlich leichter).
+      **Nicht getestet:** iPad.
 - [ ] S2.3 Wege und Karren: Pfad/Schotterweg Feld zu Feld, Karren fahren sichtbar, Ertrag kommt nur verbunden in die Stadt.
 - [ ] S2.4 Fluss: Anleger, Flussboote auf dem Padus, Speicher (horreum) als Umschlagplatz.
 - [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).

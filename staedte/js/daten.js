@@ -75,6 +75,17 @@ export const REGION_TYPEN = {
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
 };
 
+// Betriebe im Umland (S2.2). Ertrag je Monat, minus 15 % je Feld Entfernung ab dem zweiten (bis Wege/Karren mit S2.3 kommen)
+export const VERMESSEN = { kosten: { denare: 20 }, monate: 2 };
+export const LAND_BETRIEBE = {
+  gehoeft:    { n: 'Gehöft', auf: 'acker', kosten: { holz: 20 }, erzeugt: { getreide: 4 }, ernte: true, modell: 'huette',
+    text: 'Eine Bauernfamilie bestellt das Feld. Getreide wie auf den Feldern der Stadt: viel im Herbst, nichts im Winter.' },
+  holzlager:  { n: 'Holzfällerlager', auf: 'wald', kosten: { holz: 10 }, erzeugt: { holz: 3 }, modell: 'holzfaeller',
+    text: 'Holzfäller schlagen Stämme und flößen sie zur Stadt.' },
+  lehmstich:  { n: 'Lehmstich', auf: 'lehm', kosten: { holz: 10 }, erzeugt: { lehm: 3 }, modell: 'lehmgrube',
+    text: 'Lehm aus der Flussaue für die Ziegeleien.' },
+};
+
 // Stadtrang nach Einwohnern (Konzept „Ziele“)
 export const RAENGE = [
   { n: 'Feldlager', art: 'ein', ab: 0 }, { n: 'Dorf', art: 'ein', ab: 40 }, { n: 'Kleinstadt', art: 'eine', ab: 120 },

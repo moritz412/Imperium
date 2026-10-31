@@ -129,6 +129,29 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const um3 = await p.evaluate(() => SR.szene.modus());
   ok('Umland: 37 Hex-Felder, Stadt in der Mitte, Feldinfo, zurück zur Stadt', um1.n === 37 && um1.modus === 'region' && um1.titel === 'Cremona' && um1.leiste === 'none' && um2 && um2 !== 'Cremona' && um3 === 'stadt', JSON.stringify({ um1, um2, um3 }));
 
+  // S2.2 Vermessen und Betriebe im Umland
+  const land = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, nachbarn = sim.regionKarte().filter(f => sim.hexAbstand(f, { q: 0, r: 0 }) === 1 && sim.betriebFuer(f));
+    const weit = sim.regionKarte().find(f => sim.hexAbstand(f, { q: 0, r: 0 }) === 3);
+    const f = nachbarn[0]; S.gut.denare += 100; S.gut.holz += 50;
+    const zuWeit = sim.vermessen(S, weit).ok;
+    const v = sim.vermessen(S, f).ok, zuFrueh = sim.landBauen(S, f).ok;
+    SR.monate(2); const nachVerm = sim.landStand(S, f);
+    const b = sim.landBauen(S, f).ok; SR.monate(1);
+    return { typ: f.typ, zuWeit, v, zuFrueh, nachVerm, b, stand: sim.landStand(S, f) };
+  });
+  ok('Umland: vermessen (2 Monate), dann Betrieb; zu weit/zu früh abgelehnt', !land.zuWeit && land.v && !land.zuFrueh && land.nachVerm === 'vermessen' && land.b && land.stand === 'betrieb', JSON.stringify(land));
+  // dasselbe über die Knöpfe im Feldfenster
+  await p.evaluate(() => { SR.umland(true); const sim = SR.sim; SR.hexInfo(sim.regionKarte().find(f => sim.kannVermessen(SR.S, f) && sim.betriebFuer(f))); });
+  await p.click('#info [data-a="vermessen"]');
+  const knopf1 = await p.evaluate(() => document.querySelector('#info .lage')?.textContent || '');
+  await p.evaluate(() => SR.monate(2));
+  await p.click('#info [data-a="landbau"]');
+  const knopf2 = await p.evaluate(() => document.querySelector('#info .lage')?.textContent || '');
+  ok('Umland per Knopf: vermessen lassen, dann bauen', /Landvermesser/.test(knopf1) && /arbeitet/.test(knopf2), knopf1 + ' | ' + knopf2);
+  if (BILD) { await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_land.png') }); }
+  await p.evaluate(() => SR.umland(false));
+
   // Stadtrang
   const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));
   ok('Stadtrang Dorf ab 40 Einwohnern', rg.r === 1 && /^Dorf/.test(rg.kopf), JSON.stringify(rg));

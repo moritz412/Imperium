@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -16,7 +16,7 @@ szene.jahreszeitFarbe(sim.jahreszeit(S));
 
 // ---------- Speichern ----------
 function laden() {
-  try { const s = JSON.parse(localStorage.getItem(SPEICHER)); return s && s.v === 1 ? s : null; } catch (e) { return null; }
+  try { const s = JSON.parse(localStorage.getItem(SPEICHER)); if (s) s.land = s.land || {}; return s && s.v === 1 ? s : null; } catch (e) { return null; }
 }
 function speichern(still) {
   try { localStorage.setItem(SPEICHER, JSON.stringify(S)); if (!still) melden('Gespeichert.'); }
@@ -207,7 +207,15 @@ function infoZeichnen() {
 }
 $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
-  if (szene.modus() === 'region') { if (a.dataset.a === 'stadt') umland(false); else $('#info').hidden = true; return; }
+  if (szene.modus() === 'region') {
+    if (a.dataset.a === 'stadt') umland(false);
+    else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau') {
+      const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : sim.landBauen(S, hexWahl);
+      if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx(a.dataset.a === 'landbau' ? 'bauen' : 'klick');
+      allesZeichnen(); hexInfo(hexWahl);
+    } else hexInfo(null);
+    return;
+  }
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
@@ -238,7 +246,7 @@ $('#menue').addEventListener('click', e => {
 });
 
 // ---------- Spielschleife ----------
-function allesZeichnen() { szene.abgleichen(S, auswahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+function allesZeichnen() { szene.abgleichen(S, auswahl); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
 // ---------- Umland (S2.1) ----------
 function umland(an) {
@@ -249,14 +257,28 @@ function umland(an) {
   k.querySelector('small').textContent = an ? 'Stadt' : 'Umland';
   if (an) melden('Das Umland von Cremona. Tippe ein Feld an.');
 }
+let hexWahl = null;
 function hexInfo(f) {
+  hexWahl = f;
   if (!f) { $('#info').hidden = true; return; }
-  const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 });
+  const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 }), stand = sim.landStand(S, f);
+  const l = (S.land || {})[sim.landKey(f)], bt = sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
+  const pro = bd ? Object.entries(bd.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ') : '';
+  let lage = '';
+  if (stand === 'frei') lage = sim.kannVermessen(S, f)
+    ? `<button class="knopf haupt" data-a="vermessen">Vermessen lassen (${kostenText(VERMESSEN.kosten)}, ${VERMESSEN.monate} Monate)</button>`
+    : '<div class="lage warn">Noch zu weit draußen – erst das Land daneben vermessen.</div>';
+  if (stand === 'vermessung') lage = `<div class="lage warn">Die Landvermesser sind bei der Arbeit (${l.verm} von ${VERMESSEN.monate} Monaten).</div>`;
+  if (stand === 'vermessen') lage = bd
+    ? `<div class="lage gut">Vermessen</div><p>${bd.text}</p><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>
+       <button class="knopf haupt" data-a="landbau">${bd.n} bauen (${kostenText(bd.kosten)})</button>`
+    : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
+  if (stand === 'betrieb') lage = `<div class="lage gut">${bd.n} arbeitet</div><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>
+    <p>Weiter weg liefert weniger. Mit Wegen und Karren wird das besser.</p>`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${weit ? weit + (weit === 1 ? ' Feld' : ' Felder') + ' von der Stadt' : 'Stadtgebiet'}</div>
     <p>${d.text}</p>
-    ${d.nutzen ? `<div class="zeile"><span>Nutzen</span><b>${d.nutzen}</b></div>
-    <div class="lage warn">Noch nicht vermessen – die Landvermesser kommen mit der nächsten Ausbaustufe.</div>` : '<button class="knopf haupt" data-a="stadt">Zur Stadt</button>'}`;
+    ${d.nutzen ? `<div class="zeile"><span>Nutzen</span><b>${d.nutzen}</b></div>${lage}` : '<button class="knopf haupt" data-a="stadt">Zur Stadt</button>'}`;
   $('#info').hidden = false;
 }
 
@@ -315,6 +337,6 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
-  modelle: () => szene.modelleBereit, szene, start, ton, umland,
+  modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

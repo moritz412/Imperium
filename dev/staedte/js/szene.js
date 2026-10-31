@@ -1,6 +1,7 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey } from './sim.js';
+import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
 const BLICK = new THREE.Vector3(1, 1.05, 1).normalize();   // feste Blickrichtung (Azimut 45°, ca. 37° Höhe)
@@ -433,7 +434,7 @@ export function erzeugeSzene(leinwand, welt) {
     szene.add(g); return { g, felder };
   }
   function zeigeModus(m) {
-    if (m === 'region' && !region) region = regionBauen();
+    if (m === 'region' && !region) { region = regionBauen(); if (landS) landAbgleichen(landS); }
     modus = m; const mx = m === 'region' ? REG_X : 0;
     sonne.position.set(mx - 18, 30, 10); sonne.target.position.set(mx, 0, 0); sonne.target.updateMatrixWorld();
     ziel.set(mx, 0, 0); kamera.zoom = m === 'region' ? 0.85 : 1.1; kameraSetzen();
@@ -450,6 +451,28 @@ export function erzeugeSzene(leinwand, welt) {
     return f;
   }
   const regionInfo = () => region ? region.felder.length : 0;
+  // Stand des Umlands zeichnen: Pflöcke (Vermessung/vermessen), Betriebsmodell
+  const landObj = new Map();
+  let landS = null;
+  function landAbgleichen(S) {
+    landS = S; if (!region) return;
+    for (const f of region.felder) {
+      const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k], schl = stand + (l && l.betrieb || '');
+      const alt = landObj.get(k); if (alt && alt.schl === schl) continue;
+      if (alt) region.g.remove(alt.g);
+      const g = new THREE.Group(), [x, z] = hexMitte(f.q, f.r), top = HOEHE[f.typ] ?? 0.32;
+      if (stand === 'vermessung' || stand === 'vermessen') for (let i = 0; i < 6; i++) {
+        const w = Math.PI / 3 * i, p = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.7, 4), new THREE.MeshLambertMaterial({ color: i % 2 ? 0xf0ebe0 : 0xb5322a }));
+        p.position.set(x + Math.cos(w) * HEX * 0.86, top + 0.35, z + Math.sin(w) * HEX * 0.86); p.castShadow = true; g.add(p);
+      }
+      if (stand === 'betrieb') {
+        const t = LAND_BETRIEBE[l.betrieb].modell, mo = modelle && modelle[t];
+        const m = mo ? new THREE.Mesh(mo.geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1, 0.7, 1), new THREE.MeshLambertMaterial({ color: 0xd8b88a }));
+        m.scale.setScalar(mo ? 0.9 : 1); m.position.set(x + 0.9, top, z + 0.9); m.castShadow = true; m.receiveShadow = true; g.add(m);
+      }
+      region.g.add(g); landObj.set(k, { g, schl });
+    }
+  }
 
   function zentrieren(x, z) { ziel.copy(weltPos(x, z)); kameraSetzen(); }
 
@@ -472,5 +495,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { zeigeModus, hexAn, regionInfo, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { zeigeModus, hexAn, regionInfo, landAbgleichen, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }
