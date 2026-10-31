@@ -104,9 +104,9 @@ def farben(ob, me):
 
 
 def _maskenart(mat):
-    """Tönungsmaske (31.10., Farben je Volk): 1 = Kleidung (Tunika, Hose, Mantel), 2 = Schildvorderseite, 0 = fest."""
+    """Tönungsmaske (31.10., Farben je Volk): 1 = Kleidung (Tunika, Mantel), 2 = Schildvorderseite, 0 = fest."""
     n = (mat.name if mat else "").lower().split(".")[0]
-    if n.startswith("tunika") or n in ("hose", "mantel", "umhang"):
+    if n.startswith("tunika") or n in ("mantel", "umhang"):   # Hose bleibt in Paketfarbe (Kontrast zur Tunika)
         return 1
     if n.endswith("_vorn"):
         return 2
