@@ -119,6 +119,29 @@ def helm(art, name):
         _kugelkappe(bm, r * 1.04, 1.08, -0.02, r * 1.04, mi=0)
         _kasten(bm, Vector((0, 0.0, r + 0.03)), (0.018, 0.14, 0.06), 1)
         return _obj(name, bm, mats), r
+    if art in ("topf", "eisenhut", "becken"):   # Hochmittelalter (31.10., Vorlagen Job 48)
+        mats = [mat("eisen_helm", *EISEN), mat("kette", (0.3, 0.3, 0.31), 0.85, 0.55), mat("sehschlitz", (0.02, 0.02, 0.02), 0, 0.9)]
+        if art == "topf":   # Topfhelm: Zylinder mit flacher Platte, Sehschlitz, Kreuz
+            bmesh.ops.create_cone(bm, cap_ends=True, segments=12, radius1=r * 1.1, radius2=r * 1.05, depth=0.25,
+                                  matrix=Matrix.Translation((0, 0, -0.035)))
+            for f in bm.faces: f.material_index = 0
+            _kasten(bm, Vector((0, -r * 1.1 - 0.004, -0.005)), (0.15, 0.012, 0.016), 2)   # Sehschlitz
+            _kasten(bm, Vector((0, -r * 1.1 - 0.006, -0.07)), (0.02, 0.01, 0.12), 0)      # Kreuzleiste senkrecht
+        else:
+            _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, seg=12, ringe=5, mi=0, spitze=r * 1.06 + (0.05 if art == "becken" else 0.0))
+            if art == "eisenhut":   # breite, nach unten geneigte Krempe
+                bmesh.ops.create_cone(bm, cap_ends=False, segments=14, radius1=r * 1.75, radius2=r * 1.08, depth=0.05,
+                                      matrix=Matrix.Translation((0, 0, -0.035)))
+                for f in bm.faces:
+                    if f.material_index != 0: f.material_index = 0
+            else:   # Beckenhaube: Kettenbrünne um Hals und Seiten, Gesicht offen
+                n = 10
+                for k in range(n):
+                    a0 = math.radians(-115 + 230 * k / n); a1 = math.radians(-115 + 230 * (k + 1) / n)
+                    p = lambda a, z, rr: (rr * math.sin(a), rr * 1.1 * math.cos(a), z)
+                    _platte(bm, [p(a0, -0.03, 0.123), p(a1, -0.03, 0.123), p(a1, -0.2, 0.14), p(a0, -0.2, 0.14)], 0.0, 1)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        return _obj(name, bm, mats), r
     if art in ("nasal", "spangen", "byz", "kataphrakt"):   # Frühmittelalter (31.10., Vorlagen Job 47): Eisen, kegelförmig
         mats = [mat("eisen_helm", *EISEN), mat("kette", (0.3, 0.3, 0.31), 0.85, 0.55), mat("beschlag", *BRONZE)]
         _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, seg=12, ringe=5, mi=0, spitze=r * 1.06 + (0.035 if art != "spangen" else 0.025))
@@ -173,7 +196,7 @@ def helm(art, name):
     return _obj(name, bm, mats), r
 
 
-def schild(w, h, name, farbe, rand_farbe=BRONZE, mittel=None, woelbung=0.0, zylinder=0.0, buckel=0.05, seg=16, eckig=2.0):
+def schild(w, h, name, farbe, rand_farbe=BRONZE, mittel=None, woelbung=0.0, zylinder=0.0, buckel=0.05, seg=16, eckig=2.0, dreieck=False):
     """Ovaler/runder Schild. w,h Breite/Höhe (m). woelbung: Mitte nach vorn (m, Aspis); zylinder: seitliches Zurückbiegen
     (m an der Kante, Scutum). mittel: Farbe des senkrechten Mittelgrats (Spina) oder None. eckig > 2: abgerundetes Rechteck."""
     bm = bmesh.new()
@@ -184,6 +207,8 @@ def schild(w, h, name, farbe, rand_farbe=BRONZE, mittel=None, woelbung=0.0, zyli
         c, si = math.cos(s), math.sin(s)
         k = (abs(c) ** eckig + abs(si) ** eckig) ** (-1 / eckig)
         x, z = 0.5 * w * t * k * c, 0.5 * h * t * k * si
+        if dreieck and si < 0:   # Dreieckschild (13. Jh.): unten spitz zulaufend, oben gerade
+            x *= max(0.05, 1 + si * 0.95); z *= 1.15
         y = -woelbung * (1 - t * t) + zylinder * (2 * x / w) ** 2
         return Vector((x, y, z))
     ts = [0.0, 0.13, 0.55, 0.88, 1.0]

@@ -29,6 +29,9 @@ const PAKETE = {
   M1_bogen: { familien: ['M1_nordwest_fuss'], rollen: ['missile'] }, M1_panzerreiter: { familien: ['M1_nordwest_fuss'], rollen: ['cav'] },
   M3_skutatos: { familien: ['M3_ostrom_orient_steppe'], rollen: ['spear'] }, M3_thematen: { familien: ['M3_ostrom_orient_steppe'], rollen: ['sword'] },
   M3_toxotes: { familien: ['M3_ostrom_orient_steppe'], rollen: ['missile'] }, M3_kataphrakt: { familien: ['M3_ostrom_orient_steppe'], rollen: ['cav'] },
+  // Hochmittelalter (31.10., F4): gepanzerter Westen (Ritter, Speersergeant, Schwertknecht, Langbogen; Armbrust folgt)
+  M2_ritter: { familien: ['M2_gepanzert_west'], rollen: ['cav'] }, M2_sergeant: { familien: ['M2_gepanzert_west'], rollen: ['spear'] },
+  M2_knecht: { familien: ['M2_gepanzert_west'], rollen: ['sword'] }, M2_langbogen: { familien: ['M2_gepanzert_west'], rollen: ['missile'] },
 };
 const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A1_veles', cav: 'A1_eques', art: 'A1_hastatus' };
 

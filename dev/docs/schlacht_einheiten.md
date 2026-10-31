@@ -193,3 +193,11 @@ Ein Knopf „Fähigkeit“ (rechte Spalte, nur in der Schlacht; ausgegraut ohne 
 - **Wurfsalve** (A1_hastatus, A1_legion; einmal je Schlacht): jeder Mann wirft einen Speer (Plänkler-Fernlogik, Reichweite 32 m, Schaden 1,3) auf die nächste Einheit; nicht im Nahkampf. Der Knopf wählt Salve, solange sie bereit ist und ein Feind in 30 m steht, sonst Schildkröte.
 - **KI**: Schildwall bei anstürmenden Reitern von vorn (innerhalb 55 m), Schildkröte nur unter Beschuss; sonst nichts. Salve und Keil setzt die KI nicht ein.
 - Test `dev/tests/schlacht_faehigkeit_t.js` (Einzelläufe, kein Mittel über viele Läufe). Offen: Feinabstimmung der Zahlen, Test auf dem echten iPad (nicht getestet), kein Ton/eigener Clip für Salve/Schildkröte, Kartentext bei schmalen Karten gekürzt.
+
+## Stand Verstecken R3 (31.10.)
+**Auf dem echten iPad nicht getestet.** Code: `versteckTick`, `vorVerstecktem` (nach `naechster`), Feld `u.vers`/`u.aufT` in `schlachtKern`.
+- **Regel**: Einheit gilt als versteckt, wenn der Mittelpunkt im Wald steht (`WF` ≥ 0,5), sie nicht kämpft, nicht schießt/Salve wirft und nicht rennt/stürmt und kein Gegner (nicht fliehend) näher als 40 m (Reiter 50 m, Fernkämpfer +10 m) steht. Entdeckt oder selbst angegriffen/geschossen: mindestens 10 s sichtbar (`aufT`). Gilt für beide Seiten.
+- **Versteckter Feind**: keine Figuren, kein Ring, kein Banner, Feindliste ausgegraut mit „?“ (Antippen ohne Wirkung); nicht Ziel von `naechster`, `fernZiel`, `salveZiel`, `naechsterNahk`, `reitKI`. Eigene versteckte Einheit: sichtbar, Ring halbtransparent, Karte zeigt „versteckt“.
+- **Hinterhalt**: Wechsel von versteckt zu schießen/Nahkampf/Sturm (Ziel ≤ 70 m) = einmal −8 Moral beim Ziel, Hinweis „Hinterhalt!“, Zähler `SCHLACHT.hinterhalt`. Aufdeckung durch Annäherung gibt keinen Schock.
+- **KI**: sieht Versteckte nicht; ohne sichtbares Ziel rückt sie wie bisher in Richtung des nächsten Gegners vor (`vorVerstecktem`), bis die Aufdeckung (40 m) greift. Sonst unverändert.
+- Test `dev/tests/schlacht_versteck_t.js` (Bilder `shot/versteck_*.png`), API `SCHLACHT.verst(i)`. Offen: Feinabstimmung der Schwellen, Hinterhalt der KI-Reiter nicht eigens geprüft, Wald im Bild verdeckt Figuren ohnehin stark, Nebel-Banner-Regel (90 m) und Verstecken sind getrennt, Test auf iPad.

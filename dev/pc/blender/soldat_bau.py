@@ -108,6 +108,19 @@ KITS = {
     "M3_kataphrakt": dict(kette=True, tunika=(0.18, 0.17, 0.16), hose=(0.25, 0.2, 0.16), haut="young_caucasian_male2", muskel=0.7, rock=0.16,
                           helm="kataphrakt", brust=False, schild=dict(w=0.6, h=0.6, farbe=(0.5, 0.08, 0.05), woelbung=0.03),
                           waffe=("speer", 3.2), reiter=True),
+    # Hochmittelalter (31.10., F4, Vorlagen Job 48): gepanzerter Westen – Ritter (Topfhelm, Waffenrock über Kette, Dreieckschild, Lanze),
+    # Speersergeant (Eisenhut, Wams), Schwertknecht (Beckenhaube, Kette), Langbogenschütze (Wams, ohne Helm)
+    "M2_ritter": dict(kette=True, tunika=(0.24, 0.24, 0.25), hose=(0.24, 0.24, 0.25), haut="young_caucasian_male", muskel=0.7, rock=0.18,
+                      helm="topf", brust=False, schild=dict(w=0.6, h=0.75, farbe=(0.55, 0.42, 0.1), buckel=0.0, eckig=4.0, dreieck=True),
+                      waffe=("speer", 3.4), reiter=True),
+    "M2_sergeant": dict(tunika=(0.5, 0.44, 0.32), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male2", muskel=0.6, rock=0.14,
+                        helm="eisenhut", brust=False, schild=dict(w=0.6, h=0.75, farbe=(0.4, 0.1, 0.06), buckel=0.0, eckig=4.0, dreieck=True),
+                        waffe=("speer", 2.6)),
+    "M2_knecht": dict(kette=True, tunika=(0.24, 0.24, 0.25), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male", muskel=0.65, rock=0.16,
+                      helm="becken", brust=False, schild=dict(w=0.6, h=0.75, farbe=(0.15, 0.2, 0.4), buckel=0.0, eckig=4.0, dreieck=True),
+                      waffe=("schwert", "spatha")),
+    "M2_langbogen": dict(tunika=(0.42, 0.4, 0.3), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male2", muskel=0.6, rock=0.1,
+                         helm="eisenhut", brust=False, schild=None, waffe=("bogen", 1.8), fern="bogen"),
 }
 KIT = dict(KITS[KIT_NAME])
 # Körpervarianten (P1): a = Grundform, b = leicht/jung, c = schwer/älter; Hautton und Tunika-Farbton leicht verschoben
@@ -467,7 +480,8 @@ for seite in KIT.get("beinschiene", []):
 sk = KIT["schild"]
 if sk:
   schild = TF.schild(sk["w"], sk["h"], "teil_schild_%s_%s" % (KURZ, KIT_NAME.split("_")[1]), sk["farbe"], mittel=sk.get("mittel"),
-                     woelbung=sk.get("woelbung", 0.0), zylinder=sk.get("zylinder", 0.0), eckig=sk.get("eckig", 2.0))
+                     woelbung=sk.get("woelbung", 0.0), zylinder=sk.get("zylinder", 0.0), eckig=sk.get("eckig", 2.0),
+                     buckel=sk.get("buckel", 0.05), dreieck=sk.get("dreieck", False))
   hand_l = kp("LeftHand", 0.5)
   schild.matrix_world = Matrix.Translation(hand_l + Vector((0.0, -0.05, 0.04)))
   bpy.context.view_layer.update()
