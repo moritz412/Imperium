@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -34,7 +34,9 @@ function melden(text) {
 const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot'];
 const rund = n => Math.floor(n).toLocaleString('de-DE');
 function kopfleiste() {
-  $('#datum').textContent = sim.datumText(S);
+  const r = sim.rang(S), naechster = RAENGE[r + 1];
+  $('#datum').textContent = `${RAENGE[r].n} · ${sim.datumText(S)}`;
+  $('#datum').title = naechster ? `${naechster.n} ab ${naechster.ab} Einwohnern` : '';
   const grenze = sim.lagerGrenze(S);
   const zellen = ANZEIGE.map(g => {
     const knapp = g !== 'denare' && S.gut[g] < 5 ? ' knapp' : '';
@@ -253,7 +255,7 @@ $('#ansicht').addEventListener('click', e => {
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
   const meld = sim.monat(S, welt); meld.forEach(melden);
-  if (meld.some(m => /Casa/.test(m))) ton.sfx('aufstieg');
+  if (meld.some(m => /Casa|ist jetzt/.test(m))) ton.sfx('aufstieg');
   if (sim.jahreszeit(S) !== js) { szene.jahreszeitFarbe(sim.jahreszeit(S)); speichern(true); ton.sfx('jahreszeit', sim.jahreszeit(S)); }
   allesZeichnen();
 }

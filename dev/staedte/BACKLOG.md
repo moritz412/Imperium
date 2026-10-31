@@ -52,6 +52,9 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       Test 26/26 (PC, `PW_GPU=1`: Ton läuft, Musik dekodiert, Schalter). **Nicht angehört**, Lautstärken nur geschätzt.
       **Nicht getestet:** iPad (Safari-Audio).
 
+- [x] Stadtrang (31.10. abends, vorgezogen aus „Ziele“): Feldlager → Dorf (40 Einwohner) → Kleinstadt (120) → Kolonie (300)
+      → Metropole (800), in der Kopfleiste vor dem Datum, Meldung + Klang beim Aufstieg, fällt nicht zurück. Test 27/27.
+
 ## Später
 Stufe 2 Region & Transport · Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

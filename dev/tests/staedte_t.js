@@ -116,6 +116,10 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
   ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
 
+  // Stadtrang
+  const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));
+  ok('Stadtrang Dorf ab 40 Einwohnern', rg.r === 1 && /^Dorf/.test(rg.kopf), JSON.stringify(rg));
+
   // S1.6 Ton: nach der ersten Berührung läuft der Ton, Musik geladen, Schalter im Menü
   await p.waitForFunction(() => SR.ton.zustand().musik, null, { timeout: 20000 }).catch(() => {});
   const tz = await p.evaluate(() => SR.ton.zustand());

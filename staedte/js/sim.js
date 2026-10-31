@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -75,6 +75,8 @@ export const einwohner = S => S.geb.reduce((s, b) => s + (b.bew || 0), 0);
 export const def = b => GEB[b.t];
 export const lagerGrenze = S => LAGER_GRUND + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
 export const groesse = t => GEB[t].g;
+
+export const rang = S => { const e = einwohner(S); let r = 0; RAENGE.forEach((x, i) => { if (e >= x.ab) r = i; }); return Math.max(r, S.rang || 0); };
 
 export function datumText(S) {
   const j = jahr(S);
@@ -245,6 +247,10 @@ export function monat(S, welt) {
     meld.push('Auftrag des Senats erfüllt: ' + Object.entries(a.lohn).map(([g, n]) => `+${n} ${WAREN[g].n}`).join(', '));
     S.auftrag++;
   }
+
+  // Stadtrang steigt mit den Einwohnern (fällt nicht zurück)
+  const r = rang(S);
+  if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
   const altJs = js;
   S.monat++;

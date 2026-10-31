@@ -63,6 +63,12 @@ export const GEB = {
 // Casa: ausgebaute Hütte
 export const CASA = { n: 'Casa', h: 1.15, wand: 0xe2c8a0, dach: 0xb5522f, wohnt: 16, kosten: { ziegel: 10 } };
 
+// Stadtrang nach Einwohnern (Konzept „Ziele“)
+export const RAENGE = [
+  { n: 'Feldlager', art: 'ein', ab: 0 }, { n: 'Dorf', art: 'ein', ab: 40 }, { n: 'Kleinstadt', art: 'eine', ab: 120 },
+  { n: 'Kolonie', art: 'eine', ab: 300 }, { n: 'Metropole', art: 'eine', ab: 800 },
+];
+
 // Startregionen (Konzept „Rahmen“); vorerst nur die Po-Ebene spielbar
 export const REGIONEN = [
   { id: 'po', n: 'Po-Ebene', stadt: 'Cremona', lon: 10.02, lat: 45.13, gruendung: '218 v. Chr.', roh: 'Getreide, Holz, Lehm',
