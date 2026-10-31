@@ -31,10 +31,13 @@ export const KATEGORIEN = ['Wohnen', 'Nahrung', 'Handwerk', 'Öffentlich'];
 export const GEB = {
   huette: { n: 'Hütte', kat: 'Wohnen', g: [2, 2], h: 0.7, wand: 0xd8b88a, dach: 0xa9583a,
     kosten: { holz: 12 }, wohnt: 8, text: 'Wohnraum für 8 Plebejer. Wird zur Casa mit Brot, Brunnen und Markt in der Nähe.' },
-  feld: { n: 'Getreidefeld', kat: 'Nahrung', g: [3, 3], flach: true, wand: 0xd9c26e,
+  quartier: { n: 'Sklavenquartier', kat: 'Wohnen', g: [2, 2], h: 0.55, wand: 0xa08a6a, dach: 0x6e5236,
+    kosten: { holz: 20 }, sklavenPlatz: 10,
+    text: 'Enge Unterkunft für 10 Sklaven. Sklaven arbeiten auf Feldern, in Gruben und Werkstätten, essen Getreidebrei und zahlen keine Steuern.' },
+  feld: { n: 'Getreidefeld', kat: 'Nahrung', g: [3, 3], flach: true, wand: 0xd9c26e, sklaven: true,
     kosten: { holz: 10 }, arbeiter: 3, erzeugt: { getreide: 3 }, ernte: true,
     text: 'Getreide. Wenig im Frühling, viel im Herbst, nichts im Winter.' },
-  muehle: { n: 'Mühle', kat: 'Nahrung', g: [2, 2], h: 1.1, wand: 0xc9a27a, dach: 0x8a5a3a,
+  muehle: { n: 'Mühle', kat: 'Nahrung', g: [2, 2], h: 1.1, wand: 0xc9a27a, dach: 0x8a5a3a, sklaven: true,
     kosten: { holz: 25, ziegel: 10 }, arbeiter: 3, braucht: { getreide: 3 }, erzeugt: { mehl: 3 },
     text: 'Mahlt Getreide zu Mehl.' },
   baeckerei: { n: 'Bäckerei', kat: 'Nahrung', g: [2, 2], h: 0.8, wand: 0xd6b07e, dach: 0x9e4e30,
@@ -46,13 +49,13 @@ export const GEB = {
   speicher: { n: 'Speicher', kat: 'Öffentlich', g: [3, 2], h: 0.9, wand: 0xcbb894, dach: 0x9a4a2b,
     kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200,
     text: 'Erhöht die Lagergrenze jeder Ware um 200.' },
-  holzfaeller: { n: 'Holzfäller', kat: 'Handwerk', g: [2, 2], h: 0.6, wand: 0x9c7a55, dach: 0x6b4a32,
+  holzfaeller: { n: 'Holzfäller', kat: 'Handwerk', g: [2, 2], h: 0.6, wand: 0x9c7a55, dach: 0x6b4a32, sklaven: true,
     kosten: { holz: 8 }, arbeiter: 2, erzeugt: { holz: 3 }, wald: 6,
     text: 'Schlägt Holz. Braucht Wald in höchstens 6 Feldern Abstand.' },
-  lehmgrube: { n: 'Lehmgrube', kat: 'Handwerk', g: [2, 2], flach: true, wand: 0x9a6b4a,
+  lehmgrube: { n: 'Lehmgrube', kat: 'Handwerk', g: [2, 2], flach: true, wand: 0x9a6b4a, sklaven: true,
     kosten: { holz: 10 }, arbeiter: 2, erzeugt: { lehm: 3 },
     text: 'Sticht Lehm für die Ziegelei.' },
-  ziegelei: { n: 'Ziegelei', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0xb9714f, dach: 0x6e3b28, kamin: true,
+  ziegelei: { n: 'Ziegelei', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0xb9714f, dach: 0x6e3b28, kamin: true, sklaven: true,
     kosten: { holz: 30 }, arbeiter: 3, braucht: { lehm: 2 }, erzeugt: { ziegel: 2 },
     text: 'Brennt Ziegel aus Lehm.' },
   brunnen: { n: 'Brunnen', kat: 'Öffentlich', g: [1, 1], h: 0.35, wand: 0xbfb6a4, wasser: true,
@@ -70,6 +73,12 @@ export const GEB = {
 
 // Casa: ausgebaute Hütte
 export const CASA = { n: 'Casa', h: 1.15, wand: 0xe2c8a0, dach: 0xb5522f, wohnt: 16, kosten: { ziegel: 10 } };
+// Insula (S3.2): mehrstöckiges Mietshaus, ab Kleinstadt; braucht zusätzlich einen Schrein in der Nähe
+export const INSULA = { n: 'Insula', h: 2.1, wand: 0xd9b48a, dach: 0xa9482a, wohnt: 30, kosten: { ziegel: 25, holz: 15 }, rang: 2 };
+
+// Sklaven (S3.2, Moritz 1.11.: „historisch“). Kauf beim Sklavenhändler (servus venalis), Freilassung (manumissio)
+// mit der Freilassungssteuer (vicesima libertatis, 5 % des Werts). Viele Sklaven im Verhältnis zu Freien schüren Furcht.
+export const SKLAVEN = { los: 5, preis: 25, essen: 0.1, furcht: 0.5, vicesima: 0.05 };
 
 // Umland (S2.1): Hex-Felder um die Stadt. Ring 3 = 37 Felder. nutzen = was ab S2.2 dort entstehen kann.
 export const REGION_RING = 3;

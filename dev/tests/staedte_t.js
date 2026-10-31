@@ -281,6 +281,39 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Forschung: Ziel, Schule bringt Wissen, Fruchtwechsel wirkt', /erforschen/.test(fo.schreinVor) && /Fruchtwechsel/.test(fo.villaVor) && /Republik/.test(fo.ep2) && fo.schule && fo.wahl && fo.w1 > fo.w0 && fo.fertig && fo.bonus === 1.25, JSON.stringify(fo));
   ok('Erfindungen: Schrein, Landvermessung, Bauhütte, Villa rustica', fo.schreinNach && fo.verm === 1 && fo.holzK === 28 && fo.villa === true);
   ok('Forschungsseite: 20 Karten, Ziel per Antippen, Anzeige im Auftrag', fo.offen && fo.karten === 20 && fo.ziel === 'ziegelbrand' && /Ziegelbrand/.test(fo.zeile) && fo.zu);
+  // S3.2 Stände: Sklavenquartier (kaufen, arbeiten nur in Sklaven-Betrieben, Hunger, Freilassung, Furcht), Insula
+  const st3 = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, GEB = SR.GEB, kopie = () => JSON.parse(JSON.stringify(S));
+    S.gut.holz += 40; S.gut.denare += 400; S.gut.getreide += 100;
+    let q = null;
+    for (let z = 13; z <= 18 && !q; z++) for (let x = 2; x <= 36 && !q; x++) { const r = sim.bauen(S, SR.welt, 'quartier', x, z); if (r.ok) q = r.b; }
+    if (!q) return { fehler: 'kein Platz für das Quartier' };
+    SR.oeffne(q.id); document.querySelector('#info [data-a="kaufen"]').click();
+    const k1 = q.skl, k2 = sim.sklavenKaufen(S, q).ok, voll = sim.sklavenKaufen(S, q).grund;
+    SR.monate(1);
+    const bei = S.geb.filter(b => (b.von || []).some(v => v[0] === q.id)).map(b => b.t);
+    const nurErlaubt = bei.length > 0 && bei.every(t => GEB[t].sklaven);
+    const H = kopie(); H.monat = 22; H.gut.getreide = 0; H.gut.brot = 999; const hq = H.geb.find(b => b.id === q.id); sim.monat(H, SR.welt); const hunger = hq.skl < 10;
+    const L = kopie(); const lq = L.geb.find(b => b.id === q.id), e0 = sim.einwohner(L), d0 = L.gut.denare;
+    L.geb.filter(b => b.t === 'huette').forEach(h => { h.bew = Math.min(h.bew, sim.wohnraum(h) - 2); });
+    const e1 = sim.einwohner(L), fr = sim.freilassen(L, lq); const frei = fr.ok && lq.skl === 5 && sim.einwohner(L) === e1 + 5 && L.gut.denare > d0;
+    const A = kopie(), B = kopie(); A.stimmung = B.stimmung = 60;
+    for (let i = 0; i < 20; i++) B.geb.push({ id: 9000 + i, t: 'quartier', x: 30, z: 30, w: 0, prio: false, stufe: 1, bew: 0, skl: 10, status: [] });
+    B.gut.getreide = A.gut.getreide = 999; sim.monat(A, SR.welt); sim.monat(B, SR.welt); const furcht = B.stimmung < A.stimmung;
+    // Insula: volle Casa mit Wasser und Markt, Kleinstadt, Schrein daneben
+    const I = kopie(); I.rang = 2; I.gut.brot = 999; I.gut.ziegel += 60; I.gut.holz += 60; sim.forschungS(I).fertig.push('schreine');
+    const casa = I.geb.find(b => b.t === 'huette' && b.stufe === 2 && sim.inReichweite(I, b, 'brunnen') && sim.inReichweite(I, b, 'markt'));
+    let ins = 'keine passende Casa';
+    if (casa) {
+      casa.bew = 16; let sch = false;
+      for (let dz = -4; dz <= 5 && !sch; dz++) for (let dx = -4; dx <= 5 && !sch; dx++) sch = sim.bauen(I, SR.welt, 'schrein', casa.x + dx, casa.z + dz).ok;
+      sim.monat(I, SR.welt); ins = sch && casa.stufe === 3 && sim.wohnraum(casa) === 30 ? true : 'Schrein ' + sch + ', Stufe ' + casa.stufe + ', ' + JSON.stringify(casa.status);
+    }
+    return { k1, k2, voll, bei, nurErlaubt, hunger, frei, furcht, ins, kopf: document.querySelector('#waren').textContent.includes('Sklaven') };
+  });
+  ok('Sklaven: kaufen, Quartier voll, arbeiten nur auf Feldern/Werkstätten', st3.k1 === 5 && st3.k2 && /voll/.test(st3.voll) && st3.nurErlaubt && st3.kopf, JSON.stringify(st3));
+  ok('Sklaven: Hunger, Freilassung mit Steuer, Furcht bei vielen Sklaven', st3.hunger && st3.frei && st3.furcht);
+  ok('Insula: volle Casa mit Schrein wird aufgestockt', st3.ins === true, String(st3.ins));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

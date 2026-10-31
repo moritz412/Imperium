@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
+import { RASTER, GEB, CASA, INSULA, SKLAVEN, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -37,7 +37,8 @@ export function neuesSpiel() {
 
 // ---------- Straßen (S1.3) ----------
 export const START_STRASSE = 12;
-export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein']);   // brauchen keine Straße vor der Tür
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein']);
+export const sklaven = S => S.geb.reduce((s, b) => s + (b.skl || 0), 0);   // brauchen keine Straße vor der Tür
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export function strassenMaske(S) {
@@ -159,7 +160,12 @@ export function waldNah(welt, b) {
   return false;
 }
 
-export const wohnraum = b => b.t === 'huette' ? (b.stufe === 2 ? CASA.wohnt : GEB.huette.wohnt) : 0;
+export const wohnraum = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.wohnt : b.stufe === 2 ? CASA.wohnt : GEB.huette.wohnt) : 0;
+export function insulaFehlt(S, b, wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt')) {
+  if (!wasser) return 'Brunnen'; if (!markt) return 'Markt'; if (!S.versorgt.brot) return 'Brot';
+  if (!S.geb.some(o => o.t === 'schrein' && abstand(o, b) <= GEB.schrein.reichweite)) return 'Schrein in der Nähe';
+  return '';
+}
 
 // Ein Monat: Arbeit verteilen, produzieren, essen, wachsen, Steuern, Stimmung, Aufträge
 export function monat(S, welt) {
@@ -169,18 +175,20 @@ export function monat(S, welt) {
 
   // Arbeiter verteilen (S1.2): Betriebe nach Priorität, dann Bauzeit; jeder holt sich Arbeiter aus den nächsten Häusern
   // in Laufweite. b.von = [[Haus-Id, Anzahl], …] für die Laufwege in der Szene.
-  const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }));
+  // Sklaven (S3.2) arbeiten vollständig, aber nur in Betrieben mit „sklaven“; dort gehen sie vor den Freien hin.
+  const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }))
+    .concat(S.geb.filter(b => b.t === 'quartier' && b.skl > 0).map(h => ({ h, frei: h.skl, skl: true })));
   const alle = wohnorte.reduce((s, x) => s + x.frei, 0);
   const betriebe = S.geb.filter(b => GEB[b.t].arbeiter).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   for (const b of betriebe) {
-    const brauch = GEB[b.t].arbeiter, nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG);
+    const brauch = GEB[b.t].arbeiter, nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || GEB[b.t].sklaven));
     b.w = 0; b.von = []; b.einzug = nah.length;
-    for (const x of nah.filter(x => x.frei > 0).sort((p, q) => abstand(p.h, b) - abstand(q.h, b))) {
+    for (const x of nah.filter(x => x.frei > 0).sort((p, q) => (q.skl ? 1 : 0) - (p.skl ? 1 : 0) || abstand(p.h, b) - abstand(q.h, b))) {
       if (b.w >= brauch) break;
       const n = Math.min(x.frei, brauch - b.w); x.frei -= n; b.w += n; b.von.push([x.h.id, n]);
     }
   }
-  S.letzte = { arbeitslos: wohnorte.reduce((s, x) => s + x.frei, 0), arbeiter: alle };
+  S.letzte = { arbeitslos: wohnorte.filter(x => !x.skl).reduce((s, x) => s + x.frei, 0), sklavenFrei: wohnorte.filter(x => x.skl).reduce((s, x) => s + x.frei, 0), arbeiter: alle };
 
   // Produktion
   for (const b of S.geb) {
@@ -220,6 +228,15 @@ export function monat(S, welt) {
     brotAnteil = (ausBrot + ausFisch) / bedarf; essen = ausBrot + ausFisch + ausKorn >= bedarf * 0.99;
   }
   S.versorgt = { brot: brotAnteil > 0.95, essen };
+  // Sklaven essen Getreidebrei nach den Freien; fehlt er, fliehen oder sterben sie (−1 je Quartier)
+  const skl = sklaven(S);
+  if (skl > 0) {
+    const brauch = skl * SKLAVEN.essen, aus = Math.min(S.gut.getreide, brauch); S.gut.getreide -= aus;
+    if (aus < brauch * 0.99) {
+      for (const q of S.geb.filter(b => b.t === 'quartier' && b.skl > 0)) { q.skl--; q.status.push({ art: 'hunger', text: 'Die Sklaven hungern' }); }
+      meld.push('Die Sklaven hungern – einige sind geflohen.');
+    }
+  }
 
   // Häuser: Wasser, Markt, Wachstum, Aufstieg
   let wasserN = 0, marktN = 0, haeuser = 0;
@@ -238,11 +255,21 @@ export function monat(S, welt) {
         b.stufe = 2; meld.push('Eine Hütte ist zur Casa aufgestiegen.');
       } else b.status.push({ art: 'rohstoff', gut: 'ziegel', text: 'Für die Casa fehlen 10 Ziegel', leicht: true });
     }
+    // Insula (S3.2): volle Casa, Kleinstadt, Wasser, Markt, Brot und ein Schrein in der Nähe
+    if (b.stufe === 2 && b.bew >= wohnraum(b) && rang(S) >= INSULA.rang) {
+      const fehlt = insulaFehlt(S, b, wasser, markt);
+      if (fehlt) b.status.push({ art: 'markt', text: 'Für die Insula fehlt: ' + fehlt, leicht: true });
+      else if (kannBezahlen(S, INSULA.kosten)) {
+        for (const [g, n] of Object.entries(INSULA.kosten)) S.gut[g] -= n;
+        b.stufe = 3; meld.push('Eine Casa wird zur Insula aufgestockt – Platz für 30 Bewohner.');
+      } else b.status.push({ art: 'rohstoff', gut: 'ziegel', text: 'Für die Insula fehlen ' + fehlendeKosten(S, INSULA.kosten).join(', '), leicht: true });
+    }
   }
 
   // Stimmung und Steuern
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
+  if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;   // S3.2: Furcht vor einem Sklavenaufstand
   const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
@@ -607,5 +634,28 @@ export function villaBauen(S, f) {
   for (const [g, n] of Object.entries(VILLA_KOSTEN)) S.gut[g] -= n;
   l.villa = true;
   return { ok: true };
+}
+
+// ---------- Sklaven (S3.2): kaufen beim Händler, freilassen (manumissio) ----------
+export function sklavenKaufen(S, q) {
+  if (!q || q.t !== 'quartier') return { ok: false, grund: 'Sklaven wohnen im Sklavenquartier' };
+  const n = Math.min(SKLAVEN.los, GEB.quartier.sklavenPlatz - (q.skl || 0));
+  if (n <= 0) return { ok: false, grund: 'Das Quartier ist voll' };
+  const preis = n * SKLAVEN.preis;
+  if (S.gut.denare < preis) return { ok: false, grund: `Es fehlen ${Math.ceil(preis - S.gut.denare)} Denare` };
+  S.gut.denare -= preis; q.skl = (q.skl || 0) + n;
+  return { ok: true, n, preis };
+}
+export function freilassen(S, q) {
+  if (!q || !(q.skl > 0)) return { ok: false, grund: 'Hier wohnen keine Sklaven' };
+  const haeuser = S.geb.filter(b => b.t === 'huette' && b.bew < wohnraum(b));
+  const platz = haeuser.reduce((s, b) => s + wohnraum(b) - b.bew, 0), n = Math.min(SKLAVEN.los, q.skl, platz);
+  if (n <= 0) return { ok: false, grund: 'Kein freier Platz in den Häusern für die Freigelassenen' };
+  let rest = n;
+  for (const h of haeuser) { const k = Math.min(rest, wohnraum(h) - h.bew); h.bew += k; rest -= k; if (!rest) break; }
+  q.skl -= n;
+  const steuer = Math.round(n * SKLAVEN.preis * SKLAVEN.vicesima * 10) / 10;
+  S.gut.denare += steuer; S.stimmung = Math.min(100, S.stimmung + 2);
+  return { ok: true, n, steuer };
 }
 

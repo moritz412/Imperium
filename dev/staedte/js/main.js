@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
+import { GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -45,6 +45,7 @@ function kopfleiste() {
   });
   const st = Math.round(S.stimmung);
   zellen.push(`<div class="ware"><b>${rund(sim.einwohner(S))}</b><small>Einwohner</small></div>`);
+  const skl = sim.sklaven(S); if (skl) zellen.push(`<div class="ware"><b>${rund(skl)}</b><small>Sklaven</small></div>`);
   zellen.push(`<div class="ware${st < 40 ? ' knapp' : ''}"><b>${st} %</b><small>Stimmung</small></div>`);
   $('#waren').innerHTML = zellen.join('');
   document.querySelectorAll('.tempo button').forEach(b => b.classList.toggle('an', +b.dataset.tempo === tempo));
@@ -183,8 +184,8 @@ function schliesseInfo() { auswahl = 0; $('#info').hidden = true; szene.abgleich
 function infoZeichnen() {
   const b = S.geb.find(x => x.id === auswahl);
   if (!b) { schliesseInfo(); return; }
-  const d = GEB[b.t], casa = b.t === 'huette' && b.stufe === 2;
-  const name = casa ? CASA.n : d.n;
+  const d = GEB[b.t], casa = b.t === 'huette' && b.stufe >= 2;
+  const name = b.t === 'huette' && b.stufe === 3 ? INSULA.n : casa ? CASA.n : d.n;
   const schwer = b.status.find(s => !s.leicht), leicht = b.status.find(s => s.leicht && s.art !== 'winter');
   let html = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${name}</h2><div class="unter">${d.kat}</div>`;
@@ -200,7 +201,8 @@ function infoZeichnen() {
   if (d.arbeiter) {
     html += `<div class="zeile"><span>Arbeiter</span><b>${b.w} / ${d.arbeiter}</b></div>`;
     html += `<div class="zeile"><span>Häuser in Laufweite (${sim.EINZUG} Felder)</span><b>${b.einzug ?? '–'}</b></div>`;
-    html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}</b></div>`;
+    html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}${S.letzte.sklavenFrei ? ' + ' + S.letzte.sklavenFrei + ' Sklaven' : ''}</b></div>`;
+    html += `<div class="zeile"><span>Sklaven</span><b>${d.sklaven ? 'arbeiten hier' : 'nicht hier'}</b></div>`;
     html += `<button class="knopf${b.prio ? ' an' : ''}" data-a="prio" aria-pressed="${b.prio}">${b.prio ? 'Arbeiter gehen zuerst hierher' : 'Arbeiter zuerst hierher schicken'}</button>`;
   }
   if (b.t === 'huette') {
@@ -212,6 +214,19 @@ function infoZeichnen() {
       <div class="zeile"><span>Brunnen in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'brunnen'))}</b></div>
       <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
+    else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
+      ? `<p>Ab der Kleinstadt (${RAENGE[INSULA.rang].ab} Einwohner) kann eine volle Casa zur Insula aufgestockt werden (30 Bewohner).</p>`
+      : `<p>Aufstockung zur Insula (30 Bewohner): Casa voll, Brot, Brunnen, Markt und ein Schrein in der Nähe, ${kostenText(INSULA.kosten)}.${sim.insulaFehlt(S, b) ? ' Es fehlt: ' + sim.insulaFehlt(S, b) + '.' : ''}</p>`;
+  }
+  if (b.t === 'quartier') {
+    const frei = GEB.quartier.sklavenPlatz - (b.skl || 0), n = Math.min(SKLAVEN.los, frei);
+    const arbeiten = S.geb.reduce((s, o) => s + (o.von || []).filter(v => v[0] === b.id).reduce((t, v) => t + v[1], 0), 0);
+    html += `<div class="zeile"><span>Sklaven</span><b>${b.skl || 0} / ${GEB.quartier.sklavenPlatz}</b></div>
+      <div class="zeile"><span>Arbeiten in Betrieben</span><b>${arbeiten}</b></div>
+      <div class="zeile"><span>Getreidebrei im Monat</span><b>${zahl((b.skl || 0) * SKLAVEN.essen)} Getreide</b></div>
+      <p>Sklaven arbeiten auf Feldern, in Gruben, Mühlen und Werkstätten – nicht am Markt oder in der Schule. Sind es mehr als halb so viele wie freie Bürger, fürchtet die Stadt einen Aufstand.</p>
+      <button class="knopf haupt" data-a="kaufen"${n > 0 ? '' : ' disabled'}>${n > 0 ? `${n} Sklaven kaufen (${n * SKLAVEN.preis} Denare)` : 'Quartier voll'}</button>
+      <button class="knopf" data-a="frei"${b.skl > 0 ? '' : ' disabled'}>Freilassen (manumissio): ${Math.min(SKLAVEN.los, b.skl || 0)} werden Plebejer</button>`;
   }
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
@@ -239,6 +254,12 @@ $('#info').addEventListener('click', e => {
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
+  if (a.dataset.a === 'kaufen' || a.dataset.a === 'frei') {
+    const r = a.dataset.a === 'kaufen' ? sim.sklavenKaufen(S, b) : sim.freilassen(S, b);
+    if (!r.ok) { melden(r.grund); ton.sfx('fehler'); }
+    else { ton.sfx('klick'); melden(a.dataset.a === 'kaufen' ? `${r.n} Sklaven gekauft (${r.preis} Denare).` : `${r.n} Sklaven freigelassen – sie ziehen als Liberti in die Häuser. Freilassungssteuer: ${zahl(r.steuer)} Denare.`); }
+    allesZeichnen();
+  }
   if (a.dataset.a === 'weg') { sim.abreissen(S, b.id); ton.sfx('abreissen'); schliesseInfo(); allesZeichnen(); }
 });
 
@@ -265,6 +286,7 @@ $('#menue').addEventListener('click', e => {
       <li>Umland: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.</li>
       <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li>
       <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li>
+      <li>Sklaven: im Sklavenquartier kaufen. Sie arbeiten auf Feldern und in Werkstätten und essen Getreide. Freigelassene werden Plebejer.</li>
       <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
   }
 });

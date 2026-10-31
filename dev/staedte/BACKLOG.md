@@ -115,8 +115,17 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Forschung unter dem Senatsauftrag. Test 44/44 (Cloud, Software-Rendering), Bild angesehen.
       Offen: Bild/Illustration für die Seite (Leitlinie „Bilder“), Schule und Schrein ohne eigenes Modell (Quader).
       **Nicht getestet:** iPad.
-- [ ] S3.2 Stände: Insula (Plebejer Stufe 3), Equites in der Domus (brauchen Wein/Öl → mit Epoche II), Sklavenquartier
-      (offene Entscheidung „Sklaven als Stand oder Tagelöhner?“ – Moritz fragen).
+- [x] S3.2 Stände (1.11., Cloud; Moritz: Sklaven als eigener Stand, „es soll historisch sein“):
+      **Sklavenquartier** (Wohnen, Holz 20, 10 Plätze, braucht Straße). Sklaven kauft man im
+      Quartier beim Händler (5 für je 25 Denare). Sie arbeiten vollständig, aber nur in Feld, Mühle, Holzfäller, Lehmgrube,
+      Ziegelei (`sklaven: true`) und gehen dort vor den Freien hin; nicht in Markt, Schule, Speicher, Bäckerei. Sie zahlen
+      keine Steuern, zählen nicht als Einwohner (eigene Zahl in der Kopfleiste), essen Getreidebrei nach den Freien; fehlt er,
+      flieht je Quartier einer im Monat. Mehr Sklaven als halb so viele Freie → Stimmungsziel −8 (Furcht vor Aufstand).
+      **Freilassung** (manumissio): 5 werden Plebejer in Häusern mit Platz, Freilassungssteuer vicesima libertatis 5 %
+      in die Kasse, Stimmung +2. **Insula** (Stufe 3 der Hütte, 30 Bewohner): ab Kleinstadt, volle Casa, Brot, Brunnen, Markt
+      und Schrein in der Nähe, Ziegel 25 + Holz 15; eigenes Modell (Läden unten, 2 Wohngeschosse). Test 47/47 (Cloud),
+      Bild angesehen. Offen: Equites/Domus erst mit Wein/Öl (S3.4), Modell für das Quartier, Sklavenaufstand als Ereignis.
+      **Nicht getestet:** iPad, Balance (Sklaven sind günstig).
 - [ ] S3.3 Feuer und Ordnung: Brandgefahr dichter Häuser, Vigiles-Wache, Ansicht „Feuer“.
 - [ ] S3.4 Epoche II (Späte Republik): Übergang mit Amt/Stadtrang, Weinbau/Öl/Weberei/Garum als Ketten, Römerstraße, Aquädukt.
 
@@ -135,4 +144,4 @@ Stufe 6 weitere Regionen, Verbindung Hauptspiel.
 - Raster quadratisch (jetzt) oder frei drehbar wie Manor Lords?
 - ~~Region als Hex-Felder oder freie Landschaft?~~ → Hex-Felder mit Landschafts-Optik (31.10.)
 - Länge eines Spieljahres (jetzt: 1 Monat = 5 s bei normalem Tempo → 1 Jahr = 1 min).
-- Sklaven als Stand oder Tagelöhner?
+- ~~Sklaven als Stand oder Tagelöhner?~~ → eigener Stand, historisch (1.11.)

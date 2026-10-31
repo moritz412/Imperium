@@ -1,5 +1,5 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
-import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
+import { RASTER, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
 import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
@@ -117,8 +117,28 @@ export function erzeugeSzene(leinwand, welt) {
     return g;
   }
 
+  // Insula (S3.2): Läden (tabernae) im Erdgeschoss, zwei Wohngeschosse mit Fenstern, Ziegeldach
+  function baueInsula() {
+    const g = new THREE.Group(), lam = c => new THREE.MeshLambertMaterial({ color: c }), B = 1.76;
+    const stock = (y, h, c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(B, h, B), lam(c)); m.position.y = y + h / 2; m.castShadow = true; m.receiveShadow = true; g.add(m); };
+    stock(0, 0.6, 0xb89a74); stock(0.6, 0.72, INSULA.wand); stock(1.32, 0.72, 0xe0c39c);
+    const gesims = new THREE.Mesh(new THREE.BoxGeometry(B + 0.08, 0.05, B + 0.08), lam(0xc9b08a)); gesims.position.y = 0.62; g.add(gesims);
+    const dunkel = lam(0x3a2a1e);
+    for (const seite of [0, 1, 2, 3]) {
+      const w = Math.PI / 2 * seite, nx = Math.sin(w), nz = Math.cos(w);
+      for (let i = 0; i < 3; i++) {
+        const o = (i - 1) * 0.55;
+        const tuer = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.02), dunkel); tuer.position.set(nx * (B / 2 + 0.01) + nz * o, 0.22, nz * (B / 2 + 0.01) - nx * o); tuer.rotation.y = w; g.add(tuer);
+        for (const y of [0.98, 1.7]) { const f = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.24, 0.02), dunkel); f.position.set(nx * (B / 2 + 0.01) + nz * o, y, nz * (B / 2 + 0.01) - nx * o); f.rotation.y = w; g.add(f); }
+      }
+    }
+    const r = satteldach(B + 0.12, B + 0.12, 0.45, INSULA.dach); r.position.y = 2.04; g.add(r);
+    g.userData.h = 2.6;
+    return g;
+  }
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
+    if (t === 'huette' && stufe === 3) return baueInsula();
     const casa = t === 'huette' && stufe === 2;
     const name = casa ? 'casa' : t;
     if (modelle && modelle[name]) return baueModell(name, geist);
