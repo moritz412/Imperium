@@ -1,5 +1,5 @@
 {
-"version": "v217-baf4531460",
+"version": "v218-f5c3039ad0",
 "files": {
 "img/pk_lk.json": "1e42421565c2d897",
 "img/pk_lb.json": "3c38083e6e69af9f",
@@ -141,16 +141,16 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"proto/einheiten_kampagne.json": "de85a851be3ce9c4",
+"proto/einheiten_kampagne.json": "b09eed23456cbead",
 "proto/figuren/k_A1_eques.json": "46048179727689bb",
 "proto/figuren/k_A1_hastatus.json": "118afd45fc5733ca",
-"proto/figuren/k_A1_legion.json": "6abc472f77efb7df",
+"proto/figuren/k_A1_legion.json": "0825a5d4ebab1b62",
 "proto/figuren/k_A1_veles.json": "d5299d172a85a693",
 "proto/figuren/k_A2_libysch.json": "4248282a000165fc",
 "proto/figuren/k_A2_numidisch.json": "8a8796931d08aec2",
 "proto/figuren/k_A3_iberisch.json": "fdb60f1fc44c71e1",
 "proto/figuren/k_A4_balearisch.json": "285cbaefba689cca",
-"proto/figuren/k_A6_adlig.json": "8cc693b86cf75541",
+"proto/figuren/k_A6_adlig.json": "54f424bc318f6cdf",
 "proto/figuren/k_A6_falx.json": "b84ff3b06386d08e",
 "proto/figuren/k_A6_keltisch.json": "468192f8702722ff",
 "proto/figuren/k_A6_plaenkler.json": "7934684ef1b3728e",
@@ -161,6 +161,14 @@
 "proto/figuren/k_A8_aksum.json": "dcb32ae863f14f55",
 "proto/figuren/k_A8_nubisch.json": "cbf2dac34c8336fc",
 "proto/figuren/k_E_elefant.json": "a54b8c7e6559c8b6",
+"proto/figuren/k_M1_bogen.json": "ebcea219c98ad3f2",
+"proto/figuren/k_M1_heerbann.json": "7afec091e355f7d1",
+"proto/figuren/k_M1_huskarl.json": "38c8afefa015b181",
+"proto/figuren/k_M1_panzerreiter.json": "df26f8e4db9d4794",
+"proto/figuren/k_M3_kataphrakt.json": "ae458acbb3a4f007",
+"proto/figuren/k_M3_skutatos.json": "a861f7a511498cad",
+"proto/figuren/k_M3_thematen.json": "71add98934a6fa28",
+"proto/figuren/k_M3_toxotes.json": "a54f033eecdb680d",
 "proto/figuren/k_P_pferd.json": "80a8b1dac019cbe9",
 "proto/figuren/umgebung.json": "35e92a0c21ecc189",
 "proto/ton/m_aufmarsch_hellen_a.mp3": "1493d0a1e7b41f6e",
@@ -240,6 +248,7 @@
 "proto/ton/s_pfeil_treffer_4.mp3": "933bbbe3c9bb23ad",
 "proto/ton/s_pferd_tod_1.mp3": "3f73da6d5791706a",
 "proto/ton/s_pferd_tod_2.mp3": "becc0e9e08b44548",
+"proto/ton/s_regen_1.mp3": "7bbfbc3a1b3bbbfd",
 "proto/ton/s_reiter_aufprall_1.mp3": "3fc3f709db32bec1",
 "proto/ton/s_reiter_aufprall_2.mp3": "57de82278cc4d9b5",
 "proto/ton/s_reiter_aufprall_3.mp3": "9232d0cef4f410e3",
@@ -292,6 +301,6 @@
 "proto/ton/s_wurf_1.mp3": "de7bf5abdf6cea59",
 "proto/ton/s_wurf_2.mp3": "88f739c7bad00df0",
 "proto/ton/s_wurf_3.mp3": "b315c140796b30c1",
-"index.html": "09b59ba07b306984"
+"index.html": "46a9309d53faaa16"
 }
 }
