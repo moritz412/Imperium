@@ -141,6 +141,20 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { typ: f.typ, zuWeit, v, zuFrueh, nachVerm, b, stand: sim.landStand(S, f) };
   });
   ok('Umland: vermessen (2 Monate), dann Betrieb; zu weit/zu früh abgelehnt', !land.zuWeit && land.v && !land.zuFrueh && land.nachVerm === 'vermessen' && land.b && land.stand === 'betrieb', JSON.stringify(land));
+  // S2.3 Feldweg: ohne Weg kein Ertrag, mit Weg verbunden und liefernd
+  const weg = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, f = sim.regionKarte().find(h => sim.landStand(S, h) === 'betrieb');
+    const ware = { acker: 'getreide', wald: 'holz', lehm: 'lehm' }[f.typ], vorher = sim.verbunden(S, f);
+    // Ertrag eines Monats nur aus dem Umland messen: Stadtbetriebe kurz entfernen, Sommer
+    const geb = S.geb, monat0 = S.monat; S.geb = geb.filter(b => b.t === 'strasse' || b.t === 'speicher'); S.monat = 6;
+    const a0 = S.gut[ware]; SR.sim.monat(S, SR.welt); const ohne = S.gut[ware] - a0;
+    S.gut.denare += 50; S.gut.holz += 20; const w = sim.wegAnlegen(S, f).ok, nachher = sim.verbunden(S, f);
+    const a1 = S.gut[ware]; S.monat = 6; SR.sim.monat(S, SR.welt); const mit = S.gut[ware] - a1;
+    S.geb = geb; S.monat = monat0;
+    return { typ: f.typ, vorher, w, nachher, ohne: Math.round(ohne * 10) / 10, mit: Math.round(mit * 10) / 10 };
+  });
+  ok('Feldweg: ohne Weg kein Ertrag, mit Weg verbunden und Ertrag', !weg.vorher && weg.w && weg.nachher && weg.mit > weg.ohne, JSON.stringify(weg));
+
   // dasselbe über die Knöpfe im Feldfenster
   await p.evaluate(() => { SR.umland(true); const sim = SR.sim; SR.hexInfo(sim.regionKarte().find(f => sim.kannVermessen(SR.S, f) && sim.betriebFuer(f))); });
   await p.click('#info [data-a="vermessen"]');

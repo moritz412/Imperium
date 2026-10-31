@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -209,8 +209,8 @@ $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
-    else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau') {
-      const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : sim.landBauen(S, hexWahl);
+    else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau' || a.dataset.a === 'weg') {
+      const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : a.dataset.a === 'weg' ? sim.wegAnlegen(S, hexWahl) : sim.landBauen(S, hexWahl);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx(a.dataset.a === 'landbau' ? 'bauen' : 'klick');
       allesZeichnen(); hexInfo(hexWahl);
     } else hexInfo(null);
@@ -273,8 +273,13 @@ function hexInfo(f) {
     ? `<div class="lage gut">Vermessen</div><p>${bd.text}</p><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>
        <button class="knopf haupt" data-a="landbau">${bd.n} bauen (${kostenText(bd.kosten)})</button>`
     : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
-  if (stand === 'betrieb') lage = `<div class="lage gut">${bd.n} arbeitet</div><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>
-    <p>Weiter weg liefert weniger. Mit Wegen und Karren wird das besser.</p>`;
+  const verb = sim.verbunden(S, f);
+  if (stand === 'betrieb') lage = verb
+    ? `<div class="lage gut">${bd.n} arbeitet</div><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>`
+    : `<div class="lage schlecht">${bd.n} arbeitet, aber kein Weg zur Stadt</div><p>Ohne Weg kommt nichts in der Stadt an. Lege Feldwege bis zur Stadt an.</p>`;
+  if ((stand === 'vermessen' || stand === 'betrieb') && !sim.hatWeg(S, f))
+    lage += `<button class="knopf${stand === 'betrieb' ? ' haupt' : ''}" data-a="weg">Feldweg anlegen (${kostenText(WEG.kosten)})</button>`;
+  else if (sim.hatWeg(S, f)) lage += `<div class="zeile"><span>Feldweg</span><b>${verb ? 'mit der Stadt verbunden' : 'noch nicht bis zur Stadt'}</b></div>`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${weit ? weit + (weit === 1 ? ' Feld' : ' Felder') + ' von der Stadt' : 'Stadtgebiet'}</div>
     <p>${d.text}</p>

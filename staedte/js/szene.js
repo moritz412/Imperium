@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey, hatWeg, nachbarn } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -457,7 +457,9 @@ export function erzeugeSzene(leinwand, welt) {
   function landAbgleichen(S) {
     landS = S; if (!region) return;
     for (const f of region.felder) {
-      const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k], schl = stand + (l && l.betrieb || '');
+      const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k];
+      const wegNach = hatWeg(S, f) ? nachbarn(f).map(n => n && hatWeg(S, n) ? 1 : 0).join('') : '';
+      const schl = stand + (l && l.betrieb || '') + wegNach;
       const alt = landObj.get(k); if (alt && alt.schl === schl) continue;
       if (alt) region.g.remove(alt.g);
       const g = new THREE.Group(), [x, z] = hexMitte(f.q, f.r), top = HOEHE[f.typ] ?? 0.32;
@@ -465,6 +467,13 @@ export function erzeugeSzene(leinwand, welt) {
         const w = Math.PI / 3 * i, p = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.7, 4), new THREE.MeshLambertMaterial({ color: i % 2 ? 0xf0ebe0 : 0xb5322a }));
         p.position.set(x + Math.cos(w) * HEX * 0.86, top + 0.35, z + Math.sin(w) * HEX * 0.86); p.castShadow = true; g.add(p);
       }
+      // Feldweg: halbe Strecke von der Mitte zu jedem Nachbarn mit Weg (der Nachbar zeichnet die andere Hälfte)
+      [...wegNach].forEach((v, i) => {
+        if (v !== '1') return;
+        const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, L = Math.hypot(dx, dz) / 2;
+        const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: 0x9c8460 }));
+        st.position.set(x + dx / 4, top + 0.03, z + dz / 4); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
+      });
       if (stand === 'betrieb') {
         const t = LAND_BETRIEBE[l.betrieb].modell, mo = modelle && modelle[t];
         const m = mo ? new THREE.Mesh(mo.geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1, 0.7, 1), new THREE.MeshLambertMaterial({ color: 0xd8b88a }));

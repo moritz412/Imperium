@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -383,12 +383,34 @@ export function landBauen(S, f) {
   S.land[landKey(f)].betrieb = t;
   return { ok: true };
 }
-export const landFaktor = f => Math.max(0.25, 1 - 0.15 * (hexAbstand(f, { q: 0, r: 0 }) - 1));
+// Wege (S2.3): Netz ab der Stadt über Felder mit Weg; nur verbundene Betriebe liefern
+export const hatWeg = (S, f) => f.typ === 'stadt' || !!((S.land || {})[landKey(f)] || {}).weg;
+export function wegNetz(S) {
+  const karte = regionKarte(), da = new Set(['0,0']), q = [{ q: 0, r: 0 }];
+  for (let i = 0; i < q.length; i++) for (const [dq, dr] of HEX_NACHBARN) {
+    const n = karte.find(h => h.q === q[i].q + dq && h.r === q[i].r + dr);
+    if (n && !da.has(landKey(n)) && hatWeg(S, n)) { da.add(landKey(n)); q.push(n); }
+  }
+  return da;
+}
+export const verbunden = (S, f) => wegNetz(S).has(landKey(f));
+export const nachbarn = f => HEX_NACHBARN.map(([dq, dr]) => regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr) || null);
+export function wegAnlegen(S, f) {
+  const st = landStand(S, f);
+  if (st !== 'vermessen' && st !== 'betrieb') return { ok: false, grund: 'Erst vermessen' };
+  if (hatWeg(S, f)) return { ok: false, grund: 'Hier gibt es schon einen Weg' };
+  if (!kannBezahlen(S, WEG.kosten)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, WEG.kosten).join(', ') };
+  for (const [g, n] of Object.entries(WEG.kosten)) S.gut[g] -= n;
+  S.land[landKey(f)].weg = true;
+  return { ok: true };
+}
+export const landFaktor = f => Math.max(0.5, 1 - 0.05 * (hexAbstand(f, { q: 0, r: 0 }) - 1));
 function landMonat(S, js, grenze, meld) {
+  const netz = wegNetz(S);
   for (const f of regionKarte()) {
     const l = (S.land || {})[landKey(f)]; if (!l) continue;
     if (l.verm < VERMESSEN.monate) { if (++l.verm === VERMESSEN.monate) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
-    const d = LAND_BETRIEBE[l.betrieb]; if (!d) continue;
+    const d = LAND_BETRIEBE[l.betrieb]; if (!d || !netz.has(landKey(f))) continue;
     const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor);
   }

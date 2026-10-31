@@ -75,8 +75,9 @@ export const REGION_TYPEN = {
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
 };
 
-// Betriebe im Umland (S2.2). Ertrag je Monat, minus 15 % je Feld Entfernung ab dem zweiten (bis Wege/Karren mit S2.3 kommen)
+// Betriebe im Umland (S2.2). Ertrag je Monat nur mit Weg zur Stadt (S2.3), minus 5 % je Feld Entfernung ab dem zweiten
 export const VERMESSEN = { kosten: { denare: 20 }, monate: 2 };
+export const WEG = { kosten: { denare: 10, holz: 5 } };   // Feldweg auf einem vermessenen Feld (S2.3)
 export const LAND_BETRIEBE = {
   gehoeft:    { n: 'Gehöft', auf: 'acker', kosten: { holz: 20 }, erzeugt: { getreide: 4 }, ernte: true, modell: 'huette',
     text: 'Eine Bauernfamilie bestellt das Feld. Getreide wie auf den Feldern der Stadt: viel im Herbst, nichts im Winter.' },

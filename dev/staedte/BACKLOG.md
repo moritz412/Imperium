@@ -71,7 +71,11 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Gespeichert in `S.land`; alte Stände laden mit leerem Umland. Weide/Hang/Fluss noch ohne Betrieb.
       Test 30/30 (PC, `PW_GPU=1`, auch per Knopf). Nicht geprüft: Balance (Umland macht Getreide deutlich leichter).
       **Nicht getestet:** iPad.
-- [ ] S2.3 Wege und Karren: Pfad/Schotterweg Feld zu Feld, Karren fahren sichtbar, Ertrag kommt nur verbunden in die Stadt.
+- [ ] S2.3 Wege und Karren – **Teil 1 fertig (31.10. abends):** Feldweg je vermessenem Feld (10 Denare, 5 Holz), Netz ab der
+      Stadt (Breitensuche über Felder mit Weg). Betriebe liefern nur verbunden („arbeitet, aber kein Weg zur Stadt“),
+      Abzug nur noch 5 % je Feld Entfernung. Wege als Streifen zu Nachbarn mit Weg. Test 31/31 (PC, `PW_GPU=1`).
+      **Offen:** Karren sichtbar fahren lassen, Schotterweg/Römerstraße als Ausbau, Weg auch über unvermessenes Land?
+      **Nicht getestet:** iPad.
 - [ ] S2.4 Fluss: Anleger, Flussboote auf dem Padus, Speicher (horreum) als Umschlagplatz.
 - [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).
 - [ ] S2.6 Gefahren: Räuber (Wachturm), Gallier (Kastell), Hochwasser im Frühling (Deich).

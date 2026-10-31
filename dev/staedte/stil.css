@@ -40,7 +40,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 #info h2{margin:0;font-family:Cinzel,serif;font-size:22px}
 #info .unter{font-size:13px;color:var(--leise);margin-top:-8px}
 #info p{margin:0;font-size:14px;line-height:1.4;color:#dcd0bc}
-.zeile{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid #3a3026}
+.zeile{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:6px 0;border-bottom:1px solid #3a3026}
 .lage{display:flex;gap:8px;align-items:center;border-radius:10px;padding:9px 11px;font-size:14px;font-weight:600}
 .lage.warn{background:rgba(232,163,58,.14);border:1px solid #a8762a;color:#f2c27a}
 .lage.schlecht{background:rgba(242,140,110,.12);border:1px solid #9a5a46;color:#f5ab95}
@@ -109,6 +109,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .region h2{margin:0;font-family:Cinzel,serif;font-size:21px}
 .region .ortzeile{font-size:14px;color:var(--leise)}.region .ortzeile b{color:var(--gold)}
 .region p{margin:0;font-size:14px;line-height:1.4;color:#dcd0bc}
+.zeile b{text-align:right}
 .region .zeile b{text-align:right;max-width:60%}
 .region.gesperrt{filter:saturate(.3);opacity:.85}
 .schloss{font-size:13px;color:#f2c27a}
