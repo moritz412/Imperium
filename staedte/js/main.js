@@ -240,4 +240,5 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
+  modelle: () => szene.modelleBereit, szene,
 };

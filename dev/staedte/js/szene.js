@@ -5,6 +5,28 @@ import { WALD, WASSER, groesse } from './sim.js';
 const THREE = window.THREE;
 const BLICK = new THREE.Vector3(1, 1.05, 1).normalize();   // feste Blickrichtung (Azimut 45°, ca. 37° Höhe)
 const RAHMEN = 11;                                            // halbe Bildhöhe in Feldern bei Zoom 1
+// Gebäudemodelle (S1.1) aus dev/pc/blender/staedte_geb.py, gemeinsam mit dem Hauptspiel in models/.
+// Liegt unter /staedte/ (veröffentlicht) bzw. /dev/staedte/ (Entwicklung) – daher zwei Pfade.
+const MODELL_PFADE = ['../models/staedte_geb.json', '../../models/staedte_geb.json'];
+
+async function ladeModelle() {
+  for (const url of MODELL_PFADE) {
+    try {
+      const r = await fetch(url); if (!r.ok) continue;
+      const d = await r.json(); if (d.format !== 'staedte_geb_v1') continue;
+      const m = {};
+      for (const [name, t] of Object.entries(d.teile)) {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(t.pos, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(new Uint8Array(t.col), 3, true));
+        geo.computeVertexNormals();   // ohne Index = flache Schattierung
+        m[name] = { geo, h: t.h, anh: t.anh || [] };
+      }
+      return m;
+    } catch (e) { /* nächster Pfad */ }
+  }
+  return null;
+}
 
 export function erzeugeSzene(leinwand, welt) {
   const renderer = new THREE.WebGLRenderer({ canvas: leinwand, antialias: true });
@@ -74,10 +96,31 @@ export function erzeugeSzene(leinwand, welt) {
     m.castShadow = true; return m;
   }
 
+  let modelle = null;
+  function modellMesh(teil, geist) {
+    const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+    if (geist) { mat.transparent = true; mat.opacity = 0.6; }
+    const m = new THREE.Mesh(teil.geo, mat);
+    m.castShadow = !geist; m.receiveShadow = true; return m;
+  }
+  function baueModell(name, geist) {
+    const teil = modelle[name], g = new THREE.Group();
+    g.add(modellMesh(teil, geist));
+    teil.anh.forEach((a, i) => {
+      const m = modellMesh(modelle[a.t], geist);
+      m.position.set(a.p[0], a.p[1], a.p[2]); m.rotation.y = i * 2.1;
+      m.userData.drehY = a.dreh * Math.PI * 2; g.add(m);
+    });
+    g.userData.h = teil.h;
+    return g;
+  }
+
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
-    const g = new THREE.Group();
     const casa = t === 'huette' && stufe === 2;
+    const name = casa ? 'casa' : t;
+    if (modelle && modelle[name]) return baueModell(name, geist);
+    const g = new THREE.Group();
     const wand = casa ? CASA.wand : d.wand, dach = casa ? CASA.dach : d.dach, h = casa ? CASA.h : d.h;
     const rand = 0.12, w = gw - rand * 2, tief = gd - rand * 2;
     if (d.flach) {
@@ -147,7 +190,9 @@ export function erzeugeSzene(leinwand, welt) {
     const tex = new THREE.CanvasTexture(c); symbolTex.set(art, tex); return tex;
   }
 
+  let letzter = null;
   function abgleichen(S, auswahlId) {
+    letzter = [S, auswahlId];
     const da = new Set();
     for (const b of S.geb) {
       da.add(b.id);
@@ -238,11 +283,20 @@ export function erzeugeSzene(leinwand, welt) {
   let zeit = 0;
   function zeichnen(dt) {
     zeit += dt;
-    gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; });
+    gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY; });
     renderer.render(szene, kamera);
   }
 
   window.addEventListener('resize', groesseAnpassen);
   groesseAnpassen(); kameraSetzen();
-  return { abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  // Modelle nachladen; bis dahin (oder wenn die Datei fehlt) bleiben die einfachen Formen
+  const modelleBereit = ladeModelle().then(m => {
+    if (!m) return false;
+    modelle = m;
+    for (const o of objekte.values()) o.schluessel = '';
+    if (geist) { szene.remove(geist); geist = null; geistTyp = ''; }
+    if (letzter) abgleichen(letzter[0], letzter[1]);
+    return true;
+  });
+  return { modelleBereit, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }
