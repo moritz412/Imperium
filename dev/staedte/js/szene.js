@@ -169,10 +169,53 @@ export function erzeugeSzene(leinwand, welt) {
     g.userData.h = 1.2;
     return g;
   }
+  // Eigene Formen für Gebäude ohne Blender-Modell (1.11.): Schule, Feuerwache, Quartier, Schrein, Schmiede, Kelter
+  function teileBau(geist) {
+    const g = new THREE.Group();
+    const teil = (geo, c, x, y, z, ry = 0) => { const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: c, transparent: geist, opacity: geist ? 0.6 : 1 }));
+      m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+    const box = (w, h, d, c, x, y, z, ry) => teil(new THREE.BoxGeometry(w, h, d), c, x, y, z, ry);
+    const dach = (w, d, hh, c, x, y, z) => { const r = satteldach(w, d, hh, c); r.position.set(x, y, z); if (geist) r.material.transparent = true; g.add(r); return r; };
+    const saeule = (x, z, h, c = 0xf2ead8) => teil(new THREE.CylinderGeometry(0.05, 0.06, h, 6), c, x, h / 2, z);
+    return { g, teil, box, dach, saeule };
+  }
+  const EIGEN = {
+    ludus: geist => { const { g, box, dach, saeule } = teileBau(geist);   // Schulhaus mit Säulenvorhalle und Bänken
+      box(1.7, 0.7, 1.1, 0xe6d6b4, 0, 0.35, -0.3); dach(1.8, 1.2, 0.35, 0x8a4a2b, 0, 0.7, -0.3);
+      box(1.7, 0.05, 0.55, 0x9a8a70, 0, 0.6, 0.55); for (const x of [-0.75, -0.25, 0.25, 0.75]) saeule(x, 0.78, 0.6);
+      for (const x of [-0.45, 0.45]) box(0.5, 0.12, 0.14, 0x7a5a3a, x, 0.06, 0.45);
+      box(0.5, 0.35, 0.03, 0x2e3a2e, 0, 0.35, 0.26); g.userData.h = 1.1; return g; },
+    wache: geist => { const { g, box, dach, teil } = teileBau(geist);   // Wachhaus mit Turm, Eimern und Haken
+      box(1.4, 0.65, 1.2, 0xc8a888, -0.15, 0.33, 0.1); dach(1.5, 1.3, 0.3, 0x8a3a2a, -0.15, 0.65, 0.1);
+      box(0.5, 1.5, 0.5, 0xb89878, 0.6, 0.75, -0.55); dach(0.6, 0.6, 0.25, 0x8a3a2a, 0.6, 1.5, -0.55);
+      for (let i = 0; i < 4; i++) teil(new THREE.CylinderGeometry(0.07, 0.06, 0.14, 8), 0x6b4a2a, -0.6 + i * 0.22, 0.07, 0.8);
+      box(0.04, 0.9, 0.04, 0x5a4330, 0.75, 0.45, 0.6); box(0.25, 0.04, 0.04, 0x444444, 0.75, 0.88, 0.6); g.userData.h = 1.8; return g; },
+    quartier: geist => { const { g, box, dach } = teileBau(geist);   // langes, niedriges Quartier mit kleinen Öffnungen
+      box(1.75, 0.5, 1.0, 0xa08a6a, 0, 0.25, -0.2); dach(1.85, 1.1, 0.25, 0x6e5236, 0, 0.5, -0.2);
+      for (const x of [-0.6, -0.2, 0.2, 0.6]) box(0.12, 0.12, 0.02, 0x2a1e14, x, 0.36, 0.31);
+      box(0.25, 0.35, 0.02, 0x2a1e14, 0.75, 0.18, 0.31); box(1.75, 0.04, 0.6, 0x8a7a5a, 0, 0.02, 0.6); g.userData.h = 0.9; return g; },
+    schrein: geist => { const { g, box, saeule, teil } = teileBau(geist);   // Lararium: Sockel, zwei Säulen, Giebel, Altar
+      box(0.7, 0.18, 0.6, 0xd8ccb0, 0, 0.09, 0); for (const x of [-0.24, 0.24]) teil(new THREE.CylinderGeometry(0.04, 0.05, 0.5, 6), 0xf2ead8, x, 0.43, 0.18);
+      box(0.6, 0.45, 0.3, 0xe8dcc4, 0, 0.4, -0.12); const gi = new THREE.Shape(); gi.moveTo(-0.36, 0); gi.lineTo(0.36, 0); gi.lineTo(0, 0.2); gi.lineTo(-0.36, 0);
+      teil(new THREE.ExtrudeGeometry(gi, { depth: 0.55, bevelEnabled: false }).translate(0, 0, -0.3), 0xa9583a, 0, 0.68, 0.02);
+      box(0.16, 0.16, 0.16, 0xc8bca4, 0, 0.26, 0.45); g.userData.h = 0.95; return g; },
+    schmiede: geist => { const { g, box, dach, teil } = teileBau(geist);   // Werkstatt mit offener Front, Esse und Amboss
+      box(1.6, 0.6, 1.1, 0x8a7a68, 0, 0.3, -0.3); dach(1.7, 1.2, 0.3, 0x5a3a2a, 0, 0.6, -0.3);
+      box(0.45, 1.25, 0.45, 0x6a5a4a, 0.55, 0.62, -0.45);
+      teil(new THREE.SphereGeometry(0.16, 8, 6), 0xff7a2a, 0.55, 0.3, -0.05).material.emissive = new THREE.Color(0x8a2a00);
+      box(0.3, 0.2, 0.15, 0x3a3a3a, -0.35, 0.22, 0.45); box(0.12, 0.12, 0.12, 0x3a3a3a, -0.35, 0.06, 0.45);
+      box(0.4, 0.15, 0.3, 0x7a5848, 0.3, 0.07, 0.6); g.userData.h = 1.4; return g; },
+    kelter: geist => { const { g, box, dach, teil } = teileBau(geist);   // Kelterhaus mit Baumpresse und Dolia
+      box(1.5, 0.65, 1.0, 0xd2b48c, -0.1, 0.33, -0.35); dach(1.6, 1.1, 0.3, 0x7a3a2a, -0.1, 0.65, -0.35);
+      box(1.3, 0.08, 0.1, 0x5a4330, 0.05, 0.55, 0.45); box(0.1, 0.6, 0.1, 0x5a4330, -0.55, 0.3, 0.45);
+      for (let i = 0; i < 4; i++) teil(new THREE.SphereGeometry(0.17, 8, 6), 0xb0703a, -0.6 + i * 0.4, 0.15, 0.75);
+      teil(new THREE.CylinderGeometry(0.28, 0.3, 0.12, 10), 0x6a2a5a, 0.45, 0.06, 0.45); g.userData.h = 1.0; return g; },
+  };
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
     if (t === 'huette' && stufe === 3) return baueInsula();
     if (t === 'domus') return baueDomus(geist);
+    if (EIGEN[t]) return EIGEN[t](geist);
     const casa = t === 'huette' && stufe === 2;
     const name = casa ? 'casa' : t;
     if (modelle && modelle[name]) return baueModell(name, geist);

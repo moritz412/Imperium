@@ -165,6 +165,13 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       fast jedes Jahr. Jetzt Ganzzahl-Mischfunktion (geprüft: 38 % bei Soll 35 %). Brände erst ab Jahr 3 und seltener
       (−25 %), Gallier erst ab Jahr 4 und ab 60 Einwohnern; Feuermeldung nennt das Gebäude. Test 56/56.
       Offen: Denare-Senke (z. B. Unterhalt der Gebäude, Löhne der Wache) – Vorschlag für Moritz.
+- [x] Eigene Formen (three.js, kein Blender) für Schule (Säulenvorhalle), Feuerwache (Turm, Eimer), Sklavenquartier,
+      Schrein (Lararium), Schmiede (Esse), Kelter (Baumpresse, Dolia). Test 56/56, Bild angesehen.
+      Offen: Vorderseiten zeigen immer nach Süden, nicht zur Straße (gilt auch für die Blender-Modelle).
+### Vorschläge für den nächsten Block
+- Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
+- Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.
+- Rest der Späten Republik: Öl, Tuch, Garum, Tempel, Theater; danach Stufe 4 Familie & Politik.
 ## Plan nächste 2 Stunden (1.11., Vorschlag)
 Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
 Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt
