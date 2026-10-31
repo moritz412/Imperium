@@ -179,3 +179,12 @@ fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
 **Test-Haken im Kern** (nur für Tests): `SCHLACHT.druck`, `feldherr`, `feldherrLeben`, `tötefeldherr`, `sammeln`, `anfeuern`, `abklingzeit`.
 
 **Offen / nicht getestet**: iPad, Anfeuern-KI und Leicht-Variante (nur Sammeln) nur durch Code, nicht im Spielverlauf; Verhalten des Feind-Feldherrn über eine ganze Schlacht nur stichprobenartig; Flucht des Feldherrn mit der Einheit (Aura aus, Standarte bleibt bei ihm); Balance der Zahlen ungeprüft; Elefanten-Panik und Aura nicht zusammen geprüft.
+
+## Stand Gelände I6 (31.10.)
+- `OPT.gelaende={typ:'plain'|'rough'|'mountain', klima:'mittelmeer'|'steppe'|'wueste'|'wald'|'schnee', saat, kueste}`; ohne Angabe bleibt das alte Testgelände (Zufallssaat und Formeln unverändert).
+- Höhe: Saat bestimmt Phasen der Wellen und Lage der Kuppen (`GHILL`); plain flach (×0,5), rough ×1,5 mit 9 Kuppen plus flachen Buckeln, mountain hohe Kämme an den Flanken (|x|≈190) und hinten, Mitte frei. Kampfebene (|x|<120, |z|<100) bleibt gemessen unter 6,3 m Höhenspanne, Steigung ≤ 0,16.
+- Klima: Bodenfarben (`GCOL`), Himmel/Dunst (`HZK`), Bewuchsdichte (`KV`), Waldliste je Klima, Baumartenmischung (`baum`); Wüste ohne Rundhäuser, Zäune, Heu (mehr Felsen), Zypressenallee nur Mittelmeer.
+- Ton: Teppiche `s_wald_1`, `s_wueste_1`, `s_kueste_1` (nur geladen, wenn gebraucht); Wiese nur Mittelmeer/Steppe, Schnee mehr Wind. `s_fluss_1`/`s_sumpf_1` noch ungenutzt.
+- Hauptspiel (`eschStart`): typ=`pter(ti)`; klima: Winter und Norden (Breite >46, >41 mit 20 %) Schnee, `aridAt`>0,7 Wüste, >0,4 Steppe, rough und nicht trocken Wald, sonst Mittelmeer; saat=ti·131+Runde; Küste=`feat(ti).coast`.
+- Testseite: `schlacht_spiel.html?gel=rough&klima=wueste&saat=5&kueste=1`. Test `dev/tests/schlacht_gelaende_t.js` (Bilder `shot/gel_*.png`).
+- Offen: Felsen tragen in Steppe/Wüste noch Moos; Fluss/Sumpf-Gelände; echtes iPad nicht getestet.

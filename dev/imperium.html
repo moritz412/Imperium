@@ -2424,13 +2424,43 @@ function vnp(x,z,p){const i=Math.floor(x),j=Math.floor(z),fx=x-i,fz=z-j,u=fx*fx*
   const i0=((i%p)+p)%p,i1=(i0+1)%p,j0=((j%p)+p)%p,j1=(j0+1)%p;
   return hash2(i0,j0)*(1-u)*(1-v)+hash2(i1,j0)*u*(1-v)+hash2(i0,j1)*(1-u)*v+hash2(i1,j1)*u*v;}
 const mulberry=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
-const rnd=mulberry(20261030);
+/* Gelände aus der Provinz (I6, 31.10.): OPT.gelaende={typ:'plain'|'rough'|'mountain', klima:'mittelmeer'|'steppe'|'wueste'|'wald'|'schnee', saat, kueste}. Fehlt es: unverändertes Gelände der Testschlacht. */
+const KLAUB=(r,g,b,t)=>{   // Laubfarbe nach Klima (31.10.): Schnee dunkel/entsättigt mit weißen Kronen, trocken gelblicher
+  if(GKL==='schnee'){const w=Math.max(0,Math.min(1,t))>.55&&Math.random()<.6?.75:0,m=(r+g+b)/3*.75;return[m*.5+r*.35+(220-m)*w,m*.5+g*.4+(224-m)*w,m*.55+b*.45+(230-m)*w];}
+  if(GKL==='steppe'||GKL==='wueste')return[r*1.15+12,g*1.02+6,b*.8];return[r,g,b];};
+const GEL=OPT.gelaende||null,GKL=GEL&&GEL.klima||'mittelmeer',GTYP=GEL&&GEL.typ||'plain',GSAAT=GEL?((GEL.saat|0)>>>0):0;
+const KV=({mittelmeer:{b:1,olive:1,busch:1,stein:1,gras:1},steppe:{b:.3,olive:.2,busch:.55,stein:.8,gras:.8},wueste:{b:.04,olive:0,busch:.1,stein:2.4,gras:.12},
+  wald:{b:1,olive:0,busch:1,stein:.7,gras:1},schnee:{b:.8,olive:0,busch:.4,stein:1.2,gras:.3}})[GKL]||{b:1,olive:1,busch:1,stein:1,gras:1};
+const rnd=mulberry(20261030+GSAAT*7919);
 const lin=(r,g,b)=>new THREE.Color(r/255,g/255,b/255).convertSRGBToLinear();   // sRGB-Wert -> Arbeitsfarbe
 const disp=(r,g,b)=>new THREE.Color(r/255,g/255,b/255);                          // Anzeige-Wert (Nebel, Himmel)
 
 /* ---- Höhenfunktion: Rolling Hills, flache Senke in der Mitte, Rücken auf der Ostflanke, Kuppen hinter beiden Heeren ---- */
 function gauss(x,z,cx,cz,sx,sz,a){const u=(x-cx)/sx,v=(z-cz)/sz;return a*Math.exp(-(u*u+v*v));}
+const GHILL=[];   // Kuppen und Kämme je Provinz-Gelände: [cx,cz,sx,sz,a]
+if(GEL){
+  const gr=mulberry((GSAAT*2654435761+12345)>>>0),R=(a,b)=>a+(b-a)*gr();
+  const pl=GTYP==='plain',mo=GTYP==='mountain';
+  const nK=pl?4:mo?3:9;
+  for(let k=0;k<nK;k++){   // Kuppen außerhalb der Kampfebene (|x|>135 oder |z|>115)
+    let cx,cz,sx=R(25,55),sz=R(25,55),t=0;do{cx=R(-290,290);cz=R(-235,235);t++;}while(Math.abs(cx)<135+sx*.9&&Math.abs(cz)<115+sz*.9&&t<40);
+    GHILL.push([cx,cz,sx,sz,pl?R(2,5):mo?R(4,8):R(5,11)]);
+  }
+  if(GTYP==='rough')for(let k=0;k<2;k++)GHILL.push([R(-90,90),R(-70,70),R(18,28),R(14,22),R(1.4,2.6)]);   // flache Buckel in der Kampfebene
+  if(mo){   // hohe Kämme an den Flanken, freier Durchgang in der Mitte
+    for(const sx of[-1,1])for(let z=-250;z<=250;z+=55)GHILL.push([sx*R(188,206),z+R(-12,12),R(36,48),R(40,58),R(10,18)]);
+    for(const sz of[-1,1])for(let x=-210;x<=210;x+=70)GHILL.push([x+R(-15,15),sz*R(215,240),R(46,60),R(26,36),R(8,15)]);
+  }
+}
+const GAMP=!GEL?1:GTYP==='plain'?.5:GTYP==='rough'?1.5:1.1,GPH=GEL?[GSAAT*1.7%6.28,GSAAT*.9%6.28,GSAAT*2.3%6.28]:[1.3,.4,2];
 function hoeheFormel(x,z){
+  if(GEL){
+    const r=Math.max(Math.abs(x)/HX,Math.abs(z)/HZ),mask=1-sst(.70,.97,r);
+    let h=1.5*Math.sin(x*.017+GPH[0])*Math.cos(z*.021+GPH[1])+1.0*Math.sin(x*.041-z*.033+GPH[2])+.35*Math.sin(x*.09+z*.07)+.25*Math.sin(z*.11-x*.05);
+    h*=GAMP*(.35+.65*sst(40,150,Math.hypot(x*.8,z*1.1)));
+    for(let k=0;k<GHILL.length;k++){const q=GHILL[k];h+=gauss(x,z,q[0],q[1],q[2],q[3],q[4]);}
+    return h*mask;
+  }
   const r=Math.max(Math.abs(x)/HX,Math.abs(z)/HZ),mask=1-sst(.70,.97,r);
   let h=1.5*Math.sin(x*.017+1.3)*Math.cos(z*.021+.4)+1.0*Math.sin(x*.041-z*.033+2)+.35*Math.sin(x*.09+z*.07)+.25*Math.sin(z*.11-x*.05);
   h*=.35+.65*sst(40,150,Math.hypot(x*.8,z*1.1));       // Kampfebene in der Mitte ruhiger
@@ -2450,8 +2480,9 @@ let _gx=0,_gz=0;
 function grad(x,z){_gx=(H(x+1,z)-H(x-1,z))*.5;_gz=(H(x,z+1)-H(x,z-1))*.5;}   // Steigung je Meter -> _gx,_gz
 
 /* ---- Wälder (Ellipsen mit Rauschrand), Feldwege ---- */
-const WALD=[[-135,10,38,55],[95,100,40,28],[-70,-108,30,22],[150,-120,40,30],[-205,-185,55,42],[215,150,55,48],[-255,120,45,55],[262,-70,45,55],
+const WALD0=[[-135,10,38,55],[95,100,40,28],[-70,-108,30,22],[150,-120,40,30],[-205,-185,55,42],[215,150,55,48],[-255,120,45,55],[262,-70,45,55],
   [0,-262,110,36],[40,268,120,36],[-345,0,30,190],[352,10,30,190]];
+const WALD=GKL==='wueste'?[]:GKL==='steppe'?WALD0.filter((q,k)=>k%3===1||k>9):GKL==='wald'?WALD0.map(q=>[q[0],q[1],q[2]*1.3,q[3]*1.3]).concat([[-70,100,40,34],[100,-60,36,40],[-20,-170,60,30],[30,190,60,30]]):WALD0;
 function wald(x,z){
   let m=0;const n=(vn(x*.06,z*.06)-.5)*.4;
   for(let k=0;k<WALD.length;k++){const p=WALD[k],d=Math.hypot((x-p[0])/p[2],(z-p[1])/p[3])+n,v=1-sst(.6,1,d);if(v>m)m=v;}
@@ -2508,8 +2539,10 @@ const cloudTex=(function(){
   t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.needsUpdate=true;return t;
 })();
 /* gemeinsame Boden-Uniforms (Gelände und Gras färben gleich) */
+const GCOL=({steppe:[[150,138,76],[178,158,90],[104,100,56],[160,130,90],[140,130,112]],wueste:[[206,178,122],[224,196,136],[182,150,104],[198,162,112],[164,142,114]],
+  wald:[[58,92,40],[96,112,52],[38,60,32],[110,90,64],[116,114,104]],schnee:[[208,214,222],[194,202,210],[166,176,186],[150,146,140],[178,180,186]]})[GKL]||[[80,108,46],[152,136,80],[54,74,38],[150,122,86],[130,124,112]];
 const GU={uSplat:{value:splTex},uSplO:{value:new THREE.Vector2(-HX,-HZ)},uSplK:{value:new THREE.Vector2(1/(2*HX),1/(2*HZ))},uDet:{value:detTex},
-  uC0:{value:lin(80,108,46)},uC1:{value:lin(152,136,80)},uC2:{value:lin(54,74,38)},uC3:{value:lin(150,122,86)},uC4:{value:lin(130,124,112)}};
+  uC0:{value:lin(...GCOL[0])},uC1:{value:lin(...GCOL[1])},uC2:{value:lin(...GCOL[2])},uC3:{value:lin(...GCOL[3])},uC4:{value:lin(...GCOL[4])}};
 const GDECL='uniform sampler2D uSplat;uniform vec2 uSplO;uniform vec2 uSplK;uniform vec3 uC0;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uC4;\n'
   +'vec3 groundCol(vec4 sp){vec3 c=mix(uC0,uC1,sp.g);c=mix(c,uC2,sp.b);c=mix(c,uC3,sp.r);return mix(c,uC4,sp.a);}\n';
 const HDECL='uniform sampler2D uHM;uniform vec2 uHS;uniform vec2 uHO;\n'
@@ -2621,7 +2654,7 @@ const rindO=y=>srgbL(98,86,70,.7+rnd()*.35);
 const VEGGEO={},NEARGEO={laub:[],pinie:[],zypresse:[],olive:[],busch:[]};
 (function(){
   const rb=()=>({pos:[],nrm:[],col:[]});
-  const blatt=(lo,hi,r,g,b)=>y=>srgbL(r,g,b,(.62+.5*Math.max(0,Math.min(1,(y-lo)/(hi-lo))))*(.82+rnd()*.34));
+  const blatt=(lo,hi,r,g,b)=>y=>srgbL(...(KLAUB(r,g,b,(y-lo)/(hi-lo))),(.62+.5*Math.max(0,Math.min(1,(y-lo)/(hi-lo))))*(.82+rnd()*.34));
   /* ---- Fernstufe: die einfachen Formen ---- */
   let P=rb();
   teil(P,new THREE.CylinderGeometry(.28,.5,4.6,6,1),0,2.3,0,1,1,1,rindF,0);
@@ -2711,7 +2744,7 @@ const VEGGEO={},NEARGEO={laub:[],pinie:[],zypresse:[],olive:[],busch:[]};
   teil(P,new THREE.IcosahedronGeometry(.45,1),-.9,.2,-.7,1,.7,1,gr,.5);
   for(let f=0;f<P.pos.length/9;f++){
     const ny=P.nrm[f*9+1],m=sst(.3,.8,ny)*(.55+.45*rnd());
-    const c=srgbL(70+rnd()*20,98+rnd()*14,44,.75+rnd()*.3);
+    const c=GKL==='schnee'?srgbL(222,228,236,1):(GKL==='steppe'||GKL==='wueste')?srgbL(150+rnd()*20,132+rnd()*14,96,.85+rnd()*.2):srgbL(70+rnd()*20,98+rnd()*14,44,.75+rnd()*.3);
     for(let k=0;k<3;k++){const o=f*9+k*3;P.col[o]=P.col[o]*(1-m)+c[0]*m;P.col[o+1]=P.col[o+1]*(1-m)+c[1]*m;P.col[o+2]=P.col[o+2]*(1-m)+c[2]*m;}
   }
   VEGGEO.stein=geoVon(P);
@@ -2721,24 +2754,25 @@ const LODV=[];    // Bäume/Büsche mit Fern-/Nahstufe
 (function(){
   const L={laub:[],pinie:[],zypresse:[],olive:[],busch:[],stein:[]},CAP={laub:560,pinie:190,zypresse:150,olive:110,busch:560,stein:90};
   const zone=(x,z)=>Math.abs(x)<78&&Math.abs(z)<96;   // Aufstellungszone bleibt frei
-  const add=(t,x,z,s)=>{if(L[t].length<CAP[t])L[t].push([x,z,s,rnd()*TAU]);};
+  const add=(t,x,z,s)=>{if(L[t].length>=CAP[t])return;if(KV.b<1&&t!=='busch'&&t!=='stein'&&t!=='olive'&&rnd()>KV.b)return;L[t].push([x,z,s,rnd()*TAU]);};
+  const baum=(r,h)=>GKL==='wald'?(r<.72?'laub':r<.86?'pinie':'zypresse'):GKL==='schnee'?(r<.3?'laub':r<.55?'pinie':'zypresse'):(r<(h>4?.25:.55)?'laub':r<(h>4?.7:.8)?'pinie':'zypresse');
   for(let k=0;k<WALD.length;k++){
     const p=WALD[k],sp=(Math.abs(p[0])>300||Math.abs(p[1])>240||Math.hypot(p[0],p[1])>300)?11:6.6;
     for(let x=p[0]-p[2]*1.2;x<=p[0]+p[2]*1.2;x+=sp)for(let z=p[1]-p[3]*1.2;z<=p[1]+p[3]*1.2;z+=sp){
       const xx=x+(rnd()-.5)*sp*.7,zz=z+(rnd()-.5)*sp*.7,w=wald(xx,zz);
       if(w<.35||rnd()>w*1.1||zone(xx,zz)||wegD(xx,zz)<4)continue;
       const h=H(xx,zz),r=rnd(),s=.85+rnd()*.5;
-      add(r<(h>4?.25:.55)?'laub':r<(h>4?.7:.8)?'pinie':'zypresse',xx,zz,s);
+      add(baum(r,h),xx,zz,s);
     }
   }
   for(let k=0;k<300&&L.laub.length+L.pinie.length+L.zypresse.length<800;k++){   // Einzelbäume
     const x=(rnd()*2-1)*(HX-10),z=(rnd()*2-1)*(HZ-10);
     if(zone(x,z)||wald(x,z)>.2||wegD(x,z)<4)continue;grad(x,z);if(Math.hypot(_gx,_gz)>.25)continue;
-    if(rnd()>.28)continue;const r=rnd();add(r<.5?'laub':r<.8?'pinie':'zypresse',x,z,.9+rnd()*.5);
+    if(rnd()>.28)continue;const r=rnd();add(GKL==='mittelmeer'||GKL==='steppe'?(r<.5?'laub':r<.8?'pinie':'zypresse'):baum(r,0),x,z,.9+rnd()*.5);
   }
-  for(let x=-310;x<=-190;x+=13){const z=24+18*Math.sin(x*.011)+6*Math.sin(x*.037);add('zypresse',x,z+5.5,1.1);add('zypresse',x+6,z-5.5,1.05);}   // Zypressenallee
+  if(GKL==='mittelmeer')for(let x=-310;x<=-190;x+=13){const z=24+18*Math.sin(x*.011)+6*Math.sin(x*.037);add('zypresse',x,z+5.5,1.1);add('zypresse',x+6,z-5.5,1.05);}   // Zypressenallee
   // Olivenhaine auf freiem, flachem Gelände
-  for(let g=0,tries=0;g<5&&tries<400;tries++){
+  for(let g=0,tries=0;g<Math.round(5*KV.olive)&&tries<400;tries++){
     const cx=(rnd()*2-1)*(HX-40),cz=(rnd()*2-1)*(HZ-40);
     if(zone(cx,cz)||wald(cx,cz)>.02||wegD(cx,cz)<12||H(cx,cz)>5)continue;grad(cx,cz);if(Math.hypot(_gx,_gz)>.12)continue;
     g++;for(let k=0;k<22;k++){const a=rnd()*TAU,d=Math.sqrt(rnd())*26,x=cx+Math.cos(a)*d,z=cz+Math.sin(a)*d;
@@ -2751,18 +2785,18 @@ const LODV=[];    // Bäume/Büsche mit Fern-/Nahstufe
       const xx=x+(rnd()-.5)*4,zz=z+(rnd()-.5)*4,w=wald(xx,zz);
       if(zone(xx,zz)||wegD(xx,zz)<3.2||w<.06)continue;
       if(w<.5){
-        const r=rnd();if(r<.14)add('laub',xx,zz,.5+rnd()*.3);else if(r<.2)add('olive',xx,zz,.6+rnd()*.3);else if(r<.55)add('busch',xx,zz,.8+rnd()*.8);
+        const r=rnd();if(r<.14)add('laub',xx,zz,.5+rnd()*.3);else if(r<.2&&KV.olive>0)add('olive',xx,zz,.6+rnd()*.3);else if(r<.55)add('busch',xx,zz,.8+rnd()*.8);
       }else if(rnd()<.2)add('busch',xx,zz,.6+rnd()*.6);
     }
   }
   for(let k=0;k<4000&&L.busch.length<CAP.busch;k++){
     const x=(rnd()*2-1)*(HX-6),z=(rnd()*2-1)*(HZ-6),w=wald(x,z);
     if(wegD(x,z)<2.6)continue;if(zone(x,z)&&rnd()>.1)continue;
-    if(w<.04&&rnd()>.22)continue;add('busch',x,z,.7+rnd()*.9);
+    if(w<.04&&rnd()>.22*KV.busch)continue;add('busch',x,z,.7+rnd()*.9);
   }
   for(let k=0;k<4000&&L.stein.length<CAP.stein;k++){
     const x=(rnd()*2-1)*(HX-6),z=(rnd()*2-1)*(HZ-6);if(wegD(x,z)<2.4||(zone(x,z)&&rnd()>.08))continue;
-    const h=H(x,z);if(rnd()>.15+Math.min(.6,h*.07))continue;add('stein',x,z,.5+rnd()*rnd()*2.6+(h>5?.6:0));
+    const h=H(x,z);if(rnd()>(.15+Math.min(.6,h*.07))*KV.stein)continue;add('stein',x,z,.5+rnd()*rnd()*2.6+(h>5?.6:0));
   }
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),ps=new THREE.Vector3(),ax=new THREE.Vector3(0,1,0),cl=new THREE.Color();
   for(const t in L){
@@ -2835,12 +2869,14 @@ async function umgebungLaden(){
   try{const r=await fetch(AS+'figuren/umgebung.json');if(!r.ok)throw new Error('HTTP '+r.status);UMD=await r.json();}
   catch(e){UMD=false;console.warn('Umgebungsteile nicht geladen',e);return;}
   const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.95,metalness:0});GMATS.push(mat);
+  const MOOSK=GKL==='schnee'?[.72,.76,.82]:GKL==='steppe'?[.3,.25,.12]:GKL==='wueste'?[.5,.4,.22]:null;
   for(const name in UMD.teile){
     if(name==='balliste')continue;
     const t=UMD.teile[name],n=t.pos.length/3,C=new Float32Array(n*3);
     let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;
     for(let k=0;k<n;k++){
       for(let c=0;c<3;c++)C[k*3+c]=Math.pow(t.col[k*3+c]/255,2.2);
+      if(MOOSK&&name.startsWith('fels')&&t.col[k*3+1]>t.col[k*3]*1.08){const q=MOOSK;C[k*3]=q[0];C[k*3+1]=q[1];C[k*3+2]=q[2];}   // Moos -> Klima (Schnee, trockener Boden)
       const x=t.pos[k*3],z=t.pos[k*3+2];if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;
     }
     const g=new THREE.BufferGeometry();
@@ -2908,7 +2944,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
     let sd=7;const sk=String(g.id||'')+'|'+String(g.n||'')+'|'+(g.seiten||[]).join(',')+'|'+((g.einheiten||[]).length)+'|'+(g.saat||0);
     for(let i=0;i<sk.length;i++)sd=(Math.imul(sd,31)+sk.charCodeAt(i))|0;
     const rn=mulberry(sd>>>0);
-    const feind=(g.einheiten||[]).filter(e=>e.s===1),kel=g.umgebung==='kelt'||(g.umgebung!=='mittelmeer'&&feind.length&&feind.filter(e=>e.kultur==='keltisch').length>feind.length/2);
+    const wue=GKL==='wueste',feind=(g.einheiten||[]).filter(e=>e.s===1),kel=!wue&&(g.umgebung==='kelt'||(g.umgebung!=='mittelmeer'&&feind.length&&feind.filter(e=>e.kultur==='keltisch').length>feind.length/2));
     // Gehöft / Rundhäuser an einer Flanke: flachste Stelle aus 48 Versuchen
     const sg=rn()<.5?-1:1;let bx=sg*140,bz=40,bs=1e9;
     for(let t=0;t<48;t++){const x=sg*(128+rn()*36),z=12+rn()*56,sc=hoeheSpanne(x,z,11)*3+WF(x,z)*8+(wegD(x,z)<9?3:0);if(sc<bs){bs=sc;bx=x;bz=z;}}
@@ -2926,8 +2962,8 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
       teil('haus_mittelmeer',0,0,th,1);
       for(const lx of[-6,0,6])teil('steinmauer',lx,-8.5,th,1);
       for(const sx of[-1,1])for(const lz of[-5.5,.5])teil('steinmauer',sx*9.2,lz,th+PI/2,1);
-      for(const lx of[-7.2,-3.2,3.2,7.2])teil('flechtzaun',lx,6.8,th,1);
-      teil('heuhaufen',-6,-5,rn()*TAU,1);teil('heuhaufen',13,-2,rn()*TAU,1);
+      if(!wue){for(const lx of[-7.2,-3.2,3.2,7.2])teil('flechtzaun',lx,6.8,th,1);
+      teil('heuhaufen',-6,-5,rn()*TAU,1);teil('heuhaufen',13,-2,rn()*TAU,1);}
     }else{   // Kelten: zwei bis drei Rundhäuser mit Flechtzäunen und Heu
       const nh=2+(rn()<.5?1:0);
       for(let k=0;k<nh;k++){
@@ -2939,7 +2975,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
       teil('heuhaufen',(nh-1)/2*17+9,-3,rn()*TAU,1);
     }
     // Felsen: verstreut am Rand und auf Hügeln, nie in Kampfmitte und Aufstellungszonen (|x|<118 und |z|<100)
-    const felsen=[['fels_gross',5,.75,.5],['fels_platte',6,.75,.5],['fels_mittel',11,.75,.5],['fels_klein',24,.7,.6]];
+    const fm=wue||GTYP==='mountain'?1.6:1,felsen=[['fels_gross',Math.round(5*fm),.75,.5],['fels_platte',Math.round(6*fm),.75,.5],['fels_mittel',Math.round(11*fm),.75,.5],['fels_klein',Math.round(24*fm),.7,.6]];
     for(const[name,anz,s0,sv]of felsen){
       const w=UMW[name];if(!w)continue;let ok=0;
       for(let t=0;t<400&&ok<anz;t++){
@@ -3007,12 +3043,13 @@ vColor=color*groundCol(sp)*(.72+aSeed.w*.45)*1.1;`);
   mat.customProgramCacheKey=()=>'gras1';GMATS.push(mat);
   const m=new THREE.Mesh(ig,mat);m.frustumCulled=false;scene.add(m);GRAS.push({m,uni,max:n});return m;
 }
-grasSchicht(9000,26,.28,.45);  // nah, dicht (30.10.: kleiner, wirkte aus der Nähe wie Blätter)
-grasSchicht(6000,80,.5,1.0);  // fern, größere Büschel
+grasSchicht(Math.round(9000*KV.gras),26,.28,.45);  // nah, dicht (30.10.: kleiner, wirkte aus der Nähe wie Blätter)
+grasSchicht(Math.round(6000*KV.gras),80,.5,1.0);  // fern, größere Büschel
 
 /* ---- Himmel (Kuppel mit Verlauf, Sonnenhof, Wolken), Dunst, ferne Hügelketten ---- */
 const SD=new THREE.Vector3(-.60,.50,.45).normalize();   // Richtung zur Sonne (tief, von rechts vorn)
-const HOR=disp(206,219,232),ZEN=disp(78,124,196),SUNC=disp(255,226,170);
+const HZK=({wueste:[[226,214,194],[104,140,190]],schnee:[[214,220,228],[120,144,178]],wald:[[200,214,226],[78,120,186]],steppe:[[216,220,224],[86,128,194]]})[GKL]||[[206,219,232],[78,124,196]];
+const HOR=disp(...HZK[0]),ZEN=disp(...HZK[1]),SUNC=disp(255,226,170);
 scene.fog=new THREE.Fog(HOR,70,2300);renderer.setClearColor(HOR);
 const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,depthTest:false,fog:false,
   uniforms:{uSun:{value:SD},uHor:{value:HOR},uZen:{value:ZEN},uSunCol:{value:SUNC},uTime:UWT,uCloud:{value:cloudTex}},
@@ -4833,7 +4870,7 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeue
    ==================================================================================================== */
 const TON=(()=>{
   const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
-  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
+  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
     hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
   const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
@@ -4858,7 +4895,8 @@ const TON=(()=>{
   const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'],id,art:null,ok:false});
   LISTE.push(mItem('kampf_1'));
   const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
-  for(const a in SFX)for(let n=1;n<=SFX[a];n++)if(!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
+  const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste)};   // Klima-Teppiche nur laden, wenn gebraucht
+  for(const a in SFX)for(let n=1;n<=SFX[a];n++)if((!(a in KLB)||KLB[a])&&!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
   for(const id of ['ruhe_1','aufmarsch_%','kampf_%','sieg_1','niederlage_1','hoehepunkt_1','kampf_2','kampf_3','hoehepunkt_2','sieg_2','ruhe_2','niederlage_2']){const m=mItem(id);if(id.endsWith('%'))m.kz=id;LISTE.push(m);}
   function kultSetzen(){   // stärkste Kultur der Spielerseite (nach Figuren); noch nicht geladene Volksstücke umstellen
     const z={};for(const u of U){const k=u.side===0&&u.ein&&KMUS[u.ein.kultur];if(k)z[k]=(z[k]||0)+u.np;}
@@ -4977,8 +5015,8 @@ const TON=(()=>{
   function teppiche(){
     const n=ctx.currentTime,sz=.5+.5/(1+dist/140),ruhig=phase==='schlacht'&&!pausiert;
     const nah=ruhig?mn(1,nahK/40):0,fern=ruhig?mn(1,fernK/70)*(1-.7*nah):0,mar=ruhig?mn(1,marschK/50)*(1-.6*nah):0,stu=ruhig?mn(1,sturmK/40)*(1-.5*nah):0;
-    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:.3,wiese:.25*(1-.8*nah)};
-    for(const k in T){if(!AMB[k])ambStart(k);const a=AMB[k];if(a)a.g.gain.setTargetAtTime(T[k],n,.6);}
+    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:GKL==='schnee'?.4:.3,wiese:(GKL==='mittelmeer'||GKL==='steppe'?.25:GKL==='schnee'?.08:0)*(1-.8*nah),wald:KLB.wald?.3*(1-.8*nah):0,wueste:KLB.wueste?.3*(1-.7*nah):0,kueste:KLB.kueste?.28*(1-.8*nah):0};
+    for(const k in T){if(!AMB[k]&&T[k]>0)ambStart(k);const a=AMB[k];if(a)a.g.gain.setTargetAtTime(T[k],n,.6);}
   }
 
   /* ---- Hufteppich: je bewegter Reitereinheit eine räumliche Schleife (Gang nach Tempo, Lautstärke nach Tempo, Zahl und Abstand) ---- */
@@ -5353,6 +5391,7 @@ return{
   pause(p){pausiert=p===undefined?!pausiert:!!p;uiAktualisieren();},
   stellen(i,x,z){if(phase==='aufstellung'&&U[i])platziere(U[i],x,z);},
   versetzen(i,x,z){const u=U[i];if(!u)return;const dx=x-u.cx,dz=z-u.cz;u.cx=x;u.cz=z;u.mx+=dx;u.mz+=dz;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sX[id]+=dx;sZ[id]+=dz;}}},   // nur für Tests: Einheit samt Soldaten umsetzen
+  hoehe(x,z){return H(x,z);},get gelaende(){return{typ:GTYP,klima:GKL,saat:GSAAT,gesetzt:!!GEL,huegel:GHILL.length};},
   bildPos(x,z){const v=new THREE.Vector3(x,H(x,z),z).project(camera);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight];},
   haltung(i,s){if(U[i])U[i].stance=s;},kiSeiten(a,b){KIS[0]=!!a;KIS[1]=!!b;},   // nur für Tests: true = Computer-Führung, false = Haltung/Befehle (Spielerseite)
 
@@ -22500,7 +22539,13 @@ function eschStart(args){
   root.textContent='';root.appendChild(tpl.content.cloneNode(true));root.hidden=false;
   try{AUDIO.hush(true);}catch(e){}
   const au=AUDIO.cfg,gq=GFX.q==='leicht'?'niedrig':GFX.q==='mittel'?'mittel':null;
-  const api=schlachtKern({root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff:bdiffNow(),limit:600,zeitSieg:playerAttacker?'niederlage':'sieg',
+  let gel;try{   // Gelände aus der Provinz: Typ wie in der alten Schlacht, Klima aus Trockenheit, Breite, Jahreszeit
+    const pd=PROV_DEF[ti],ar=aridAt(pd.lon,pd.lat),se=season(),ft=feat(ti),h=((ti*131+(S.turn||0)*17)>>>0)%100;
+    const ty=pter(ti),dry=isAfr(pd.lon,pd.lat)||pd.lat<38.6||ar>0.55;
+    const kl=(se===3&&(pd.lat>46||(pd.lat>41&&h<20)))?'schnee':ar>0.7?'wueste':ar>0.4?'steppe':(ty==='rough'&&!dry)?'wald':'mittelmeer';
+    gel={typ:ty,klima:kl,saat:ti*131+(S.turn||0),kueste:!!(ft&&ft.coast)};
+  }catch(e){gel=undefined;}
+  const api=schlachtKern({root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff:bdiffNow(),limit:600,gelaende:gel,zeitSieg:playerAttacker?'niederlage':'sieg',
     farben:[c0!=null?c0:0xb02a22,c1!=null?c1:0x7a3fa0],fps:!!GFX.fps,ton:{an:!!(au.sfx||au.music),m:Math.round((au.mv==null?0.6:au.mv)*100),g:Math.round((au.sv==null?0.8:au.sv)*100)},
     onEnde:r=>setTimeout(()=>eschEnde(r),0)});
   ESCH.api=api;
