@@ -15,6 +15,16 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.goto(`http://localhost:${PORT}/dev/staedte/index.html`, { timeout: 120000 });
   await p.waitForFunction(() => window.SR, null, { timeout: 60000 });
   ok('Geladen, Spielobjekt vorhanden', true);
+
+  // S1.5 Startseite: vier Regionen, nur Cremona wählbar
+  const st = await p.evaluate(() => ({ offen: !document.querySelector('#startseite').hidden, orte: document.querySelectorAll('#startseite .ort').length }));
+  await p.click('#startseite .ort[data-r="kampanien"]');
+  const gesperrt = await p.evaluate(() => !!document.querySelector('#regionKarte .gesperrt') && !!document.querySelector('.startknoepfe button:disabled'));
+  if (BILD) await p.screenshot({ path: BILD.replace(/\.png$/, '_start.png') });
+  await p.click('#startseite .ort[data-r="po"]');
+  await p.click('.startknoepfe [data-s="neu"]');
+  const zu = await p.evaluate(() => document.querySelector('#startseite').hidden && SR.S.region === 'po');
+  ok('Startseite: 4 Regionen, Kampanien gesperrt, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
   await p.evaluate(() => SR.tempo(0));
 
   // S1.3: Landstraße beim Start, Bauen nur an der Straße

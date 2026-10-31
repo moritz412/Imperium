@@ -63,6 +63,18 @@ export const GEB = {
 // Casa: ausgebaute Hütte
 export const CASA = { n: 'Casa', h: 1.15, wand: 0xe2c8a0, dach: 0xb5522f, wohnt: 16, kosten: { ziegel: 10 } };
 
+// Startregionen (Konzept „Rahmen“); vorerst nur die Po-Ebene spielbar
+export const REGIONEN = [
+  { id: 'po', n: 'Po-Ebene', stadt: 'Cremona', lon: 10.02, lat: 45.13, gruendung: '218 v. Chr.', roh: 'Getreide, Holz, Lehm',
+    text: 'Latinische Kolonie am Fluss Padus, vorgeschobener Posten gegen die Gallier. Fruchtbare Ebene, Hochwasser im Frühling.', schwer: 'Mittel', aktiv: true },
+  { id: 'etrurien', n: 'Etrurien', stadt: 'Florentia', lon: 11.25, lat: 43.77, gruendung: '59 v. Chr.', roh: 'Eisenerz, Wein, Marmor',
+    text: 'Veteranenstadt am Arnus. Marmor aus Luna, aber wenig Bauland zwischen den Hügeln.', schwer: 'Mittel' },
+  { id: 'kampanien', n: 'Kampanien', stadt: 'Puteoli', lon: 14.1, lat: 40.82, gruendung: '194 v. Chr.', roh: 'Wein, Oliven, Fisch, Puzzolanerde',
+    text: 'Hafenstadt am Golf. Puzzolanerde für römischen Beton – und die Erde bebt unter dem Vesuv.', schwer: 'Leicht' },
+  { id: 'apulien', n: 'Apulien', stadt: 'Luceria', lon: 15.33, lat: 41.5, gruendung: '314 v. Chr.', roh: 'Oliven, Wolle, Getreide',
+    text: 'Weite Ebenen und Schafweiden, Dürre im Sommer, fern von Rom.', schwer: 'Schwer' },
+];
+
 export const START = {
   gut: { denare: 300, holz: 170, lehm: 0, ziegel: 40, getreide: 40, mehl: 0, brot: 20 },
   stimmung: 60,

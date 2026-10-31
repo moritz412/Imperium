@@ -2,6 +2,7 @@
 import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
+import { startseite } from './start.js';
 
 const SPEICHER = 'staedte_roms.v1';
 const $ = s => document.querySelector(s);
@@ -216,9 +217,7 @@ $('#menue').addEventListener('click', e => {
   const m = b.dataset.m;
   if (m === 'weiter') $('#menue').hidden = true;
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
-  if (m === 'neu' && confirm('Neues Spiel beginnen? Der aktuelle Stand geht verloren.')) {
-    S = sim.neuesSpiel(); auswahl = 0; bauTyp = ''; speichern(true); szene.jahreszeitFarbe(sim.jahreszeit(S)); allesZeichnen(); $('#menue').hidden = true;
-  }
+  if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
   if (m === 'hilfe') {
     b.closest('.menuespalte').querySelector('.klein').outerHTML = `<ol class="hilfe">
       <li>Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.</li>
@@ -257,13 +256,24 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
-  szene.zeichnen(dt, $('#menue').hidden ? tempo : 0);
+  if (tempo && $('#menue').hidden && $('#startseite').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
+// ---------- Startseite (S1.5) ----------
+const willkommen = () => melden('Willkommen in Cremona. Der Senat erwartet die ersten Hütten an der Landstraße.');
+const start = startseite({
+  hatStand: () => { try { return !!localStorage.getItem(SPEICHER); } catch (e) { return false; } },
+  weiter: () => {},
+  gruenden: r => {
+    S = sim.neuesSpiel(); S.region = r.id; auswahl = 0; bauTyp = ''; uhr = 0;
+    speichern(true); szene.jahreszeitFarbe(sim.jahreszeit(S)); szene.zentrieren(20, 20); allesZeichnen(); willkommen();
+  },
+});
+
 allesZeichnen();
 requestAnimationFrame(schleife);
-if (!S.geb.length) melden('Willkommen in Cremona. Der Senat erwartet die ersten Hütten.');
+start.zeigen();
 
 // Für Tests und Fehlersuche
 window.SR = {
@@ -272,6 +282,6 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
-  modelle: () => szene.modelleBereit, szene,
+  modelle: () => szene.modelleBereit, szene, start,
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

@@ -39,7 +39,12 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       Legende daneben. Wasser: Brunnenbereich blau, Häuser grün/rot. Stimmung: Straßen in Marktreichweite gelb, Häuser nach
       Versorgung (Wasser, Markt, Brot). Arbeit: Betriebe nach Besetzung, Häuser mit freien Arbeitern blau. Farbe als Fläche
       unter dem Gebäude + schwaches Leuchten. Test 24/24 (PC, ). **Nicht getestet:** iPad.
-- [ ] S1.5 Startbildschirm mit Regionswahl (Mockup „Startregion“), zunächst nur Cremona aktiv.
+- [x] S1.5 Startseite (31.10. abends): beim Laden und über Menü „Provinz wählen / neu gründen“. Italienkarte (SVG, grobe
+      Umrisse, Padus, Tiberis, Roma) mit Cremona, Florentia, Puteoli, Luceria; Regionskarte mit Gründung, Rohstoffen,
+      Schwierigkeit (Daten  in daten.js). Nur Cremona wählbar, die anderen entsättigt mit Schloss.
+      Hintergrund img/ep_0.webp. Knöpfe in einer Spalte: Weiterspielen (wenn Stand da) / neu gründen (mit Rückfrage).
+      Zeit läuft erst nach dem Schließen. Gebaut ohne Blick auf das Mockup „Startregion“ (Canvas von hier nicht erreichbar),
+      nach dem Konzepttext. Test 25/25 (PC, ). **Nicht getestet:** iPad, Abgleich mit dem Mockup.
 - [ ] S1.6 Ton (Hintergrund, Bauen, Jahreszeit) aus vorhandener Pipeline.
 
 ## Später
