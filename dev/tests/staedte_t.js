@@ -216,7 +216,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const knoepfe = [...document.querySelectorAll('#info [data-a="handel"]')], ui = { n: knoepfe.length, frei: knoepfe.every(b => !b.disabled), titel: document.querySelector('#info h2').textContent };
     const h0 = S.gut.holz; S.gut.holz += 10; knoepfe[0].click(); ui.klick = Math.round(S.gut.holz) === Math.round(h0);
     SR.hexInfo(null); SR.umland(false);
-    return { zu, zuGrund, offen, v: v.ok, plus, billiger: p1 < p0, k: k.ok, mehrZiegel: zi1 - zi0, teurer: z1 > z0, erholt: rueck > p1,
+    return { pWaren: Object.keys(sim.PARTNER.placentia.waren).length, zu, zuGrund, offen, v: v.ok, plus, billiger: p1 < p0, k: k.ok, mehrZiegel: zi1 - zi0, teurer: z1 > z0, erholt: rueck > p1,
       gunstA: A.gunst, mA: /bezahlt/.test(mA), gunstB: B.gunst, mB: /reicht nicht/.test(mB), ui };
   });
   ok('Placentia: Handel erst mit Verbindung, Preise nach Angebot und Nachfrage', !handel.zu && /kein Weg/.test(handel.zuGrund) && handel.offen && handel.v && handel.plus > 0 && handel.billiger && handel.k && handel.mehrZiegel === 10 && handel.teurer && handel.erholt, JSON.stringify(handel));
@@ -376,12 +376,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     sim.monat(W, SR.welt);
     SR.umland(true); SR.hexInfo(sim.mantuaFeld); const ui = { titel: document.querySelector('#info h2').textContent, knoepfe: document.querySelectorAll('#info [data-p="mantua"]').length };
     SR.hexInfo(sim.gallierFeld); ui.geschenk = !!document.querySelector('#info [data-a="geschenk"]'); SR.hexInfo(null); SR.umland(false);
-    return { stein: !!stein && sim.betriebeFuer(stein).includes('steinbruch'), erz: !!erz && sim.betriebeFuer(erz).includes('erzgrube'), zu, offen, plOffen, v: v.ok, kf: kf.ok,
+    return { mWaren: sim.PARTNER.mantua.waren, stein: !!stein && sim.betriebeFuer(stein).includes('steinbruch'), erz: !!erz && sim.betriebeFuer(erz).includes('erzgrube'), zu, offen, plOffen, v: v.ok, kf: kf.ok,
       gs, fr, friedlich: !/Gallier fallen/.test(mG), schmiede: !!sm, werkzeug: Math.round((W.gut.werkzeug || 0) * 10) / 10, ui };
   });
   ok('Ring 4: Steinbruch und Erz, Mantua nur über Land, Handel', r4.stein && r4.erz && !r4.zu && r4.offen && !r4.plOffen && r4.v && r4.kf, JSON.stringify(r4));
   ok('Gallier: Geschenke bringen Frieden, Schmiede macht Werkzeug', r4.gs && r4.fr === 24 && r4.friedlich && r4.schmiede && r4.werkzeug > 0);
-  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 14 && r4.ui.geschenk, JSON.stringify(r4.ui));
+  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 2 * Object.keys(r4.mWaren).length && r4.ui.geschenk, JSON.stringify(r4.ui));
   // Späte Republik (1.11.): Übergang, Weinberg → Kelter → Wein, Domus der Equites, Archiv
   const ep = await p.evaluate(() => {
     const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
@@ -390,7 +390,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const E = kopie(), F = sim.forschungS(E);
     const vorher = sim.epocheWechseln(E).grund || '', domusVor = sim.bauen(E, SR.welt, 'domus', 30, 13).grund || '';
     E.rang = 3; E.gunst = 60; F.fertig = [...new Set([...F.fertig, 'fruchtwechsel', 'villa', 'ziegelbrand', 'schotter', 'steuerlisten', 'landvermessung'])];
-    const wechsel = sim.epocheWechseln(E).ok, wein = sim.forschungWaehlen(E, 'weinbau').ok, tempel = sim.forschungWaehlen(E, 'tempel').grund;
+    const wechsel = sim.epocheWechseln(E).ok, wein = sim.forschungWaehlen(E, 'weinbau').ok, tempel = sim.forschungWaehlen(E, 'theater').grund;
     F.fertig.push('weinbau', 'archiv');
     const hang = sim.regionKarte().find(f => f.typ === 'hang' && !(E.land[sim.landKey(f)] || {}).betrieb);
     E.land[sim.landKey(hang)] = { verm: 2, betrieb: '' }; const berg = sim.landBauen(E, hang, 'weinberg').ok;
@@ -407,7 +407,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const A = kopie(); const ohne = sim.handelSumme(A, 'holz', 'kauf'); A.forschung = { ziel: '', wissen: 0, fertig: ['archiv'] }; const mit = sim.handelSumme(A, 'holz', 'kauf');
     return { block, knopfAus, vorher, domusVor, wechsel, wein, tempel, berg, kelter, domus: !!domus, eq: domus ? domus.bew : -1, dst: domus ? JSON.stringify(domus.status) + ' st' + Math.round(E.stimmung) + ' w' + sim.inReichweite(E, domus, 'brunnen') : '', weinWeg: E.gut.wein < 60, archiv: mit < ohne };
   });
-  ok('Späte Republik: Übergang mit Rang, Erfindungen und Gunst', ep.block && ep.knopfAus && /Stadtrang/.test(ep.vorher) && /Späten Republik/.test(ep.domusVor) && ep.wechsel && ep.wein && /späteren/.test(ep.tempel), JSON.stringify(ep));
+  ok('Späte Republik: Übergang mit Rang, Erfindungen und Gunst', ep.block && ep.knopfAus && /Stadtrang/.test(ep.vorher) && /Späten Republik/.test(ep.domusVor) && ep.wechsel && ep.wein && /Tempelbau/.test(ep.tempel), JSON.stringify(ep));
   ok('Weinberg, Kelter, Domus mit Equites, Archiv senkt Aufschlag', ep.berg && ep.kelter && ep.domus && ep.eq >= 1 && ep.weinWeg && ep.archiv);
   // Unterhalt (1.11.): Lohn/Sold kostet Denare; ohne Geld steht der Markt still
   const uh = await p.evaluate(() => {
@@ -418,7 +418,27 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { summe: sim.unterhaltSumme(S), bezahlt, marktOk: markt && !markt.unbezahlt, marktStill: mb && mb.unbezahlt === true && mb.w === 0 && /Lohn/.test(JSON.stringify(mb.status)) };
   });
   ok('Unterhalt: Lohn wird bezahlt, ohne Geld steht der Markt still', uh.summe > 0 && uh.bezahlt > 0 && uh.marktOk && uh.marktStill, JSON.stringify(uh));
-  ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
+  // Späte Republik vollständig (1.11.): Öl, Tuch, Garum, Tempel, Theater
+  const sr = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, E = JSON.parse(JSON.stringify(S)), F = sim.forschungS(E);
+    E.epoche = 2; F.fertig = [...new Set([...F.fertig, 'olivenpresse', 'weberei', 'garum', 'tempel', 'theater', 'weinbau'])];
+    Object.assign(E.gut, { holz: 900, ziegel: 900, stein: 900, denare: 3000, oel: 50, garum: 50, tuch: 50, wein: 50, brot: 500 });
+    const gebaut = {};
+    for (const t of ['oelmuehle', 'weberei', 'garumsiederei', 'tempel', 'theater']) {
+      for (let z = 1; z <= 34 && !gebaut[t]; z++) for (let x = 1; x <= 37 && !gebaut[t]; x++) { const r = sim.bauen(E, SR.welt, t, x, z); if (r.ok) { gebaut[t] = r.b; r.b.prio = true; } }
+    }
+    const karte = sim.regionKarte(), frei = typ => karte.find(f => f.typ === typ && !(E.land[sim.landKey(f)] || {}).betrieb);
+    const hang = frei('hang'), weide = frei('weide');
+    E.land[sim.landKey(hang)] = { verm: 2, betrieb: '' }; E.land[sim.landKey(weide)] = { verm: 2, betrieb: '' };
+    const oliven = sim.landBauen(E, hang, 'olivenhain').ok, schafe = sim.landBauen(E, weide, 'schaeferei').ok;
+    const dom = { id: 9900, t: 'domus', x: 0, z: 0, w: 0, prio: false, stufe: 1, bew: 10, status: [] }; E.geb.push(dom);
+    E.monat = 8; const g0 = sim.gunst(E); sim.monat(E, SR.welt);
+    return { gebaut: Object.keys(gebaut), oliven, schafe, lux: dom.lux, tuch: E.versorgt.tuch, gunst: sim.gunst(E) - g0,
+      tempelArbeit: (gebaut.tempel || {}).w > 0, theaterArbeit: (gebaut.theater || {}).w > 0 };
+  });
+  ok('Späte Republik: Ölmühle, Weberei, Garum, Tempel, Theater gebaut; Olivenhain, Schäferei', sr.gebaut.length === 5 && sr.oliven && sr.schafe, JSON.stringify(sr));
+  ok('Öl und Garum als Luxus, Tuch versorgt, Tempel bringt Gunst', sr.lux === 1.5 && sr.tuch && sr.tempelArbeit && sr.gunst >= 2);
+  ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
   const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));

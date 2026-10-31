@@ -297,16 +297,29 @@ export function monat(S, welt) {
     if (b.brand > 0) continue;
     const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske), wein = S.gut.wein >= Math.max(0.5, b.bew * 0.1);
     if (b.bew > 0) { if (wein) S.gut.wein -= b.bew * 0.1; else { b.status.push({ art: 'rohstoff', gut: 'wein', text: 'Kein Wein – die Equites ziehen weg' }); b.bew--; } }
+    // Luxus (Späte Republik): Öl und Garum – je +25 % Steuern
+    let lux = 1;
+    for (const [g, n] of [['oel', 0.05], ['garum', 0.02]]) if (b.bew > 0 && S.gut[g] >= b.bew * n) { S.gut[g] -= b.bew * n; lux += 0.25; }
+    b.lux = lux;
     const fehlt = !wasser ? 'Brunnen' : !markt ? 'Markt' : !S.versorgt.brot ? 'Brot' : !wein ? 'Wein' : '';
     if (fehlt && b.bew === 0) b.status.push({ art: 'markt', text: 'Equites ziehen erst ein mit ' + fehlt, leicht: true });
     else if (!fehlt && b.bew < wohnraum(b) && S.stimmung >= 50) b.bew++;
-    equites += b.bew;
+    equites += b.bew * lux;
   }
+  // Tuch für Casa und Insula (Späte Republik)
+  const tuchBedarf = S.geb.filter(b => b.t === 'huette' && b.stufe >= 2).reduce((s, b) => s + b.bew * 0.02, 0);
+  S.versorgt.tuch = tuchBedarf > 0 && S.gut.tuch >= tuchBedarf;
+  if (S.versorgt.tuch) S.gut.tuch -= tuchBedarf;
 
   // Stimmung und Steuern
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
   if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
+  if (S.versorgt.tuch) ziel += 6;
+  const tempel = S.geb.filter(b => b.t === 'tempel' && b.w > 0);
+  if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;
+  if (tempel.length && S.monat % 12 === 8) S.gunst = Math.min(100, gunst(S) + 2);
+  if (S.geb.some(b => b.t === 'theater' && b.w > 0)) ziel += 8;
   if (haeuser && rang(S) >= INSULA.rang) {   // S3.3: Ordnung – Häuser ohne Wache in der Nähe
     const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
     ziel -= FEUER.unruhe * ohne / haeuser;

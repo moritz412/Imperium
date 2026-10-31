@@ -174,6 +174,11 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       nicht. Summe im Cremona-Fenster und als Hinweis an den Denaren. Test 57/57.
 - [x] Gebäude zur Straße drehen: beim Bauen gespeicherte Vorderseite (`dreh`, Süd/Ost/Nord/West; nicht quadratische nur
       Süd/Nord), alte Stände werden beim Zeichnen nachgerechnet, Vorschau dreht mit. Test 57/57, Bild angesehen.
+- [x] Späte Republik vollständig: **Öl** (Olivenhain auf Hang → Ölmühle), **Tuch** (Schäferei auf Weide → Weberei; Casa/Insula
+      verbrauchen 0,02/Kopf, versorgt → Stimmung +6), **Garum** (Garum-Siederei: Fisch 3 → Garum 1; teuer im Handel), Öl und
+      Garum als Luxus der Equites (je +25 % Steuern), **Tempel** (3×3, 2 Priester, Unterhalt 5: Stimmung bis +12 im Umkreis 16,
+      jeden Herbst Gunst +2), **Theater** (4×3, nach Tempelbau, Unterhalt 8: Stimmung +8 stadtweit). Placentia/Mantua handeln
+      Wein, Öl, Tuch, Garum. Eigene Formen (Podiumstempel, Theater mit Rängen, Ölmühle, Weberei, Garum-Becken). Test 59/59.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

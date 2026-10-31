@@ -29,6 +29,11 @@ export const WAREN = {
   werkzeug: { n: 'Werkzeug', lager: true },
   trauben:  { n: 'Trauben',  lager: true },
   wein:     { n: 'Wein',     lager: true },
+  oliven:   { n: 'Oliven',   lager: true },
+  oel:      { n: 'Öl',       lager: true },
+  wolle:    { n: 'Wolle',    lager: true },
+  tuch:     { n: 'Tuch',     lager: true },
+  garum:    { n: 'Garum',    lager: true },
 };
 
 export const JAHRESZEITEN = [
@@ -74,6 +79,15 @@ export const GEB = {
   kelter: { n: 'Kelter', kat: 'Nahrung', g: [2, 2], h: 0.75, wand: 0xd2b48c, dach: 0x7a3a2a, sklaven: true, forschung: 'weinbau',
     kosten: { holz: 30, ziegel: 20 }, arbeiter: 2, braucht: { trauben: 2 }, erzeugt: { wein: 2 },
     text: 'Presst Trauben zu Wein und lagert ihn in Dolia. Die Equites in ihren Domus trinken ihn.' },
+  oelmuehle: { n: 'Ölmühle', kat: 'Nahrung', g: [2, 2], h: 0.75, wand: 0xd8c49a, dach: 0x8a4a2a, sklaven: true, forschung: 'olivenpresse',
+    kosten: { holz: 30, ziegel: 20 }, arbeiter: 2, braucht: { oliven: 2 }, erzeugt: { oel: 2 },
+    text: 'Mahlt Oliven mit dem Trapetum und presst das Öl. Equites mit Öl zahlen mehr Steuern.' },
+  garumsiederei: { n: 'Garum-Siederei', kat: 'Nahrung', g: [2, 2], h: 0.6, wand: 0xc8b898, dach: 0x7a4a2a, sklaven: true, forschung: 'garum',
+    kosten: { holz: 25, ziegel: 15 }, arbeiter: 2, braucht: { fisch: 3 }, erzeugt: { garum: 1 },
+    text: 'Fisch reift mit Salz in offenen Becken zu Garum. Teuer im Handel, begehrt bei den Equites. Es riecht.' },
+  weberei: { n: 'Weberei', kat: 'Handwerk', g: [2, 2], h: 0.75, wand: 0xd6c4a8, dach: 0x8a5a3a, forschung: 'weberei',
+    kosten: { holz: 30, ziegel: 15 }, arbeiter: 3, braucht: { wolle: 2 }, erzeugt: { tuch: 2 },
+    text: 'Webt Tuch aus Wolle. Familien in Casa und Insula kleiden sich damit – das hebt die Stimmung.' },
   schmiede: { n: 'Schmiede', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0x8a7a68, dach: 0x5a3a2a, kamin: true, sklaven: true,
     kosten: { holz: 25, ziegel: 15 }, arbeiter: 3, braucht: { erz: 1, holz: 1 }, erzeugt: { werkzeug: 2 },
     text: 'Schmiedet Werkzeug aus Erz. Mit Werkzeug arbeiten Felder, Gruben und Werkstätten 15 % schneller.' },
@@ -92,6 +106,12 @@ export const GEB = {
   wache: { n: 'Feuerwache', kat: 'Öffentlich', g: [2, 2], h: 0.8, wand: 0xc8a888, dach: 0x8a3a2a,
     kosten: { holz: 30, ziegel: 20 }, arbeiter: 3, reichweite: 12, unterhalt: 5,
     text: 'Nachtwächter mit Eimern, Haken und Decken (tresviri nocturni) löschen Brände und halten nachts Ordnung. Augustus macht daraus später die Vigiles.' },
+  tempel: { n: 'Tempel', kat: 'Öffentlich', g: [3, 3], h: 1.2, wand: 0xeee6d4, dach: 0xa9482a, forschung: 'tempel',
+    kosten: { ziegel: 60, stein: 40, holz: 20 }, arbeiter: 2, unterhalt: 5, reichweite: 16,
+    text: 'Tempel für Jupiter. Häuser im Umkreis von 16 Feldern sind zufriedener, und jeden Herbst steigt die Gunst Roms.' },
+  theater: { n: 'Theater', kat: 'Öffentlich', g: [4, 3], h: 0.9, wand: 0xe0d4bc, dach: 0xb5522f, forschung: 'theater',
+    kosten: { ziegel: 80, stein: 60, holz: 40 }, arbeiter: 4, unterhalt: 8,
+    text: 'Komödien des Plautus und Terenz. Ein bespieltes Theater hebt die Stimmung der ganzen Stadt.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -129,7 +149,8 @@ export const NACHBAR = { q: -5, r: 4 };   // 1.11.: an den Rand von Ring 4 gerü
 export const MANTUA = { q: 5, r: -1, n: 'Mantua', unter: 'Stadt am Mincius · Handel',
   text: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
   waren: { holz: { basis: 3, normal: 100 }, getreide: { basis: 2.5, normal: 90 }, fisch: { basis: 2, normal: 120 }, ziegel: { basis: 3.5, normal: 80 },
-    stein: { basis: 3, normal: 60 }, erz: { basis: 4, normal: 40 }, werkzeug: { basis: 6, normal: 50 } } };
+    stein: { basis: 3, normal: 60 }, erz: { basis: 4, normal: 40 }, werkzeug: { basis: 6, normal: 50 },
+    wein: { basis: 6.5, normal: 30 }, tuch: { basis: 7.5, normal: 40 }, garum: { basis: 11, normal: 40 } } };
 // Gallier (1.11.): das Dorf, von dem die Überfälle kommen. Geschenke kaufen Frieden.
 export const GALLIER = { q: -1, r: -4, geschenk: { brot: 40, denare: 60 }, monate: 24 };
 export const HANDEL = {
@@ -138,6 +159,7 @@ export const HANDEL = {
     holz:     { basis: 2, normal: 160 }, lehm: { basis: 1, normal: 120 }, ziegel: { basis: 4, normal: 50 },
     getreide: { basis: 2, normal: 140 }, mehl: { basis: 3, normal: 80 }, brot: { basis: 4, normal: 60 },
     fisch:    { basis: 3, normal: 60 },
+    wein: { basis: 6, normal: 40 }, oel: { basis: 6, normal: 40 }, tuch: { basis: 7, normal: 30 }, garum: { basis: 12, normal: 30 },
   },
 };
 // Abgaben an Rom (S2.5): am Ende jedes Herbstes ab dem zweiten Jahr. Gunst Roms (0–100) ändert den Lohn der Senatsaufträge.
@@ -163,6 +185,10 @@ export const LAND_BETRIEBE = {
     text: 'Bergleute fördern Eisenerz für die Schmiede in der Stadt.' },
   weinberg:   { n: 'Weinberg', auf: 'hang', forschung: 'weinbau', kosten: { holz: 25, denare: 30 }, erzeugt: { trauben: 3 }, ernte: true, modell: 'huette',
     text: 'Reben an den sonnigen Hängen. Lese im Herbst, die Trauben gehen in die Kelter der Stadt.' },
+  olivenhain: { n: 'Olivenhain', auf: 'hang', forschung: 'olivenpresse', kosten: { holz: 20, denare: 30 }, erzeugt: { oliven: 3 }, ernte: true, modell: 'huette',
+    text: 'Ölbäume an den Hängen. Im Herbst werden die Oliven geschlagen und in die Ölmühle der Stadt gebracht.' },
+  schaeferei: { n: 'Schäferei', auf: 'weide', forschung: 'weberei', kosten: { holz: 20 }, erzeugt: { wolle: 2 }, modell: 'huette',
+    text: 'Hirten scheren die Schafe der feuchten Wiesen. Die Wolle geht an die Weberei.' },
   kastell:    { n: 'Kastell', auf: 'hang', unterhalt: 6, kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
     text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
 };
@@ -229,15 +255,15 @@ export const FORSCHUNG = {
   schreine:       { n: 'Schreine', zweig: 4, ep: 1, kosten: 30, text: 'Schreine der Laren an den Straßen: Häuser in der Nähe sind zufriedener.' },
   feste:          { n: 'Erntefest', zweig: 4, ep: 1, kosten: 40, braucht: 'schreine', text: 'Nach der Ernte feiert die Stadt: Stimmung +10, kostet 20 Brot.' },
   weinbau:        { n: 'Weinbau', zweig: 0, ep: 2, kosten: 80, text: 'Weinberge an den Hängen und Kelter in der Stadt. Wein brauchen die Equites.' },
-  olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, bald: true, text: 'Öl für Küche, Lampen und Thermen.' },
-  weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, bald: true, text: 'Wolle von den Weiden wird zu Tuch.' },
-  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, bald: true, text: 'Fischsoße für die Equites – und für den Handel.' },
+  olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, text: 'Olivenhaine an den Hängen und Ölmühle: Equites mit Öl zahlen mehr.' },
+  weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, text: 'Schäfereien auf den Weiden und Weberei: Tuch für Casa und Insula.' },
+  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, text: 'Fischsoße aus Padus-Fisch: teuer im Handel, Luxus für die Equites.' },
   roemerstrasse:  { n: 'Römerstraße', zweig: 2, ep: 2, kosten: 100, braucht: 'schotter', text: 'Gepflasterte Wege: Karren dreimal so schnell, Räuber halb so oft.' },
   aquaedukt:      { n: 'Aquädukt', zweig: 2, ep: 2, kosten: 120, text: 'Wasser aus den Hügeln: Brunnen reichen 12 statt 7 Felder, weniger Brände.' },
   archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit den Nachbarstädten: Händler nehmen nur 8 statt 15 % Aufschlag.' },
   zoelle:         { n: 'Zölle', zweig: 3, ep: 2, kosten: 90, braucht: 'archiv', text: 'Zoll auf durchziehende Händler: 8 Denare im Monat je offener Handelsstraße.' },
-  tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, bald: true, text: 'Ein Tempel für Jupiter auf dem Forum.' },
-  theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, bald: true, text: 'Komödien des Plautus für die Plebejer.' },
+  tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, text: 'Ein Tempel für Jupiter: Stimmung im Umkreis, jeden Herbst Gunst Roms.' },
+  theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, braucht: 'tempel', text: 'Komödien des Plautus: Stimmung in der ganzen Stadt.' },
 };
 export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
 

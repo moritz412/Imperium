@@ -210,6 +210,37 @@ export function erzeugeSzene(leinwand, welt) {
       box(1.3, 0.08, 0.1, 0x5a4330, 0.05, 0.55, 0.45); box(0.1, 0.6, 0.1, 0x5a4330, -0.55, 0.3, 0.45);
       for (let i = 0; i < 4; i++) teil(new THREE.SphereGeometry(0.17, 8, 6), 0xb0703a, -0.6 + i * 0.4, 0.15, 0.75);
       teil(new THREE.CylinderGeometry(0.28, 0.3, 0.12, 10), 0x6a2a5a, 0.45, 0.06, 0.45); g.userData.h = 1.0; return g; },
+    oelmuehle: geist => { const { g, box, dach, teil } = teileBau(geist);   // Haus mit Trapetum (Steinbecken, Mühlstein)
+      box(1.5, 0.65, 1.0, 0xd8c49a, -0.1, 0.33, -0.35); dach(1.6, 1.1, 0.3, 0x8a4a2a, -0.1, 0.65, -0.35);
+      teil(new THREE.CylinderGeometry(0.42, 0.45, 0.25, 14), 0xb8b0a0, 0.3, 0.12, 0.45); teil(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 12).rotateZ(Math.PI / 2), 0x9a948a, 0.3, 0.36, 0.45);
+      for (let i = 0; i < 3; i++) teil(new THREE.SphereGeometry(0.15, 8, 6), 0xb0703a, -0.6 + i * 0.32, 0.14, 0.65); g.userData.h = 1.0; return g; },
+    garumsiederei: geist => { const { g, box, dach } = teileBau(geist);   // offene Becken und Schuppen
+      box(1.6, 0.5, 0.6, 0xc8b898, 0, 0.25, -0.55); dach(1.7, 0.7, 0.2, 0x7a4a2a, 0, 0.5, -0.55);
+      for (const [x, z] of [[-0.45, 0.2], [0.45, 0.2], [-0.45, 0.68], [0.45, 0.68]]) { box(0.7, 0.18, 0.38, 0xb8ae98, x, 0.09, z); box(0.58, 0.02, 0.27, 0x8a6a3a, x, 0.185, z); }
+      g.userData.h = 0.8; return g; },
+    weberei: geist => { const { g, box, dach } = teileBau(geist);   // Werkstatt mit Webstuhl und Wollballen
+      box(1.6, 0.7, 1.0, 0xd6c4a8, 0, 0.35, -0.35); dach(1.7, 1.1, 0.3, 0x8a5a3a, 0, 0.7, -0.35);
+      box(0.06, 0.6, 0.06, 0x5a4330, -0.3, 0.3, 0.45); box(0.06, 0.6, 0.06, 0x5a4330, 0.3, 0.3, 0.45); box(0.66, 0.05, 0.05, 0x5a4330, 0, 0.6, 0.45);
+      box(0.5, 0.45, 0.01, 0xb0402a, 0, 0.33, 0.45); for (const x of [-0.6, 0.62]) box(0.3, 0.25, 0.3, 0xeee6d4, x, 0.13, 0.55); g.userData.h = 1.1; return g; },
+    tempel: geist => { const { g, box, saeule, teil } = teileBau(geist);   // Podiumstempel mit Freitreppe, 6 Säulen vorn, Giebel
+      box(2.2, 0.45, 2.6, 0xd8ccb0, 0, 0.22, -0.1); for (let i = 0; i < 4; i++) box(1.4, 0.11, 0.18, 0xd8ccb0, 0, 0.055 + i * 0.11, 1.4 - i * 0.18);
+      box(1.7, 1.0, 1.5, 0xeee6d4, 0, 0.95, -0.45);
+      for (let i = 0; i < 6; i++) teil(new THREE.CylinderGeometry(0.07, 0.08, 1.0, 8), 0xf6f0e2, -0.85 + i * 0.34, 0.95, 0.85);
+      for (const z of [0.45, 0.05]) for (const x of [-0.85, 0.85]) teil(new THREE.CylinderGeometry(0.07, 0.08, 1.0, 8), 0xf6f0e2, x, 0.95, z);
+      box(2.0, 0.12, 2.3, 0xe8dcc4, 0, 1.5, -0.05);
+      const gi = new THREE.Shape(); gi.moveTo(-1.02, 0); gi.lineTo(1.02, 0); gi.lineTo(0, 0.42); gi.lineTo(-1.02, 0);
+      teil(new THREE.ExtrudeGeometry(gi, { depth: 2.3, bevelEnabled: false }).translate(0, 0, -1.2), 0xa9482a, 0, 1.56, 0);
+      g.userData.h = 2.1; return g; },
+    theater: geist => { const { g, box, teil } = teileBau(geist);   // halbrunde Ränge (cavea), Bühnenhaus (scaena)
+      for (let i = 0; i < 4; i++) {   // Ränge: halbe Ringe, nach außen höher
+        const ri = 0.55 + i * 0.3, ro = ri + 0.3, h = 0.15 + i * 0.15, f = new THREE.Shape();
+        f.absarc(0, 0, ro, 0, Math.PI, false); f.lineTo(-ri, 0); f.absarc(0, 0, ri, Math.PI, 0, true); f.lineTo(ro, 0);
+        teil(new THREE.ExtrudeGeometry(f, { depth: h, bevelEnabled: false, curveSegments: 20 }).rotateX(-Math.PI / 2), i % 2 ? 0xd8ccb2 : 0xe6dcc6, 0, 0, 0.35);
+      }
+      teil(new THREE.CylinderGeometry(0.55, 0.55, 0.03, 20, 1, false, Math.PI / 2, Math.PI), 0xc8b898, 0, 0.015, 0.35);
+      box(3.6, 0.9, 0.35, 0xd8c8a8, 0, 0.45, 1.15); box(3.7, 0.08, 0.45, 0xb5522f, 0, 0.92, 1.15);
+      for (let i = 0; i < 5; i++) box(0.22, 0.4, 0.02, 0x3a2a1e, -1.2 + i * 0.6, 0.25, 0.97);
+      box(2.6, 0.12, 0.4, 0xb8a888, 0, 0.06, 0.75); g.userData.h = 1.1; return g; },
   };
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
@@ -659,7 +690,7 @@ export function erzeugeSzene(leinwand, welt) {
       const g = new THREE.Group(), lam = col => new THREE.MeshLambertMaterial({ color: col });
       const wagen = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.8), lam(0x6b4a2a)); wagen.position.y = 0.22; g.add(wagen);
       for (const sx of [-1, 1]) { const rad = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8).rotateZ(Math.PI / 2), lam(0x3a2a1a)); rad.position.set(sx * 0.28, 0.16, 0); g.add(rad); }
-      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ weinberg: 0x6a2a5a, gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a, steinbruch: 0xd0cabc, erzgrube: 0x6a5048, fischer: 0x9ab8c8 }[l.betrieb] || 0xd9c26e));
+      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ olivenhain: 0x6a7a3a, schaeferei: 0xeee6d4, weinberg: 0x6a2a5a, gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a, steinbruch: 0xd0cabc, erzgrube: 0x6a5048, fischer: 0x9ab8c8 }[l.betrieb] || 0xd9c26e));
       last.position.y = 0.4; g.add(last);
       const ochse = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), lam(0xb8a890)); ochse.position.set(0, 0.3, 0.85); g.add(ochse);
       g.traverse(o => { if (o.isMesh) o.castShadow = true; });

@@ -31,8 +31,8 @@ function melden(text) {
 }
 
 // ---------- Kopfleiste ----------
-const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug', 'trauben', 'wein'];
-const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug', 'trauben', 'wein']);   // erscheinen erst, wenn vorhanden
+const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum'];
+const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum']);   // erscheinen erst, wenn vorhanden
 const rund = n => Math.floor(n || 0).toLocaleString('de-DE');
 function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
@@ -228,7 +228,8 @@ function infoZeichnen() {
     html += `<div class="zeile"><span>Equites</span><b>${b.bew} / ${sim.wohnraum(b)}</b></div>
       <div class="zeile"><span>Wein im Lager</span><b>${rund(S.gut.wein)}</b></div>
       <div class="zeile"><span>Brunnen / Markt in der Nähe</span><b>${sim.inReichweite(S, b, 'brunnen') ? 'ja' : 'nein'} / ${sim.inReichweite(S, b, 'markt') ? 'ja' : 'nein'}</b></div>
-      <p>Equites zahlen viermal so viel Steuern wie Plebejer. Sie trinken jeden Monat Wein (0,1 je Kopf).</p>`;
+      <div class="zeile"><span>Luxus (Öl, Garum)</span><b>${b.lux > 1.4 ? 'beides' : b.lux > 1.1 ? 'eins davon' : 'nichts'}</b></div>
+      <p>Equites zahlen viermal so viel Steuern wie Plebejer, mit Öl und Garum je ein Viertel mehr. Sie trinken jeden Monat Wein (0,1 je Kopf).</p>`;
   }
   if (b.t === 'quartier') {
     const frei = GEB.quartier.sklavenPlatz - (b.skl || 0), n = Math.min(SKLAVEN.los, frei);
@@ -420,7 +421,7 @@ function epocheBlock() {
   const z = (t, ok) => `<span class="${ok ? 'ok' : 'nein'}">${t}</span>`;
   return `<div class="fziel fepochewahl"><b>Der Weg in die Späte Republik</b>
     <div class="fbeding">${z(`Stadtrang ${RAENGE[EPOCHE2.rang].n}`, sim.rang(S) >= EPOCHE2.rang)}${z(`${n} von ${EPOCHE2.erfindungen} Erfindungen`, n >= EPOCHE2.erfindungen)}${z(`Gunst Roms ${Math.round(sim.gunst(S))} von ${EPOCHE2.gunst}`, sim.gunst(S) >= EPOCHE2.gunst)}</div>
-    <small>Dann öffnen sich Weinbau, Domus der Equites, Römerstraße, Aquädukt, Archiv und Zölle.</small>
+    <small>Dann öffnen sich Wein, Öl, Tuch, Garum, Domus der Equites, Römerstraße, Aquädukt, Archiv, Zölle, Tempel und Theater.</small>
     <button class="knopf${fehlt ? '' : ' haupt'}" data-f="epoche"${fehlt ? ' disabled' : ''}>Späte Republik beginnen</button></div>`;
 }
 $('#forschung').addEventListener('click', e => {
