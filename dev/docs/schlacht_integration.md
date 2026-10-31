@@ -203,3 +203,12 @@ fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
 - Hauptspiel: `eschStart` würfelt das Wetter wie die alte Schlacht (Klima/Breite/Jahreszeit), deterministisch aus Provinz und Runde (`gel.wetter`).
 - Ton: Teppich `regen` (nur bei Regen geladen) – `s_regen_1.mp3` fehlt noch in dev/proto/ton (wird still übersprungen, 404 nur bei Regen).
 - Offen: Boden bei Schnee/Regen nicht weiß/nass (Klima 'schnee' kommt nur über die Jahreszeit); echtes iPad nicht getestet.
+
+## Stand Verstärkungen R5 (31.10.)
+- Hauptspiel (`eschStart`/`bau`): je Seite bis zu 9 Einheiten + Leibwache sofort auf dem Feld (Heer, Garnison, dann Verstärkungsheere); die **nächsten 4** kommen als Verstärkung (`verst:{t:60+20·k, rand:links|rechts|hinten}`, reihum). Alles darüber hinaus bleibt wie bisher zurück (`weg`, Hinweis beim Start, im Heer unverändert).
+- Kern: Beschreibung `verst` -> Einheit mit Zustand `wartet` (zählt über `gone()` wie nicht vorhanden: unsichtbar, nicht ziel-/siegrelevant, keine Auswahl). `MAXU` 20 -> 28.
+- Regel (`verstTick`, je Seite, kleinste Zeit zuerst): Ankunft, wenn Zeit `t` erreicht **und** weniger als 10 Einheiten (fliehende zählen mit, bis sie das Feld verlassen haben) auf dem Feld **und** 10 s seit der letzten Ankunft der Seite. Hat die Seite keine kampffähige Einheit mehr auf dem Feld, kommt die nächste sofort. Die Schlacht endet nicht, solange eine Seite noch wartende Verstärkung hat (Ausnahme: Zeitgrenze, Rückzug).
+- Eintritt am Rand (links x=-188, rechts x=188, hinten z=±138); eigene Einheiten marschieren 80 m ins Feld, die KI rückt normal vor. Hinweis „Verstärkung trifft ein: …“ bzw. „Feindliche Verstärkung: …“. Eigene Karte ist vorher ausgegraut mit „in N s“ / „rückt nach“, Feindkarte als „?“ (wie versteckt).
+- Ergebnis: Verstärkungen stehen mit `tag` in `ergebnisDaten`, Feld `verst` = Ankunftszeit (s) oder -1 (nicht eingetroffen); nicht eingetroffene gelten als unversehrt (rest = np). Testseite `?verst=1`: je Seite 2 Fußeinheiten als Verstärkung (60 s / 80 s).
+- Tests: `dev/tests/schlacht_verst_t.js` (Zeitpunkt, Rand, Hinweis, Karte, Höchstzahl, Ergebnis), Lauf 2b in `eschlacht_integ_t.js`.
+- Offen: nicht auf dem echten iPad getestet; Fluss/Wald/Hang am Eintrittspunkt nicht eigens geprüft; keine Balance-Messung; Verstärkungsheere zählen in der Sieg-Zeitgrenze erst nach Ankunft.

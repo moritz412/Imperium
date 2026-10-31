@@ -37,7 +37,8 @@ const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A
 
 // Einzelne Einheiten mit eigenem Paket (E2), vor der Familienregel
 const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler',
-  legion: 'A1_legion', evocati: 'A1_legion', soldurii: 'A6_adlig', galater: 'A6_adlig', falx: 'A6_falx', nubbow: 'A8_nubisch', habbog: 'A8_nubisch', aksumsp: 'A8_aksum' };
+  legion: 'A1_legion', evocati: 'A1_legion', soldurii: 'A6_adlig', galater: 'A6_adlig', falx: 'A6_falx', nubbow: 'A8_nubisch', habbog: 'A8_nubisch', aksumsp: 'A8_aksum',
+  armbr: 'M2_armbrust', balestr: 'M2_armbrust' };   // Armbrustschützen (31.10.)
 function paketFuer(kit, rolle, id) {
   if (EIGEN[id]) return { paket: EIGEN[id], genau: true };
   for (const [id, p] of Object.entries(PAKETE)) if (p.familien.includes(kit) && p.rollen.includes(rolle)) return { paket: id, genau: true };

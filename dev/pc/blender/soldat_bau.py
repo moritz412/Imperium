@@ -119,6 +119,8 @@ KITS = {
     "M2_knecht": dict(kette=True, tunika=(0.24, 0.24, 0.25), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male", muskel=0.65, rock=0.16,
                       helm="becken", brust=False, schild=dict(w=0.6, h=0.75, farbe=(0.15, 0.2, 0.4), buckel=0.0, eckig=4.0, dreieck=True),
                       waffe=("schwert", "spatha")),
+    "M2_armbrust": dict(tunika=(0.45, 0.4, 0.3), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male", muskel=0.6, rock=0.12,
+                        helm="eisenhut", brust=False, schild=None, waffe=("armbrust", 0.7), fern="bogen"),
     "M2_langbogen": dict(tunika=(0.42, 0.4, 0.3), hose=(0.3, 0.25, 0.18), haut="young_caucasian_male2", muskel=0.6, rock=0.1,
                          helm="eisenhut", brust=False, schild=None, waffe=("bogen", 1.8), fern="bogen"),
 }
@@ -508,6 +510,20 @@ elif KIT["waffe"][0] == "bogen":
     bpy.context.view_layer.update()
     mk = kk.matrix_world.copy(); kk.parent = arm; kk.parent_type = "BONE"; kk.parent_bone = "Spine1"
     bpy.context.view_layer.update(); kk.matrix_world = mk; teile.append(kk)
+elif KIT["waffe"][0] == "armbrust":   # Hochmittelalter (31.10.): Armbrust in der rechten Hand, Säule entlang des Unterarms nach vorn
+    waffe = TF.armbrust("teil_armbrust_%s" % KURZ)
+    ellb, hand = kp("RightForeArm", 0.0), kp("RightHand", 0.5)
+    R = Vector((0, 0, 1)).rotation_difference((hand - ellb).normalized()).to_matrix().to_4x4()
+    waffe.matrix_world = Matrix.Translation(hand) @ R
+    bpy.context.view_layer.update()
+    m = waffe.matrix_world.copy(); waffe.parent = arm; waffe.parent_type = "BONE"; waffe.parent_bone = "RightHand"
+    bpy.context.view_layer.update(); waffe.matrix_world = m
+    kk = TF.koecher("teil_koecher_%s_bolzen" % KURZ)
+    s1k = kp("Spine1", 0.5)
+    kk.matrix_world = Matrix.Translation(s1k + Vector((-0.16, 0.1, -0.35))) @ Matrix.Rotation(math.radians(160), 4, "Y")
+    bpy.context.view_layer.update()
+    mk = kk.matrix_world.copy(); kk.parent = arm; kk.parent_type = "BONE"; kk.parent_bone = "Spine1"
+    bpy.context.view_layer.update(); kk.matrix_world = mk; teile.append(kk)
 elif KIT["waffe"][0] == "schleuder":
     import bmesh as _b
     bm = _b.new()
@@ -590,7 +606,13 @@ ABWURF = dict(BEREIT, RightArm=(-0.1, -0.9, 0.35), RightForeArm=(0, -1, 0.05), S
 BOGEN_HOCH = dict(BEREIT, LeftArm=(0.15, -0.45, -0.88), LeftForeArm=(-0.1, -0.9, 0.42), RightArm=(-0.2, -0.5, -0.84), RightForeArm=(0.3, -0.85, 0.42))
 BOGEN_ZUG = dict(BOGEN_HOCH, RightArm=(-0.3, -0.25, -0.92), RightForeArm=(0.55, -0.2, 0.81), Spine1=(-0.06, 0.0, 1))
 BOGEN_LOS = dict(BOGEN_ZUG, RightArm=(-0.4, 0.1, -0.9), RightForeArm=(0.2, 0.5, 0.84))
-clip_haltung("bogen", [(1, BEREIT), (7, BOGEN_HOCH), (15, BOGEN_ZUG), (21, BOGEN_ZUG), (23, BOGEN_LOS), (32, BEREIT)])
+if KIT["waffe"][0] == "armbrust":   # Armbrust: spannen (vorgebeugt, Arme unten), anlegen (beide Arme vorn), Schuss mit kurzem Rückstoß; Clip heißt wie beim Bogen
+    A_SPANN = dict(BEREIT, Spine1=(0, -0.45, 0.89), RightArm=(-0.1, -0.4, -0.9), RightForeArm=(0.1, -0.3, -0.95), LeftArm=(0.1, -0.4, -0.9), LeftForeArm=(-0.1, -0.3, -0.95))
+    A_AN = dict(BEREIT, RightArm=(-0.15, -0.9, -0.4), RightForeArm=(0.25, -0.95, 0.1), LeftArm=(0.2, -0.9, -0.35), LeftForeArm=(-0.3, -0.95, 0.05))
+    A_LOS = dict(A_AN, RightForeArm=(0.25, -0.9, 0.3), LeftForeArm=(-0.3, -0.9, 0.25), Spine1=(0, 0.05, 1))
+    clip_haltung("bogen", [(1, BEREIT), (8, A_SPANN), (26, A_SPANN), (34, A_AN), (44, A_AN), (46, A_LOS), (52, BEREIT)])
+else:
+    clip_haltung("bogen", [(1, BEREIT), (7, BOGEN_HOCH), (15, BOGEN_ZUG), (21, BOGEN_ZUG), (23, BOGEN_LOS), (32, BEREIT)])
 if KIT.get("fern") == "schleuder" or True:
     clip_haltung("schleuder", [(1, BEREIT), (4, K1), (7, K2), (10, K3), (13, K4), (16, K1), (19, K2), (22, K3), (24, ABWURF), (28, ABWURF), (36, BEREIT)])
 if KIT["waffe"][0] == "speer" and KIT["waffe"][1] > 4:

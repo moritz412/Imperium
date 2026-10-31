@@ -17,6 +17,13 @@ Kein GPU-Auftrag für spätere Epochen vorhanden (Jobs 44/45 = nur Antike-Vorlag
 - **R8 Siedlungsschlacht ohne Mauern** mit Eroberungspunkt (Halten X s = Sieg), danach Mauern/Belagerung (Leitern, Rammbock, Türme).
 - **R9 Kamera/Übersicht:** Einheitenfahnen mit Moral-/Ausdauer-Anzeige, „Wanken“-Hinweis, Schlacht-Zusammenfassung mit Abschüssen.
 Reihenfolge-Vorschlag: R2, R1, F2, R3/R4, R7, F1, R5, R6, R8, F3, F4.
+**Stand 31.10. abends (v222–v229 veröffentlicht, Freigabe Moritz „bis 8 Uhr bauen und pushen“):** erledigt R1 Fähigkeiten (Schildkröte, Keil, Schildwall,
+Wurfsalve), R2 Ausdauer, R3 Verstecken/Hinterhalt, R4 Wetter, R7 Erfahrung (3 EP je Abschuss, max. 150), R9 Endtafel (Abschüsse, beste Einheit, Feldherr),
+F2 Farben je Volk (Maske beim Backen, Palette je Kultur), Fluss/Furten, Gelände je Provinz, Volksmusik. F4 begonnen: Frühmittelalter 8 Kits (M1 Heerbann/Huskarl/
+Bogen/Panzerreiter, M3 Skutatos/Thematen/Toxotes/Kataphrakt), Hochmittelalter 4 Kits (M2 Ritter/Sergeant/Knecht/Langbogen); 161 von 333 Profilen mit eigener Figur.
+Schlacht im Hauptspiel weiter nur Antike (eschGeeignet) – Freischalten Epoche 1/2 braucht noch: Armbrust-Kit+Clips, Ostasien/Südasien/Afrika-Kits, Test im Spiel.
+Vorlagen: Jobs 47 (Frühmittelalter) und 48 (Hochmittelalter) mit auswahl.txt. Offen: R5 (läuft), R6 Feldartillerie, R8 Siedlung/Belagerung, F1 Körpervarianten,
+F3 Details; Schildwall-Wirkung jetzt stark (Verlust je Stoß 0,72 → 0,09); Kartentexte jetzt kurz (Testudo/Wall/getarnt); R5 Verstärkungen erledigt (v230); Armbrust-Kit M2_armbrust (eigene Spann-/Anlegehaltung). Test schlacht_faehigkeit_t.js: Keil-Prüfung streut (je Lauf ~20 Stöße, ×1,25 geht im Zufall unter – 2 von 6 Läufen FAIL) → Messung über mehr Stöße oder Mittel aus 3 Läufen. Echtes iPad nicht getestet.
 
 ## ÜBERGABE 29.10. (zuerst lesen)
 - **30.10. spät – v220 + Feldherr (I3):** v219/v220 veröffentlicht (neue Schlacht hinter Schalter, Elefanten, Umgebung). Danach: Elefanten abgeschwächt (Stampfen 2,4→1,6, Trampeln ×0,7), dunkler, Laute (AudioGen: Trompete, Panik, Tod; Schritte noch ungenutzt). Feldherr: goldene Figur in der Leibwache, Aura 40 m, Sammeln (60 m, 45 s), Anfeuern (60 m, 60 s, 20 s ×1,2), Tod = Moral −18; KI-Feldherr als Reserve. Ergebnis feldherr{lebt,verwundet} kommt in der Kampagne an, wirkt aber noch nicht (offene Entscheidung Moritz: gefallener Feldherr ersetzen?). Tests feldherr 26/0, integ 20/20, smoke 4/4. Feldherr noch nicht veröffentlicht. **iPad nicht getestet.**

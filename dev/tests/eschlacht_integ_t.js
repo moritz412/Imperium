@@ -78,6 +78,24 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   ok('Speicher nach Rückzug: Geometrien/Texturen der Schlacht freigegeben', memNach.g <= mem0.g + 80 && memNach.t <= mem0.t + 4 && memIn.g > memNach.g + 40, 'Kampagne vorher ' + mem0.g + '/' + mem0.t + ' · in der Schlacht ' + memIn.g + '/' + memIn.t + ' · nach Rückzug ' + memNach.g + '/' + memNach.t + ' (Geometrien/Texturen)');
   const nachRz = await p.evaluate(() => ({ esch: !!ESCH, battle: !!BATTLE, hidden: document.getElementById('esch').hidden, empty: document.getElementById('esch').childElementCount, top: !document.getElementById('top').hidden, done: window.__done || 0 }));
   ok('Rückzug räumt auf (kein ESCH/BATTLE, #esch leer, Leiste da, done)', !nachRz.esch && !nachRz.battle && nachRz.hidden && nachRz.empty === 0 && nachRz.top, JSON.stringify(nachRz));
+  // ---- Lauf 2b (R5): Heer mit mehr als 9 Einheiten -> Verstärkung im Schlachtergebnis ----
+  {
+    const vor = await p.evaluate(() => { const a = window.__a; window.__origUnits = a.units.slice(); for (let i = 0; i < 6; i++) a.units.push(newUnit(S.player, 'sword')); window.__nVor = a.units.length; return a.units.length; });
+    await beginne(1);
+    const vs = await p.evaluate(() => { const U = ESCH.api.units; return { n: U.filter(u => u.side === 0).length, wartet: U.filter(u => u.side === 0 && u.state === 'wartet').length, tags: U.filter(u => u.side === 0 && u.state === 'wartet').map(u => ESCH.tags[u.ein.tag] && ESCH.tags[u.ein.tag].ref ? 1 : 0), men: window.__a.units.slice(9).map(u => u.men) }; });
+    console.log('LAUF 2b', JSON.stringify(vs), 'Einheiten im Heer ' + vor);
+    ok('R5: Heer mit ' + vor + ' Einheiten -> Einheiten ab Nr. 10 als wartende Verstärkung angelegt', vs.wartet >= vor - 9 && vs.wartet <= 4 && vs.tags.every(t => t === 1), JSON.stringify(vs));
+    await p.evaluate(() => { const A = ESCH.api; A.start(); A.tempo(2); });
+    await p.waitForTimeout(1500);
+    const erg = await p.evaluate(() => { const r = ESCH.api.ergebnisDaten(true); return { n: r.einheiten.length, ver: r.einheiten.filter(e => e.verst === -1).map(e => [e.np, e.rest, e.geflohen]), tags: r.einheiten.filter(e => e.verst != null).length }; });
+    ok('R5: Schlachtergebnis enthält die Verstärkung (nicht eingetroffen = unversehrt)', erg.tags === vs.wartet && erg.ver.length === vs.wartet && erg.ver.every(v => v[1] === v[0] && v[2] === 0), JSON.stringify(erg));
+    await p.click('#esch #bRueck'); await p.waitForTimeout(200); await p.click('#esch #bRueck');
+    await warte(() => !ESCH && document.getElementById('modal').hidden === false);
+    await p.evaluate(() => closeModal());
+    const men2 = await p.evaluate(() => window.__a.units.slice(9).map(u => u.men));
+    ok('R5: nicht eingetroffene Einheiten bleiben im Heer (nur Rückzugsverlust 12 %)', men2.length === vs.men.length && men2.every((m, i) => m > 0 && m >= vs.men[i] * 0.8), vs.men.join(',') + ' -> ' + men2.join(','));
+    await p.evaluate(() => { window.__a.units = window.__origUnits; });
+  }
   // ---- Lauf 3: Normal, bis zum Ende ----
   const men1 = await p.evaluate(() => { const a = window.__a; window.__men1 = a.units.map(u => u.men); window.__nU = a.units.length; return window.__men1; });
   await beginne(1);

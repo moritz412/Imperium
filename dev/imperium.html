@@ -1708,8 +1708,8 @@ body{height:100%;min-height:-webkit-fill-available}
 #esch .karte .ring{position:absolute;right:6px;top:6px;z-index:2}
 #esch .karte .info{position:absolute;left:0;top:0;width:44px;height:44px;z-index:3;border:0;background:none;padding:6px;display:flex;align-items:flex-start;justify-content:flex-start}
 #esch .karte .info span{width:22px;height:22px;border-radius:50%;background:rgba(20,15,10,.75);border:1px solid var(--bronze);color:var(--gold);font:italic 14px Georgia,serif;line-height:20px;text-align:center}
-#esch .karte .zst{position:absolute;left:6px;right:6px;bottom:56px;z-index:2;display:flex;align-items:center;gap:4px;padding:2px 7px;border-radius:9px;background:rgba(20,16,12,.72);border:1px solid rgba(169,121,58,.4);font-size:11px;color:#f1d79a;white-space:nowrap;overflow:hidden}
-#esch .karte .zst svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#esch .karte .zst{position:absolute;left:6px;right:6px;bottom:56px;z-index:2;display:flex;align-items:center;gap:3px;padding:2px 4px;border-radius:9px;background:rgba(20,16,12,.72);border:1px solid rgba(169,121,58,.4);font-size:10.5px;letter-spacing:-.2px;color:#f1d79a;white-space:nowrap;overflow:hidden}   /* 31.10.: „Schildkröte“, „versteckt“ passen ganz */
+#esch .karte .zst svg{width:12px;height:12px;flex:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #esch .karte .band{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 7px 6px;background:linear-gradient(transparent,rgba(16,12,9,.93) 40%)}
 #esch .karte .n{font:14.5px Marcellus,Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 1px 3px;text-shadow:0 1px 2px #000}
 #esch .karte .stz{display:flex;align-items:center;gap:6px;margin:0 1px}
@@ -2126,7 +2126,7 @@ const ECHT_FERN={
   pfeil:{typ:'pfeil',reich:110,nachl:[3,4.5],vorrat:20,schaden:1.0,moral:.3,clip:'bogen',wurfT:.72,v:55,weich:20,rueck:30},   // Kompositbogen (E2, 30.10.)
   stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
 };
-const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil',M2_langbogen:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
+const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil',M2_langbogen:'pfeil',M2_armbrust:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
 const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
   A1_hastatus:{schild:.55},A1_veles:{schild:.4},A2_libysch:{schild:.45},A3_iberisch:{schild:.45},
   A4_balearisch:{schild:0,bloss:true},A6_keltisch:{schild:.35,bloss:true},A7_hellenistisch:{schild:.5},
@@ -2134,13 +2134,14 @@ const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss v
   A1_legion:{schild:.6},A6_adlig:{schild:.45},A6_falx:{schild:0,bloss:true},A8_nubisch:{schild:0,bloss:true},A8_aksum:{schild:.4},
   M1_heerbann:{schild:.5},M1_huskarl:{schild:.55},M1_bogen:{schild:0,bloss:true},M1_panzerreiter:{schild:.45},   // Frühmittelalter (31.10.)
   M3_skutatos:{schild:.55},M3_thematen:{schild:.5},M3_toxotes:{schild:0},M3_kataphrakt:{schild:.4},
-  M2_ritter:{schild:.5},M2_sergeant:{schild:.55},M2_knecht:{schild:.55},M2_langbogen:{schild:0},   // Hochmittelalter (31.10.)
+  M2_ritter:{schild:.5},M2_sergeant:{schild:.55},M2_knecht:{schild:.55},M2_langbogen:{schild:0},M2_armbrust:{schild:0},   // Hochmittelalter (31.10.)
 };
 /* Fähigkeiten (31.10., R1): je Paket höchstens zwei; ein Knopf „Fähigkeit“ schaltet sie. Schildkröte/Schildwall/Keil sind An/Aus-Haltungen, die Wurfsalve gibt es einmal je Schlacht.
    Schildkröte: Fernschaden ×0,25 (von allen Seiten, Schilde auch oben), Tempo ×0,4, Angriff ×0,8, enger Verband · Keil (nur berittene Schwerreiter): Ansturm ×1,25, Abwehr ×0,85
    Schildwall: Abwehr ×1,2 von vorn, Reiteransturm von vorn ×0,5 (31.10. abgeschwächt), kein Laufen · Wurfsalve: eine Pilum-Salve je Mann auf die nächste Einheit in 32 m (wie Plänkler-Speere) */
 const FAEH={A1_hastatus:['schildkroete','salve'],A1_legion:['schildkroete','salve'],A1_eques:['keil'],A6_adlig:['keil'],A7_hoplit:['schildwall'],A7_phalangit:['schildwall'],A2_libysch:['schildwall'],
   M1_heerbann:['schildwall'],M3_skutatos:['schildwall'],M1_panzerreiter:['keil'],M3_kataphrakt:['keil'],M2_sergeant:['schildwall'],M2_ritter:['keil']};
+const FAEH_KURZ={schildkroete:'Testudo',schildwall:'Wall'};
 const FAEH_NAME={schildkroete:'Schildkröte',keil:'Keil',schildwall:'Schildwall',salve:'Wurfsalve'};
 const FAEH_TEXT={
   schildkroete:'Schildkröte: die Männer schließen die Schilde über sich. Pfeile und Speere richten nur ein Viertel an, dafür geht es langsam (Tempo ×0,4) und der Angriff sinkt (×0,8).',
@@ -2296,7 +2297,7 @@ function gefechtAufloesen(g){   // Beschreibungen -> Einheiten mit Echtzeitwerte
     if(d.mult)multAnwenden(r,d.mult);
     if(d.name)r.name=d.name;
     if(d.minFig)r.figuren=Math.min(60,Math.max(d.minFig,r.figuren));
-    r.kultur=d.kultur;r.tag=d.tag;r.mil=!!d.mil;r.fname=d.feldherr||null;r.aura=d.aura||1;   // tag 'gen': Leibwache mit Feldherr (feldherr = Name, aura = Stärke ab 1)
+    r.verst=d.verst||null;r.kultur=d.kultur;r.tag=d.tag;r.mil=!!d.mil;r.fname=d.feldherr||null;r.aura=d.aura||1;   // tag 'gen': Leibwache mit Feldherr (feldherr = Name, aura = Stärke ab 1)
     r.werte.bild=r.bild;r.s=d.s;r.x=d.x;r.z=d.z;R.push(r);const k=d.s+r.name;anz[k]=(anz[k]||0)+1;}
   const ZIF=['','I','II','III','IV','V','VI'];
   for(const r of R){const k=r.s+r.name;zaehl[k]=(zaehl[k]||0)+1;r.anzeige=anz[k]>1?r.name+' '+ZIF[zaehl[k]]:r.name;}
@@ -2308,7 +2309,7 @@ const BDIFF=[{n:'Leicht',am:.9,mor:-10,iv:2,flanke:false,loesen:false,gezielt:fa
 const BD=OPT.bdiff==null?null:BDIFF[Math.max(0,Math.min(3,OPT.bdiff|0))];
 const KI_IV=BD?BD.iv:.5;
 const PRO=60,BREIT=10,ABST=1.2;            // höchstens 60 Figuren je Einheit (Platz-Raster 10 breit), Abstand 1,2 m
-const MAXU=20;                              // höchstens 20 Einheiten im Gefecht (je Seite 10, mit Reiterei)
+const MAXU=28;                              // höchstens 28 Einheiten im Gefecht: je Seite 10 gleichzeitig auf dem Feld, dazu bis zu 4 Verstärkungen (R5)
 let NU=0,NA=0;                              // NU Einheiten, NA = NU × PRO belegte Soldaten-Plätze
 const N=MAXU*PRO;
 ;
@@ -3403,7 +3404,7 @@ const TON_ANTEIL={tod:.25,treffer:.3,wiehern:.6,pferd_tod:.35};   // 30.10. Mori
 function ereignis(typ,x,z){evZ[typ]=(evZ[typ]||0)+1;if(tonAn&&!(TON_ANTEIL[typ]&&Math.random()>TON_ANTEIL[typ]))TON.ereignis(typ,x,z);}
 
 function einheitenAnlegen(){
-  U.length=0;cHead.fill(-1);sCell.fill(-1);sSt.fill(S_WEG);sGen.fill(0);genTonSetzen();FK[0].s=FK[0].a=FK[1].s=FK[1].a=0;
+  verstLetzt[0]=verstLetzt[1]=-99;U.length=0;cHead.fill(-1);sCell.fill(-1);sSt.fill(S_WEG);sGen.fill(0);genTonSetzen();FK[0].s=FK[0].a=FK[1].s=FK[1].a=0;
   for(const k in zaehler)zaehler[k]=0;for(const k in G)G[k]=0;for(const k in evZ)evZ[k]=0;gA.fill(0);sAmmo.fill(0);
   NU=ROSTER.length;NA=NU*PRO;
   ROSTER.forEach((r,i)=>{
@@ -3417,10 +3418,11 @@ function einheitenAnlegen(){
       mx:r.x,mz:r.z,sn:np,ax:0,az:0,an:0,nF:0,fatS:0,nL:np,cnt:new Int16Array(NU),
       lebend:np,kaempfend:0,muede:0,hoehe:0,dAcc:0,
       gen:r.tag==='gen',gname:r.fname||'Feldherr',auraW:Math.max(1,Math.min(1.6,r.aura||1)),genId:-1,genAlive:false,genHP0:1,genWund:false,aura:0,m0:K.mor,anfT:0,festT:0,druck:0,kiW:0,reserve:false,fern:K.fern||null,fBef:-1,fZ:-1,plaenk:true,rueck:false,zurueck:false,beschuss:0,schiessT:0,mun:K.fern?K.fern.vorrat*np:0,munS:0,eng:true,fk:1,gef:0,weichT:0,fa:null,faV:1,faNoRun:false,salveT:0,salveVerbr:false,vers:false,aufT:0};
+    if(r.verst){u.state='wartet';u.ank={t:Math.max(0,+r.verst.t||60),rand:r.verst.rand==='links'||r.verst.rand==='rechts'?r.verst.rand:'hinten'};}
     U.push(u);
     for(let s=0;s<np;s++){
       const id=i*PRO+s;
-      sKit[id]=KITIX[r.paket];sUnit[id]=i;sTon.fill(-1,id*4,id*4+4);if(!K.ele)tonSetzen(id,u);sSide[id]=side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
+      sKit[id]=KITIX[r.paket];sUnit[id]=i;sTon.fill(-1,id*4,id*4+4);if(!K.ele)tonSetzen(id,u);sSide[id]=side;sSt[id]=r.verst?S_WEG:S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
       sJit[id]=.88+Math.random()*.24;sJX[id]=(Math.random()-.5)*.5;sJZ[id]=(Math.random()-.5)*.5;sJR[id]=(Math.random()-.5)*.14;
       sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=K.fern?Math.random()*K.fern.nachl[1]:Math.random()*.8;sAmmo[id]=K.fern?K.fern.vorrat:0;sVar[id]=Math.random()<.5?1:0;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
       sPX[id]=NOGOAL;sPZ[id]=0;sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sJub[id]=0;sNAtt[id]=0;sFOff[id]=0;sFA[id]=0;sFSp[id]=1;
@@ -3436,7 +3438,7 @@ function einheitenAnlegen(){
 }
 function reserveWaehlen(){   // Sehr schwer: letzte Fußeinheit der KI (bei mindestens 4) als Reserve
   if(!BD||!BD.reserve)return;
-  const L=U.filter(u=>u.side===1&&!u.def.reit&&!u.fern);if(L.length>=4)L[L.length-1].reserve=true;
+  const L=U.filter(u=>u.side===1&&!u.def.reit&&!u.fern&&!u.ank);if(L.length>=4)L[L.length-1].reserve=true;
 }
 let _tx=0,_tz=0;
 function slotPos(u,s,id){   // Weltposition des Platzes s -> _tx,_tz ; lockert sich beim Marsch (u.loose 0..1)
@@ -3547,7 +3549,7 @@ function panikEnde(i,u){
 function trompetenEinheit(u){   // vor dem Ansturm: die Tiere bleiben nacheinander kurz stehen und trompeten
   for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_KAMPF&&!sPanK[id])sTw[id]=.05+Math.random()*.9;}
 }
-const gone=u=>u.state==='geflohen'||u.state==='aufgerieben';
+const gone=u=>u.state==='geflohen'||u.state==='aufgerieben'||u.state==='wartet';   // 'wartet': Verstärkung (R5) noch nicht eingetroffen, zählt wie nicht vorhanden
 const aktiv=u=>!gone(u)&&u.state!=='flieht';
 function slotFrei(u,id){   // Hintermann der Spalte rückt nach
   const slot=sSlot[id];if(u.occ[slot]!==id)return;
@@ -3996,9 +3998,30 @@ function kampfTick(dt){
   for(let i=0;i<NA;i++)if(sSt[i]===S_FLIEH)sFA[i]=U[sUnit[i]].fAng+sFOff[i];
   // --- Ende?
   if(phase==='schlacht'){
-    const r=U.some(u=>u.side===0&&aktiv(u)),k=U.some(u=>u.side===1&&aktiv(u));
+    const r=U.some(u=>u.side===0&&(aktiv(u)||u.state==='wartet')),k=U.some(u=>u.side===1&&(aktiv(u)||u.state==='wartet'));   // R5: solange Verstärkung im Anmarsch ist, endet die Schlacht nicht
     if(!k)ende('sieg');else if(!r)ende('niederlage');
   }
+}
+/* ---- Verstärkung (R5, 31.10.): Einheiten mit Beschreibung verst:{t,rand} warten (state 'wartet', unsichtbar, zählen nicht). Regel je Seite: die nächste (kleinste t) trifft ein, wenn
+   ihre Zeit t erreicht ist UND weniger als VERST_MAX Einheiten auf dem Feld stehen (fliehende zählen mit, bis sie das Feld verlassen haben) UND seit der letzten Ankunft der Seite 10 s vergangen sind;
+   hat die Seite gar keine kampffähige Einheit mehr auf dem Feld, kommt sie sofort. Eintritt am Rand (links/rechts/hinten), eigene Einheiten marschieren ein Stück ins Feld. ---- */
+const VERST_MAX=10,VERST_ABST=10,verstLetzt=[-99,-99];
+function verstTick(){
+  for(let sd=0;sd<2;sd++){
+    let w=null;for(const u of U)if(u.side===sd&&u.state==='wartet'&&(!w||u.ank.t<w.ank.t))w=u;
+    if(!w)continue;
+    let feld=0,leer=true;for(const u of U)if(u.side===sd&&!gone(u)){feld++;if(u.state!=='flieht')leer=false;}
+    if(leer||(schlachtZ>=w.ank.t&&feld<VERST_MAX&&schlachtZ-verstLetzt[sd]>=VERST_ABST))verstAnkunft(w);
+  }
+}
+function verstAnkunft(u){
+  const sd=u.side,zs=sd===0?-1:1,rd=u.ank.rand;let x=0,z=zs*(FELD_Z-12),f=sd===0?0:PI,ex=0,ez=zs*80;
+  if(rd==='links'){x=-FELD_X+12;z=zs*50;f=PI/2;ex=-FELD_X+80;ez=z;}else if(rd==='rechts'){x=FELD_X-12;z=zs*50;f=-PI/2;ex=FELD_X-80;ez=z;}
+  u.state='steht';u.ank.da=true;u.ank.zeit=Math.round(schlachtZ);verstLetzt[sd]=schlachtZ;
+  u.cx=u.mx=u.startX=x;u.cz=u.mz=u.startZ=z;u.f=f;u.hasDest=false;u.aiT=0;
+  for(let s=0;s<PRO;s++){const id=u.occ[s];if(id<0)continue;sSt[id]=S_FORM;slotPos(u,s,id);sX[id]=_tx;sZ[id]=_tz;sR[id]=f+sJR[id];sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sMov[id]=0;sFoe[id]=-1;sDelay[id]=Math.random()*.5;}
+  if(sd===0)befehl(u.i,ex,ez,false);
+  hinweis((sd===0?'Verstärkung trifft ein: ':'Feindliche Verstärkung: ')+u.name+' ('+(rd==='hinten'?'von hinten':'von '+rd)+')');
 }
 function ende(was){
   sPanK.fill(0);sTr.fill(0);sTw.fill(0);
@@ -4541,6 +4564,7 @@ function schritt(dt){
     schlachtZ+=dt;
     tickAcc+=dt;
     while(tickAcc>=TICK){tickAcc-=TICK;kampfTick(TICK);}
+    verstTick();
     kiAcc+=dt;
     if(kiAcc>=.5){kiAcc=0;for(const u of U){if(u.side===1&&KI_IV>.5){u.kiW+=.5;if(u.kiW<KI_IV-1e-6)continue;u.kiW=0;}ki(u);}}
     if(OPT.limit&&schlachtZ>=OPT.limit){   // Zeitgrenze: wer deutlich mehr Soldaten auf dem Feld hat, gewinnt; sonst der Verteidiger (OPT.zeitSieg)
@@ -4810,6 +4834,7 @@ function tippen(px,py){
   gruppenBefehl(_g.x,_g.z,dop);
 }
 function select(i,add){   // add (langer Druck auf eine zweite Karte): zur Auswahl hinzufügen / entfernen
+  if(i>=0&&U[i]&&U[i].state==='wartet')return;
   if(add&&i>=0&&sel>=0){if(selM.has(i)){selM.delete(i);if(sel===i)sel=selM.size?[...selM][0]:-1;}else{selM.add(i);sel=i;}}
   else{selM.clear();if(i>=0)selM.add(i);sel=i;}
   uiAuswahl();
@@ -4908,13 +4933,14 @@ function uiBauen(){
   });
 }
 function zustand(u){   // -> [Zeichen, Text]
+  if(u.state==='wartet')return['zs-steht',phase==='schlacht'&&schlachtZ>=u.ank.t?'rückt nach':'in '+Math.max(1,Math.ceil(u.ank.t-schlachtZ))+' s'];
   if(u.state==='geflohen')return['zs-flucht','geflohen'];
   if(u.state==='aufgerieben')return['zs-kampf','aufgerieben'];
   if(u.state==='flieht')return['zs-flucht','flieht!'];
   if(u.loesen)return['zs-flucht',u.hasDest?'löst sich':'sammelt sich'];
   if(u.salveT>0)return['zs-schuss','Wurfsalve'];
-  if(u.vers)return['zs-steht','versteckt'];
-  if(u.fa)return['zs-steht',FAEH_NAME[u.fa]];
+  if(u.vers)return['zs-steht','getarnt'];   // kurz für die schmale Karte (versteckt im Wald)
+  if(u.fa)return['zs-steht',FAEH_KURZ[u.fa]||FAEH_NAME[u.fa]];   // schmale Karte: Kurzform
   if(u.engaged||u.state==='kampf')return['zs-kampf','kämpft'];
   if(u.rueck)return['zs-flucht','weicht aus'];
   if(u.fern&&u.mun>0&&u.schiessT>0)return['zs-schuss','schießt · '+u.mun];
@@ -4960,8 +4986,8 @@ function uiAktualisieren(){
   }
   // Feindliste
   for(const f of feinde){
-    const u=U[f.i],g=gone(u);
-    const vf=!!u.vers&&!g;klasse(f.d,'weg',g);klasse(f.d,'verst',vf);klasse(f.d,'fl',u.state==='flieht'&&!vf);klasse(f.d,'kampf',u.engaged&&!g);
+    const u=U[f.i],wt=u.state==='wartet',g=gone(u)&&!wt;
+    const vf=(!!u.vers||wt)&&!g;klasse(f.d,'weg',g);klasse(f.d,'verst',vf);klasse(f.d,'fl',u.state==='flieht'&&!vf);klasse(f.d,'kampf',u.engaged&&!g);
     wid(f.bar,vf?0:u.strength/u.np*100);txt(f.sn,g?'–':vf?'?':String(u.strength));
     if(vf){txt(f.zt,'?');continue;}
     txt(f.zt,u.state==='flieht'?'flieht':g?(u.state==='geflohen'?'geflohen':'gefallen'):u.engaged?'kämpft':u.fern&&u.schiessT>0?'schießt':'');
@@ -5579,7 +5605,7 @@ function feldherrInfo(g){   // lebt: nicht gefallen (auch geflohen); verwundet: 
 function ergebnisDaten(rz){   // Ergebnis für das Hauptspiel: je Einheit Start-Figuren, Rest, Geflohene, Gefallene
   return{sieg:ergebnis==='sieg',rueckzug:!!rz,zeit:Math.round(schlachtZ),seiten:SEITE.slice(),
     feldherr:[0,1].map(sd=>{const g=U.find(u=>u.gen&&u.side===sd);return g?feldherrInfo(g):null;}),   // je Seite: {name, lebt, verwundet} (null: kein Feldherr)
-    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef,kills:u.kills||0}))};
+    einheiten:U.map(u=>({tag:u.ein.tag,mil:!!u.ein.mil,seite:u.side,name:u.name,np:u.np,rest:u.strength,geflohen:u.fled,gefallen:u.gef,kills:u.kills||0,verst:u.ank?(u.ank.da?u.ank.zeit:-1):undefined}))};
 }
 function abbau(){   // Szene, Geometrien, Texturen, Ton, Zuhörer freigeben; gemeinsamen Renderer zurücksetzen
   if(abbauT)return;abbauT=true;phase='aus';
@@ -5601,6 +5627,10 @@ function abbau(){   // Szene, Geometrien, Texturen, Ton, Zuhörer freigeben; gem
   U.length=0;karten.length=feinde.length=BN.length=0;selM.clear();
   WURZ.textContent='';
 }
+/* Testseite ?verst=1 (R5): jedes Gefecht bekommt je Seite 2 Verstärkungen (Kopien von Fußeinheiten), Ankunft ab 60 s, dann alle 20 s, von links / rechts */
+if(OPT.standalone){try{if(new URLSearchParams(location.search).get('verst')==='1')for(const g of GEFECHTE)for(const sd of [0,1]){
+  const L=g.einheiten.filter(d=>d.s===sd&&d.tag!=='gen'&&(d.rolle==='sword'||d.rolle==='spear'));
+  for(let k=0;k<2&&L.length;k++)g.einheiten.push(Object.assign({},L[k%L.length],{x:k?60:-60,z:sd?96:-96,verst:{t:60+20*k,rand:k?'rechts':'links'}}));}}catch(e){console.warn(e);}}
 if(OPT.standalone)laden().catch(e=>{$('ladez').textContent='Fehler: '+e.message;console.error(e);});
 
 /* Test-Schnittstelle (Testseite: window.SCHLACHT; Hauptspiel: ESCH.api) */
@@ -22765,12 +22795,14 @@ function eschStart(args){
   const reA=[],reD=[];for(const x of ctx.attRe)for(const u of x.units)reA.push({ref:u,f:x.f,ga:x});for(const x of ctx.defRe)for(const u of x.units)reD.push({ref:u,f:x.f,ga:x});
   const mine=(playerAttacker?atk:def).concat(playerAttacker?reA:reD),foe=(playerAttacker?def:atk).concat(playerAttacker?reD:reA);
   const tags=[],weg=[0,0];
-  const bau=(L,seite,gaMain)=>{   // höchstens 9 Einheiten + Leibwache je Seite (Heer zuerst, Garnison, dann Verstärkung)
-    const out=[],vis=L.slice(0,9);weg[seite]=L.length-vis.length;
+  const bau=(L,seite,gaMain)=>{   // höchstens 9 Einheiten + Leibwache gleichzeitig je Seite (Heer zuerst, Garnison, dann Verstärkungsheere); die nächsten 4 kommen als Verstärkung (R5), der Rest bleibt zurück
+    const out=[],vis=L.slice(0,9),ver=L.slice(9,13);weg[seite]=L.length-vis.length-ver.length;
     for(const sp of vis){const d=eschDesc(sp,seite);d.tag=tags.length;tags.push(sp);out.push(d);}
     if(gaMain){const f=gaMain.f,m=eschMult(f,gaMain,'cav'),h=noHorse(f,'cav'),gn=(gaMain.gen&&gaMain.gen.n)||'Feldherr';   // Feldherr: Leibwache als Reiter (Fußtruppe bei Völkern ohne Pferd), Werte ×1,8 bis zur Kappe; Aura aus den Eigenschaften (genFx mor)
       out.push({s:seite,volk:f,kultur:facCul(f)||'latein',rolle:h?'sword':'cav',epoche:0,mann:60,name:'Leibwache des '+gn,feldherr:gn,aura:1+Math.max(0,m.mor)/50,tag:'gen',minFig:8,mult:{atk:1.8*m.atk,def:1.8*m.def,mor:m.mor}});}
-    eschAufstellen(out,seite);return out;
+    eschAufstellen(out,seite);
+    ver.forEach((sp,k)=>{const d=eschDesc(sp,seite);d.tag=tags.length;tags.push(sp);d.verst={t:60+20*k,rand:['links','rechts','hinten'][k%3]};d.x=0;d.z=seite===0?-120:120;out.push(d);});   // Ankunft ab 60 s, alle 20 s eine (Regeln im Kern: verstTick)
+    return out;
   };
   const einheiten=bau(mine,0,playerAttacker?a:ctx.defArmies[0]).concat(bau(foe,1,playerAttacker?ctx.defArmies[0]:a));
   const pf=S.player,ef=playerAttacker?P.owner:a.f;
@@ -24645,7 +24677,7 @@ try{const _ws=warStandHtml;warStandHtml=function(f){const h=_ws(f);let w=0;try{w
 try{const _dh=dipHouseHtml;dipHouseHtml=function(g){const h=_dh(g);if(!h)return h;let k=null;try{const G=S.fac[g].dyn;if(G&&G.pu&&G.pu.lord===S.player)k='fam_personalunion';else if((S.fac[S.player].exl||[]).length)k='fam_exil';}catch(e){}return k?sysImg(k,'small')+h:h;};}catch(e){}
 
 // ---------- Reisemodus: Oberfläche (Vorladen, Status, Löschen) ----------
-const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101224], ["proto/figuren/k_A1_eques.json", 2831935], ["proto/figuren/k_A1_hastatus.json", 2567582], ["proto/figuren/k_A1_legion.json", 2547746], ["proto/figuren/k_A1_veles.json", 2541309], ["proto/figuren/k_A2_libysch.json", 2528773], ["proto/figuren/k_A2_numidisch.json", 2897875], ["proto/figuren/k_A3_iberisch.json", 2540489], ["proto/figuren/k_A4_balearisch.json", 2528213], ["proto/figuren/k_A6_adlig.json", 2541014], ["proto/figuren/k_A6_falx.json", 2525903], ["proto/figuren/k_A6_keltisch.json", 2541060], ["proto/figuren/k_A6_plaenkler.json", 2534667], ["proto/figuren/k_A7_hellenistisch.json", 2547250], ["proto/figuren/k_A7_hoplit.json", 2565461], ["proto/figuren/k_A7_phalangit.json", 2789874], ["proto/figuren/k_A7_toxotes.json", 2540508], ["proto/figuren/k_A8_aksum.json", 2540291], ["proto/figuren/k_A8_nubisch.json", 2540552], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_M1_bogen.json", 2541316], ["proto/figuren/k_M1_heerbann.json", 2533567], ["proto/figuren/k_M1_huskarl.json", 2535038], ["proto/figuren/k_M1_panzerreiter.json", 2815628], ["proto/figuren/k_M2_knecht.json", 2534130], ["proto/figuren/k_M2_langbogen.json", 2535632], ["proto/figuren/k_M2_ritter.json", 2794514], ["proto/figuren/k_M2_sergeant.json", 2527210], ["proto/figuren/k_M3_kataphrakt.json", 2817509], ["proto/figuren/k_M3_skutatos.json", 2541149], ["proto/figuren/k_M3_thematen.json", 2542481], ["proto/figuren/k_M3_toxotes.json", 2541515], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_regen_1.mp3", 74304], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v219';
+const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101222], ["proto/figuren/k_A1_eques.json", 2831935], ["proto/figuren/k_A1_hastatus.json", 2567582], ["proto/figuren/k_A1_legion.json", 2547746], ["proto/figuren/k_A1_veles.json", 2541309], ["proto/figuren/k_A2_libysch.json", 2528773], ["proto/figuren/k_A2_numidisch.json", 2897875], ["proto/figuren/k_A3_iberisch.json", 2540489], ["proto/figuren/k_A4_balearisch.json", 2528213], ["proto/figuren/k_A6_adlig.json", 2541014], ["proto/figuren/k_A6_falx.json", 2525903], ["proto/figuren/k_A6_keltisch.json", 2541060], ["proto/figuren/k_A6_plaenkler.json", 2534667], ["proto/figuren/k_A7_hellenistisch.json", 2547250], ["proto/figuren/k_A7_hoplit.json", 2565461], ["proto/figuren/k_A7_phalangit.json", 2789874], ["proto/figuren/k_A7_toxotes.json", 2540508], ["proto/figuren/k_A8_aksum.json", 2540291], ["proto/figuren/k_A8_nubisch.json", 2540552], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_M1_bogen.json", 2541316], ["proto/figuren/k_M1_heerbann.json", 2533567], ["proto/figuren/k_M1_huskarl.json", 2535038], ["proto/figuren/k_M1_panzerreiter.json", 2815628], ["proto/figuren/k_M2_armbrust.json", 2586098], ["proto/figuren/k_M2_knecht.json", 2534130], ["proto/figuren/k_M2_langbogen.json", 2535632], ["proto/figuren/k_M2_ritter.json", 2794514], ["proto/figuren/k_M2_sergeant.json", 2527210], ["proto/figuren/k_M3_kataphrakt.json", 2817509], ["proto/figuren/k_M3_skutatos.json", 2541149], ["proto/figuren/k_M3_thematen.json", 2542481], ["proto/figuren/k_M3_toxotes.json", 2541515], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_regen_1.mp3", 74304], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v220';
 const OFFUI={run:false,stop:false};
 function offSize(set){return OFF_MAN.filter(([p])=>set==='alles'||!/^(audio|proto\/ton)\//.test(p)).reduce((a,[,s])=>a+s,0);}
 function offMB(b){return(b/1048576).toFixed(b<1048576*10?1:0).replace('.',',')+' MB';}

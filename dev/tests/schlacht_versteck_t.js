@@ -58,9 +58,9 @@ const check = (n, c, info) => { (c ? ok : fail).push(n); console.log((c ? 'OK   
   await warteBis(8);
   v = await V(0);
   const gz = await p.evaluate(() => ({ fz: SCHLACHT.units[14].fZ, ges: SCHLACHT.geschosse.gesamt }));
-  check('eigene Einheit im Wald ist versteckt, Zustand „versteckt“', v.vers === true && v.zustand === 'versteckt', JSON.stringify(v));
+  check('eigene Einheit im Wald ist versteckt, Zustand „getarnt“', v.vers === true && v.zustand === 'getarnt', JSON.stringify(v));
   const kt = await p.evaluate(() => document.querySelector('#karten .karte .zst span').innerText);
-  check('Karte zeigt „versteckt“', kt === 'versteckt', `„${kt}“`);
+  check('Karte zeigt „getarnt“', kt === 'getarnt', `„${kt}“`);
   check('Fernkämpfer (Reichweite 110 m, Ziel 80 m) wählt die versteckte Einheit nicht', gz.fz === -1 && gz.ges === 0, JSON.stringify(gz));
   await p.evaluate(() => { SCHLACHT.pause(true); SCHLACHT.kamera(Math.PI * 0.8, 0.4, 70, 95, 120); });
   await p.waitForTimeout(2500); await p.screenshot({ path: 'shot/versteck_eigen.png' });

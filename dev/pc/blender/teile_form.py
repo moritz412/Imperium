@@ -255,6 +255,23 @@ def bogen(name, laenge=1.15):
     return _obj(name, bm, mats)
 
 
+def armbrust(name):
+    """Armbrust (14. Jh., Vorlage Job 48): Säule entlang +Z (Griff im Ursprung, Bogen vorn bei z≈0,55), Bogen quer entlang X, Spannbügel vorn."""
+    bm = bmesh.new()
+    mats = [mat("armbrust_holz", *HOLZ), mat("bogen_horn", (0.16, 0.09, 0.04), 0, 0.6), mat("sehne", (0.6, 0.55, 0.45), 0, 0.9),
+            mat("eisen", *EISEN)]
+    _kasten(bm, Vector((0, 0, 0.2)), (0.035, 0.05, 0.72), 0)          # Säule
+    n = 4; pts = []
+    for k in range(-n, n + 1):
+        t = k / n; pts.append(Vector((t * 0.36, 0, 0.5 - 0.06 * (1 - t * t))))
+    for a2, b2 in zip(pts, pts[1:]):
+        m = (a2 + b2) / 2; d = b2 - a2
+        _kasten(bm, m, (d.length * 1.05, 0.02, 0.025), 1, Vector((1, 0, 0)).rotation_difference(d.normalized()).to_matrix())
+    _kasten(bm, Vector((0, 0, 0.47)), (0.7, 0.004, 0.004), 2)          # Sehne (gespannt)
+    _kasten(bm, Vector((0, 0, 0.6)), (0.09, 0.012, 0.012), 3)           # Spannbügel
+    return _obj(name, bm, mats)
+
+
 def koecher(name):
     """Köcher mit Pfeilen: Unterkante im Ursprung, entlang +Z (0,6 m)."""
     bm = bmesh.new()
