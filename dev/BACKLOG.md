@@ -1,5 +1,23 @@
 # Backlog – Imperium der Epochen 2 (Stand 29.10.2026 morgens, v215 veröffentlicht)
 
+## SCHLACHT-PLAN 31.10. (Figuren, Farben, Ideen aus Rome-II-Spielmechanik)
+Stand Figuren: 18 Soldaten-Kits + Pferd + Elefant. Kampagnenprofile 333: Antike 53 von 55 mit eigener Figur, Epoche 1–4 (278 Profile) nur Rückfall auf Antike-Kits.
+Kein GPU-Auftrag für spätere Epochen vorhanden (Jobs 44/45 = nur Antike-Vorlagen).
+- **F1 Antike schließen:** 2 Rückfall-Profile, Körpervarianten (3 Körper, 2–3 Hauttöne; Plan in dev/pc/plan_schlacht_pc.md, nicht umgesetzt).
+- **F2 Authentische Farben (neu):** Stoff-/Schild-Maske beim Backen (Vertexfarben-Kanal), Tönung je Volk/Einheit über instanceColor; Farbtabelle je Kultur aus Quellen (Rom: ungefärbte/rote Tuniken, Kelten: Karo/Streifen, Karthago/Iberer: weiß mit roten Säumen …). Schildmotive als eigene Muster.
+- **F3 Detail:** Formteile feiner (Helme, Schilde mit Buckel/Rand), Gesichter/Haare, Grenze 3000 Dreiecke halten (iPad), Nahstufe/Fernstufe.
+- **F4 Epochen 1–4:** Kit-Familien je Epoche (≈ 8–12 je Epoche), FLUX-Vorlagen (GPU, Warteschlange), neue Clips für Armbrust/Langbogen/Muskete/Pike-and-Shot, Geschütze. Erst nach F2, da Farben dann gleich mitgebaut werden.
+- **R1 Einheitenfähigkeiten** (je Kit 1–2, Knopf in der Einheitenkarte): Schildkröte (Legion), Keil (Reiterei), Schildwall/Phalanx halten, Wurfspeer-Salve vor Ansturm, Plänkeln automatisch.
+- **R2 Erschöpfung sichtbar:** Ausdauer gibt es intern (sFat) – Anzeige auf der Karte, Rennen/Kampf kostet, Stehen erholt.
+- **R3 Verstecken/Hinterhalt:** Einheiten im Wald unsichtbar bis nah; Kampagnen-Hinterhalt startet mit Feind in Marschkolonne.
+- **R4 Wetter:** Regen (Fernkampf schwächer, Ton), Nebel (Sicht), Hitze (schneller müde) aus vorhandenem B.weather.
+- **R5 Verstärkungen:** zweites Heer in der Nähe kommt nach Zeit vom Rand; Einheitenobergrenze je Seite.
+- **R6 Feldartillerie Antike** (Skorpion/Balliste, Modell vorhanden): Fernschaden mit Bogenbahn, Bedienung.
+- **R7 Erfahrung aus der Schlacht:** Abschüsse je Einheit -> Rangaufstieg in der Kampagne.
+- **R8 Siedlungsschlacht ohne Mauern** mit Eroberungspunkt (Halten X s = Sieg), danach Mauern/Belagerung (Leitern, Rammbock, Türme).
+- **R9 Kamera/Übersicht:** Einheitenfahnen mit Moral-/Ausdauer-Anzeige, „Wanken“-Hinweis, Schlacht-Zusammenfassung mit Abschüssen.
+Reihenfolge-Vorschlag: R2, R1, F2, R3/R4, R7, F1, R5, R6, R8, F3, F4.
+
 ## ÜBERGABE 29.10. (zuerst lesen)
 - **30.10. spät – v220 + Feldherr (I3):** v219/v220 veröffentlicht (neue Schlacht hinter Schalter, Elefanten, Umgebung). Danach: Elefanten abgeschwächt (Stampfen 2,4→1,6, Trampeln ×0,7), dunkler, Laute (AudioGen: Trompete, Panik, Tod; Schritte noch ungenutzt). Feldherr: goldene Figur in der Leibwache, Aura 40 m, Sammeln (60 m, 45 s), Anfeuern (60 m, 60 s, 20 s ×1,2), Tod = Moral −18; KI-Feldherr als Reserve. Ergebnis feldherr{lebt,verwundet} kommt in der Kampagne an, wirkt aber noch nicht (offene Entscheidung Moritz: gefallener Feldherr ersetzen?). Tests feldherr 26/0, integ 20/20, smoke 4/4. Feldherr noch nicht veröffentlicht. **iPad nicht getestet.**
 - **30.10. Nacht – Einbau I1/I2/I4 + PC-Paket:** Neue Schlacht in dev/imperium.html hinter Schalter (Einstellungen > Grafik „Neue Echtzeitschlacht (Test)“ bzw. ?eschlacht=1; nur Antike, keine Mauern, kein Mehrspieler), Datenbrücke Heer↔Schlacht, Rückzug-Knopf, Schlacht-Schwierigkeit S.bdiff. Kern-Quelle bleibt dev/proto/schlacht_spiel.html, Abgleich mit `node dev/tools/sync_schlacht.js`. Test eschlacht_integ_t.js 19/19, smoke 4/4. Abzug aus dem Nahkampf per Marschbefehl (alle Einheiten, Test abzug_t.js). PC: Elefant (elefant_bau.py, noch nicht in der Schlacht), alle Kits neu mit Körper male1591, Federn/Kamm/Beinschienen; neue Kits A1_legion, A6_adlig, A6_falx, A8_nubisch, A8_aksum (56 Profile genau); Umgebungsteile umgebung_bau.py (Felsen, Häuser, Zaun, Mauer, Heu, Balliste; noch nicht platziert). Nicht deployt. **iPad nicht getestet.**
