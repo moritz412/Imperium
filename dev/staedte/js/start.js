@@ -33,6 +33,12 @@ export function startseite({ hatStand, weiter, gruenden }) {
         <text x="${x}" y="${y - 19}" text-anchor="middle">${r.stadt}</text></g>`; }).join('')}
   </svg>`;
   const el = $('#startseite');
+  // Hintergrundbild aus dem Hauptspiel: veröffentlicht unter ../img, in der Entwicklung unter ../../img
+  (function bild(pfade) {
+    if (!pfade.length) return;
+    const i = new Image(); i.onload = () => el.style.setProperty('--startbild', `url(${pfade[0]})`); i.onerror = () => bild(pfade.slice(1));
+    i.src = pfade[0];
+  })(['../img/ep_0.webp', '../../img/ep_0.webp']);
   el.innerHTML = `<div class="startrahmen feld">
     <div class="startkarte">${karte}</div>
     <div class="startspalte">
