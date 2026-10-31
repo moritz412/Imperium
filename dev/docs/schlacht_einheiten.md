@@ -184,3 +184,12 @@ Gebaut in `schlachtKern` (`dev/proto/schlacht_spiel.html`, abgeglichen nach `imp
 - Neue Clips in `CN`: `sarissa_bereit`, `sarissa_stoss`, `gehen_sarissa` (Ersatz bei Paketen ohne sie: `kampf_bereit`, `stoss_speer`, `gehen`). Die Paketdatei kennzeichnet `sarissa_bereit` und `gehen_sarissa` als nicht schleifend; `kitBauen` setzt sie auf Schleife.
 - Regeln: Feind (Einheitsanker, nicht fliehend) näher als 40 m (Abstand alle 0,3 s in `u.feindD`) oder Nahkampf → `sarissa_bereit` statt `stehen_bereit`/`kampf_bereit`; Angriff immer `sarissa_stoss` (Schaden 1,2 wie der Speerstich, kein Schildstoß); Gehen in Formation → `gehen_sarissa` (Laufen bleibt `laufen`). Sonst normale Clips (Pike aufrecht). Phalanx-Regel gegen Reiter unverändert.
 - Bilder: `dev/tests/shot/sarissa_*.png` (`node dev/tests/schlacht_sarissa_t.js`).
+
+## Stand Fähigkeiten R1 (31.10.)
+Ein Knopf „Fähigkeit“ (rechte Spalte, nur in der Schlacht; ausgegraut ohne Fähigkeit) schaltet die Fähigkeit der gewählten Einheit; Zustand steht auf der Karte (`zst`), Erklärung und angepasste Zahlen im Einheitenfenster. Code: `FAEH`, `faehigAnwenden`, `kiFaehig` in `schlachtKern`; API `SCHLACHT.faehigkeit(i,name)`, `SCHLACHT.faehig(i)`.
+- **Schildkröte** (A1_hastatus, A1_legion; An/Aus): Fernschaden ×0,25 (alle Richtungen), Tempo ×0,4, kein Laufen, Angriff ×0,8, Verband enger (fk 0,78), Schild-hoch-Haltung.
+- **Keil** (berittene A1_eques; An/Aus): Ansturm-Wucht ×1,25, Abwehr ×0,85. A6_adlig kämpft im Spiel zu Fuß (keine Fähigkeit).
+- **Schildwall** (A7_hoplit, A7_phalangit, A2_libysch; An/Aus): Abwehr ×1,3 von vorn, Reiteransturm von vorn ×0,4 (Speere halten +12 Prozentpunkte), kein Laufen, enger Verband (0,88).
+- **Wurfsalve** (A1_hastatus, A1_legion; einmal je Schlacht): jeder Mann wirft einen Speer (Plänkler-Fernlogik, Reichweite 32 m, Schaden 1,3) auf die nächste Einheit; nicht im Nahkampf. Der Knopf wählt Salve, solange sie bereit ist und ein Feind in 30 m steht, sonst Schildkröte.
+- **KI**: Schildwall bei anstürmenden Reitern von vorn (innerhalb 55 m), Schildkröte nur unter Beschuss; sonst nichts. Salve und Keil setzt die KI nicht ein.
+- Test `dev/tests/schlacht_faehigkeit_t.js` (Einzelläufe, kein Mittel über viele Läufe). Offen: Feinabstimmung der Zahlen, Test auf dem echten iPad (nicht getestet), kein Ton/eigener Clip für Salve/Schildkröte, Kartentext bei schmalen Karten gekürzt.
