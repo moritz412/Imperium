@@ -3,6 +3,7 @@ import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
+import * as ton from './ton.js';
 
 const SPEICHER = 'staedte_roms.v1';
 const $ = s => document.querySelector(s);
@@ -101,7 +102,8 @@ function vorschauAn(t, px, py) {
 function bauenAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
   const r = sim.bauen(S, welt, t, p.x, p.z);
-  if (!r.ok) { melden(r.grund); return; }
+  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
+  ton.sfx('bauen');
   if (t === 'holzfaeller' && !sim.waldNah(welt, r.b)) melden('Achtung: Kein Wald in der Nähe dieses Holzfällers.');
   allesZeichnen();
 }
@@ -144,7 +146,7 @@ function strasseMalen(px, py) {
   const p = platzFuer('strasse', px, py); if (!p) return;
   const k = p.x + ',' + p.z; if (malen.has(k)) return; malen.add(k);
   const r = sim.bauen(S, welt, 'strasse', p.x, p.z);
-  if (r.ok) allesZeichnen(); else if (/fehlen/.test(r.grund)) melden(r.grund);
+  if (r.ok) { allesZeichnen(); ton.sfx('strasse'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
 }
 function fingerWeg(e) {
   const war = finger.has(e.pointerId); finger.delete(e.pointerId);
@@ -205,7 +207,7 @@ $('#info').addEventListener('click', e => {
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
-  if (a.dataset.a === 'weg') { sim.abreissen(S, b.id); schliesseInfo(); allesZeichnen(); }
+  if (a.dataset.a === 'weg') { sim.abreissen(S, b.id); ton.sfx('abreissen'); schliesseInfo(); allesZeichnen(); }
 });
 
 // ---------- Tempo und Menü ----------
@@ -216,6 +218,7 @@ $('#menue').addEventListener('click', e => {
   if (!b) { if (e.target.id === 'menue') $('#menue').hidden = true; return; }
   const m = b.dataset.m;
   if (m === 'weiter') $('#menue').hidden = true;
+  if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
   if (m === 'hilfe') {
@@ -249,8 +252,9 @@ $('#ansicht').addEventListener('click', e => {
 });
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
-  sim.monat(S, welt).forEach(melden);
-  if (sim.jahreszeit(S) !== js) { szene.jahreszeitFarbe(sim.jahreszeit(S)); speichern(true); }
+  const meld = sim.monat(S, welt); meld.forEach(melden);
+  if (meld.some(m => /Casa/.test(m))) ton.sfx('aufstieg');
+  if (sim.jahreszeit(S) !== js) { szene.jahreszeitFarbe(sim.jahreszeit(S)); speichern(true); ton.sfx('jahreszeit', sim.jahreszeit(S)); }
   allesZeichnen();
 }
 let zuletzt = performance.now();
@@ -260,6 +264,9 @@ function schleife(jetzt) {
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
+const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus'; };
+tonKnopf();
+
 // ---------- Startseite (S1.5) ----------
 const willkommen = () => melden('Willkommen in Cremona. Der Senat erwartet die ersten Hütten an der Landstraße.');
 const start = startseite({
@@ -282,6 +289,6 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
-  modelle: () => szene.modelleBereit, szene, start,
+  modelle: () => szene.modelleBereit, szene, start, ton,
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

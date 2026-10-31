@@ -45,7 +45,12 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       Hintergrund img/ep_0.webp. Knöpfe in einer Spalte: Weiterspielen (wenn Stand da) / neu gründen (mit Rückfrage).
       Zeit läuft erst nach dem Schließen. Gebaut ohne Blick auf das Mockup „Startregion“ (Canvas von hier nicht erreichbar),
       nach dem Konzepttext. Test 25/25 (PC, `PW_GPU=1`). **Nicht getestet:** iPad, Abgleich mit dem Mockup.
-- [ ] S1.6 Ton (Hintergrund, Bauen, Jahreszeit) aus vorhandener Pipeline.
+- [x] S1.6 Ton (31.10. abends): `js/ton.js`. Musik „rom_ant“ aus dem Hauptspiel (MusicGen) als eigene Datei
+      `audio/st_rom.json` (0,9 MB statt 6 MB `m_eu.json`), Schleife mit Einblenden. Umgebung: leiser Wind, ab und zu Vögel.
+      Geräusche per WebAudio wie `sfx()` im Hauptspiel: Bauen (Hammer), Straße, Abreißen, Casa-Aufstieg, Fehler,
+      Jahreszeitwechsel (Harfenakkord je Jahreszeit). Start mit der ersten Berührung; Menü „Ton: an/aus“ (gespeichert).
+      Test 26/26 (PC, `PW_GPU=1`: Ton läuft, Musik dekodiert, Schalter). **Nicht angehört**, Lautstärken nur geschätzt.
+      **Nicht getestet:** iPad (Safari-Audio).
 
 ## Später
 Stufe 2 Region & Transport · Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·

@@ -116,6 +116,14 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
   ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
 
+  // S1.6 Ton: nach der ersten Berührung läuft der Ton, Musik geladen, Schalter im Menü
+  await p.waitForFunction(() => SR.ton.zustand().musik, null, { timeout: 20000 }).catch(() => {});
+  const tz = await p.evaluate(() => SR.ton.zustand());
+  await p.click('#menueKnopf'); await p.click('#menue [data-m="ton"]');
+  const tonAus = await p.evaluate(() => ({ z: SR.ton.zustand().an, k: document.querySelector('#menue [data-m="ton"]').textContent }));
+  await p.click('#menue [data-m="ton"]'); await p.click('#menue [data-m="weiter"]');
+  ok('Ton läuft, Musik geladen, Schalter im Menü', tz.laeuft && tz.musik && !tonAus.z && tonAus.k === 'Ton: aus', JSON.stringify({ tz, tonAus }));
+
   // S1.4 Ansichten
   await p.evaluate(() => SR.tempo(0));
   await p.click('#ansicht button[data-ansicht="wasser"]');
