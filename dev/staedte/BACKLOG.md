@@ -137,6 +137,17 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       **Nicht getestet:** iPad, Balance (Häufigkeit).
 - [ ] S3.4 Epoche II (Späte Republik): Übergang mit Amt/Stadtrang, Weinbau/Öl/Weberei/Garum als Ketten, Römerstraße, Aquädukt.
 
+## Plan nächste 2 Stunden (1.11., Vorschlag, wartet auf Moritz)
+Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
+Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt
+das „Kaufen“ von Land (historisch: Landzuteilung, ager publicus).
+1. Stadterweiterung (Raster 64, 2 Stufen per Senat) – ca. 35 min
+2. Umland Ring 4: Mantua (zweiter Handelspartner, andere Preise), Gallierdorf im Norden als Ursprung der Überfälle – ca. 30 min
+3. S3.4 Einstieg Späte Republik: Übergang (Kolonie + Erfindungen + Gunst), Weinberg → Kelter → Wein, Domus der Equites – ca. 40 min
+4. Balance-Lauf über 5 Spieljahre (Simulation mit Kennzahlen) + Modelle Schule/Wache/Quartier/Schrein – ca. 15 min
+Abgrenzung zu Anno 117 (Pax Romana, 2025): eigene Mechaniken (Laufwege, Hex-Umland mit Vermessen, Jahreszeiten,
+Sklaven als historischer Stand, Senatsgunst/Abgaben, echte Orte), keine Übernahme von Ketten, Gebäudelisten oder Oberfläche.
+
 ## Rückmeldung Moritz 1.11. (nach Spielen)
 „Spielt sich gut, aber sehr schnell und leicht. Man bekommt Lust auf mehr – Manor Lords mit Rom.“ Straßenbau ließ sich nicht korrigieren.
 - [x] Straßen korrigieren: Im Straßen-Baumodus Knopf „Entfernen“ – Felder antippen oder ziehen reißt Straßen ab. Test 41/41.
