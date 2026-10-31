@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -296,13 +296,15 @@ export function erzeugeSzene(leinwand, welt) {
     const da = new Set();
     for (const b of S.geb) {
       da.add(b.id);
-      const schluessel = b.t + b.stufe;
+      if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
+      const schluessel = b.t + b.stufe + 'd' + b.dreh;
       let o = objekte.get(b.id);
       if (!o || o.schluessel !== schluessel) {
         if (o) gruppe.remove(o.g);
         const g = baueMesh(b.t, b.stufe);
         const [gw, gd] = groesse(b.t);
         g.position.copy(weltPos(b.x + gw / 2, b.z + gd / 2));
+        g.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];
         g.userData.id = b.id;
         gruppe.add(g);
         o = { g, schluessel, symbol: null, art: '' };
@@ -452,11 +454,11 @@ export function erzeugeSzene(leinwand, welt) {
 
   // Vorschau beim Bauen
   let geist = null, geistTyp = '';
-  function vorschau(t, x, z, gueltig) {
+  function vorschau(t, x, z, gueltig, dreh = 0) {
     if (!t) { if (geist) { szene.remove(geist); geist = null; geistTyp = ''; } return; }
     if (geistTyp !== t) { if (geist) szene.remove(geist); geist = baueMesh(t, 1, true); geistTyp = t; szene.add(geist); }
     const [gw, gd] = groesse(t);
-    geist.position.copy(weltPos(x + gw / 2, z + gd / 2)).setY(0.02);
+    geist.position.copy(weltPos(x + gw / 2, z + gd / 2)).setY(0.02); geist.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][dreh];
     geist.traverse(m => { if (m.isMesh) m.material.emissive && m.material.emissive.setHex(gueltig ? 0x1e5a1e : 0x7a1e1e); });
   }
 

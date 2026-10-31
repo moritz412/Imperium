@@ -59,6 +59,18 @@ export function randFelder(t, x, z) {
   return r.filter(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < TIEFE).map(([a, c]) => c * RASTER + a);
 }
 export const anStrasse = (t, x, z, maske) => randFelder(t, x, z).some(i => maske[i]);
+// Vorderseite zur Straße (1.11.): 0 = Süden (+z), 1 = Osten, 2 = Norden, 3 = Westen. Nicht quadratische Gebäude nur Süd/Nord.
+export function frontSeite(S, t, x, z, maske = strassenMaske(S)) {
+  if (GEB[t].flach || t === 'strasse') return 0;
+  const [w, d] = groesse(t), hat = feld => feld.some(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < TIEFE && maske[c * RASTER + a]);
+  const reihe = (zz) => Array.from({ length: w }, (_, i) => [x + i, zz]), spalte = (xx) => Array.from({ length: d }, (_, i) => [xx, z + i]);
+  if (hat(reihe(z + d))) return 0;
+  if (hat(reihe(z - 1))) return 2;
+  if (w !== d) return 0;
+  if (hat(spalte(x + w))) return 1;
+  if (hat(spalte(x - 1))) return 3;
+  return 0;
+}
 
 // Wegstrecke über Straßen ab den Straßenfeldern vor einem Gebäude (Breitensuche), −1 = nicht erreichbar
 export function strassenWeg(maske, b, max = 999) {
@@ -128,7 +140,7 @@ export function bauen(S, welt, t, x, z) {
   const k = baukosten(S, t);
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
-  const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [] };
+  const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
   S.geb.push(b);
   return { ok: true, b };
 }

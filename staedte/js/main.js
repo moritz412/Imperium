@@ -106,7 +106,7 @@ function platzFuer(t, px, py) {
 function vorschauAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
   const ok = !sim.pruefePlatz(S, welt, t, p.x, p.z) && sim.kannBezahlen(S, sim.baukosten(S, t));
-  szene.vorschau(t, p.x, p.z, ok);
+  szene.vorschau(t, p.x, p.z, ok, sim.frontSeite(S, t, p.x, p.z));
 }
 function bauenAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
