@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -243,7 +243,7 @@ export function monat(S, welt) {
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += einwohner(S) * 0.4 * (S.stimmung / 70);
+  S.gut.denare += einwohner(S) * STEUER * (S.stimmung / 70);
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
   const a = AUFTRAEGE[S.auftrag];

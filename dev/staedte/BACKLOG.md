@@ -103,6 +103,13 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Bild angesehen. Offen: Balance (Häufigkeit), Räuber/Gallier nicht als Figuren sichtbar, Hochwasser in der Stadt selbst.
       **Nicht getestet:** iPad.
 
+## Rückmeldung Moritz 1.11. (nach Spielen)
+„Spielt sich gut, aber sehr schnell und leicht. Man bekommt Lust auf mehr – Manor Lords mit Rom.“ Straßenbau ließ sich nicht korrigieren.
+- [x] Straßen korrigieren: Im Straßen-Baumodus Knopf „Entfernen“ – Felder antippen oder ziehen reißt Straßen ab. Test 41/41.
+- [x] Balance erster Schritt: 1 Monat 5 → 9 s, Steuern 0,4 → 0,3 je Einwohner, Start 220 Denare / 130 Holz / 30 Ziegel
+      (vorher 300/170/40), Gehöft 4 → 3 Getreide. Der Test gibt sich für den Stadtaufbau den alten Vorrat (prüft Abläufe).
+      **Nicht nachgespielt** – ob es jetzt passt, muss Moritz sagen.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

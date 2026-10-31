@@ -72,6 +72,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 
 #baumodus{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;padding:8px 8px 8px 16px;display:flex;align-items:center;gap:12px;font-size:14px;z-index:2}
 #baumodus button{height:40px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:700;padding:0 14px}
+#baumodus button.an{background:#9a4a2b;border-color:#e0603c;color:#fff}
 
 .schleier{position:fixed;inset:0;background:rgba(10,8,6,.6);display:flex;align-items:center;justify-content:center;z-index:10}
 .menuespalte{width:320px;padding:22px;display:flex;flex-direction:column;gap:10px}

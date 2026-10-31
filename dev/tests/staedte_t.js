@@ -33,6 +33,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
 
   // Bauen per API (Straßennetz: Landstraße z=12, Gassen z=16 und z=19, Verbindungen x=14 und x=15)
   const bau = await p.evaluate(() => {
+    Object.assign(SR.S.gut, { denare: 300, holz: 170, ziegel: 40 });   // Test-Vorrat wie vor der Balance vom 1.11. (Abläufe prüfen, nicht Balance)
     const str = [];
     for (let x = 14; x <= 25; x++) str.push([x, 16]);
     for (let x = 9; x <= 26; x++) str.push([x, 19]);
@@ -101,6 +102,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.mouse.up(); await p.click('#baumodusEnde');
   const s1 = await p.evaluate(() => SR.S.geb.filter(b => b.t === 'strasse').length);
   ok('Straße per Ziehen gelegt', s1 - s0 >= 3, `${s0} → ${s1}`);
+  // Straßen korrigieren (1.11.): Knopf „Entfernen“ im Straßen-Baumodus, dieselbe Strecke zurück ziehen
+  await p.click('.karte[data-t="strasse"]'); await p.click('#baumodusWeg');
+  await p.mouse.move(700, 560); await p.mouse.down();
+  for (let i = 1; i <= 10; i++) await p.mouse.move(700 + i * 14, 560 - i * 7);
+  await p.mouse.up(); await p.click('#baumodusEnde');
+  const s2 = await p.evaluate(() => SR.S.geb.filter(b => b.t === 'strasse').length);
+  ok('Straße per Ziehen entfernt', s2 <= s0 && s2 < s1, `${s1} → ${s2}`);
 
   // S1.1 Modelle, S1.2 Einzugsbereich und Laufwege
   ok('Gebäudemodelle geladen', await p.evaluate(() => SR.modelle()));

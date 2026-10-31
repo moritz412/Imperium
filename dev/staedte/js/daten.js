@@ -1,7 +1,8 @@
 // Städte Roms – Spieldaten (Gebäude, Waren, Jahreszeiten, Senatsaufträge)
 
 export const RASTER = 40;            // Felder je Seite
-export const MONAT_S = 5;            // Sekunden je Monat bei normalem Tempo
+export const MONAT_S = 9;            // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9, Moritz: „zu schnell“)
+export const STEUER = 0.3;           // Denare je Einwohner und Monat bei Stimmung 70 (1.11.: 0,4 → 0,3)
 export const LAGER_GRUND = 150;      // Lagergrenze je Ware ohne Speicher
 export const ARBEIT_ANTEIL = 0.7;    // Anteil der Einwohner, der arbeitet
 export const ESSEN_JE_MONAT = 0.1;   // Nahrung je Einwohner und Monat
@@ -96,7 +97,7 @@ export const ABGABE = { grund: 10, je: 0.8, gunst: 50, plus: 8, minus: 20 };
 export const VERMESSEN = { kosten: { denare: 20 }, monate: 2 };
 export const WEG = { kosten: { denare: 10, holz: 5 } };   // Feldweg auf einem vermessenen Feld (S2.3)
 export const LAND_BETRIEBE = {
-  gehoeft:    { n: 'Gehöft', auf: 'acker', kosten: { holz: 20 }, erzeugt: { getreide: 4 }, ernte: true, modell: 'huette',
+  gehoeft:    { n: 'Gehöft', auf: 'acker', kosten: { holz: 20 }, erzeugt: { getreide: 3 }, ernte: true, modell: 'huette',
     text: 'Eine Bauernfamilie bestellt das Feld. Getreide wie auf den Feldern der Stadt: viel im Herbst, nichts im Winter.' },
   holzlager:  { n: 'Holzfällerlager', auf: 'wald', kosten: { holz: 10 }, erzeugt: { holz: 3 }, modell: 'holzfaeller',
     text: 'Holzfäller schlagen Stämme und flößen sie zur Stadt.' },
@@ -141,7 +142,7 @@ export const REGIONEN = [
 ];
 
 export const START = {
-  gut: { denare: 300, holz: 170, lehm: 0, ziegel: 40, getreide: 40, mehl: 0, brot: 20, fisch: 0 },
+  gut: { denare: 220, holz: 130, lehm: 0, ziegel: 30, getreide: 40, mehl: 0, brot: 20, fisch: 0 },
   stimmung: 60,
 };
 

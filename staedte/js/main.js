@@ -9,7 +9,7 @@ const SPEICHER = 'staedte_roms.v1';
 const $ = s => document.querySelector(s);
 const welt = sim.erzeugeWelt();
 let S = laden() || sim.neuesSpiel();
-let tempo = 1, uhr = 0, auswahl = 0, bauTyp = '', reiter = 'Wohnen';
+let tempo = 1, uhr = 0, auswahl = 0, bauTyp = '', reiter = 'Wohnen', entfernen = false;
 const szene = erzeugeSzene($('#welt'), welt);
 szene.zentrieren(20, 20);
 szene.jahreszeitFarbe(sim.jahreszeit(S));
@@ -111,11 +111,14 @@ function bauenAn(t, px, py) {
 }
 function baumodus() {
   $('#baumodus').hidden = !bauTyp;
-  if (bauTyp) { $('#baumodusText').textContent = bauTyp === 'strasse' ? 'Straße bauen: Felder antippen oder ziehen' : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
+  if (bauTyp !== 'strasse') entfernen = false;
+  const wk = $('#baumodusWeg'); wk.hidden = bauTyp !== 'strasse'; wk.classList.toggle('an', entfernen); wk.setAttribute('aria-pressed', entfernen);
+  if (bauTyp) { $('#baumodusText').textContent = bauTyp === 'strasse' ? (entfernen ? 'Straße entfernen: Felder antippen oder ziehen' : 'Straße bauen: Felder antippen oder ziehen') : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
   else szene.vorschau('');
   bauleiste();
 }
 $('#baumodusEnde').addEventListener('click', () => { bauTyp = ''; baumodus(); });
+$('#baumodusWeg').addEventListener('click', () => { entfernen = !entfernen; baumodus(); szene.vorschau(''); });
 
 // ---------- Eingabe auf der Karte: wischen, Zwei-Finger-Zoom, antippen ----------
 const finger = new Map();
@@ -132,7 +135,7 @@ lw.addEventListener('pointerdown', e => {
   if (finger.size === 2) { const [a, b] = [...finger.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
 });
 lw.addEventListener('pointermove', e => {
-  if (!finger.has(e.pointerId)) { if (bauTyp && e.pointerType === 'mouse') vorschauAn(bauTyp, e.clientX, e.clientY); return; }
+  if (!finger.has(e.pointerId)) { if (bauTyp && !entfernen && e.pointerType === 'mouse') vorschauAn(bauTyp, e.clientX, e.clientY); return; }
   const alt = finger.get(e.pointerId);
   if (Math.hypot(e.clientX - alt.x, e.clientY - alt.y) > 3) bewegt = true;
   finger.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -147,6 +150,11 @@ let malen = null;
 function strasseMalen(px, py) {
   const p = platzFuer('strasse', px, py); if (!p) return;
   const k = p.x + ',' + p.z; if (malen.has(k)) return; malen.add(k);
+  if (entfernen) {   // Straßen korrigieren: vorhandene Straße auf dem Feld abreißen
+    const st = S.geb.find(b => b.t === 'strasse' && b.x === p.x && b.z === p.z);
+    if (st) { sim.abreissen(S, st.id); allesZeichnen(); ton.sfx('abreissen'); }
+    return;
+  }
   const r = sim.bauen(S, welt, 'strasse', p.x, p.z);
   if (r.ok) { allesZeichnen(); ton.sfx('strasse'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
 }
