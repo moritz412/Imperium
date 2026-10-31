@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2 } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -55,6 +55,8 @@ function kopfleiste() {
   $('#auftragText').textContent = a ? a.n : 'Alle Aufträge erfüllt. Die Stadt wächst weiter – bald folgt die Region.';
   $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
+  const Fa = sim.familieS(S);
+  $('#familieZeile').textContent = `Familie der ${Fa.name} · ${AEMTER[Fa.amt].n} · Ansehen ${Math.round(Fa.ansehen)} · Vermögen ${rund(Fa.vermoegen)}`;
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
 
@@ -208,6 +210,7 @@ function infoZeichnen() {
     html += `<div class="zeile"><span>Häuser in Laufweite (${sim.EINZUG} Felder)</span><b>${b.einzug ?? '–'}</b></div>`;
     html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}${S.letzte.sklavenFrei ? ' + ' + S.letzte.sklavenFrei + ' Sklaven' : ''}</b></div>`;
     html += `<div class="zeile"><span>Sklaven</span><b>${d.sklaven ? 'arbeiten hier' : 'nicht hier'}</b></div>`;
+    if (d.erzeugt) html += `<button class="knopf${b.familie ? ' an' : ''}" data-a="familie">${b.familie ? 'Familiengeschäft der ' + sim.familieS(S).name + ' (zurückgeben)' : 'Der Familie übertragen (Gewinn ins Familienvermögen)'}</button>`;
     html += `<button class="knopf${b.prio ? ' an' : ''}" data-a="prio" aria-pressed="${b.prio}">${b.prio ? 'Arbeiter gehen zuerst hierher' : 'Arbeiter zuerst hierher schicken'}</button>`;
   }
   if (b.t === 'huette') {
@@ -280,6 +283,7 @@ $('#info').addEventListener('click', e => {
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
+  if (a.dataset.a === 'familie') { const r = sim.familienGeschaeft(S, b); melden(r.ok ? r.text : r.grund); if (!r.ok) ton.sfx('fehler'); infoZeichnen(); kopfleiste(); }
   if (a.dataset.a === 'kaufen' || a.dataset.a === 'frei') {
     const r = a.dataset.a === 'kaufen' ? sim.sklavenKaufen(S, b) : sim.freilassen(S, b);
     if (!r.ok) { melden(r.grund); ton.sfx('fehler'); }
@@ -314,6 +318,7 @@ $('#menue').addEventListener('click', e => {
       <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li>
       <li>Sklaven: im Sklavenquartier kaufen. Sie arbeiten auf Feldern und in Werkstätten und essen Getreide. Freigelassene werden Plebejer.</li>
       <li>Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Eine Feuerwache löscht Brände und hält Ordnung. Ansicht „Feuer“ zeigt die Gefahr.</li>
+      <li>Familie (Knopf „Familie“): Ansehen sammeln, gegen die Rivalen zum Ädil und Prätor gewählt werden. Familiengeschäfte füllen das Familienvermögen – auf Kosten der Stadtkasse.</li>
       <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
   }
 });
@@ -391,6 +396,46 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Familie und Ämter (S4.1) ----------
+function familieZeigen() {
+  const F = sim.familieS(S), naechstes = AEMTER[F.amt + 1], fehlt = sim.amtFehlt(S);
+  const mitglieder = F.mitglieder.map(m => `<div class="fkarte"><b>${m.n}</b><span>${m.rolle}, ${m.alter} Jahre · ${m.eig}</span><small>${m.text}</small></div>`).join('');
+  const laufbahn = AEMTER.map((a, i) => {
+    const st = i < F.amt ? 'fertig' : i === F.amt ? 'ziel' : a.bald ? 'bald' : 'offen';
+    const unten = i < F.amt ? 'bekleidet' : i === F.amt ? 'jetziges Amt' : a.bald ? 'kommt später' : `Ansehen ${a.ansehen} · ${a.kosten} Denare`;
+    return `<div class="fkarte ${st}"><b>${a.n}</b><span>${a.text}</span><small>${unten}</small></div>`;
+  }).join('');
+  const rivalen = S.rivalen.map(r => { const d = RIVALEN.find(x => x.gens === r.gens); return `<div class="zeile"><span>${d.n} – ${d.text}</span><b>Ansehen ${Math.round(r.ansehen)}</b></div>`; }).join('');
+  const gesch = sim.geschaefte(S);
+  const spieleOk = F.amt >= 1 && F.spieleJahr !== sim.jahr(S);
+  $('#familie').innerHTML = `<div class="feld forschungsseite">
+    <button class="schliessen" data-fa="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Familie der ${F.name}</h2><div class="untertitel">${AEMTER[F.amt].n} · Ansehen ${Math.round(F.ansehen)} (+${zahl(sim.ansehenProMonat(S))} im Monat) · Familienvermögen ${rund(F.vermoegen)} Denare</div>
+    <div class="fbaum fam">${mitglieder}</div>
+    <h3 class="fh">Ämterlaufbahn (cursus honorum)</h3>
+    <div class="fbaum fam">${laufbahn}</div>
+    ${naechstes && !naechstes.bald ? `<div class="fziel"><b>Kandidatur als ${naechstes.n}</b><small>${fehlt ? 'Es fehlt: ' + fehlt : 'Alles bereit – die Bürger warten auf die Wahl.'}</small>
+      <button class="knopf${fehlt ? '' : ' haupt'}" data-fa="wahl"${fehlt ? ' disabled' : ''}>Kandidieren (${naechstes.kosten} Denare Wahlkampf)</button></div>` : ''}
+    <h3 class="fh">Rivalen</h3>${rivalen}
+    <h3 class="fh">Familiengeschäfte (${gesch.length} von ${FAMILIE.geschaeftMax})</h3>
+    <p class="fp">Ein Betrieb kann der Familie übertragen werden (im Gebäudefenster). Er bringt dem Familienvermögen ${FAMILIE.geschaeftGewinn} Denare im Monat – bezahlt aus der Stadtkasse. Ab ${FAMILIE.gerede} Geschäften redet der Senat: Die Gunst Roms sinkt.</p>
+    ${gesch.map(b => `<div class="zeile"><span>${GEB[b.t].n}</span><b>${b.w > 0 ? 'arbeitet' : 'steht still'}</b></div>`).join('')}
+    <h3 class="fh">Spiele (ludi)</h3>
+    <p class="fp">Als Ädil richtet die Familie einmal im Jahr Spiele aus: ${FAMILIE.spiele.vermoegen} Denare aus dem Familienvermögen, Ansehen +${FAMILIE.spiele.ansehen}, Stimmung +${FAMILIE.spiele.stimmung}.</p>
+    <button class="knopf${spieleOk ? ' haupt' : ''}" data-fa="spiele"${spieleOk ? '' : ' disabled'}>${F.amt < 1 ? 'Erst als Ädil' : F.spieleJahr === sim.jahr(S) ? 'Dieses Jahr schon gefeiert' : 'Spiele ausrichten'}</button>
+  </div>`;
+  $('#familie').hidden = false;
+}
+$('#familie').addEventListener('click', e => {
+  const b = e.target.closest('[data-fa]');
+  if (!b) { if (e.target.id === 'familie') $('#familie').hidden = true; return; }
+  if (b.dataset.fa === 'zu') { $('#familie').hidden = true; return; }
+  const r = b.dataset.fa === 'wahl' ? sim.kandidieren(S) : sim.spieleAusrichten(S);
+  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); }
+  else { ton.sfx('aufstieg'); melden(b.dataset.fa === 'wahl' ? r.text : 'Die Spiele begeistern die Stadt! Ansehen und Stimmung steigen.'); }
+  familieZeigen(); kopfleiste();
+});
+
 // ---------- Forschung (S3.1) ----------
 const STAND_TEXT = { fertig: 'erforscht', ziel: 'wird erforscht', epoche: 'Späte Republik', bald: 'kommt in einer späteren Ausbaustufe' };
 function forschungZeigen() {
@@ -506,6 +551,7 @@ $('#ansicht').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.hasAttribute('data-umland')) { umland(szene.modus() !== 'region'); return; }
   if (b.hasAttribute('data-forschung')) { forschungZeigen(); return; }
+  if (b.hasAttribute('data-familie')) { familieZeigen(); return; }
   ansicht = ansicht === b.dataset.ansicht ? '' : b.dataset.ansicht; ansichtZeichnen();
 });
 function monatAblaufen() {
@@ -518,7 +564,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -547,7 +593,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

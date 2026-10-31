@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2 } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -327,7 +327,7 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (S.stimmung / 70);   // Equites zahlen vierfach
+  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70);   // ×1,1: Quästor   // Equites zahlen vierfach
   if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
@@ -336,6 +336,7 @@ export function monat(S, welt) {
     const lohn = Object.entries(a.lohn).map(([g, n]) => [g, Math.round(n * lohnFaktor(S))]);
     for (const [g, n] of lohn) S.gut[g] += n;
     meld.push('Auftrag des Senats erfüllt: ' + lohn.map(([g, n]) => `+${n} ${WAREN[g].n}`).join(', '));
+    familieS(S).ansehen += FAMILIE.auftragAnsehen;
     S.auftrag++;
   }
 
@@ -344,6 +345,8 @@ export function monat(S, welt) {
   if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
   feuerMonat(S, meld);
+
+  familieMonat(S, meld);
 
   // Handel und Abgaben (S2.5), Forschung und Erntefest (S3.1)
   handelMonat(S);
@@ -598,7 +601,7 @@ function gefahren(S, meld) {
   const betriebe = regionKarte().filter(f => { const l = land[landKey(f)]; return fertig(S, l) && l.betrieb && !['anleger', 'kastell'].includes(l.betrieb); });
   const G = GEFAHR;
   if (m >= G.raeuber.ab) {
-    const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance * (hat(S, 'roemerstrasse') ? 0.5 : 1));
+    const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance * (hat(S, 'roemerstrasse') ? 0.5 : 1) * (amt(S) >= 2 ? 0.5 : 1));
     opfer.forEach(f => stoeren(land[landKey(f)], 'raeuber', G.raeuber.monate));
     if (opfer.length) meld.push(`Räuber haben ${opfer.length === 1 ? 'einen Betrieb' : opfer.length + ' Betriebe'} im Umland geplündert. Wachtürme schützen.`);
   }
@@ -710,6 +713,7 @@ export const vermKosten = S => hat(S, 'landvermessung') ? { denare: 10 } : VERME
 export function baukosten(S, t) {
   const k = { ...GEB[t].kosten };
   if (k.holz && hat(S, 'bauhuette')) k.holz = Math.ceil(k.holz * 0.8);
+  if (amt(S) >= 1) for (const g of Object.keys(k)) k[g] = Math.ceil(k[g] * 0.9);   // Ädil
   return k;
 }
 export function bonus(S, t, g) {
@@ -856,14 +860,83 @@ function unterhaltZahlen(S) {
   let n = 0;
   const zahle = u => { if (S.gut.denare >= u) { S.gut.denare -= u; n += u; return true; } return false; };
   for (const b of S.geb) {
-    const u = GEB[b.t].unterhalt; if (!u) continue;
+    const u = (GEB[b.t].unterhalt || 0) * (b.t === 'wache' && amt(S) >= 2 ? 0.5 : 1); if (!u) continue;
     b.unbezahlt = !(b.w > 0) ? false : !zahle(u);   // nur wer arbeitet, bekommt Lohn
     if (b.unbezahlt) { b.w = 0; b.von = []; }
   }
   for (const l of Object.values(S.land || {})) {
-    if (l.betrieb === 'kastell') l.unbezahlt = !zahle(LAND_BETRIEBE.kastell.unterhalt);
+    if (l.betrieb === 'kastell') l.unbezahlt = !zahle(LAND_BETRIEBE.kastell.unterhalt * (amt(S) >= 2 ? 0.5 : 1));
     if (l.turm) l.turmUnbezahlt = !zahle(SCHUTZ.turm.unterhalt);
   }
   return n;
+}
+
+// ---------- Familie und Ämter (S4.1) ----------
+export function familieS(S) {
+  if (!S.familie) S.familie = JSON.parse(JSON.stringify(FAMILIE_START));
+  if (!S.rivalen) S.rivalen = RIVALEN.map(r => ({ gens: r.gens, ansehen: r.ansehen }));
+  return S.familie;
+}
+export const amt = S => (S.familie ? S.familie.amt : 0);
+const oberhaupt = F => F.mitglieder.find(m => m.rolle === 'Oberhaupt');
+const eigenschaft = (F, e) => F.mitglieder.some(m => m.eig === e && (m.rolle === 'Oberhaupt' || m.rolle === 'Ehefrau'));
+export const ansehenProMonat = S => { const F = familieS(S); return (0.3 + 0.35 * rang(S) + (gunst(S) >= 70 ? 0.4 : 0)) * (eigenschaft(F, 'Redner') ? 1.2 : 1); };
+export const staerksterRivale = S => { familieS(S); return S.rivalen.reduce((a, r) => r.ansehen > a.ansehen ? r : a); };
+export function amtFehlt(S) {
+  const F = familieS(S), a = AEMTER[F.amt + 1]; if (!a) return 'Kein höheres Amt';
+  if (a.bald) return 'Kommt mit der Kaiserzeit';
+  const f = [];
+  if (a.epoche && epoche(S) < a.epoche) f.push('Späte Republik');
+  if (a.rang && rang(S) < a.rang) f.push(`Stadtrang ${RAENGE[a.rang].n}`);
+  if (F.ansehen < a.ansehen) f.push(`Ansehen ${a.ansehen}`);
+  const r = staerksterRivale(S); if (F.ansehen <= r.ansehen) f.push(`mehr Ansehen als die ${RIVALEN.find(x => x.gens === r.gens).n} (${Math.round(r.ansehen)})`);
+  if (F.vermoegen < a.kosten) f.push(`${a.kosten} Denare Familienvermögen für den Wahlkampf`);
+  return f.join(', ');
+}
+export function kandidieren(S) {
+  const fehlt = amtFehlt(S); if (fehlt) return { ok: false, grund: 'Es fehlt: ' + fehlt };
+  const F = familieS(S), a = AEMTER[F.amt + 1];
+  F.vermoegen -= a.kosten; F.amt++;
+  return { ok: true, text: `${(oberhaupt(F) || { n: 'Die Familie' }).n} ist zum ${a.n} gewählt!` };
+}
+export const geschaefte = S => S.geb.filter(b => b.familie);
+export function familienGeschaeft(S, b) {
+  if (!b || !GEB[b.t].erzeugt) return { ok: false, grund: 'Nur ein Betrieb kann ein Familiengeschäft sein' };
+  if (b.familie) { b.familie = false; return { ok: true, text: 'Der Betrieb gehört wieder der Stadt.' }; }
+  if (geschaefte(S).length >= FAMILIE.geschaeftMax) return { ok: false, grund: `Mehr als ${FAMILIE.geschaeftMax} Familiengeschäfte duldet der Senat nicht` };
+  b.familie = true; return { ok: true, text: 'Der Betrieb arbeitet jetzt für die Familie.' };
+}
+export function spieleAusrichten(S) {
+  const F = familieS(S), k = FAMILIE.spiele;
+  if (F.amt < 1) return { ok: false, grund: 'Spiele richtet der Ädil aus' };
+  if (F.spieleJahr === jahr(S)) return { ok: false, grund: 'Dieses Jahr gab es schon Spiele' };
+  if (F.vermoegen < k.vermoegen) return { ok: false, grund: `Es fehlen ${Math.ceil(k.vermoegen - F.vermoegen)} Denare im Familienvermögen` };
+  F.vermoegen -= k.vermoegen; F.ansehen += k.ansehen; F.spieleJahr = jahr(S); S.stimmung = Math.min(100, S.stimmung + k.stimmung);
+  return { ok: true };
+}
+function familieMonat(S, meld) {
+  const F = familieS(S);
+  F.vermoegen += 1;   // kleines Landgut der Familie
+  // Familiengeschäfte: Gewinn für die Familie, bezahlt aus der Stadtkasse (Versuchung); ab 3 Gerede im Senat
+  const gesch = geschaefte(S).filter(b => b.w > 0);
+  const gewinn = gesch.length * FAMILIE.geschaeftGewinn * (eigenschaft(F, 'Geschäftssinn') ? 1.25 : 1);
+  const aus = Math.min(gewinn, Math.max(0, S.gut.denare)); S.gut.denare -= aus; F.vermoegen += aus;
+  if (geschaefte(S).length >= FAMILIE.gerede) S.gunst = Math.max(0, gunst(S) - 1);
+  F.ansehen += ansehenProMonat(S);
+  S.rivalen.forEach(r => { r.ansehen += RIVALEN.find(x => x.gens === r.gens).wachstum; });
+  // Jahreswechsel: Alter, Mündigkeit, Erbfolge
+  if (S.monat % 12 === 11) {
+    for (const m of F.mitglieder) {
+      m.alter++;
+      if (m.rolle === 'Sohn' && m.alter === 16) meld.push(`${m.n} ist mündig und kann einmal die Familie führen.`);
+    }
+    const o = oberhaupt(F);
+    if (o && o.alter >= 62 && wurf(S, 9001) < 0.2) {
+      const erbe = F.mitglieder.filter(m => m.rolle === 'Sohn' && m.alter >= 16).sort((a, b) => b.alter - a.alter)[0];
+      F.mitglieder = F.mitglieder.filter(m => m !== o);
+      if (erbe) { erbe.rolle = 'Oberhaupt'; F.ansehen *= 0.8; meld.push(`${o.n} ist gestorben. ${erbe.n} führt nun die Familie.`); }
+      else meld.push(`${o.n} ist gestorben. Ohne mündigen Sohn führt die Witwe die Familie.`);
+    }
+  }
 }
 

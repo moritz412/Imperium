@@ -445,6 +445,28 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { n, mantua: SR.sim.handelOffen(S, 'mantua'), placentia: SR.sim.handelOffen(S, 'placentia') };
   });
   ok('Händler fahren nach Mantua und Placentia', hd.mantua && hd.placentia && hd.n === 2, JSON.stringify(hd));
+  // S4.1 Familie und Ämter: Wahl gegen Rivalen, Ädil-Vorteile, Spiele, Familiengeschäfte, Altern
+  const fa = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    const F0 = sim.familieS(S), start = { amt: F0.amt, mitglieder: F0.mitglieder.length };
+    const vorher = sim.kandidieren(kopie()).grund || '';
+    const A = kopie(), FA = sim.familieS(A); A.epoche = 2; FA.ansehen = 50; FA.vermoegen = 900;
+    const zuWenig = sim.kandidieren(A).grund || '';
+    FA.ansehen = 120; const holz0 = sim.baukosten(A, 'markt').holz, wahl = sim.kandidieren(A).ok, holz1 = sim.baukosten(A, 'markt').holz;
+    const sp1 = sim.spieleAusrichten(A).ok, sp2 = sim.spieleAusrichten(A).grund || '';
+    const praetor = sim.amtFehlt(A);
+    const G = kopie(), FG = sim.familieS(G); G.gut.denare = 500; G.gunst = 60;
+    const betr = G.geb.filter(b => SR.GEB[b.t].erzeugt).slice(0, 3); betr.forEach(b => sim.familienGeschaeft(G, b));
+    const v0 = FG.vermoegen, vierter = sim.familienGeschaeft(G, G.geb.find(b => SR.GEB[b.t].erzeugt && !b.familie)).grund || '';
+    G.monat = 11; const alter0 = FG.mitglieder[2].alter; sim.monat(G, SR.welt);
+    SR.familie(); const ui = { karten: document.querySelectorAll('#familie .fkarte').length, titel: document.querySelector('#familie h2').textContent, zeile: document.querySelector('#familieZeile').textContent };
+    document.querySelector('#familie [data-fa="zu"]').click();
+    return { start, vorher, zuWenig, wahl, amt: FA.amt, holz0, holz1, sp1, sp2, praetor, plus: Math.round(FG.vermoegen - v0), gunst: G.gunst, vierter, gealtert: FG.mitglieder[2].alter === alter0 + 1, ui };
+  });
+  ok('Familie: Start als Quästor, Wahl zum Ädil gegen Rivalen, Bauen billiger', fa.start.amt === 0 && fa.start.mitglieder === 4 && /Späte Republik/.test(fa.vorher) && /Ansehen/.test(fa.zuWenig) && fa.wahl && fa.amt === 1 && fa.holz1 < fa.holz0, JSON.stringify(fa));
+  ok('Spiele einmal im Jahr, Prätor braucht Kolonie', fa.sp1 && /schon/.test(fa.sp2) && /Kolonie/.test(fa.praetor));
+  ok('Familiengeschäfte füllen das Vermögen, Gerede im Senat, Altern', fa.plus >= 12 && fa.gunst < 60 && /duldet/.test(fa.vierter) && fa.gealtert);
+  ok('Familienseite: Mitglieder, Ämterlaufbahn, Zeile im Auftrag', fa.ui.karten === 8 && /Valerier/.test(fa.ui.titel) && /Quästor/.test(fa.ui.zeile), JSON.stringify(fa.ui));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

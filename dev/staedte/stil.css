@@ -150,4 +150,11 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .fbeding .ok{color:var(--gut);border-color:#5d7e52}.fbeding .nein{color:var(--schlecht);border-color:#9a5a46}
 .fepochewahl .knopf{align-self:flex-start}
 .fkarte.bald{opacity:.38;filter:grayscale(.7);min-height:0}.fkarte.bald small{color:var(--leise)}
+/* Familie (S4.1) */
+.fbaum.fam{grid-template-columns:repeat(4,1fr)}
+.fh{margin:6px 0 0;font-family:Cinzel,serif;font-size:15px;color:var(--gold);border-bottom:1px solid #5e4a30;padding-bottom:4px}
+.fp{margin:0;font-size:13px;line-height:1.4;color:#dcd0bc}
+.forschungsseite > .knopf{align-self:flex-start}
+#auftrag .forschzeile + .forschzeile{margin-top:2px;border-top:0;padding-top:0}
+@media (max-width:820px){.fbaum.fam{grid-template-columns:1fr 1fr}}
 

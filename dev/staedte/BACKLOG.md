@@ -183,6 +183,23 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       nächsten Anleger nach Placentia. Dabei behoben: Karren kamen mit Schotter-/Römerstraße nur halb ans Ziel (Tempo nur in
       der Fahrzeit, nicht im Weg). Neues Werkzeug `dev/staedte/werkzeug/modulcheck.sh` (lädt alle Module, findet z. B. doppelte
       Importe, die `node --check` übersieht). Test 60/60. Fahrt selbst nicht angesehen.
+- [x] Balance-Lauf mit Unterhalt: Kasse pendelt ab Jahr 3 bei ≈ 1.100–1.170 Denaren (Testplan gibt nichts für Vermessen/Handel
+      aus), Holz bleibt Engpass, Brände im 4. Jahr ohne Wache.
+
+## Stufe 4 – Familie & Politik (begonnen 1.11.)
+- [x] S4.1 Familie und Ämter: Familie der Valerier (Lucius 38 „Redner“ = Ansehen +20 %, Aemilia „Geschäftssinn“ =
+      Geschäfte +25 %, Sohn Marcus 13, Tochter Valeria 9), altern jährlich, Sohn mündig mit 16, Oberhaupt ab 62 stirbt mit
+      20 % je Jahr → Erbfolge (Ansehen −20 %). Stadtkasse und **Familienvermögen** getrennt (+1/Monat Landgut).
+      **Familiengeschäfte** (Gebäudefenster, max. 3): je 4 Denare/Monat aus der Stadtkasse ins Vermögen, ab 3 Gunst −1/Monat.
+      **Ansehen**: 0,3 + 0,35 × Rang (+0,4 bei Gunst ≥ 70) im Monat, +5 je Senatsauftrag, +15 je Spiele.
+      **Ämter**: Quästor (Start, Steuern +10 %) → Ädil (Späte Republik, Ansehen 60, 300 Denare: Bauen −10 %, Spiele einmal im
+      Jahr) → Prätor (Kolonie, Ansehen 150, 800 Denare: Räuber halb, Wache/Kastell halber Sold) → Konsul (kommt später).
+      Wahl nur mit mehr Ansehen als die stärkste **Rivalen-Familie** (Fabier +0,6/Monat, Sempronier +0,75/Monat).
+      Knopf „Familie“ (Ansichten-Spalte), Familienseite, Zeile unter dem Senatsauftrag. Test 64/64, Bild angesehen.
+      **Nicht getestet:** iPad, Balance (Rennen gegen die Rivalen nicht nachgespielt).
+- [ ] S4.2 Heirat und Bündnisse (Tochter verheiraten: Mitgift ↔ Bündnis mit einer Rivalen-Familie oder Placentia), Klienten
+      (Bürger, die für Getreide/Geld Stimmen bringen), Ausbildung des Sohnes (Rhetor/Militär).
+- [ ] S4.3 Ereignisse mit 2–3 Entscheidungen (Konzept „Jahreszeiten & Ereignisse“): Bestechung, Bittsteller, Seuche, Unruhen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

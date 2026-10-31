@@ -279,3 +279,29 @@ export const FEUER = {
 // Übergang in die Späte Republik (1.11., Moritz: Rang + Forschung): Kolonie, 6 Erfindungen, Gunst Roms ab 50
 export const EPOCHE2 = { rang: 3, erfindungen: 6, gunst: 50 };
 
+// Familie und Ämter (S4.1). Stadtkasse (S.gut.denare) und Familienvermögen (S.familie.vermoegen) sind getrennt.
+export const FAMILIE_START = {
+  gens: 'Valerii', name: 'Valerier', vermoegen: 120, ansehen: 10, amt: 0, geschaefte: 0,
+  mitglieder: [
+    { n: 'Lucius Valerius', alter: 38, rolle: 'Oberhaupt', eig: 'Redner', text: 'Ansehen wächst 20 % schneller.' },
+    { n: 'Aemilia', alter: 31, rolle: 'Ehefrau', eig: 'Geschäftssinn', text: 'Familiengeschäfte bringen 25 % mehr.' },
+    { n: 'Marcus Valerius', alter: 13, rolle: 'Sohn', eig: 'ehrgeizig', text: 'Erbe der Familie, mündig mit 16.' },
+    { n: 'Valeria', alter: 9, rolle: 'Tochter', eig: 'klug', text: 'Eine gute Heirat stärkt später die Familie.' },
+  ],
+};
+// cursus honorum (vereinfacht). Wahl: Ansehen über der Schwelle UND über der stärksten Rivalen-Familie, Wahlkampf aus dem Vermögen.
+export const AEMTER = [
+  { id: 'quaestor', n: 'Quästor', text: 'Verwaltet die Kasse der Kolonie: Steuern +10 %.' },
+  { id: 'aedil', n: 'Ädil', ansehen: 60, kosten: 300, epoche: 2, text: 'Aufsicht über Bauten, Märkte und Spiele: alles 10 % billiger zu bauen, Spiele ausrichten.' },
+  { id: 'praetor', n: 'Prätor', ansehen: 150, kosten: 800, rang: 3, text: 'Gerichte und Ordnung: Räuber halb so oft, Wache und Kastell nur halben Sold.' },
+  { id: 'konsul', n: 'Konsul', ansehen: 300, kosten: 2000, rang: 4, bald: true, text: 'Das höchste Amt der Republik – kommt mit der Kaiserzeit.' },
+];
+export const RIVALEN = [
+  { gens: 'Fabii', n: 'Fabier', ansehen: 22, wachstum: 0.6, text: 'Alte Grundbesitzer, stolz und vorsichtig.' },
+  { gens: 'Sempronii', n: 'Sempronier', ansehen: 14, wachstum: 0.75, text: 'Händlerfamilie mit Freunden in Placentia.' },
+];
+export const FAMILIE = {
+  geschaeftMax: 3, geschaeftGewinn: 4, gerede: 3,   // ab 3 Familiengeschäften: Gunst −1 im Monat
+  spiele: { vermoegen: 150, ansehen: 15, stimmung: 10 }, auftragAnsehen: 5,
+};
+
