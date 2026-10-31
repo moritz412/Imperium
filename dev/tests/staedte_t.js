@@ -168,6 +168,31 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   if (BILD) { await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_land.png') }); }
   await p.evaluate(() => SR.umland(false));
 
+  // S2.4 Padus: zwei Anleger verbinden ein fernes Feld ohne durchgehenden Weg; Fischer liefert Fisch, Fisch wird gegessen
+  const fluss = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, karte = sim.regionKarte(), k = sim.landKey;
+    const fl = karte.filter(f => f.typ === 'fluss'), A = fl.find(f => f.q === 0 && f.r === 2), B = fl.find(f => f.q === -3 && f.r === 3);
+    const zwischen = karte.find(f => f.q === 0 && f.r === 1);   // zwischen Stadt und Anleger A
+    const fern = sim.nachbarn(B).find(n => n && n.typ !== 'fluss' && sim.betriebFuer(n));
+    const fischer = fl.find(f => f.q === -1 && f.r === 3);
+    S.land[k(zwischen)] = Object.assign(S.land[k(zwischen)] || { verm: 2, betrieb: '' }, { verm: 2, weg: true });
+    [A, B, fischer].forEach(f => { S.land[k(f)] = { verm: 2, betrieb: '' }; });
+    S.land[k(fern)] = { verm: 2, betrieb: sim.betriebFuer(fern), weg: true };
+    S.gut.holz += 100; S.gut.ziegel += 30;
+    const a1 = sim.landBauen(S, A, 'anleger').ok, vorB = sim.verbunden(S, fern);
+    const b1 = sim.landBauen(S, B, 'anleger').ok, nachB = sim.verbunden(S, fern);
+    const f1 = sim.landBauen(S, fischer, 'fischer').ok; S.land[k(fischer)].weg = true;
+    const fischVerb = sim.verbunden(S, fischer);
+    SR.umland(true); SR.szene.landAbgleichen(S); const boote = SR.szene.karrenZahl(); SR.umland(false);
+    // Fang ohne Esser (Kopie ohne Häuser, Sommer) und Essen aus Fisch (Kopie ohne Brot und Getreide)
+    const T = JSON.parse(JSON.stringify(S)); T.geb = T.geb.filter(b => b.t === 'strasse'); T.monat = 6; T.gut.fisch = 0; sim.monat(T, SR.welt);
+    const E = JSON.parse(JSON.stringify(S)); E.gut.brot = 0; E.gut.getreide = 0; E.gut.fisch = 100; sim.monat(E, SR.welt);
+    SR.monate(1);
+    return { a1, b1, f1, vorB, nachB, fischVerb, boote, fang: Math.round(T.gut.fisch * 10) / 10, gegessen: Math.round((100 - E.gut.fisch) * 10) / 10, satt: E.versorgt.essen, kopf: document.querySelector('#waren').textContent.includes('Fisch') };
+  });
+  ok('Padus: Anleger verbinden per Boot, Fischer liefert, Fisch in der Kopfleiste', fluss.a1 && fluss.b1 && fluss.f1 && !fluss.vorB && fluss.nachB && fluss.fischVerb && fluss.boote >= 2 && fluss.fang > 0 && fluss.gegessen > 0 && fluss.satt && fluss.kopf, JSON.stringify(fluss));
+  if (BILD) { await p.evaluate(() => SR.umland(true)); await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_fluss.png') }); await p.evaluate(() => SR.umland(false)); }
+
   // Stadtrang
   const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));
   ok('Stadtrang Dorf ab 40 Einwohnern', rg.r === 1 && /^Dorf/.test(rg.kopf), JSON.stringify(rg));

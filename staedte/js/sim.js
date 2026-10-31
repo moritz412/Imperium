@@ -212,9 +212,11 @@ export function monat(S, welt) {
   const bedarf = bew * ESSEN_JE_MONAT;
   let brotAnteil = 1, essen = true;
   if (bedarf > 0) {
+    S.gut.fisch = S.gut.fisch || 0;
     const ausBrot = Math.min(S.gut.brot, bedarf); S.gut.brot -= ausBrot;
-    const rest = bedarf - ausBrot, ausKorn = Math.min(S.gut.getreide, rest); S.gut.getreide -= ausKorn;
-    brotAnteil = ausBrot / bedarf; essen = ausBrot + ausKorn >= bedarf * 0.99;
+    const ausFisch = Math.min(S.gut.fisch, bedarf - ausBrot); S.gut.fisch -= ausFisch;   // Fisch zählt wie Brot (S2.4)
+    const rest = bedarf - ausBrot - ausFisch, ausKorn = Math.min(S.gut.getreide, rest); S.gut.getreide -= ausKorn;
+    brotAnteil = (ausBrot + ausFisch) / bedarf; essen = ausBrot + ausFisch + ausKorn >= bedarf * 0.99;
   }
   S.versorgt = { brot: brotAnteil > 0.95, essen };
 
@@ -372,9 +374,10 @@ export function vermessen(S, f) {
   (S.land = S.land || {})[landKey(f)] = { verm: 0, betrieb: '' };
   return { ok: true };
 }
-export const betriebFuer = f => Object.keys(LAND_BETRIEBE).find(t => LAND_BETRIEBE[t].auf === f.typ) || '';
-export function landBauen(S, f) {
-  const t = betriebFuer(f);
+export const betriebeFuer = f => Object.keys(LAND_BETRIEBE).filter(t => LAND_BETRIEBE[t].auf === f.typ);
+export const betriebFuer = f => betriebeFuer(f)[0] || '';
+export function landBauen(S, f, t = betriebFuer(f)) {
+  if (!betriebeFuer(f).includes(t)) t = '';
   if (!t) return { ok: false, grund: 'Hier ist noch kein Betrieb möglich' };
   if (landStand(S, f) !== 'vermessen') return { ok: false, grund: 'Erst vermessen' };
   const k = LAND_BETRIEBE[t].kosten;
@@ -384,12 +387,14 @@ export function landBauen(S, f) {
   return { ok: true };
 }
 // Wege (S2.3): Netz ab der Stadt über Felder mit Weg; nur verbundene Betriebe liefern
-export const hatWeg = (S, f) => f.typ === 'stadt' || !!((S.land || {})[landKey(f)] || {}).weg;
+const istAnleger = (S, f) => ((S.land || {})[landKey(f)] || {}).betrieb === 'anleger';
+export const hatWeg = (S, f) => f.typ === 'stadt' || istAnleger(S, f) || !!((S.land || {})[landKey(f)] || {}).weg;
 export function wegNetz(S) {
   const karte = regionKarte(), da = new Set(['0,0']), q = [{ q: 0, r: 0 }];
-  for (let i = 0; i < q.length; i++) for (const [dq, dr] of HEX_NACHBARN) {
-    const n = karte.find(h => h.q === q[i].q + dq && h.r === q[i].r + dr);
-    if (n && !da.has(landKey(n)) && hatWeg(S, n)) { da.add(landKey(n)); q.push(n); }
+  for (let i = 0; i < q.length; i++) {
+    const nb = HEX_NACHBARN.map(([dq, dr]) => karte.find(h => h.q === q[i].q + dq && h.r === q[i].r + dr));
+    if (istAnleger(S, q[i])) nb.push(...karte.filter(h => istAnleger(S, h)));   // Flussboote: Anleger untereinander
+    for (const n of nb) if (n && !da.has(landKey(n)) && hatWeg(S, n)) { da.add(landKey(n)); q.push(n); }
   }
   return da;
 }
@@ -424,6 +429,6 @@ function landMonat(S, js, grenze, meld) {
     if (l.verm < VERMESSEN.monate) { if (++l.verm === VERMESSEN.monate) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
     const d = LAND_BETRIEBE[l.betrieb]; if (!d || !netz.has(landKey(f))) continue;
     const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
-    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor);
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor);
   }
 }

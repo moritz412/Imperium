@@ -14,6 +14,7 @@ export const WAREN = {
   getreide: { n: 'Getreide', lager: true },
   mehl:     { n: 'Mehl',     lager: true },
   brot:     { n: 'Brot',     lager: true },
+  fisch:    { n: 'Fisch',    lager: true },
 };
 
 export const JAHRESZEITEN = [
@@ -85,6 +86,10 @@ export const LAND_BETRIEBE = {
     text: 'Holzfäller schlagen Stämme und flößen sie zur Stadt.' },
   lehmstich:  { n: 'Lehmstich', auf: 'lehm', kosten: { holz: 10 }, erzeugt: { lehm: 3 }, modell: 'lehmgrube',
     text: 'Lehm aus der Flussaue für die Ziegeleien.' },
+  fischer:    { n: 'Fischerhütte', auf: 'fluss', kosten: { holz: 15 }, erzeugt: { fisch: 3 }, modell: 'huette',
+    text: 'Fischer werfen ihre Netze im Padus aus. Fisch macht satt wie Brot.' },
+  anleger:    { n: 'Anleger', auf: 'fluss', kosten: { holz: 30, ziegel: 10 }, erzeugt: {}, modell: '',
+    text: 'Flussboote verbinden alle Anleger am Padus: Was einen Anleger erreicht, kommt über einen anderen in die Stadt.' },
 };
 
 // Stadtrang nach Einwohnern (Konzept „Ziele“)
@@ -106,7 +111,7 @@ export const REGIONEN = [
 ];
 
 export const START = {
-  gut: { denare: 300, holz: 170, lehm: 0, ziegel: 40, getreide: 40, mehl: 0, brot: 20 },
+  gut: { denare: 300, holz: 170, lehm: 0, ziegel: 40, getreide: 40, mehl: 0, brot: 20, fisch: 0 },
   stimmung: 60,
 };
 

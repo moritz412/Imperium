@@ -31,8 +31,8 @@ function melden(text) {
 }
 
 // ---------- Kopfleiste ----------
-const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot'];
-const rund = n => Math.floor(n).toLocaleString('de-DE');
+const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch'];
+const rund = n => Math.floor(n || 0).toLocaleString('de-DE');
 function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
   $('#datum').textContent = `${RAENGE[r].n} · ${sim.datumText(S)}`;
@@ -210,7 +210,7 @@ $('#info').addEventListener('click', e => {
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
     else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau' || a.dataset.a === 'weg') {
-      const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : a.dataset.a === 'weg' ? sim.wegAnlegen(S, hexWahl) : sim.landBauen(S, hexWahl);
+      const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : a.dataset.a === 'weg' ? sim.wegAnlegen(S, hexWahl) : sim.landBauen(S, hexWahl, a.dataset.t);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx(a.dataset.a === 'landbau' ? 'bauen' : 'klick');
       allesZeichnen(); hexInfo(hexWahl);
     } else hexInfo(null);
@@ -262,7 +262,7 @@ function hexInfo(f) {
   hexWahl = f;
   if (!f) { $('#info').hidden = true; return; }
   const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 }), stand = sim.landStand(S, f);
-  const l = (S.land || {})[sim.landKey(f)], bt = sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
+  const l = (S.land || {})[sim.landKey(f)], bt = (l && l.betrieb) || sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
   const pro = bd ? Object.entries(bd.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ') : '';
   let lage = '';
   if (stand === 'frei') lage = sim.kannVermessen(S, f)
@@ -270,11 +270,14 @@ function hexInfo(f) {
     : '<div class="lage warn">Noch zu weit draußen – erst das Land daneben vermessen.</div>';
   if (stand === 'vermessung') lage = `<div class="lage warn">Die Landvermesser sind bei der Arbeit (${l.verm} von ${VERMESSEN.monate} Monaten).</div>`;
   if (stand === 'vermessen') lage = bd
-    ? `<div class="lage gut">Vermessen</div><p>${bd.text}</p><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>
-       <button class="knopf haupt" data-a="landbau">${bd.n} bauen (${kostenText(bd.kosten)})</button>`
+    ? '<div class="lage gut">Vermessen</div>' + sim.betriebeFuer(f).map((t, i) => { const b = LAND_BETRIEBE[t];
+        const e = Object.entries(b.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ');
+        return `<p>${b.text}</p>${e ? `<div class="zeile"><span>Ertrag im Monat</span><b>${e}${b.ernte ? ' (Sommer)' : ''}</b></div>` : ''}
+        <button class="knopf${i ? '' : ' haupt'}" data-a="landbau" data-t="${t}">${b.n} bauen (${kostenText(b.kosten)})</button>`; }).join('')
     : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
   const verb = sim.verbunden(S, f);
-  if (stand === 'betrieb') lage = verb
+  if (stand === 'betrieb' && bt === 'anleger') lage = `<div class="lage ${verb ? 'gut' : 'warn'}">Anleger ${verb ? 'mit der Stadt verbunden' : 'noch ohne Verbindung'}</div><p>${bd.text}</p>`;
+  else if (stand === 'betrieb') lage = verb
     ? `<div class="lage gut">${bd.n} arbeitet</div><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>`
     : `<div class="lage schlecht">${bd.n} arbeitet, aber kein Weg zur Stadt</div><p>Ohne Weg kommt nichts in der Stadt an. Lege Feldwege bis zur Stadt an.</p>`;
   if ((stand === 'vermessen' || stand === 'betrieb') && !sim.hatWeg(S, f))

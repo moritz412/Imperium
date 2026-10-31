@@ -78,7 +78,12 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Stadt und leer zurück, hält bei Pause. Test 32/32 (Anzahl Karren geprüft; die Fahrt selbst nicht angesehen).
       **Offen:** Schotterweg/Römerstraße als Ausbau (schneller), Weg auch über unvermessenes Land?
       **Nicht getestet:** iPad.
-- [ ] S2.4 Fluss: Anleger, Flussboote auf dem Padus, Speicher (horreum) als Umschlagplatz.
+- [x] S2.4 Padus (31.10. spät, Moritz: „Fisch und Boote“): neue Ware Fisch (Kopfleiste), wird nach Brot und vor Getreide
+      gegessen und zählt für die Stimmung wie Brot. Auf vermessenem Fluss wahlweise Fischerhütte (3 Fisch, Holz 15) oder
+      Anleger (Holz 30, Ziegel 10). Anleger zählen als Weg, Flussboote verbinden alle Anleger: ein fernes Feld mit Weg zu
+      einem Anleger ist mit der Stadt verbunden, wenn ein anderer Anleger es ist. Boote pendeln sichtbar zwischen Anlegern.
+      Test 33/33 (PC, `PW_GPU=1`, Logik per Schnittstelle; Bild nicht angesehen). Offen: Speicher als Umschlagplatz.
+      **Nicht getestet:** iPad, Bedienung per Knopf für Fluss-Felder.
 - [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).
 - [ ] S2.6 Gefahren: Räuber (Wachturm), Gallier (Kastell), Hochwasser im Frühling (Deich).
 

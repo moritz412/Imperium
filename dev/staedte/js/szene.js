@@ -474,7 +474,20 @@ export function erzeugeSzene(leinwand, welt) {
         const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: 0x9c8460 }));
         st.position.set(x + dx / 4, top + 0.03, z + dz / 4); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
-      if (stand === 'betrieb') {
+      if (stand === 'betrieb' && (l.betrieb === 'anleger' || l.betrieb === 'fischer')) {
+        const lam = c => new THREE.MeshLambertMaterial({ color: c });
+        if (l.betrieb === 'anleger') {
+          const steg = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 0.7), lam(0x8a6a46)); steg.position.set(x, top + 0.12, z - 0.4); g.add(steg);
+          for (const sx of [-1, 0, 1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 5), lam(0x5a4330)); p.position.set(x + sx * 0.95, top + 0.05, z - 0.1); g.add(p); }
+          const lager = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.5, 0.6), lam(0xcbb894)); lager.position.set(x - 0.4, top + 0.25, z - 1.3); g.add(lager);
+          const dach = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.08, 0.7), lam(0xa9583a)); dach.position.set(x - 0.4, top + 0.54, z - 1.3); g.add(dach);
+        } else {
+          const boot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.14, 1.3), lam(0x6b4a2a)); boot.position.set(x + 0.5, top + 0.1, z + 0.3); boot.rotation.y = 0.6; g.add(boot);
+          const netz = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.01, 10), new THREE.MeshLambertMaterial({ color: 0xd8d0b8, transparent: true, opacity: 0.5 })); netz.position.set(x - 0.6, top + 0.06, z - 0.2); g.add(netz);
+          const h = modelle && modelle.huette; if (h) { const m = new THREE.Mesh(h.geo, new THREE.MeshLambertMaterial({ vertexColors: true })); m.scale.setScalar(0.6); m.position.set(x - 0.9, top, z - 1.4); g.add(m); }
+        }
+        g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      } else if (stand === 'betrieb') {
         const t = LAND_BETRIEBE[l.betrieb].modell, mo = modelle && modelle[t];
         const m = mo ? new THREE.Mesh(mo.geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1, 0.7, 1), new THREE.MeshLambertMaterial({ color: 0xd8b88a }));
         m.scale.setScalar(mo ? 0.9 : 1); m.position.set(x + 0.9, top, z + 0.9); m.castShadow = true; m.receiveShadow = true; g.add(m);
@@ -484,8 +497,21 @@ export function erzeugeSzene(leinwand, welt) {
     // Karren (S2.3): je verbundenem Betrieb einer, fährt beladen zur Stadt und leer zurück
     for (const k of karren) region.g.remove(k.g);
     karren = [];
+    // Flussboote: pendeln zwischen je zwei verbundenen Anlegern
+    const anl = region.felder.filter(f => ((S.land || {})[landKey(f)] || {}).betrieb === 'anleger');
+    for (let i = 1; i < anl.length; i++) {
+      const a = anl[i - 1], b = anl[i], [ax, az] = hexMitte(a.q, a.r), [bx, bz] = hexMitte(b.q, b.r);
+      const g = new THREE.Group(), lam = col => new THREE.MeshLambertMaterial({ color: col });
+      const rumpf = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 1.6), lam(0x6b4a2a)); rumpf.position.y = 0.12; g.add(rumpf);
+      const ladung = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.2, 0.8), lam(0xd9c26e)); ladung.position.y = 0.32; g.add(ladung);
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2, 4), lam(0x5a4330)); mast.position.set(0, 0.7, 0.4); g.add(mast);
+      const segel = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.7, 0.6), lam(0xe8dcc0)); segel.position.set(0, 0.85, 0.4); g.add(segel);
+      g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      const pts = [[ax, az, 0.1], [bx, bz, 0.1]], L = Math.hypot(bx - ax, bz - az);
+      region.g.add(g); karren.push({ g, pts, c: [0, L], L, last: ladung, ph: i * 3 });
+    }
     for (const f of region.felder) {
-      const l = (S.land || {})[landKey(f)]; if (!l || !l.betrieb) continue;
+      const l = (S.land || {})[landKey(f)]; if (!l || !l.betrieb || l.betrieb === 'anleger') continue;
       const pf = hatWeg(S, f) && wegPfad(S, f); if (!pf) continue;
       const pts = pf.map(h => { const [x, z] = hexMitte(h.q, h.r); return [x, z, (HOEHE[h.typ] ?? 0.32) + 0.05]; });
       const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
