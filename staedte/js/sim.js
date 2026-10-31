@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -323,4 +323,23 @@ function ansichtRoh(S, welt, art) {
     return { felder, geb, legende: [[GELB, 'Straßen in Marktreichweite'], [GRUEN, 'Wasser, Markt und Brot'], [ORANGE, 'teilweise versorgt'], [ROT, 'nichts davon']] };
   }
   return null;
+}
+
+// ---------- Umland (S2.1): Hex-Felder in axialen Koordinaten (q, r), Spitze oben ----------
+export const hexAbstand = (a, b) => (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2;
+export function erzeugeRegion() {
+  const felder = [], R = REGION_RING;
+  let s = 11; const zufall = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let q = -R; q <= R; q++) for (let r = Math.max(-R, -q - R); r <= Math.min(R, -q + R); r++) {
+    const z = r + q / 2;   // Nord-Süd-Lage (Süden = positiv)
+    let typ;
+    if (q === 0 && r === 0) typ = 'stadt';
+    else if (r === Math.max(-R, -q - R, Math.min(R, -q + R, Math.round(2.4 - q / 2)))) typ = 'fluss';   // Padus: je Spalte ein Feld im Süden
+    else if (z < -2.2) typ = zufall() < 0.6 ? 'hang' : 'wald';                       // Hügel im Norden
+    else if (q <= -2 && z < 1) typ = zufall() < 0.75 ? 'wald' : 'acker';             // Wald im Westen
+    else if (z > 0.9) typ = zufall() < 0.5 ? 'lehm' : 'weide';                       // Flussaue
+    else typ = zufall() < 0.78 ? 'acker' : zufall() < 0.5 ? 'weide' : 'wald';
+    felder.push({ q, r, typ });
+  }
+  return felder;
 }

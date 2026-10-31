@@ -116,6 +116,19 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
   ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
 
+  // S2.1 Umland: Hex-Karte, Stadtfeld in der Mitte, Feld antippen
+  await p.evaluate(() => SR.tempo(0));
+  await p.click('#ansicht [data-umland]'); await p.waitForTimeout(400);
+  const vp = p.viewportSize();
+  await p.mouse.click(vp.width / 2, vp.height / 2);
+  const um1 = await p.evaluate(() => ({ n: SR.szene.regionInfo(), modus: SR.szene.modus(), titel: document.querySelector('#info h2')?.textContent, leiste: getComputedStyle(document.querySelector('#leiste')).display }));
+  await p.mouse.click(vp.width / 2 - 260, vp.height / 2 + 40);
+  const um2 = await p.evaluate(() => document.querySelector('#info h2')?.textContent);
+  if (BILD) await p.screenshot({ path: BILD.replace(/\.png$/, '_umland.png') });
+  await p.click('#ansicht [data-umland]');
+  const um3 = await p.evaluate(() => SR.szene.modus());
+  ok('Umland: 37 Hex-Felder, Stadt in der Mitte, Feldinfo, zurück zur Stadt', um1.n === 37 && um1.modus === 'region' && um1.titel === 'Cremona' && um1.leiste === 'none' && um2 && um2 !== 'Cremona' && um3 === 'stadt', JSON.stringify({ um1, um2, um3 }));
+
   // Stadtrang
   const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));
   ok('Stadtrang Dorf ab 40 Einwohnern', rg.r === 1 && /^Dorf/.test(rg.kopf), JSON.stringify(rg));

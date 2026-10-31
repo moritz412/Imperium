@@ -55,12 +55,27 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
 - [x] Stadtrang (31.10. abends, vorgezogen aus „Ziele“): Feldlager → Dorf (40 Einwohner) → Kleinstadt (120) → Kolonie (300)
       → Metropole (800), in der Kopfleiste vor dem Datum, Meldung + Klang beim Aufstieg, fällt nicht zurück. Test 27/27.
 
+## Stufe 2 – Region & Transport (begonnen 31.10.)
+Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber als Landschaft gezeichnet, nicht als Spielbrett.
+- [x] S2.1 Regionskarte (31.10. abends): Hex-Karte um Cremona (Ring 3 = 37 Felder, fest erzeugt: Acker, Wald im Westen,
+      Hang im Norden, Weide/Lehm in der Aue, Padus durchgehend im Süden), als Landschaft gezeichnet (Ackerstreifen,
+      Bäume, Schafe, Reben, Zypressen, Schilf), Stadt in der Mitte mit Mauerring und verkleinerten Gebäudemodellen.
+      Liegt in derselben Szene neben der Stadt (x + 200), gleiche Kamera/Gesten. Knopf „Umland“/„Stadt“ oben in der
+      Ansichten-Spalte; im Umland sind Bauleiste, Auftrag und Ansichten ausgeblendet. Feld antippen: Art, Entfernung,
+      Nutzen, Hinweis „noch nicht vermessen“. Test 28/28 (PC, `PW_GPU=1`). Noch ohne Spielwirkung und ohne Speichern.
+      **Nicht getestet:** iPad.
+- [ ] S2.2 Vermessen und Gehöfte: Feld vermessen (agrimensores, Kosten/Dauer), Gehöft je Feldtyp setzen, Erträge.
+- [ ] S2.3 Wege und Karren: Pfad/Schotterweg Feld zu Feld, Karren fahren sichtbar, Ertrag kommt nur verbunden in die Stadt.
+- [ ] S2.4 Fluss: Anleger, Flussboote auf dem Padus, Speicher (horreum) als Umschlagplatz.
+- [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).
+- [ ] S2.6 Gefahren: Räuber (Wachturm), Gallier (Kastell), Hochwasser im Frühling (Deich).
+
 ## Später
-Stufe 2 Region & Transport · Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
+Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.
 
 ## Offene Entscheidungen (Moritz)
 - Raster quadratisch (jetzt) oder frei drehbar wie Manor Lords?
-- Region als Hex-Felder oder freie Landschaft?
+- ~~Region als Hex-Felder oder freie Landschaft?~~ → Hex-Felder mit Landschafts-Optik (31.10.)
 - Länge eines Spieljahres (jetzt: 1 Monat = 5 s bei normalem Tempo → 1 Jahr = 1 min).
 - Sklaven als Stand oder Tagelöhner?

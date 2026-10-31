@@ -1,10 +1,11 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
-import { RASTER, GEB, CASA, JAHRESZEITEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder } from './sim.js';
+import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion } from './sim.js';
 
 const THREE = window.THREE;
 const BLICK = new THREE.Vector3(1, 1.05, 1).normalize();   // feste Blickrichtung (Azimut 45°, ca. 37° Höhe)
-const RAHMEN = 11;                                            // halbe Bildhöhe in Feldern bei Zoom 1
+const RAHMEN = 11;
+const REG_X = 200;                                            // Umland liegt neben der Stadt in derselben Szene                                            // halbe Bildhöhe in Feldern bei Zoom 1
 // Gebäudemodelle (S1.1) aus dev/pc/blender/staedte_geb.py, gemeinsam mit dem Hauptspiel in models/.
 // Liegt unter /staedte/ (veröffentlicht) bzw. /dev/staedte/ (Entwicklung) – daher zwei Pfade.
 const MODELL_PFADE = ['../models/staedte_geb.json', '../../models/staedte_geb.json'];
@@ -47,7 +48,7 @@ export function erzeugeSzene(leinwand, welt) {
   sonne.shadow.mapSize.set(2048, 2048);
   Object.assign(sonne.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 90 });
   sonne.shadow.bias = -0.0008;
-  szene.add(sonne);
+  szene.add(sonne, sonne.target);
 
   // Gelände
   const welt0 = -RASTER / 2;
@@ -357,7 +358,8 @@ export function erzeugeSzene(leinwand, welt) {
     kamera.updateProjectionMatrix();
   }
   function kameraSetzen() {
-    ziel.x = Math.max(-RASTER / 2, Math.min(RASTER / 2, ziel.x));
+    const mx = modus === 'region' ? REG_X : 0;
+    ziel.x = Math.max(mx - RASTER / 2, Math.min(mx + RASTER / 2, ziel.x));
     ziel.z = Math.max(-RASTER / 2, Math.min(RASTER / 2, ziel.z));
     kamera.position.copy(ziel).addScaledVector(BLICK, 100);
     kamera.lookAt(ziel);
@@ -387,6 +389,68 @@ export function erzeugeSzene(leinwand, welt) {
     let o = t.object; while (o && !o.userData.id) o = o.parent;
     return o ? o.userData.id : 0;
   }
+  // ---------- Umland (S2.1): Hex-Felder neben der Stadt (x + REG_X), gleiche Kamera und Steuerung ----------
+  let modus = 'stadt', region = null, wahlRing = null;
+  const HEX = 3.2, S3 = Math.sqrt(3);
+  const hexMitte = (q, r) => [REG_X + 1.5 * HEX * q, S3 * HEX * (r + q / 2)];
+  const HOEHE = { hang: 0.75, fluss: 0.08, stadt: 0.3 };
+  function regionBauen() {
+    const g = new THREE.Group(), felder = erzeugeRegion(), lam = c => new THREE.MeshLambertMaterial({ color: c });
+    const hexGeo = h => new THREE.CylinderGeometry(HEX, HEX, h, 6).rotateY(Math.PI / 6).translate(0, h / 2 - 0.2, 0);
+    const rand = 0.82 * HEX;
+    felder.forEach(f => {
+      const [x, z] = hexMitte(f.q, f.r), h = (HOEHE[f.typ] ?? 0.32) + 0.2, top = h - 0.2;
+      let k = (f.q * 7 + f.r * 13 + 100) | 0; const zz = () => (k = (k * 16807) % 2147483647) / 2147483647;
+      const im = (rr = rand) => { let a, b; do { a = (zz() * 2 - 1) * rr; b = (zz() * 2 - 1) * rr; } while (Math.hypot(a, b) > rr); return [a, b]; };
+      const feld = new THREE.Mesh(hexGeo(h), lam(REGION_TYPEN[f.typ].farbe)); feld.position.set(x, 0, z); feld.receiveShadow = true; g.add(feld);
+      const ring = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(HEX * 0.995, 6).rotateX(-Math.PI / 2).rotateY(Math.PI / 6)),
+        new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.12 }));
+      ring.position.set(x, top + 0.01, z); g.add(ring);
+      const add = (geo, farbe, a, y, b, ry = 0) => { const m = new THREE.Mesh(geo, lam(farbe)); m.position.set(x + a, top + y, z + b); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+      if (f.typ === 'wald') for (let i = 0; i < 16; i++) { const [a, b] = im(), sc = 0.8 + zz() * 0.6;
+        add(new THREE.CylinderGeometry(0.08, 0.1, 0.4 * sc, 5), 0x5a4330, a, 0.2 * sc, b); add(new THREE.ConeGeometry(0.5 * sc, 1.3 * sc, 6), zz() < 0.5 ? 0x55703a : 0x4a6534, a, 0.4 * sc + 0.65 * sc, b); }
+      if (f.typ === 'acker') { const w = zz() * Math.PI; for (let i = 0; i < 4; i++) { const c = [0xd9c26e, 0x8a9a48, 0xb08a52, 0xc8b060][(i + f.q + 9) % 4];
+        const off = (i - 1.5) * 1.05, L = 2 * Math.sqrt(Math.max(0.3, (0.8 * S3 / 2 * HEX) ** 2 - (Math.abs(off) + 0.48) ** 2));
+        add(new THREE.BoxGeometry(L, 0.04, 0.95), c, Math.sin(w) * off, 0.02, Math.cos(w) * off, w); } }
+      if (f.typ === 'weide') { for (let i = 0; i < 6; i++) { const [a, b] = im(); add(new THREE.BoxGeometry(0.22, 0.16, 0.14), 0xeee8dc, a, 0.12, b, zz() * 3); }
+        for (let i = 0; i < 3; i++) { const [a, b] = im(); add(new THREE.SphereGeometry(0.35, 6, 4), 0x6f8c46, a, 0.15, b); } }
+      if (f.typ === 'lehm') for (let i = 0; i < 5; i++) { const [a, b] = im(1.6); add(new THREE.CylinderGeometry(0.5 + zz() * 0.4, 0.6, 0.05, 7), i % 2 ? 0x7a4f34 : 0x5e8fb0, a, 0.03, b); }
+      if (f.typ === 'hang') { for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(3.4, 0.12, 0.12), 0x4f6a30, 0, 0.08, (i - 2) * 0.6);
+        for (let i = 0; i < 3; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.18, 1.4, 6), 0x3f5a2a, a, 0.7, b); } }
+      if (f.typ === 'fluss') for (let i = 0; i < 4; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.1, 0.5, 4), 0x7d8a48, a * 1.05, 0.25, b * 1.05); }
+      if (f.typ === 'stadt') {
+        add(new THREE.CylinderGeometry(HEX * 0.8, HEX * 0.8, 0.04, 24), 0xc9b48a, 0, 0.02, 0);
+        const mauer = new THREE.Mesh(new THREE.TorusGeometry(HEX * 0.8, 0.09, 4, 32).rotateX(Math.PI / 2), lam(0xb8aa8c)); mauer.position.set(x, top + 0.12, z); g.add(mauer);
+        const orte = [['markt', 0, 0, 0.35], ['casa', -1.1, -0.6, 0.38], ['casa', 1.1, -0.5, 0.38], ['casa', -0.3, 1.2, 0.38], ['huette', 1.0, 1.0, 0.38], ['huette', -1.4, 0.6, 0.38], ['speicher', 0.2, -1.5, 0.3]];
+        orte.forEach(([t, a, b, sc]) => {
+          const m = modelle && modelle[t] ? new THREE.Mesh(modelle[t].geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.8, 1.2), lam(0xd8b88a));
+          m.scale.setScalar(modelle && modelle[t] ? sc : 0.35); m.position.set(x + a, top + 0.04, z + b); m.castShadow = true; g.add(m);
+        });
+      }
+    });
+    wahlRing = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(HEX * 0.95, 6).rotateX(-Math.PI / 2).rotateY(Math.PI / 6)), new THREE.LineBasicMaterial({ color: 0xe9b44c }));
+    wahlRing.visible = false; g.add(wahlRing);
+    szene.add(g); return { g, felder };
+  }
+  function zeigeModus(m) {
+    if (m === 'region' && !region) region = regionBauen();
+    modus = m; const mx = m === 'region' ? REG_X : 0;
+    sonne.position.set(mx - 18, 30, 10); sonne.target.position.set(mx, 0, 0); sonne.target.updateMatrixWorld();
+    ziel.set(mx, 0, 0); kamera.zoom = m === 'region' ? 0.85 : 1.1; kameraSetzen();
+  }
+  function hexAn(px, py) {
+    const p = bodenPunkt(px, py); if (!p || !region) return null;
+    const x = p.x - REG_X, z = p.z;
+    let q = (2 / 3 * x) / HEX, r = (-x / 3 + S3 / 3 * z) / HEX, s = -q - r;
+    let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
+    const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
+    if (dq > dr && dq > ds) rq = -rr - rs; else if (dr > ds) rr = -rq - rs;
+    const f = region.felder.find(h => h.q === rq && h.r === rr) || null;
+    if (wahlRing) { wahlRing.visible = !!f; if (f) { const [hx, hz] = hexMitte(f.q, f.r); wahlRing.position.set(hx, (HOEHE[f.typ] ?? 0.32) + 0.03, hz); } }
+    return f;
+  }
+  const regionInfo = () => region ? region.felder.length : 0;
+
   function zentrieren(x, z) { ziel.copy(weltPos(x, z)); kameraSetzen(); }
 
   let zeit = 0;
@@ -408,5 +472,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { zeigeModus, hexAn, regionInfo, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

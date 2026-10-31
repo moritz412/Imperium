@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -156,6 +156,7 @@ function fingerWeg(e) {
   if (finger.size === 1) { const [a] = [...finger.values()]; wisch = szene.bodenPunkt(a.x, a.y); }
   if (malen && !finger.size) { malen = null; return; }
   if (!war || bewegt || finger.size) return;
+  if (szene.modus() === 'region') { hexInfo(szene.hexAn(e.clientX, e.clientY)); return; }
   if (bauTyp) { bauenAn(bauTyp, e.clientX, e.clientY); return; }
   const id = szene.gebaeudeAn(e.clientX, e.clientY);
   if (id) oeffneInfo(id); else schliesseInfo();
@@ -206,6 +207,7 @@ function infoZeichnen() {
 }
 $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
+  if (szene.modus() === 'region') { if (a.dataset.a === 'stadt') umland(false); else $('#info').hidden = true; return; }
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
@@ -238,6 +240,26 @@ $('#menue').addEventListener('click', e => {
 // ---------- Spielschleife ----------
 function allesZeichnen() { szene.abgleichen(S, auswahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
+// ---------- Umland (S2.1) ----------
+function umland(an) {
+  bauTyp = ''; baumodus(); schliesseInfo(); ansicht = ''; ansichtZeichnen();
+  szene.zeigeModus(an ? 'region' : 'stadt');
+  document.body.classList.toggle('umland', an);
+  const k = $('#ansicht [data-umland]'); k.classList.toggle('an', an); k.setAttribute('aria-pressed', an);
+  k.querySelector('small').textContent = an ? 'Stadt' : 'Umland';
+  if (an) melden('Das Umland von Cremona. Tippe ein Feld an.');
+}
+function hexInfo(f) {
+  if (!f) { $('#info').hidden = true; return; }
+  const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 });
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>${d.n}</h2><div class="unter">${weit ? weit + (weit === 1 ? ' Feld' : ' Felder') + ' von der Stadt' : 'Stadtgebiet'}</div>
+    <p>${d.text}</p>
+    ${d.nutzen ? `<div class="zeile"><span>Nutzen</span><b>${d.nutzen}</b></div>
+    <div class="lage warn">Noch nicht vermessen – die Landvermesser kommen mit der nächsten Ausbaustufe.</div>` : '<button class="knopf haupt" data-a="stadt">Zur Stadt</button>'}`;
+  $('#info').hidden = false;
+}
+
 // ---------- Ansichten (S1.4) ----------
 let ansicht = '';
 const ANSICHT_NAME = { wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
@@ -250,6 +272,7 @@ function ansichtZeichnen() {
 }
 $('#ansicht').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.hasAttribute('data-umland')) { umland(szene.modus() !== 'region'); return; }
   ansicht = ansicht === b.dataset.ansicht ? '' : b.dataset.ansicht; ansichtZeichnen();
 });
 function monatAblaufen() {
@@ -275,6 +298,7 @@ const start = startseite({
   hatStand: () => { try { return !!localStorage.getItem(SPEICHER); } catch (e) { return false; } },
   weiter: () => {},
   gruenden: r => {
+    if (szene.modus() === 'region') umland(false);
     S = sim.neuesSpiel(); S.region = r.id; auswahl = 0; bauTyp = ''; uhr = 0;
     speichern(true); szene.jahreszeitFarbe(sim.jahreszeit(S)); szene.zentrieren(20, 20); allesZeichnen(); willkommen();
   },
@@ -291,6 +315,6 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
-  modelle: () => szene.modelleBereit, szene, start, ton,
+  modelle: () => szene.modelleBereit, szene, start, ton, umland,
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };
