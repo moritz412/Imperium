@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN } from './daten.js';
-import { WALD, WASSER, groesse } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder } from './sim.js';
 
 const THREE = window.THREE;
 const BLICK = new THREE.Vector3(1, 1.05, 1).normalize();   // feste Blickrichtung (Azimut 45°, ca. 37° Höhe)
@@ -124,7 +124,7 @@ export function erzeugeSzene(leinwand, welt) {
     const wand = casa ? CASA.wand : d.wand, dach = casa ? CASA.dach : d.dach, h = casa ? CASA.h : d.h;
     const rand = 0.12, w = gw - rand * 2, tief = gd - rand * 2;
     if (d.flach) {
-      const f = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.06, 0.05, gd - 0.06), new THREE.MeshLambertMaterial({ color: wand }));
+      const fuge = t === 'strasse' ? 0 : 0.06, f = new THREE.Mesh(new THREE.BoxGeometry(gw - fuge, t === 'strasse' ? 0.03 : 0.05, gd - fuge), new THREE.MeshLambertMaterial({ color: wand }));
       f.position.y = 0.025; f.receiveShadow = true; g.add(f);
       if (t === 'feld') for (let i = 0; i < 6; i++) {
         const reihe = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.3, 0.06, 0.08), new THREE.MeshLambertMaterial({ color: 0xb59e48 }));
@@ -244,14 +244,40 @@ export function erzeugeSzene(leinwand, welt) {
   const ABNEHMER = g => Object.keys(GEB).filter(t => GEB[t].braucht && GEB[t].braucht[g]).concat(g === 'brot' ? ['markt'] : [], ['speicher']);
   let laeufer = [], lzeit = 0;
   const tuer = b => { const [gw, gd] = groesse(b.t); return [welt0 + b.x + gw / 2, welt0 + b.z + gd + 0.3]; };
-  function weg(a, b, farbe, ware, schluessel) {
-    const p = [a, [b[0], a[1]], b], c = [0];
+  // Weg über die Straßen (Breitensuche von den Straßenfeldern vor a zu denen vor b), sonst L-förmig querfeldein
+  function strassenPfad(maske, a, b) {
+    const ziel = new Set(randFelder(b.t, b.x, b.z).filter(i => maske[i]));
+    if (!ziel.size) return null;
+    const vor = new Int32Array(RASTER * RASTER).fill(-2), q = [];
+    for (const i of randFelder(a.t, a.x, a.z)) if (maske[i]) { vor[i] = -1; q.push(i); }
+    for (let k = 0; k < q.length; k++) {
+      const i = q[k];
+      if (ziel.has(i)) { const p = []; for (let j = i; j >= 0; j = vor[j]) p.push(j); return p.reverse(); }
+      const x = i % RASTER, z = (i - x) / RASTER;
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ax = x + dx, az = z + dz, j = az * RASTER + ax;
+        if (ax >= 0 && az >= 0 && ax < RASTER && az < RASTER && maske[j] && vor[j] === -2) { vor[j] = i; q.push(j); }
+      }
+    }
+    return null;
+  }
+  function punkte(maske, a, b) {
+    const pf = strassenPfad(maske, a, b), m = o => { const [gw, gd] = groesse(o.t); return [welt0 + o.x + gw / 2, welt0 + o.z + gd / 2]; };
+    if (!pf) { const p = tuer(a), q = tuer(b); return [p, [q[0], p[1]], q]; }
+    const p = [m(a)];
+    for (const i of pf) { const x = i % RASTER; p.push([welt0 + x + 0.5, welt0 + (i - x) / RASTER + 0.5]); }
+    p.push(m(b));
+    return p.filter((q, k) => k === 0 || k === p.length - 1 ||   // Punkte auf gerader Linie weglassen
+      (q[0] - p[k - 1][0]) * (p[k + 1][1] - q[1]) !== (q[1] - p[k - 1][1]) * (p[k + 1][0] - q[0]));
+  }
+  function weg(p, farbe, ware, schluessel) {
+    const c = [0];
     for (let i = 1; i < p.length; i++) c.push(c[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
     let h = 0; for (const z of schluessel) h = (h * 31 + z.charCodeAt(0)) % 9973;
     return { p, c, L: c[c.length - 1], farbe, ware: ware ? new THREE.Color(WARE[ware] || 0xd9c26e) : null, ph: h / 97 };
   }
   function laufwege(S) {
-    const neu = [], nach = new Map(S.geb.map(b => [b.id, b]));
+    const neu = [], nach = new Map(S.geb.map(b => [b.id, b])), maske = strassenMaske(S);
     const nachste = (von, typen) => {
       let best = null, bd = 1e9;
       for (const o of S.geb) if (typen.includes(o.t) && o !== von && (o.w || 0) > 0) {
@@ -264,12 +290,12 @@ export function erzeugeSzene(leinwand, welt) {
       b.von.forEach(([hid, n], k) => {
         const h = nach.get(hid); if (!h) return;
         for (let i = 0; i < Math.min(n, 2); i++)
-          neu.push(weg(tuer(h), tuer(b), TUNIKA[(hid + i + k) % TUNIKA.length], '', `${hid}-${b.id}-${i}`));
+          neu.push(weg(punkte(maske, h, b), TUNIKA[(hid + i + k) % TUNIKA.length], '', `${hid}-${b.id}-${i}`));
       });
       const d = GEB[b.t];
       if (d.erzeugt && !b.status.some(s => !s.leicht)) {
         const g = Object.keys(d.erzeugt)[0], ziel = nachste(b, ABNEHMER(g));
-        if (ziel) neu.push(weg(tuer(b), tuer(ziel), TUNIKA[(b.id + 3) % TUNIKA.length], g, `t${b.id}-${ziel.id}`));
+        if (ziel) neu.push(weg(punkte(maske, b, ziel), TUNIKA[(b.id + 3) % TUNIKA.length], g, `t${b.id}-${ziel.id}`));
       }
     }
     laeufer = neu.filter(l => l.L > 0.5).slice(0, LMAX);

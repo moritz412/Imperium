@@ -28,7 +28,13 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       Gebäudefenster: Häuser in Laufweite, je Haus „Gehen zur Arbeit“. Test 18/18 (PC, `PW_GPU=1`).
       Offen: Träger sind nur Anzeige (Waren bleiben im gemeinsamen Lager), Figuren laufen noch durch Gebäude.
       **Nicht getestet:** iPad.
-- [ ] S1.3 Straßen mit Wirkung (Bau nur an Straße, Markt-Reichweite über Straßen).
+- [x] S1.3 Straßen (31.10. abends): Neues Spiel beginnt mit einer Landstraße (z = 12, 38 Felder). Jedes Gebäude außer
+      Straße und Brunnen braucht ein Straßenfeld direkt an der Grundfläche („Hier fehlt eine Straße vor der Tür“).
+      Markt versorgt nur Häuser, die er über Straßen in höchstens 20 Feldern erreicht (Breitensuche); Brunnen weiter
+      per Umkreis. Läufer gehen auf den Straßen (ohne Verbindung weiter querfeldein). Straßen-Baumodus: mit einem Finger
+      ziehen legt Straße statt die Karte zu verschieben. Straßen ohne Fugen.
+      Alte Spielstände ohne Straßen bleiben ladbar, Märkte versorgen dort aber erst nach Straßenbau.
+      Straßen-Ziehen per Maus im Test geprüft (20/20). **Nicht getestet:** iPad, Ziehen mit dem Finger.
 - [ ] S1.4 Overlays Wasser, Stimmung, Arbeit.
 - [ ] S1.5 Startbildschirm mit Regionswahl (Mockup „Startregion“), zunächst nur Cremona aktiv.
 - [ ] S1.6 Ton (Hintergrund, Bauen, Jahreszeit) aus vorhandener Pipeline.

@@ -26,8 +26,47 @@ export function erzeugeWelt() {
 }
 
 export function neuesSpiel() {
-  return { v: 1, jahr0: -218, monat: 2, gut: { ...START.gut }, geb: [], naechste: 1, stimmung: START.stimmung,
+  const S = { v: 1, jahr0: -218, monat: 2, gut: { ...START.gut }, geb: [], naechste: 1, stimmung: START.stimmung,
     auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true } };
+  // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
+  const welt = erzeugeWelt();
+  for (let x = 0; x < RASTER; x++) if (welt.typ[START_STRASSE * RASTER + x] === GRAS)
+    S.geb.push({ id: S.naechste++, t: 'strasse', x, z: START_STRASSE, w: 0, prio: false, stufe: 1, bew: 0, status: [] });
+  return S;
+}
+
+// ---------- Straßen (S1.3) ----------
+export const START_STRASSE = 12;
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen']);   // brauchen keine Straße vor der Tür
+const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+export function strassenMaske(S) {
+  const m = new Uint8Array(RASTER * RASTER);
+  for (const b of S.geb) if (b.t === 'strasse') m[b.z * RASTER + b.x] = 1;
+  return m;
+}
+// Felder rings um die Grundfläche (ohne Ecken)
+export function randFelder(t, x, z) {
+  const [w, d] = groesse(t), r = [];
+  for (let i = 0; i < w; i++) r.push([x + i, z - 1], [x + i, z + d]);
+  for (let i = 0; i < d; i++) r.push([x - 1, z + i], [x + w, z + i]);
+  return r.filter(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < RASTER).map(([a, c]) => c * RASTER + a);
+}
+export const anStrasse = (t, x, z, maske) => randFelder(t, x, z).some(i => maske[i]);
+
+// Wegstrecke über Straßen ab den Straßenfeldern vor einem Gebäude (Breitensuche), −1 = nicht erreichbar
+export function strassenWeg(maske, b, max = 999) {
+  const dist = new Int16Array(RASTER * RASTER).fill(-1), q = [];
+  for (const i of randFelder(b.t, b.x, b.z)) if (maske[i]) { dist[i] = 0; q.push(i); }
+  for (let k = 0; k < q.length; k++) {
+    const i = q[k], x = i % RASTER, z = (i - x) / RASTER;
+    if (dist[i] >= max) continue;
+    for (const [dx, dz] of NACHBARN) {
+      const a = x + dx, c = z + dz, j = c * RASTER + a;
+      if (a >= 0 && c >= 0 && a < RASTER && c < RASTER && maske[j] && dist[j] < 0) { dist[j] = dist[i] + 1; q.push(j); }
+    }
+  }
+  return dist;
 }
 
 export const jahreszeit = S => Math.floor((S.monat % 12) / 3);
@@ -61,6 +100,7 @@ export function pruefePlatz(S, welt, t, x, z, bel = belegung(S)) {
     if (welt.typ[i] === WALD) return 'Hier steht Wald';
     if (bel[i]) return 'Hier steht schon etwas';
   }
+  if (!OHNE_STRASSE.has(t) && !anStrasse(t, x, z, strassenMaske(S))) return 'Hier fehlt eine Straße vor der Tür';
   return '';
 }
 
@@ -95,8 +135,17 @@ export function abreissen(S, id) {
 export const mitte = b => { const [w, d] = groesse(b.t); return [b.x + w / 2, b.z + d / 2]; };
 export const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math.hypot(p[0] - q[0], p[1] - q[1]); };
 
-export function inReichweite(S, b, typ) {
-  return S.geb.some(o => o.t === typ && (typ !== 'markt' || o.w > 0) && abstand(o, b) <= GEB[typ].reichweite);
+export function inReichweite(S, b, typ, maske) {
+  const d = GEB[typ];
+  if (!d.strassen) return S.geb.some(o => o.t === typ && abstand(o, b) <= d.reichweite);
+  // über Straßen: Weg vom Versorger bis zu einem Straßenfeld vor dem Haus
+  maske = maske || strassenMaske(S);
+  const vorHaus = randFelder(b.t, b.x, b.z);
+  return S.geb.some(o => {
+    if (o.t !== typ || !(o.w > 0)) return false;
+    const dist = strassenWeg(maske, o, d.reichweite);
+    return vorHaus.some(i => dist[i] >= 0 && dist[i] <= d.reichweite);
+  });
 }
 
 export function waldNah(welt, b) {
@@ -166,9 +215,10 @@ export function monat(S, welt) {
 
   // Häuser: Wasser, Markt, Wachstum, Aufstieg
   let wasserN = 0, marktN = 0, haeuser = 0;
+  const maske = strassenMaske(S);
   for (const b of S.geb.filter(b => b.t === 'huette')) {
     haeuser++;
-    const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt');
+    const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske);
     if (wasser) wasserN++; if (markt) marktN++;
     if (!essen) { b.status.push({ art: 'hunger', text: 'Hunger' }); b.bew = Math.max(0, b.bew - 1); continue; }
     if (b.bew < wohnraum(b) && S.stimmung >= 40) b.bew++;

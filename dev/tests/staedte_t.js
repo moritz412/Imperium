@@ -17,11 +17,21 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Geladen, Spielobjekt vorhanden', true);
   await p.evaluate(() => SR.tempo(0));
 
-  // Bauen per API
+  // S1.3: Landstraße beim Start, Bauen nur an der Straße
+  const start = await p.evaluate(() => ({ strassen: SR.S.geb.filter(b => b.t === 'strasse').length, ohne: SR.bauen('huette', 16, 25).grund }));
+  ok('Landstraße beim Start, Hütte ohne Straße abgelehnt', start.strassen > 20 && /Straße/.test(start.ohne), start.strassen + ' Felder, ' + start.ohne);
+
+  // Bauen per API (Straßennetz: Landstraße z=12, Gassen z=16 und z=19, Verbindungen x=14 und x=15)
   const bau = await p.evaluate(() => {
+    const str = [];
+    for (let x = 14; x <= 25; x++) str.push([x, 16]);
+    for (let x = 9; x <= 26; x++) str.push([x, 19]);
+    for (let z = 13; z <= 15; z++) str.push([14, z]);
+    for (let z = 17; z <= 18; z++) str.push([15, z]);
+    const fehl = str.map(([x, z]) => SR.bauen('strasse', x, z)).filter(r => !r.ok).map(r => 'strasse:' + r.grund);
     const liste = [['huette', 16, 14], ['huette', 19, 14], ['huette', 16, 17], ['huette', 22, 14], ['holzfaeller', 4, 10], ['feld', 9, 20], ['muehle', 13, 20],
       ['baeckerei', 16, 20], ['lehmgrube', 20, 20], ['ziegelei', 23, 20], ['brunnen', 19, 17]];
-    return liste.map(([t, x, z]) => { const r = SR.bauen(t, x, z); return t + ':' + (r.ok ? 'ok' : r.grund); });
+    return fehl.concat(liste.map(([t, x, z]) => { const r = SR.bauen(t, x, z); return t + ':' + (r.ok ? 'ok' : r.grund); }));
   });
   ok('11 Gebäude gebaut', bau.every(s => s.endsWith(':ok')), bau.filter(s => !s.endsWith(':ok')).join(', '));
   const besetzt = await p.evaluate(() => SR.bauen('huette', 16, 14).grund);
@@ -29,7 +39,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const wald = await p.evaluate(() => SR.bauen('huette', 0, 5).grund);
   ok('Wald wird abgelehnt', /Wald/.test(wald), wald);
 
-  // Bauen per Ziehen aus der Leiste (Maus)
+  // Bauen per Ziehen aus der Leiste (Maus); vorher Straße unter dem Zielfeld legen
+  await p.evaluate(() => {
+    const f = SR.szene.feldAn(330, 480), x = Math.round(f.p.x + 20 - 1), z = Math.round(f.p.z + 20 - 1);
+    SR.bauen('strasse', x, z + 2); SR.bauen('strasse', x + 1, z + 2);
+  });
   const vorher = await p.evaluate(() => SR.S.geb.length);
   await p.click('#reiter button[data-k="Wohnen"]');
   const karte = await p.$('.karte[data-t="huette"]'); const kb = await karte.boundingBox();
@@ -43,7 +57,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const lauf = await p.evaluate(() => {
     const spur = [];
     for (let m = 0; m < 24; m++) {
-      if (m === 8) SR.bauen('markt', 20, 10);
+      if (m === 8) SR.bauen('markt', 20, 9);
       SR.monate(1);
       const S = SR.S; spur.push({ m: S.monat, bew: SR.sim.einwohner(S), brot: Math.round(S.gut.brot), korn: Math.round(S.gut.getreide), ziegel: Math.round(S.gut.ziegel), st: Math.round(S.stimmung) });
     }
@@ -69,10 +83,19 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const gesp = await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('staedte_roms.v1') || 'null'); return s ? s.geb.length : 0; });
   ok('Spielstand gespeichert (Jahreszeitwechsel)', gesp > 0, gesp + ' Gebäude');
 
+  // S1.3 Straße ziehen im Baumodus (Maus)
+  const s0 = await p.evaluate(() => { SR.S.gut.denare += 100; return SR.S.geb.filter(b => b.t === 'strasse').length; });
+  await p.click('#reiter button[data-k="Öffentlich"]'); await p.click('.karte[data-t="strasse"]');
+  await p.mouse.move(700, 560); await p.mouse.down();
+  for (let i = 1; i <= 10; i++) await p.mouse.move(700 + i * 14, 560 - i * 7);
+  await p.mouse.up(); await p.click('#baumodusEnde');
+  const s1 = await p.evaluate(() => SR.S.geb.filter(b => b.t === 'strasse').length);
+  ok('Straße per Ziehen gelegt', s1 - s0 >= 3, `${s0} → ${s1}`);
+
   // S1.1 Modelle, S1.2 Einzugsbereich und Laufwege
   ok('Gebäudemodelle geladen', await p.evaluate(() => SR.modelle()));
   const lauf2 = await p.evaluate(() => {
-    SR.S.gut.holz += 50; const r = SR.bauen('lehmgrube', 36, 2); SR.monate(1);
+    SR.S.gut.holz += 50; SR.bauen('strasse', 36, 4); SR.bauen('strasse', 37, 4); const r = SR.bauen('lehmgrube', 36, 2); SR.monate(1);
     const fern = SR.S.geb.find(b => b.id === r.b.id);
     const von = SR.S.geb.filter(b => b.von && b.von.length).length;
     return { fern: fern.status.map(s => s.text).join(', '), von };

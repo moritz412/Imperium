@@ -106,7 +106,7 @@ function bauenAn(t, px, py) {
 }
 function baumodus() {
   $('#baumodus').hidden = !bauTyp;
-  if (bauTyp) { $('#baumodusText').textContent = `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
+  if (bauTyp) { $('#baumodusText').textContent = bauTyp === 'strasse' ? 'Straße bauen: Felder antippen oder ziehen' : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
   else szene.vorschau('');
   bauleiste();
 }
@@ -121,6 +121,9 @@ lw.addEventListener('pointerdown', e => {
   finger.set(e.pointerId, { x: e.clientX, y: e.clientY });
   bewegt = false;
   if (finger.size === 1) wisch = szene.bodenPunkt(e.clientX, e.clientY);
+  // Straßen-Baumodus: mit einem Finger ziehen legt Straße statt die Karte zu verschieben
+  malen = bauTyp === 'strasse' && finger.size === 1 ? new Set() : null;
+  if (malen) strasseMalen(e.clientX, e.clientY);
   if (finger.size === 2) { const [a, b] = [...finger.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
 });
 lw.addEventListener('pointermove', e => {
@@ -132,12 +135,21 @@ lw.addEventListener('pointermove', e => {
     const [a, b] = [...finger.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
     if (pinch) szene.zoom(d / pinch); pinch = d; return;
   }
+  if (finger.size === 1 && malen) { strasseMalen(e.clientX, e.clientY); return; }
   if (finger.size === 1 && bewegt && wisch) szene.verschieben(wisch, szene.bodenPunkt(e.clientX, e.clientY));
 });
+let malen = null;
+function strasseMalen(px, py) {
+  const p = platzFuer('strasse', px, py); if (!p) return;
+  const k = p.x + ',' + p.z; if (malen.has(k)) return; malen.add(k);
+  const r = sim.bauen(S, welt, 'strasse', p.x, p.z);
+  if (r.ok) allesZeichnen(); else if (/fehlen/.test(r.grund)) melden(r.grund);
+}
 function fingerWeg(e) {
   const war = finger.has(e.pointerId); finger.delete(e.pointerId);
   if (finger.size < 2) pinch = 0;
   if (finger.size === 1) { const [a] = [...finger.values()]; wisch = szene.bodenPunkt(a.x, a.y); }
+  if (malen && !finger.size) { malen = null; return; }
   if (!war || bewegt || finger.size) return;
   if (bauTyp) { bauenAn(bauTyp, e.clientX, e.clientY); return; }
   const id = szene.gebaeudeAn(e.clientX, e.clientY);
@@ -183,7 +195,7 @@ function infoZeichnen() {
       <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
   }
-  if (d.reichweite) html += `<div class="zeile"><span>Reichweite</span><b>${d.reichweite} Felder</b></div>`;
+  if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
   $('#info').innerHTML = html; $('#info').hidden = false;
 }
@@ -214,6 +226,7 @@ $('#menue').addEventListener('click', e => {
       <li>Ein Symbol über einem Gebäude zeigt ein Problem. Antippen zeigt die Ursache.</li>
       <li>Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei.</li>
       <li>Im Herbst wird geerntet, im Winter wächst nichts – Vorräte anlegen.</li>
+      <li>Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen. Der Markt versorgt nur Häuser an seinen Straßen.</li>
       <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li></ol>`;
   }
 });

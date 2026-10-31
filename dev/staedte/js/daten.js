@@ -39,8 +39,8 @@ export const GEB = {
     kosten: { holz: 20, ziegel: 15 }, arbeiter: 3, braucht: { mehl: 3 }, erzeugt: { brot: 4 },
     text: 'Backt Brot aus Mehl. Brot macht die Bürger zufriedener als Getreidebrei.' },
   markt: { n: 'Markt', kat: 'Öffentlich', g: [3, 3], h: 0.45, wand: 0xe9d9b5, dach: 0x3f6e8c,
-    kosten: { holz: 35, ziegel: 15 }, arbeiter: 2, reichweite: 9,
-    text: 'Versorgt Häuser im Umkreis. Nötig für den Aufstieg zur Casa.' },
+    kosten: { holz: 35, ziegel: 15 }, arbeiter: 2, reichweite: 20, strassen: true,
+    text: 'Versorgt Häuser, die er über Straßen in höchstens 20 Feldern erreicht. Nötig für den Aufstieg zur Casa.' },
   speicher: { n: 'Speicher', kat: 'Öffentlich', g: [3, 2], h: 0.9, wand: 0xcbb894, dach: 0x9a4a2b,
     kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200,
     text: 'Erhöht die Lagergrenze jeder Ware um 200.' },
@@ -56,8 +56,8 @@ export const GEB = {
   brunnen: { n: 'Brunnen', kat: 'Öffentlich', g: [1, 1], h: 0.35, wand: 0xbfb6a4, wasser: true,
     kosten: { ziegel: 8 }, reichweite: 7,
     text: 'Versorgt Häuser im Umkreis von 7 Feldern mit Wasser.' },
-  strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xcdbb97,
-    kosten: { denare: 2 }, text: 'Pflasterweg. Wirkung kommt mit Stufe 1.3.' },
+  strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
+    kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
 
 // Casa: ausgebaute Hütte
@@ -71,7 +71,7 @@ export const START = {
 const anzahl = (S, t) => S.geb.filter(b => b.t === t).length;
 
 export const AUFTRAEGE = [
-  { n: 'Baue zwei Hütten für die ersten Siedler.', ok: S => anzahl(S, 'huette') >= 2, lohn: { denare: 50, holz: 30 } },
+  { n: 'Baue zwei Hütten an der Landstraße für die ersten Siedler.', ok: S => anzahl(S, 'huette') >= 2, lohn: { denare: 50, holz: 30 } },
   { n: 'Baue einen Holzfäller am Waldrand.', ok: S => anzahl(S, 'holzfaeller') >= 1, lohn: { denare: 40 } },
   { n: 'Brotkette: Getreidefeld, Mühle und Bäckerei.', ok: S => ['feld', 'muehle', 'baeckerei'].every(t => anzahl(S, t) >= 1), lohn: { denare: 80, ziegel: 20 } },
   { n: 'Ziegelkette: Lehmgrube und Ziegelei.', ok: S => anzahl(S, 'lehmgrube') >= 1 && anzahl(S, 'ziegelei') >= 1, lohn: { denare: 80 } },
