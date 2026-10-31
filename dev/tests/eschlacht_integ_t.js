@@ -36,7 +36,7 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
     for (const n of ADJ[a.p]) { if (isSeaLink(a.p, n) || S.prov[n].owner === S.player) continue; ti = n; break; }
     if (ti == null) return { err: 'kein Ziel' };
     const P = S.prov[ti]; if (P.b) P.b.walls = 0; if (P.gar < 4) P.gar = 8;
-    window.__a = a; window.__ti = ti; window.__men0 = a.units.map(u => u.men);
+    window.__a = a; window.__ti = ti; window.__men0 = a.units.map(u => u.men); window.__xp0 = a.units.map(u => u.xp || 0);
     return { aid: a.id, units: a.units.map(u => u.r + (u.v ? ':' + u.v : '') + ' ' + u.men), ti, prov: PROV_DEF[ti].name, owner: P.owner, gar: P.gar, ep: S.epoch || 0, bdiff: S.bdiff };
   });
   console.log('SETUP', JSON.stringify(set));
@@ -110,6 +110,9 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   console.log('NACH SCHLACHT', JSON.stringify(fin));
   ok('Zurück in der Kampagne, aufgeräumt', !fin.esch && !fin.battle && fin.hidden && fin.kinder === 0 && fin.top);
   ok('Männer der Einheiten verändert', JSON.stringify(fin.men1) !== JSON.stringify(fin.men2), fin.men1.join(',') + ' -> ' + fin.men2.join(','));
+  const xp = await p.evaluate(() => ({ kills: (window.__killsLog || null), vor: window.__xp0, nach: window.__a.units.map(u => u.xp || 0), log: S.log.slice(-8).map(e => e.t).filter(t => /Herausragend/.test(t)) }));
+  console.log('ERFAHRUNG', JSON.stringify(xp));
+  ok('Erfahrung nach der Schlacht gestiegen (R7: Abschüsse + Kampagnenwert)', xp.nach.some((v, i) => v > (xp.vor[i] || 0)), xp.vor.join(',') + ' -> ' + xp.nach.join(','));
   const fe = await p.evaluate(() => eschFeldherr);
   ok('Feldherr-Ergebnis kommt in der Kampagne an (je Seite name/lebt/verwundet)', Array.isArray(fe) && fe[0] && fe[0].name && typeof fe[0].lebt === 'boolean' && typeof fe[0].verwundet === 'boolean' && fe[1] && typeof fe[1].lebt === 'boolean', JSON.stringify(fe));
   ok('Schlussmodal der Kampagne (showBattle)', /Sieg|Niederlage/.test(fin.modal), fin.modal);
