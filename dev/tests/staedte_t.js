@@ -409,6 +409,15 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Späte Republik: Übergang mit Rang, Erfindungen und Gunst', ep.block && ep.knopfAus && /Stadtrang/.test(ep.vorher) && /Späten Republik/.test(ep.domusVor) && ep.wechsel && ep.wein && /späteren/.test(ep.tempel), JSON.stringify(ep));
   ok('Weinberg, Kelter, Domus mit Equites, Archiv senkt Aufschlag', ep.berg && ep.kelter && ep.domus && ep.eq >= 1 && ep.weinWeg && ep.archiv);
+  // Unterhalt (1.11.): Lohn/Sold kostet Denare; ohne Geld steht der Markt still
+  const uh = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    const A = kopie(); A.gut.denare = 1000; sim.monat(A, SR.welt); const bezahlt = A.letzte.unterhalt, markt = A.geb.find(b => b.t === 'markt');
+    const B = kopie(); B.gut.denare = 0; sim.monat(B, SR.welt);
+    const mb = B.geb.find(b => b.t === 'markt');
+    return { summe: sim.unterhaltSumme(S), bezahlt, marktOk: markt && !markt.unbezahlt, marktStill: mb && mb.unbezahlt === true && mb.w === 0 && /Lohn/.test(JSON.stringify(mb.status)) };
+  });
+  ok('Unterhalt: Lohn wird bezahlt, ohne Geld steht der Markt still', uh.summe > 0 && uh.bezahlt > 0 && uh.marktOk && uh.marktStill, JSON.stringify(uh));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

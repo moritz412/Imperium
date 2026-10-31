@@ -168,6 +168,10 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
 - [x] Eigene Formen (three.js, kein Blender) für Schule (Säulenvorhalle), Feuerwache (Turm, Eimer), Sklavenquartier,
       Schrein (Lararium), Schmiede (Esse), Kelter (Baumpresse, Dolia). Test 56/56, Bild angesehen.
       Offen: Vorderseiten zeigen immer nach Süden, nicht zur Straße (gilt auch für die Blender-Modelle).
+## Zweiter 2-Stunden-Block (1.11., selbst gewählt; Moritz: „selbstständig weiter“)
+- [x] Unterhalt: Lohn/Sold je Monat aus der Kasse – Markt 3, Speicher 2, Schule 4, Feuerwache 5, Kastell 6, Wachturm 1
+      (nur wer arbeitet, wird bezahlt). Fehlt Geld, steht das Gebäude still („Kein Geld für den Lohn“), Kastell/Turm schützen
+      nicht. Summe im Cremona-Fenster und als Hinweis an den Denaren. Test 57/57.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

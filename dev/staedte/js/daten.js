@@ -60,10 +60,10 @@ export const GEB = {
     kosten: { holz: 20, ziegel: 15 }, arbeiter: 3, braucht: { mehl: 3 }, erzeugt: { brot: 4 },
     text: 'Backt Brot aus Mehl. Brot macht die Bürger zufriedener als Getreidebrei.' },
   markt: { n: 'Markt', kat: 'Öffentlich', g: [3, 3], h: 0.45, wand: 0xe9d9b5, dach: 0x3f6e8c,
-    kosten: { holz: 35, ziegel: 15 }, arbeiter: 2, reichweite: 20, strassen: true,
+    kosten: { holz: 35, ziegel: 15 }, arbeiter: 2, reichweite: 20, strassen: true, unterhalt: 3,
     text: 'Versorgt Häuser, die er über Straßen in höchstens 20 Feldern erreicht. Nötig für den Aufstieg zur Casa.' },
   speicher: { n: 'Speicher', kat: 'Öffentlich', g: [3, 2], h: 0.9, wand: 0xcbb894, dach: 0x9a4a2b,
-    kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200,
+    kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200, unterhalt: 2,
     text: 'Erhöht die Lagergrenze jeder Ware um 200.' },
   holzfaeller: { n: 'Holzfäller', kat: 'Handwerk', g: [2, 2], h: 0.6, wand: 0x9c7a55, dach: 0x6b4a32, sklaven: true,
     kosten: { holz: 8 }, arbeiter: 2, erzeugt: { holz: 3 }, wald: 6,
@@ -84,13 +84,13 @@ export const GEB = {
     kosten: { ziegel: 8 }, reichweite: 7,
     text: 'Versorgt Häuser im Umkreis von 7 Feldern mit Wasser.' },
   ludus: { n: 'Schule', kat: 'Öffentlich', g: [2, 2], h: 0.75, wand: 0xe6d6b4, dach: 0x8a4a2b,
-    kosten: { holz: 25, ziegel: 15 }, arbeiter: 2, wissen: 3,
+    kosten: { holz: 25, ziegel: 15 }, arbeiter: 2, wissen: 3, unterhalt: 4,
     text: 'Ein Lehrer (ludi magister) unterrichtet die Kinder der Stadt: 3 Wissen im Monat für die Forschung.' },
   schrein: { n: 'Schrein', kat: 'Öffentlich', g: [1, 1], h: 0.6, wand: 0xd8ccb0, dach: 0xa9583a, forschung: 'schreine',
     kosten: { ziegel: 10, holz: 5 }, reichweite: 9,
     text: 'Kleiner Schrein der Laren. Häuser im Umkreis von 9 Feldern sind zufriedener.' },
   wache: { n: 'Feuerwache', kat: 'Öffentlich', g: [2, 2], h: 0.8, wand: 0xc8a888, dach: 0x8a3a2a,
-    kosten: { holz: 30, ziegel: 20 }, arbeiter: 3, reichweite: 12,
+    kosten: { holz: 30, ziegel: 20 }, arbeiter: 3, reichweite: 12, unterhalt: 5,
     text: 'Nachtwächter mit Eimern, Haken und Decken (tresviri nocturni) löschen Brände und halten nachts Ordnung. Augustus macht daraus später die Vigiles.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
@@ -163,13 +163,13 @@ export const LAND_BETRIEBE = {
     text: 'Bergleute fördern Eisenerz für die Schmiede in der Stadt.' },
   weinberg:   { n: 'Weinberg', auf: 'hang', forschung: 'weinbau', kosten: { holz: 25, denare: 30 }, erzeugt: { trauben: 3 }, ernte: true, modell: 'huette',
     text: 'Reben an den sonnigen Hängen. Lese im Herbst, die Trauben gehen in die Kelter der Stadt.' },
-  kastell:    { n: 'Kastell', auf: 'hang', kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
+  kastell:    { n: 'Kastell', auf: 'hang', unterhalt: 6, kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
     text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
 };
 
 // Gefahren (S2.6). Schutzbauten als Zusatz auf vermessenem Land (wie der Feldweg)
 export const SCHUTZ = {
-  turm:  { n: 'Wachturm', kosten: { holz: 25, ziegel: 10 }, text: 'Wächter halten Räuber fern – auf diesem Feld und den Feldern daneben.' },
+  turm:  { n: 'Wachturm', unterhalt: 1, kosten: { holz: 25, ziegel: 10 }, text: 'Wächter halten Räuber fern – auf diesem Feld und den Feldern daneben.' },
   deich: { n: 'Deich', kosten: { holz: 10, lehm: 15 }, text: 'Schützt das Feld vor dem Hochwasser des Padus im Frühling.' },
 };
 // ab = erster Spielmonat, monat = Monat im Jahr (0 = erster Frühlingsmonat), chance je Gelegenheit, monate = Ausfall

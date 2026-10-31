@@ -42,7 +42,8 @@ function kopfleiste() {
   const zellen = ANZEIGE.filter(g => !NUR_WENN_DA.has(g) || S.gut[g] >= 1).map(g => {
     const knapp = g !== 'denare' && S.gut[g] < 5 ? ' knapp' : '';
     const voll = WAREN[g].lager && S.gut[g] >= grenze ? ' (voll)' : '';
-    return `<div class="ware${knapp}"><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
+    const titel = g === 'denare' ? ` title="Unterhalt ${sim.unterhaltSumme(S)} Denare im Monat"` : '';
+    return `<div class="ware${knapp}"${titel}><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
   });
   const st = Math.round(S.stimmung);
   zellen.push(`<div class="ware"><b>${rund(sim.einwohner(S))}</b><small>Einwohner</small></div>`);
@@ -241,6 +242,7 @@ function infoZeichnen() {
   }
   const gefahr = sim.brandGefahr(S, b);
   if (gefahr) html += `<div class="zeile"><span>Brandgefahr</span><b>${gefahr < 0.002 ? 'gering' : gefahr < 0.006 ? 'mittel' : 'hoch'}</b></div>`;
+  if (d.unterhalt) html += `<div class="zeile"><span>Lohn/Sold im Monat</span><b>${d.unterhalt} Denare${b.unbezahlt ? ' – nicht bezahlt!' : ''}</b></div>`;
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
   $('#info').innerHTML = html; $('#info').hidden = false;
@@ -456,6 +458,7 @@ function romInfo() {
   const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
   return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
     <div class="zeile"><span>Schutz vor Galliern</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
+    <div class="zeile"><span>Unterhalt (Löhne, Sold) im Monat</span><b>${sim.unterhaltSumme(S)} Denare</b></div>
     <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
     <p>Wer pünktlich zahlt, gewinnt die Gunst des Senats – dann fällt auch der Lohn für Aufträge höher aus (jetzt ${Math.round(sim.lohnFaktor(S) * 100)} %).</p>`;
 }

@@ -197,11 +197,13 @@ export function monat(S, welt) {
     }
   }
   S.letzte = { arbeitslos: wohnorte.filter(x => !x.skl).reduce((s, x) => s + x.frei, 0), sklavenFrei: wohnorte.filter(x => x.skl).reduce((s, x) => s + x.frei, 0), arbeiter: alle };
+  S.letzte.unterhalt = unterhaltZahlen(S);
 
   // Produktion
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
     if (b.brand > 0) { b.status.push({ art: 'brand', text: b.brand === 1 ? 'Es brennt!' : `Es brennt seit ${b.brand} Monaten!` }); continue; }
+    if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
     if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
@@ -551,9 +553,9 @@ const fertig = (S, l) => l && l.verm >= vermMonate(S);
 export function raeuberSchutz(S, f) {
   if (hexAbstand(f, STADT) < GEFAHR.raeuber.weit) return true;
   return regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; if (!fertig(S, l)) return false;
-    const d = hexAbstand(f, g); return (l.turm && d <= 1) || (l.betrieb === 'kastell' && d <= 2); });
+    const d = hexAbstand(f, g); return (l.turm && !l.turmUnbezahlt && d <= 1) || (l.betrieb === 'kastell' && !l.unbezahlt && d <= 2); });
 }
-export const hatKastell = S => regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; return fertig(S, l) && l.betrieb === 'kastell'; });
+export const hatKastell = S => regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; return fertig(S, l) && l.betrieb === 'kastell' && !l.unbezahlt; });
 export function schutzBauen(S, f, art) {
   const d = SCHUTZ[art], st = landStand(S, f), l = (S.land || {})[landKey(f)];
   if (!d) return { ok: false, grund: 'Unbekannter Bau' };
@@ -817,5 +819,26 @@ export function erweitern(S, welt) {
   for (let x = von; x < stadtGrenze(S); x++) { const i = START_STRASSE * RASTER + x;
     if (welt.typ[i] === GRAS && !bel[i]) S.geb.push({ id: S.naechste++, t: 'strasse', x, z: START_STRASSE, w: 0, prio: false, stufe: 1, bew: 0, status: [] }); }
   return { ok: true, text: e.text };
+}
+
+// ---------- Unterhalt (1.11.): Lohn und Sold aus der Stadtkasse; ohne Geld steht das Gebäude still ----------
+export function unterhaltSumme(S) {
+  let n = S.geb.reduce((s, b) => s + (GEB[b.t].unterhalt || 0), 0);
+  for (const l of Object.values(S.land || {})) { if (l.betrieb === 'kastell') n += LAND_BETRIEBE.kastell.unterhalt; if (l.turm) n += SCHUTZ.turm.unterhalt; }
+  return n;
+}
+function unterhaltZahlen(S) {
+  let n = 0;
+  const zahle = u => { if (S.gut.denare >= u) { S.gut.denare -= u; n += u; return true; } return false; };
+  for (const b of S.geb) {
+    const u = GEB[b.t].unterhalt; if (!u) continue;
+    b.unbezahlt = !(b.w > 0) ? false : !zahle(u);   // nur wer arbeitet, bekommt Lohn
+    if (b.unbezahlt) { b.w = 0; b.von = []; }
+  }
+  for (const l of Object.values(S.land || {})) {
+    if (l.betrieb === 'kastell') l.unbezahlt = !zahle(LAND_BETRIEBE.kastell.unterhalt);
+    if (l.turm) l.turmUnbezahlt = !zahle(SCHUTZ.turm.unterhalt);
+  }
+  return n;
 }
 
