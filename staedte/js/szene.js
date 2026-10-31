@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, handelOffen, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -696,6 +696,7 @@ export function erzeugeSzene(leinwand, welt) {
       g.traverse(o => { if (o.isMesh) o.castShadow = true; });
       region.g.add(g); karren.push({ g, pts, c, L: c[c.length - 1], last, ph: (f.q * 3 + f.r * 7 + 20) % 10 });
     }
+    haendler(S);
   }
   // Gefahren (S2.6): Wachturm, Deich zum Fluss hin, Rauch (geplündert) oder Wasser (überflutet)
   function gefahrZeichnen(g, f, l, x, z, top) {
@@ -718,18 +719,47 @@ export function erzeugeSzene(leinwand, welt) {
         r.position.set(x + 0.9 + i * 0.15, top + 1.2 + i * 0.55, z + 0.9 - i * 0.1); g.add(r); }
     }
   }
+  // Händler (1.11.): Maultierkarren über die Feldwege zu Mantua/Placentia, sonst Handelsboot vom Anleger nach Placentia
+  function haendler(S) {
+    const lam = c => new THREE.MeshLambertMaterial({ color: c });
+    for (const [id, pf] of [['placentia', nachbarFeld], ['mantua', mantuaFeld]]) {
+      if (!handelOffen(S, id)) continue;
+      const nb = nachbarn(pf).find(n => n && n.typ !== 'nachbar' && n.typ !== 'gallier' && regionKarte().includes(n) && hatWeg(S, n) && verbunden(S, n));
+      const [px, pz] = hexMitte(pf.q, pf.r), g = new THREE.Group();
+      let pts;
+      if (nb) {
+        const weg = wegPfad(S, nb); if (!weg) continue;
+        pts = weg.reverse().map(h => { const [x, z] = hexMitte(h.q, h.r); return [x, z, (HOEHE[h.typ] ?? 0.32) + 0.05]; }).concat([[px, pz, 0.35]]);
+        const wagen = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.16, 0.7), lam(0x7a5a3a)); wagen.position.y = 0.2; g.add(wagen);
+        for (const sx of [-1, 1]) { const rad = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.05, 8).rotateZ(Math.PI / 2), lam(0x3a2a1a)); rad.position.set(sx * 0.25, 0.15, 0); g.add(rad); }
+        const esel = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.26, 0.5), lam(0x8a8078)); esel.position.set(0, 0.28, 0.7); g.add(esel);
+      } else {
+        const anl = regionKarte().filter(f => ((S.land || {})[landKey(f)] || {}).betrieb === 'anleger' && verbunden(S, f))
+          .sort((a, b) => Math.hypot(...hexMitte(a.q, a.r).map((v, i) => v - [px, pz][i])) - Math.hypot(...hexMitte(b.q, b.r).map((v, i) => v - [px, pz][i])))[0];
+        if (!anl) continue;
+        const [ax, az] = hexMitte(anl.q, anl.r); pts = [[ax, az, 0.1], [px, pz + 2.2, 0.1]];
+        const rumpf = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 1.7), lam(0x5a3a22)); rumpf.position.y = 0.12; g.add(rumpf);
+        const segel = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.8, 0.7), lam(0xc8a070)); segel.position.set(0, 0.8, 0.2); g.add(segel);
+      }
+      const last = new THREE.Group();
+      [0xb0402a, 0x3f6e8c, 0xe0c464].forEach((c, i) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), lam(c)); m.position.set(-0.13 + i * 0.13, 0.36, (i - 1) * 0.15); last.add(m); });
+      g.add(last); g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+      region.g.add(g); karren.push({ g, pts, c, L: c[c.length - 1], last, ph: id.length * 2, beide: true, haendler: id });
+    }
+  }
   let karren = [], kzeit = 0, kTempo = 1;
   function karrenFahren(dt) {
     kzeit += dt;
     for (const k of karren) {
       if (k.L <= 0) continue;
-      const hin = k.L / (1.6 * kTempo), zyklus = 2 * hin + 3, t = (kzeit + k.ph) % zyklus;
-      const zurStadt = t < hin + 1.5, s = t < hin ? t * 1.6 : t < hin + 1.5 ? k.L : t < 2 * hin + 1.5 ? k.L - (t - hin - 1.5) * 1.6 : 0;
+      const v = 1.6 * kTempo, hin = k.L / v, zyklus = 2 * hin + 3, t = (kzeit + k.ph) % zyklus;
+      const zurStadt = t < hin + 1.5, s = t < hin ? t * v : t < hin + 1.5 ? k.L : t < 2 * hin + 1.5 ? k.L - (t - hin - 1.5) * v : 0;
       let i = 1; while (i < k.c.length - 1 && k.c[i] < s) i++;
       const a = k.pts[i - 1], b = k.pts[i], f = Math.min(1, (s - k.c[i - 1]) / Math.max(1e-6, k.c[i] - k.c[i - 1]));
       k.g.position.set(a[0] + (b[0] - a[0]) * f, a[2] + (b[2] - a[2]) * f, a[1] + (b[1] - a[1]) * f);
       const dir = zurStadt ? 1 : -1; k.g.rotation.y = Math.atan2((b[0] - a[0]) * dir, (b[1] - a[1]) * dir);
-      k.last.visible = zurStadt;
+      k.last.visible = zurStadt || !!k.beide;
     }
   }
 
@@ -756,5 +786,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

@@ -438,6 +438,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Späte Republik: Ölmühle, Weberei, Garum, Tempel, Theater gebaut; Olivenhain, Schäferei', sr.gebaut.length === 5 && sr.oliven && sr.schafe, JSON.stringify(sr));
   ok('Öl und Garum als Luxus, Tuch versorgt, Tempel bringt Gunst', sr.lux === 1.5 && sr.tuch && sr.tempelArbeit && sr.gunst >= 2);
+  // Händler sichtbar (1.11.): Weg nach Mantua → Maultierkarren; Anleger → Boot nach Placentia
+  const hd = await p.evaluate(() => {
+    const S = SR.S; [[1, 0], [2, -1], [3, -1], [4, -1]].forEach(([q, r]) => { S.land[q + ',' + r] = Object.assign(S.land[q + ',' + r] || { betrieb: '' }, { verm: 2, weg: true }); });
+    SR.umland(true); SR.szene.landAbgleichen(S); SR.szene.zeichnen(2, 1); const n = SR.szene.haendlerZahl(); SR.umland(false);
+    return { n, mantua: SR.sim.handelOffen(S, 'mantua'), placentia: SR.sim.handelOffen(S, 'placentia') };
+  });
+  ok('Händler fahren nach Mantua und Placentia', hd.mantua && hd.placentia && hd.n === 2, JSON.stringify(hd));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

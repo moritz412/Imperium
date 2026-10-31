@@ -179,6 +179,10 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Garum als Luxus der Equites (je +25 % Steuern), **Tempel** (3×3, 2 Priester, Unterhalt 5: Stimmung bis +12 im Umkreis 16,
       jeden Herbst Gunst +2), **Theater** (4×3, nach Tempelbau, Unterhalt 8: Stimmung +8 stadtweit). Placentia/Mantua handeln
       Wein, Öl, Tuch, Garum. Eigene Formen (Podiumstempel, Theater mit Rängen, Ölmühle, Weberei, Garum-Becken). Test 59/59.
+- [x] Händler sichtbar: Maultierkarren mit bunter Ladung über die Feldwege nach Mantua/Placentia, sonst Handelsboot vom
+      nächsten Anleger nach Placentia. Dabei behoben: Karren kamen mit Schotter-/Römerstraße nur halb ans Ziel (Tempo nur in
+      der Fahrzeit, nicht im Weg). Neues Werkzeug `dev/staedte/werkzeug/modulcheck.sh` (lädt alle Module, findet z. B. doppelte
+      Importe, die `node --check` übersieht). Test 60/60. Fahrt selbst nicht angesehen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.
