@@ -175,6 +175,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 #esch #ende h2{margin:0 0 2px;font-family:Marcellus,Georgia,serif;font-weight:normal;font-size:44px}
 #esch #ende.sieg h2{color:#8a5a0e}#esch #ende.nied h2{color:#8c2018}
 #esch #ende .u{margin:0 0 10px;font-style:italic}
+#esch #ende .best{font:italic 12px Georgia,serif;color:#8a5a0e;white-space:nowrap}
 #esch #ende .eh{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:1px dotted rgba(90,63,23,.45);text-align:left}
 #esch #ende .eh .bild{width:42px;height:56px;border-radius:5px;flex:none;border:1px solid rgba(60,40,10,.7)}
 #esch #ende .eh .t{flex:1;min-width:0}
@@ -3277,9 +3278,11 @@ function uiEnde(){
   const e=$('ende'),sieg=ergebnis==='sieg',fl=[0,0],rest=[0,0];
   for(const u of U){fl[u.side]+=u.fled||0;rest[u.side]+=u.strength;}
   let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(sieg?SEITE[1]+' weicht. '+SEITE[0]+' behauptet das Feld.':'Dein Heer ist zerschlagen.')+'</p><div class="liste">';
+  let best=null;for(const u of U)if(u.side===0&&(u.kills||0)>=3&&(!best||u.kills>best.kills))best=u;   // Zusammenfassung (31.10., R9): Abschüsse, beste Einheit
   for(const u of U){if(u.side!==0)continue;
-    h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+'</div><div class="v"><i style="width:'+(u.strength/u.np*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/u.np*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/u.np*100)+'%;background:#9c2a20"></i></div>'
-      +'<small>Rest '+u.strength+' · geflohen '+u.fled+' · gefallen '+u.gef+'</small></div></div>';}
+    h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+(u===best?' <span class="best">★ beste Einheit</span>':'')+'</div><div class="v"><i style="width:'+(u.strength/u.np*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/u.np*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/u.np*100)+'%;background:#9c2a20"></i></div>'
+      +'<small>Rest '+u.strength+' · geflohen '+u.fled+' · gefallen '+u.gef+' · Abschüsse '+(u.kills||0)+'</small></div></div>';}
+  {const g=U.find(u=>u.gen&&u.side===0);if(g){const fi=feldherrInfo(g);h+='<div class="zl" style="margin-top:6px"><span>Feldherr '+g.gname+'</span><b>'+(!fi.lebt?'gefallen':fi.verwundet?'verwundet':'unversehrt')+'</b></div>';}}
   h+='<div class="zl" style="margin-top:6px"><span>Gefallene '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+gefallen[0]+' / '+gefallen[1]+'</b></div>'
     +'<div class="zl"><span>Geflohen '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+fl[0]+' / '+fl[1]+'</b></div>'
     +'<div class="zl"><span>Auf dem Feld '+SEITE[0]+' / '+SEITE[1]+'</span><b>'+rest[0]+' / '+rest[1]+'</b></div>'
