@@ -176,7 +176,7 @@ export const SCHUTZ = {
 export const GEFAHR = {
   raeuber:    { ab: 12, chance: 0.05, monate: 3, weit: 2 },              // je ungeschütztem Betrieb ab 2 Feldern Entfernung
   hochwasser: { ab: 12, monat: 1, chance: 0.4, monate: 2 },             // Betriebe neben dem Fluss ohne Deich
-  gallier:    { ab: 24, monat: 4, chance: 0.35, monate: 4, raub: 0.25, stimmung: 10 },   // Norden, ohne Kastell
+  gallier:    { ab: 36, einwohner: 60, monat: 4, chance: 0.35, monate: 4, raub: 0.25, stimmung: 10 },   // Norden, ohne Kastell
 };
 
 // Stadtrang nach Einwohnern (Konzept „Ziele“)
@@ -241,11 +241,11 @@ export const FORSCHUNG = {
 };
 export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
 
-// Feuer und Ordnung (S3.3). Chance je Gebäude und Monat = basis × Dichte × Schutz (ab dem 2. Jahr).
+// Feuer und Ordnung (S3.3). Chance je Gebäude und Monat = basis × Dichte × Schutz (ab dem 3. Jahr; 1.11. nach Balance-Lauf gesenkt).
 // Dichte = 1 + 0,15 je Gebäude (nicht flach) im Umkreis von 3 Feldern. Feuerwache in Reichweite ×0,2, Brunnen ×0,7.
 // Ein Brand ohne Wache greift zu 25 % je Monat auf Nachbarn (bis 3,5 Felder) über und zerstört nach 3 Monaten das Gebäude.
 export const FEUER = {
-  ab: 12, basis: { huette: 0.002, casa: 0.0015, insula: 0.004, baeckerei: 0.006, ziegelei: 0.006, quartier: 0.003 }, sonst: 0.001,
+  ab: 24, basis: { huette: 0.0015, casa: 0.0012, insula: 0.003, baeckerei: 0.0045, ziegelei: 0.0045, schmiede: 0.0045, quartier: 0.002 }, sonst: 0.0008,
   dichte: 0.15, umkreis: 3, wache: 0.2, brunnen: 0.7, sommer: 1.5, ueber: 0.25, ueberWache: 0.05, nachbar: 3.5, monate: 3,
   unruhe: 6,   // Stimmungsziel − bis 6, wenn Häuser ab der Kleinstadt keine Wache in der Nähe haben
 };

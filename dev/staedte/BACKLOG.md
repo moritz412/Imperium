@@ -158,6 +158,13 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       **Römerstraße** (nach Schotterwegen: Karren ×3, Räuber halb so oft), **Aquädukt** (Brunnen 12 Felder, Brandgefahr ×0,5
       statt ×0,7), **Archiv** (Aufschlag 8 statt 15 %), **Zölle** (8 Denare je offener Handelsstraße und Monat).
       Als „kommt später“ markiert: Olivenpresse, Weberei, Garum, Tempelbau, Theater. Test 56/56, Bild angesehen.
+- [x] Balance-Lauf (`dev/staedte/werkzeug/balance_lauf.js`, fester Bauplan, 5 Spieljahre, Node ohne Grafik). Ergebnisse:
+      erste Casa nach 13 Monaten (≈ 3 min), Dorf nach 19 Monaten (≈ 5 min), ≈ 96 Einwohner im 3. Jahr; danach Hunger, weil
+      der Plan nur 2 Felder hat (Spielerentscheidung). Denare häufen sich (> 1.400 nach 5 Jahren), Holz ist der Engpass.
+      **Fehler gefunden und behoben:** Zufall per sin-Hash lieferte für Monate im Abstand 12 fast gleiche Werte → Gallier
+      fast jedes Jahr. Jetzt Ganzzahl-Mischfunktion (geprüft: 38 % bei Soll 35 %). Brände erst ab Jahr 3 und seltener
+      (−25 %), Gallier erst ab Jahr 4 und ab 60 Einwohnern; Feuermeldung nennt das Gebäude. Test 56/56.
+      Offen: Denare-Senke (z. B. Unterhalt der Gebäude, Löhne der Wache) – Vorschlag für Moritz.
 ## Plan nächste 2 Stunden (1.11., Vorschlag)
 Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
 Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt

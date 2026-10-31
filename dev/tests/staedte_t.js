@@ -233,8 +233,8 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const R2 = kopie(); R2.monat = 14; R2.land[k(fern)].turm = true; sim.monat(R2, SR.welt); const turm = R2.land[k(fern)];
     const H1 = kopie(); H1.monat = 13; const mH = sim.monat(H1, SR.welt).join(' | '); const nass = H1.land[k(aue)];
     const H2 = kopie(); H2.monat = 13; H2.land[k(aue)].deich = true; H2.land[k(aue)].turm = true; sim.monat(H2, SR.welt); const trocken = H2.land[k(aue)];
-    const G1 = kopie(); G1.monat = 28; G1.gut.getreide = 100; const mG1 = sim.monat(G1, SR.welt).join(' | ');
-    const G2 = kopie(); G2.monat = 28; G2.gut.getreide = 100; G2.land[k(hang)] = { verm: 2, betrieb: 'kastell' }; const mG2 = sim.monat(G2, SR.welt).join(' | ');
+    const G1 = kopie(); G1.monat = 40; G1.gut.getreide = 100; const mG1 = sim.monat(G1, SR.welt).join(' | ');
+    const G2 = kopie(); G2.monat = 40; G2.gut.getreide = 100; G2.land[k(hang)] = { verm: 2, betrieb: 'kastell' }; const mG2 = sim.monat(G2, SR.welt).join(' | ');
     sim.setzeZufall(null);
     // Bedienung: Wachturm per Knopf auf dem fernen Feld, Kastell auf dem Hang zählt
     S.gut.holz += 50; S.gut.ziegel += 20;
@@ -320,17 +320,17 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const ziel = S.geb.find(b => b.t === 'huette' && sim.brandGefahr(S, b) > 0);
     const nur = (extra = () => 1) => salz => salz === 5000 + ziel.id ? 0 : extra(salz);
     // ohne Wache: 1 Monat → brennt, dann abbrennen
-    const A = kopie(); A.monat = 14; A.geb = A.geb.filter(b => b.t !== 'wache');
+    const A = kopie(); A.monat = 26; A.geb = A.geb.filter(b => b.t !== 'wache');
     sim.setzeZufall(nur()); const m1 = sim.monat(A, SR.welt).join(' | ');
     const brennt = (A.geb.find(b => b.id === ziel.id) || {}).brand === 1;
     sim.setzeZufall(() => 1); for (let i = 0; i < 4; i++) sim.monat(A, SR.welt);
     const weg = !A.geb.some(b => b.id === ziel.id);
     // Übergreifen
-    const U = kopie(); U.monat = 14; U.geb = U.geb.filter(b => b.t !== 'wache');
+    const U = kopie(); U.monat = 26; U.geb = U.geb.filter(b => b.t !== 'wache');
     sim.setzeZufall(nur()); sim.monat(U, SR.welt); sim.setzeZufall(salz => salz >= 7000 ? 0 : 1); sim.monat(U, SR.welt);
     const ueber = U.geb.filter(b => b.brand > 0 && b.id !== ziel.id).length;
     // mit Feuerwache: wird gelöscht
-    const W = kopie(); W.monat = 14; W.gut.holz += 60; W.gut.ziegel += 40;
+    const W = kopie(); W.monat = 26; W.gut.holz += 60; W.gut.ziegel += 40;
     let wache = null;
     for (let r = 2; r <= 9 && !wache; r++) for (let dz = -r; dz <= r && !wache; dz++) for (let dx = -r; dx <= r && !wache; dx++) { const t = sim.bauen(W, SR.welt, 'wache', ziel.x + dx, ziel.z + dz); if (t.ok) wache = t.b; }
     if (wache) wache.prio = true;
@@ -369,7 +369,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const offen = sim.handelOffen(M, 'mantua'), plOffen = sim.handelOffen(M, 'placentia');
     M.gut.erz = 20; M.gut.denare = 500; const v = sim.handeln(M, 'erz', 'verkauf', 'mantua'), kf = sim.handeln(M, 'werkzeug', 'kauf', 'mantua');
     const G = kopie(); G.gut.brot = 100; G.gut.denare += 100; G.land = {}; const gs = sim.geschenk(G).ok, fr = G.frieden;
-    G.monat = 28; sim.setzeZufall(() => 0); const mG = sim.monat(G, SR.welt).join(' | '); sim.setzeZufall(null);
+    G.monat = 40; sim.setzeZufall(() => 0); const mG = sim.monat(G, SR.welt).join(' | '); sim.setzeZufall(null);
     const W = kopie(); W.gut.holz += 80; W.gut.ziegel += 40; W.gut.erz = 40; W.gut.werkzeug = 0; let sm = null;
     for (let z = 13; z <= 20 && !sm; z++) for (let x = 2; x <= 38 && !sm; x++) { const t = sim.bauen(W, SR.welt, 'schmiede', x, z); if (t.ok) sm = t.b; }
     if (sm) sm.prio = true;

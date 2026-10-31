@@ -540,7 +540,10 @@ let zufallFn = null;
 export const setzeZufall = f => { zufallFn = f; };   // für Tests: f(salz) → 0..1
 function wurf(S, salz) {
   if (zufallFn) return zufallFn(salz);
-  const x = Math.sin(S.monat * 12.9898 + salz * 78.233) * 43758.5453; return x - Math.floor(x);
+  // Ganzzahl-Mischfunktion (1.11.: ersetzt sin-Hash, der für Monate im Abstand 12 fast gleiche Werte lieferte)
+  let h = (Math.imul(S.monat + 1, 0x9E3779B1) ^ Math.imul(salz + 7, 0x85EBCA6B)) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x7FEB352D) >>> 0; h = Math.imul(h ^ (h >>> 15), 0x846CA68B) >>> 0; h = (h ^ (h >>> 16)) >>> 0;
+  return h / 4294967296;
 }
 const STADT = { q: 0, r: 0 };
 export const amFluss = f => f.typ !== 'fluss' && f.typ !== 'stadt' && nachbarn(f).some(n => n && n.typ === 'fluss');
@@ -578,7 +581,7 @@ function gefahren(S, meld) {
     meld.push('Hochwasser am Padus! ' + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
   }
   if (S.frieden > 0) S.frieden--;
-  else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && wurf(S, 1002) < G.gallier.chance) {
+  else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && einwohner(S) >= G.gallier.einwohner && wurf(S, 1002) < G.gallier.chance) {
     if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
     const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
@@ -783,13 +786,14 @@ function feuerMonat(S, meld) {
     }
   }
   // neue Brände (ab dem 2. Jahr)
-  let neu = 0;
-  for (const b of S.geb) if (b.neu) { delete b.neu; neu++; }
+  const neu = [];
+  for (const b of S.geb) if (b.neu) { delete b.neu; neu.push(b); }
   if (S.monat >= FEUER.ab) for (const b of S.geb) {
-    if (b.brand > 0) continue;
-    if (wurf(S, 5000 + b.id) < brandGefahr(S, b)) { b.brand = 1; neu++; }
+    if (b.brand > 0 || neu.includes(b)) continue;
+    if (wurf(S, 5000 + b.id) < brandGefahr(S, b)) { b.brand = 1; neu.push(b); }
   }
-  if (neu) meld.push(neu === 1 ? 'Feuer! Ein Gebäude brennt.' : `Feuer! ${neu} Gebäude brennen.`);
+  const nameVon = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.n : b.stufe === 2 ? CASA.n : GEB.huette.n) : GEB[b.t].n;
+  if (neu.length) meld.push(neu.length === 1 ? `Feuer! ${nameVon(neu[0])} brennt.` : `Feuer! ${neu.length} Gebäude brennen.`);
 }
 
 // ---------- Stadterweiterung (1.11.): der Senat gibt Land im Osten frei ----------
