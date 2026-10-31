@@ -1,5 +1,5 @@
 {
-"version": "v218-93ca3ec20f",
+"version": "v219-a0b2ddbf1a",
 "files": {
 "img/pk_lk.json": "1e42421565c2d897",
 "img/pk_lb.json": "3c38083e6e69af9f",
@@ -141,7 +141,7 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"proto/einheiten_kampagne.json": "b09eed23456cbead",
+"proto/einheiten_kampagne.json": "845ba3cf9ab93d60",
 "proto/figuren/k_A1_eques.json": "46048179727689bb",
 "proto/figuren/k_A1_hastatus.json": "118afd45fc5733ca",
 "proto/figuren/k_A1_legion.json": "0825a5d4ebab1b62",
@@ -165,6 +165,10 @@
 "proto/figuren/k_M1_heerbann.json": "7afec091e355f7d1",
 "proto/figuren/k_M1_huskarl.json": "38c8afefa015b181",
 "proto/figuren/k_M1_panzerreiter.json": "df26f8e4db9d4794",
+"proto/figuren/k_M2_knecht.json": "9b08e2dadfce4892",
+"proto/figuren/k_M2_langbogen.json": "93b9bd7dfe466126",
+"proto/figuren/k_M2_ritter.json": "9f0a2e6550a815ee",
+"proto/figuren/k_M2_sergeant.json": "73d0c17d4b590ef7",
 "proto/figuren/k_M3_kataphrakt.json": "ae458acbb3a4f007",
 "proto/figuren/k_M3_skutatos.json": "a861f7a511498cad",
 "proto/figuren/k_M3_thematen.json": "71add98934a6fa28",
@@ -301,6 +305,6 @@
 "proto/ton/s_wurf_1.mp3": "de7bf5abdf6cea59",
 "proto/ton/s_wurf_2.mp3": "88f739c7bad00df0",
 "proto/ton/s_wurf_3.mp3": "b315c140796b30c1",
-"index.html": "2a55814fbff4557a"
+"index.html": "56ef6776f118f6d5"
 }
 }
