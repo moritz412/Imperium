@@ -461,7 +461,7 @@ export function erzeugeSzene(leinwand, welt) {
     for (const f of region.felder) {
       const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k];
       const wegNach = hatWeg(S, f) ? nachbarn(f).map(n => n && hatWeg(S, n) ? 1 : 0).join('') : '';
-      const schl = stand + (l && l.betrieb || '') + wegNach;
+      const schl = stand + (l && l.betrieb || '') + wegNach + (l && l.turm ? 'T' : '') + (l && l.deich ? 'D' : '') + (l && l.stoer > 0 ? 'S' + l.stoerArt : '');
       const alt = landObj.get(k); if (alt && alt.schl === schl) continue;
       if (alt) region.g.remove(alt.g);
       const g = new THREE.Group(), [x, z] = hexMitte(f.q, f.r), top = HOEHE[f.typ] ?? 0.32;
@@ -476,7 +476,17 @@ export function erzeugeSzene(leinwand, welt) {
         const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: 0x9c8460 }));
         st.position.set(x + dx / 4 * ganz, top + 0.03, z + dz / 4 * ganz); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
-      if (stand === 'betrieb' && (l.betrieb === 'anleger' || l.betrieb === 'fischer')) {
+      if (l) gefahrZeichnen(g, f, l, x, z, top);
+      if (stand === 'betrieb' && l.betrieb === 'kastell') {
+        const lam = c => new THREE.MeshLambertMaterial({ color: c }), A = 1.1;
+        for (const [a, b, w, d] of [[0, -A, 2 * A, 0.2], [0, A, 2 * A, 0.2], [-A, 0, 0.2, 2 * A], [A, 0, 0.2, 2 * A]]) {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.5, d), lam(0xb8aa8c)); m.position.set(x + a, top + 0.25, z + b); g.add(m); }
+        for (const [a, b] of [[-A, -A], [A, -A], [-A, A], [A, A]]) {
+          const t = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.85, 0.4), lam(0xa89a7c)); t.position.set(x + a, top + 0.42, z + b); g.add(t); }
+        const zelt = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.35, 0.7), lam(0x9a4a2b)); zelt.position.set(x, top + 0.18, z); g.add(zelt);
+        const fahne = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.3, 0.45), lam(0xa8261f)); fahne.position.set(x + A, top + 1.15, z - A + 0.2); g.add(fahne);
+        g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      } else if (stand === 'betrieb' && (l.betrieb === 'anleger' || l.betrieb === 'fischer')) {
         const lam = c => new THREE.MeshLambertMaterial({ color: c });
         if (l.betrieb === 'anleger') {
           const steg = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 0.7), lam(0x8a6a46)); steg.position.set(x, top + 0.12, z - 0.4); g.add(steg);
@@ -513,7 +523,7 @@ export function erzeugeSzene(leinwand, welt) {
       region.g.add(g); karren.push({ g, pts, c: [0, L], L, last: ladung, ph: i * 3 });
     }
     for (const f of region.felder) {
-      const l = (S.land || {})[landKey(f)]; if (!l || !l.betrieb || l.betrieb === 'anleger') continue;
+      const l = (S.land || {})[landKey(f)]; if (!l || !l.betrieb || !Object.keys(LAND_BETRIEBE[l.betrieb].erzeugt).length) continue;
       const pf = hatWeg(S, f) && wegPfad(S, f); if (!pf) continue;
       const pts = pf.map(h => { const [x, z] = hexMitte(h.q, h.r); return [x, z, (HOEHE[h.typ] ?? 0.32) + 0.05]; });
       const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
@@ -525,6 +535,27 @@ export function erzeugeSzene(leinwand, welt) {
       const ochse = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), lam(0xb8a890)); ochse.position.set(0, 0.3, 0.85); g.add(ochse);
       g.traverse(o => { if (o.isMesh) o.castShadow = true; });
       region.g.add(g); karren.push({ g, pts, c, L: c[c.length - 1], last, ph: (f.q * 3 + f.r * 7 + 20) % 10 });
+    }
+  }
+  // Gefahren (S2.6): Wachturm, Deich zum Fluss hin, Rauch (geplündert) oder Wasser (überflutet)
+  function gefahrZeichnen(g, f, l, x, z, top) {
+    const lam = c => new THREE.MeshLambertMaterial({ color: c });
+    if (l.turm) {
+      const t = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.7, 0.5), lam(0xa89a7c)); t.position.set(x - 1.3, top + 0.85, z + 0.7); t.castShadow = true; g.add(t);
+      const d = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.45, 4).rotateY(Math.PI / 4), lam(0x9a4a2b)); d.position.set(x - 1.3, top + 1.92, z + 0.7); d.castShadow = true; g.add(d);
+    }
+    if (l.deich) nachbarn(f).forEach(n => {
+      if (!n || n.typ !== 'fluss') return;
+      const [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, L = Math.hypot(dx, dz);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(HEX * 0.95, 0.28, 0.45), lam(0x6f7f45));
+      m.position.set(x + dx / L * HEX * 0.72, top + 0.12, z + dz / L * HEX * 0.72); m.rotation.y = Math.atan2(dx, dz); m.castShadow = true; g.add(m);
+    });
+    if (l.stoer > 0 && l.stoerArt === 'hochwasser') {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(HEX * 0.85, HEX * 0.85, 0.06, 6).rotateY(Math.PI / 6), new THREE.MeshLambertMaterial({ color: 0x5e8fb0, transparent: true, opacity: 0.7 }));
+      w.position.set(x, top + 0.12, z); g.add(w);
+    } else if (l.stoer > 0) {
+      for (let i = 0; i < 4; i++) { const r = new THREE.Mesh(new THREE.SphereGeometry(0.35 + i * 0.12, 6, 4), new THREE.MeshLambertMaterial({ color: 0x3a3632, transparent: true, opacity: 0.55 - i * 0.1 }));
+        r.position.set(x + 0.9 + i * 0.15, top + 1.2 + i * 0.55, z + 0.9 - i * 0.1); g.add(r); }
     }
   }
   let karren = [], kzeit = 0;

@@ -213,6 +213,35 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Placentia: Handel erst mit Verbindung, Preise nach Angebot und Nachfrage', !handel.zu && /kein Weg/.test(handel.zuGrund) && handel.offen && handel.v && handel.plus > 0 && handel.billiger && handel.k && handel.mehrZiegel === 10 && handel.teurer && handel.erholt, JSON.stringify(handel));
   ok('Abgaben an Rom am Ende des Herbstes, Gunst steigt/sinkt', handel.mA && handel.gunstA === 58 && handel.mB && handel.gunstB === 30, JSON.stringify({ a: handel.gunstA, b: handel.gunstB }));
+  // S2.6 Gefahren (Zufall erzwungen): Räuber/Wachturm, Hochwasser/Deich, Gallier/Kastell
+  const gef = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, karte = sim.regionKarte(), k = sim.landKey, kopie = () => JSON.parse(JSON.stringify(S));
+    const fern = karte.find(f => sim.hexAbstand(f, { q: 0, r: 0 }) >= 2 && (S.land[k(f)] || {}).betrieb && !['anleger', 'kastell'].includes(S.land[k(f)].betrieb) && !sim.raeuberSchutz(S, f));
+    const aue = karte.find(f => sim.amFluss(f) && sim.betriebFuer(f));
+    S.land[k(aue)] = Object.assign(S.land[k(aue)] || {}, { verm: 2, betrieb: sim.betriebFuer(aue), weg: true });
+    const hang = karte.find(f => f.typ === 'hang');
+    sim.setzeZufall(() => 0);
+    const R1 = kopie(); R1.monat = 14; const mR = sim.monat(R1, SR.welt).join(' | '); const raub = R1.land[k(fern)];
+    const R2 = kopie(); R2.monat = 14; R2.land[k(fern)].turm = true; sim.monat(R2, SR.welt); const turm = R2.land[k(fern)];
+    const H1 = kopie(); H1.monat = 13; const mH = sim.monat(H1, SR.welt).join(' | '); const nass = H1.land[k(aue)];
+    const H2 = kopie(); H2.monat = 13; H2.land[k(aue)].deich = true; H2.land[k(aue)].turm = true; sim.monat(H2, SR.welt); const trocken = H2.land[k(aue)];
+    const G1 = kopie(); G1.monat = 28; G1.gut.getreide = 100; const mG1 = sim.monat(G1, SR.welt).join(' | ');
+    const G2 = kopie(); G2.monat = 28; G2.gut.getreide = 100; G2.land[k(hang)] = { verm: 2, betrieb: 'kastell' }; const mG2 = sim.monat(G2, SR.welt).join(' | ');
+    sim.setzeZufall(null);
+    // Bedienung: Wachturm per Knopf auf dem fernen Feld, Kastell auf dem Hang zählt
+    S.gut.holz += 50; S.gut.ziegel += 20;
+    SR.umland(true); SR.hexInfo(fern);
+    const tk = document.querySelector('#info [data-a="schutz"][data-t="turm"]'); if (tk) tk.click();
+    const ui = { knopf: !!tk, turm: !!S.land[k(fern)].turm, zeile: document.querySelector('#info').textContent.includes('Wachturm') };
+    SR.szene.landAbgleichen(S); SR.hexInfo(null); SR.umland(false);
+    return { fern: k(fern), aue: k(aue), raub: raub.stoer > 0 && raub.stoerArt, mR: /Räuber/.test(mR), turm: !(turm.stoer > 0),
+      nass: nass.stoer > 0 && nass.stoerArt, mH: /Hochwasser/.test(mH), trocken: !(trocken.stoer > 0),
+      mG1: /Gallier fallen/.test(mG1), korn: Math.round(G1.gut.getreide), kornK: Math.round(G2.gut.getreide), mG2: /Kastells/.test(mG2), ui };
+  });
+  ok('Räuber plündern ferne Betriebe, Wachturm schützt', gef.raub === 'raeuber' && gef.mR && gef.turm, JSON.stringify(gef));
+  ok('Hochwasser im Frühling, Deich schützt', gef.nass === 'hochwasser' && gef.mH && gef.trocken);
+  ok('Gallier rauben, Kastell schlägt sie zurück', gef.mG1 && gef.korn < gef.kornK - 15 && gef.mG2, JSON.stringify({ korn: gef.korn, mitKastell: gef.kornK }));
+  ok('Wachturm per Knopf gebaut', gef.ui.knopf && gef.ui.turm && gef.ui.zeile, JSON.stringify(gef.ui));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

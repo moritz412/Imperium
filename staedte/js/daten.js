@@ -72,7 +72,7 @@ export const REGION_TYPEN = {
   wald:  { n: 'Wald', farbe: 0x55703a, text: 'Eichen- und Buchenwald.', nutzen: 'Holzfällerlager' },
   lehm:  { n: 'Lehmgrund', farbe: 0x9a7650, text: 'Schwerer Lehm in der Flussaue.', nutzen: 'Lehmgrube und Ziegelei' },
   weide: { n: 'Weide', farbe: 0x86a35a, text: 'Feuchte Wiesen.', nutzen: 'Schafe und Rinder (Wolle, Leder)' },
-  hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Wein und Oliven (später erforscht)' },
+  hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Kastell gegen die Gallier, später Wein und Oliven' },
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
   nachbar: { n: 'Placentia', farbe: 0x8f9a5c, text: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.', nutzen: '' },
 };
@@ -106,6 +106,20 @@ export const LAND_BETRIEBE = {
     text: 'Fischer werfen ihre Netze im Padus aus. Fisch macht satt wie Brot.' },
   anleger:    { n: 'Anleger', auf: 'fluss', kosten: { holz: 30, ziegel: 10 }, erzeugt: {}, modell: '',
     text: 'Flussboote verbinden alle Anleger am Padus: Was einen Anleger erreicht, kommt über einen anderen in die Stadt.' },
+  kastell:    { n: 'Kastell', auf: 'hang', kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
+    text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
+};
+
+// Gefahren (S2.6). Schutzbauten als Zusatz auf vermessenem Land (wie der Feldweg)
+export const SCHUTZ = {
+  turm:  { n: 'Wachturm', kosten: { holz: 25, ziegel: 10 }, text: 'Wächter halten Räuber fern – auf diesem Feld und den Feldern daneben.' },
+  deich: { n: 'Deich', kosten: { holz: 10, lehm: 15 }, text: 'Schützt das Feld vor dem Hochwasser des Padus im Frühling.' },
+};
+// ab = erster Spielmonat, monat = Monat im Jahr (0 = erster Frühlingsmonat), chance je Gelegenheit, monate = Ausfall
+export const GEFAHR = {
+  raeuber:    { ab: 12, chance: 0.05, monate: 3, weit: 2 },              // je ungeschütztem Betrieb ab 2 Feldern Entfernung
+  hochwasser: { ab: 12, monat: 1, chance: 0.4, monate: 2 },             // Betriebe neben dem Fluss ohne Deich
+  gallier:    { ab: 24, monat: 4, chance: 0.35, monate: 4, raub: 0.25, stimmung: 10 },   // Norden, ohne Kastell
 };
 
 // Stadtrang nach Einwohnern (Konzept „Ziele“)

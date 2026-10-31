@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG, HANDEL } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -209,7 +209,11 @@ $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
-    else if (a.dataset.a === 'handel') {
+    else if (a.dataset.a === 'schutz') {
+      const r = sim.schutzBauen(S, hexWahl, a.dataset.t);
+      if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('bauen');
+      allesZeichnen(); hexInfo(hexWahl);
+    } else if (a.dataset.a === 'handel') {
       const r = sim.handeln(S, a.dataset.g, a.dataset.art);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('klick');
       allesZeichnen(); hexInfo(hexWahl);
@@ -247,7 +251,8 @@ $('#menue').addEventListener('click', e => {
       <li>Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen. Der Markt versorgt nur Häuser an seinen Straßen.</li>
       <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li>
       <li>Umland: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.</li>
-      <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li></ol>`;
+      <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li>
+      <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li></ol>`;
   }
 });
 
@@ -283,13 +288,16 @@ function hexInfo(f) {
         <button class="knopf${i ? '' : ' haupt'}" data-a="landbau" data-t="${t}">${b.n} bauen (${kostenText(b.kosten)})</button>`; }).join('')
     : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
   const verb = sim.verbunden(S, f);
-  if (stand === 'betrieb' && bt === 'anleger') lage = `<div class="lage ${verb ? 'gut' : 'warn'}">Anleger ${verb ? 'mit der Stadt verbunden' : 'noch ohne Verbindung'}</div><p>${bd.text}</p>`;
+  if (stand === 'betrieb' && bt === 'kastell') lage = `<div class="lage gut">Kastell besetzt</div><p>${bd.text}</p>`;
+  else if (stand === 'betrieb' && bt === 'anleger') lage = `<div class="lage ${verb ? 'gut' : 'warn'}">Anleger ${verb ? 'mit der Stadt verbunden' : 'noch ohne Verbindung'}</div><p>${bd.text}</p>`;
   else if (stand === 'betrieb') lage = verb
     ? `<div class="lage gut">${bd.n} arbeitet</div><div class="zeile"><span>Ertrag im Monat</span><b>${pro}${bd.ernte ? ' (Sommer)' : ''}</b></div>`
     : `<div class="lage schlecht">${bd.n} arbeitet, aber kein Weg zur Stadt</div><p>Ohne Weg kommt nichts in der Stadt an. Lege Feldwege bis zur Stadt an.</p>`;
   if ((stand === 'vermessen' || stand === 'betrieb') && !sim.hatWeg(S, f))
     lage += `<button class="knopf${stand === 'betrieb' ? ' haupt' : ''}" data-a="weg">Feldweg anlegen (${kostenText(WEG.kosten)})</button>`;
   else if (sim.hatWeg(S, f)) lage += `<div class="zeile"><span>Feldweg</span><b>${verb ? 'mit der Stadt verbunden' : 'noch nicht bis zur Stadt'}</b></div>`;
+  if (stand === 'vermessen' || stand === 'betrieb') lage += schutzInfo(f, l, bt);
+  if (l && l.stoer > 0) lage = `<div class="lage schlecht">${STOER[l.stoerArt] || 'Gestört'} – noch ${l.stoer} ${l.stoer === 1 ? 'Monat' : 'Monate'} ohne Ertrag</div>` + lage;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${weit ? weit + (weit === 1 ? ' Feld' : ' Felder') + ' von der Stadt' : 'Stadtgebiet'}</div>
     <p>${d.text}</p>
@@ -299,9 +307,26 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Gefahren (S2.6) ----------
+const STOER = { raeuber: 'Von Räubern geplündert', hochwasser: 'Vom Hochwasser überflutet', gallier: 'Von Galliern verwüstet' };
+function schutzInfo(f, l, bt) {
+  let h = '';
+  const knopf = t => `<button class="knopf" data-a="schutz" data-t="${t}">${SCHUTZ[t].n} bauen (${kostenText(SCHUTZ[t].kosten)})</button>`;
+  if (bt !== 'kastell') {
+    const nah = sim.hexAbstand(f, { q: 0, r: 0 }) < GEFAHR.raeuber.weit;
+    h += `<div class="zeile"><span>Schutz vor Räubern</span><b>${l.turm ? 'Wachturm' : nah ? 'nah an der Stadt' : sim.raeuberSchutz(S, f) ? 'bewacht' : 'ungeschützt'}</b></div>`;
+    if (!nah && !l.turm) h += knopf('turm');
+  }
+  if (sim.amFluss(f)) {
+    h += `<div class="zeile"><span>Hochwasser im Frühling</span><b>${l.deich ? 'Deich schützt' : 'gefährdet'}</b></div>`;
+    if (!l.deich) h += knopf('deich');
+  }
+  return h;
+}
 function romInfo() {
   const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
   return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
+    <div class="zeile"><span>Schutz vor Galliern</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
     <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
     <p>Wer pünktlich zahlt, gewinnt die Gunst des Senats – dann fällt auch der Lohn für Aufträge höher aus (jetzt ${Math.round(sim.lohnFaktor(S) * 100)} %).</p>`;
 }

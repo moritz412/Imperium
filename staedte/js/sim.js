@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -434,9 +434,63 @@ function landMonat(S, js, grenze, meld) {
   for (const f of regionKarte()) {
     const l = (S.land || {})[landKey(f)]; if (!l) continue;
     if (l.verm < VERMESSEN.monate) { if (++l.verm === VERMESSEN.monate) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
+    if (l.stoer > 0) { l.stoer--; continue; }   // geplündert oder überschwemmt (S2.6)
     const d = LAND_BETRIEBE[l.betrieb]; if (!d || !netz.has(landKey(f))) continue;
     const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor);
+  }
+  gefahren(S, meld);
+}
+
+// ---------- Gefahren (S2.6): Räuber, Hochwasser, Gallier ----------
+let zufallFn = null;
+export const setzeZufall = f => { zufallFn = f; };   // für Tests: f(salz) → 0..1
+function wurf(S, salz) {
+  if (zufallFn) return zufallFn(salz);
+  const x = Math.sin(S.monat * 12.9898 + salz * 78.233) * 43758.5453; return x - Math.floor(x);
+}
+const STADT = { q: 0, r: 0 };
+export const amFluss = f => f.typ !== 'fluss' && f.typ !== 'stadt' && nachbarn(f).some(n => n && n.typ === 'fluss');
+const fertig = l => l && l.verm >= VERMESSEN.monate;
+export function raeuberSchutz(S, f) {
+  if (hexAbstand(f, STADT) < GEFAHR.raeuber.weit) return true;
+  return regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; if (!fertig(l)) return false;
+    const d = hexAbstand(f, g); return (l.turm && d <= 1) || (l.betrieb === 'kastell' && d <= 2); });
+}
+export const hatKastell = S => regionKarte().some(g => { const l = (S.land || {})[landKey(g)]; return fertig(l) && l.betrieb === 'kastell'; });
+export function schutzBauen(S, f, art) {
+  const d = SCHUTZ[art], st = landStand(S, f), l = (S.land || {})[landKey(f)];
+  if (!d) return { ok: false, grund: 'Unbekannter Bau' };
+  if (st !== 'vermessen' && st !== 'betrieb') return { ok: false, grund: 'Erst vermessen' };
+  if (art === 'deich' && !amFluss(f)) return { ok: false, grund: 'Ein Deich gehört an den Fluss' };
+  if (l[art]) return { ok: false, grund: `Hier steht schon ein ${d.n}` };
+  if (!kannBezahlen(S, d.kosten)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, d.kosten).join(', ') };
+  for (const [g, n] of Object.entries(d.kosten)) S.gut[g] -= n;
+  l[art] = true;
+  return { ok: true };
+}
+function stoeren(l, art, n) { l.stoer = Math.max(l.stoer || 0, n); l.stoerArt = art; }
+function gefahren(S, meld) {
+  const m = S.monat, land = S.land || {}, salz = f => (f.q + 5) * 13 + (f.r + 5);
+  const betriebe = regionKarte().filter(f => { const l = land[landKey(f)]; return fertig(l) && l.betrieb && !['anleger', 'kastell'].includes(l.betrieb); });
+  const G = GEFAHR;
+  if (m >= G.raeuber.ab) {
+    const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance);
+    opfer.forEach(f => stoeren(land[landKey(f)], 'raeuber', G.raeuber.monate));
+    if (opfer.length) meld.push(`Räuber haben ${opfer.length === 1 ? 'einen Betrieb' : opfer.length + ' Betriebe'} im Umland geplündert. Wachtürme schützen.`);
+  }
+  if (m >= G.hochwasser.ab && m % 12 === G.hochwasser.monat && wurf(S, 1001) < G.hochwasser.chance) {
+    const nass = betriebe.filter(f => amFluss(f) && !land[landKey(f)].deich);
+    nass.forEach(f => stoeren(land[landKey(f)], 'hochwasser', G.hochwasser.monate));
+    meld.push('Hochwasser am Padus! ' + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
+  }
+  if (m >= G.gallier.ab && m % 12 === G.gallier.monat && wurf(S, 1002) < G.gallier.chance) {
+    if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
+    const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5);
+    nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
+    for (const g of ['getreide', 'holz']) S.gut[g] = (S.gut[g] || 0) * (1 - G.gallier.raub);
+    S.stimmung = Math.max(0, S.stimmung - G.gallier.stimmung);
+    meld.push(`Gallier fallen aus dem Norden ein! Sie rauben Getreide und Holz${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''}. Ein Kastell auf den Hügeln hielte sie ab.`);
   }
 }
 

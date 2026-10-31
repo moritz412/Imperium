@@ -93,7 +93,15 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       Gunst und Abgabe stehen im Fenster von Cremona im Umland. Test 36/36 (Cloud, Software-Rendering), Bild angesehen.
       Offen: keine sichtbaren Händler/Boote nach Placentia, Verträge, wandernde Händler, Balance der Preise.
       **Nicht getestet:** iPad.
-- [ ] S2.6 Gefahren: Räuber (Wachturm), Gallier (Kastell), Hochwasser im Frühling (Deich).
+- [x] S2.6 Gefahren (31.10. nachts, Cloud; `GEFAHR`/`SCHUTZ` in daten.js, Zufall fest je Monat und Feld):
+      Räuber ab dem 2. Jahr: je Monat 5 % je Betrieb ab 2 Feldern Entfernung ohne Schutz → 3 Monate kein Ertrag (Rauch).
+      Wachturm (Holz 25, Ziegel 10) schützt das Feld und die Nachbarn. Hochwasser ab dem 2. Jahr im 2. Frühlingsmonat (40 %):
+      Betriebe neben dem Padus ohne Deich (Holz 10, Lehm 15) 2 Monate überflutet. Gallier ab dem 3. Jahr im 2. Sommermonat
+      (35 %): rauben 25 % Getreide und Holz, Stimmung −10, Betriebe im Norden 4 Monate verwüstet – außer ein Kastell steht
+      (neuer Betrieb auf Hang: Holz 60, Ziegel 40, Denare 80; vertreibt auch Räuber im Umkreis 2). Feldfenster zeigt Schutz
+      und Schaden, Cremona-Fenster den Gallierschutz. Test 40/40 (Cloud, Software-Rendering, Zufall im Test erzwungen),
+      Bild angesehen. Offen: Balance (Häufigkeit), Räuber/Gallier nicht als Figuren sichtbar, Hochwasser in der Stadt selbst.
+      **Nicht getestet:** iPad.
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
