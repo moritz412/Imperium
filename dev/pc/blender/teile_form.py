@@ -119,6 +119,27 @@ def helm(art, name):
         _kugelkappe(bm, r * 1.04, 1.08, -0.02, r * 1.04, mi=0)
         _kasten(bm, Vector((0, 0.0, r + 0.03)), (0.018, 0.14, 0.06), 1)
         return _obj(name, bm, mats), r
+    if art in ("china", "kabuto", "strohhut"):   # Ostasien (31.10., Vorlagen Job 50)
+        mats = [mat("eisen_helm", *EISEN), mat("lack_schwarz", (0.04, 0.035, 0.03), 0.3, 0.45), mat("stroh", (0.55, 0.45, 0.25), 0, 0.95),
+                mat("busch_rot", (0.4, 0.04, 0.03), 0, 0.95)]
+        if art == "strohhut":   # flacher Kegel, breit
+            bmesh.ops.create_cone(bm, cap_ends=True, segments=14, radius1=r * 2.3, radius2=0.01, depth=0.12, matrix=Matrix.Translation((0, 0, 0.05)))
+            for f in bm.faces: f.material_index = 2
+        else:
+            _kugelkappe(bm, r * 1.06, 1.1, -0.035, r * 1.06, seg=12, ringe=5, mi=1 if art == "kabuto" else 0)
+            n = 10; von, bis = (-140, 140) if art == "kabuto" else (-120, 120)
+            for k in range(n):   # Nackenschutz: Kabuto ausgestellte Lamellen (shikoro), China Lamellen-Behang
+                a0 = math.radians(von + (bis - von) * k / n); a1 = math.radians(von + (bis - von) * (k + 1) / n)
+                p = lambda a, z, rr: (rr * math.sin(a), rr * 1.1 * math.cos(a), z)
+                ro = 0.19 if art == "kabuto" else 0.135
+                _platte(bm, [p(a0, -0.03, 0.123), p(a1, -0.03, 0.123), p(a1, -0.15, ro), p(a0, -0.15, ro)], 0.0, 1 if art == "kabuto" else 0)
+            if art == "china":   # Federrohr mit rotem Busch
+                _kasten(bm, Vector((0, 0, r * 1.06 + 0.03)), (0.016, 0.016, 0.06), 0)
+                _feder(bm, (0, 0, r * 1.06 + 0.06), 0.1, 0.04, 0, 3)
+            else:   # Kuwagata-artige Stirnzier (schlicht)
+                _platte(bm, [(-0.05, -0.12, 0.06), (0.05, -0.12, 0.06), (0.09, -0.13, 0.16), (-0.09, -0.13, 0.16)], 0.0, 0)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        return _obj(name, bm, mats), r
     if art in ("topf", "eisenhut", "becken"):   # Hochmittelalter (31.10., Vorlagen Job 48)
         mats = [mat("eisen_helm", *EISEN), mat("kette", (0.3, 0.3, 0.31), 0.85, 0.55), mat("sehschlitz", (0.02, 0.02, 0.02), 0, 0.9)]
         if art == "topf":   # Topfhelm: Zylinder mit flacher Platte, Sehschlitz, Kreuz
@@ -287,13 +308,13 @@ def schwert(art, name):
     """art: gladius | falcata | lang | falx | spatha. Griffmitte im Ursprung, Klinge +Z."""
     bm = bmesh.new()
     mats = [mat("klinge", (0.55, 0.56, 0.58), 0.95, 0.3), mat("griff", *HOLZ), mat("beschlag", *BRONZE)]
-    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05), "falx": (0.55, 0.05), "spatha": (0.8, 0.052)}[art]
+    L, B = {"gladius": (0.5, 0.055), "falcata": (0.47, 0.05), "lang": (0.75, 0.05), "falx": (0.55, 0.05), "spatha": (0.8, 0.052), "dao": (0.72, 0.045), "tachi": (0.75, 0.034)}[art]
     n = 4
     ringe = []
     for k in range(n + 1):
         t = k / n; z = 0.06 + t * L
         b = B * (1 - t ** 3 * 0.85) if art != "falcata" else B * (0.8 + 0.5 * math.sin(t * math.pi * 0.9)) * (1 - t ** 4)
-        x0 = -0.07 * math.sin(t * math.pi * 0.85) if art == "falcata" else 0.2 * t ** 2 if art == "falx" else 0.0   # Falcata vorn gebogen, Falx sichelartig nach innen
+        x0 = -0.07 * math.sin(t * math.pi * 0.85) if art == "falcata" else 0.2 * t ** 2 if art == "falx" else -0.06 * t ** 2 if art in ("dao", "tachi") else 0.0   # Dao/Tachi leicht gebogen   # Falcata vorn gebogen, Falx sichelartig nach innen
         if k == n:
             ringe.append([bm.verts.new((x0 + (0.02 if art == "falcata" else 0), 0, z + 0.04))]); continue
         ringe.append([bm.verts.new(p) for p in ((x0 - b / 2, 0, z), (x0, -0.006, z), (x0 + b / 2, 0, z), (x0, 0.006, z))])
@@ -314,6 +335,9 @@ def schwert(art, name):
         _kasten(bm, Vector((0.03, 0, -0.085)), (0.07, 0.015, 0.025), 2, Matrix.Rotation(math.radians(35), 3, "Y"))  # Hakengriff
     elif art == "falx":
         _kasten(bm, Vector((0, 0, -0.12)), (0.03, 0.03, 0.3), 1)        # langer Griff (zweihändig)
+    elif art in ("dao", "tachi"):   # Ostasien: runde Scheibenparierstange (tsuba), langer Griff
+        _kasten(bm, Vector((0, 0, 0.045)), (0.07, 0.07, 0.008), 2)
+        _kasten(bm, Vector((0, 0, -0.06)), (0.03, 0.026, 0.2 if art == "tachi" else 0.12), 1)
     elif art == "spatha":   # Frühmittelalter: kurze Eisen-Parierstange, gelappter Knauf
         _kasten(bm, Vector((0, 0, 0.045)), (0.11, 0.028, 0.02), 0)
         _kasten(bm, Vector((0, 0, -0.085)), (0.06, 0.03, 0.035), 2)

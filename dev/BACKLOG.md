@@ -1,5 +1,11 @@
 # Backlog – Imperium der Epochen 2 (Stand 29.10.2026 morgens, v215 veröffentlicht)
 
+## ZUERST (Stand 31.10. 20:30, NICHT veröffentlicht – letzte Version v232)
+- dev enthält zusätzlich: Triarius-Figur mit Hasta (Moritz: Speerträger Roms hielten ein Schwert), 8 Ostasien-Figuren (China/Japan Ep. 1–2, Zuordnung per EIGEN), Paletten chinesisch/japanisch, OFF_VER v221.
+- BLOCKER: eschlacht_integ_t.js hängt beim Rückzug in der Aufstellung (2× Klick auf #bRueck → keine Wirkung, Knopftext bleibt „Rückzug“, keine Seitenfehler; Lauf 1).
+  Bis v232 lief der Test 24/24. Danach geändert: eschAufstellen (Artillerie hinter der Linie), FAEH/ECHT_PAKET/FERN_PAKET/KFARB-Einträge, neue Pakete. Erst klären, dann v233.
+- Rom verlor im e1-Test 3/3 nach Triarius-Umstellung (Einzelläufe) → Balance beobachten.
+
 ## SCHLACHT-PLAN 31.10. (Figuren, Farben, Ideen aus Rome-II-Spielmechanik)
 Stand Figuren: 18 Soldaten-Kits + Pferd + Elefant. Kampagnenprofile 333: Antike 53 von 55 mit eigener Figur, Epoche 1–4 (278 Profile) nur Rückfall auf Antike-Kits.
 Kein GPU-Auftrag für spätere Epochen vorhanden (Jobs 44/45 = nur Antike-Vorlagen).

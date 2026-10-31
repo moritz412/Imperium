@@ -8,6 +8,7 @@ const SHEET = html.match(/U_SHEET=\[([^\]]*)\]/)[1].split(',').map(s => s.trim()
 
 // Vorhandene Figurenpakete (dev/proto/figuren/k_<id>.json) und welche Kit-Familie bzw. Rolle sie vertreten dürfen
 const PAKETE = {
+  A1_triarius: { familien: ['A1_roemisch_manipel'], rollen: ['spear'] },   // 31.10.: Speerträger Roms mit Hasta statt Gladius
   A1_hastatus: { familien: ['A1_roemisch_manipel'], rollen: ['sword', 'spear'] },
   A1_veles: { familien: ['A1_roemisch_manipel'], rollen: ['missile'] },
   A2_libysch: { familien: ['A2_punisch_libysch'], rollen: ['spear'] },
@@ -39,6 +40,10 @@ const ROLLE_RUECKFALL = { spear: 'A2_libysch', sword: 'A1_hastatus', missile: 'A
 const EIGEN = { phalanx: 'A7_phalangit', hoplit: 'A7_hoplit', basis_hellen_e0_spear: 'A7_hoplit', bogen: 'A7_toxotes', basis_hellen_e0_missile: 'A7_toxotes', speerw: 'A6_plaenkler',
   legion: 'A1_legion', evocati: 'A1_legion', soldurii: 'A6_adlig', galater: 'A6_adlig', falx: 'A6_falx', nubbow: 'A8_nubisch', habbog: 'A8_nubisch', aksumsp: 'A8_aksum',
   armbr: 'M2_armbrust', balestr: 'M2_armbrust' };   // Armbrustschützen (31.10.)
+// Ostasien Epoche 1–2 (31.10.): China (Song) und Japan (Kamakura)
+for (const e of [1, 2]) Object.assign(EIGEN, {
+  ['basis_china_e' + e + '_spear']: 'O1_cn_speer', ['basis_china_e' + e + '_sword']: 'O1_cn_dao', ['basis_china_e' + e + '_missile']: 'O1_cn_armbrust', ['basis_china_e' + e + '_cav']: 'O1_cn_reiter',
+  ['basis_japan_e' + e + '_spear']: 'O1_jp_speer', ['basis_japan_e' + e + '_sword']: 'O1_jp_tachi', ['basis_japan_e' + e + '_missile']: 'O1_jp_bogen', ['basis_japan_e' + e + '_cav']: 'O1_jp_reiter' });   // Armbrustschützen (31.10.)
 function paketFuer(kit, rolle, id) {
   if (EIGEN[id]) return { paket: EIGEN[id], genau: true };
   for (const [id, p] of Object.entries(PAKETE)) if (p.familien.includes(kit) && p.rollen.includes(rolle)) return { paket: id, genau: true };

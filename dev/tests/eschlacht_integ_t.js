@@ -11,7 +11,7 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   const t0 = Date.now(); const R = []; const ok = (n, c, i = '') => { R.push(!!c); console.log((c ? 'PASS ' : 'FAIL ') + n + (i ? '  ' + i : '')); };
   const b = await chromium.launch({ executablePath: process.env.PW_CHROMIUM || undefined, args: process.env.PW_GPU ? [] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const ctx = await b.newContext({ viewport: { width: 1194, height: 834 }, deviceScaleFactor: 1 });
-  const p = await ctx.newPage(); const errs = [];
+  const p = await ctx.newPage(); const errs = globalThis.__errs = [];
   p.on('pageerror', e => errs.push('PAGE ' + e.message + ' @ ' + String(e.stack).split('\n').slice(1, 4).map(x => x.trim().replace(/^at /, '')).join(' < ')));
   p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource|WebGL|GPU stall/.test(m.text())) errs.push('CON ' + m.text().slice(0, 200)); });
   await p.addInitScript(() => { try { localStorage.setItem('imperium.gfx', JSON.stringify({ q: 'leicht' })); } catch (e) {} });
@@ -156,4 +156,4 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 5).join(' | '));
   console.log(`ESCH-INTEG ${R.filter(Boolean).length}/${R.length} in ${Math.round((Date.now() - t0) / 1000)} s`);
   await b.close();
-})().catch(e => { console.error('ABBRUCH', e.message); process.exit(1); });
+})().catch(e => { console.error('ABBRUCH', e.message); try { console.error('SEITENFEHLER', JSON.stringify(globalThis.__errs || [])); } catch (x) {} process.exit(1); });

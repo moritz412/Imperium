@@ -350,7 +350,7 @@ const ECHT_FERN={
   bolzen:{typ:'bolzen',reich:220,nachl:[8,10],vorrat:4,schaden:4.5,moral:1,clip:'bogen',wurfT:.72,v:70,weich:0,rueck:0,streu:.3,schildW:.25,durch:true},   // Torsionsgeschütz (R6, 31.10.): Bolzen, Schild hilft wenig, trifft ggf. noch einen Nachbarn
   stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
 };
-const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil',M2_langbogen:'pfeil',M2_armbrust:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
+const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil',M2_langbogen:'pfeil',M2_armbrust:'pfeil',O1_cn_armbrust:'pfeil',O1_jp_bogen:'pfeil',O1_jp_reiter:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
 const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss von vorn abzuwehren · bloss = ungeschützt (Steine ×1,6)
   A1_hastatus:{schild:.55},A1_veles:{schild:.4},A2_libysch:{schild:.45},A3_iberisch:{schild:.45},
   A4_balearisch:{schild:0,bloss:true},A6_keltisch:{schild:.35,bloss:true},A7_hellenistisch:{schild:.5},
@@ -358,13 +358,16 @@ const ECHT_PAKET={   // Ausrüstung der Figuren: schild = Chance, ein Geschoss v
   A1_legion:{schild:.6},A6_adlig:{schild:.45},A6_falx:{schild:0,bloss:true},A8_nubisch:{schild:0,bloss:true},A8_aksum:{schild:.4},
   M1_heerbann:{schild:.5},M1_huskarl:{schild:.55},M1_bogen:{schild:0,bloss:true},M1_panzerreiter:{schild:.45},   // Frühmittelalter (31.10.)
   M3_skutatos:{schild:.55},M3_thematen:{schild:.5},M3_toxotes:{schild:0},M3_kataphrakt:{schild:.4},
-  M2_ritter:{schild:.5},M2_sergeant:{schild:.55},M2_knecht:{schild:.55},M2_langbogen:{schild:0},M2_armbrust:{schild:0},   // Hochmittelalter (31.10.)
+  M2_ritter:{schild:.5},M2_sergeant:{schild:.55},M2_knecht:{schild:.55},M2_langbogen:{schild:0},M2_armbrust:{schild:0},
+  A1_triarius:{schild:.55},O1_cn_speer:{schild:.5},O1_cn_dao:{schild:.45},O1_cn_armbrust:{schild:0,bloss:true},O1_cn_reiter:{schild:.35},   // Triarier, Ostasien (31.10.)
+  O1_jp_speer:{schild:0},O1_jp_tachi:{schild:0},O1_jp_bogen:{schild:0},O1_jp_reiter:{schild:0},   // Hochmittelalter (31.10.)
 };
 /* Fähigkeiten (31.10., R1): je Paket höchstens zwei; ein Knopf „Fähigkeit“ schaltet sie. Schildkröte/Schildwall/Keil sind An/Aus-Haltungen, die Wurfsalve gibt es einmal je Schlacht.
    Schildkröte: Fernschaden ×0,25 (von allen Seiten, Schilde auch oben), Tempo ×0,4, Angriff ×0,8, enger Verband · Keil (nur berittene Schwerreiter): Ansturm ×1,25, Abwehr ×0,85
    Schildwall: Abwehr ×1,2 von vorn, Reiteransturm von vorn ×0,5 (31.10. abgeschwächt), kein Laufen · Wurfsalve: eine Pilum-Salve je Mann auf die nächste Einheit in 32 m (wie Plänkler-Speere) */
 const FAEH={A1_hastatus:['schildkroete','salve'],A1_legion:['schildkroete','salve'],A1_eques:['keil'],A6_adlig:['keil'],A7_hoplit:['schildwall'],A7_phalangit:['schildwall'],A2_libysch:['schildwall'],
-  M1_heerbann:['schildwall'],M3_skutatos:['schildwall'],M1_panzerreiter:['keil'],M3_kataphrakt:['keil'],M2_sergeant:['schildwall'],M2_ritter:['keil']};
+  M1_heerbann:['schildwall'],M3_skutatos:['schildwall'],M1_panzerreiter:['keil'],M3_kataphrakt:['keil'],M2_sergeant:['schildwall'],M2_ritter:['keil'],
+  A1_triarius:['schildwall'],O1_cn_speer:['schildwall'],O1_cn_reiter:['keil']};
 const FAEH_KURZ={schildkroete:'Testudo',schildwall:'Wall'};
 const FAEH_NAME={schildkroete:'Schildkröte',keil:'Keil',schildwall:'Schildwall',salve:'Wurfsalve'};
 const FAEH_TEXT={
@@ -1610,6 +1613,7 @@ const KFARB={
   berber:{s:[[206,196,172],[150,116,76]],h:[[150,110,70]]},
   aegyptisch:{s:[[226,218,200]],h:[[202,192,162],[150,110,60]]},
   semitisch:{s:[[206,196,172],[150,46,40],[62,62,110]],h:[[160,122,62]]},
+  chinesisch:{s:[[122,32,26],[96,28,22],[58,50,44]],h:[[150,112,52],[122,34,26]]},japanisch:{s:[[42,54,98],[112,32,26],[50,48,46]],h:[[60,50,40]]},   // Lack und Schnürung (31.10.)
   habescha:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]},afrikanisch:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]}};
 for(const k in KFARB){const F=KFARB[k];for(const t of['s','h'])F[t+'i']=F[t].map(c=>{UPAL.value.push(new THREE.Vector3(...c.map(v=>Math.pow(v/255,2.2))));return UPAL.value.length-1;});}   // Palette (linear) für den Figuren-Shader
 KFARB.nordisch=KFARB.slawisch=KFARB.germanisch;KFARB.britisch=KFARB.thrakisch=KFARB.keltisch;   // verwandte Kulturen (Frühmittelalter)
