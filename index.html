@@ -2131,13 +2131,14 @@ const ECHT_ROLLE={   // Echtzeit-Grundwerte je Kampagnenrolle (Gehen/Laufen in m
   sword:{atk:11,def:10,hp:3,mor:62,walk:1.35,run:3.8,ans:1.1,sym:'schwert'},
   missile:{atk:6,def:6,hp:2.5,mor:55,walk:1.4,run:4.0,ans:.8,sym:'wurfspeer'},
   cav:{atk:12,def:9,hp:4.5,mor:70,walk:2,run:8,ans:1.8,sym:'reiter'},
-  art:{atk:4,def:4,hp:2,mor:50,walk:1,run:2,ans:0,sym:'schwert'},
+  art:{atk:3,def:3,hp:2,mor:50,walk:.6,run:.7,ans:0,sym:'schwert'},   // Geschütz (R6): langsam, kein Laufen, Bedienung wehrt sich schwach
 };
 /* Waffenarten des Fernkampfs (reich m · nachl [min,max] s · vorrat je Mann · schaden · moral = Zusatzabzug je Treffer · wurfT Zeitpunkt des Abwurfs im Clip
    · v Fluggeschwindigkeit m/s · weich = Plänkler weicht, wenn Nahkämpfer näher als m · rueck = so weit weicht er zurück) */
 const ECHT_FERN={
   speer:{typ:'speer',reich:30,nachl:[4,6],vorrat:5,schaden:1.6,moral:.5,clip:'speerwurf',wurfT:.55,v:24,weich:14,rueck:22},
   pfeil:{typ:'pfeil',reich:110,nachl:[3,4.5],vorrat:20,schaden:1.0,moral:.3,clip:'bogen',wurfT:.72,v:55,weich:20,rueck:30},   // Kompositbogen (E2, 30.10.)
+  bolzen:{typ:'bolzen',reich:220,nachl:[8,10],vorrat:4,schaden:4.5,moral:1,clip:'bogen',wurfT:.72,v:70,weich:0,rueck:0,streu:.3,schildW:.25,durch:true},   // Torsionsgeschütz (R6, 31.10.): Bolzen, Schild hilft wenig, trifft ggf. noch einen Nachbarn
   stein:{typ:'stein',reich:70,nachl:[2.5,4],vorrat:25,schaden:.8,ungeschuetzt:1.6,clip:'schleuder',wurfT:.65,v:40,weich:24,rueck:34},
 };
 const FERN_PAKET={A1_veles:'speer',A4_balearisch:'stein',A7_toxotes:'pfeil',A6_plaenkler:'speer',A8_nubisch:'pfeil',M1_bogen:'pfeil',M3_toxotes:'pfeil',M2_langbogen:'pfeil',M2_armbrust:'pfeil'};   // Pakete mit Fern-Clip; andere Fernkämpfer bekommen A1_veles
@@ -2194,13 +2195,17 @@ function schlachtEinheit(e){
   // Figurenpaket (Fernkämpfer brauchen ein Paket mit Wurf-Clips)
   let pak=P.paket,genau=P.paketGenau!==false;
   if(rolle==='missile'&&!FERN_PAKET[pak]){pak='A1_veles';genau=false;}
+  const art=rolle==='art',artN=art?Math.max(2,Math.min(5,Math.round((e.mann!=null?e.mann|0:R0.men*(M.men||1))/10))):0;   // R6: je 10 Mann ein Geschütz (2 bis 5), je Geschütz 3 Mann Bedienung (Figurenpaket Velites)
+  if(art){pak='A1_veles';genau=false;}
   const ele=rolle==='cav'&&P.reittier==='E_elefant';   // Kriegselefant: Treiber (Reiterpaket) auf dem Reittier E_elefant
-  const PK=ele?{schild:0}:(ECHT_PAKET[pak]||{schild:.4});
+  const PK=ele?{schild:0}:art?{schild:.2}:(ECHT_PAKET[pak]||{schild:.4});
   let fern=null;
   const reit=rolle==='cav';
   if(rolle==='missile'){
     const W=ECHT_FERN[FERN_PAKET[pak]];
     fern=Object.assign({},W,{reich:W.reich*(B.range||1),schaden:W.schaden*(B.ratk||1),vorrat:Math.max(1,Math.round(W.vorrat*(B.ammo||1)))});
+  }else if(art){
+    fern=Object.assign({},ECHT_FERN.bolzen,{reich:ECHT_FERN.bolzen.reich*(B.range||1)});
   }else if(reit&&B.range&&pak==='A2_numidisch'){   // Reiter-Plänkler (Numider): Wurfspeere vom Pferd, weichen früher und weiter aus als Fußplänkler
     const W=ECHT_FERN.speer;
     fern=Object.assign({},W,{clip:'wurf_reiter',reich:W.reich*B.range,schaden:W.schaden*(B.ratk||1),vorrat:Math.max(1,Math.round(W.vorrat*(B.ammo||1))),weich:22,rueck:45});
@@ -2209,10 +2214,11 @@ function schlachtEinheit(e){
   const kap=(v,g)=>Math.min(v,g*1.6);
   const werte={atk:kap(G.atk*sq*(B.atk||1)*atkM,G.atk),def:kap(G.def*sq*(B.def||1)*defM,G.def),mor:Math.min(90,G.mor+2*(B.mor||0)+RG.m),hp:ele?G.hp*4:G.hp,
     walk:G.walk*spd,run:ele?Math.min(G.run*spd,5.5):G.run*spd,ans:G.ans*(B.chg||1),pike:B.pike||0,skirm:B.skirm?1:(rolle==='missile'?1:0),
-    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sar:rolle==='spear'&&!ele&&pak==='A7_phalangit',sym:ele?'elefant':reit?G.sym:fern?(fern.typ==='stein'?'schleuder':fern.typ==='pfeil'?'bogen':'wurfspeer'):G.sym,fern,pakId:pak,
+    schild:PK.schild,bloss:!!PK.bloss,speer:rolle==='spear',sar:rolle==='spear'&&!ele&&pak==='A7_phalangit',sym:ele?'elefant':reit?G.sym:fern?(fern.typ==='stein'?'schleuder':fern.typ==='pfeil'?'bogen':'wurfspeer'):G.sym,fern,art:art?{guns:artN,crew:3}:null,pakId:pak,
     reit,ele,lanze:reit&&!ele&&pak!=='A2_numidisch',rg:ele?3.0:reit?2.1:rolle==='spear'?(B.pike?1.9:1.7):1.6,reach:ele?2.4:reit?1.7:rolle==='spear'?(B.pike?1.35:1.2):1.1};   // Speerlänge: nur wenig weiter als das Schwert (war 2,0/1,45; schon 0,1 m mehr Schlagweite entschied Paargefechte)   // reit = Reiter (Pferd + Reiter je Figur) · lanze = Ansturm mit gesenkter Lanze · rg Schlagweite · reach Standabstand
   const f=[];
-  if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':fern.typ==='pfeil'?'Bogenschützen: größte Reichweite':'Wurfspeere: kurze Reichweite');
+  if(art){f.push('Geschütze: größte Reichweite, lange Nachladezeit, durchschlagender Bolzen');f.push('Sehr langsam; die Bedienung wehrt sich im Nahkampf kaum');}
+  else if(fern)f.push(fern.typ==='stein'?'Schleuderer: große Reichweite':fern.typ==='pfeil'?'Bogenschützen: größte Reichweite':'Wurfspeere: kurze Reichweite');
   if(B.skirm)f.push('Plänkeln: weicht dem Nahkampf aus');else if(rolle==='missile')f.push('Plänkeln (Fernkämpfer weichen aus)');
   if(B.pike)f.push('Pike: Abwehr ×1,5 gegen Ansturm von vorn');
   if(ele){f.push('Kriegselefanten: trampeln Gegner nieder, Fußvolk fürchtet sie, Pferde scheuen');f.push('Sehr zäh, aber gegen Wurfspeere und Pfeile verwundbar; einzelne Tiere können in Panik geraten');}
@@ -2223,7 +2229,7 @@ function schlachtEinheit(e){
   const mann=e.mann!=null?e.mann|0:Math.round(R0.men*(M.men||1));
   const bild=P.sheet>=0?{typ:'sheet',sheet:P.sheet}:{typ:'ui',key:'u_e'+ue+'_'+rolle};
   return{id:pid,name:P.n+(tier?' (Veteranen)':''),rolle,epoche:ep,ausruestungEpoche:ue,kit:P.kit,paket:pak,paketGenau:genau,reittier:ele?'E_elefant':null,
-    figuren:Math.max(4,Math.min(ele?10:60,Math.round(mann/3))),mann,bild,str,q,werte,faehigkeiten:f,beschreibung:V?V.d:'',
+    figuren:art?artN*3:Math.max(4,Math.min(ele?10:60,Math.round(mann/3))),mann,bild,str,q,werte,faehigkeiten:f,beschreibung:V?V.d:'',
     waffen:wpn,ruestung:arm,tier,rang:rk,rangName:RG.n,sondereinheit:!!V};
 }
 function EP_STR(ue,rolle){return KAMP.EPOCH_STR[ue]*(rolle==='missile'?KAMP.FERN_EPOCHE[ue]:1);}
@@ -2956,8 +2962,8 @@ function vegInfo(){   // Dreiecke je Art/Stufe und aktuelle Instanzzahlen
 }
 
 /* ---- Feste Umgebungsteile (30.10.): Felsen, Gehöft oder Rundhäuser, Zäune, Mauern, Heu. Teile aus figuren/umgebung.json (ein Fetch), je Teil ein InstancedMesh mit Vertexfarben.
-   Platzierung je Gefecht deterministisch (Saat aus dem Gefecht). Hindernisse sind Kreise (x,z,r), aus denen Soldaten herausgeschoben werden; Gras und Bäume weichen den Gebäuden. Die Balliste wird nicht verteilt. ---- */
-const UMW={},UMCAP={fels_gross:10,fels_mittel:24,fels_klein:48,fels_platte:12,haus_mittelmeer:2,rundhaus_kelt:4,flechtzaun:24,steinmauer:12,heuhaufen:8};
+   Platzierung je Gefecht deterministisch (Saat aus dem Gefecht). Hindernisse sind Kreise (x,z,r), aus denen Soldaten herausgeschoben werden; Gras und Bäume weichen den Gebäuden. Die Balliste wird nicht verteilt, sondern von den Geschützeinheiten gezeichnet (baueGeschuetze). ---- */
+const UMW={},UMCAP={fels_gross:10,fels_mittel:24,fels_klein:48,fels_platte:12,haus_mittelmeer:2,rundhaus_kelt:4,flechtzaun:24,steinmauer:12,heuhaufen:8,balliste:24};
 let UMD=null,UMFETCH=false;
 const HIND=[],HIW=Math.ceil(2*HX/8)+2,HIH=Math.ceil(2*HZ/8)+2,HGR=new Array(HIW*HIH).fill(null);   // Hindernisliste und 8-m-Raster
 let HN=0,_hx=0,_hz=0;
@@ -2970,7 +2976,6 @@ async function umgebungLaden(){
   const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.95,metalness:0});GMATS.push(mat);
   const MOOSK=GKL==='schnee'?[.72,.76,.82]:GKL==='steppe'?[.3,.25,.12]:GKL==='wueste'?[.5,.4,.22]:null;
   for(const name in UMD.teile){
-    if(name==='balliste')continue;
     const t=UMD.teile[name],n=t.pos.length/3,C=new Float32Array(n*3);
     let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;
     for(let k=0;k<n;k++){
@@ -3423,8 +3428,8 @@ function einheitenAnlegen(){
   NU=ROSTER.length;NA=NU*PRO;
   ROSTER.forEach((r,i)=>{
     const K=wetterWerte((BD&&r.s===1)?Object.assign({},r.werte,{atk:r.werte.atk*BD.am,def:r.werte.def*BD.am,mor:Math.max(20,Math.min(98,r.werte.mor+BD.mor))}):r.werte),np=r.figuren,side=r.s;
-    const u={i,side,name:r.anzeige,def:K,ein:r,np,tief:Math.ceil(np/(K.ele?5:BREIT)),br:K.ele?5:BREIT,ele:!!K.ele,mk:K.ele?EFK:PFK,mh:K.ele?2.45:.62,mf:K.ele?1.05:-.05,scheu:0,trumT:0,panikN:0,panikCool:0,panikGes:0,ai:K.reit?'reit':K.ans>=1.6?'sturm':K.speer?'linie':r.rolle==='sword'?'spaet':'linie',
-      reit:!!K.reit,abx:K.ele?4.2:K.reit?1.6:ABST,abz:K.ele?6.4:K.reit?3.0:ABST,rx:K.ele?(Math.min(np,5)-1)*2.1+4.2:K.reit?(Math.min(np,BREIT)-1)*.8+2.6:7.4,rz:K.ele?(Math.ceil(np/5)-1)*3.2+5.2:K.reit?(Math.ceil(np/BREIT)-1)*1.5+3.2:4.4,nahT:0,loesen:false,sammelT:0,reitW:null,chF:-1,
+    const u={i,side,name:r.anzeige,def:K,ein:r,np,art:K.art||null,tief:K.art?1:Math.ceil(np/(K.ele?5:BREIT)),br:K.art?np:K.ele?5:BREIT,ele:!!K.ele,mk:K.ele?EFK:PFK,mh:K.ele?2.45:.62,mf:K.ele?1.05:-.05,scheu:0,trumT:0,panikN:0,panikCool:0,panikGes:0,ai:K.reit?'reit':K.ans>=1.6?'sturm':K.speer?'linie':r.rolle==='sword'?'spaet':'linie',
+      reit:!!K.reit,abx:K.ele?4.2:K.reit?1.6:ABST,abz:K.ele?6.4:K.reit?3.0:ABST,rx:K.art?(K.art.guns-1)*ART_ABST/2+4:K.ele?(Math.min(np,5)-1)*2.1+4.2:K.reit?(Math.min(np,BREIT)-1)*.8+2.6:7.4,rz:K.art?5:K.ele?(Math.ceil(np/5)-1)*3.2+5.2:K.reit?(Math.ceil(np/BREIT)-1)*1.5+3.2:4.4,nahT:0,loesen:false,sammelT:0,reitW:null,chF:-1,
       strength:np,morale:K.mor,state:'steht',
       cx:r.x,cz:r.z,f:side===0?0:PI,destX:0,destZ:0,hasDest:false,run:false,atkT:-1,stance:side===0?'halten':'angreifen',
       occ:new Int16Array(PRO).fill(-1),charge:0,runT:0,engaged:false,kT:0,sperre:0,kontakt:false,nahF:false,foeU:-1,curSpeed:0,aiT:Math.random()*.5,
@@ -3455,7 +3460,12 @@ function reserveWaehlen(){   // Sehr schwer: letzte Fußeinheit der KI (bei mind
   const L=U.filter(u=>u.side===1&&!u.def.reit&&!u.fern&&!u.ank);if(L.length>=4)L[L.length-1].reserve=true;
 }
 let _tx=0,_tz=0;
+const ART_ABST=8;   // Abstand der Geschütze (m)
 function slotPos(u,s,id){   // Weltposition des Platzes s -> _tx,_tz ; lockert sich beim Marsch (u.loose 0..1)
+  if(u.art){   // Geschützmannschaft (R6): Geschütz g in der Reihe, Richtschütze (k=0) hinter dem Rohr, zwei Helfer seitlich
+    const c=u.art.crew,g=(s/c)|0,k=s%c,x0=(g-(u.art.guns-1)/2)*ART_ABST+(k===0?0:k===1?-1.7:1.7),z0=k===0?-2.6:-1.1,cs=Math.cos(u.f),sn=Math.sin(u.f);
+    const lx=x0+sJX[id],lz=z0+sJZ[id];_tx=u.cx+lx*cs+lz*sn;_tz=u.cz-lx*sn+lz*cs;return;
+  }
   const br=u.br,col=s%br,row=(s/br)|0,L=u.loose;
   const fk=u.fk;
   const lx=(col-(br-1)/2)*u.abx*fk*(1+.10*L)+((row&1)?.3:-.3)+sJX[id];
@@ -3804,6 +3814,11 @@ function fernZiel(u){   // Ziel-Einheit u.fZ : befohlene, sonst nächste in Reic
   let bd=R;
   for(const v of U){if(v.side===u.side||gone(v)||v.sn<=0||v.vers)continue;const d=Math.hypot(v.mx-u.mx,v.mz-u.mz);if(d<bd){bd=d;u.fZ=v.i;}}
 }
+function artSchuetze(u,i){   // Geschütz: nur der erste lebende, nicht fliehende Mann der Bedienung schießt
+  const c=u.art.crew,b=((sSlot[i]/c)|0)*c;
+  for(let k=0;k<c;k++){const id=u.occ[b+k];if(id>=0&&sSt[id]<=S_KAMPF)return id===i;}
+  return false;
+}
 function wurfStart(i,u){
   const F=u.def.fern||SALVE_F,T=U[u.fZ];
   if(sVX[i]*sVX[i]+sVZ[i]*sVZ[i]>.25){sCool[i]=.3;return;}   // nur im Stehen
@@ -3820,11 +3835,11 @@ function wurfStart(i,u){
 function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst mit der Entfernung
   const u=U[sUnit[i]],F=u.def.fern||(u.salveT>0?SALVE_F:null);if(!F||sAmmo[i]<=0)return;
   sAmmo[i]--;
-  const k=F.typ==='stein'?1:0,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;gSk[q]=F.typ==='pfeil'?.55:1;
+  const k=F.typ==='stein'?1:0,q=k*GN+gHead[k];gHead[k]=(gHead[k]+1)%GN;gSk[q]=F.typ==='pfeil'?.55:F.typ==='bolzen'?1.6:1;
   if(gA[q]===1)G.fliegend--;
-  const fx=Math.sin(sR[i]),fz=Math.cos(sR[i]),ox=sX[i]+fx*.35,oz=sZ[i]+fz*.35,oy=H(sX[i],sZ[i])+1.65+(sRt[i]?.75:0);
+  const fx=Math.sin(sR[i]),fz=Math.cos(sR[i]),ov=u.art?3.4:.35,ox=sX[i]+fx*ov,oz=sZ[i]+fz*ov,oy=H(sX[i],sZ[i])+(u.art?1.25:1.65+(sRt[i]?.75:0));
   const d=Math.hypot(sAX[i]-ox,sAZ[i]-oz),T=Math.max(.35,d/F.v);
-  const sg=STREU0+STREU1*d,a=Math.random()*TAU,r=sg*Math.sqrt(Math.random());
+  const sg=(STREU0+STREU1*d)*(F.streu||1),a=Math.random()*TAU,r=sg*Math.sqrt(Math.random());
   const tx=sAX[i]+Math.cos(a)*r,tz=sAZ[i]+Math.sin(a)*r,ty=H(tx,tz)+.9;
   const o3=q*3;gO[o3]=ox;gO[o3+1]=oy;gO[o3+2]=oz;
   gV[o3]=(tx-ox)/T;gV[o3+1]=(ty-oy)/T+.5*GRAV*T;gV[o3+2]=(tz-oz)/T;
@@ -3832,6 +3847,18 @@ function abwurf(i){   // Geschoss startet: ballistische Bahn, Streuung wächst m
   if(u.fZ>=0){const V=U[u.fZ];V.beschuss=Math.max(V.beschuss,T+.8);}
   G.gesamt++;G.fliegend++;if(k)G.steine++;else if(F.typ==='pfeil')G.pfeile=(G.pfeile||0)+1;else G.speere++;
   u.schiessT=1.3;ereignis(k?'schleuder':F.typ==='pfeil'?'pfeil':'wurf',sX[i],sZ[i]);
+}
+function durchTreffer(j,nx,nz,u0,F){   // zweiter Mann in der Schusslinie hinter j (R6)
+  let b=-1,bd=9;const cx=((sX[j]-GX0)/ZELLE)|0,cz=((sZ[j]-GZ0)/ZELLE)|0;
+  for(let gz=Math.max(0,cz-1);gz<=Math.min(GH-1,cz+1);gz++)for(let gx=Math.max(0,cx-1);gx<=Math.min(GW-1,cx+1);gx++)
+    for(let m=cHead[gz*GW+gx];m>=0;m=sNext[m]){
+      if(m===j||sSide[m]!==sSide[j]||sSt[m]>S_FLIEH)continue;
+      const dx=sX[m]-sX[j],dz=sZ[m]-sZ[j],al=dx*nx+dz*nz,qu=Math.abs(dx*nz-dz*nx);if(al<.3||al>3.2||qu>.7)continue;
+      if(al<bd){bd=al;b=m;}}
+  if(b<0)return;
+  const Ud=U[sUnit[b]];sHP[b]-=F.schaden*WFERN*.7;G.treffer++;zaehler.fernTreffer++;ereignis('treffer_fern',sX[b],sZ[b]);spritzer(sX[b],sZ[b],nx,nz,3);
+  if(F.moral)Ud.morale-=F.moral;
+  if(sHP[b]<=0)sterbeDir(b,-nx,-nz,u0,1);
 }
 function geschossAufprall(q){
   const tx=gTX[q],tz=gTZ[q],side=gS[q],k=q>=GN?1:0,u0=U[gUq[q]],F=u0.def.fern||SALVE_F;
@@ -3852,12 +3879,13 @@ function geschossAufprall(q){
   }
   const j=best,Ud=U[sUnit[j]],Kd=Ud.def;
   const von=Math.abs(wrap(Math.atan2(gSX[q]-sX[j],gSZ[q]-sZ[j])-sR[j]));
-  if(Kd.schild>0&&von<SCHILD_WINKEL&&sSt[j]!==S_FLIEH&&sAct[j]!==A_TREFFER&&Math.random()<Kd.schild){   // Schild fängt es ab
+  if(Kd.schild>0&&von<SCHILD_WINKEL&&sSt[j]!==S_FLIEH&&sAct[j]!==A_TREFFER&&Math.random()<Kd.schild*(F.schildW||1)){   // Schild fängt es ab
     G.abgewehrt++;ereignis('abgewehrt',sX[j],sZ[j]);
     if(sAct[j]===A_NIX){const dur=setClip(j,C.abwehr_schild,sJit[j],true);sAct[j]=A_REAKT;sActT[j]=dur;sFace[j]=-1;sKX[j]=sKZ[j]=0;}
     return;
   }
   const ex=sX[j]-gSX[q],ez=sZ[j]-gSZ[q],el=Math.hypot(ex,ez)+1e-6,nx=ex/el,nz=ez/el;
+  if(F.durch&&Math.random()<.5)durchTreffer(j,nx,nz,u0,F);   // Bolzen schlägt durch: noch ein Mann dahinter
   const dmg=F.schaden*WFERN*((F.ungeschuetzt&&Kd.bloss)?F.ungeschuetzt:1)*(Kd.ele?1.5:1)*(Ud.fa==='schildkroete'?.25:1);   // Schildkröte: Schilde auch oben
   sHP[j]-=dmg;G.treffer++;zaehler.fernTreffer++;sFat[j]=Math.min(1,sFat[j]+.01*WFATK);ereignis('treffer_fern',sX[j],sZ[j]);
   spritzer(sX[j],sZ[j],nx,nz,3+(Math.random()*3|0));if(Math.random()<.5)blutFleck(sX[j]+nx*.4,sZ[j]+nz*.4,.5);
@@ -3959,7 +3987,7 @@ function kampfTick(dt){
       sActT[i]-=dt;if(sActT[i]<=0){sAct[i]=A_NIX;sKX[i]=sKZ[i]=0;}
     }
     if(sSt[i]!==S_KAMPF){
-      if(u.fZ>=0&&st===S_FORM&&sAct[i]===A_NIX&&sCool[i]<=0&&sDelay[i]<=0&&sAmmo[i]>0&&phase==='schlacht')wurfStart(i,u);
+      if(u.fZ>=0&&st===S_FORM&&sAct[i]===A_NIX&&sCool[i]<=0&&sDelay[i]<=0&&sAmmo[i]>0&&phase==='schlacht'&&(!u.art||artSchuetze(u,i)))wurfStart(i,u);
       continue;
     }
     let f=sFoe[i];
@@ -4145,7 +4173,8 @@ function naechsterNahk(u){   // nächste feindliche Einheit, die im Nahkampf gef
   for(const v of U){if(v.side===u.side||gone(v)||v.state==='flieht'||v.vers)continue;if(v.fern&&v.mun>0)continue;const d=Math.hypot(v.cx-u.cx,v.cz-u.cz);if(d<_nd){_nd=d;_nv=v;}}
 }
 function fernKI(u){   // true = Fernkampf-Verhalten führt die Einheit (Aufruf alle 0,5 s)
-  const F=u.fern;if(!F||u.mun<=0)return false;
+  const F=u.fern;if(!F)return false;
+  if(u.mun<=0)return!!u.art;   // Geschütze ohne Bolzen bleiben stehen
   if(gone(u)||u.state==='flieht'||u.engaged)return true;
   if(u.weichT>0)u.weichT-=(u.side===1?KI_IV:.5);
   const eigen=u.side===0;
@@ -4675,6 +4704,26 @@ function baueGeschosse(){   // Speere liegen in Flugrichtung (Bahn-Tangente), St
     }
     m.count=n;m.instanceMatrix.needsUpdate=true;
   }
+}
+/* Geschütze (R6): je Geschütz eine Balliste (Teil aus umgebung.json) am Platz der Mannschaft; aufgegeben (bleibt stehen), wenn die ganze Bedienung tot ist oder flieht */
+function baueGeschuetze(){
+  const w=UMW.balliste;if(!w)return;
+  const M=w.m.instanceMatrix.array,cap=w.m.instanceMatrix.count;let n=0;
+  for(const u of U){
+    const A=u.def.art;if(!A||u.state==='wartet')continue;
+    if(!u.gun)u.gun=[];
+    for(let g=0;g<A.guns&&n<cap;g++){
+      const q=u.gun[g]||(u.gun[g]={x:0,z:0,r:u.f,tot:false});
+      if(!q.tot){
+        let leb=false;for(let k=0;k<A.crew;k++){const id=u.occ[g*A.crew+k];if(id>=0&&sSt[id]<=S_KAMPF){leb=true;break;}}
+        if(leb||!q.gesetzt){const cs=Math.cos(u.f),sn=Math.sin(u.f),lx=(g-(A.guns-1)/2)*ART_ABST;q.x=u.cx+lx*cs;q.z=u.cz-lx*sn;q.r=u.f;q.gesetzt=true;}
+        if(!leb)q.tot=true;
+      }
+      const c=Math.cos(q.r),sn=Math.sin(q.r),o=n*16;
+      M[o]=c;M[o+1]=0;M[o+2]=-sn;M[o+3]=0;M[o+4]=0;M[o+5]=1;M[o+6]=0;M[o+7]=0;M[o+8]=sn;M[o+9]=0;M[o+10]=c;M[o+11]=0;M[o+12]=q.x;M[o+13]=H(q.x,q.z);M[o+14]=q.z;M[o+15]=1;n++;
+    }
+  }
+  w.m.count=n;w.m.instanceMatrix.needsUpdate=true;
 }
 /* gemalte Pfeil-Marken (Sprites) für Marschziel und Angriffsziel */
 function pfeilTextur(c1,c2){
@@ -5520,7 +5569,7 @@ function schleife(t){
   GRAS[0].uni.uCen.value.set(ziel.x,ziel.z);GRAS[1].uni.uCen.value.set(ziel.x,ziel.z);
   sonneNachfuehren();nSchritt(t);
   if(t-lodT>=500){lodT=t;lodUpdate(false);}
-  baueInstanzen();baueGeschosse();markerUpdate(t);
+  baueInstanzen();baueGeschosse();baueGeschuetze();markerUpdate(t);
   if(!pausiert&&phase!=='aufstellung')staubEmission(Math.min(.1,dt));
   if(!pausiert){staubSchritt(Math.min(.1,dt));spritzSchritt(Math.min(.1,dt)*tempoV);}
   renderer.render(scene,camera);
@@ -5645,6 +5694,10 @@ function abbau(){   // Szene, Geometrien, Texturen, Ton, Zuhörer freigeben; gem
 if(OPT.standalone){try{if(new URLSearchParams(location.search).get('verst')==='1')for(const g of GEFECHTE)for(const sd of [0,1]){
   const L=g.einheiten.filter(d=>d.s===sd&&d.tag!=='gen'&&(d.rolle==='sword'||d.rolle==='spear'));
   for(let k=0;k<2&&L.length;k++)g.einheiten.push(Object.assign({},L[k%L.length],{x:k?60:-60,z:sd?96:-96,verst:{t:60+20*k,rand:k?'rechts':'links'}}));}}catch(e){console.warn(e);}}
+/* Testseite ?art=1 (R6): jedes Gefecht bekommt je Seite eine Artillerie-Einheit (Torsionsgeschütze) hinter der Linie, seitlich versetzt */
+if(OPT.standalone){try{if(new URLSearchParams(location.search).get('art')==='1')for(const g of GEFECHTE)for(const sd of [0,1]){
+  const b=g.einheiten.find(d=>d.s===sd&&d.tag!=='gen'&&d.rolle==='sword')||g.einheiten.find(d=>d.s===sd);if(!b)continue;
+  g.einheiten.push({s:sd,volk:b.volk,kultur:b.kultur,rolle:'art',epoche:0,x:sd?-110:110,z:sd?112:-112});}}catch(e){console.warn(e);}}
 if(OPT.standalone)laden().catch(e=>{$('ladez').textContent='Fehler: '+e.message;console.error(e);});
 
 /* Test-Schnittstelle (Testseite: window.SCHLACHT; Hauptspiel: ESCH.api) */
@@ -5678,6 +5731,7 @@ return{
 
   einheit(d){return schlachtEinheit(d);},gefecht(n){return gefechtWaehlen(n);},get gefechte(){return GEFECHTE.map(g=>g.id);},get aktuellesGefecht(){return GEFECHT.id;},
   get pakete(){return Object.keys(GELADEN);},
+  geschuetze(i){const u=U[i];return u&&u.gun?u.gun.map(q=>({x:q.x,z:q.z,tot:q.tot})):[];},get geschuetzSichtbar(){return UMW.balliste?UMW.balliste.m.count:-1;},
 };
 }
 //ESCH-KERN-END
@@ -12440,6 +12494,7 @@ const RUL_TRAITS={
 // v228 (31.10.): Neue Schlacht: Verstecken im Wald (unsichtbar fuer den Gegner, Hinterhalt mit Moralschock, KI sieht Versteckte nicht), Figuren Hochmittelalter (Ritter, Speersergeant, Schwertknecht, Langbogen; Schlacht weiter nur Antike); OFF_VER v219
 // v229 (31.10.): Neue Schlacht: Endtafel mit Abschuessen je Einheit, Auszeichnung beste Einheit, Zustand des Feldherrn
 // v230 (31.10.): Neue Schlacht: Verstaerkungen (Einheiten ueber 9 hinaus ruecken ab 60 s vom Rand nach, hoechstens 10 je Seite auf dem Feld), Armbrustschuetzen-Figur, kurze Zustandstexte auf den Karten; OFF_VER v220
+// v231 (31.10.): Neue Schlacht: Feldartillerie der Antike (Torsionsgeschuetze als Ballisten mit Bedienung, grosse Reichweite, langes Nachladen, Durchschlag; KI laesst sie hinten stehen), Aufstellung hinter der Linie
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -22789,7 +22844,7 @@ function eschDesc(sp,seite){   // Kampagnen-Einheit oder Garnison -> Beschreibun
 }
 function eschAufstellen(L,seite){   // Fußtruppen in Reihen (bis 6 nebeneinander), Fernkämpfer davor, Reiter auf den Flügeln, Leibwache hinter der Mitte
   const dz=seite===0?-1:1,z0=dz*60,W=26,per=6;
-  const inf=L.filter(d=>d.tag!=='gen'&&(d.rolle==='spear'||d.rolle==='sword')),mis=L.filter(d=>d.rolle==='missile'),cav=L.filter(d=>d.tag!=='gen'&&d.rolle==='cav'),gen=L.filter(d=>d.tag==='gen'),oth=L.filter(d=>!inf.includes(d)&&!mis.includes(d)&&!cav.includes(d)&&!gen.includes(d));
+  const inf=L.filter(d=>d.tag!=='gen'&&(d.rolle==='spear'||d.rolle==='sword')),mis=L.filter(d=>d.rolle==='missile'),cav=L.filter(d=>d.tag!=='gen'&&d.rolle==='cav'),gen=L.filter(d=>d.tag==='gen'),art=L.filter(d=>d.rolle==='art'),oth=L.filter(d=>!inf.includes(d)&&!mis.includes(d)&&!cav.includes(d)&&!gen.includes(d)&&!art.includes(d));
   const cl=x=>Math.max(-188,Math.min(188,x));
   const row=(arr,z,w)=>arr.forEach((d,k)=>{d.x=cl((k-(arr.length-1)/2)*w);d.z=z;});
   const rows=Math.max(1,Math.ceil((inf.length+oth.length)/per));
@@ -22799,6 +22854,7 @@ function eschAufstellen(L,seite){   // Fußtruppen in Reihen (bis 6 nebeneinande
   const infW=Math.max(1,Math.min(per,base.length))*W;
   cav.forEach((d,k)=>{const sg=k%2?1:-1,col=Math.floor(k/2);d.x=cl(sg*(infW/2+28+col*24));d.z=z0+dz*8;});
   gen.forEach((d,k)=>{d.x=cl((k-(gen.length-1)/2)*24);d.z=z0+dz*(rows*20+8);});
+  art.forEach((d,k)=>{const sg=k%2?1:-1;d.x=cl(sg*(40+Math.floor(k/2)*34));d.z=z0+dz*(rows*20+14);});   // Geschütze (31.10., R6): hinter der Linie, seitlich der Leibwache
 }
 function eschStart(args){
   const{a,ti,playerAttacker,done}=args;
