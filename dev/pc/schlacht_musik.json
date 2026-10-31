@@ -12,5 +12,10 @@
  {"id": "hoehepunkt_2", "p": "desperate climactic battle music, dark choir, pounding drums, dissonant brass swells, racing strings, overwhelming intensity, cinematic film score"},
  {"id": "sieg_1", "p": "triumphant victory music after a battle, majestic brass fanfare, choir, warm strings, glorious and proud, cinematic film score, no vocals"},
  {"id": "sieg_2", "p": "noble victorious orchestral theme, slow majestic horns and strings, choir swelling, relief and glory, cinematic film score"},
- {"id": "niederlage_1", "p": "sorrowful orchestral lament after a lost battle, solo cello, slow mournful strings, distant choir, grief, cinematic film score, no vocals"}
+ {"id": "niederlage_1", "p": "sorrowful orchestral lament after a lost battle, solo cello, slow mournful strings, distant choir, grief, cinematic film score, no vocals"},
+ {"id": "aufmarsch_hellen", "p": "epic orchestral march, ancient Greek and Macedonian phalanx advancing, aulos pipes, lyre, heavy war drums, low brass, building tension, cinematic film score, no vocals"},
+ {"id": "kampf_kelt", "p": "wild epic battle music with Celtic war drums, carnyx horns, bodhran, fierce fiddles and low strings, tribal intensity, cinematic film score"},
+ {"id": "kampf_hellen", "p": "epic ancient Greek battle music, pounding drums, aulos, bold brass, male choir, driving strings, heroic and fierce, cinematic film score"},
+ {"id": "ruhe_2", "p": "tense quiet orchestral ambient before battle, soft low drums like a heartbeat, distant horn call, sustained strings, morning mist, cinematic film score, no vocals"},
+ {"id": "niederlage_2", "p": "slow tragic orchestral piece after defeat, low strings and solo horn, fading drums, sorrow and exhaustion, cinematic film score, no vocals"}
 ]

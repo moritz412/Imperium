@@ -56,10 +56,31 @@ def haus_mittelmeer(name):
     for fl in ((v[0], v[1], v[2], v[3]), (v[3], v[2], v[5], v[4])): bm.faces.new(fl).material_index = 1
     for fl in ((v[0], v[3], v[4]), (v[1], v[5], v[2])): bm.faces.new(fl).material_index = 2
     for fl in ((v[1], v[0], v[4], v[5]),): bm.faces.new(fl).material_index = 1
+    kasten(bm, (0, 0, 0.2), (2 * W + 0.08, 2 * T + 0.08, 0.4), 4)   # Bruchsteinsockel
+    for sy in (-1, 1):   # Hohlziegel-Reihen auf beiden Dachseiten, Firstziegel
+        n = 18
+        for k in range(n + 1):
+            x = -W - ue + 0.1 + k * (2 * (W + ue) - 0.2) / n
+            y0, z0 = sy * (T + ue), H + 0.02; y1, z1 = sy * 0.05, H + dh + 0.02
+            m = Vector((x, (y0 + y1) / 2, (z0 + z1) / 2 + 0.03)); L = math.hypot(y1 - y0, z1 - z0)
+            r = bmesh.ops.create_cube(bm, size=1.0)
+            a = math.atan2(z1 - z0, abs(y1 - y0)) * (1 if sy < 0 else -1)
+            for v in r["verts"]:
+                p = Vector((v.co.x * 0.11, v.co.y * L, v.co.z * 0.07)); p.rotate(__import__("mathutils").Euler((a, 0, 0))); v.co = p + m
+            for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = 5
+    kasten(bm, (0, 0, H + dh + 0.06), (2 * (W + ue), 0.22, 0.12), 5)
     kasten(bm, (0.6, -T - 0.02, 0.95), (0.9, 0.06, 1.9), 3)     # Tür
     kasten(bm, (-1.6, -T - 0.02, 1.6), (0.5, 0.06, 0.5), 3)     # Fensterluke
     kasten(bm, (W + 1.6, 0.6, 0.6), (0.35, 4.2, 1.2), 0)        # Hofmauer
-    FARBEN = [(0.62, 0.55, 0.45), (0.42, 0.15, 0.08), (0.58, 0.5, 0.4), (0.12, 0.08, 0.05)]
+    kasten(bm, (W + 1.6, 0.6, 1.25), (0.45, 4.3, 0.1), 5)        # Ziegelabdeckung der Hofmauer
+    for px in (-0.2, 1.4): kasten(bm, (px, -T - 1.3, 1.1), (0.14, 0.14, 2.2), 3)   # Vordach: Pfosten, Balken, Schilfdach
+    kasten(bm, (0.6, -T - 1.3, 2.22), (1.9, 0.12, 0.12), 3)
+    kasten(bm, (0.6, -T - 0.7, 2.3), (2.1, 1.4, 0.06), 6)
+    for ax, ay in ((-2.2, -T - 0.4), (-2.6, -T - 0.5)):   # Amphoren
+        r = bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=0.12, radius2=0.2, depth=0.7)
+        for v in r["verts"]: v.co += Vector((ax, ay, 0.35))
+        for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = 1
+    FARBEN = [(0.62, 0.55, 0.45), (0.42, 0.15, 0.08), (0.58, 0.5, 0.4), (0.12, 0.08, 0.05), (0.3, 0.27, 0.22), (0.36, 0.11, 0.05), (0.4, 0.33, 0.17)]
     def farbe(p, n, f):
         c = FARBEN[f.material_index]; k = 0.9 + 0.12 * noise.noise(p * 1.7) - (0.15 if p.z < 0.4 and f.material_index == 0 else 0)
         return tuple(x * k for x in c)
@@ -73,15 +94,29 @@ def rundhaus(name):
     for i in range(seg):
         j = (i + 1) % seg; bm.faces.new((unten[i], unten[j], oben[j], oben[i])).material_index = 0
     tr = [bm.verts.new(((R + 0.6) * math.cos(2 * math.pi * i / seg), (R + 0.6) * math.sin(2 * math.pi * i / seg), H - 0.35)) for i in range(seg)]
-    sp = bm.verts.new((0, 0, H + 4.2))
     for i in range(seg):
-        j = (i + 1) % seg; bm.faces.new((tr[i], tr[j], sp)).material_index = 1
-        bm.faces.new((oben[i], oben[j], tr[j], tr[i])).material_index = 1
-    kasten(bm, (0, -R - 0.5, 0.9), (1.3, 1.2, 1.8), 2)           # Vorbau des Eingangs
-    FARBEN = [(0.4, 0.3, 0.2), (0.48, 0.38, 0.18), (0.32, 0.22, 0.12)]
+        j = (i + 1) % seg; bm.faces.new((oben[i], oben[j], tr[j], tr[i])).material_index = 1
+    # Strohdach in Lagen: jede Lage überlappt die untere (sichtbare Stufen), Spitze mit Firstbund
+    unten_r = tr
+    for k, (rr, zz) in enumerate(((R + 0.6, H - 0.35), (R * 0.72, H + 1.2), (R * 0.42, H + 2.6))):
+        r_o = [bm.verts.new(((rr + 0.35) * math.cos(2 * math.pi * i / seg), (rr + 0.35) * math.sin(2 * math.pi * i / seg), zz - 0.3)) for i in range(seg)]
+        nxt = (R * 0.72, H + 1.35) if k == 0 else (R * 0.42, H + 2.75) if k == 1 else (0.0, H + 4.2)
+        r_i = [bm.verts.new((nxt[0] * math.cos(2 * math.pi * i / seg), nxt[0] * math.sin(2 * math.pi * i / seg), nxt[1])) for i in range(seg)]
+        for i in range(seg):
+            j = (i + 1) % seg; bm.faces.new((unten_r[i], unten_r[j], r_o[j], r_o[i])).material_index = 1
+            bm.faces.new((r_o[i], r_o[j], r_i[j], r_i[i])).material_index = 1
+        unten_r = r_i
+    sp = bm.verts.new((0, 0, H + 4.35))
+    for i in range(seg):
+        j = (i + 1) % seg; bm.faces.new((unten_r[i], unten_r[j], sp)).material_index = 1
+    for px in (-0.6, 0.6): kasten(bm, (px, -R - 0.05, 0.85), (0.16, 0.2, 1.7), 2)   # Türpfosten, Sturz, dunkle Öffnung
+    kasten(bm, (0, -R - 0.05, 1.72), (1.4, 0.22, 0.16), 2)
+    kasten(bm, (0, -R + 0.02, 0.82), (1.05, 0.06, 1.64), 3)
+    FARBEN = [(0.4, 0.3, 0.2), (0.48, 0.38, 0.18), (0.25, 0.16, 0.08), (0.04, 0.03, 0.02)]
     def farbe(p, n, f):
         c = FARBEN[f.material_index]; k = 0.88 + 0.16 * noise.noise(p * 2.2 + Vector((5, 1, 0)))
         if f.material_index == 1: k *= 0.8 + 0.25 * min(1, p.z / 5)   # Stroh oben heller, unten verwittert
+        if f.material_index == 0: k *= 0.9 + 0.1 * math.sin(p.z * 22)   # Flechtwerk-Bänder
         return tuple(x * k for x in c)
     return ablegen(name, bm, farbe, 4.3)
 
@@ -89,7 +124,10 @@ def flechtzaun(name, laenge=4.0):
     bm = bmesh.new(); n = int(laenge / 0.8) + 1
     for i in range(n):
         x = -laenge / 2 + i * laenge / (n - 1); kasten(bm, (x, 0, 0.6), (0.08, 0.08, 1.2), 0)
-    for z in (0.3, 0.55, 0.8, 1.0): kasten(bm, (0, (0.02 if int(z * 10) % 2 else -0.02), z), (laenge, 0.05, 0.12), 1)
+    for r_, z in enumerate((0.25, 0.4, 0.55, 0.7, 0.85, 1.0)):   # Ruten wechselnd vor/hinter den Pfosten
+        for i in range(n - 1):
+            x0 = -laenge / 2 + i * laenge / (n - 1); sg = 1 if (i + r_) % 2 else -1
+            kasten(bm, (x0 + laenge / (n - 1) / 2, sg * 0.045, z), (laenge / (n - 1) + 0.04, 0.04, 0.1), 1)
     def farbe(p, n, f):
         c = (0.24, 0.17, 0.1) if f.material_index == 0 else (0.36, 0.28, 0.16); k = 0.85 + 0.2 * noise.noise(p * 3)
         return tuple(x * k for x in c)
@@ -100,18 +138,23 @@ def steinmauer(name, laenge=6.0):
     random.seed(7); bm = bmesh.new(); x = -laenge / 2
     while x < laenge / 2:
         w = random.uniform(0.35, 0.6)
-        for z, h in ((0.18, 0.36), (0.5, 0.28)):
-            kasten(bm, (x + w / 2, random.uniform(-0.04, 0.04), z), (w * 0.96, random.uniform(0.4, 0.5), h * random.uniform(0.85, 1.0)), 0)
-        x += w
+        for z, h in ((0.17, 0.34), (0.48, 0.27)):
+            r = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.5); off = Vector((x * 3.7, z * 5.1, 0.3))
+            for v in r["verts"]:
+                d = v.co.normalized(); sk = 1 + 0.25 * noise.noise(d * 2.1 + off)
+                v.co = Vector((d.x * w * 0.58, d.y * random.uniform(0.26, 0.32), d.z * h * 0.85)) * sk + Vector((x + w / 2, random.uniform(-0.03, 0.03), z))
+        x += w * 0.92
     def farbe(p, n, f):
-        g = 0.36 + 0.08 * noise.noise(f.calc_center_median() * 3.1); return (g, g * 0.96, g * 0.88)
+        g = 0.24 + 0.06 * noise.noise(f.calc_center_median() * 3.1); return (g * 1.05, g, g * 0.85)
     return ablegen(name, bm, farbe, laenge / 2)
 
 def heuhaufen(name):
-    bm = bmesh.new(); bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=1.1, radius2=0.15, depth=2.0)
-    for v in bm.verts: v.co.z += 1.0; v.co += v.co.normalized() * 0.08 * noise.noise(v.co * 2)
+    bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=7, radius=1.0)
+    for v in bm.verts:
+        z = max(-0.05, v.co.z); v.co = Vector((v.co.x * 1.15, v.co.y * 1.15, z * 1.9 + (0.25 * (1 - abs(z)) if z > 0 else 0)))
+        v.co += Vector((v.co.x, v.co.y, 0)).normalized() * 0.06 * noise.noise(v.co * 2.5) if v.co.length > 0.01 else Vector()
     def farbe(p, n, f):
-        k = 0.85 + 0.2 * noise.noise(p * 3); return (0.55 * k, 0.45 * k, 0.2 * k)
+        k = (0.85 + 0.2 * noise.noise(p * 3)) * (0.75 + 0.25 * min(1, p.z / 1.5)); return (0.5 * k, 0.41 * k, 0.18 * k)
     return ablegen(name, bm, farbe, 1.2)
 
 def balliste(name):

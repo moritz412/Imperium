@@ -165,3 +165,22 @@ Gebaut in `schlachtKern` (`dev/proto/schlacht_spiel.html`, abgeglichen nach `imp
 - Test: `dev/tests/schlacht_elefant_t.js` (Bilder `dev/tests/shot/elefant_*.png`). Testhilfen im Kern: `SCHLACHT.elefPanik(i[,Winkel])`, `SCHLACHT.versetzen(i,x,z)`, `SCHLACHT.umwelt`.
 
 **Offen:** iPad (Leistung mit 2 Kits mehr + Teilen), Handy, Ton (Elefantenlaute am PC erzeugen: Trompeten, Stampfen/Schritte, Panikschrei, Tod), Gleichgewicht nur grob (eine Elefanteneinheit kann in 40 s über 50 Soldaten töten), Soldaten bleiben an Mauern kleben, statt ums Gehöft zu laufen (Wegfindung nur Abstoßung), Treiber sitzt im Reit-Clip etwas steif, Gehöft-Heuhaufen sind schlichte Kegel, `OFF_MAN` unverändert (`proto/` ist dort insgesamt nicht eingetragen, also auch nicht `k_E_elefant.json`, `umgebung.json`, die geänderte `einheiten_kampagne.json`; ohne Netz fällt die Schlacht auf die alte zurück).
+
+## Stand Balance/Wege/Sarissa (31.10.)
+
+**Auf dem echten iPad nicht getestet.** Alle Zahlen aus Läufen am PC (Chromium, Software-Rendering, Zeitraffer 8–20×; die Regeln laufen in festen Schritten, das Tempo ändert das Ergebnis nicht). Läufe je Szenario 6–10, also grobe Zahlen (Schwankung ±2 Siege).
+
+**1. Gleichgewicht** (`dev/tests/schlacht_balance_t.js`; Modus `ki` = beide Seiten Computerführung, `auto` = Rom steht in Haltung „Angreifen“ und greift erst bei Feind < 45 m an, Seite 1 Computer)
+- Ursachen (gemessen, Vorher-Werte siehe Bericht): (a) **Schlagweite der Speere**: `rg` 2,0 / `reach` 1,45 gegen Schwert 1,6 / 1,1 – der erste Stich unterbricht den Gegner; schon 0,1 m mehr entschied Paargefechte. Jetzt 1,7 / 1,2, Pike 1,9 / 1,35. (b) **Speerträger-Grundwerte** 9/12 gegen Schwert 11/10, obwohl die Kampagne 7 gegen 9 sagt: jetzt Angriff 8, Abwehr 9,4. (c) **Doppelzählung** in `schlachtEinheit`: die Kampagnenstärke der Sondereinheit enthält ihre Boni `b.atk`/`b.def` schon, sie wurden zusätzlich über `sqrt(q)` aufgeschlagen (Libyer Abwehr ×1,23); jetzt `sq = sqrt(q / (b.atk·b.def))`. (d) **Seite 0 gewann bei gleichen Heeren ~69 %**: in `kampfTick` laufen die Soldaten in Indexreihenfolge, bei gleichzeitigem Treffer gewann immer der kleinere Index (Seite 0); die Reihenfolge wird jetzt je Takt umgekehrt (Spiegelgefechte danach ~50 %). (e) **Zusammensetzung**: Rom hatte 6 Einheiten (213 Figuren) gegen 8–9 (293–303) – Vorlagen auf 8–9 Einheiten (293–333) angepasst (Triarii als zweite Reihe, mehr Hastati, einzelne Veteranen). Trefferformel, Moral, Kettenflucht unverändert.
+- Test-Haken im Kern: `SCHLACHT.kiSeiten(a,b)` (true = Computerführung), `SCHLACHT.gefecht(objekt)` nimmt auch ein Beschreibungsobjekt.
+- Offen: Rom bleibt gegen Karthago/Kelten bei reiner Computerführung etwas unter 50 %; ein Spieler, der Reihen hält, Flanken schützt und Phalanx/Elefanten umgeht, soll besser stehen (nicht mit einem Spieler getestet).
+
+**2. Wege um Hindernisse** (`dev/tests/schlacht_wege_t.js`)
+- Hindernisse, die sich bis 6 m nähern, werden beim Aufbau zu Gruppen mit umschließendem Kreis (`HC`; Gehöft mit Mauern und Zäunen ≈ 14 m Radius). `wegpunkt(u)` in `bewegen`: schneidet die Gerade vom Anker zum Ziel eine Gruppe (Radius + halbe Einheitsbreite + 2,5 m), steuert der Anker einen Zwischenpunkt seitlich daran vorbei an (kürzerer Umweg, Seite bleibt danach gleich; bis zu drei Hindernisse hintereinander). Ziel oder Start innerhalb der Gruppe: wie bisher (`hindPush`). Gilt für alle Befehle, Angriffsziele und KI-Wege.
+- Einzelne Soldaten, die am Hindernis stehen (herausgeschoben, Geschwindigkeit nach innen entfernt), gleiten jetzt mit 1,8 m/s tangential auf der Seite ihres Ziels (Gegner bzw. Anker) statt zu drücken.
+- Test-Haken: `SCHLACHT.umwelt.gruppen`.
+
+**3. Sarissa gesenkt** (Paket `A7_phalangit`, Flag `def.sar` = Rolle Speer, kein Elefant, Paket Phalangit)
+- Neue Clips in `CN`: `sarissa_bereit`, `sarissa_stoss`, `gehen_sarissa` (Ersatz bei Paketen ohne sie: `kampf_bereit`, `stoss_speer`, `gehen`). Die Paketdatei kennzeichnet `sarissa_bereit` und `gehen_sarissa` als nicht schleifend; `kitBauen` setzt sie auf Schleife.
+- Regeln: Feind (Einheitsanker, nicht fliehend) näher als 40 m (Abstand alle 0,3 s in `u.feindD`) oder Nahkampf → `sarissa_bereit` statt `stehen_bereit`/`kampf_bereit`; Angriff immer `sarissa_stoss` (Schaden 1,2 wie der Speerstich, kein Schildstoß); Gehen in Formation → `gehen_sarissa` (Laufen bleibt `laufen`). Sonst normale Clips (Pike aufrecht). Phalanx-Regel gegen Reiter unverändert.
+- Bilder: `dev/tests/shot/sarissa_*.png` (`node dev/tests/schlacht_sarissa_t.js`).

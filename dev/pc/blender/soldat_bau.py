@@ -555,6 +555,15 @@ BOGEN_LOS = dict(BOGEN_ZUG, RightArm=(-0.4, 0.1, -0.9), RightForeArm=(0.2, 0.5, 
 clip_haltung("bogen", [(1, BEREIT), (7, BOGEN_HOCH), (15, BOGEN_ZUG), (21, BOGEN_ZUG), (23, BOGEN_LOS), (32, BEREIT)])
 if KIT.get("fern") == "schleuder" or True:
     clip_haltung("schleuder", [(1, BEREIT), (4, K1), (7, K2), (10, K3), (13, K4), (16, K1), (19, K2), (22, K3), (24, ABWURF), (28, ABWURF), (36, BEREIT)])
+if KIT["waffe"][0] == "speer" and KIT["waffe"][1] > 4:
+    # Sarissa (31.10.): zweihändig gesenkt in Hüfthöhe, rechte Hand hinten (Griff 30 % vom Ende), linke Hand vorn am Schaft
+    SAR_ARME = {"RightArm": (-0.08, 0.25, -0.96), "RightForeArm": (0.0, -1, -0.04), "LeftArm": (0.12, -0.5, -0.86), "LeftForeArm": (-0.22, -0.97, -0.02)}
+    SAR = dict(BEREIT, **SAR_ARME, Spine1=(0, -0.08, 1))
+    SAR_B = dict(SAR, Spine=(0, -0.12, 0.99))
+    SAR_VOR = dict(SAR, **VOR_BEIN, RightArm=(-0.06, -0.15, -0.99), LeftArm=(0.1, -0.75, -0.65), Spine1=(0, -0.25, 0.97))
+    clip_haltung("sarissa_bereit", [(1, SAR), (20, SAR_B), (40, SAR)])
+    clip_haltung("sarissa_stoss", [(1, SAR), (6, dict(SAR, RightArm=(-0.1, 0.45, -0.89))), (12, SAR_VOR), (16, SAR_VOR), (26, SAR)])
+    clip_cmu("gehen_sarissa", "02", "01", 0.1, 0.9, arme=SAR_ARME, schleife=True)
 if KIT.get("reiter"):
     # Sitz: Oberschenkel nach vorn und außen (rittlings), Unterschenkel hängen; linke Hand am Zügel
     SITZ = {"LeftUpLeg": (0.38, -0.62, -0.69), "LeftLeg": (0.14, 0.12, -0.98), "RightUpLeg": (-0.38, -0.62, -0.69), "RightLeg": (-0.14, 0.12, -0.98),

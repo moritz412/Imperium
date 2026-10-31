@@ -27,5 +27,13 @@
  {"id": "elefant_trompete", "p": "a single elephant trumpeting loudly, angry war elephant call, outdoors", "dauer": 3, "n": 4},
  {"id": "elefant_schritte", "p": "heavy elephants walking, deep thudding footsteps on the ground, rumble", "dauer": 8, "n": 1},
  {"id": "elefant_panik", "p": "a panicked elephant screaming and trumpeting wildly, running", "dauer": 3, "n": 2},
- {"id": "elefant_tod", "p": "a large elephant groaning and collapsing heavily to the ground, deep thud", "dauer": 3, "n": 2}
+ {"id": "elefant_tod", "p": "a large elephant groaning and collapsing heavily to the ground, deep thud", "dauer": 3, "n": 2},
+ {"id": "wald", "p": "forest ambience, birds singing, wind rustling in leaves and trees, calm outdoors", "dauer": 10, "n": 1},
+ {"id": "fluss", "p": "a river flowing over stones, steady running water, outdoors", "dauer": 10, "n": 1},
+ {"id": "wueste", "p": "dry desert wind blowing sand, hot empty landscape, low whistling gusts", "dauer": 10, "n": 1},
+ {"id": "sumpf", "p": "marsh ambience, frogs croaking, insects buzzing, water bubbling", "dauer": 10, "n": 1},
+ {"id": "kueste", "p": "sea waves breaking on a beach, seagulls, coastal wind", "dauer": 10, "n": 1},
+ {"id": "feldherr_ruf", "p": "a commander shouting a loud rallying battle command, soldiers roar in response", "dauer": 3, "n": 3},
+ {"id": "anfeuern_jubel", "p": "a large army of soldiers cheering and roaring together, raising spirits, outdoors", "dauer": 4, "n": 2},
+ {"id": "flucht", "p": "soldiers fleeing in panic, frightened shouting, many running footsteps", "dauer": 4, "n": 2}
 ]

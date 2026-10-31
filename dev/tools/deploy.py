@@ -14,6 +14,11 @@ if os.path.exists(A): shutil.rmtree(A)
 os.makedirs(A)
 for d in ('img', 'audio', 'models', 'snd', 'saves'):
     if os.path.isdir(os.path.join(ROOT, d)): shutil.copytree(os.path.join(ROOT, d), os.path.join(A, d))
+# Echtzeitschlacht (I5): Figuren, Ton, Einheitendaten stehen in OFF_MAN unter proto/ (Liste: node dev/tools/off_schlacht.js)
+P0 = os.path.join(ROOT, 'dev', 'proto')
+for d in ('figuren', 'ton'):
+    if os.path.isdir(os.path.join(P0, d)): shutil.copytree(os.path.join(P0, d), os.path.join(A, 'proto', d))
+if os.path.exists(os.path.join(P0, 'einheiten_kampagne.json')): shutil.copy2(os.path.join(P0, 'einheiten_kampagne.json'), os.path.join(A, 'proto', 'einheiten_kampagne.json'))
 r = subprocess.run([sys.executable, os.path.join(ROOT, 'dev', 'tools', 'build.py'), os.path.join(ROOT, 'dev', 'imperium.html'),
                     '--assets', A, '--out', B, '--zip', os.path.join(A, 'imperium_pwa.zip')])
 if r.returncode: sys.exit('Build fehlgeschlagen')
@@ -26,5 +31,5 @@ for n in os.listdir(B):
 shutil.rmtree(B); shutil.rmtree(A)
 # Testseiten (Prototypen) liegen als Quelle in dev/proto und werden nach proto/ kopiert – die Wurzel wird oben geleert!
 P = os.path.join(ROOT, 'dev', 'proto')
-if os.path.isdir(P): shutil.copytree(P, os.path.join(ROOT, 'proto'))
+if os.path.isdir(P): shutil.copytree(P, os.path.join(ROOT, 'proto'), dirs_exist_ok=True)
 print('Fertig. Jetzt: git add -A && git commit -m "..." && git push')
