@@ -3090,7 +3090,7 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeue
 const TON=(()=>{
   const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
   const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
-    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
+    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_schritte:1,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
   const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
   let KULT='rom';
@@ -3243,17 +3243,17 @@ const TON=(()=>{
   function hufAus(k){const h=HUF[k];if(!h)return;delete HUF[k];const n=ctx.currentTime;try{h.g.gain.cancelScheduledValues(n);h.g.gain.setTargetAtTime(0,n,.15);h.src.stop(n+.8);}catch(e){}h.src.onended=()=>{try{h.src.disconnect();h.g.disconnect();if(h.p)h.p.disconnect();}catch(er){}};}
   function hufe(){
     const n=ctx.currentTime;
-    for(const k in HUF)if(!U[k]||!U[k].def.reit||U[k].def.ele)hufAus(k);
+    for(const k in HUF)if(!U[k]||!U[k].def.reit)hufAus(k);
     for(const u of U){
-      if(!u.def.reit||u.def.ele)continue;
+      if(!u.def.reit)continue;   // Elefanten (31.10.): schwere Schritte statt Hufe
       let name=null,gv=0,pan=0;
       if(phase==='schlacht'&&!pausiert&&!gone(u)&&u.sn>0&&!u.engaged){
         const sp=u.state==='flieht'?u.def.run:u.curSpeed;
-        name=sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
+        name=u.def.ele?(sp>1?'elefant_schritte':null):sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
         if(name&&!SB[name])name=null;
         if(name){
           const dx=u.mx-ziel.x,dz=u.mz-ziel.z,d=Math.sqrt(dx*dx+dz*dz),R=90+.3*dist;
-          if(d<R){const f=1-d/R;gv=.5*f*f*Math.min(1,u.sn/20)*Math.min(1,sp/7)*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
+          if(d<R){const f=1-d/R;gv=.5*f*f*(u.def.ele?Math.min(1,u.sn/4)*Math.min(1,sp/3):Math.min(1,u.sn/20)*Math.min(1,sp/7))*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
         }
       }
       let h=HUF[u.i];

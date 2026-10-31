@@ -4871,7 +4871,7 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeue
 const TON=(()=>{
   const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
   const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
-    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
+    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_schritte:1,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
   const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
   let KULT='rom';
@@ -5024,17 +5024,17 @@ const TON=(()=>{
   function hufAus(k){const h=HUF[k];if(!h)return;delete HUF[k];const n=ctx.currentTime;try{h.g.gain.cancelScheduledValues(n);h.g.gain.setTargetAtTime(0,n,.15);h.src.stop(n+.8);}catch(e){}h.src.onended=()=>{try{h.src.disconnect();h.g.disconnect();if(h.p)h.p.disconnect();}catch(er){}};}
   function hufe(){
     const n=ctx.currentTime;
-    for(const k in HUF)if(!U[k]||!U[k].def.reit||U[k].def.ele)hufAus(k);
+    for(const k in HUF)if(!U[k]||!U[k].def.reit)hufAus(k);
     for(const u of U){
-      if(!u.def.reit||u.def.ele)continue;
+      if(!u.def.reit)continue;   // Elefanten (31.10.): schwere Schritte statt Hufe
       let name=null,gv=0,pan=0;
       if(phase==='schlacht'&&!pausiert&&!gone(u)&&u.sn>0&&!u.engaged){
         const sp=u.state==='flieht'?u.def.run:u.curSpeed;
-        name=sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
+        name=u.def.ele?(sp>1?'elefant_schritte':null):sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
         if(name&&!SB[name])name=null;
         if(name){
           const dx=u.mx-ziel.x,dz=u.mz-ziel.z,d=Math.sqrt(dx*dx+dz*dz),R=90+.3*dist;
-          if(d<R){const f=1-d/R;gv=.5*f*f*Math.min(1,u.sn/20)*Math.min(1,sp/7)*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
+          if(d<R){const f=1-d/R;gv=.5*f*f*(u.def.ele?Math.min(1,u.sn/4)*Math.min(1,sp/3):Math.min(1,u.sn/20)*Math.min(1,sp/7))*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
         }
       }
       let h=HUF[u.i];
@@ -12089,14 +12089,16 @@ const GEN_LV=[0,120,300,560,900,1350];
 function newGeneral(f){const e=ep(),r=()=>Math.random();const tr=[GT_POS[Math.floor(r()*GT_POS.length)]];if(r()<0.35)tr.push(GT_NEG[Math.floor(r()*GT_NEG.length)]);
   return{n:cFull(f,e)||GEN_NAMES[e][Math.floor(r()*20)]+' '+GEN_SUR[e][Math.floor(r()*10)],lvl:1,xp:0,tr,e,face:Math.floor(r()*4)};}
 function genOf(a){if(!a)return null;if(!a.gen)a.gen=newGeneral(a.f);else if(a.gen.e!=null&&S&&a.gen.e<ep()&&!(a.gen.leg&&a.gen.e>=ep()-1)){const o=a.gen,n=newGeneral(a.f);n.lvl=Math.max(1,o.lvl-2);n.xp=GEN_LV[n.lvl-1];a.gen=n;}return a.gen;}
-function genFx(a,k){if(!a||!a.units)return 0;const G=genOf(a);let s=0;for(const t of G.tr){const T=GEN_TRAITS[t];if(T&&T.fx[k])s+=T.fx[k];}for(const r of G.ret||[]){const R=RETINUE[r];if(R&&R.fx[k])s+=R.fx[k];}if(k==='atk'||k==='def')s+=0.025*(G.lvl-1);if(k==='mor')s+=2*(G.lvl-1);return s;}
+function genFx(a,k){if(!a||!a.units)return 0;const G=genOf(a);let s=0;for(const t of G.tr){const T=GEN_TRAITS[t];if(T&&T.fx[k])s+=T.fx[k];}for(const r of G.ret||[]){const R=RETINUE[r];if(R&&R.fx[k])s+=R.fx[k];}if(k==='atk'||k==='def')s+=0.025*(G.lvl-1);if(k==='mor')s+=2*(G.lvl-1);const w=genWund(G);if(w)s+=({atk:-0.05,def:-0.05,mor:-5,mp:-0.1})[k]*w.st||0;return s;}
+// Verwundung aus der neuen Schlacht (31.10.): G.wund={bis:Runde,st:1 leicht|2 schwer}; bis dahin Angriff/Verteidigung -5 % je Stufe, Moral -5, Bewegung -10 %
+function genWund(G){return G&&G.wund&&S&&G.wund.bis>S.turn?G.wund:null;}
 function genXP(a,v){const G=genOf(a);if(!G)return;v*=1+((G.ret||[]).includes('chronist')?0.3:0);G.xp+=Math.round(v);
   while(G.lvl<GEN_LV.length&&G.xp>=GEN_LV[G.lvl]){G.lvl++;
     let gain='';if(G.lvl%2===0&&G.tr.filter(t=>!GEN_TRAITS[t].neg).length<4){const c=GT_POS.filter(t=>!G.tr.includes(t));if(c.length){const t=c[Math.floor(Math.random()*c.length)];G.tr.push(t);gain=` und gilt nun als „${GEN_TRAITS[t].n}“`;}}
     if(G.lvl===5){const ng=G.tr.findIndex(t=>GEN_TRAITS[t].neg);if(ng>=0){gain+=`, legt die Schwäche „${GEN_TRAITS[G.tr[ng]].n}“ ab`;G.tr.splice(ng,1);}}
     if(a.f===S.player)addLog(`${G.n} (${a.name}) steigt auf Stufe ${G.lvl}${gain}.`,true,'good');}}
 function genHtml(a,full){const G=genOf(a);if(!G)return'';const nx=GEN_LV[G.lvl]||null,p0=GEN_LV[G.lvl-1]||0;
-  return`<div class="gencard">${genPortrait(a,'gport')}<div><span class="eyebrow">Feldherr · Stufe ${G.lvl}</span><b>${esc(G.n)}${G.hon?` <em class="newu">${esc(genTitle(G,a.f))}</em>`:''}</b><div class="trs">${G.tr.map(t=>`<span class="tr${GEN_TRAITS[t].neg?' neg':''}" title="${GEN_TRAITS[t].d}">${GEN_TRAITS[t].n}</span>`).join('')}</div>${(G.ret||[]).length?`<div class="trs">${G.ret.map(r=>`<span class="tr ret" title="${RETINUE[r].d}">⚑ ${RETINUE[r].n}</span>`).join('')}</div>`:''}${deedHtml(G,full)}${(()=>{try{return fameHtml(G,a.f);}catch(e){return'';}})()}${full?`<small>${G.tr.map(t=>GEN_TRAITS[t].d).concat((G.ret||[]).map(r=>RETINUE[r].d)).join(' · ')}${G.lvl>1?` · Stufe: Angriff und Verteidigung +${Math.round(2.5*(G.lvl-1))} %`:''}</small>`:''}${nx?`<span class="pbar thin"><i style="width:${Math.round((G.xp-p0)/(nx-p0)*100)}%"></i></span>`:'<small>Höchste Stufe</small>'}</div></div>`;}
+  return`<div class="gencard">${genPortrait(a,'gport')}<div><span class="eyebrow">Feldherr · Stufe ${G.lvl}</span><b>${esc(G.n)}${G.hon?` <em class="newu">${esc(genTitle(G,a.f))}</em>`:''}</b><div class="trs">${G.tr.map(t=>`<span class="tr${GEN_TRAITS[t].neg?' neg':''}" title="${GEN_TRAITS[t].d}">${GEN_TRAITS[t].n}</span>`).join('')}${(w=>w?`<span class="tr neg" title="Angriff und Verteidigung −${5*w.st} %, Moral −${5*w.st}, Bewegung −${10*w.st} %">${w.st>1?'Schwer verwundet':'Verwundet'} · noch ${w.bis-S.turn} R.</span>`:'')(genWund(G))}</div>${(G.ret||[]).length?`<div class="trs">${G.ret.map(r=>`<span class="tr ret" title="${RETINUE[r].d}">⚑ ${RETINUE[r].n}</span>`).join('')}</div>`:''}${deedHtml(G,full)}${(()=>{try{return fameHtml(G,a.f);}catch(e){return'';}})()}${full?`<small>${G.tr.map(t=>GEN_TRAITS[t].d).concat((G.ret||[]).map(r=>RETINUE[r].d)).join(' · ')}${G.lvl>1?` · Stufe: Angriff und Verteidigung +${Math.round(2.5*(G.lvl-1))} %`:''}</small>`:''}${nx?`<span class="pbar thin"><i style="width:${Math.round((G.xp-p0)/(nx-p0)*100)}%"></i></span>`:'<small>Höchste Stufe</small>'}</div></div>`;}
 const PORTRAITS=new Set([0,1,2,3,4].flatMap(e=>[0,1].map(k=>`gp_e${e}_${k}`)));
 function genPortrait(a,cls){const G=genOf(a),e=clamp(G.e==null?ep():G.e,0,4),k=`gp_e${e}_${(G.face|0)%2}`;return PORTRAITS.has(k)?`<img class="${cls}" src="img/${k}.webp" alt="">`:`<span class="${cls} ge" style="${cst(a.f)}"><span class="crest" style="${cst(a.f)}"></span></span>`;}
 // Hof: fünf Ämter
@@ -22578,8 +22580,8 @@ function eschGenSchicksal(B,fh){
     const x=(s===0)===(B.attSide===0)?B.ctx.a:B.ctx.defArmies[0];if(!x||!x.gen)continue;
     const eig=x.f===S.player,G=genOf(x),alt=G.n;
     if(!f.lebt&&Math.random()<0.5){x.gen=newGeneral(x.f);addLog(eig?`${alt} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`:`Der feindliche Feldherr ${alt} ist in der Schlacht gefallen.`,true,eig?'bad':'good');}
-    else if(!f.lebt)addLog(eig?`${alt} wurde aus der Schlacht getragen – schwer verwundet, aber am Leben.`:`Der feindliche Feldherr ${alt} wurde schwer verwundet vom Feld getragen.`,true);
-    else if(eig)addLog(`${alt} wurde in der Schlacht verwundet.`,false);
+    else if(!f.lebt){G.wund={bis:S.turn+5,st:2};addLog(eig?`${alt} wurde aus der Schlacht getragen – schwer verwundet, aber am Leben. Fünf Runden lang führt der Feldherr schwächer.`:`Der feindliche Feldherr ${alt} wurde schwer verwundet vom Feld getragen.`,true);}
+    else{G.wund={bis:S.turn+2,st:1};if(eig)addLog(`${alt} wurde in der Schlacht verwundet und führt zwei Runden lang schwächer.`,false);}
   }
 }
 function eschEnde(r){
