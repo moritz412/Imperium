@@ -74,7 +74,9 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
 - [ ] S2.3 Wege und Karren – **Teil 1 fertig (31.10. abends):** Feldweg je vermessenem Feld (10 Denare, 5 Holz), Netz ab der
       Stadt (Breitensuche über Felder mit Weg). Betriebe liefern nur verbunden („arbeitet, aber kein Weg zur Stadt“),
       Abzug nur noch 5 % je Feld Entfernung. Wege als Streifen zu Nachbarn mit Weg. Test 31/31 (PC, `PW_GPU=1`).
-      **Offen:** Karren sichtbar fahren lassen, Schotterweg/Römerstraße als Ausbau, Weg auch über unvermessenes Land?
+      **Teil 2 (31.10. abends):** Ochsenkarren je verbundenem Betrieb, fährt beladen (Farbe je Ware) über die Feldwege zur
+      Stadt und leer zurück, hält bei Pause. Test 32/32 (Anzahl Karren geprüft; die Fahrt selbst nicht angesehen).
+      **Offen:** Schotterweg/Römerstraße als Ausbau (schneller), Weg auch über unvermessenes Land?
       **Nicht getestet:** iPad.
 - [ ] S2.4 Fluss: Anleger, Flussboote auf dem Padus, Speicher (horreum) als Umschlagplatz.
 - [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).

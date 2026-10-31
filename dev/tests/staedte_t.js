@@ -163,6 +163,8 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.click('#info [data-a="landbau"]');
   const knopf2 = await p.evaluate(() => document.querySelector('#info .lage')?.textContent || '');
   ok('Umland per Knopf: vermessen lassen, dann bauen', /Landvermesser/.test(knopf1) && /arbeitet/.test(knopf2), knopf1 + ' | ' + knopf2);
+  const karren = await p.evaluate(() => SR.szene.karrenZahl());
+  ok('Karren fährt für den verbundenen Betrieb', karren === 1, karren + ' Karren');
   if (BILD) { await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_land.png') }); }
   await p.evaluate(() => SR.umland(false));
 

@@ -394,6 +394,18 @@ export function wegNetz(S) {
   return da;
 }
 export const verbunden = (S, f) => wegNetz(S).has(landKey(f));
+// Weg vom Feld zur Stadt über Felder mit Weg (Liste der Felder, Stadt zuletzt), null ohne Verbindung
+export function wegPfad(S, f) {
+  const karte = regionKarte(), vor = new Map([[landKey(f), null]]), q = [f];
+  for (let i = 0; i < q.length; i++) {
+    if (q[i].typ === 'stadt') { const p = []; for (let k = landKey(q[i]); k; k = vor.get(k)) p.push(karte.find(h => landKey(h) === k)); return p.reverse(); }
+    for (const [dq, dr] of HEX_NACHBARN) {
+      const n = karte.find(h => h.q === q[i].q + dq && h.r === q[i].r + dr);
+      if (n && !vor.has(landKey(n)) && hatWeg(S, n)) { vor.set(landKey(n), landKey(q[i])); q.push(n); }
+    }
+  }
+  return null;
+}
 export const nachbarn = f => HEX_NACHBARN.map(([dq, dr]) => regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr) || null);
 export function wegAnlegen(S, f) {
   const st = landStand(S, f);

@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey, hatWeg, nachbarn } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey, hatWeg, nachbarn, wegPfad } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -481,6 +481,37 @@ export function erzeugeSzene(leinwand, welt) {
       }
       region.g.add(g); landObj.set(k, { g, schl });
     }
+    // Karren (S2.3): je verbundenem Betrieb einer, fährt beladen zur Stadt und leer zurück
+    for (const k of karren) region.g.remove(k.g);
+    karren = [];
+    for (const f of region.felder) {
+      const l = (S.land || {})[landKey(f)]; if (!l || !l.betrieb) continue;
+      const pf = hatWeg(S, f) && wegPfad(S, f); if (!pf) continue;
+      const pts = pf.map(h => { const [x, z] = hexMitte(h.q, h.r); return [x, z, (HOEHE[h.typ] ?? 0.32) + 0.05]; });
+      const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+      const g = new THREE.Group(), lam = col => new THREE.MeshLambertMaterial({ color: col });
+      const wagen = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.8), lam(0x6b4a2a)); wagen.position.y = 0.22; g.add(wagen);
+      for (const sx of [-1, 1]) { const rad = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8).rotateZ(Math.PI / 2), lam(0x3a2a1a)); rad.position.set(sx * 0.28, 0.16, 0); g.add(rad); }
+      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a }[l.betrieb] || 0xd9c26e));
+      last.position.y = 0.4; g.add(last);
+      const ochse = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), lam(0xb8a890)); ochse.position.set(0, 0.3, 0.85); g.add(ochse);
+      g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      region.g.add(g); karren.push({ g, pts, c, L: c[c.length - 1], last, ph: (f.q * 3 + f.r * 7 + 20) % 10 });
+    }
+  }
+  let karren = [], kzeit = 0;
+  function karrenFahren(dt) {
+    kzeit += dt;
+    for (const k of karren) {
+      if (k.L <= 0) continue;
+      const hin = k.L / 1.6, zyklus = 2 * hin + 3, t = (kzeit + k.ph) % zyklus;
+      const zurStadt = t < hin + 1.5, s = t < hin ? t * 1.6 : t < hin + 1.5 ? k.L : t < 2 * hin + 1.5 ? k.L - (t - hin - 1.5) * 1.6 : 0;
+      let i = 1; while (i < k.c.length - 1 && k.c[i] < s) i++;
+      const a = k.pts[i - 1], b = k.pts[i], f = Math.min(1, (s - k.c[i - 1]) / Math.max(1e-6, k.c[i] - k.c[i - 1]));
+      k.g.position.set(a[0] + (b[0] - a[0]) * f, a[2] + (b[2] - a[2]) * f, a[1] + (b[1] - a[1]) * f);
+      const dir = zurStadt ? 1 : -1; k.g.rotation.y = Math.atan2((b[0] - a[0]) * dir, (b[1] - a[1]) * dir);
+      k.last.visible = zurStadt;
+    }
   }
 
   function zentrieren(x, z) { ziel.copy(weltPos(x, z)); kameraSetzen(); }
@@ -489,6 +520,7 @@ export function erzeugeSzene(leinwand, welt) {
   function zeichnen(dt, laufTempo = 1) {
     zeit += dt;
     laufen(dt * laufTempo);
+    if (modus === 'region') karrenFahren(dt * laufTempo);
     gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY; });
     renderer.render(szene, kamera);
   }
@@ -504,5 +536,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { zeigeModus, hexAn, regionInfo, landAbgleichen, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }
