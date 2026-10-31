@@ -1646,6 +1646,9 @@ body{height:100%;min-height:-webkit-fill-available}
 #esch #kraft .kz{display:flex;justify-content:space-between;align-items:center;font:13px Marcellus,Georgia,serif;color:var(--mut);margin-top:1px;padding:0 4px}
 #esch #kraft .kz em{font-style:normal;color:var(--gold);font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:4px}
 #esch #kraft svg.ic{width:13px;height:13px}
+#esch #kPkt{display:none;position:relative;height:16px;margin-top:3px;border-radius:8px;background:rgba(0,0,0,.45);border:1px solid #14110d;overflow:hidden;font:12.5px Marcellus,Georgia,serif;color:var(--ink);text-align:center;line-height:15px}
+#esch #kPkt i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(#c9a24a,#8a6a24);opacity:.75;transition:width .3s}
+#esch #kPkt span{position:relative}
 #esch #hinweis{max-width:100%;text-align:center;padding:5px 16px;font-size:13.5px;border-radius:9px;background:var(--holz);border:1.5px solid var(--bronze);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5),0 3px 8px rgba(0,0,0,.45);opacity:0;transition:opacity 1.2s;min-height:28px}
 #esch #hinweis.an{opacity:1;transition:opacity .25s}
 
@@ -2024,6 +2027,7 @@ window.OFF=(function(){
       <span class="kn r" id="kR">0</span><div class="kb"><i id="kBar"></i><b></b></div><span class="kn k" id="kK">0</span>
       <div class="wap k"><svg viewBox="0 0 44 52"><path d="M3 3h38v25c0 12-10 18-19 22C13 46 3 40 3 28z"/><g><use href="#sy-speer" x="9" y="7" width="26" height="26"/></g></svg></div></div>
     <div class="kz"><span id="kS0">Rom</span><em><svg class="ic"><use href="#ic-sand"/></svg><span id="kZeit">0:00</span></em><em id="kTempo">1×</em><span id="kS1">Karthago</span></div>
+    <div id="kPkt"><i id="kPktB"></i><span id="kPktT">Siedlung</span></div>
   </div>
   <div id="feinde"></div>
   <div id="hinweis"></div>
@@ -2071,7 +2075,7 @@ window.OFF=(function(){
 //ESCH-KERN-BEGIN
 /* Schlachtkern: eine Fassung für die Testseite (dev/proto/schlacht_spiel.html) und das Hauptspiel (imperium.html, Abschnitt ESCH-KERN).
    Aufruf schlachtKern(OPT): OPT.root Wurzelelement (#esch) · OPT.renderer/OPT.canvas gemeinsamer Renderer (sonst eigener) · OPT.extern Hauptschleife von außen (api.schleife)
-   · OPT.assets/img Pfade · OPT.onEnde(ergebnis) Hauptspiel-Modus · OPT.bdiff Schwierigkeit 0..3 (fehlt: alte Testwerte) · OPT.limit/zeitSieg Zeitgrenze · OPT.farben Wappenfarben · OPT.ton Lautstärke aus dem Spiel */
+   · OPT.assets/img Pfade · OPT.onEnde(ergebnis) Hauptspiel-Modus · OPT.bdiff Schwierigkeit 0..3 (fehlt: alte Testwerte) · OPT.limit/zeitSieg Zeitgrenze · OPT.punkt Eroberungspunkt {seite:Verteidiger,x,z,r,zeit} · OPT.farben Wappenfarben · OPT.ton Lautstärke aus dem Spiel */
 function schlachtKern(OPT){
 'use strict';
 OPT=OPT||{};
@@ -3038,6 +3042,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
     // Gehöft / Rundhäuser an einer Flanke: flachste Stelle aus 48 Versuchen
     const sg=rn()<.5?-1:1;let bx=sg*140,bz=40,bs=1e9;
     for(let t=0;t<48;t++){const x=sg*(128+rn()*36),z=12+rn()*56,sc=hoeheSpanne(x,z,11)*3+WF(x,z)*8+(wegD(x,z)<9?3:0)+(FLU&&Math.abs(z-flussZ(x))<FLHW+16?60:0);if(sc<bs){bs=sc;bx=x;bz=z;}}
+    if(PK){bx=PK.x+(PK.x>0?-1:1)*(PK.r+12);bz=PK.z+(PK.seite?10:-10);}   // Siedlung am Rand des Eroberungspunkts
     const th=Math.atan2(-bx,-bz)+(rn()-.5)*.5,ct=Math.cos(th),st=Math.sin(th);
     const W=(lx,lz)=>[bx+lx*ct+lz*st,bz-lx*st+lz*ct];   // lokal (rechts, vorn) -> Welt
     const teil=(name,lx,lz,rot,sc,hind)=>{   // Teil an lokalem Ort; Bodenhöhe = tiefster Punkt der Grundfläche (nichts schwebt)
@@ -4310,6 +4315,7 @@ function ki(u){
     if(schlachtZ>40||U.some(v=>v.side===1&&!v.reserve&&!gone(v)&&!v.def.reit&&(v.state==='flieht'||v.strength<v.np*.6)))u.reserve=false;
     else{halt(u);return;}
   }
+  if(PK&&punktKI(u))return;
   const T=naechster(u,false)||naechster(u,true);if(!T){vorVerstecktem(u);return;}
   const d=Math.hypot(T.cx-u.cx,T.cz-u.cz);
   if(u.ai==='sturm'){auftrag(u,T.i,true);return;}                // Kelten stürmen zuerst
@@ -4593,7 +4599,7 @@ function schritt(dt){
     schlachtZ+=dt;
     tickAcc+=dt;
     while(tickAcc>=TICK){tickAcc-=TICK;kampfTick(TICK);}
-    verstTick();
+    verstTick();punktTick(dt);
     kiAcc+=dt;
     if(kiAcc>=.5){kiAcc=0;for(const u of U){if(u.side===1&&KI_IV>.5){u.kiW+=.5;if(u.kiW<KI_IV-1e-6)continue;u.kiW=0;}ki(u);}}
     if(OPT.limit&&schlachtZ>=OPT.limit){   // Zeitgrenze: wer deutlich mehr Soldaten auf dem Feld hat, gewinnt; sonst der Verteidiger (OPT.zeitSieg)
@@ -4728,6 +4734,10 @@ function pfeilSprite(c1,c2){
 }
 const destPfeil=pfeilSprite('#f3d27a','#b9812f'),zielPfeil=pfeilSprite('#e8705e','#8e241a');
 const FARBE=OPT.farben?OPT.farben.slice():[0xb02a22,0x7a3fa0];
+/* Eroberungspunkt (R8a, 31.10.): Kreis hinter dem Verteidiger (Siedlung ohne Mauern). Steht der Angreifer (nicht fliehend) im Kreis und kein Verteidiger, läuft die Uhr hoch; bei PK.zeit Sekunden siegt er.
+   Verteidiger im Kreis hält die Uhr an; ohne Angreifer im Kreis sinkt sie halb so schnell zurück. */
+const PK=OPT.punkt?{seite:OPT.punkt.seite?1:0,x:OPT.punkt.x||0,r:OPT.punkt.r||22,zeit:OPT.punkt.zeit||60,uhr:0,a:0,d:0,fertig:false,los:false,besetzt:false,ring:null,fill:null}:null;
+if(PK)PK.z=OPT.punkt.z!=null?OPT.punkt.z:(PK.seite?120:-120);
 if(OPT.farben)FARBE.forEach((c,i)=>WURZ.style.setProperty('--sc'+i,'#'+(c+0x1000000).toString(16).slice(1)));   // Wappenfarben der Reiche für Banner und Kräftebalken
 const ringGeo=new THREE.RingGeometry(.9,1,56);ringGeo.rotateX(-PI/2);
 const auraGeo=new THREE.RingGeometry(.975,1,120);auraGeo.rotateX(-PI/2);   // dünner Ring für die Aura des Feldherrn
@@ -4741,7 +4751,40 @@ function ringSetzen(m,cx,cz,rot,sx,sz,dy){
   for(let i=0;i<a.length;i+=3){const lx=b[i]*sx,lz=b[i+2]*sz,x=cx+lx*c+lz*s,z=cz-lx*s+lz*c;a[i]=x;a[i+1]=H(x,z)+dy;a[i+2]=z;}
   p.needsUpdate=true;
 }
+function punktBauen(){
+  if(!PK)return;
+  PK.uhr=0;PK.fertig=false;PK.los=false;PK.besetzt=false;PK.a=PK.d=0;
+  const fg=new THREE.RingGeometry(.02,.97,40,5);fg.rotateX(-PI/2);
+  PK.ring=ringBauen(FARBE[PK.seite],.7);PK.fill=ringBauen(FARBE[PK.seite],.14,fg);
+  ringSetzen(PK.ring,PK.x,PK.z,0,PK.r,PK.r,.35);ringSetzen(PK.fill,PK.x,PK.z,0,PK.r,PK.r,.3);
+  scene.add(PK.ring);scene.add(PK.fill);
+}
+function punktWeg(){if(!PK)return;for(const o of [PK.ring,PK.fill])if(o){scene.remove(o);o.geometry.dispose();o.material.dispose();}PK.ring=PK.fill=null;}
+function punktTick(dt){
+  if(!PK||PK.fertig)return;
+  const att=1-PK.seite;let a=0,d=0;
+  for(const u of U){if(!aktiv(u)||Math.hypot(u.mx-PK.x,u.mz-PK.z)>PK.r)continue;if(u.side===att)a++;else d++;}
+  PK.a=a;PK.d=d;
+  if(a>0&&d===0){
+    PK.uhr=Math.min(PK.zeit,PK.uhr+dt);
+    if(!PK.besetzt){PK.besetzt=true;hinweis(att===0?'Der Kreis ist besetzt – halte ihn.':'Der Feind besetzt die Siedlung!');}
+    if(PK.uhr>=PK.zeit){PK.fertig=true;hinweis(att===0?'Siedlung erobert!':'Die Siedlung ist gefallen!');ende(att===0?'sieg':'niederlage');return;}
+  }else if(a===0){PK.uhr=Math.max(0,PK.uhr-dt*.5);if(PK.uhr===0)PK.besetzt=false;}
+  if(PK.ring){const c=a>0&&d===0?FARBE[att]:FARBE[PK.seite];PK.ring.material.color.setHex(c);PK.fill.material.color.setHex(c);}
+}
+function punktKI(u){   // vorsichtig: Angreifer schicken nach Kampfbeginn 1-2 Nahkämpfer in den Kreis, der Verteidiger hält eine Einheit dort; true = Einheit ist damit beschäftigt
+  if(!PK||PK.fertig||u.fern||u.gen||u.def.reit)return false;
+  const L=U.filter(v=>v.side===u.side&&!v.fern&&!v.gen&&!v.def.reit&&aktiv(v));
+  const n=u.side===PK.seite?(L.length>=2?1:0):(L.length>=4?2:L.length>=2?1:0),k=L.indexOf(u);
+  if(n===0||k<0)return false;
+  if(u.side===PK.seite){if(k!==L.length-1)return false;}
+  else{if(!PK.los&&U.some(v=>v.engaged&&!gone(v)))PK.los=true;if(!PK.los||k>=n)return false;}
+  if(Math.hypot(u.mx-PK.x,u.mz-PK.z)<PK.r*.6){halt(u);return true;}
+  if(!(u.hasDest&&Math.hypot(u.destX-PK.x,u.destZ-PK.z)<25))befehl(u.i,PK.x,PK.z,u.side!==PK.seite);
+  return true;
+}
 function marker(){
+  punktBauen();
   U.forEach(u=>{
     u.ring=ringBauen(FARBE[u.side],.35);scene.add(u.ring);
     const g=new THREE.Group(),pole=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,6,6),new THREE.MeshLambertMaterial({color:lin(58,42,24)}));
@@ -5048,6 +5091,7 @@ function uiAktualisieren(){
    for(const u of U){if(gone(u))continue;const m=u.strength;if(u.side===0)m0+=m;else m1+=m;
      if(u.state==='flieht')continue;const w=m*(.4+.6*Math.max(0,u.morale)/u.def.mor);if(u.side===0)p0+=w;else p1+=w;}
    txt($('kR'),String(m0));txt($('kK'),String(m1));wid($('kBar'),p0+p1>0?p0/(p0+p1)*100:50);
+   if(PK){$('kPkt').style.display='block';txt($('kPktT'),'Siedlung: '+Math.floor(PK.uhr)+'/'+PK.zeit+' s');wid($('kPktB'),PK.uhr/PK.zeit*100);}
    txt($('kZeit'),fmtZeit(schlachtZ));txt($('kTempo'),pausiert?'Pause':(WET!=='klar'?WET[0].toUpperCase()+WET.slice(1)+' · ':'')+fmt(tempoV)+'× Tempo');}
   // Einheitenfenster
   const h=infoId>=0?U[infoId]:null,fe=$('fenster');
@@ -5133,7 +5177,7 @@ function bannerSchritt(){
 function uiEnde(){
   const e=$('ende'),sieg=ergebnis==='sieg',fl=[0,0],rest=[0,0];
   for(const u of U){fl[u.side]+=u.fled||0;rest[u.side]+=u.strength;}
-  let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(sieg?SEITE[1]+' weicht. '+SEITE[0]+' behauptet das Feld.':'Dein Heer ist zerschlagen.')+'</p><div class="liste">';
+  let h='<h2 class="titel">'+(sieg?'Sieg':'Niederlage')+'</h2><p class="u">'+(PK&&PK.fertig?(sieg?'Die Siedlung ist erobert.':'Die Siedlung ist gefallen.'):sieg?SEITE[1]+' weicht. '+SEITE[0]+' behauptet das Feld.':'Dein Heer ist zerschlagen.')+'</p><div class="liste">';
   let best=null;for(const u of U)if(u.side===0&&(u.kills||0)>=3&&(!best||u.kills>best.kills))best=u;   // Zusammenfassung (31.10., R9): Abschüsse, beste Einheit
   for(const u of U){if(u.side!==0)continue;
     h+='<div class="eh">'+bildHTML(u.def,0)+'<div class="t"><div class="n">'+u.name+(u===best?' <span class="best">★ beste Einheit</span>':'')+'</div><div class="v"><i style="width:'+(u.strength/u.np*100)+'%;background:#b8862f"></i><i style="width:'+(u.fled/u.np*100)+'%;background:#8a8478"></i><i style="width:'+(u.gef/u.np*100)+'%;background:#9c2a20"></i></div>'
@@ -5461,11 +5505,12 @@ function start(){
   if(phase!=='aufstellung')return false;
   phase='schlacht';pausiert=false;tickAcc=0;kiAcc=.5;TON.start();
   for(const u of U)if(u.side===0&&u.stance==='angreifen')u.aiT=0;
+  if(PK)hinweis(PK.seite===1?'Nimm die Siedlung ein: halte den Kreis '+PK.zeit+' s allein.':'Verteidige die Siedlung: kein Feind darf allein im Kreis stehen.');
   uiAktualisieren();return true;
 }
 function neu(){
   $('ende').style.display='none';
-  blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;
+  blutLeeren();gefallen[0]=gefallen[1]=0;ergebnis=null;pausiert=false;tempoV=1;sel=-1;selM.clear();schlachtZ=0;if(PK){PK.uhr=0;PK.fertig=false;PK.los=false;PK.besetzt=false;}
   const alt=U.map(u=>({ring:u.ring,flag:u.flag,auraR:u.auraR}));
   einheitenAnlegen();U.forEach((u,i)=>{u.ring=alt[i].ring;u.flag=alt[i].flag;u.auraR=alt[i].auraR;});
   phase='aufstellung';tickAcc=0;lastZ='';uiAktualisieren();
@@ -5585,7 +5630,7 @@ async function paketeFuer(R,ladeBar){
   const need=[...new Set(R.map(r=>r.paket).concat(R.some(r=>r.werte.reit&&!r.werte.ele)?['P_pferd']:[]).concat(R.some(r=>r.werte.ele)?['E_elefant']:[]))].filter(id=>!GELADEN[id]);
   for(let i=0;i<need.length;i++)await paketLaden(need[i],i,need.length,ladeBar);
 }
-function markerWeg(){for(const u of U){for(const o of [u.ring,u.flag,u.auraR])if(o){scene.remove(o);o.traverse(c=>{if(c.geometry&&c.geometry!==FAHNEGEO)c.geometry.dispose();});}}}
+function markerWeg(){punktWeg();for(const u of U){for(const o of [u.ring,u.flag,u.auraR])if(o){scene.remove(o);o.traverse(c=>{if(c.geometry&&c.geometry!==FAHNEGEO)c.geometry.dispose();});}}}
 let gefechtBusy=false;
 async function gefechtWaehlen(name){   // Vorlage wählen, fehlende Figurenpakete laden, Aufstellung neu bauen
   const g=name&&typeof name==='object'?name:GEFECHTE.find(x=>x.id===name||x.n===name);if(!g||gefechtBusy)return false;   // auch ein Beschreibungsobjekt (Tests: Spiegel- und Paargefechte)
@@ -5691,6 +5736,7 @@ return{
   beginne,abbau,schleife,ergebnisDaten,get bdiffName(){return BD?BD.n:null;},get kiIntervall(){return KI_IV;},get abgebaut(){return abbauT;},
   get phase(){return phase;},get pausiert(){return pausiert;},get tempoWert(){return tempoV;},get zeit(){return spielzeit;},
   get units(){return U;},get gefallen(){return gefallen.slice();},get ergebnis(){return ergebnis;},get fps(){return fpsLog;},
+  get punkt(){return PK?{x:PK.x,z:PK.z,r:PK.r,seite:PK.seite,zeit:PK.zeit,uhr:PK.uhr,a:PK.a,d:PK.d,fertig:PK.fertig,ring:!!PK.ring}:null;},
   get tris(){return KIT.map(k=>k.tris);},get zaehler(){return zaehler;},
   soldat(id){return{x:sX[id],z:sZ[id],st:sSt[id],act:sAct[id],hp:sHP[id],fat:sFat[id],clip:CN[sCur[id]],foe:sFoe[id],unit:sUnit[id],pferd:pCur[id]>=0?(U[sUnit[id]].ele?EFN:PFN)[pCur[id]]:null,ch:sCh[id],rush:sRush[id],v:Math.hypot(sVX[id],sVZ[id]),reit:sRt[id],ele:!!(sRt[id]&&U[sUnit[id]].ele),pan:sPanK[id],hurt:sHurt[id],rad:sRad[id]};},
   elefPanik(i,w){const u=U[i];if(!u||!u.ele)return -1;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0&&sSt[id]<=S_KAMPF&&!sPanK[id]){panikStart(id,u);if(w!=null)sPA[id]=w;return id;}}return -1;},   // nur für Tests / Bilder
@@ -22890,7 +22936,7 @@ function eschStart(args){
       if(nearR||((ti*977+(S.turn||0)*31)>>>0)%100<10){const fr=k=>((Math.sin((ti*131+(S.turn||0))*12.9898+k*78.233)*43758.5453)%1+1)%1;gel.fluss={z:(fr(1)-.5)*12,fords:[-(40+fr(2)*70),40+fr(3)*70]};}
     }
   }catch(e){gel=undefined;}
-  const api=schlachtKern({root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff:bdiffNow(),limit:600,gelaende:gel,zeitSieg:playerAttacker?'niederlage':'sieg',
+  const api=schlachtKern({root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff:bdiffNow(),limit:600,punkt:((P.b.walls||0)>0||!P.owner)?undefined:{seite:playerAttacker?1:0},gelaende:gel,zeitSieg:playerAttacker?'niederlage':'sieg',
     farben:[c0!=null?c0:0xb02a22,c1!=null?c1:0x7a3fa0],fps:!!GFX.fps,ton:{an:!!(au.sfx||au.music),m:Math.round((au.mv==null?0.6:au.mv)*100),g:Math.round((au.sv==null?0.8:au.sv)*100)},
     onEnde:r=>setTimeout(()=>eschEnde(r),0)});
   ESCH.api=api;

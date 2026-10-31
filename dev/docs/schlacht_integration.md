@@ -212,3 +212,11 @@ fs.writeFileSync(R+'imperium.html',CR?I.replace(/\n/g,'\r\n'):I);
 - Ergebnis: Verstärkungen stehen mit `tag` in `ergebnisDaten`, Feld `verst` = Ankunftszeit (s) oder -1 (nicht eingetroffen); nicht eingetroffene gelten als unversehrt (rest = np). Testseite `?verst=1`: je Seite 2 Fußeinheiten als Verstärkung (60 s / 80 s).
 - Tests: `dev/tests/schlacht_verst_t.js` (Zeitpunkt, Rand, Hinweis, Karte, Höchstzahl, Ergebnis), Lauf 2b in `eschlacht_integ_t.js`.
 - Offen: nicht auf dem echten iPad getestet; Fluss/Wald/Hang am Eintrittspunkt nicht eigens geprüft; keine Balance-Messung; Verstärkungsheere zählen in der Sieg-Zeitgrenze erst nach Ankunft.
+
+## Stand Eroberungspunkt R8a (31.10.)
+- Kern: `OPT.punkt={seite:<Verteidiger 0|1>,x,z,r:22,zeit:60}` (z fehlt: ±120 hinter dem Verteidiger). Kreis (Ring + schwache Füllung, Farbe der haltenden Seite; Angreifer allein im Kreis: seine Farbe), Gehöft/Rundhäuser daneben am Kreisrand.
+- Regel (`punktTick`): Angreifer (nicht fliehend, Einheitenmitte im Kreis) und kein Verteidiger im Kreis -> Uhr +1 s/s; bei `zeit` siegt der Angreifer (`sieg`, wenn Seite 0 angreift, sonst `niederlage`). Verteidiger im Kreis hält die Uhr an; ohne Angreifer im Kreis sinkt sie mit 0,5 s/s. Normales Ende und Zeitgrenze unverändert.
+- Anzeige: Balken „Siedlung: 34/60 s“ unter der Kopfleiste, Hinweise bei Beginn/Besetzung/Eroberung, Endtext „Die Siedlung ist erobert/gefallen“. API: `SCHLACHT.punkt`.
+- KI (`punktKI`, vorsichtig): KI-Angreifer schickt nach Kampfbeginn 1-2 Nahkämpfer (kein Fernkampf, keine Reiter, kein Feldherr) in den Kreis (bei weniger als 4 Einheiten nur 1); KI-Verteidiger hält die letzte Nahkampf-Einheit im Kreis (Haltung halten). Kämpfende Einheiten bleiben im Kampf.
+- Hauptspiel: `eschStart` setzt `punkt:{seite:Verteidiger}` wenn die Provinz einen Besitzer und keine Mauern hat. Testseite `?punkt=1` (Seite 1 verteidigt). Test: `dev/tests/schlacht_punkt_t.js`.
+- Nicht getestet: KI-Verhalten im Kampf (nur Code, kein Lauf), echte Kampagnenschlacht im Hauptspiel, iPad.
