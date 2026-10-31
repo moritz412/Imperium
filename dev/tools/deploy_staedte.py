@@ -13,7 +13,7 @@ def kopieren():
         return
     if os.path.exists(DST):
         shutil.rmtree(DST)
-    shutil.copytree(SRC, DST, ignore=shutil.ignore_patterns('BACKLOG.md', 'docs'))
+    shutil.copytree(SRC, DST, ignore=shutil.ignore_patterns('BACKLOG.md', 'docs', 'werkzeug'))
 
 if __name__ == '__main__':
     kopieren()
