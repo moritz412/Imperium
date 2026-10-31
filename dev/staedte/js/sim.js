@@ -267,3 +267,54 @@ export function ursache(S, b) {
   if (schwach) return `${x.n}: ${schwach.status[0].text}.`;
   return `Die ${x.n} liefert zu wenig. Baue eine zweite.`;
 }
+
+// ---------- Ansichten (S1.4): Farben für Felder und Gebäude ----------
+// Rückgabe: { felder: [[x, z, farbe]], geb: [[id, farbe]], legende: [[farbe, text]] }
+const GRUEN = 0x6fc060, GELB = 0xe9c84c, ORANGE = 0xe8903a, ROT = 0xe0603c, BLAU = 0x4f8fd0;
+const stufe = a => a >= 0.99 ? GRUEN : a >= 0.5 ? GELB : a > 0 ? ORANGE : ROT;
+export function ansicht(S, welt, art) {
+  const d = ansichtRoh(S, welt, art);
+  if (!d) return null;
+  // Grundfläche der Gebäude in derselben Farbe (Gebäude leuchten nur schwach, Mischfarben wären missverständlich)
+  const nach = new Map(S.geb.map(b => [b.id, b]));
+  for (const [id, c] of d.geb) {
+    const b = nach.get(id), [w, t] = groesse(b.t);
+    for (let z = b.z; z < b.z + t; z++) for (let x = b.x; x < b.x + w; x++) d.felder.push([x, z, c]);
+  }
+  return d;
+}
+function ansichtRoh(S, welt, art) {
+  const felder = [], geb = [];
+  const haeuser = S.geb.filter(b => b.t === 'huette');
+  if (art === 'wasser') {
+    const brunnen = S.geb.filter(b => b.t === 'brunnen'), r = GEB.brunnen.reichweite;
+    for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) {
+      if (welt.typ[z * RASTER + x] !== GRAS) continue;
+      if (brunnen.some(o => { const [cx, cz] = mitte(o); return Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r; })) felder.push([x, z, BLAU]);
+    }
+    for (const h of haeuser) geb.push([h.id, inReichweite(S, h, 'brunnen') ? GRUEN : ROT]);
+    return { felder, geb, legende: [[BLAU, 'Brunnen erreicht'], [GRUEN, 'Haus hat Wasser'], [ROT, 'Haus ohne Wasser']] };
+  }
+  if (art === 'arbeit') {
+    const geht = new Map();
+    for (const b of S.geb) for (const [id, n] of b.von || []) geht.set(id, (geht.get(id) || 0) + n);
+    for (const b of S.geb) {
+      if (GEB[b.t].arbeiter) geb.push([b.id, stufe((b.w || 0) / GEB[b.t].arbeiter)]);
+      else if (b.t === 'huette' && b.bew > 0) geb.push([b.id, (geht.get(b.id) || 0) >= Math.round(b.bew * ARBEIT_ANTEIL) ? GRUEN : BLAU]);
+    }
+    return { felder, geb, legende: [[GRUEN, 'voll besetzt'], [GELB, 'halb'], [ROT, 'ohne Arbeiter'], [BLAU, 'Haus mit freien Arbeitern']] };
+  }
+  if (art === 'stimmung') {
+    const maske = strassenMaske(S), rw = GEB.markt.reichweite;
+    for (const m of S.geb.filter(b => b.t === 'markt' && b.w > 0)) {
+      const dist = strassenWeg(maske, m, rw);
+      for (let i = 0; i < dist.length; i++) if (dist[i] >= 0 && dist[i] <= rw) felder.push([i % RASTER, Math.floor(i / RASTER), GELB]);
+    }
+    for (const h of haeuser) {
+      const n = (inReichweite(S, h, 'brunnen') ? 1 : 0) + (inReichweite(S, h, 'markt', maske) ? 1 : 0) + (S.versorgt.brot ? 1 : 0);
+      geb.push([h.id, [ROT, ORANGE, ORANGE, GRUEN][n]]);
+    }
+    return { felder, geb, legende: [[GELB, 'Straßen in Marktreichweite'], [GRUEN, 'Wasser, Markt und Brot'], [ORANGE, 'teilweise versorgt'], [ROT, 'nichts davon']] };
+  }
+  return null;
+}

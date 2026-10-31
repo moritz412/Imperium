@@ -35,7 +35,10 @@ Veröffentlicht unter `staedte/` (https://moritz412.github.io/Imperium/staedte/)
       ziehen legt Straße statt die Karte zu verschieben. Straßen ohne Fugen.
       Alte Spielstände ohne Straßen bleiben ladbar, Märkte versorgen dort aber erst nach Straßenbau.
       Straßen-Ziehen per Maus im Test geprüft (20/20). **Nicht getestet:** iPad, Ziehen mit dem Finger.
-- [ ] S1.4 Overlays Wasser, Stimmung, Arbeit.
+- [x] S1.4 Ansichten (31.10. abends): Spalte links unter der Kopfleiste mit Wasser, Stimmung, Arbeit (antippen = an/aus),
+      Legende daneben. Wasser: Brunnenbereich blau, Häuser grün/rot. Stimmung: Straßen in Marktreichweite gelb, Häuser nach
+      Versorgung (Wasser, Markt, Brot). Arbeit: Betriebe nach Besetzung, Häuser mit freien Arbeitern blau. Farbe als Fläche
+      unter dem Gebäude + schwaches Leuchten. Test 24/24 (PC, ). **Nicht getestet:** iPad.
 - [ ] S1.5 Startbildschirm mit Regionswahl (Mockup „Startregion“), zunächst nur Cremona aktiv.
 - [ ] S1.6 Ton (Hintergrund, Bauen, Jahreszeit) aus vorhandener Pipeline.
 

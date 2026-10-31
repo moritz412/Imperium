@@ -106,6 +106,18 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
   ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
 
+  // S1.4 Ansichten
+  await p.evaluate(() => SR.tempo(0));
+  await p.click('#ansicht button[data-ansicht="wasser"]');
+  const ans = await p.evaluate(() => ({ wasser: SR.szene.ansichtZahl(), leg: !document.querySelector('#legende').hidden,
+    stimmung: SR.ansicht('stimmung'), arbeit: SR.ansicht('arbeit') }));
+  ok('Ansicht Wasser zeigt Brunnenbereich', ans.wasser > 50 && ans.leg, ans.wasser + ' Felder');
+  ok('Ansicht Stimmung zeigt Marktstraßen und Häuser', ans.stimmung.felder.length > 5 && ans.stimmung.geb.length >= 5, ans.stimmung.felder.length + ' Straßenfelder, ' + ans.stimmung.geb.length + ' Häuser');
+  ok('Ansicht Arbeit färbt Betriebe', ans.arbeit.geb.length >= 8, ans.arbeit.geb.length + ' Gebäude');
+  if (BILD) { await p.screenshot({ path: BILD.replace(/\.png$/, '_ansicht.png') }); }
+  await p.evaluate(() => SR.ansicht(''));
+  ok('Ansicht wieder aus', await p.evaluate(() => SR.szene.ansichtZahl() === 0 && document.querySelector('#legende').hidden));
+
   if (BILD) { await p.evaluate(() => SR.tempo(0)); await p.waitForTimeout(500); await p.screenshot({ path: BILD }); console.log('  Bild: ' + BILD); }
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);

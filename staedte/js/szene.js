@@ -221,8 +221,9 @@ export function erzeugeSzene(leinwand, welt) {
         o.art = art;
       }
       // Auswahl hervorheben
-      const an = b.id === auswahlId;
-      o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(an ? 0x3a2a08 : 0x000000); });
+      const an = b.id === auswahlId, af = ansichtGeb.get(b.id);
+      const glanz = an ? 0x3a2a08 : af !== undefined ? new THREE.Color(af).multiplyScalar(0.3).getHex() : 0x000000;
+      o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
     laufwege(S);
@@ -318,6 +319,23 @@ export function erzeugeSzene(leinwand, welt) {
     for (const m of [koerper, kopf, sack]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
   }
 
+  // Ansichten (S1.4): eingefärbte Felder (Instancing) und leuchtende Gebäude
+  let ansichtGeb = new Map();
+  const ansichtFelder = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.94, 0.94).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }), RASTER * RASTER);
+  for (let i = 0; i < RASTER * RASTER; i++) ansichtFelder.setColorAt(i, new THREE.Color(0xffffff));
+  ansichtFelder.count = 0; ansichtFelder.frustumCulled = false; ansichtFelder.renderOrder = 2; szene.add(ansichtFelder);
+  function ansicht(d) {
+    ansichtGeb = new Map(d ? d.geb : []);
+    const f = d ? d.felder : [], farbe = new THREE.Color();
+    f.forEach(([x, z, c], i) => {
+      ansichtFelder.setMatrixAt(i, m4.makeTranslation(welt0 + x + 0.5, 0.07, welt0 + z + 0.5));
+      ansichtFelder.setColorAt(i, farbe.setHex(c));
+    });
+    ansichtFelder.count = f.length; ansichtFelder.instanceMatrix.needsUpdate = true; ansichtFelder.instanceColor.needsUpdate = true;
+    if (letzter) abgleichen(letzter[0], letzter[1]);
+  }
+
   // Vorschau beim Bauen
   let geist = null, geistTyp = '';
   function vorschau(t, x, z, gueltig) {
@@ -390,5 +408,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { modelleBereit, laeuferZahl: () => koerper.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

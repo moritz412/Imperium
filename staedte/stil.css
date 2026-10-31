@@ -22,6 +22,15 @@ svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .tempo button{width:44px;height:44px;border-radius:9px;border:1px solid var(--rand);background:transparent;display:flex;align-items:center;justify-content:center}
 .tempo button.an{background:var(--gold);color:#1f1a15;border-color:var(--gold)}
 
+#ansicht{position:fixed;left:10px;top:calc(max(10px,env(safe-area-inset-top)) + 70px);display:flex;flex-direction:column;gap:4px;padding:5px}
+#ansicht button{width:64px;height:58px;border-radius:9px;border:1px solid var(--rand);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#ansicht small{font-size:11px;color:var(--leise)}
+#ansicht button.an{background:var(--gold);color:#1f1a15;border-color:var(--gold)}
+#ansicht button.an small{color:#1f1a15}
+#legende{position:fixed;left:86px;top:calc(max(10px,env(safe-area-inset-top)) + 70px);padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px;pointer-events:none}
+#legende b{font-family:Cinzel,serif;color:var(--gold);font-size:14px}
+#legende span{display:flex;align-items:center;gap:8px}
+#legende i{width:14px;height:14px;border-radius:4px;display:inline-block}
 #auftrag{position:fixed;top:calc(max(10px,env(safe-area-inset-top)) + 70px);right:10px;width:270px;padding:12px 14px;pointer-events:none}
 #auftrag small{font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--gold)}
 #auftrag p{margin:6px 0 0;font-size:14px;line-height:1.35}

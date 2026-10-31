@@ -232,7 +232,22 @@ $('#menue').addEventListener('click', e => {
 });
 
 // ---------- Spielschleife ----------
-function allesZeichnen() { szene.abgleichen(S, auswahl); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+function allesZeichnen() { szene.abgleichen(S, auswahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+
+// ---------- Ansichten (S1.4) ----------
+let ansicht = '';
+const ANSICHT_NAME = { wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
+function ansichtZeichnen() {
+  const d = ansicht ? sim.ansicht(S, welt, ansicht) : null;
+  szene.ansicht(d);
+  document.querySelectorAll('#ansicht button').forEach(b => { const an = b.dataset.ansicht === ansicht; b.classList.toggle('an', an); b.setAttribute('aria-pressed', an); });
+  $('#legende').hidden = !d;
+  if (d) $('#legende').innerHTML = `<b>${ANSICHT_NAME[ansicht]}</b>` + d.legende.map(([c, t]) => `<span><i style="background:#${c.toString(16).padStart(6, '0')}"></i>${t}</span>`).join('');
+}
+$('#ansicht').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  ansicht = ansicht === b.dataset.ansicht ? '' : b.dataset.ansicht; ansichtZeichnen();
+});
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
   sim.monat(S, welt).forEach(melden);
@@ -258,4 +273,5 @@ window.SR = {
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
   modelle: () => szene.modelleBereit, szene,
+  ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };
