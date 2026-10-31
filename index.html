@@ -1729,7 +1729,7 @@ body{height:100%;min-height:-webkit-fill-available}
 #esch .karte .stz .zbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.6);overflow:hidden;border:1px solid rgba(0,0,0,.6)}
 #esch .karte .stz .zbar i{display:block;height:100%;width:100%;background:linear-gradient(#e46a58,#a22d22)}
 #esch .karte .stz b{font:600 14px Marcellus,Georgia,serif;color:var(--gold);min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
-#esch .karte .mud{height:3px;border-radius:2px;background:rgba(0,0,0,.5);margin:4px 1px 0;overflow:hidden}
+#esch .karte .mud{height:4px;border-radius:2px;background:rgba(0,0,0,.5);margin:4px 1px 0;overflow:hidden}
 #esch .karte .mud i{display:block;height:100%;width:0;background:#c9a24a}
 #esch .ring{width:38px;height:38px;border-radius:50%;flex:none;background:conic-gradient(var(--mc,#7bbf5a) calc(var(--m,100)*1%),rgba(0,0,0,.6) 0);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.7)}
 #esch .ring i{width:28px;height:28px;border-radius:50%;background:#241d16;display:grid;place-items:center;font:normal 11px Georgia,serif;color:var(--ink)}
@@ -2338,12 +2338,13 @@ function geometrie(pk,stufe){
   const teile=Object.values(pk.koerper).map(k=>({d:k[stufe]}));
   for(const t of Object.values(pk.teile))teile.push({d:t.nah});
   let n=0,m=0;teile.forEach(t=>{n+=t.d.n;m+=new Uint16Array(b64(t.d.idx)).length;});
-  const P=new Float32Array(n*3),Nr=new Float32Array(n*3),C=new Float32Array(n*3),B=new Float32Array(n*4),W=new Float32Array(n*4),I=new Uint32Array(m);
+  const P=new Float32Array(n*3),Nr=new Float32Array(n*3),C=new Float32Array(n*3),B=new Float32Array(n*4),W=new Float32Array(n*4),I=new Uint32Array(m),MS=new Float32Array(n);
   let o=0,oi=0;
   for(const t of teile){
     const d=t.d,p=new Float32Array(b64(d.pos)),nr=new Float32Array(b64(d.nrm)),c=new Uint8Array(b64(d.col)),
       si=new Uint8Array(b64(d.si)),sw=new Uint8Array(b64(d.sw)),ix=new Uint16Array(b64(d.idx));
     P.set(p,o*3);Nr.set(nr,o*3);
+    if(d.msk){const mk=new Uint8Array(b64(d.msk));for(let i=0;i<d.n;i++)MS[o+i]=mk[i];}   // Tönungsmaske (31.10.): 1 Kleidung, 2 Schildvorderseite
     for(let i=0;i<d.n;i++){
       for(let k=0;k<3;k++)C[(o+i)*3+k]=Math.pow(c[i*3+k]/255,2.2);
       for(let k=0;k<4;k++){B[(o+i)*4+k]=si[i*4+k];W[(o+i)*4+k]=sw[i*4+k]/255;}
@@ -2354,7 +2355,7 @@ function geometrie(pk,stufe){
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('normal',new THREE.BufferAttribute(Nr,3));
   g.setAttribute('color',new THREE.BufferAttribute(C,3));g.setAttribute('aBone',new THREE.BufferAttribute(B,4));
-  g.setAttribute('aWeight',new THREE.BufferAttribute(W,4));g.setIndex(new THREE.BufferAttribute(I,1));
+  g.setAttribute('aWeight',new THREE.BufferAttribute(W,4));g.setAttribute('aMsk',new THREE.BufferAttribute(MS,1));g.setIndex(new THREE.BufferAttribute(I,1));
   g.userData.tris=m/3;
   return g;
 }
@@ -2381,17 +2382,20 @@ function animTextur(pk){
   const tex=new THREE.DataTexture(new Float32Array(b64(pk.anim.f32)),pk.anim.w,pk.anim.h,THREE.RGBAFormat,THREE.FloatType);
   tex.minFilter=tex.magFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.flipY=false;tex.needsUpdate=true;return tex;
 }
+const UPAL={value:[]};   // Farbpalette der Völker (aus KFARB, beim Start gefüllt)
 function material(pk){
-  const U={uTime:{value:0},uAnimTex:{value:animTextur(pk)},uTexSize:{value:new THREE.Vector2(pk.anim.w,pk.anim.h)}};
+  const U={uPal:UPAL,uTime:{value:0},uAnimTex:{value:animTextur(pk)},uTexSize:{value:new THREE.Vector2(pk.anim.w,pk.anim.h)}};
   const m=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
   m.onBeforeCompile=sh=>{
     Object.assign(sh.uniforms,U);
     sh.vertexShader=sh.vertexShader
     .replace('#include <common>','#include <common>'+SKIN_GLSL)
     .replace('#include <beginnormal_vertex>','#include <beginnormal_vertex>\n'+SKIN_MAT+'\nobjectNormal=(skM*vec4(objectNormal,0.0)).xyz;')
-    .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed=(skM*vec4(transformed,1.0)).xyz;');
+    .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed=(skM*vec4(transformed,1.0)).xyz;')
+    .replace('#include <common>','#include <common>\nattribute float aMsk;attribute vec4 aTon;uniform vec3 uPal['+UPAL.value.length+'];')
+    .replace('#include <color_vertex>','vColor=vec3(1.0);vec3 cc=color;if(aMsk>0.5){float ti=aMsk>1.5?aTon.y:aTon.x;if(ti>=0.0)cc=uPal[int(ti+0.5)]*(aMsk>1.5?aTon.w:aTon.z);}vColor*=cc;\n#ifdef USE_INSTANCING_COLOR\nvColor*=instanceColor;\n#endif');
   };
-  m.customProgramCacheKey=()=>'schlachtspiel3';
+  m.customProgramCacheKey=()=>'schlachtspiel4';
   m.userData.U=U;
   // Schattenwurf: gleiche Haut-Anpassung im Tiefenmaterial, gleiche Uniform-Objekte
   const d=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});
@@ -2413,6 +2417,7 @@ function kitBauen(i,pk,id){
     g.setAttribute('aAnim',new THREE.InstancedBufferAttribute(new Float32Array(N*4),4));
     g.setAttribute('aAnimAlt',new THREE.InstancedBufferAttribute(new Float32Array(N*4),4));
     g.setAttribute('aLoop',new THREE.InstancedBufferAttribute(new Float32Array(N*3),3));
+    g.setAttribute('aTon',new THREE.InstancedBufferAttribute(new Float32Array(N*4).fill(-1),4));   // Farben je Volk (Palettenindex, Helligkeit)
     const m=new THREE.InstancedMesh(g,mat,N);m.frustumCulled=false;m.count=0;m.customDepthMaterial=mat.userData.depth;
     m.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(N*3).fill(1),3);   // Tönung je Instanz (Feldherr); sonst 1 = unverändert
     scene.add(m);im.push(m);
@@ -2446,6 +2451,40 @@ const GEL=OPT.gelaende||null,GKL=GEL&&GEL.klima||'mittelmeer',GTYP=GEL&&GEL.typ|
 const KV=({mittelmeer:{b:1,olive:1,busch:1,stein:1,gras:1},steppe:{b:.3,olive:.2,busch:.55,stein:.8,gras:.8},wueste:{b:.04,olive:0,busch:.1,stein:2.4,gras:.12},
   wald:{b:1,olive:0,busch:1,stein:.7,gras:1},schnee:{b:.8,olive:0,busch:.4,stein:1.2,gras:.3}})[GKL]||{b:1,olive:1,busch:1,stein:1,gras:1};
 const rnd=mulberry(20261030+GSAAT*7919);
+/* Fluss mit Furten (31.10.): OPT.gelaende.fluss={z,fords:[x1,x2]} · quer zwischen den Heeren, leicht geschwungen, 12 m breit; Furten 16 m. Ohne Angabe: kein Fluss. */
+const FLU=GEL&&GEL.fluss?{z:+GEL.fluss.z||0,fords:(GEL.fluss.fords&&GEL.fluss.fords.length?GEL.fluss.fords:[-60,60]).map(Number)}:null;
+const FLHW=6,FLWB=4.8,FLFW=8,FLWL=.32,FLP1=(GSAAT*.37)%6.28,FLP2=(GSAAT*.61)%6.28;   // halbe Breite · Sperrbreite (Tiefwasser) · halbe Furtbreite · Wasserhöhe
+function flussZ(x){return FLU.z+4*Math.sin(x*.022+FLP1)+1.5*Math.sin(x*.057+FLP2);}
+function fordS(x){let s=0;for(let k=0;k<FLU.fords.length;k++){const v=1-sst(5,8.5,Math.abs(x-FLU.fords[k]));if(v>s)s=v;}return s;}
+function flussHoehe(x,z,h){   // Flussbett als Senke, Ufer eben; in der Furt nur eine flache Mulde
+  const a=Math.abs(z-flussZ(x));if(a>FLHW+16)return h;
+  const rw=1-sst(235,275,Math.abs(x)),w=(1-sst(FLHW+2,FLHW+16,a))*rw;
+  h+=(.6-h)*w;
+  return h-(1-sst(FLHW*.6,FLHW,a))*rw*(1.6-1.2*fordS(x));
+}
+let _fx=0,_fz=0;
+function fordNah(x){let b=FLU.fords[0],bd=1e9;for(let k=0;k<FLU.fords.length;k++){const d=Math.abs(x-FLU.fords[k]);if(d<bd){bd=d;b=FLU.fords[k];}}return b;}
+function imFurt(x,z){   // steht in einer Furt (Flussband, Furtstreifen)
+  if(!FLU||Math.abs(z-flussZ(x))>FLHW+1)return false;
+  for(let k=0;k<FLU.fords.length;k++)if(Math.abs(x-FLU.fords[k])<FLFW)return true;return false;
+}
+function furtK(x,z){return FLU&&imFurt(x,z)?.5:1;}   // Tempo in der Furt ×0,5
+function furtZiel(sx,sz,tx,tz){   // Fluss zwischen Standort und Ziel: Zwischenpunkt an der nächsten Furt (erst Einstieg, in der Furt Ausstieg) -> _fx,_fz
+  const a=sz-flussZ(sx),b=tz-flussZ(tx),sa=a>=0?1:-1,sb=b>=0?1:-1,aa=a<0?-a:a;
+  let best=fordNah(sx);
+  if(sa!==sb){let bd=1e9;for(let k=0;k<FLU.fords.length;k++){const f=FLU.fords[k],d=Math.abs(sx-f)+Math.abs(f-tx);if(d<bd){bd=d;best=f;}}}
+  else if(!(aa<FLHW+1&&Math.abs(sx-best)<FLFW+1.5))return false;   // gleiche Seite: nur in der Furt selbst zum Ausstieg
+  const dx=sx-best,lat=(dx<-5.5?-5.5:dx>5.5?5.5:dx)*.6,col=Math.abs(dx)<FLFW-1&&aa<FLHW+7;
+  if(sa!==sb&&!col){_fx=best+lat;_fz=flussZ(_fx)+sa*(FLHW+5);}   // zum Einstieg
+  else{_fx=best+lat;_fz=flussZ(_fx)+sb*(FLHW+6);}                // durch die Furt zum Ausstieg
+  return true;
+}
+function flussPush(x,z,pad){   // Punkt aus dem Tiefwasser auf das nähere Ufer schieben (Furtstreifen frei) -> _hx,_hz
+  _hx=x;_hz=z;if(!FLU)return false;
+  const r=flussZ(x),dz=z-r,a=dz<0?-dz:dz,wb=FLWB+pad;if(a>=wb)return false;
+  for(let k=0;k<FLU.fords.length;k++)if(Math.abs(x-FLU.fords[k])<FLFW)return false;
+  _hz=r+(dz<0?-1:1)*wb;return true;
+}
 const lin=(r,g,b)=>new THREE.Color(r/255,g/255,b/255).convertSRGBToLinear();   // sRGB-Wert -> Arbeitsfarbe
 const disp=(r,g,b)=>new THREE.Color(r/255,g/255,b/255);                          // Anzeige-Wert (Nebel, Himmel)
 
@@ -2473,7 +2512,7 @@ function hoeheFormel(x,z){
     let h=1.5*Math.sin(x*.017+GPH[0])*Math.cos(z*.021+GPH[1])+1.0*Math.sin(x*.041-z*.033+GPH[2])+.35*Math.sin(x*.09+z*.07)+.25*Math.sin(z*.11-x*.05);
     h*=GAMP*(.35+.65*sst(40,150,Math.hypot(x*.8,z*1.1)));
     for(let k=0;k<GHILL.length;k++){const q=GHILL[k];h+=gauss(x,z,q[0],q[1],q[2],q[3],q[4]);}
-    return h*mask;
+    h*=mask;return FLU?flussHoehe(x,z,h):h;
   }
   const r=Math.max(Math.abs(x)/HX,Math.abs(z)/HZ),mask=1-sst(.70,.97,r);
   let h=1.5*Math.sin(x*.017+1.3)*Math.cos(z*.021+.4)+1.0*Math.sin(x*.041-z*.033+2)+.35*Math.sin(x*.09+z*.07)+.25*Math.sin(z*.11-x*.05);
@@ -2524,6 +2563,11 @@ for(let j=0;j<SPZ;j++){
     const dirt=Math.max(path,sst(.11,.22,s)*.8,sst(.8,.92,n2*.5+n3*.5)*.45);
     const o=(j*SPX+i)*4;
     SPL[o]=Math.round(Math.min(1,dirt)*255);SPL[o+1]=Math.round(dry*(1-path)*255);SPL[o+2]=Math.round(w*.9*(1-path)*255);SPL[o+3]=Math.round(sst(.2,.34,s)*255);
+    if(FLU){   // Flussbett und Ufer: Erde, in der Furt heller Kies
+      const fa=Math.abs(z-flussZ(x)),rw=1-sst(235,275,Math.abs(x)),bd=(1-sst(FLHW*.8,FLHW+2.5,fa))*rw;
+      if(bd>0){const kk=1-bd,gr=fordS(x)*(1-sst(FLHW+.5,FLHW+3,fa))*rw;
+        SPL[o]=Math.max(SPL[o],Math.round(bd*255));SPL[o+1]=Math.round(SPL[o+1]*kk);SPL[o+2]=Math.round(SPL[o+2]*kk);SPL[o+3]=Math.round(Math.max(SPL[o+3]*kk,gr*255));}
+    }
   }
 }
 const splTex=new THREE.DataTexture(SPL,SPX,SPZ,THREE.RGBAFormat,THREE.UnsignedByteType);
@@ -2584,7 +2628,7 @@ diffuseColor.rgb=gc*mix(gg,1.0,max(fk*.3,smoothstep(120.,520.,dd)*.9));`);
 };
 matGel.customProgramCacheKey=()=>'gelaende1';GMATS.push(matGel);
 const gelNetz=(function(){
-  const g=new THREE.PlaneGeometry(2*HX,2*HZ,HX/3,HZ/3);g.rotateX(-PI/2);
+  const g=new THREE.PlaneGeometry(2*HX,2*HZ,FLU?HX/1.5:HX/3,FLU?HZ/1.5:HZ/3);g.rotateX(-PI/2);   // mit Fluss 3-m-Netz (Bett 12 m breit)
   const p=g.attributes.position,n=g.attributes.normal;
   for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,H(x,z));grad(x,z);const l=Math.hypot(_gx,1,_gz);n.setXYZ(i,-_gx/l,1/l,-_gz/l);}
   const m=new THREE.Mesh(g,matGel);m.receiveShadow=true;scene.add(m);return m;
@@ -2595,6 +2639,17 @@ const gelAussen=(function(){
   const g=new THREE.ShapeGeometry(sh);g.rotateX(-PI/2);
   const m=new THREE.Mesh(g,matGel);m.receiveShadow=true;scene.add(m);return m;
 })();
+/* Wasserfläche des Flusses: schmaler Streifen auf Wasserhöhe, leicht durchsichtig (Phong, vorhandene Lichter), Ufer verdeckt das Gelände */
+const flussWasser=FLU?(function(){
+  const NX=121,pos=[],idx=[],nor=[],uv=[];
+  for(let i=0;i<NX;i++){const x=-240+i*4,r=flussZ(x),wy=FLWL-.34*fordS(x);for(const o of[-1,0,1]){pos.push(x,wy,r+o*(FLHW+1));   // in der Furt unter dem Kies: dort liegt nur eine dünne Mulde, der helle Kies bleibt sichtbar
+    nor.push(0,1,0);uv.push(i*.4,o*.5+.5);}}
+  for(let i=0;i<NX-1;i++){const a=i*3;idx.push(a,a+3,a+1,a+1,a+3,a+4,a+1,a+4,a+2,a+2,a+4,a+5);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);
+  const wc=({schnee:[132,160,176],wueste:[84,150,142],steppe:[100,128,122],wald:[58,104,100]})[GKL]||[84,136,152];
+  const m=new THREE.MeshPhongMaterial({color:lin(...wc),specular:0x445566,shininess:70,transparent:true,opacity:.58,depthWrite:false,side:THREE.DoubleSide});GMATS.push(m);
+  const me=new THREE.Mesh(g,m);me.renderOrder=2;me.receiveShadow=false;scene.add(me);return me;
+})():null;
 // Grenzsteine am Spielfeldrand
 (function(){
   const st=new THREE.CylinderGeometry(.5,.7,2,6),mt=new THREE.MeshPhongMaterial({color:lin(138,132,120),specular:0x000000,shininess:1,flatShading:true});
@@ -2908,10 +2963,10 @@ function umPut(name,x,y,z,rot,sc,tx,tz){   // Teil setzen (Ort, Höhe, Drehung u
 }
 function hoeheMin(x,z,r){let m=1e9;for(let k=0;k<6;k++){const a=k*1.0472,rr=k?r:0,h=H(x+Math.cos(a)*rr,z+Math.sin(a)*rr);if(h<m)m=h;}return m;}
 function hoeheSpanne(x,z,r){let a=1e9,b=-1e9;for(let k=0;k<9;k++){const an=k*.7854,rr=k?r:0,h=H(x+Math.cos(an)*rr,z+Math.sin(an)*rr);if(h<a)a=h;if(h>b)b=h;}return b-a;}
-function umHide(x,z,r){   // Bäume, Büsche und Steine im Kreis ausblenden (Matrix auf Größe 0; Original merken)
+function umHide(x,z,r,pred){   // Bäume, Büsche und Steine im Kreis (oder nach Bedingung pred(x,z)) ausblenden (Matrix auf Größe 0; Original merken)
   const r2=r*r;
-  const arr=(M,n,X,Z)=>{for(let i=0;i<n;i++){const dx=(X?X[i]:M[i*16+12])-x,dz=(Z?Z[i]:M[i*16+14])-z;
-    if(dx*dx+dz*dz<r2&&M[i*16+5]!==0){UMTREE.push({a:M,o:i*16,v:Float32Array.from(M.subarray(i*16,i*16+16))});for(const e of[0,1,2,4,5,6,8,9,10])M[i*16+e]=0;}}};
+  const arr=(M,n,X,Z)=>{for(let i=0;i<n;i++){const px=X?X[i]:M[i*16+12],pz=Z?Z[i]:M[i*16+14],dx=px-x,dz=pz-z;
+    if((pred?pred(px,pz):dx*dx+dz*dz<r2)&&M[i*16+5]!==0){UMTREE.push({a:M,o:i*16,v:Float32Array.from(M.subarray(i*16,i*16+16))});for(const e of[0,1,2,4,5,6,8,9,10])M[i*16+e]=0;}}};
   for(const sp of LODV)arr(sp.M,sp.n,sp.X,sp.Z);
   const st=VEG.stein;if(st){arr(st.m.instanceMatrix.array,st.n);st.m.instanceMatrix.needsUpdate=true;}
 }
@@ -2961,7 +3016,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
     const wue=GKL==='wueste',feind=(g.einheiten||[]).filter(e=>e.s===1),kel=!wue&&(g.umgebung==='kelt'||(g.umgebung!=='mittelmeer'&&feind.length&&feind.filter(e=>e.kultur==='keltisch').length>feind.length/2));
     // Gehöft / Rundhäuser an einer Flanke: flachste Stelle aus 48 Versuchen
     const sg=rn()<.5?-1:1;let bx=sg*140,bz=40,bs=1e9;
-    for(let t=0;t<48;t++){const x=sg*(128+rn()*36),z=12+rn()*56,sc=hoeheSpanne(x,z,11)*3+WF(x,z)*8+(wegD(x,z)<9?3:0);if(sc<bs){bs=sc;bx=x;bz=z;}}
+    for(let t=0;t<48;t++){const x=sg*(128+rn()*36),z=12+rn()*56,sc=hoeheSpanne(x,z,11)*3+WF(x,z)*8+(wegD(x,z)<9?3:0)+(FLU&&Math.abs(z-flussZ(x))<FLHW+16?60:0);if(sc<bs){bs=sc;bx=x;bz=z;}}
     const th=Math.atan2(-bx,-bz)+(rn()-.5)*.5,ct=Math.cos(th),st=Math.sin(th);
     const W=(lx,lz)=>[bx+lx*ct+lz*st,bz-lx*st+lz*ct];   // lokal (rechts, vorn) -> Welt
     const teil=(name,lx,lz,rot,sc,hind)=>{   // Teil an lokalem Ort; Bodenhöhe = tiefster Punkt der Grundfläche (nichts schwebt)
@@ -2998,6 +3053,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
         if(WF(x,z)>.45||wegD(x,z)<4)continue;
         const h=H(x,z);if(name!=='fels_klein'&&rn()>.2+Math.min(.8,Math.max(0,h)/6))continue;   // Hügel bevorzugt
         if(Math.hypot(x-bx,z-bz)<22)continue;
+        if(FLU&&Math.abs(z-flussZ(x))<FLHW+6)continue;
         const sc=s0+rn()*sv,o=umPut(name,x,h-.07*sc,z,rn()*TAU,sc,(rn()-.5)*.14,(rn()-.5)*.14);
         if(o<0)break;ok++;
         if(w.r*sc>1)hindAdd(x,z,w.r*sc,name,o);
@@ -3005,6 +3061,7 @@ function umweltBauen(g){   // je Gefecht neu: Bodenkarte und Bäume zurücksetze
     }
     for(const f of FUSS){umHide(f[0],f[1],f[2]);umPaint(f[0],f[1],f[2]+1.6);}
   }
+  if(FLU)umHide(0,0,0,(px,pz)=>Math.abs(pz-flussZ(px))<FLHW+2.5);   // keine Bäume, Büsche, Steine im Flussbett
   for(const k in UMW)UMW[k].m.instanceMatrix.needsUpdate=true;
   hindGridBauen();
   splTex.needsUpdate=true;
@@ -3266,6 +3323,27 @@ const sMk=new Uint8Array(N).fill(255),sPanK=new Uint8Array(N),sPan=new Float32Ar
 const cHead=new Int16Array(GW*GH).fill(-1);
 /* Feldherr (Paket I3): eine Figur der Leibwache (u.genId) ist der Feldherr: größer, getönt, mehr Leben, Standarte über ihm. Aura (Moral), Sammeln, Anfeuern, Tod = Moralschock */
 const sGen=new Uint8Array(N);
+const sTon=new Float32Array(N*4).fill(-1);   // je Soldat: Palettenindex Kleidung, Schild, Helligkeit Kleidung, Schild; −1 = Farbe des Pakets
+/* Farben je Kultur (31.10., F2): Stoffe nach dem, was die Völker färben konnten (ungefärbte Wolle/Leinen, Krapp-Rot, Waid-Blau, Ocker,
+   Purpur bei Karthago). Mehrfach genannte Farben kommen häufiger vor. bunt: Schild je Soldat (Stammeskrieger), sonst je Einheit. */
+const KFARB={
+  latein:{s:[[150,42,32],[150,42,32],[188,174,148],[132,36,28]],h:[[146,36,28],[118,30,24]]},
+  griechisch:{s:[[200,190,165],[200,190,165],[160,48,36],[66,74,112]],h:[[168,42,32],[200,190,162],[52,62,104],[150,112,52]]},
+  punisch:{s:[[206,196,172],[206,196,172],[112,42,84]],h:[[202,192,164],[140,42,36]]},
+  iberisch:{s:[[214,204,180],[214,204,180],[150,42,32]],h:[[122,92,60],[202,192,164]]},
+  keltisch:{s:[[70,88,52],[118,64,40],[58,66,92],[138,116,62],[100,86,62],[96,84,70]],h:[[70,88,52],[124,48,36],[58,66,92],[138,116,72],[102,82,56]],bunt:1},
+  germanisch:{s:[[112,92,66],[92,86,76],[62,72,96]],h:[[112,82,52],[140,42,32],[62,72,96]],bunt:1},
+  berber:{s:[[206,196,172],[150,116,76]],h:[[150,110,70]]},
+  aegyptisch:{s:[[226,218,200]],h:[[202,192,162],[150,110,60]]},
+  semitisch:{s:[[206,196,172],[150,46,40],[62,62,110]],h:[[160,122,62]]},
+  habescha:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]},afrikanisch:{s:[[222,212,190],[160,52,42]],h:[[132,96,62]]}};
+for(const k in KFARB){const F=KFARB[k];for(const t of['s','h'])F[t+'i']=F[t].map(c=>{UPAL.value.push(new THREE.Vector3(...c.map(v=>Math.pow(v/255,2.2))));return UPAL.value.length-1;});}   // Palette (linear) für den Figuren-Shader
+const tonWahl=(L,h)=>L[Math.floor(h*L.length)%L.length],tonHell=a=>Math.pow(.9+.2*a,2.2);
+function tonSetzen(id,u){
+  const F=KFARB[u.ein&&u.ein.kultur];if(!F)return;
+  const h1=hash2(id,17),h2=hash2(id,29),hu=hash2(u.i,31),hs=hash2(u.i,43);
+  const o=id*4;sTon[o]=tonWahl(F.si,h1);sTon[o+1]=tonWahl(F.hi,F.bunt?h2:hu);sTon[o+2]=tonHell(h2);sTon[o+3]=tonHell(F.bunt?h1:hs);
+}
 const AURA_R=40,SAMMEL_R=60,ANF_R=60,SAMMEL_CD=45,ANF_CD=60,ANF_DAUER=20,GEN_HP=3,GEN_SCHOCK=18;   // Meter · Sekunden · Lebensfaktor · Moralschock bei Tod der eigenen Seite
 const FK=[{s:0,a:0},{s:0,a:0}];   // Abklingzeit-Ende (schlachtZ) je Seite: Sammeln, Anfeuern
 let spielzeit=0;
@@ -3297,7 +3375,7 @@ function einheitenAnlegen(){
     U.push(u);
     for(let s=0;s<np;s++){
       const id=i*PRO+s;
-      sKit[id]=KITIX[r.paket];sUnit[id]=i;sSide[id]=side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
+      sKit[id]=KITIX[r.paket];sUnit[id]=i;sTon.fill(-1,id*4,id*4+4);if(!K.ele)tonSetzen(id,u);sSide[id]=side;sSt[id]=S_FORM;sAct[id]=0;sSlot[id]=s;u.occ[s]=id;sMov[id]=0;sFoe[id]=-1;sAtt[id]=-1;sTgt[id]=-1;sFace[id]=-1;
       sJit[id]=.88+Math.random()*.24;sJX[id]=(Math.random()-.5)*.5;sJZ[id]=(Math.random()-.5)*.5;sJR[id]=(Math.random()-.5)*.14;
       sHP[id]=K.hp;sFat[id]=0;sDelay[id]=0;sCool[id]=K.fern?Math.random()*K.fern.nachl[1]:Math.random()*.8;sAmmo[id]=K.fern?K.fern.vorrat:0;sVar[id]=Math.random()<.5?1:0;sRet[id]=Math.random()*.2;sBackT[id]=Math.random()*2;
       sPX[id]=NOGOAL;sPZ[id]=0;sVX[id]=sVZ[id]=0;sKX[id]=sKZ[id]=0;sJub[id]=0;sNAtt[id]=0;sFOff[id]=0;sFA[id]=0;sFSp[id]=1;
@@ -3557,7 +3635,7 @@ function trefferWirkung(i,j){
   const UA=U[sUnit[i]],UD=U[sUnit[j]];
   const ang=Math.abs(wrap(Math.atan2(sX[i]-sX[j],sZ[i]-sZ[j])-sR[j]));
   const fm=ang<1.15?1:ang<2.4?1.5:2;
-  const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1);
+  const dmg=sDmg[i]*(fm>1.6?1.35:fm>1?1.15:1)*(FLU&&imFurt(sX[j],sZ[j])?1.25:1);   // Furt: Abwehr ×0,8
   sHP[j]-=dmg;zaehler.treffer++;sFat[j]=Math.min(1,sFat[j]+.01);
   if(sHP[j]>0)ereignis(sDmg[i]<.9?'schildstoss':U[sUnit[i]].def.speer?'speer':'treffer',sX[j],sZ[j]);
   if(Math.random()<.18)staub(sX[j],sZ[j],1,.9,.3);
@@ -3801,6 +3879,7 @@ function kampfTick(dt){
     const st=sSt[i];if(st>S_FLIEH)continue;
     const u=U[sUnit[i]];
     u.nL++;u.fatS+=sFat[i];
+    if(st!==S_KAMPF){const fa=sFat[i];sFat[i]=u.run&&u.curSpeed>u.def.walk*1.2?Math.min(1,fa+(u.def.reit?.002:.003)*dt):u.curSpeed>.2?Math.max(0,fa-.002*dt):Math.max(0,fa-.006*dt);}   // Ausdauer (31.10.): Rennen kostet, Gehen/Stehen erholt
     if(sCool[i]>0)sCool[i]-=dt;
     sRet[i]-=dt;sBackT[i]-=dt;
     const act=sAct[i];
@@ -4127,13 +4206,14 @@ function bewegen(dt){
       let dx=u.destX-u.cx,dz=u.destZ-u.cz,d=Math.hypot(dx,dz);
       if(d<.6&&u.atkT<0)u.hasDest=false;
       else{
-        if(HC.length&&d>8&&wegpunkt(u)){dx=_wx-u.cx;dz=_wz-u.cz;d=Math.hypot(dx,dz)||1e-3;}   // Hindernis im Weg: erst zum Zwischenpunkt
+        if(FLU&&furtZiel(u.cx,u.cz,u.destX,u.destZ)){dx=_fx-u.cx;dz=_fz-u.cz;d=Math.hypot(dx,dz)||1e-3;}   // Fluss dazwischen: über die Furt
+        else if(HC.length&&d>8&&wegpunkt(u)){dx=_wx-u.cx;dz=_wz-u.cz;d=Math.hypot(dx,dz)||1e-3;}   // Hindernis im Weg: erst zum Zwischenpunkt
         u.stX=u.cx+dx;u.stZ=u.cz+dz;
         const h=Math.atan2(dx,dz),df=wrap(h-u.f);
         u.f+=Math.max(-2.5*dt,Math.min(2.5*dt,df));
         if(u.ele&&u.run&&u.trumT<=0&&u.atkT>=0&&d>38&&d<95&&phase==='schlacht'){u.trumT=45;if(Math.random()<.7)trompetenEinheit(u);}   // gelegentlich vor dem Ansturm
-        let sp=u.run?u.def.run:u.def.walk;if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;
-        {grad(u.cx,u.cz);const sl=(_gx*dx+_gz*dz)/d;sp*=sl>0?1-Math.min(.4,sl*2.2):1+Math.min(.12,-sl);sp*=1-.3*WF(u.cx,u.cz);}   // bergauf langsamer, Wald bremst
+        let sp=u.run?u.def.run*(1-.3*u.muede):u.def.walk*(1-.12*u.muede);if(Math.abs(df)>1)sp*=.35;if(u.scheu)sp*=.82;
+        {grad(u.cx,u.cz);const sl=(_gx*dx+_gz*dz)/d;sp*=sl>0?1-Math.min(.4,sl*2.2):1+Math.min(.12,-sl);sp*=1-.3*WF(u.cx,u.cz);if(FLU)sp*=furtK(u.cx,u.cz);}   // bergauf langsamer, Wald bremst, Furt halbiert
         if(u.sn>0&&!u.loesen){const lag=Math.hypot(u.cx-u.mx,u.cz-u.mz);sp*=Math.max(.25,Math.min(1,1-(lag-3)/6));}   // wartet auf die Soldaten
         const st=Math.min(sp*dt,d);u.cx+=dx/d*st;u.cz+=dz/d*st;u.curSpeed=st/dt;moving=true;
         if(u.run&&u.curSpeed>2)u.runT=.7;
@@ -4144,6 +4224,7 @@ function bewegen(dt){
     {const wd=WF(u.cx,u.cz),lz=Math.max(moving?1:0,.85*wd);u.loose+=(lz-u.loose)*Math.min(1,dt*(lz>u.loose?.6:.9));}   // Wald lockert die Formation
     u.cx=Math.max(-FELD_X,Math.min(FELD_X,u.cx));u.cz=Math.max(-FELD_Z,Math.min(FELD_Z,u.cz));
     if(HN){hindPush(u.cx,u.cz,1.5);u.cx=_hx;u.cz=_hz;}   // der Anker gleitet um Felsen und Häuser
+    if(FLU&&flussPush(u.cx,u.cz,0)){u.cz=_hz;}                  // und bleibt aus dem Tiefwasser
     u.state=moving?(u.run?'lauf':'marsch'):'steht';
   }
 }
@@ -4244,6 +4325,7 @@ function figuren(dt){
     }
     else{   // Formation: Platz ansteuern
       slotPos(u,sSlot[i],i);
+      if(FLU&&furtZiel(sX[i],sZ[i],_tx,_tz)){_tx=_fx;_tz=_fz;}   // Fluss zwischen Soldat und Platz: über die Furt
       const dx=_tx-sX[i],dz=_tz-sZ[i],d=Math.sqrt(dx*dx+dz*dz)+1e-6;
       if(sMov[i]){if(d<.12)sMov[i]=0;}else if(d>.45){sMov[i]=1;sDelay[i]=Math.random()*.4;}
       if(sMov[i]&&sDelay[i]<=0){
@@ -4261,7 +4343,7 @@ function figuren(dt){
     let slope=0;
     if(dvx!==0||dvz!==0){
       grad(sX[i],sZ[i]);const l=Math.sqrt(dvx*dvx+dvz*dvz);slope=(_gx*dvx+_gz*dvz)/l;
-      const k=(slope>0?1-Math.min(.4,slope*2.2):1+Math.min(.12,-slope))*(1-.35*WF(sX[i],sZ[i]));dvx*=k;dvz*=k;
+      const k=(slope>0?1-Math.min(.4,slope*2.2):1+Math.min(.12,-slope))*(1-.35*WF(sX[i],sZ[i]))*(FLU?furtK(sX[i],sZ[i]):1);dvx*=k;dvz*=k;
     }
     // Geschwindigkeit (Beschleunigung / Bremsen), Ort
     const ax=dvx-sVX[i],az=dvz-sVZ[i],al=Math.sqrt(ax*ax+az*az);
@@ -4322,6 +4404,11 @@ function figuren(dt){
           if(d2<rr*rr){const d=Math.sqrt(d2)||1e-3,nx=dx/d,nz=dz/d;sX[i]=L[k]+nx*rr;sZ[i]=L[k+1]+nz*rr;const vn=sVX[i]*nx+sVZ[i]*nz;if(vn<0){sVX[i]-=vn*nx;sVZ[i]-=vn*nz;
             const f=st===S_KAMPF?sFoe[i]:-1,gx=(f>=0?sX[f]:u.stX)-sX[i],gz=(f>=0?sZ[f]:u.stZ)-sZ[i],tg=(gx*-nz+gz*nx)>=0?1:-1;   // nicht frontal drücken: seitlich am Hindernis entlanggleiten, auf der Seite des Ziels
             sX[i]+=-nz*tg*1.8*dt;sZ[i]+=nx*tg*1.8*dt;}}}}}
+    // Fluss: Tiefwasser außerhalb der Furten ist nicht begehbar; am Ufer entlang zur nächsten Furt gleiten
+    if(FLU&&flussPush(sX[i],sZ[i],0)){
+      const sg=_hz>sZ[i]?1:-1;sZ[i]=_hz;if(sVZ[i]*sg<0)sVZ[i]=0;
+      const fx=fordNah(sX[i]);sX[i]+=(fx>sX[i]?1:-1)*2.2*dt;
+    }
     // Feldgrenzen / Flucht aus dem Feld
     if(st===S_FLIEH){
       if(Math.abs(sX[i])>FELD_X+6||Math.abs(sZ[i])>FELD_Z+6){soldatWeg(i);continue;}
@@ -4363,6 +4450,8 @@ function instSchreiben(K,l,rot,gr,px,py,pz,An,w,p){   // eine Instanz (Matrix + 
   A[a]=An[w];A[a+1]=An[w+1];A[a+2]=An[w+2];A[a+3]=An[w+3];
   B[a]=An[w+4];B[a+1]=An[w+5];B[a+2]=An[w+6];B[a+3]=An[w+7];
   L[q]=An[w+8];L[q+1]=An[w+9];L[q+2]=An[w+10];
+  const T=g.aTon.array,tw=An===sAn?(w/12)*4:-1;   // Tönung nur für Soldaten (Reittiere: Paketfarbe)
+  if(tw<0){T[a]=T[a+1]=-1;}else{T[a]=sTon[tw];T[a+1]=sTon[tw+1];T[a+2]=sTon[tw+2];T[a+3]=sTon[tw+3];}
 }
 const GEN_TON=[[1,1,1],[1,1,1]];   // Tönung des Feldherrn je Seite (aus den Wappenfarben)
 function genTonSetzen(){for(let k=0;k<2;k++){const c=FARBE[k];GEN_TON[k]=[1.5,1.2-.25*((c&255)/255),.5+.35*((c&255)/255)];}}   // goldener Stich, Blauanteil der Wappenfarbe schimmert durch
@@ -4393,7 +4482,7 @@ function baueInstanzen(){
   }
   blobMesh.count=nb;blobMesh.instanceMatrix.needsUpdate=true;
   for(const K of KIT)for(let l=0;l<2;l++){const m=K.im[l],g=m.geometry.attributes;m.count=K.n[l];m.instanceMatrix.needsUpdate=true;if(K.tint||K.tintD){m.instanceColor.needsUpdate=true;if(l===1)K.tintD=false;}
-    g.aAnim.needsUpdate=true;g.aAnimAlt.needsUpdate=true;g.aLoop.needsUpdate=true;}
+    g.aAnim.needsUpdate=true;g.aAnimAlt.needsUpdate=true;g.aLoop.needsUpdate=true;g.aTon.needsUpdate=true;}
 }
 /* ---- Geschosse (30.10.): ein InstancedMesh je Art (Speer, Stein), Ringpuffer GN; Matrizen werden ohne Zuweisungen in die Instanz-Arrays geschrieben ---- */
 function fuse(parts){   // mehrere Teile mit Einzelfarbe zu einer Geometrie
@@ -4586,6 +4675,7 @@ lis(document,'touchmove',e=>{if(!(e.target.closest&&e.target.closest('#tonkarte,
 function platziere(u,x,z){   // Aufstellung
   u.cx=Math.max(-FELD_X+8,Math.min(FELD_X-8,x));u.cz=Math.max(-FELD_Z+8,Math.min(-20,z));
   if(HN){hindPush(u.cx,u.cz,4);u.cx=_hx;u.cz=_hz;}
+  if(FLU){flussPush(u.cx,u.cz,5);u.cz=_hz;}
 }
 function tippen(px,py){
   if(!bodenAn(px,py,_g))return;
@@ -4623,6 +4713,7 @@ function befehl(i,x,z,laufen){
   const u=U[i];if(!u||gone(u)||u.state==='flieht')return false;
   u.atkT=-1;u.fBef=-1;u.rueck=false;u.zurueck=false;u.loesen=false;u.destX=Math.max(-FELD_X,Math.min(FELD_X,x));u.destZ=Math.max(-FELD_Z,Math.min(FELD_Z,z));
   if(HN){hindPush(u.destX,u.destZ,3.5);u.destX=_hx;u.destZ=_hz;}   // Ziele in Felsen und Häusern auf den Rand verschieben
+  if(FLU){flussPush(u.destX,u.destZ,3.5);u.destZ=_hz;}              // Ziele im Tiefwasser ans Ufer
   u.hasDest=true;u.run=!!laufen;
   if(u.engaged){u.sperre=2.5;u.kT=0;u.abzug=true;}   // Marschbefehl im Gefecht: löst sich vom Feind und geht bis zum Ziel durch (Verfolger schlagen in den Rücken)
   return true;
@@ -4720,7 +4811,7 @@ function fensterBauen(u){
   const gear=(E.waffen||E.ruestung||E.tier||E.rang)?'Waffen: '+STUFE_NAME[E.waffen]+' · Rüstung: '+STUFE_NAME[E.ruestung]+(E.rang?' · Rang: '+E.rangName:'')+(E.tier?' · aufgewertet (Stärke ×1,2)':''):'Waffen und Rüstung: einfach';
   e.innerHTML='<button class="x" aria-label="Schließen">×</button>'+bildHTML(K,u.side)+'<div class="w"><h3></h3><div class="sub"></div>'
     +'<div class="zl"><span>Mannschaft</span><b data-k="m"></b></div><div class="zl"><span>Angriff</span><b data-k="a"></b></div>'
-    +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div>'
+    +'<div class="zl"><span>Abwehr</span><b data-k="d"></b></div><div class="zl"><span>Moral</span><b data-k="o"></b></div><div class="zl"><span>Ausdauer</span><b data-k="f"></b></div>'
     +'<div class="zl"><span>Tempo</span><b data-k="t"></b></div><div class="zl"><span>'+(K.fern?'Reichweite':'Kampf')+'</span><b data-k="r"></b></div></div>'
     +'<p class="fa"></p><p class="sub" style="flex-basis:100%;margin:0"></p><p class="bs"></p><p class="vl"></p>';
   e.querySelector('h3').textContent=u.name;
@@ -4729,7 +4820,7 @@ function fensterBauen(u){
   e.querySelector('p.sub').textContent=E.paketGenau?'Figuren: eigenes Paket ('+E.paket+')':'Figuren vorläufig ('+E.paket+' als Ersatz)';
   e.querySelector('p.bs').textContent=E.beschreibung||'';
   e.querySelector('.vl').textContent=E.paketGenau?'':'Für diese Einheit gibt es noch keine eigenen Figuren.';
-  fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
+  fw={m:e.querySelector('[data-k=m]'),a:e.querySelector('[data-k=a]'),d:e.querySelector('[data-k=d]'),o:e.querySelector('[data-k=o]'),f:e.querySelector('[data-k=f]'),t:e.querySelector('[data-k=t]'),r:e.querySelector('[data-k=r]')};
   e.querySelector('.x').onclick=()=>{infoId=-1;};
   e.querySelector('.x').addEventListener('pointerdown',ev=>ev.stopPropagation());
 }
@@ -4745,7 +4836,7 @@ function uiAktualisieren(){
     klasse(k.d,'sel',selM.has(u.i));klasse(k.d,'multi',selM.size>1&&selM.has(u.i));klasse(k.d,'weg',g);
     wid(k.bar,u.strength/u.np*100);txt(k.sn,String(u.strength));
     hrefSet(k.zi,zs[0]);txt(k.zt,zs[1]);
-    wid(k.mu,Math.min(1,u.muede*1.6)*100);
+    wid(k.mu,Math.min(1,u.muede*1.6)*100);{const ms=u.muede>.45?2:u.muede>.22?1:0;if(k.ms!==ms){k.ms=ms;k.mu.style.background=['#c9a24a','#d97a2b','#c0392b'][ms];k.d.title=['','müde','erschöpft'][ms];}}
     if(k.m!==Math.round(m)){k.m=Math.round(m);k.ring.style.setProperty('--m',m);k.ring.style.setProperty('--mc',moralFarbe(u.morale));k.num.textContent=k.m;}
   }
   // Feindliste
@@ -4769,7 +4860,7 @@ function uiAktualisieren(){
     if(fensterId!==h.i){fensterId=h.i;fensterBauen(h);}
     fe.classList.add('an');
     const K=h.def;
-    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));
+    txt(fw.m,h.strength+' von '+h.np);txt(fw.a,fmt(K.atk*(h.anfT>0?1.2:1)));txt(fw.d,fmt(K.def));txt(fw.o,fmt(h.morale)+' / '+fmt(K.mor));txt(fw.f,h.muede>.45?'erschöpft':h.muede>.22?'müde':'frisch');
     txt(fw.t,fmt(K.walk)+' · '+fmt(K.run)+' m/s');txt(fw.r,K.fern?fmt(K.fern.reich)+' m · '+h.mun+'×':'Nahkampf');
   }else{fe.classList.remove('an');fensterId=-2;}
   // Knöpfe
@@ -4884,8 +4975,8 @@ for(const id of['bBegin','bHalt','bPlaenk','bLoesen','bForm','bSammeln','bAnfeue
    ==================================================================================================== */
 const TON=(()=>{
   const DIR=AS+'ton/',MAXM=7,POLY=12,HOER=60,FADE=3.5;
-  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
-    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
+  const SFX={klirren:8,schild:6,schildstoss:4,treffer:6,tod:6,speer:4,ruestung:4,kriegsgeschrei:4,horn:4,sieg_jubel:2,marsch:2,sturm:2,kampflaerm_nah:3,kampflaerm_fern:2,wind:2,wiese:1,wald:1,wueste:1,kueste:1,fluss:1,pfeil:4,pfeil_treffer:4,schleuder:3,wurf:3,
+    hufe_galopp:2,hufe_trab:1,wiehern:4,reiter_aufprall:3,pferd_tod:2,elefant_trompete:4,elefant_schritte:1,elefant_panik:2,elefant_tod:2,feldherr_ruf:3,anfeuern_jubel:2,flucht:1};   // Reiterei (30.10.): Dateien entstehen am PC, fehlende werden still übergangen
   /* Musik nach der Kultur der Spielerseite (31.10.): Aufmarsch- und Kampfstück des eigenen Volkes, sonst die allgemeinen Stücke */
   const KMUS={latein:'rom',griechisch:'hellen',punisch:'karthago',berber:'karthago',iberisch:'karthago',aegyptisch:'karthago',semitisch:'karthago',keltisch:'kelt',germanisch:'kelt'};
   let KULT='rom';
@@ -4909,7 +5000,7 @@ const TON=(()=>{
   const mItem=id=>({alt:['m_'+id+'_a','m_'+id+'_b'],id,art:null,ok:false});
   LISTE.push(mItem('kampf_1'));
   const SFX_FEHLT={s_speer_1:1};   // beim Erzeugen aussortiert (fast stumm)
-  const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste)};   // Klima-Teppiche nur laden, wenn gebraucht
+  const KLB={wald:GKL==='wald',wueste:GKL==='wueste',kueste:!!(GEL&&GEL.kueste),fluss:!!FLU};   // Klima-Teppiche nur laden, wenn gebraucht
   for(const a in SFX)for(let n=1;n<=SFX[a];n++)if((!(a in KLB)||KLB[a])&&!SFX_FEHLT['s_'+a+'_'+n])LISTE.push({alt:['s_'+a+'_'+n],id:null,art:a,ok:false});
   for(const id of ['ruhe_1','aufmarsch_%','kampf_%','sieg_1','niederlage_1','hoehepunkt_1','kampf_2','kampf_3','hoehepunkt_2','sieg_2','ruhe_2','niederlage_2']){const m=mItem(id);if(id.endsWith('%'))m.kz=id;LISTE.push(m);}
   function kultSetzen(){   // stärkste Kultur der Spielerseite (nach Figuren); noch nicht geladene Volksstücke umstellen
@@ -5029,7 +5120,7 @@ const TON=(()=>{
   function teppiche(){
     const n=ctx.currentTime,sz=.5+.5/(1+dist/140),ruhig=phase==='schlacht'&&!pausiert;
     const nah=ruhig?mn(1,nahK/40):0,fern=ruhig?mn(1,fernK/70)*(1-.7*nah):0,mar=ruhig?mn(1,marschK/50)*(1-.6*nah):0,stu=ruhig?mn(1,sturmK/40)*(1-.5*nah):0;
-    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:GKL==='schnee'?.4:.3,wiese:(GKL==='mittelmeer'||GKL==='steppe'?.25:GKL==='schnee'?.08:0)*(1-.8*nah),wald:KLB.wald?.3*(1-.8*nah):0,wueste:KLB.wueste?.3*(1-.7*nah):0,kueste:KLB.kueste?.28*(1-.8*nah):0};
+    const T={kampflaerm_nah:.95*nah*sz,kampflaerm_fern:.8*fern,marsch:.7*mar*sz,sturm:.8*stu*sz,wind:GKL==='schnee'?.4:.3,wiese:(GKL==='mittelmeer'||GKL==='steppe'?.25:GKL==='schnee'?.08:0)*(1-.8*nah),wald:KLB.wald?.3*(1-.8*nah):0,wueste:KLB.wueste?.3*(1-.7*nah):0,kueste:KLB.kueste?.28*(1-.8*nah):0,fluss:KLB.fluss?.22*(1-.8*nah):0};
     for(const k in T){if(!AMB[k]&&T[k]>0)ambStart(k);const a=AMB[k];if(a)a.g.gain.setTargetAtTime(T[k],n,.6);}
   }
 
@@ -5038,17 +5129,17 @@ const TON=(()=>{
   function hufAus(k){const h=HUF[k];if(!h)return;delete HUF[k];const n=ctx.currentTime;try{h.g.gain.cancelScheduledValues(n);h.g.gain.setTargetAtTime(0,n,.15);h.src.stop(n+.8);}catch(e){}h.src.onended=()=>{try{h.src.disconnect();h.g.disconnect();if(h.p)h.p.disconnect();}catch(er){}};}
   function hufe(){
     const n=ctx.currentTime;
-    for(const k in HUF)if(!U[k]||!U[k].def.reit||U[k].def.ele)hufAus(k);
+    for(const k in HUF)if(!U[k]||!U[k].def.reit)hufAus(k);
     for(const u of U){
-      if(!u.def.reit||u.def.ele)continue;
+      if(!u.def.reit)continue;   // Elefanten (31.10.): schwere Schritte statt Hufe
       let name=null,gv=0,pan=0;
       if(phase==='schlacht'&&!pausiert&&!gone(u)&&u.sn>0&&!u.engaged){
         const sp=u.state==='flieht'?u.def.run:u.curSpeed;
-        name=sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
+        name=u.def.ele?(sp>1?'elefant_schritte':null):sp>5?'hufe_galopp':sp>1.5?'hufe_trab':null;
         if(name&&!SB[name])name=null;
         if(name){
           const dx=u.mx-ziel.x,dz=u.mz-ziel.z,d=Math.sqrt(dx*dx+dz*dz),R=90+.3*dist;
-          if(d<R){const f=1-d/R;gv=.5*f*f*Math.min(1,u.sn/20)*Math.min(1,sp/7)*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
+          if(d<R){const f=1-d/R;gv=.5*f*f*(u.def.ele?Math.min(1,u.sn/4)*Math.min(1,sp/3):Math.min(1,u.sn/20)*Math.min(1,sp/7))*(.45+.55/(1+dist/120));pan=Math.max(-.85,Math.min(.85,(dx*Math.cos(az)-dz*Math.sin(az))/(d+10)));}
         }
       }
       let h=HUF[u.i];
@@ -5405,7 +5496,8 @@ return{
   pause(p){pausiert=p===undefined?!pausiert:!!p;uiAktualisieren();},
   stellen(i,x,z){if(phase==='aufstellung'&&U[i])platziere(U[i],x,z);},
   versetzen(i,x,z){const u=U[i];if(!u)return;const dx=x-u.cx,dz=z-u.cz;u.cx=x;u.cz=z;u.mx+=dx;u.mz+=dz;for(let s=0;s<PRO;s++){const id=u.occ[s];if(id>=0){sX[id]+=dx;sZ[id]+=dz;}}},   // nur für Tests: Einheit samt Soldaten umsetzen
-  hoehe(x,z){return H(x,z);},get gelaende(){return{typ:GTYP,klima:GKL,saat:GSAAT,gesetzt:!!GEL,huegel:GHILL.length};},
+  hoehe(x,z){return H(x,z);},get gelaende(){return{typ:GTYP,klima:GKL,saat:GSAAT,gesetzt:!!GEL,huegel:GHILL.length,fluss:FLU?{z:FLU.z,fords:FLU.fords.slice()}:null};},
+  fluss:{aktiv:!!FLU,zAt(x){return FLU?flussZ(x):null;},tief(x,z){return!!FLU&&Math.abs(z-flussZ(x))<FLWB-.6&&!FLU.fords.some(f=>Math.abs(x-f)<FLFW);},furt:imFurt},
   bildPos(x,z){const v=new THREE.Vector3(x,H(x,z),z).project(camera);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight];},
   haltung(i,s){if(U[i])U[i].stance=s;},kiSeiten(a,b){KIS[0]=!!a;KIS[1]=!!b;},   // nur für Tests: true = Computer-Führung, false = Haltung/Befehle (Spielerseite)
 
@@ -12103,14 +12195,16 @@ const GEN_LV=[0,120,300,560,900,1350];
 function newGeneral(f){const e=ep(),r=()=>Math.random();const tr=[GT_POS[Math.floor(r()*GT_POS.length)]];if(r()<0.35)tr.push(GT_NEG[Math.floor(r()*GT_NEG.length)]);
   return{n:cFull(f,e)||GEN_NAMES[e][Math.floor(r()*20)]+' '+GEN_SUR[e][Math.floor(r()*10)],lvl:1,xp:0,tr,e,face:Math.floor(r()*4)};}
 function genOf(a){if(!a)return null;if(!a.gen)a.gen=newGeneral(a.f);else if(a.gen.e!=null&&S&&a.gen.e<ep()&&!(a.gen.leg&&a.gen.e>=ep()-1)){const o=a.gen,n=newGeneral(a.f);n.lvl=Math.max(1,o.lvl-2);n.xp=GEN_LV[n.lvl-1];a.gen=n;}return a.gen;}
-function genFx(a,k){if(!a||!a.units)return 0;const G=genOf(a);let s=0;for(const t of G.tr){const T=GEN_TRAITS[t];if(T&&T.fx[k])s+=T.fx[k];}for(const r of G.ret||[]){const R=RETINUE[r];if(R&&R.fx[k])s+=R.fx[k];}if(k==='atk'||k==='def')s+=0.025*(G.lvl-1);if(k==='mor')s+=2*(G.lvl-1);return s;}
+function genFx(a,k){if(!a||!a.units)return 0;const G=genOf(a);let s=0;for(const t of G.tr){const T=GEN_TRAITS[t];if(T&&T.fx[k])s+=T.fx[k];}for(const r of G.ret||[]){const R=RETINUE[r];if(R&&R.fx[k])s+=R.fx[k];}if(k==='atk'||k==='def')s+=0.025*(G.lvl-1);if(k==='mor')s+=2*(G.lvl-1);const w=genWund(G);if(w)s+=({atk:-0.05,def:-0.05,mor:-5,mp:-0.1})[k]*w.st||0;return s;}
+// Verwundung aus der neuen Schlacht (31.10.): G.wund={bis:Runde,st:1 leicht|2 schwer}; bis dahin Angriff/Verteidigung -5 % je Stufe, Moral -5, Bewegung -10 %
+function genWund(G){return G&&G.wund&&S&&G.wund.bis>S.turn?G.wund:null;}
 function genXP(a,v){const G=genOf(a);if(!G)return;v*=1+((G.ret||[]).includes('chronist')?0.3:0);G.xp+=Math.round(v);
   while(G.lvl<GEN_LV.length&&G.xp>=GEN_LV[G.lvl]){G.lvl++;
     let gain='';if(G.lvl%2===0&&G.tr.filter(t=>!GEN_TRAITS[t].neg).length<4){const c=GT_POS.filter(t=>!G.tr.includes(t));if(c.length){const t=c[Math.floor(Math.random()*c.length)];G.tr.push(t);gain=` und gilt nun als „${GEN_TRAITS[t].n}“`;}}
     if(G.lvl===5){const ng=G.tr.findIndex(t=>GEN_TRAITS[t].neg);if(ng>=0){gain+=`, legt die Schwäche „${GEN_TRAITS[G.tr[ng]].n}“ ab`;G.tr.splice(ng,1);}}
     if(a.f===S.player)addLog(`${G.n} (${a.name}) steigt auf Stufe ${G.lvl}${gain}.`,true,'good');}}
 function genHtml(a,full){const G=genOf(a);if(!G)return'';const nx=GEN_LV[G.lvl]||null,p0=GEN_LV[G.lvl-1]||0;
-  return`<div class="gencard">${genPortrait(a,'gport')}<div><span class="eyebrow">Feldherr · Stufe ${G.lvl}</span><b>${esc(G.n)}${G.hon?` <em class="newu">${esc(genTitle(G,a.f))}</em>`:''}</b><div class="trs">${G.tr.map(t=>`<span class="tr${GEN_TRAITS[t].neg?' neg':''}" title="${GEN_TRAITS[t].d}">${GEN_TRAITS[t].n}</span>`).join('')}</div>${(G.ret||[]).length?`<div class="trs">${G.ret.map(r=>`<span class="tr ret" title="${RETINUE[r].d}">⚑ ${RETINUE[r].n}</span>`).join('')}</div>`:''}${deedHtml(G,full)}${(()=>{try{return fameHtml(G,a.f);}catch(e){return'';}})()}${full?`<small>${G.tr.map(t=>GEN_TRAITS[t].d).concat((G.ret||[]).map(r=>RETINUE[r].d)).join(' · ')}${G.lvl>1?` · Stufe: Angriff und Verteidigung +${Math.round(2.5*(G.lvl-1))} %`:''}</small>`:''}${nx?`<span class="pbar thin"><i style="width:${Math.round((G.xp-p0)/(nx-p0)*100)}%"></i></span>`:'<small>Höchste Stufe</small>'}</div></div>`;}
+  return`<div class="gencard">${genPortrait(a,'gport')}<div><span class="eyebrow">Feldherr · Stufe ${G.lvl}</span><b>${esc(G.n)}${G.hon?` <em class="newu">${esc(genTitle(G,a.f))}</em>`:''}</b><div class="trs">${G.tr.map(t=>`<span class="tr${GEN_TRAITS[t].neg?' neg':''}" title="${GEN_TRAITS[t].d}">${GEN_TRAITS[t].n}</span>`).join('')}${(w=>w?`<span class="tr neg" title="Angriff und Verteidigung −${5*w.st} %, Moral −${5*w.st}, Bewegung −${10*w.st} %">${w.st>1?'Schwer verwundet':'Verwundet'} · noch ${w.bis-S.turn} R.</span>`:'')(genWund(G))}</div>${(G.ret||[]).length?`<div class="trs">${G.ret.map(r=>`<span class="tr ret" title="${RETINUE[r].d}">⚑ ${RETINUE[r].n}</span>`).join('')}</div>`:''}${deedHtml(G,full)}${(()=>{try{return fameHtml(G,a.f);}catch(e){return'';}})()}${full?`<small>${G.tr.map(t=>GEN_TRAITS[t].d).concat((G.ret||[]).map(r=>RETINUE[r].d)).join(' · ')}${G.lvl>1?` · Stufe: Angriff und Verteidigung +${Math.round(2.5*(G.lvl-1))} %`:''}</small>`:''}${nx?`<span class="pbar thin"><i style="width:${Math.round((G.xp-p0)/(nx-p0)*100)}%"></i></span>`:'<small>Höchste Stufe</small>'}</div></div>`;}
 const PORTRAITS=new Set([0,1,2,3,4].flatMap(e=>[0,1].map(k=>`gp_e${e}_${k}`)));
 function genPortrait(a,cls){const G=genOf(a),e=clamp(G.e==null?ep():G.e,0,4),k=`gp_e${e}_${(G.face|0)%2}`;return PORTRAITS.has(k)?`<img class="${cls}" src="img/${k}.webp" alt="">`:`<span class="${cls} ge" style="${cst(a.f)}"><span class="crest" style="${cst(a.f)}"></span></span>`;}
 // Hof: fünf Ämter
@@ -12164,6 +12258,7 @@ const RUL_TRAITS={
 // v221 (30.10.): Neue Schlacht: Feldherr (Aura, Sammeln, Anfeuern; gefallen = 50 % tot, sonst schwer verwundet), Elefanten abgeschwächt, Elefantenlaute.
 // v222 (31.10.): Neue Schlacht: Gleichgewicht (Speer-Reichweite, keine Doppelzaehlung, kein Seitenvorteil), Wege um Hindernisse, Phalanx mit gesenkter Sarissa, Musik nach Volk, Feldherr-/Anfeuern-/Fluchtlaute; Schlachtdateien in der Offline-Liste (OFF_VER v216)
 // v223 (31.10.): Neue Schlacht: Gelaende aus der Provinz (Ebene/Huegel/Pass, Klima Mittelmeer/Steppe/Wueste/Wald/Schnee, Kueste), Klimafarben, Geraeusche Wald/Wueste/Kueste
+// v224 (31.10.): Neue Schlacht: Fluss mit Furten, Ausdauer (Rennen ermuedet, Erholung, Anzeige), Farben je Volk fuer Kleidung und Schilde, Elefantenschritte; Kampagne: verwundeter Feldherr fuehrt schwaecher (2/5 Runden); OFF_VER v217
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -22559,6 +22654,10 @@ function eschStart(args){
     const ty=pter(ti),dry=isAfr(pd.lon,pd.lat)||pd.lat<38.6||ar>0.55;
     const kl=(se===3&&(pd.lat>46||(pd.lat>41&&h<20)))?'schnee':ar>0.7?'wueste':ar>0.4?'steppe':(ty==='rough'&&!dry)?'wald':'mittelmeer';
     gel={typ:ty,klima:kl,saat:ti*131+(S.turn||0),kueste:!!(ft&&ft.coast)};
+    if(ty!=='mountain'){   // Fluss wie in der alten Schlacht: Provinz am Fluss (RIVER_PTS nahe der Hauptstadt / Angriff über einen Fluss), sonst 10 % Zufall
+      const cap=CAP[ti],nearR=(cap&&RIVER_PTS.some(q=>Math.hypot(q[0]-cap.x,q[1]-cap.z)<0.9))||!!(ctx&&ctx.res&&ctx.res.river);
+      if(nearR||((ti*977+(S.turn||0)*31)>>>0)%100<10){const fr=k=>((Math.sin((ti*131+(S.turn||0))*12.9898+k*78.233)*43758.5453)%1+1)%1;gel.fluss={z:(fr(1)-.5)*12,fords:[-(40+fr(2)*70),40+fr(3)*70]};}
+    }
   }catch(e){gel=undefined;}
   const api=schlachtKern({root,renderer,canvas,extern:true,assets:'proto/',img:'img/',bdiff:bdiffNow(),limit:600,gelaende:gel,zeitSieg:playerAttacker?'niederlage':'sieg',
     farben:[c0!=null?c0:0xb02a22,c1!=null?c1:0x7a3fa0],fps:!!GFX.fps,ton:{an:!!(au.sfx||au.music),m:Math.round((au.mv==null?0.6:au.mv)*100),g:Math.round((au.sv==null?0.8:au.sv)*100)},
@@ -22592,8 +22691,8 @@ function eschGenSchicksal(B,fh){
     const x=(s===0)===(B.attSide===0)?B.ctx.a:B.ctx.defArmies[0];if(!x||!x.gen)continue;
     const eig=x.f===S.player,G=genOf(x),alt=G.n;
     if(!f.lebt&&Math.random()<0.5){x.gen=newGeneral(x.f);addLog(eig?`${alt} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`:`Der feindliche Feldherr ${alt} ist in der Schlacht gefallen.`,true,eig?'bad':'good');}
-    else if(!f.lebt)addLog(eig?`${alt} wurde aus der Schlacht getragen – schwer verwundet, aber am Leben.`:`Der feindliche Feldherr ${alt} wurde schwer verwundet vom Feld getragen.`,true);
-    else if(eig)addLog(`${alt} wurde in der Schlacht verwundet.`,false);
+    else if(!f.lebt){G.wund={bis:S.turn+5,st:2};addLog(eig?`${alt} wurde aus der Schlacht getragen – schwer verwundet, aber am Leben. Fünf Runden lang führt der Feldherr schwächer.`:`Der feindliche Feldherr ${alt} wurde schwer verwundet vom Feld getragen.`,true);}
+    else{G.wund={bis:S.turn+2,st:1};if(eig)addLog(`${alt} wurde in der Schlacht verwundet und führt zwei Runden lang schwächer.`,false);}
   }
 }
 function eschEnde(r){
@@ -24401,7 +24500,7 @@ try{const _ws=warStandHtml;warStandHtml=function(f){const h=_ws(f);let w=0;try{w
 try{const _dh=dipHouseHtml;dipHouseHtml=function(g){const h=_dh(g);if(!h)return h;let k=null;try{const G=S.fac[g].dyn;if(G&&G.pu&&G.pu.lord===S.player)k='fam_personalunion';else if((S.fac[S.player].exl||[]).length)k='fam_exil';}catch(e){}return k?sysImg(k,'small')+h:h;};}catch(e){}
 
 // ---------- Reisemodus: Oberfläche (Vorladen, Status, Löschen) ----------
-const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101115], ["proto/figuren/k_A1_eques.json", 2828882], ["proto/figuren/k_A1_hastatus.json", 2564461], ["proto/figuren/k_A1_legion.json", 2547201], ["proto/figuren/k_A1_veles.json", 2538248], ["proto/figuren/k_A2_libysch.json", 2525720], ["proto/figuren/k_A2_numidisch.json", 2894802], ["proto/figuren/k_A3_iberisch.json", 2537564], ["proto/figuren/k_A4_balearisch.json", 2525589], ["proto/figuren/k_A6_adlig.json", 2540661], ["proto/figuren/k_A6_falx.json", 2523279], ["proto/figuren/k_A6_keltisch.json", 2538083], ["proto/figuren/k_A6_plaenkler.json", 2531758], ["proto/figuren/k_A7_hellenistisch.json", 2544325], ["proto/figuren/k_A7_hoplit.json", 2562404], ["proto/figuren/k_A7_phalangit.json", 2786821], ["proto/figuren/k_A7_toxotes.json", 2537916], ["proto/figuren/k_A8_aksum.json", 2537222], ["proto/figuren/k_A8_nubisch.json", 2537960], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v216';
+const OFF_MAN=[["img/pk_lk.json", 1745286], ["img/pk_lb.json", 562347], ["img/pk_vk.json", 1584136], ["img/pk_vk2.json", 1202181], ["img/pk_tk.json", 1681141], ["img/pk_p2.json", 1708769], ["img/pk_glaube.json", 1294998], ["img/pk_neu.json", 1270851], ["img/pk_vg.json", 2031529], ["audio/m_as.json", 6263554], ["audio/m_eu.json", 6263556], ["audio/m_or.json", 4473974], ["audio/m_sl.json", 2684398], ["audio/x_akbar.json", 1317920], ["audio/x_amerika.json", 3673928], ["audio/x_asien.json", 4123380], ["audio/x_asien2.json", 3464533], ["audio/x_asien3.json", 5105061], ["audio/x_augustus.json", 1253269], ["audio/x_caesar.json", 2310198], ["audio/x_chronik.json", 3847252], ["audio/x_cuauhtemoc.json", 915165], ["audio/x_de.json", 4895500], ["audio/x_endlos.json", 502561], ["audio/x_hannibal.json", 2142062], ["audio/x_harun.json", 1393440], ["audio/x_hundert.json", 862984], ["audio/x_kaleb.json", 1357440], ["audio/x_karl.json", 2088894], ["audio/x_kastilien.json", 1614916], ["audio/x_kleopatra.json", 1555076], ["audio/x_mansa.json", 1487040], ["audio/x_mongolen.json", 1430907], ["audio/x_napoleon.json", 1651585], ["audio/x_ostindien.json", 1398596], ["audio/x_pachacutec.json", 1477645], ["audio/x_portugal.json", 1284507], ["audio/x_rat.json", 8122496], ["audio/x_saladin.json", 1605778], ["audio/x_stE0a.json", 4424220], ["audio/x_stE0b.json", 4760816], ["audio/x_stE1.json", 639822], ["audio/x_stE2.json", 1809812], ["audio/x_stE3.json", 1161223], ["audio/x_stE4.json", 774342], ["audio/x_suleiman.json", 1466907], ["audio/x_usa.json", 1336622], ["audio/x_venedig.json", 1399858], ["audio/x_wikinger.json", 1865422], ["audio/x_wikinger_kino.json", 2547418], ["audio/x_wikinger_kino2.json", 1514675], ["audio/x_vgas.json", 9314245], ["audio/x_vgam.json", 1992906], ["audio/x_vgeu.json", 1131076], ["img/bcul.json", 568371], ["img/bcul2_a.json", 866200], ["img/bcul2_b.json", 1189144], ["img/bcul2_c.json", 484522], ["img/in_a.json", 3001180], ["img/in_am.json", 664943], ["img/in_as.json", 797116], ["img/in_as2.json", 1193352], ["img/in_as3.json", 1793706], ["img/in_m.json", 2029956], ["img/in_n1.json", 2685580], ["img/in_n2.json", 1378140], ["img/pb_bau.json", 1922070], ["img/pb_ev_a.json", 3264197], ["img/pb_ev_m.json", 3640168], ["img/pb_ev_n.json", 4308803], ["img/pb_ev_x.json", 1437473], ["img/pb_kampf.json", 2138504], ["img/pb_misc.json", 1997801], ["img/pb_sc.json", 3552180], ["img/pb_spr.json", 800537], ["img/pb_ui.json", 1386613], ["img/pk_amerika.json", 1060843], ["img/pk_asien.json", 1373986], ["img/pk_hof.json", 138492], ["img/pk_kt.json", 537346], ["img/pk_regional.json", 1638652], ["img/pk_reich.json", 3841337], ["img/pk_schlacht.json", 3767063], ["img/pk_sys.json", 4989342], ["img/veg_bb.json", 534779], ["img/ep_0.webp", 62842], ["img/g_sheet.webp", 115656], ["img/load_1.webp", 78320], ["img/load_2.webp", 45294], ["img/start_1.webp", 116824], ["img/start_2.webp", 94190], ["img/start_3.webp", 90036], ["img/start_4.webp", 73070], ["img/start_5.webp", 101418], ["img/u_sheet.webp", 483198], ["models/army0.json", 262003], ["models/army0h.json", 738460], ["models/army1.json", 270116], ["models/army1h.json", 725120], ["models/army2.json", 238599], ["models/army2h.json", 697845], ["models/army3.json", 227731], ["models/army3h.json", 652196], ["models/army4.json", 213732], ["models/army4h.json", 647068], ["models/c_kit.json", 3552108], ["models/c_en.json", 1284895], ["models/f_a1.json", 3301891], ["models/f_a2.json", 3296088], ["models/f_am.json", 806821], ["models/f_as.json", 1425603], ["models/f_eu.json", 1029379], ["models/f_or.json", 372814], ["models/kit0.json", 603623], ["models/kit1.json", 523697], ["models/kit2.json", 533728], ["models/kit3.json", 634436], ["models/kit4.json", 585870], ["models/lmk_a.json", 2409265], ["models/lmk_b.json", 1580101], ["models/obj_b.json", 2436228], ["models/s_all.json", 3621708], ["models/st_a.json", 2737072], ["models/st_b.json", 2861936], ["models/w_all.json", 2755697], ["saves/e0.json", 401004], ["saves/e1.json", 448182], ["saves/e2.json", 507481], ["saves/e3.json", 568849], ["saves/e4.json", 604576], ["saves/index.json", 548], ["saves/w1.json", 1311998], ["saves/w2.json", 1537696], ["saves/w3.json", 1884025], ["saves/w4.json", 2171493], ["saves/worlds.json", 14846], ["snd/g_asia.json", 1885465], ["snd/g_base.json", 3041301], ["snd/g_folk.json", 3532559], ["snd/g_world.json", 987616], ["proto/einheiten_kampagne.json", 101115], ["proto/figuren/k_A1_eques.json", 2831935], ["proto/figuren/k_A1_hastatus.json", 2567582], ["proto/figuren/k_A1_legion.json", 2550322], ["proto/figuren/k_A1_veles.json", 2541309], ["proto/figuren/k_A2_libysch.json", 2528773], ["proto/figuren/k_A2_numidisch.json", 2897875], ["proto/figuren/k_A3_iberisch.json", 2540489], ["proto/figuren/k_A4_balearisch.json", 2528213], ["proto/figuren/k_A6_adlig.json", 2543594], ["proto/figuren/k_A6_falx.json", 2525903], ["proto/figuren/k_A6_keltisch.json", 2541060], ["proto/figuren/k_A6_plaenkler.json", 2534667], ["proto/figuren/k_A7_hellenistisch.json", 2547250], ["proto/figuren/k_A7_hoplit.json", 2565461], ["proto/figuren/k_A7_phalangit.json", 2789874], ["proto/figuren/k_A7_toxotes.json", 2540508], ["proto/figuren/k_A8_aksum.json", 2540291], ["proto/figuren/k_A8_nubisch.json", 2540552], ["proto/figuren/k_E_elefant.json", 652813], ["proto/figuren/k_P_pferd.json", 422701], ["proto/figuren/umgebung.json", 401040], ["proto/ton/m_aufmarsch_hellen_a.mp3", 1220832], ["proto/ton/m_aufmarsch_hellen_b.mp3", 1220832], ["proto/ton/m_aufmarsch_karthago_a.mp3", 1220832], ["proto/ton/m_aufmarsch_kelt_a.mp3", 1220832], ["proto/ton/m_aufmarsch_rom_b.mp3", 1220832], ["proto/ton/m_hoehepunkt_1_a.mp3", 1220832], ["proto/ton/m_hoehepunkt_2_a.mp3", 1220832], ["proto/ton/m_kampf_1_a.mp3", 1220832], ["proto/ton/m_kampf_2_a.mp3", 1220832], ["proto/ton/m_kampf_3_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_a.mp3", 1220832], ["proto/ton/m_kampf_hellen_b.mp3", 1220832], ["proto/ton/m_kampf_karthago_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_a.mp3", 1220832], ["proto/ton/m_kampf_kelt_b.mp3", 1220832], ["proto/ton/m_kampf_rom_a.mp3", 1220832], ["proto/ton/m_niederlage_1_a.mp3", 1220832], ["proto/ton/m_niederlage_2_a.mp3", 1220832], ["proto/ton/m_niederlage_2_b.mp3", 1220832], ["proto/ton/m_ruhe_1_a.mp3", 1220832], ["proto/ton/m_ruhe_2_a.mp3", 1220832], ["proto/ton/m_ruhe_2_b.mp3", 1220832], ["proto/ton/m_sieg_1_a.mp3", 1220832], ["proto/ton/m_sieg_2_a.mp3", 1220832], ["proto/ton/s_anfeuern_jubel_1.mp3", 32832], ["proto/ton/s_anfeuern_jubel_2.mp3", 32832], ["proto/ton/s_elefant_panik_1.mp3", 24768], ["proto/ton/s_elefant_panik_2.mp3", 24768], ["proto/ton/s_elefant_schritte_1.mp3", 58176], ["proto/ton/s_elefant_tod_1.mp3", 24768], ["proto/ton/s_elefant_tod_2.mp3", 24768], ["proto/ton/s_elefant_trompete_1.mp3", 24768], ["proto/ton/s_elefant_trompete_2.mp3", 13536], ["proto/ton/s_elefant_trompete_3.mp3", 23040], ["proto/ton/s_elefant_trompete_4.mp3", 10944], ["proto/ton/s_feldherr_ruf_1.mp3", 24768], ["proto/ton/s_feldherr_ruf_2.mp3", 24768], ["proto/ton/s_feldherr_ruf_3.mp3", 24768], ["proto/ton/s_flucht_1.mp3", 32832], ["proto/ton/s_fluss_1.mp3", 74304], ["proto/ton/s_horn_1.mp3", 16416], ["proto/ton/s_horn_2.mp3", 30528], ["proto/ton/s_horn_3.mp3", 23904], ["proto/ton/s_horn_4.mp3", 15840], ["proto/ton/s_hufe_galopp_1.mp3", 74304], ["proto/ton/s_hufe_galopp_2.mp3", 74304], ["proto/ton/s_hufe_trab_1.mp3", 58176], ["proto/ton/s_kampflaerm_fern_1.mp3", 74304], ["proto/ton/s_kampflaerm_fern_2.mp3", 74304], ["proto/ton/s_kampflaerm_nah_1.mp3", 74304], ["proto/ton/s_kampflaerm_nah_2.mp3", 74880], ["proto/ton/s_kampflaerm_nah_3.mp3", 74304], ["proto/ton/s_klirren_1.mp3", 6624], ["proto/ton/s_klirren_2.mp3", 5472], ["proto/ton/s_klirren_3.mp3", 14400], ["proto/ton/s_klirren_4.mp3", 15264], ["proto/ton/s_klirren_5.mp3", 16416], ["proto/ton/s_klirren_6.mp3", 9216], ["proto/ton/s_klirren_7.mp3", 7488], ["proto/ton/s_klirren_8.mp3", 3168], ["proto/ton/s_kriegsgeschrei_1.mp3", 33408], ["proto/ton/s_kriegsgeschrei_2.mp3", 33408], ["proto/ton/s_kriegsgeschrei_3.mp3", 33408], ["proto/ton/s_kriegsgeschrei_4.mp3", 33408], ["proto/ton/s_kueste_1.mp3", 74304], ["proto/ton/s_marsch_1.mp3", 74304], ["proto/ton/s_marsch_2.mp3", 74304], ["proto/ton/s_pfeil_1.mp3", 8640], ["proto/ton/s_pfeil_2.mp3", 8640], ["proto/ton/s_pfeil_3.mp3", 8640], ["proto/ton/s_pfeil_4.mp3", 8352], ["proto/ton/s_pfeil_treffer_1.mp3", 8352], ["proto/ton/s_pfeil_treffer_2.mp3", 6624], ["proto/ton/s_pfeil_treffer_3.mp3", 8352], ["proto/ton/s_pfeil_treffer_4.mp3", 8640], ["proto/ton/s_pferd_tod_1.mp3", 23904], ["proto/ton/s_pferd_tod_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_1.mp3", 24768], ["proto/ton/s_reiter_aufprall_2.mp3", 24768], ["proto/ton/s_reiter_aufprall_3.mp3", 24768], ["proto/ton/s_ruestung_1.mp3", 15552], ["proto/ton/s_ruestung_2.mp3", 15840], ["proto/ton/s_ruestung_3.mp3", 16704], ["proto/ton/s_ruestung_4.mp3", 14688], ["proto/ton/s_schild_1.mp3", 16704], ["proto/ton/s_schild_2.mp3", 16416], ["proto/ton/s_schild_3.mp3", 14976], ["proto/ton/s_schild_4.mp3", 14400], ["proto/ton/s_schild_5.mp3", 16416], ["proto/ton/s_schild_6.mp3", 16128], ["proto/ton/s_schildstoss_1.mp3", 16128], ["proto/ton/s_schildstoss_2.mp3", 16704], ["proto/ton/s_schildstoss_3.mp3", 13536], ["proto/ton/s_schildstoss_4.mp3", 16416], ["proto/ton/s_schleuder_1.mp3", 15264], ["proto/ton/s_schleuder_2.mp3", 16128], ["proto/ton/s_schleuder_3.mp3", 16704], ["proto/ton/s_sieg_jubel_1.mp3", 34848], ["proto/ton/s_sieg_jubel_2.mp3", 34848], ["proto/ton/s_speer_2.mp3", 16416], ["proto/ton/s_speer_3.mp3", 11808], ["proto/ton/s_speer_4.mp3", 15552], ["proto/ton/s_sturm_1.mp3", 74880], ["proto/ton/s_sturm_2.mp3", 74304], ["proto/ton/s_sumpf_1.mp3", 74304], ["proto/ton/s_tod_1.mp3", 13248], ["proto/ton/s_tod_2.mp3", 20160], ["proto/ton/s_tod_3.mp3", 8640], ["proto/ton/s_tod_4.mp3", 6624], ["proto/ton/s_tod_5.mp3", 10080], ["proto/ton/s_tod_6.mp3", 15264], ["proto/ton/s_treffer_1.mp3", 15840], ["proto/ton/s_treffer_2.mp3", 16704], ["proto/ton/s_treffer_3.mp3", 16128], ["proto/ton/s_treffer_4.mp3", 16416], ["proto/ton/s_treffer_5.mp3", 14400], ["proto/ton/s_treffer_6.mp3", 15552], ["proto/ton/s_wald_1.mp3", 74304], ["proto/ton/s_wiehern_1.mp3", 16704], ["proto/ton/s_wiehern_2.mp3", 16704], ["proto/ton/s_wiehern_3.mp3", 16704], ["proto/ton/s_wiehern_4.mp3", 16704], ["proto/ton/s_wiese_1.mp3", 74304], ["proto/ton/s_wind_1.mp3", 74304], ["proto/ton/s_wind_2.mp3", 74304], ["proto/ton/s_wueste_1.mp3", 74304], ["proto/ton/s_wurf_1.mp3", 2304], ["proto/ton/s_wurf_2.mp3", 3744], ["proto/ton/s_wurf_3.mp3", 8064]],OFF_VER='v217';
 const OFFUI={run:false,stop:false};
 function offSize(set){return OFF_MAN.filter(([p])=>set==='alles'||!/^(audio|proto\/ton)\//.test(p)).reduce((a,[,s])=>a+s,0);}
 function offMB(b){return(b/1048576).toFixed(b<1048576*10?1:0).replace('.',',')+' MB';}
