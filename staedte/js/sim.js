@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG } from './daten.js';
+import { RASTER, GEB, CASA, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -245,11 +245,12 @@ export function monat(S, welt) {
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
   S.gut.denare += einwohner(S) * 0.4 * (S.stimmung / 70);
 
-  // Senatsauftrag
+  // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
   const a = AUFTRAEGE[S.auftrag];
   if (a && a.ok(S)) {
-    for (const [g, n] of Object.entries(a.lohn)) S.gut[g] += n;
-    meld.push('Auftrag des Senats erfüllt: ' + Object.entries(a.lohn).map(([g, n]) => `+${n} ${WAREN[g].n}`).join(', '));
+    const lohn = Object.entries(a.lohn).map(([g, n]) => [g, Math.round(n * lohnFaktor(S))]);
+    for (const [g, n] of lohn) S.gut[g] += n;
+    meld.push('Auftrag des Senats erfüllt: ' + lohn.map(([g, n]) => `+${n} ${WAREN[g].n}`).join(', '));
     S.auftrag++;
   }
 
@@ -257,9 +258,14 @@ export function monat(S, welt) {
   const r = rang(S);
   if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
+  // Handel und Abgaben (S2.5)
+  handelMonat(S);
+  if (S.monat % 12 === 8 && S.monat >= 12) meld.push(abgabeZahlen(S));
+
   const altJs = js;
   S.monat++;
   if (jahreszeit(S) !== altJs) meld.push(JAHRESZEITEN[jahreszeit(S)].n + ' beginnt.');
+  if (S.monat % 12 === 6 && S.monat >= 12) meld.push(`Rom erwartet am Ende des Herbstes ${abgabeBetrag(S)} Denare Abgaben.`);
   if (bedarf > 0 && !essen) meld.push('Die Vorräte reichen nicht – die Menschen hungern.');
   return meld;
 }
@@ -388,7 +394,7 @@ export function landBauen(S, f, t = betriebFuer(f)) {
 }
 // Wege (S2.3): Netz ab der Stadt über Felder mit Weg; nur verbundene Betriebe liefern
 const istAnleger = (S, f) => ((S.land || {})[landKey(f)] || {}).betrieb === 'anleger';
-export const hatWeg = (S, f) => f.typ === 'stadt' || istAnleger(S, f) || !!((S.land || {})[landKey(f)] || {}).weg;
+export const hatWeg = (S, f) => f.typ === 'stadt' || f.typ === 'nachbar' || istAnleger(S, f) || !!((S.land || {})[landKey(f)] || {}).weg;
 export function wegNetz(S) {
   const karte = regionKarte(), da = new Set(['0,0']), q = [{ q: 0, r: 0 }];
   for (let i = 0; i < q.length; i++) {
@@ -411,7 +417,8 @@ export function wegPfad(S, f) {
   }
   return null;
 }
-export const nachbarn = f => HEX_NACHBARN.map(([dq, dr]) => regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr) || null);
+export const nachbarn = f => HEX_NACHBARN.map(([dq, dr]) => regionKarte().find(h => h.q === f.q + dq && h.r === f.r + dr)
+  || (f.q + dq === NACHBAR.q && f.r + dr === NACHBAR.r ? nachbarFeld : null));   // Placentia nur für die Zeichnung
 export function wegAnlegen(S, f) {
   const st = landStand(S, f);
   if (st !== 'vermessen' && st !== 'betrieb') return { ok: false, grund: 'Erst vermessen' };
@@ -431,4 +438,52 @@ function landMonat(S, js, grenze, meld) {
     const faktor = landFaktor(f) * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor);
   }
+}
+
+// ---------- Nachbarstadt und Handel (S2.5) ----------
+export const nachbarFeld = { q: NACHBAR.q, r: NACHBAR.r, typ: 'nachbar' };
+export function handelOffen(S) {
+  const netz = wegNetz(S);
+  if (regionKarte().some(f => istAnleger(S, f) && netz.has(landKey(f)))) return true;   // Boote fahren flussaufwärts
+  return HEX_NACHBARN.some(([dq, dr]) => netz.has((NACHBAR.q + dq) + ',' + (NACHBAR.r + dr)));
+}
+const handelS = S => (S.handel = S.handel || { vorrat: {} });
+export const handelVorrat = (S, g) => handelS(S).vorrat[g] ?? HANDEL.waren[g].normal;
+export function preis(S, g) {
+  const w = HANDEL.waren[g], f = Math.pow(w.normal / Math.max(5, handelVorrat(S, g)), 0.7);
+  return w.basis * Math.max(0.4, Math.min(3, f));
+}
+// Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
+export const handelSumme = (S, g, art) => Math.max(1, Math.round(preis(S, g) * HANDEL.menge * (art === 'kauf' ? 1 + HANDEL.aufschlag : 1 - HANDEL.aufschlag)));
+export function handeln(S, g, art) {
+  if (!HANDEL.waren[g]) return { ok: false, grund: 'Diese Ware handelt Placentia nicht' };
+  if (!handelOffen(S)) return { ok: false, grund: 'Noch kein Weg nach Placentia' };
+  const n = HANDEL.menge, summe = handelSumme(S, g, art), v = handelS(S).vorrat;
+  if (art === 'verkauf') {
+    if ((S.gut[g] || 0) < n) return { ok: false, grund: `Es fehlen ${n - Math.floor(S.gut[g] || 0)} ${WAREN[g].n}` };
+    S.gut[g] -= n; S.gut.denare += summe; v[g] = handelVorrat(S, g) + n;
+  } else {
+    if (S.gut.denare < summe) return { ok: false, grund: `Es fehlen ${Math.ceil(summe - S.gut.denare)} Denare` };
+    if (handelVorrat(S, g) < n) return { ok: false, grund: `Placentia hat kaum noch ${WAREN[g].n}` };
+    if ((S.gut[g] || 0) + n > lagerGrenze(S)) return { ok: false, grund: `Lager für ${WAREN[g].n} voll` };
+    S.gut.denare -= summe; S.gut[g] = (S.gut[g] || 0) + n; v[g] = handelVorrat(S, g) - n;
+  }
+  return { ok: true, summe };
+}
+function handelMonat(S) {
+  const v = handelS(S).vorrat;
+  for (const g of Object.keys(v)) { const z = HANDEL.waren[g].normal; v[g] += (z - v[g]) * HANDEL.rueck; if (Math.abs(z - v[g]) < 1) delete v[g]; }
+}
+// Abgaben an Rom: am Ende des Herbstes; bezahlt → Gunst steigt, sonst sinkt sie stark
+export const gunst = S => S.gunst ?? ABGABE.gunst;
+export const lohnFaktor = S => 0.5 + gunst(S) / 100;
+export const abgabeBetrag = S => Math.round(ABGABE.grund + einwohner(S) * ABGABE.je);
+function abgabeZahlen(S) {
+  const n = abgabeBetrag(S);
+  if (S.gut.denare >= n) {
+    S.gut.denare -= n; S.gunst = Math.min(100, gunst(S) + ABGABE.plus);
+    return `Abgaben an Rom bezahlt: ${n} Denare. Die Gunst Roms steigt.`;
+  }
+  S.gunst = Math.max(0, gunst(S) - ABGABE.minus);
+  return `Die Kasse reicht nicht für die Abgaben an Rom (${n} Denare). Der Senat ist verärgert.`;
 }

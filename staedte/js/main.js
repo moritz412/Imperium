@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG } from './daten.js';
+import { GEB, CASA, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, VERMESSEN, LAND_BETRIEBE, WEG, HANDEL } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -209,7 +209,11 @@ $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
-    else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau' || a.dataset.a === 'weg') {
+    else if (a.dataset.a === 'handel') {
+      const r = sim.handeln(S, a.dataset.g, a.dataset.art);
+      if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('klick');
+      allesZeichnen(); hexInfo(hexWahl);
+    } else if (a.dataset.a === 'vermessen' || a.dataset.a === 'landbau' || a.dataset.a === 'weg') {
       const r = a.dataset.a === 'vermessen' ? sim.vermessen(S, hexWahl) : a.dataset.a === 'weg' ? sim.wegAnlegen(S, hexWahl) : sim.landBauen(S, hexWahl, a.dataset.t);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx(a.dataset.a === 'landbau' ? 'bauen' : 'klick');
       allesZeichnen(); hexInfo(hexWahl);
@@ -241,7 +245,9 @@ $('#menue').addEventListener('click', e => {
       <li>Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei.</li>
       <li>Im Herbst wird geerntet, im Winter wächst nichts – Vorräte anlegen.</li>
       <li>Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen. Der Markt versorgt nur Häuser an seinen Straßen.</li>
-      <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li></ol>`;
+      <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li>
+      <li>Umland: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.</li>
+      <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li></ol>`;
   }
 });
 
@@ -261,6 +267,7 @@ let hexWahl = null;
 function hexInfo(f) {
   hexWahl = f;
   if (!f) { $('#info').hidden = true; return; }
+  if (f.typ === 'nachbar') { handelInfo(); return; }
   const d = REGION_TYPEN[f.typ], weit = sim.hexAbstand(f, { q: 0, r: 0 }), stand = sim.landStand(S, f);
   const l = (S.land || {})[sim.landKey(f)], bt = (l && l.betrieb) || sim.betriebFuer(f), bd = LAND_BETRIEBE[bt];
   const pro = bd ? Object.entries(bd.erzeugt).map(([g, n]) => `${(n * sim.landFaktor(f)).toFixed(1).replace('.', ',')} ${WAREN[g].n}`).join(', ') : '';
@@ -286,7 +293,32 @@ function hexInfo(f) {
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${weit ? weit + (weit === 1 ? ' Feld' : ' Felder') + ' von der Stadt' : 'Stadtgebiet'}</div>
     <p>${d.text}</p>
-    ${d.nutzen ? `<div class="zeile"><span>Nutzen</span><b>${d.nutzen}</b></div>${lage}` : '<button class="knopf haupt" data-a="stadt">Zur Stadt</button>'}`;
+    ${d.nutzen ? `<div class="zeile"><span>Nutzen</span><b>${d.nutzen}</b></div>${lage}` : romInfo() + '<button class="knopf haupt" data-a="stadt">Zur Stadt</button>'}`;
+  $('#info').hidden = false;
+}
+
+// ---------- Nachbarstadt und Rom (S2.5) ----------
+const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+function romInfo() {
+  const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
+  return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
+    <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
+    <p>Wer pünktlich zahlt, gewinnt die Gunst des Senats – dann fällt auch der Lohn für Aufträge höher aus (jetzt ${Math.round(sim.lohnFaktor(S) * 100)} %).</p>`;
+}
+function handelInfo() {
+  const offen = sim.handelOffen(S), d = REGION_TYPEN.nachbar, n = HANDEL.menge;
+  const zeilen = Object.keys(HANDEL.waren).map(g => {
+    const p = sim.preis(S, g), rel = p / HANDEL.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
+    return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · Placentia: ${zahl(p)} je Stück, ${wort}</small></div>
+      <button class="knopf" data-a="handel" data-art="verkauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} verkaufen<small>+${sim.handelSumme(S, g, 'verkauf')} Denare</small></button>
+      <button class="knopf" data-a="handel" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf')} Denare</small></button></div>`;
+  }).join('');
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>${d.n}</h2><div class="unter">Nachbarstadt am Padus · Handel</div><p>${d.text}</p>
+    ${offen ? '<div class="lage gut">Händler fahren zwischen Cremona und Placentia</div>'
+      : '<div class="lage warn">Noch kein Weg nach Placentia</div><p>Lege Feldwege bis an Placentia heran oder baue einen Anleger am Padus – dann fahren die Boote flussaufwärts.</p>'}
+    <p>Was du verkaufst, wird in Placentia billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus.</p>
+    ${zeilen}`;
   $('#info').hidden = false;
 }
 
@@ -346,5 +378,6 @@ window.SR = {
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); },
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
+  handeln: (g, art) => { const r = sim.handeln(S, g, art); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

@@ -116,6 +116,9 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .startknoepfe{display:flex;flex-direction:column;gap:8px}
 .startknoepfe .knopf{min-height:50px;font-size:16px}
 .knopf:disabled{opacity:.5;cursor:default}
+.handel{display:grid;grid-template-columns:1fr 92px 92px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #3a3026}
+.handel small{display:block;font-size:12px;color:var(--leise);font-weight:400}
+.handel .knopf{min-height:44px;padding:2px 4px;font-size:13px;line-height:1.15}
 
 @media (max-width:820px){
   .startrahmen{flex-direction:column}.startspalte{flex:none}.italien{max-height:38vh}

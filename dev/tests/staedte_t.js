@@ -193,6 +193,28 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Padus: Anleger verbinden per Boot, Fischer liefert, Fisch in der Kopfleiste', fluss.a1 && fluss.b1 && fluss.f1 && !fluss.vorB && fluss.nachB && fluss.fischVerb && fluss.boote >= 2 && fluss.fang > 0 && fluss.gegessen > 0 && fluss.satt && fluss.kopf, JSON.stringify(fluss));
   if (BILD) { await p.evaluate(() => SR.umland(true)); await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_fluss.png') }); await p.evaluate(() => SR.umland(false)); }
 
+  // S2.5 Placentia: Handel erst mit Verbindung, Preise nach Angebot/Nachfrage, Abgaben an Rom im Herbst
+  const handel = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    const Z = kopie(); Z.land = {}; const zu = sim.handelOffen(Z), zuGrund = sim.handeln(Z, 'holz', 'verkauf').grund;
+    S.gut.holz += 20; S.gut.denare += 200;
+    const offen = sim.handelOffen(S), p0 = sim.preis(S, 'holz'), d0 = S.gut.denare;
+    const v = SR.handeln('holz', 'verkauf'), p1 = sim.preis(S, 'holz'), plus = S.gut.denare - d0;
+    const z0 = sim.preis(S, 'ziegel'), zi0 = S.gut.ziegel, k = SR.handeln('ziegel', 'kauf'), z1 = sim.preis(S, 'ziegel'), zi1 = S.gut.ziegel;
+    const M = kopie(); sim.monat(M, SR.welt); const rueck = sim.preis(M, 'holz');
+    const A = kopie(); A.monat = 20; A.gut.denare = 1000; A.gunst = 50; const mA = sim.monat(A, SR.welt).join(' | ');
+    const B = kopie(); B.monat = 20; B.gut.denare = 0; B.gunst = 50; const mB = sim.monat(B, SR.welt).join(' | ');
+    SR.umland(true); SR.hexInfo(sim.nachbarFeld);
+    const knoepfe = [...document.querySelectorAll('#info [data-a="handel"]')], ui = { n: knoepfe.length, frei: knoepfe.every(b => !b.disabled), titel: document.querySelector('#info h2').textContent };
+    const h0 = S.gut.holz; S.gut.holz += 10; knoepfe[0].click(); ui.klick = Math.round(S.gut.holz) === Math.round(h0);
+    SR.hexInfo(null); SR.umland(false);
+    return { zu, zuGrund, offen, v: v.ok, plus, billiger: p1 < p0, k: k.ok, mehrZiegel: zi1 - zi0, teurer: z1 > z0, erholt: rueck > p1,
+      gunstA: A.gunst, mA: /bezahlt/.test(mA), gunstB: B.gunst, mB: /reicht nicht/.test(mB), ui };
+  });
+  ok('Placentia: Handel erst mit Verbindung, Preise nach Angebot und Nachfrage', !handel.zu && /kein Weg/.test(handel.zuGrund) && handel.offen && handel.v && handel.plus > 0 && handel.billiger && handel.k && handel.mehrZiegel === 10 && handel.teurer && handel.erholt, JSON.stringify(handel));
+  ok('Abgaben an Rom am Ende des Herbstes, Gunst steigt/sinkt', handel.mA && handel.gunstA === 58 && handel.mB && handel.gunstB === 30, JSON.stringify({ a: handel.gunstA, b: handel.gunstB }));
+  ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
+
   // Stadtrang
   const rg = await p.evaluate(() => ({ r: SR.S.rang, kopf: document.querySelector('#datum').textContent }));
   ok('Stadtrang Dorf ab 40 Einwohnern', rg.r === 1 && /^Dorf/.test(rg.kopf), JSON.stringify(rg));

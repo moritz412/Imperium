@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, GEB, CASA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, landStand, landKey, hatWeg, nachbarn, wegPfad } from './sim.js';
+import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -394,12 +394,12 @@ export function erzeugeSzene(leinwand, welt) {
   let modus = 'stadt', region = null, wahlRing = null;
   const HEX = 3.2, S3 = Math.sqrt(3);
   const hexMitte = (q, r) => [REG_X + 1.5 * HEX * q, S3 * HEX * (r + q / 2)];
-  const HOEHE = { hang: 0.75, fluss: 0.08, stadt: 0.3 };
+  const HOEHE = { hang: 0.75, fluss: 0.08, stadt: 0.3, nachbar: 0.3 };
   function regionBauen() {
     const g = new THREE.Group(), felder = erzeugeRegion(), lam = c => new THREE.MeshLambertMaterial({ color: c });
     const hexGeo = h => new THREE.CylinderGeometry(HEX, HEX, h, 6).rotateY(Math.PI / 6).translate(0, h / 2 - 0.2, 0);
     const rand = 0.82 * HEX;
-    felder.forEach(f => {
+    [...felder, nachbarFeld].forEach(f => {
       const [x, z] = hexMitte(f.q, f.r), h = (HOEHE[f.typ] ?? 0.32) + 0.2, top = h - 0.2;
       let k = (f.q * 7 + f.r * 13 + 100) | 0; const zz = () => (k = (k * 16807) % 2147483647) / 2147483647;
       const im = (rr = rand) => { let a, b; do { a = (zz() * 2 - 1) * rr; b = (zz() * 2 - 1) * rr; } while (Math.hypot(a, b) > rr); return [a, b]; };
@@ -419,10 +419,12 @@ export function erzeugeSzene(leinwand, welt) {
       if (f.typ === 'hang') { for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(3.4, 0.12, 0.12), 0x4f6a30, 0, 0.08, (i - 2) * 0.6);
         for (let i = 0; i < 3; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.18, 1.4, 6), 0x3f5a2a, a, 0.7, b); } }
       if (f.typ === 'fluss') for (let i = 0; i < 4; i++) { const [a, b] = im(); add(new THREE.ConeGeometry(0.1, 0.5, 4), 0x7d8a48, a * 1.05, 0.25, b * 1.05); }
-      if (f.typ === 'stadt') {
+      if (f.typ === 'stadt' || f.typ === 'nachbar') {
         add(new THREE.CylinderGeometry(HEX * 0.8, HEX * 0.8, 0.04, 24), 0xc9b48a, 0, 0.02, 0);
         const mauer = new THREE.Mesh(new THREE.TorusGeometry(HEX * 0.8, 0.09, 4, 32).rotateX(Math.PI / 2), lam(0xb8aa8c)); mauer.position.set(x, top + 0.12, z); g.add(mauer);
-        const orte = [['markt', 0, 0, 0.35], ['casa', -1.1, -0.6, 0.38], ['casa', 1.1, -0.5, 0.38], ['casa', -0.3, 1.2, 0.38], ['huette', 1.0, 1.0, 0.38], ['huette', -1.4, 0.6, 0.38], ['speicher', 0.2, -1.5, 0.3]];
+        const orte = f.typ === 'nachbar'   // Placentia (S2.5): kleiner, mit Speicher am Fluss
+          ? [['speicher', 0.4, 1.0, 0.3], ['casa', -0.9, -0.4, 0.36], ['casa', 0.7, -0.9, 0.36], ['huette', -0.6, 1.1, 0.36], ['huette', 1.3, 0.1, 0.36], ['brunnen', 0, 0, 0.5]]
+          : [['markt', 0, 0, 0.35], ['casa', -1.1, -0.6, 0.38], ['casa', 1.1, -0.5, 0.38], ['casa', -0.3, 1.2, 0.38], ['huette', 1.0, 1.0, 0.38], ['huette', -1.4, 0.6, 0.38], ['speicher', 0.2, -1.5, 0.3]];
         orte.forEach(([t, a, b, sc]) => {
           const m = modelle && modelle[t] ? new THREE.Mesh(modelle[t].geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.8, 1.2), lam(0xd8b88a));
           m.scale.setScalar(modelle && modelle[t] ? sc : 0.35); m.position.set(x + a, top + 0.04, z + b); m.castShadow = true; g.add(m);
@@ -446,7 +448,7 @@ export function erzeugeSzene(leinwand, welt) {
     let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
     const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
     if (dq > dr && dq > ds) rq = -rr - rs; else if (dr > ds) rr = -rq - rs;
-    const f = region.felder.find(h => h.q === rq && h.r === rr) || null;
+    const f = region.felder.find(h => h.q === rq && h.r === rr) || (rq === nachbarFeld.q && rr === nachbarFeld.r ? nachbarFeld : null);
     if (wahlRing) { wahlRing.visible = !!f; if (f) { const [hx, hz] = hexMitte(f.q, f.r); wahlRing.position.set(hx, (HOEHE[f.typ] ?? 0.32) + 0.03, hz); } }
     return f;
   }
@@ -470,9 +472,9 @@ export function erzeugeSzene(leinwand, welt) {
       // Feldweg: halbe Strecke von der Mitte zu jedem Nachbarn mit Weg (der Nachbar zeichnet die andere Hälfte)
       [...wegNach].forEach((v, i) => {
         if (v !== '1') return;
-        const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, L = Math.hypot(dx, dz) / 2;
+        const n = nachbarn(f)[i], [nx, nz] = hexMitte(n.q, n.r), dx = nx - x, dz = nz - z, ganz = n.typ === 'nachbar' ? 2 : 1, L = Math.hypot(dx, dz) / 2 * ganz;
         const st = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, L + 0.3), new THREE.MeshLambertMaterial({ color: 0x9c8460 }));
-        st.position.set(x + dx / 4, top + 0.03, z + dz / 4); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
+        st.position.set(x + dx / 4 * ganz, top + 0.03, z + dz / 4 * ganz); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
       if (stand === 'betrieb' && (l.betrieb === 'anleger' || l.betrieb === 'fischer')) {
         const lam = c => new THREE.MeshLambertMaterial({ color: c });

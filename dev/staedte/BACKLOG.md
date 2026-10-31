@@ -84,7 +84,15 @@ Entschieden (Moritz 31.10.): Region als **Hex-Felder** (Regeln je Feld), aber al
       einem Anleger ist mit der Stadt verbunden, wenn ein anderer Anleger es ist. Boote pendeln sichtbar zwischen Anlegern.
       Test 33/33 (PC, `PW_GPU=1`, Logik per Schnittstelle; Bild nicht angesehen). Offen: Speicher als Umschlagplatz.
       **Nicht getestet:** iPad, Bedienung per Knopf für Fluss-Felder.
-- [ ] S2.5 Nachbarstadt und Handel (Preise nach Angebot/Nachfrage, Abgaben an Rom).
+- [x] S2.5 Nachbarstadt und Handel (31.10. nachts, Cloud): Placentia als eigenes Hex westlich vor dem Ring am Padus
+      (gezeichnet wie Cremona, kleiner). Handel offen, wenn ein Nachbarfeld von Placentia per Weg mit der Stadt verbunden ist
+      oder ein verbundener Anleger besteht. Fenster (Placentia antippen): je Ware 10 verkaufen/kaufen, Preis =
+      Grundpreis × (üblicher Vorrat / Vorrat)^0,7 (0,4–3 ×), Kauf +15 %, Verkauf −15 %, Vorrat kehrt monatlich um 10 % zurück
+      (`HANDEL` in daten.js). Abgaben an Rom am Ende jedes Herbstes ab dem 2. Jahr: 10 + 0,8 je Einwohner Denare; bezahlt →
+      Gunst +8, sonst −20 (`ABGABE`). Gunst ändert den Lohn der Senatsaufträge (50 → 100 %, 0 → 50 %, 100 → 150 %).
+      Gunst und Abgabe stehen im Fenster von Cremona im Umland. Test 36/36 (Cloud, Software-Rendering), Bild angesehen.
+      Offen: keine sichtbaren Händler/Boote nach Placentia, Verträge, wandernde Händler, Balance der Preise.
+      **Nicht getestet:** iPad.
 - [ ] S2.6 Gefahren: Räuber (Wachturm), Gallier (Kastell), Hochwasser im Frühling (Deich).
 
 ## Später

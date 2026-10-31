@@ -74,7 +74,23 @@ export const REGION_TYPEN = {
   weide: { n: 'Weide', farbe: 0x86a35a, text: 'Feuchte Wiesen.', nutzen: 'Schafe und Rinder (Wolle, Leder)' },
   hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Wein und Oliven (später erforscht)' },
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
+  nachbar: { n: 'Placentia', farbe: 0x8f9a5c, text: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.', nutzen: '' },
 };
+
+// Nachbarstadt und Handel (S2.5). Placentia liegt westlich vor dem Ring am Padus (Hex-Feld außerhalb der Karte).
+// Handel offen, wenn ein Nachbarfeld von Placentia mit der Stadt verbunden ist oder ein verbundener Anleger besteht.
+// Preis = basis × (normal / Vorrat)^0,7, begrenzt auf 0,4–3 × basis; Vorrat kehrt jeden Monat um 10 % zurück.
+export const NACHBAR = { q: -4, r: 3 };
+export const HANDEL = {
+  menge: 10, aufschlag: 0.15, rueck: 0.1,
+  waren: {   // basis = Denare je Einheit, normal = üblicher Vorrat in Placentia
+    holz:     { basis: 2, normal: 160 }, lehm: { basis: 1, normal: 120 }, ziegel: { basis: 4, normal: 50 },
+    getreide: { basis: 2, normal: 140 }, mehl: { basis: 3, normal: 80 }, brot: { basis: 4, normal: 60 },
+    fisch:    { basis: 3, normal: 60 },
+  },
+};
+// Abgaben an Rom (S2.5): am Ende jedes Herbstes ab dem zweiten Jahr. Gunst Roms (0–100) ändert den Lohn der Senatsaufträge.
+export const ABGABE = { grund: 10, je: 0.8, gunst: 50, plus: 8, minus: 20 };
 
 // Betriebe im Umland (S2.2). Ertrag je Monat nur mit Weg zur Stadt (S2.3), minus 5 % je Feld Entfernung ab dem zweiten
 export const VERMESSEN = { kosten: { denare: 20 }, monate: 2 };
