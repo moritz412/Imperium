@@ -27,6 +27,8 @@ export const WAREN = {
   stein:    { n: 'Stein',    lager: true },
   erz:      { n: 'Erz',      lager: true },
   werkzeug: { n: 'Werkzeug', lager: true },
+  trauben:  { n: 'Trauben',  lager: true },
+  wein:     { n: 'Wein',     lager: true },
 };
 
 export const JAHRESZEITEN = [
@@ -40,6 +42,9 @@ export const KATEGORIEN = ['Wohnen', 'Nahrung', 'Handwerk', 'Öffentlich'];
 
 // g = Größe [Breite x, Tiefe z] in Feldern, h = Wandhöhe, flach = nur Bodenfläche
 export const GEB = {
+  domus: { n: 'Domus', kat: 'Wohnen', g: [3, 3], h: 0.95, wand: 0xeadbc0, dach: 0xa9482a, epoche: 2,
+    kosten: { ziegel: 40, stein: 20, holz: 20 }, wohnt: 10,
+    text: 'Stadthaus mit Atrium für die Equites (Ritter). Sie brauchen Brot, Wasser, Markt und Wein, arbeiten nicht selbst und zahlen hohe Steuern.' },
   huette: { n: 'Hütte', kat: 'Wohnen', g: [2, 2], h: 0.7, wand: 0xd8b88a, dach: 0xa9583a,
     kosten: { holz: 12 }, wohnt: 8, text: 'Wohnraum für 8 Plebejer. Wird zur Casa mit Brot, Brunnen und Markt in der Nähe.' },
   quartier: { n: 'Sklavenquartier', kat: 'Wohnen', g: [2, 2], h: 0.55, wand: 0xa08a6a, dach: 0x6e5236,
@@ -66,6 +71,9 @@ export const GEB = {
   lehmgrube: { n: 'Lehmgrube', kat: 'Handwerk', g: [2, 2], flach: true, wand: 0x9a6b4a, sklaven: true,
     kosten: { holz: 10 }, arbeiter: 2, erzeugt: { lehm: 3 },
     text: 'Sticht Lehm für die Ziegelei.' },
+  kelter: { n: 'Kelter', kat: 'Nahrung', g: [2, 2], h: 0.75, wand: 0xd2b48c, dach: 0x7a3a2a, sklaven: true, forschung: 'weinbau',
+    kosten: { holz: 30, ziegel: 20 }, arbeiter: 2, braucht: { trauben: 2 }, erzeugt: { wein: 2 },
+    text: 'Presst Trauben zu Wein und lagert ihn in Dolia. Die Equites in ihren Domus trinken ihn.' },
   schmiede: { n: 'Schmiede', kat: 'Handwerk', g: [2, 2], h: 0.7, wand: 0x8a7a68, dach: 0x5a3a2a, kamin: true, sklaven: true,
     kosten: { holz: 25, ziegel: 15 }, arbeiter: 3, braucht: { erz: 1, holz: 1 }, erzeugt: { werkzeug: 2 },
     text: 'Schmiedet Werkzeug aus Erz. Mit Werkzeug arbeiten Felder, Gruben und Werkstätten 15 % schneller.' },
@@ -153,6 +161,8 @@ export const LAND_BETRIEBE = {
     text: 'Steinmetze brechen Kalksteinblöcke. Insulae brauchen Stein.' },
   erzgrube:   { n: 'Erzgrube', auf: 'erz', kosten: { holz: 25, denare: 20 }, erzeugt: { erz: 2 }, modell: 'holzfaeller',
     text: 'Bergleute fördern Eisenerz für die Schmiede in der Stadt.' },
+  weinberg:   { n: 'Weinberg', auf: 'hang', forschung: 'weinbau', kosten: { holz: 25, denare: 30 }, erzeugt: { trauben: 3 }, ernte: true, modell: 'huette',
+    text: 'Reben an den sonnigen Hängen. Lese im Herbst, die Trauben gehen in die Kelter der Stadt.' },
   kastell:    { n: 'Kastell', auf: 'hang', kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
     text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
 };
@@ -218,16 +228,16 @@ export const FORSCHUNG = {
   landvermessung: { n: 'Landvermessung', zweig: 3, ep: 1, kosten: 25, text: 'Groma und Messkette: Vermessen dauert 1 Monat und kostet 10 Denare.' },
   schreine:       { n: 'Schreine', zweig: 4, ep: 1, kosten: 30, text: 'Schreine der Laren an den Straßen: Häuser in der Nähe sind zufriedener.' },
   feste:          { n: 'Erntefest', zweig: 4, ep: 1, kosten: 40, braucht: 'schreine', text: 'Nach der Ernte feiert die Stadt: Stimmung +10, kostet 20 Brot.' },
-  weinbau:        { n: 'Weinbau', zweig: 0, ep: 2, kosten: 80, text: 'Reben an den Hängen, Kelter und Weinkeller.' },
-  olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, text: 'Öl für Küche, Lampen und Thermen.' },
-  weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, text: 'Wolle von den Weiden wird zu Tuch.' },
-  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, text: 'Fischsoße für die Equites – und für den Handel.' },
-  roemerstrasse:  { n: 'Römerstraße', zweig: 2, ep: 2, kosten: 100, text: 'Gepflasterte Fernstraße nach Placentia und Rom.' },
-  aquaedukt:      { n: 'Aquädukt', zweig: 2, ep: 2, kosten: 120, text: 'Frisches Wasser aus den Hügeln für die ganze Stadt.' },
-  archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit Nachbarstädten.' },
-  zoelle:         { n: 'Zölle', zweig: 3, ep: 2, kosten: 90, text: 'Einnahmen von jedem Boot auf dem Padus.' },
-  tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, text: 'Ein Tempel für Jupiter auf dem Forum.' },
-  theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, text: 'Komödien des Plautus für die Plebejer.' },
+  weinbau:        { n: 'Weinbau', zweig: 0, ep: 2, kosten: 80, text: 'Weinberge an den Hängen und Kelter in der Stadt. Wein brauchen die Equites.' },
+  olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, bald: true, text: 'Öl für Küche, Lampen und Thermen.' },
+  weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, bald: true, text: 'Wolle von den Weiden wird zu Tuch.' },
+  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, bald: true, text: 'Fischsoße für die Equites – und für den Handel.' },
+  roemerstrasse:  { n: 'Römerstraße', zweig: 2, ep: 2, kosten: 100, braucht: 'schotter', text: 'Gepflasterte Wege: Karren dreimal so schnell, Räuber halb so oft.' },
+  aquaedukt:      { n: 'Aquädukt', zweig: 2, ep: 2, kosten: 120, text: 'Wasser aus den Hügeln: Brunnen reichen 12 statt 7 Felder, weniger Brände.' },
+  archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit den Nachbarstädten: Händler nehmen nur 8 statt 15 % Aufschlag.' },
+  zoelle:         { n: 'Zölle', zweig: 3, ep: 2, kosten: 90, braucht: 'archiv', text: 'Zoll auf durchziehende Händler: 8 Denare im Monat je offener Handelsstraße.' },
+  tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, bald: true, text: 'Ein Tempel für Jupiter auf dem Forum.' },
+  theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, bald: true, text: 'Komödien des Plautus für die Plebejer.' },
 };
 export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
 
@@ -239,4 +249,7 @@ export const FEUER = {
   dichte: 0.15, umkreis: 3, wache: 0.2, brunnen: 0.7, sommer: 1.5, ueber: 0.25, ueberWache: 0.05, nachbar: 3.5, monate: 3,
   unruhe: 6,   // Stimmungsziel − bis 6, wenn Häuser ab der Kleinstadt keine Wache in der Nähe haben
 };
+
+// Übergang in die Späte Republik (1.11., Moritz: Rang + Forschung): Kolonie, 6 Erfindungen, Gunst Roms ab 50
+export const EPOCHE2 = { rang: 3, erfindungen: 6, gunst: 50 };
 

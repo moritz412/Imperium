@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2 } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -122,7 +122,7 @@ export function fehlendeKosten(S, kosten) {
 }
 
 export function bauen(S, welt, t, x, z) {
-  if (gesperrt(S, t)) return { ok: false, grund: 'Erst erforschen: ' + FORSCHUNG[GEB[t].forschung].n };
+  if (gesperrt(S, t)) return { ok: false, grund: sperrGrund(S, t) };
   const grund = pruefePlatz(S, welt, t, x, z);
   if (grund) return { ok: false, grund };
   const k = baukosten(S, t);
@@ -145,9 +145,10 @@ export function abreissen(S, id) {
 export const mitte = b => { const [w, d] = groesse(b.t); return [b.x + w / 2, b.z + d / 2]; };
 export const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math.hypot(p[0] - q[0], p[1] - q[1]); };
 
+export const reichweite = (S, typ) => typ === 'brunnen' && hat(S, 'aquaedukt') ? 12 : GEB[typ].reichweite;
 export function inReichweite(S, b, typ, maske) {
   const d = GEB[typ];
-  if (!d.strassen) return S.geb.some(o => o.t === typ && abstand(o, b) <= d.reichweite);
+  if (!d.strassen) return S.geb.some(o => o.t === typ && abstand(o, b) <= reichweite(S, typ));
   // über Straßen: Weg vom Versorger bis zu einem Straßenfeld vor dem Haus
   maske = maske || strassenMaske(S);
   const vorHaus = randFelder(b.t, b.x, b.z);
@@ -166,7 +167,7 @@ export function waldNah(welt, b) {
   return false;
 }
 
-export const wohnraum = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.wohnt : b.stufe === 2 ? CASA.wohnt : GEB.huette.wohnt) : 0;
+export const wohnraum = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.wohnt : b.stufe === 2 ? CASA.wohnt : GEB.huette.wohnt) : b.t === 'domus' ? GEB.domus.wohnt : 0;
 export function insulaFehlt(S, b, wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt')) {
   if (!wasser) return 'Brunnen'; if (!markt) return 'Markt'; if (!S.versorgt.brot) return 'Brot';
   if (!S.geb.some(o => o.t === 'schrein' && abstand(o, b) <= GEB.schrein.reichweite)) return 'Schrein in der Nähe';
@@ -276,6 +277,18 @@ export function monat(S, welt) {
     }
   }
 
+  // Domus der Equites (Späte Republik): wachsen mit Brot, Wasser, Markt und Wein; trinken Wein, zahlen hohe Steuern
+  let equites = 0;
+  for (const b of S.geb.filter(b => b.t === 'domus')) {
+    if (b.brand > 0) continue;
+    const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske), wein = S.gut.wein >= Math.max(0.5, b.bew * 0.1);
+    if (b.bew > 0) { if (wein) S.gut.wein -= b.bew * 0.1; else { b.status.push({ art: 'rohstoff', gut: 'wein', text: 'Kein Wein – die Equites ziehen weg' }); b.bew--; } }
+    const fehlt = !wasser ? 'Brunnen' : !markt ? 'Markt' : !S.versorgt.brot ? 'Brot' : !wein ? 'Wein' : '';
+    if (fehlt && b.bew === 0) b.status.push({ art: 'markt', text: 'Equites ziehen erst ein mit ' + fehlt, leicht: true });
+    else if (!fehlt && b.bew < wohnraum(b) && S.stimmung >= 50) b.bew++;
+    equites += b.bew;
+  }
+
   // Stimmung und Steuern
   let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
@@ -287,7 +300,8 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += einwohner(S) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (S.stimmung / 70);
+  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (S.stimmung / 70);   // Equites zahlen vierfach
+  if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
   const a = AUFTRAEGE[S.auftrag];
@@ -355,7 +369,7 @@ function ansichtRoh(S, welt, art) {
   const felder = [], geb = [];
   const haeuser = S.geb.filter(b => b.t === 'huette');
   if (art === 'wasser') {
-    const brunnen = S.geb.filter(b => b.t === 'brunnen'), r = GEB.brunnen.reichweite;
+    const brunnen = S.geb.filter(b => b.t === 'brunnen'), r = reichweite(S, 'brunnen');
     for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++) {
       if (welt.typ[z * RASTER + x] !== GRAS) continue;
       if (brunnen.some(o => { const [cx, cz] = mitte(o); return Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r; })) felder.push([x, z, BLAU]);
@@ -464,6 +478,7 @@ export function landBauen(S, f, t = betriebFuer(f)) {
   if (!betriebeFuer(f).includes(t)) t = '';
   if (!t) return { ok: false, grund: 'Hier ist noch kein Betrieb möglich' };
   if (landStand(S, f) !== 'vermessen') return { ok: false, grund: 'Erst vermessen' };
+  if (LAND_BETRIEBE[t].forschung && !hat(S, LAND_BETRIEBE[t].forschung)) return { ok: false, grund: 'Erst erforschen: ' + FORSCHUNG[LAND_BETRIEBE[t].forschung].n };
   const k = LAND_BETRIEBE[t].kosten;
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
@@ -553,7 +568,7 @@ function gefahren(S, meld) {
   const betriebe = regionKarte().filter(f => { const l = land[landKey(f)]; return fertig(S, l) && l.betrieb && !['anleger', 'kastell'].includes(l.betrieb); });
   const G = GEFAHR;
   if (m >= G.raeuber.ab) {
-    const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance);
+    const opfer = betriebe.filter(f => !(land[landKey(f)].stoer > 0) && !raeuberSchutz(S, f) && wurf(S, salz(f)) < G.raeuber.chance * (hat(S, 'roemerstrasse') ? 0.5 : 1));
     opfer.forEach(f => stoeren(land[landKey(f)], 'raeuber', G.raeuber.monate));
     if (opfer.length) meld.push(`Räuber haben ${opfer.length === 1 ? 'einen Betrieb' : opfer.length + ' Betriebe'} im Umland geplündert. Wachtürme schützen.`);
   }
@@ -594,7 +609,8 @@ export function preis(S, g, id = 'placentia') {
   return w.basis * Math.max(0.4, Math.min(3, f));
 }
 // Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
-export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + HANDEL.aufschlag : 1 - HANDEL.aufschlag)));
+export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + aufschlag(S) : 1 - aufschlag(S))));
+const aufschlag = S => hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag;
 export function handeln(S, g, art, id = 'placentia') {
   const p = PARTNER[id];
   if (!p || !p.waren[g]) return { ok: false, grund: `Diese Ware handelt ${p ? p.n : 'niemand'} nicht` };
@@ -642,7 +658,23 @@ function abgabeZahlen(S) {
 // ---------- Forschung (S3.1) ----------
 export const forschungS = S => (S.forschung = S.forschung || { ziel: '', wissen: 0, fertig: [] });
 export const hat = (S, id) => !!(S.forschung && S.forschung.fertig.includes(id));
-export const gesperrt = (S, t) => !!GEB[t].forschung && !hat(S, GEB[t].forschung);
+export const gesperrt = (S, t) => (!!GEB[t].forschung && !hat(S, GEB[t].forschung)) || (GEB[t].epoche || 1) > epoche(S);
+export const sperrGrund = (S, t) => (GEB[t].epoche || 1) > epoche(S) ? 'Erst in der Späten Republik' : 'Erst erforschen: ' + FORSCHUNG[GEB[t].forschung].n;
+// Epochen (1.11.): Übergang in die Späte Republik
+export const epoche = S => S.epoche || 1;
+export function epocheFehlt(S) {
+  if (epoche(S) >= 2) return '';
+  const f = [], n = forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 1).length;
+  if (rang(S) < EPOCHE2.rang) f.push(`Stadtrang ${RAENGE[EPOCHE2.rang].n} (${RAENGE[EPOCHE2.rang].ab} Einwohner)`);
+  if (n < EPOCHE2.erfindungen) f.push(`${EPOCHE2.erfindungen} Erfindungen (${n} erforscht)`);
+  if (gunst(S) < EPOCHE2.gunst) f.push(`Gunst Roms ${EPOCHE2.gunst}`);
+  return f.join(', ');
+}
+export function epocheWechseln(S) {
+  const f = epocheFehlt(S); if (epoche(S) >= 2) return { ok: false, grund: 'Schon in der Späten Republik' };
+  if (f) return { ok: false, grund: 'Es fehlt: ' + f };
+  S.epoche = 2; return { ok: true };
+}
 export const vermMonate = S => hat(S, 'landvermessung') ? 1 : VERMESSEN.monate;
 export const vermKosten = S => hat(S, 'landvermessung') ? { denare: 10 } : VERMESSEN.kosten;
 export function baukosten(S, t) {
@@ -662,7 +694,8 @@ export function wissenProMonat(S) {
 export function forschungsStand(S, id) {
   const d = FORSCHUNG[id], F = forschungS(S);
   if (F.fertig.includes(id)) return 'fertig';
-  if (d.ep > 1) return 'epoche';
+  if (d.ep > epoche(S)) return 'epoche';
+  if (d.bald) return 'bald';
   if (d.braucht && !F.fertig.includes(d.braucht)) return 'gesperrt';
   return F.ziel === id ? 'ziel' : 'offen';
 }
@@ -671,6 +704,7 @@ export function forschungWaehlen(S, id) {
   if (st === 'fertig') return { ok: false, grund: 'Schon erforscht' };
   if (st === 'epoche') return { ok: false, grund: 'Erst in der ' + (FORSCHUNG[id].ep === 2 ? 'Späten Republik' : 'Kaiserzeit') };
   if (st === 'gesperrt') return { ok: false, grund: 'Erst erforschen: ' + FORSCHUNG[FORSCHUNG[id].braucht].n };
+  if (st === 'bald') return { ok: false, grund: 'Kommt in einer späteren Ausbaustufe' };
   if (st !== 'offen' && st !== 'ziel') return { ok: false, grund: 'Unbekannt' };
   forschungS(S).ziel = id;
   return { ok: true };
@@ -729,7 +763,7 @@ export function brandGefahr(S, b) {
   let p = FEUER.basis[art] ?? FEUER.sonst;
   p *= 1 + FEUER.dichte * S.geb.filter(o => o !== b && !FLACH(o.t) && abstand(o, b) <= FEUER.umkreis).length;
   if (wacheNah(S, b)) p *= FEUER.wache;
-  if (inReichweite(S, b, 'brunnen')) p *= FEUER.brunnen;
+  if (inReichweite(S, b, 'brunnen')) p *= hat(S, 'aquaedukt') ? 0.5 : FEUER.brunnen;
   if (jahreszeit(S) === 1) p *= FEUER.sommer;
   return p;
 }

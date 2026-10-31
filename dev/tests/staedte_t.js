@@ -382,6 +382,33 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Ring 4: Steinbruch und Erz, Mantua nur über Land, Handel', r4.stein && r4.erz && !r4.zu && r4.offen && !r4.plOffen && r4.v && r4.kf, JSON.stringify(r4));
   ok('Gallier: Geschenke bringen Frieden, Schmiede macht Werkzeug', r4.gs && r4.fr === 24 && r4.friedlich && r4.schmiede && r4.werkzeug > 0);
   ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 14 && r4.ui.geschenk, JSON.stringify(r4.ui));
+  // Späte Republik (1.11.): Übergang, Weinberg → Kelter → Wein, Domus der Equites, Archiv
+  const ep = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    SR.forschung(); const block = !!document.querySelector('#forschung .fepochewahl'), knopfAus = document.querySelector('#forschung [data-f="epoche"]').disabled;
+    document.querySelector('#forschung [data-f="zu"]').click();
+    const E = kopie(), F = sim.forschungS(E);
+    const vorher = sim.epocheWechseln(E).grund || '', domusVor = sim.bauen(E, SR.welt, 'domus', 30, 13).grund || '';
+    E.rang = 3; E.gunst = 60; F.fertig = [...new Set([...F.fertig, 'fruchtwechsel', 'villa', 'ziegelbrand', 'schotter', 'steuerlisten', 'landvermessung'])];
+    const wechsel = sim.epocheWechseln(E).ok, wein = sim.forschungWaehlen(E, 'weinbau').ok, tempel = sim.forschungWaehlen(E, 'tempel').grund;
+    F.fertig.push('weinbau', 'archiv');
+    const hang = sim.regionKarte().find(f => f.typ === 'hang' && !(E.land[sim.landKey(f)] || {}).betrieb);
+    E.land[sim.landKey(hang)] = { verm: 2, betrieb: '' }; const berg = sim.landBauen(E, hang, 'weinberg').ok;
+    Object.assign(E.gut, { holz: E.gut.holz + 200, ziegel: E.gut.ziegel + 150, stein: 60, wein: 60, brot: 500, denare: E.gut.denare + 300 });
+    let kelter = false, domus = null;
+    for (let z = 13; z <= 20 && !kelter; z++) for (let x = 2; x <= 38 && !kelter; x++) kelter = sim.bauen(E, SR.welt, 'kelter', x, z).ok;
+    for (let z = 2; z <= 34 && !domus; z++) for (let x = 2; x <= 37 && !domus; x++) {
+      if (sim.pruefePlatz(E, SR.welt, 'domus', x, z)) continue;
+      const t = sim.bauen(E, SR.welt, 'domus', x, z); if (!t.ok) continue;
+      if (sim.inReichweite(E, t.b, 'markt')) { domus = t.b; for (let k = 0; k < 40 && !sim.inReichweite(E, t.b, 'brunnen'); k++) sim.bauen(E, SR.welt, 'brunnen', x - 3 + (k % 9), z - 2 + Math.floor(k / 9) * 2); }
+      else sim.abreissen(E, t.b.id);
+    }
+    E.monat = 4; sim.monat(E, SR.welt); sim.monat(E, SR.welt);
+    const A = kopie(); const ohne = sim.handelSumme(A, 'holz', 'kauf'); A.forschung = { ziel: '', wissen: 0, fertig: ['archiv'] }; const mit = sim.handelSumme(A, 'holz', 'kauf');
+    return { block, knopfAus, vorher, domusVor, wechsel, wein, tempel, berg, kelter, domus: !!domus, eq: domus ? domus.bew : -1, dst: domus ? JSON.stringify(domus.status) + ' st' + Math.round(E.stimmung) + ' w' + sim.inReichweite(E, domus, 'brunnen') : '', weinWeg: E.gut.wein < 60, archiv: mit < ohne };
+  });
+  ok('Späte Republik: Übergang mit Rang, Erfindungen und Gunst', ep.block && ep.knopfAus && /Stadtrang/.test(ep.vorher) && /Späten Republik/.test(ep.domusVor) && ep.wechsel && ep.wein && /späteren/.test(ep.tempel), JSON.stringify(ep));
+  ok('Weinberg, Kelter, Domus mit Equites, Archiv senkt Aufschlag', ep.berg && ep.kelter && ep.domus && ep.eq >= 1 && ep.weinWeg && ep.archiv);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

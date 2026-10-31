@@ -154,9 +154,25 @@ export function erzeugeSzene(leinwand, welt) {
     g.userData.h = 2.6;
     return g;
   }
+  // Domus (Späte Republik): Atriumhaus – vier Flügel mit Pultdächern um einen offenen Hof mit Becken (impluvium), Garten
+  function baueDomus(geist) {
+    const g = new THREE.Group(), lam = c => new THREE.MeshLambertMaterial({ color: c, transparent: geist, opacity: geist ? 0.6 : 1 }), A = 2.7, T = 0.75, H = 0.85;
+    const teil = (geo, c, x, y, z, ry = 0) => { const m = new THREE.Mesh(geo, lam(c)); m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+    teil(new THREE.BoxGeometry(A, 0.06, A), 0xd8cbb0, 0, 0.03, 0);
+    for (const [x, z, w, d] of [[0, -(A - T) / 2, A, T], [0, (A - T) / 2, A, T], [-(A - T) / 2, 0, T, A - 2 * T], [(A - T) / 2, 0, T, A - 2 * T]]) {
+      teil(new THREE.BoxGeometry(w, H, d), 0xeadbc0, x, H / 2, z);
+      teil(new THREE.BoxGeometry(w + 0.1, 0.08, d + 0.1), 0xa9482a, x, H + 0.06, z);
+    }
+    teil(new THREE.BoxGeometry(0.5, 0.04, 0.5), 0x5e8fb0, 0, 0.08, 0);
+    for (const [x, z] of [[-0.4, -0.4], [0.4, -0.4], [-0.4, 0.4], [0.4, 0.4]]) teil(new THREE.CylinderGeometry(0.05, 0.05, H, 6), 0xf2ead8, x, H / 2, z);
+    teil(new THREE.BoxGeometry(0.42, 0.6, 0.04), 0x3a2a1e, 0, 0.3, A / 2 + 0.005);
+    g.userData.h = 1.2;
+    return g;
+  }
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
     if (t === 'huette' && stufe === 3) return baueInsula();
+    if (t === 'domus') return baueDomus(geist);
     const casa = t === 'huette' && stufe === 2;
     const name = casa ? 'casa' : t;
     if (modelle && modelle[name]) return baueModell(name, geist);
@@ -525,7 +541,7 @@ export function erzeugeSzene(leinwand, welt) {
   const landObj = new Map();
   let landS = null;
   function landAbgleichen(S) {
-    landS = S; kTempo = hat(S, 'schotter') ? 2 : 1; if (!region) return;
+    landS = S; kTempo = hat(S, 'roemerstrasse') ? 3 : hat(S, 'schotter') ? 2 : 1; if (!region) return;
     for (const f of region.felder) {
       const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k];
       const wegNach = hatWeg(S, f) ? nachbarn(f).map(n => n && hatWeg(S, n) ? 1 : 0).join('') : '';
@@ -598,7 +614,7 @@ export function erzeugeSzene(leinwand, welt) {
       const g = new THREE.Group(), lam = col => new THREE.MeshLambertMaterial({ color: col });
       const wagen = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.8), lam(0x6b4a2a)); wagen.position.y = 0.22; g.add(wagen);
       for (const sx of [-1, 1]) { const rad = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8).rotateZ(Math.PI / 2), lam(0x3a2a1a)); rad.position.set(sx * 0.28, 0.16, 0); g.add(rad); }
-      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a, steinbruch: 0xd0cabc, erzgrube: 0x6a5048, fischer: 0x9ab8c8 }[l.betrieb] || 0xd9c26e));
+      const last = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.6), lam({ weinberg: 0x6a2a5a, gehoeft: 0xe0c464, holzlager: 0x8a6a46, lehmstich: 0x9a6b4a, steinbruch: 0xd0cabc, erzgrube: 0x6a5048, fischer: 0x9ab8c8 }[l.betrieb] || 0xd9c26e));
       last.position.y = 0.4; g.add(last);
       const ochse = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), lam(0xb8a890)); ochse.position.set(0, 0.3, 0.85); g.add(ochse);
       g.traverse(o => { if (o.isMesh) o.castShadow = true; });

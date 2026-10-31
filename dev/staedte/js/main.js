@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2 } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -31,8 +31,8 @@ function melden(text) {
 }
 
 // ---------- Kopfleiste ----------
-const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug'];
-const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug']);   // erscheinen erst, wenn vorhanden
+const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug', 'trauben', 'wein'];
+const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug', 'trauben', 'wein']);   // erscheinen erst, wenn vorhanden
 const rund = n => Math.floor(n || 0).toLocaleString('de-DE');
 function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
@@ -65,7 +65,7 @@ function bauleiste() {
     const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26), k = sim.baukosten(S, t), zu = sim.gesperrt(S, t);
     return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, k) ? '' : ' teuer'}${zu ? ' gesperrt' : ''}" data-t="${t}" aria-pressed="${t === bauTyp}">
       <span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>
-      <b>${d.n}</b><small>${zu ? 'Erforschen: ' + FORSCHUNG[d.forschung].n : kostenText(k)}</small></button>`;
+      <b>${d.n}</b><small>${zu ? (d.epoche > sim.epoche(S) ? 'Späte Republik' : 'Erforschen: ' + FORSCHUNG[d.forschung].n) : kostenText(k)}</small></button>`;
   }).join('');
 }
 $('#reiter').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { reiter = b.dataset.k; bauleiste(); } });
@@ -91,7 +91,7 @@ window.addEventListener('pointerup', e => {
     if (e.clientY < leiste.top) bauenAn(z.t, e.clientX, e.clientY);
     if (!bauTyp) szene.vorschau('');
   } else if (sim.gesperrt(S, z.t)) {
-    melden('Erst erforschen: ' + FORSCHUNG[GEB[z.t].forschung].n); ton.sfx('fehler');
+    melden(sim.sperrGrund(S, z.t)); ton.sfx('fehler');
   } else {
     bauTyp = bauTyp === z.t ? '' : z.t; baumodus();
   }
@@ -222,6 +222,12 @@ function infoZeichnen() {
     else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
       ? `<p>Ab der Kleinstadt (${RAENGE[INSULA.rang].ab} Einwohner) kann eine volle Casa zur Insula aufgestockt werden (30 Bewohner).</p>`
       : `<p>Aufstockung zur Insula (30 Bewohner): Casa voll, Brot, Brunnen, Markt und ein Schrein in der Nähe, ${kostenText(INSULA.kosten)}.${sim.insulaFehlt(S, b) ? ' Es fehlt: ' + sim.insulaFehlt(S, b) + '.' : ''}</p>`;
+  }
+  if (b.t === 'domus') {
+    html += `<div class="zeile"><span>Equites</span><b>${b.bew} / ${sim.wohnraum(b)}</b></div>
+      <div class="zeile"><span>Wein im Lager</span><b>${rund(S.gut.wein)}</b></div>
+      <div class="zeile"><span>Brunnen / Markt in der Nähe</span><b>${sim.inReichweite(S, b, 'brunnen') ? 'ja' : 'nein'} / ${sim.inReichweite(S, b, 'markt') ? 'ja' : 'nein'}</b></div>
+      <p>Equites zahlen viermal so viel Steuern wie Plebejer. Sie trinken jeden Monat Wein (0,1 je Kopf).</p>`;
   }
   if (b.t === 'quartier') {
     const frei = GEB.quartier.sklavenPlatz - (b.skl || 0), n = Math.min(SKLAVEN.los, frei);
@@ -356,8 +362,9 @@ function hexInfo(f) {
   if (stand === 'vermessen') lage = bd
     ? '<div class="lage gut">Vermessen</div>' + sim.betriebeFuer(f).map((t, i) => { const b = LAND_BETRIEBE[t];
         const e = ertrag(t);
+        const zu = b.forschung && !sim.hat(S, b.forschung);
         return `<p>${b.text}</p>${e ? `<div class="zeile"><span>Ertrag im Monat</span><b>${e}${b.ernte ? ' (Sommer)' : ''}</b></div>` : ''}
-        <button class="knopf${i ? '' : ' haupt'}" data-a="landbau" data-t="${t}">${b.n} bauen (${kostenText(b.kosten)})</button>`; }).join('')
+        <button class="knopf${i || zu ? '' : ' haupt'}" data-a="landbau" data-t="${t}"${zu ? ' disabled' : ''}>${zu ? b.n + ': erst ' + FORSCHUNG[b.forschung].n + ' erforschen' : `${b.n} bauen (${kostenText(b.kosten)})`}</button>`; }).join('')
     : '<div class="lage gut">Vermessen</div><p>Für dieses Land gibt es noch keinen Betrieb.</p>';
   const verb = sim.verbunden(S, f);
   if (stand === 'betrieb' && bt === 'kastell') lage = `<div class="lage gut">Kastell besetzt</div><p>${bd.text}</p>`;
@@ -382,13 +389,13 @@ function hexInfo(f) {
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
 // ---------- Forschung (S3.1) ----------
-const STAND_TEXT = { fertig: 'erforscht', ziel: 'wird erforscht', epoche: 'Späte Republik' };
+const STAND_TEXT = { fertig: 'erforscht', ziel: 'wird erforscht', epoche: 'Späte Republik', bald: 'kommt in einer späteren Ausbaustufe' };
 function forschungZeigen() {
   const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel];
   const karte = id => {
     const d = FORSCHUNG[id], st = sim.forschungsStand(S, id);
     const unten = st === 'offen' ? `${d.kosten} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : STAND_TEXT[st];
-    return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
+    return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' || st === 'bald' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
   };
   const spalten = ZWEIGE.map((z, i) => {
     const ids = ep => Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].zweig === i && FORSCHUNG[id].ep === ep);
@@ -397,15 +404,31 @@ function forschungZeigen() {
   const rest = ziel ? Math.max(0, ziel.kosten - F.wissen) : 0, mon = Math.ceil(rest / w);
   $('#forschung').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>Forschung</h2><div class="untertitel">Epoche I · ${EPOCHEN[1]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    <h2>Forschung</h2><div class="untertitel">Epoche ${sim.epoche(S) === 2 ? 'II' : 'I'} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    ${epocheBlock()}
     <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
       <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
       : '<b>Wähle ein Ziel</b><small>Wissen sammelt sich auch ohne Ziel. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
     <div class="fbaum">${spalten}</div></div>`;
   $('#forschung').hidden = false;
 }
+function epocheBlock() {
+  if (sim.epoche(S) >= 2) return '';
+  const n = sim.forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 1).length, fehlt = sim.epocheFehlt(S);
+  const z = (t, ok) => `<span class="${ok ? 'ok' : 'nein'}">${t}</span>`;
+  return `<div class="fziel fepochewahl"><b>Der Weg in die Späte Republik</b>
+    <div class="fbeding">${z(`Stadtrang ${RAENGE[EPOCHE2.rang].n}`, sim.rang(S) >= EPOCHE2.rang)}${z(`${n} von ${EPOCHE2.erfindungen} Erfindungen`, n >= EPOCHE2.erfindungen)}${z(`Gunst Roms ${Math.round(sim.gunst(S))} von ${EPOCHE2.gunst}`, sim.gunst(S) >= EPOCHE2.gunst)}</div>
+    <small>Dann öffnen sich Weinbau, Domus der Equites, Römerstraße, Aquädukt, Archiv und Zölle.</small>
+    <button class="knopf${fehlt ? '' : ' haupt'}" data-f="epoche"${fehlt ? ' disabled' : ''}>Späte Republik beginnen</button></div>`;
+}
 $('#forschung').addEventListener('click', e => {
   const b = e.target.closest('[data-f]');
+  if (b && b.dataset.f === 'epoche') {
+    const r = sim.epocheWechseln(S);
+    if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
+    ton.sfx('aufstieg'); melden('Die Späte Republik beginnt. Cremona ist eine blühende Kolonie – neue Erfindungen und Bauten warten.');
+    forschungZeigen(); allesZeichnen(); return;
+  }
   if (!b) { if (e.target.id === 'forschung') $('#forschung').hidden = true; return; }
   if (b.dataset.f === 'zu') { $('#forschung').hidden = true; return; }
   const r = sim.forschungWaehlen(S, b.dataset.f);

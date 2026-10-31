@@ -151,6 +151,13 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       handelt Erz/Werkzeug/Stein), Placentia an den Rand (−5,4) gerückt. **Dorf der Insubrer** im Norden (Palisade,
       Rundhütten): Geschenke (40 Brot, 60 Denare) → 24 Monate kein Gallierüberfall. Test 54/54, Bild angesehen.
       Offen: Werkzeug-Bedarf bei Höfen im Umland, Händlerkarren nach Mantua sichtbar.
+- [x] Späte Republik (Einstieg): Übergang auf der Forschungsseite („Der Weg in die Späte Republik“): Kolonie (300 Einwohner),
+      6 Erfindungen der Frühen Republik, Gunst Roms 50 → Knopf „Späte Republik beginnen“ (`EPOCHE2`, `S.epoche`).
+      Spielbar: **Weinbau** (Weinberg auf Hang, Lese im Herbst → **Kelter** in der Stadt: Trauben 2 → Wein 2),
+      **Domus** (Wohnen 3×3, Atriumhaus, 10 Equites: brauchen Brot, Brunnen, Markt, Wein 0,1/Kopf; arbeiten nicht, zahlen 4× Steuern),
+      **Römerstraße** (nach Schotterwegen: Karren ×3, Räuber halb so oft), **Aquädukt** (Brunnen 12 Felder, Brandgefahr ×0,5
+      statt ×0,7), **Archiv** (Aufschlag 8 statt 15 %), **Zölle** (8 Denare je offener Handelsstraße und Monat).
+      Als „kommt später“ markiert: Olivenpresse, Weberei, Garum, Tempelbau, Theater. Test 56/56, Bild angesehen.
 ## Plan nächste 2 Stunden (1.11., Vorschlag)
 Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
 Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt
