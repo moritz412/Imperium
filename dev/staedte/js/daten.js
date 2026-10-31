@@ -1,7 +1,15 @@
 // Städte Roms – Spieldaten (Gebäude, Waren, Jahreszeiten, Senatsaufträge)
 
-export const RASTER = 40;            // Felder je Seite
-export const MONAT_S = 9;            // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9, Moritz: „zu schnell“)
+export const RASTER = 64;            // Felder in Ost-West-Richtung (1.11.: 40 → 64, Erweiterung nach Osten)
+export const TIEFE = 40;             // Felder in Nord-Süd-Richtung
+// Stadterweiterung (1.11., Moritz: „Senat genehmigt“): offen bis x < GRENZE[S.grenze]. Die Via Postumia (148 v. Chr.)
+// führt nach Osten; mit jeder Erweiterung wird die Landstraße dorthin verlängert.
+export const GRENZE = [40, 52, 64];
+export const ERWEITERUNG = [
+  { rang: 1, gunst: 50, kosten: { denare: 150 }, text: 'Der Senat weist der Kolonie Land östlich der Mauer zu.' },
+  { rang: 2, gunst: 60, kosten: { denare: 400 }, text: 'Entlang der Via Postumia darf die Stadt bis an die Grenzsteine wachsen.' },
+];
+export const MONAT_S = 15;           // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9 → 15, Moritz: „mehr wie Manor Lords, aber nicht so langsam“)
 export const STEUER = 0.3;           // Denare je Einwohner und Monat bei Stimmung 70 (1.11.: 0,4 → 0,3)
 export const LAGER_GRUND = 150;      // Lagergrenze je Ware ohne Speicher
 export const ARBEIT_ANTEIL = 0.7;    // Anteil der Einwohner, der arbeitet

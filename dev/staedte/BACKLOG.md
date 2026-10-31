@@ -137,7 +137,14 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       **Nicht getestet:** iPad, Balance (Häufigkeit).
 - [ ] S3.4 Epoche II (Späte Republik): Übergang mit Amt/Stadtrang, Weinbau/Öl/Weberei/Garum als Ketten, Römerstraße, Aquädukt.
 
-## Plan nächste 2 Stunden (1.11., Vorschlag, wartet auf Moritz)
+## 2-Stunden-Block (1.11., Moritz: Senat genehmigt; Ring mit Mantua, Gallierdorf, Steinbruch/Erz; Epoche II über Rang +
+## Forschung; Tempo „mehr wie Manor Lords, aber nicht so langsam“; selbstständig pushen)
+- [x] Tempo: 1 Monat = 15 s (1 Jahr = 3 min).
+- [x] Stadterweiterung: Raster 64 × 40 (Osten neu, altes Gelände Feld für Feld gleich, alte Stände passen). Offen bis x < 40,
+      dann 52, dann 64 (`GRENZE`, `ERWEITERUNG`): gesperrtes Land dunkel mit Grenzsteinen (cippi); antippen → Fenster
+      „Land im Osten“ mit Bedingungen (Dorf/Gunst 50/150 Denare, dann Kleinstadt/Gunst 60/400 Denare) und Antrag beim Senat.
+      Die Landstraße wird als Via Postumia bis an die neue Grenze verlängert. Schatten folgen der Kamera. Test 51/51.
+## Plan nächste 2 Stunden (1.11., Vorschlag)
 Kartenfrage: Empfehlung **Erweitern statt sofort groß** – Stadtfläche 64×64, außen gesperrt; der Senat genehmigt
 Stadterweiterungen (Rang + Gunst + Denare). Umland Ring 4 (61 Felder) mit zweitem Nachbarn und Gallierdorf; Vermessen bleibt
 das „Kaufen“ von Land (historisch: Landzuteilung, ager publicus).

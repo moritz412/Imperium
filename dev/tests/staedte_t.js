@@ -345,6 +345,21 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Feuer: Brand bricht aus, greift über, brennt ab', fe.m1 && fe.brennt && fe.weg && fe.ueber > 0, JSON.stringify(fe));
   ok('Feuerwache löscht den Brand', fe.wache && fe.vorW === 1 && fe.nah && fe.geloescht);
   ok('Brandgefahr Insula höher, Ansicht Feuer', fe.insulaGefaehrlicher && fe.legende === 5 && fe.knopf);
+  // Stadterweiterung (1.11.): Land im Osten gesperrt, Senat gibt frei, Via Postumia wird verlängert
+  const ew = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    S.grenze = 0;
+    const vor = sim.pruefePlatz(S, SR.welt, 'huette', 42, 13), A = kopie(); A.rang = 0; A.monat = 0; A.geb = A.geb.filter(b => b.t === 'strasse');
+    const zuFrueh = sim.erweitern(A, SR.welt).grund || '';
+    const rangAlt = S.rang; S.rang = Math.max(S.rang || 0, 2); S.gunst = 70; S.gut.denare += 700;
+    SR.erweiterungInfo(); const knopf = document.querySelector('#info [data-a="erweitern"]'), frei = knopf && !knopf.disabled;
+    const s0 = S.geb.filter(b => b.t === 'strasse' && b.x >= 40).length;
+    knopf.click();
+    const g1 = sim.stadtGrenze(S), s1 = S.geb.filter(b => b.t === 'strasse' && b.x >= 40).length, nach = SR.bauen('huette', 42, 13);
+    const zwei = sim.erweitern(S, SR.welt).ok, g2 = sim.stadtGrenze(S), drei = sim.erweitern(S, SR.welt).grund; S.rang = rangAlt; SR.bauen('huette', -5, -5);
+    return { vor, zuFrueh, frei, s0, g1, s1, nach: nach.ok || nach.grund, zwei, g2, drei };
+  });
+  ok('Stadterweiterung: Senat gibt Land im Osten frei, Landstraße verlängert', /Senat/.test(ew.vor) && /Stadtrang/.test(ew.zuFrueh) && ew.frei && ew.s0 === 0 && ew.g1 === 52 && ew.s1 >= 10 && ew.nach === true && ew.zwei && ew.g2 === 64 && /größte/.test(ew.drei), JSON.stringify(ew));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 14 && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

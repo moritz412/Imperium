@@ -1,27 +1,32 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
 
 // Gelände: Fluss am unteren Rand, Wald links und in einigen Flecken (fest, nicht zufällig je Start)
 export function erzeugeWelt() {
-  const typ = new Uint8Array(RASTER * RASTER);
+  const typ = new Uint8Array(RASTER * TIEFE);
   let s = 7;
   const zufall = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) {
+  // Reihenfolge wie beim alten 40×40-Gelände (gleiche Zufallsfolge → alte Spielstände passen), danach der Osten
+  const feld = (x, z) => {
     const fluss = 36.5 + Math.sin(x * 0.25) * 1.2;
     let t = GRAS;
     if (z >= fluss) t = WASSER;
     else if (x < 3 + Math.sin(z * 0.4) * 1.5 + zufall() * 1.2) t = WALD;
     typ[z * RASTER + x] = t;
-  }
-  // Waldflecken
-  [[30, 5, 3.5], [12, 4, 2.5], [33, 24, 2.8]].forEach(([cx, cz, r]) => {
-    for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) {
+  };
+  for (let z = 0; z < 40; z++) for (let x = 0; x < 40; x++) feld(x, z);
+  for (let z = 0; z < TIEFE; z++) for (let x = 40; x < RASTER; x++) feld(x, z);
+  // Waldflecken (die ersten drei wie früher nur im alten Gebiet, dann der Osten)
+  const flecken = (liste, bx) => liste.forEach(([cx, cz, r]) => {
+    for (let z = 0; z < TIEFE; z++) for (let x = bx[0]; x < bx[1]; x++) {
       if (Math.hypot(x - cx, z - cz) < r + zufall() * 0.8 && typ[z * RASTER + x] === GRAS) typ[z * RASTER + x] = WALD;
     }
   });
+  flecken([[30, 5, 3.5], [12, 4, 2.5], [33, 24, 2.8]], [0, 40]);
+  flecken([[49, 4, 3], [60, 15, 3.5], [55, 29, 2.5]], [40, RASTER]);
   return { typ };
 }
 
@@ -30,7 +35,7 @@ export function neuesSpiel() {
     auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true }, land: {} };
   // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
   const welt = erzeugeWelt();
-  for (let x = 0; x < RASTER; x++) if (welt.typ[START_STRASSE * RASTER + x] === GRAS)
+  for (let x = 0; x < GRENZE[0]; x++) if (welt.typ[START_STRASSE * RASTER + x] === GRAS)
     S.geb.push({ id: S.naechste++, t: 'strasse', x, z: START_STRASSE, w: 0, prio: false, stufe: 1, bew: 0, status: [] });
   return S;
 }
@@ -42,7 +47,7 @@ export const sklaven = S => S.geb.reduce((s, b) => s + (b.skl || 0), 0);   // br
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export function strassenMaske(S) {
-  const m = new Uint8Array(RASTER * RASTER);
+  const m = new Uint8Array(RASTER * TIEFE);
   for (const b of S.geb) if (b.t === 'strasse') m[b.z * RASTER + b.x] = 1;
   return m;
 }
@@ -51,20 +56,20 @@ export function randFelder(t, x, z) {
   const [w, d] = groesse(t), r = [];
   for (let i = 0; i < w; i++) r.push([x + i, z - 1], [x + i, z + d]);
   for (let i = 0; i < d; i++) r.push([x - 1, z + i], [x + w, z + i]);
-  return r.filter(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < RASTER).map(([a, c]) => c * RASTER + a);
+  return r.filter(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < TIEFE).map(([a, c]) => c * RASTER + a);
 }
 export const anStrasse = (t, x, z, maske) => randFelder(t, x, z).some(i => maske[i]);
 
 // Wegstrecke über Straßen ab den Straßenfeldern vor einem Gebäude (Breitensuche), −1 = nicht erreichbar
 export function strassenWeg(maske, b, max = 999) {
-  const dist = new Int16Array(RASTER * RASTER).fill(-1), q = [];
+  const dist = new Int16Array(RASTER * TIEFE).fill(-1), q = [];
   for (const i of randFelder(b.t, b.x, b.z)) if (maske[i]) { dist[i] = 0; q.push(i); }
   for (let k = 0; k < q.length; k++) {
     const i = q[k], x = i % RASTER, z = (i - x) / RASTER;
     if (dist[i] >= max) continue;
     for (const [dx, dz] of NACHBARN) {
       const a = x + dx, c = z + dz, j = c * RASTER + a;
-      if (a >= 0 && c >= 0 && a < RASTER && c < RASTER && maske[j] && dist[j] < 0) { dist[j] = dist[i] + 1; q.push(j); }
+      if (a >= 0 && c >= 0 && a < RASTER && c < TIEFE && maske[j] && dist[j] < 0) { dist[j] = dist[i] + 1; q.push(j); }
     }
   }
   return dist;
@@ -86,7 +91,7 @@ export function datumText(S) {
 
 // Belegung: welches Gebäude steht auf Feld (x,z)
 export function belegung(S) {
-  const m = new Int32Array(RASTER * RASTER);
+  const m = new Int32Array(RASTER * TIEFE);
   for (const b of S.geb) {
     const [w, d] = groesse(b.t);
     for (let z = b.z; z < b.z + d; z++) for (let x = b.x; x < b.x + w; x++) m[z * RASTER + x] = b.id;
@@ -96,7 +101,8 @@ export function belegung(S) {
 
 export function pruefePlatz(S, welt, t, x, z, bel = belegung(S)) {
   const [w, d] = groesse(t);
-  if (x < 0 || z < 0 || x + w > RASTER || z + d > RASTER) return 'Außerhalb der Stadt';
+  if (x < 0 || z < 0 || x + w > RASTER || z + d > TIEFE) return 'Außerhalb der Stadt';
+  if (x + w > stadtGrenze(S)) return 'Dieses Land hat der Senat noch nicht freigegeben';
   for (let zz = z; zz < z + d; zz++) for (let xx = x; xx < x + w; xx++) {
     const i = zz * RASTER + xx;
     if (welt.typ[i] === WASSER) return 'Hier fließt der Fluss';
@@ -154,7 +160,7 @@ export function inReichweite(S, b, typ, maske) {
 
 export function waldNah(welt, b) {
   const r = GEB.holzfaeller.wald, [cx, cz] = mitte(b);
-  for (let z = Math.max(0, Math.floor(cz - r)); z < Math.min(RASTER, cz + r); z++)
+  for (let z = Math.max(0, Math.floor(cz - r)); z < Math.min(TIEFE, cz + r); z++)
     for (let x = Math.max(0, Math.floor(cx - r)); x < Math.min(RASTER, cx + r); x++)
       if (welt.typ[z * RASTER + x] === WALD && Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r) return true;
   return false;
@@ -348,7 +354,7 @@ function ansichtRoh(S, welt, art) {
   const haeuser = S.geb.filter(b => b.t === 'huette');
   if (art === 'wasser') {
     const brunnen = S.geb.filter(b => b.t === 'brunnen'), r = GEB.brunnen.reichweite;
-    for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) {
+    for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++) {
       if (welt.typ[z * RASTER + x] !== GRAS) continue;
       if (brunnen.some(o => { const [cx, cz] = mitte(o); return Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r; })) felder.push([x, z, BLAU]);
     }
@@ -358,7 +364,7 @@ function ansichtRoh(S, welt, art) {
   if (art === 'feuer') {   // S3.3: Brandgefahr je Gebäude, Bereich der Feuerwachen
     for (const o of S.geb.filter(b => b.t === 'wache' && b.w > 0)) {
       const [cx, cz] = mitte(o), r = GEB.wache.reichweite;
-      for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++)
+      for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++)
         if (welt.typ[z * RASTER + x] === GRAS && Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r) felder.push([x, z, BLAU]);
     }
     for (const b of S.geb) {
@@ -716,5 +722,28 @@ function feuerMonat(S, meld) {
     if (wurf(S, 5000 + b.id) < brandGefahr(S, b)) { b.brand = 1; neu++; }
   }
   if (neu) meld.push(neu === 1 ? 'Feuer! Ein Gebäude brennt.' : `Feuer! ${neu} Gebäude brennen.`);
+}
+
+// ---------- Stadterweiterung (1.11.): der Senat gibt Land im Osten frei ----------
+export const stadtGrenze = S => GRENZE[Math.min(S.grenze || 0, GRENZE.length - 1)];
+export function erweiterungFehlt(S) {
+  const e = ERWEITERUNG[S.grenze || 0]; if (!e) return 'Die Stadt hat ihre größte Ausdehnung erreicht';
+  const f = [];
+  if (rang(S) < e.rang) f.push(`Stadtrang ${RAENGE[e.rang].n} (${RAENGE[e.rang].ab} Einwohner)`);
+  if (gunst(S) < e.gunst) f.push(`Gunst Roms ${e.gunst}`);
+  if (!kannBezahlen(S, e.kosten)) f.push(fehlendeKosten(S, e.kosten).join(', '));
+  return f.join(', ');
+}
+export function erweitern(S, welt) {
+  if (!ERWEITERUNG[S.grenze || 0]) return { ok: false, grund: 'Die Stadt hat ihre größte Ausdehnung erreicht' };
+  const fehlt = erweiterungFehlt(S); if (fehlt) return { ok: false, grund: 'Es fehlt: ' + fehlt };
+  const e = ERWEITERUNG[S.grenze || 0], von = stadtGrenze(S);
+  for (const [g, n] of Object.entries(e.kosten)) S.gut[g] -= n;
+  S.grenze = (S.grenze || 0) + 1;
+  // Via Postumia: Landstraße bis an die neue Grenze verlängern (wo frei)
+  const bel = belegung(S);
+  for (let x = von; x < stadtGrenze(S); x++) { const i = START_STRASSE * RASTER + x;
+    if (welt.typ[i] === GRAS && !bel[i]) S.geb.push({ id: S.naechste++, t: 'strasse', x, z: START_STRASSE, w: 0, prio: false, stufe: 1, bew: 0, status: [] }); }
+  return { ok: true, text: e.text };
 }
 

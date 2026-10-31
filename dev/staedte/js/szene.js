@@ -1,5 +1,5 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
-import { RASTER, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
+import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
 import { WALD, WASSER, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, landStand, landKey, hatWeg, nachbarn, wegPfad, hat } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
@@ -52,18 +52,36 @@ export function erzeugeSzene(leinwand, welt) {
   szene.add(sonne, sonne.target);
 
   // Gelände
-  const welt0 = -RASTER / 2;
+  const welt0 = -TIEFE / 2, mitteX = welt0 + RASTER / 2;   // Ursprung wie beim alten 40×40-Gelände, der Osten kommt dazu
   const bodenMat = new THREE.MeshLambertMaterial({ color: JAHRESZEITEN[0].boden });
-  const boden = new THREE.Mesh(new THREE.PlaneGeometry(RASTER, RASTER), bodenMat);
-  boden.rotation.x = -Math.PI / 2; boden.receiveShadow = true; szene.add(boden);
-  const erde = new THREE.Mesh(new THREE.BoxGeometry(RASTER, 1.2, RASTER), new THREE.MeshLambertMaterial({ color: 0x5e4e36 }));
-  erde.position.y = -0.61; szene.add(erde);
-  const gitter = new THREE.GridHelper(RASTER, RASTER, 0x000000, 0x000000);
-  gitter.material.opacity = 0.06; gitter.material.transparent = true; gitter.position.y = 0.005; szene.add(gitter);
+  const boden = new THREE.Mesh(new THREE.PlaneGeometry(RASTER, TIEFE), bodenMat);
+  boden.rotation.x = -Math.PI / 2; boden.position.x = mitteX; boden.receiveShadow = true; szene.add(boden);
+  const erde = new THREE.Mesh(new THREE.BoxGeometry(RASTER, 1.2, TIEFE), new THREE.MeshLambertMaterial({ color: 0x5e4e36 }));
+  erde.position.set(mitteX, -0.61, 0); szene.add(erde);
+  const gl = [];
+  for (let x = 0; x <= RASTER; x++) gl.push(welt0 + x, 0, welt0, welt0 + x, 0, -welt0);
+  for (let z = 0; z <= TIEFE; z++) gl.push(welt0, 0, welt0 + z, welt0 + RASTER, 0, welt0 + z);
+  const gitter = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(gl, 3)),
+    new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.06 }));
+  gitter.position.y = 0.005; szene.add(gitter);
+  // Gesperrtes Land (Stadterweiterung): dunkler Schleier östlich der Grenze und Grenzsteine (cippi)
+  const sperre = new THREE.Mesh(new THREE.PlaneGeometry(1, TIEFE).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x1a140e, transparent: true, opacity: 0.45, depthWrite: false }));
+  sperre.position.y = 0.09; sperre.renderOrder = 1; szene.add(sperre);
+  const cippi = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 0.5, 0.22).translate(0, 0.25, 0), new THREE.MeshLambertMaterial({ color: 0xe8e0cc }), TIEFE);
+  cippi.castShadow = true; szene.add(cippi);
+  function grenze(gx) {
+    const breit = RASTER - gx; sperre.visible = breit > 0;
+    sperre.scale.x = Math.max(0.001, breit); sperre.position.x = welt0 + gx + breit / 2;
+    let n = 0; const mm = new THREE.Matrix4();
+    if (breit > 0) for (let z = 1; z < TIEFE; z += 3) { if (welt.typ[z * RASTER + gx] === WASSER) continue; cippi.setMatrixAt(n++, mm.makeTranslation(welt0 + gx, 0, welt0 + z + 0.5)); }
+    cippi.count = n; cippi.instanceMatrix.needsUpdate = true;
+    grenzeX = gx; kameraSetzen();
+  }
+  let grenzeX = RASTER;
 
   // Wasser als ein Mesh aus Feldern
   const wasserGeo = [];
-  for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) if (welt.typ[z * RASTER + x] === WASSER) wasserGeo.push([x, z]);
+  for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++) if (welt.typ[z * RASTER + x] === WASSER) wasserGeo.push([x, z]);
   const wasser = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshLambertMaterial({ color: 0x5e8fb0 }), wasserGeo.length);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)), eins = new THREE.Vector3(1, 1, 1);
   wasserGeo.forEach(([x, z], i) => wasser.setMatrixAt(i, m4.compose(new THREE.Vector3(welt0 + x + 0.5, 0.02, welt0 + z + 0.5), q, eins)));
@@ -71,7 +89,7 @@ export function erzeugeSzene(leinwand, welt) {
 
   // Bäume (Instancing: Stamm + Krone)
   const baeume = [];
-  for (let z = 0; z < RASTER; z++) for (let x = 0; x < RASTER; x++) if (welt.typ[z * RASTER + x] === WALD) baeume.push([x, z]);
+  for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++) if (welt.typ[z * RASTER + x] === WALD) baeume.push([x, z]);
   const stamm = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06, 0.08, 0.4, 5), new THREE.MeshLambertMaterial({ color: 0x5a4330 }), baeume.length);
   const krone = new THREE.InstancedMesh(new THREE.ConeGeometry(0.38, 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x55703a }), baeume.length);
   baeume.forEach(([x, z], i) => {
@@ -286,7 +304,7 @@ export function erzeugeSzene(leinwand, welt) {
   function strassenPfad(maske, a, b) {
     const ziel = new Set(randFelder(b.t, b.x, b.z).filter(i => maske[i]));
     if (!ziel.size) return null;
-    const vor = new Int32Array(RASTER * RASTER).fill(-2), q = [];
+    const vor = new Int32Array(RASTER * TIEFE).fill(-2), q = [];
     for (const i of randFelder(a.t, a.x, a.z)) if (maske[i]) { vor[i] = -1; q.push(i); }
     for (let k = 0; k < q.length; k++) {
       const i = q[k];
@@ -294,7 +312,7 @@ export function erzeugeSzene(leinwand, welt) {
       const x = i % RASTER, z = (i - x) / RASTER;
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const ax = x + dx, az = z + dz, j = az * RASTER + ax;
-        if (ax >= 0 && az >= 0 && ax < RASTER && az < RASTER && maske[j] && vor[j] === -2) { vor[j] = i; q.push(j); }
+        if (ax >= 0 && az >= 0 && ax < RASTER && az < TIEFE && maske[j] && vor[j] === -2) { vor[j] = i; q.push(j); }
       }
     }
     return null;
@@ -359,8 +377,8 @@ export function erzeugeSzene(leinwand, welt) {
   // Ansichten (S1.4): eingefärbte Felder (Instancing) und leuchtende Gebäude
   let ansichtGeb = new Map();
   const ansichtFelder = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.94, 0.94).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }), RASTER * RASTER);
-  for (let i = 0; i < RASTER * RASTER; i++) ansichtFelder.setColorAt(i, new THREE.Color(0xffffff));
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }), RASTER * TIEFE);
+  for (let i = 0; i < RASTER * TIEFE; i++) ansichtFelder.setColorAt(i, new THREE.Color(0xffffff));
   ansichtFelder.count = 0; ansichtFelder.frustumCulled = false; ansichtFelder.renderOrder = 2; szene.add(ansichtFelder);
   function ansicht(d) {
     ansichtGeb = new Map(d ? d.geb : []);
@@ -394,9 +412,13 @@ export function erzeugeSzene(leinwand, welt) {
     kamera.updateProjectionMatrix();
   }
   function kameraSetzen() {
-    const mx = modus === 'region' ? REG_X : 0;
-    ziel.x = Math.max(mx - RASTER / 2, Math.min(mx + RASTER / 2, ziel.x));
-    ziel.z = Math.max(-RASTER / 2, Math.min(RASTER / 2, ziel.z));
+    if (modus === 'region') { ziel.x = Math.max(REG_X - 20, Math.min(REG_X + 20, ziel.x)); ziel.z = Math.max(-20, Math.min(20, ziel.z)); }
+    else {
+      ziel.x = Math.max(welt0, Math.min(welt0 + Math.min(RASTER, grenzeX + 6), ziel.x)); ziel.z = Math.max(welt0, Math.min(-welt0, ziel.z));
+      // Schatten folgen dem Blick (Schattenbereich ±30 Felder)
+      const sx = Math.round(ziel.x / 8) * 8;
+      if (sonne.target.position.x !== sx) { sonne.position.set(sx - 18, 30, 10); sonne.target.position.set(sx, 0, 0); sonne.target.updateMatrixWorld(); }
+    }
     kamera.position.copy(ziel).addScaledVector(BLICK, 100);
     kamera.lookAt(ziel);
     kamera.updateProjectionMatrix();
@@ -631,5 +653,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

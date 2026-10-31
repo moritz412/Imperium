@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -51,7 +51,7 @@ function kopfleiste() {
   document.querySelectorAll('.tempo button').forEach(b => b.classList.toggle('an', +b.dataset.tempo === tempo));
   const a = AUFTRAEGE[S.auftrag];
   $('#auftragText').textContent = a ? a.n : 'Alle Aufträge erfüllt. Die Stadt wächst weiter – bald folgt die Region.';
-  $('#auftrag').hidden = !!auswahl;
+  $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
@@ -172,7 +172,10 @@ function fingerWeg(e) {
   if (szene.modus() === 'region') { hexInfo(szene.hexAn(e.clientX, e.clientY)); return; }
   if (bauTyp) { bauenAn(bauTyp, e.clientX, e.clientY); return; }
   const id = szene.gebaeudeAn(e.clientX, e.clientY);
-  if (id) oeffneInfo(id); else schliesseInfo();
+  if (id) { oeffneInfo(id); return; }
+  const f = szene.feldAn(e.clientX, e.clientY);
+  if (f && f.x >= sim.stadtGrenze(S) && f.x < RASTER && f.z >= 0 && f.z < TIEFE) { erweiterungInfo(); return; }
+  schliesseInfo();
 }
 lw.addEventListener('pointerup', fingerWeg);
 lw.addEventListener('pointercancel', e => { finger.delete(e.pointerId); pinch = 0; });
@@ -237,6 +240,12 @@ function infoZeichnen() {
 }
 $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;
+  if (a.dataset.a === 'erweitern') {
+    const r = sim.erweitern(S, welt);
+    if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
+    ton.sfx('aufstieg'); melden('Der Senat stimmt zu: ' + r.text); schliesseInfo(); allesZeichnen(); return;
+  }
+  if (a.dataset.a === 'zu' && !auswahl && szene.modus() !== 'region') { schliesseInfo(); return; }
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
     else if (a.dataset.a === 'schutz' || a.dataset.a === 'villa') {
@@ -296,7 +305,24 @@ $('#menue').addEventListener('click', e => {
 });
 
 // ---------- Spielschleife ----------
-function allesZeichnen() { szene.abgleichen(S, auswahl); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+// ---------- Stadterweiterung (1.11.) ----------
+function erweiterungInfo() {
+  auswahl = 0; const e = ERWEITERUNG[S.grenze || 0];
+  if (!e) { schliesseInfo(); return; }
+  const haken = ok => ok ? '<b style="color:var(--gut)">erfüllt</b>' : '<b style="color:var(--schlecht)">fehlt</b>';
+  const rg = sim.rang(S) >= e.rang, gu = sim.gunst(S) >= e.gunst, geld = sim.kannBezahlen(S, e.kosten), alles = rg && gu && geld;
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Land im Osten</h2><div class="unter">Stadterweiterung ${(S.grenze || 0) + 1} von ${ERWEITERUNG.length}</div>
+    <p>${e.text} Grenzsteine markieren, wie weit die Kolonie bauen darf. Über neues Land entscheidet der Senat in Rom.</p>
+    <div class="zeile"><span>Stadtrang ${RAENGE[e.rang].n}</span>${haken(rg)}</div>
+    <div class="zeile"><span>Gunst Roms mindestens ${e.gunst} (jetzt ${Math.round(sim.gunst(S))})</span>${haken(gu)}</div>
+    <div class="zeile"><span>Gebühr ${kostenText(e.kosten)}</span>${haken(geld)}</div>
+    <button class="knopf${alles ? ' haupt' : ''}" data-a="erweitern"${alles ? '' : ' disabled'}>Beim Senat beantragen</button>`;
+  $('#info').hidden = false; kopfleiste();
+}
+let grenzeGezeigt = -1;
+function allesZeichnen() { if (grenzeGezeigt !== sim.stadtGrenze(S)) { grenzeGezeigt = sim.stadtGrenze(S); szene.grenze(grenzeGezeigt); }
+  szene.abgleichen(S, auswahl); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
 // ---------- Umland (S2.1) ----------
 function umland(an) {
@@ -476,7 +502,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, forschung: () => forschungZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art) => { const r = sim.handeln(S, g, art); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
