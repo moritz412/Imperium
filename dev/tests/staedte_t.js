@@ -508,6 +508,14 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { heer, w, gunst, korn, trebia, zufall, text, fenster, knoepfe, titel, bild, zu };
   });
   ok('Ereignisse: Konsul will Getreide (fest), Trebia, Zufall', ev.heer === 'heer' && ev.w && ev.gunst === 8 && ev.korn === 20 && ev.trebia === 'trebia' && !!ev.zufall, JSON.stringify(ev));
+  const fest = await p.evaluate(() => {
+    const sim = SR.sim, E = JSON.parse(JSON.stringify(SR.S)); E.ereignisseAus = false; E.ereignisLog = {}; E.ereignis = null;
+    const r = [];
+    for (const m of [13, 18, 21, 25]) { E.monat = m; sim.monat(E, SR.welt); r.push(E.ereignis || '-'); if (E.ereignis) sim.ereignisWaehlen(E, 2); }
+    E.monat = 26; sim.setzeZufall(() => 0.99); sim.monat(E, SR.welt); sim.setzeZufall(null); r.push(E.ereignis || '-');
+    return r.join(',');
+  });
+  ok('Feste: Cerealia, Ludi Romani, Saturnalien jedes Jahr, nicht doppelt', fest === 'cerealia,ludi,saturnalia,cerealia,-', fest);
   ok('Ereignisfenster mit Bild, 3 Wahlmöglichkeiten, schließt nach der Wahl', ev.fenster && ev.knoepfe === 3 && /Trebia/.test(ev.titel) && ev.bild && ev.zu && /Getreide/.test(ev.text));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 

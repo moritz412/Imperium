@@ -998,10 +998,11 @@ export const ereignis = id => EREIGNISSE.find(e => e.id === id);
 function ereignisMonat(S) {
   if (S.ereignis || S.ereignisseAus) return;
   const log = S.ereignisLog = S.ereignisLog || {};
-  const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined);
+  const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined)
+    || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
   if (fest) { S.ereignis = fest.id; return; }
   if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
-  const moegl = EREIGNISSE.filter(e => !e.fest && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
+  const moegl = EREIGNISSE.filter(e => !e.fest && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
   if (moegl.length) S.ereignis = moegl[Math.floor(wurf(S, 4243) * moegl.length)].id;
 }
 export function wahlMoeglich(S, w) {

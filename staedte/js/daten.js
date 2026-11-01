@@ -366,6 +366,16 @@ export const EREIGNISSE = [
   { id: 'insubrer', titel: 'Gesandte der Insubrer', bild: 'tor', ab: 24, wenn: S => !(S.frieden > 0),
     text: 'Zwei Krieger mit goldenen Halsringen stehen vor dem Tor. Ihr Häuptling bietet Frieden – gegen Wein und Silber.',
     wahl: [{ t: 'Frieden kaufen (60 Denare)', w: { gut: { denare: -60 }, frieden: 18 } }, { t: 'Mit Gastgeschenken empfangen (20 Brot)', w: { gut: { brot: -20 }, frieden: 8, ansehen: 2 } }, { t: 'Fortschicken', w: { ansehen: 2 } }] },
+  // Feste im Jahreslauf (jährlich ab dem 2. Jahr; jaehrlich = Monat im Jahr, 0 = erster Frühlingsmonat)
+  { id: 'cerealia', jaehrlich: 1, titel: 'Cerealia', bild: 'ernte',
+    text: 'Im Frühling ehrt die Stadt Ceres, die Göttin des Getreides. Die Bauern hoffen auf ihren Segen für die Aussaat.',
+    wahl: [{ t: 'Ein großes Fest mit Opfern und Umzug', w: { gut: { getreide: -15, denare: -20 }, stimmung: 8, ansehen: 2 } }, { t: 'Ein schlichtes Opfer', w: { gut: { getreide: -5 }, stimmung: 3 } }, { t: 'Dieses Jahr ausfallen lassen', w: { stimmung: -4 } }] },
+  { id: 'ludi', jaehrlich: 6, titel: 'Ludi Romani', bild: 'spiele',
+    text: 'Im Herbst feiert ganz Rom die Römischen Spiele zu Ehren Jupiters. Auch in Cremona erwarten die Bürger Wettläufe und Theater.',
+    wahl: [{ t: 'Prächtige Spiele aus der Stadtkasse', w: { gut: { denare: -60 }, stimmung: 10 } }, { t: 'Die Familie bezahlt die Spiele', w: { vermoegen: -50, stimmung: 8, ansehen: 6 } }, { t: 'Nur ein Opfer am Altar', w: { stimmung: -2 } }] },
+  { id: 'saturnalia', jaehrlich: 9, titel: 'Saturnalien', bild: 'volk',
+    text: 'Im Dezember steht die Welt Kopf: Sklaven sitzen mit ihren Herren an einem Tisch, man beschenkt sich mit Kerzen und Tonfiguren.',
+    wahl: [{ t: 'Ein Festmahl für alle', w: { gut: { brot: -20 }, stimmung: 8 } }, { t: 'Geschenke an die Klienten', w: { vermoegen: -30, ansehen: 4, stimmung: 3 } }, { t: 'Still feiern', w: {} }] },
 ];
 export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
 

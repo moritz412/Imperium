@@ -212,6 +212,8 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       36 Monaten): Bestechung, Witwe eines Legionärs, Getreideschiff (bei Getreide < 60), Fieber (ab 80 Einwohnern), Murren auf dem
       Markt (Stimmung < 45), Münzfund, Testament, Weidestreit mit Placentia, Priester der Ceres, Gesandte der Insubrer.
       Menü: „Ereignisse: an/aus“. Test 68/68 (alter Testteil mit Ereignissen aus), Bild angesehen. **Nicht getestet:** iPad.
+- [x] Feste im Jahreslauf (ab dem 2. Jahr, als feste Ereignisse): Cerealia (2. Frühlingsmonat), Ludi Romani (1. Herbstmonat,
+      neues Bild Stadion), Saturnalien (1. Wintermonat) – je groß feiern / bescheiden / ausfallen. Test 69/69.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.
