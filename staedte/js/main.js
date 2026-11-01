@@ -405,7 +405,7 @@ $('#ereignis').addEventListener('click', e => {
 
 let grenzeGezeigt = -1;
 function allesZeichnen() { if (grenzeGezeigt !== sim.stadtGrenze(S)) { grenzeGezeigt = sim.stadtGrenze(S); szene.grenze(grenzeGezeigt); }
-  szene.abgleichen(S, auswahl); if (S.ereignis && $('#ereignis').hidden) ereignisZeigen(); else if (!S.ereignis) $('#ereignis').hidden = true; szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+  szene.abgleichen(S, auswahl); if (S.ereignis && $('#ereignis').hidden) ereignisZeigen(); else if (!S.ereignis) $('#ereignis').hidden = true; if (S.zensusNeu && !S.ereignis && $('#chronik').hidden) zensusZeigen(); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
 // ---------- Umland (S2.1) ----------
 function umland(an) {
@@ -515,9 +515,30 @@ function chronikZeigen() {
     <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     ${buchReiter('chronik')}<h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} ${sim.stadtName()} · Stand am Ende jedes Jahres</div>
     <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}${kurve(c, 'a', 'Ansehen der Familie', '#f28c6e')}</div>
+    ${(S.zensus || []).length ? `<h3 class="fh">Zensus</h3>${S.zensus.map(z => `<div class="zeile"><span>${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(z.j)} · ${zahl(z.e)} Bürger</span><b>${sim.ZENSUS_URTEIL.stadt[z.u[0]]} · ${sim.ZENSUS_URTEIL.familie[z.u[1]]} · Rom ${sim.ZENSUS_URTEIL.rom[z.u[2]]}</b></div>`).join('')}` : ''}
     <h3 class="fh">Zuletzt geschehen</h3>
     ${t.length ? t.map(([d, x]) => `<div class="zeile"><span>${x}</span><b>${d}</b></div>`).join('') : '<p class="fp">Noch nichts Erwähnenswertes.</p>'}</div>`;
   $('#chronik').hidden = false;
+}
+function zensusZeigen() {
+  S.zensusNeu = false;
+  const l = S.zensus || [], z = l[l.length - 1], v = l[l.length - 2]; if (!z) return;
+  const diff = (k, n) => v ? ` <small>(${z[k] - v[k] >= 0 ? '+' : ''}${zahl(z[k] - v[k])}${n || ''})</small>` : '';
+  const U = sim.ZENSUS_URTEIL, karte = (t, i, k) => `<div class="fkarte zensus u${z.u[i]}"><b>${t}</b><span>${U[k][z.u[i]]}</span></div>`;
+  $('#chronik').innerHTML = `<div class="feld forschungsseite">
+    <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Zensus im Jahr ${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(z.j)}</h2><div class="untertitel">Alle fünf Jahre zählen die Zensoren Bürger, Vermögen und Gebäude von ${sim.stadtName()}.</div>
+    <div class="zensusurteil">${karte('Die Stadt', 0, 'stadt')}${karte('Die Familie', 1, 'familie')}${karte('Rom', 2, 'rom')}</div>
+    ${z.lohn ? '<p class="fp">Ein glänzendes Lustrum! Der Senat lobt die Stadt (Gunst +5, Ansehen +5).</p>' : ''}
+    <div class="zeile"><span>Bürger</span><b>${zahl(z.e)}${diff('e')}</b></div>
+    <div class="zeile"><span>davon Equites</span><b>${zahl(z.eq)}</b></div>
+    <div class="zeile"><span>Sklaven</span><b>${zahl(z.skl)}${diff('skl')}</b></div>
+    <div class="zeile"><span>Gebäude</span><b>${zahl(z.geb)}${diff('geb')}</b></div>
+    <div class="zeile"><span>Stadtkasse</span><b>${zahl(z.d)} Denare${diff('d')}</b></div>
+    <div class="zeile"><span>Ansehen der Familie</span><b>${zahl(z.a)}${diff('a')}</b></div>
+    <div class="zeile"><span>Gunst Roms</span><b>${zahl(z.g)}${diff('g')}</b></div>
+    <button class="knopf haupt" data-ch="zu">Weiter</button></div>`;
+  $('#chronik').hidden = false; ton.sfx('fest');
 }
 $('#chronik').addEventListener('click', e => { if (e.target.id === 'chronik' || e.target.closest('[data-ch="zu"]')) $('#chronik').hidden = true; });
 
@@ -801,7 +822,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), zensus: () => zensusZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f), melden,
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

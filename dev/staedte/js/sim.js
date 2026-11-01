@@ -444,6 +444,7 @@ export function monat(S, welt) {
   const altJs = js;
   S.monat++;
   if (S.monat % 12 === 0) (S.chronik = S.chronik || []).push({ j: jahr(S) - 1, e: einwohner(S), d: Math.round(S.gut.denare), s: Math.round(S.stimmung), a: Math.round((S.familie || {}).ansehen || 0) });
+  if (S.monat % 60 === 0) zensus(S, meld);
   if (jahreszeit(S) !== altJs) meld.push(JAHRESZEITEN[jahreszeit(S)].n + ' beginnt.');
   if (S.monat % 12 === 6 && S.monat >= 12) meld.push(`Rom erwartet am Ende des Herbstes ${abgabeBetrag(S)} Denare Abgaben.`);
   if (bedarf > 0 && !essen) meld.push('Die Vorräte reichen nicht – die Menschen hungern.');
@@ -1359,6 +1360,21 @@ function praefektMonat(S, meld) {
     Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
       gText: 'Der Senat hat das Vertrauen in die Stadt verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
   }
+}
+
+// ---------- Zensus (Lustrum) alle fünf Jahre (1.11.): Bilanz mit Urteil für Stadt, Familie und Rom ----------
+export const ZENSUS_URTEIL = { stadt: ['in Not', 'solide', 'blühend'], familie: ['vergessen', 'geachtet', 'angesehen'], rom: ['unzufrieden', 'abwartend', 'zufrieden'] };
+function zensus(S, meld) {
+  const liste = S.zensus = S.zensus || [], alt = liste[liste.length - 1];
+  const e = einwohner(S), a = Math.round(familieS(S).ansehen), g = Math.round(gunst(S)), plus = e - (alt ? alt.e : 0);
+  const stadt = plus < 0 || S.stimmung < 35 ? 0 : (plus >= 20 || e >= 300) && S.stimmung >= 55 ? 2 : 1;
+  const familie = a < (alt ? alt.a : 10) ? 0 : a >= (alt ? alt.a + 15 : 40) ? 2 : 1;
+  const rom = g <= 25 ? 0 : g >= 60 ? 2 : 1;
+  const z = { j: jahr(S) - 1, e, eq: S.geb.filter(b => b.t === 'domus').reduce((n, b) => n + (b.bew || 0), 0), skl: sklaven(S), d: Math.round(S.gut.denare), a, g,
+    geb: S.geb.filter(b => !['strasse', 'mauer'].includes(b.t) && !(b.bau > 0)).length, u: [stadt, familie, rom] };
+  if (stadt + familie + rom === 6) { S.gunst = Math.min(100, gunst(S) + 5); familieS(S).ansehen += 5; z.lohn = true; }
+  liste.push(z); S.zensusNeu = true;
+  meld.push(`Zensus: ${e} Bürger gezählt – die Stadt ist ${ZENSUS_URTEIL.stadt[stadt]}.`);
 }
 
 // ---------- Bodenwert (Phase D) ----------

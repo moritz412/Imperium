@@ -353,6 +353,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Große Teststadt: 247 Draw-Calls (vorher 244), 213.000 Dreiecke. Bilder aller Modelle angesehen. Nicht getestet: iPad (Bildrate, Ladezeit).
 - [x] **Eröffnungen** (1.11.): erster Tempel (Weihe), erstes Theater (erstes Stück), erste Thermen (erster Badetag) als
       Entscheidung mit Festklang, einmal je Spiel. Startkarte: Ortsnamen überlappen nicht mehr. Test 91/91.
+- [x] **Spielstand-Revision + Absturzschutz** (1.11.): `sim.aufbereiten` ergänzt alte Stände (Felder, Waren, entfernte
+      Gebäudearten), Fehler im Monatsablauf halten das Spiel an statt es hängen zu lassen. Test 92/92.
+- [x] **Zensus alle fünf Jahre** (1.11.): Bilanzseite mit Urteil für Stadt, Familie, Rom (dreimal gut → Gunst +5, Ansehen +5),
+      Liste in der Chronik. Test 93/93, Bild angesehen.
+- Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
       beantwortete jede Seitenanfrage unter /Imperium/ – auch /staedte/ – mit der Index-Seite des Hauptspiels; jetzt bleibt staedte/

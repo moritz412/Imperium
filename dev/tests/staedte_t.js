@@ -729,6 +729,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     delete A.stand; delete A.land; delete A.letzte; delete A.gut.wolle; A.geb[0].status = undefined; A.geb.push({ id: 99999, t: 'abgerissen', x: 0, z: 0 });
     const B = sim.aufbereiten(A); let lauf = true; try { sim.monat(B, SR.welt); } catch (e) { lauf = e.message; }
     return { ok: !!B, stand: B && B.stand, land: B && !!B.land, wolle: B && B.gut.wolle === 0, weg: B && !B.geb.some(b => b.t === 'abgerissen'), lauf, kaputt: sim.aufbereiten({ v: 1 }) === null }; });
+  const zen = await p.evaluate(() => { const sim = SR.sim, B = JSON.parse(JSON.stringify(SR.S)); B.monat = 59; B.ereignisseAus = true; B.zensus = [];
+    const m = sim.monat(B, SR.welt).join(' | '); const z = (B.zensus || [])[0];
+    const S = SR.S; S.zensus = B.zensus; SR.zensus(); const seite = document.querySelectorAll('#chronik .fkarte.zensus').length, offen = !document.querySelector('#chronik').hidden;
+    document.querySelector('#chronik [data-ch="zu"]').click(); SR.chronik(); const inChronik = /Zensus/.test(document.querySelector('#chronik').textContent); document.querySelector('#chronik [data-ch="zu"]').click();
+    return { meld: /Zensus/.test(m), z: !!z && z.u.length === 3, seite, offen, inChronik, zu: document.querySelector('#chronik').hidden }; });
+  ok('Zensus alle fünf Jahre: Bilanz mit drei Urteilen, Seite und Chronik', zen.meld && zen.z && zen.seite === 3 && zen.offen && zen.inChronik && zen.zu, JSON.stringify(zen));
   ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand === 2 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
   ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
   const rgn = await p.evaluate(() => {

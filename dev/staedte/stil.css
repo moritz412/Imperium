@@ -202,3 +202,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 /* Ansichten-Spalte bei wenig Höhe zweispaltig (9 Knöpfe, 1.11.) */
 @media (max-height:860px){#ansicht{display:grid;grid-template-columns:repeat(2,64px);gap:4px}#ansicht button{height:54px}}
 #meldung div.tipp{pointer-events:auto;cursor:pointer;border-color:#c9a24a}
+.zensusurteil{display:flex;gap:10px;margin:10px 0 14px}
+.fkarte.zensus{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;text-align:center;min-height:0;height:auto}
+.fkarte.zensus span{font:700 17px Cinzel,serif}
+.fkarte.zensus.u2 span{color:#9ccb8e}.fkarte.zensus.u1 span{color:#e9b44c}.fkarte.zensus.u0 span{color:#f28c6e}
