@@ -193,4 +193,9 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .buchreiter button{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--rand);background:transparent;font-size:13px;font-weight:600}
 .buchreiter button.an{background:var(--gold);border-color:var(--gold);color:#1f1a15}
 .handel{grid-template-columns:1fr 84px 84px 74px}.handel .knopf.vtr{font-size:12px}.handel .knopf.vtr.an{background:rgba(90,70,40,.9);border-color:var(--gold)}
+/* Spielstände (Phase E) */
+.staendeseite{position:relative;width:min(420px,94vw)}
+.stand{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border:1px solid var(--rand);border-radius:11px}
+.stand b,.stand small{grid-column:1 / -1}.stand small{color:var(--leise);font-size:13px}
+.stand.aktiv{border-color:var(--gold);background:rgba(233,180,76,.07)}
 

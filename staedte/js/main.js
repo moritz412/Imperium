@@ -5,7 +5,10 @@ import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
 import * as ton from './ton.js';
 
-const SPEICHER = 'staedte_roms.v1';
+// Spielstände (Phase E): drei Plätze; Platz 1 ist der bisherige Speicher
+const slotKey = n => n === 1 ? 'staedte_roms.v1' : 'staedte_roms.v1.s' + n;
+let slot = (() => { try { return +localStorage.getItem('staedte_slot') || 1; } catch (e) { return 1; } })();
+const SPEICHER_VON = () => slotKey(slot);
 const $ = s => document.querySelector(s);
 const welt = sim.erzeugeWelt();
 let S = laden() || sim.neuesSpiel();
@@ -16,10 +19,13 @@ szene.jahreszeitFarbe(sim.jahreszeit(S));
 
 // ---------- Speichern ----------
 function laden() {
-  try { const s = JSON.parse(localStorage.getItem(SPEICHER)); if (s) s.land = s.land || {}; return s && s.v === 1 ? s : null; } catch (e) { return null; }
+  return ladenVon(slot);
+}
+function ladenVon(n) {
+  try { const s = JSON.parse(localStorage.getItem(slotKey(n))); if (s) s.land = s.land || {}; return s && s.v === 1 ? s : null; } catch (e) { return null; }
 }
 function speichern(still) {
-  try { localStorage.setItem(SPEICHER, JSON.stringify(S)); if (!still) melden('Gespeichert.'); }
+  try { localStorage.setItem(SPEICHER_VON(), JSON.stringify(S)); localStorage.setItem('staedte_slot', slot); if (!still) melden(`Gespeichert (Platz ${slot}).`); }
   catch (e) { if (!still) melden('Speichern nicht möglich.'); }
 }
 
@@ -341,6 +347,7 @@ $('#menue').addEventListener('click', e => {
   if (m === 'wetter') { wetterAn = !wetterAn; try { localStorage.setItem('staedte_wetter', wetterAn ? '1' : '0'); } catch (e) {} szene.wetterSchalten(wetterAn); tonKnopf(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
+  if (m === 'staende') { $('#menue').hidden = true; staendeZeigen(); }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
   if (m === 'hilfe') { $('#menue').hidden = true; hilfeZeigen(); }
 });
@@ -445,6 +452,35 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Spielstände (Phase E) ----------
+function standTextVon(n) {
+  try { const s = JSON.parse(localStorage.getItem(slotKey(n))); if (!s) return '';
+    const e = s.geb.reduce((k, b) => k + (b.bew || 0), 0), r = RAENGE[s.rang || 0].n, a = s.familie ? AEMTER[s.familie.amt].n : 'Quästor';
+    return `${r} · ${sim.datumText(s)} · ${e} Einwohner · ${a}`; } catch (e) { return ''; }
+}
+function staendeZeigen() {
+  $('#staende').innerHTML = `<div class="feld menuespalte staendeseite">
+    <button class="schliessen" data-st="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Spielstände</h2>${[1, 2, 3].map(n => { const t = standTextVon(n);
+      return `<div class="stand${n === slot ? ' aktiv' : ''}"><b>Platz ${n}${n === slot ? ' · jetzt gespielt' : ''}</b><small>${t || 'leer'}</small>
+        <button class="knopf" data-st="speichern" data-n="${n}">Hier speichern</button>
+        <button class="knopf" data-st="laden" data-n="${n}"${t ? '' : ' disabled'}>Laden</button></div>`; }).join('')}
+    <p class="klein">Zu Beginn jeder Jahreszeit speichert das Spiel automatisch auf dem Platz, der gerade gespielt wird.</p></div>`;
+  $('#staende').hidden = false;
+}
+$('#staende').addEventListener('click', e => {
+  const b = e.target.closest('[data-st]');
+  if (!b) { if (e.target.id === 'staende') $('#staende').hidden = true; return; }
+  if (b.dataset.st === 'zu') { $('#staende').hidden = true; return; }
+  const n = +b.dataset.n;
+  if (b.dataset.st === 'speichern') { if (standTextVon(n) && n !== slot && !confirm(`Platz ${n} überschreiben?`)) return; slot = n; speichern(); staendeZeigen(); return; }
+  const neu = ladenVon(n); if (!neu) { melden('Platz ist leer.'); return; }
+  S = neu; slot = n; try { localStorage.setItem('staedte_slot', n); } catch (x) {}
+  if (szene.modus() === 'region') umland(false);
+  auswahl = 0; bauTyp = ''; uhr = 0; szene.jahreszeitFarbe(sim.jahreszeit(S)); szene.zentrieren(20, 20); allesZeichnen();
+  $('#staende').hidden = true; melden(`Platz ${n} geladen.`);
+});
+
 // ---------- Stadtbuch (Phase D): gemeinsame Kapitelleiste für Wissen, Familie, Chronik, Inschriften, Hilfe ----------
 const BUCH = [['forschung', 'Wissen'], ['familie', 'Familie'], ['chronik', 'Chronik'], ['inschriften', 'Inschriften'], ['hilfe', 'Hilfe']];
 const buchReiter = aktiv => `<nav class="buchreiter" aria-label="Stadtbuch">${BUCH.map(([k, n]) => `<button data-buch="${k}" class="${k === aktiv ? 'an' : ''}" aria-pressed="${k === aktiv}">${n}</button>`).join('')}</nav>`;
@@ -716,7 +752,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden && $('#chronik').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden && $('#chronik').hidden && $('#staende').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -734,11 +770,9 @@ tonKnopf();
 // ---------- Startseite (S1.5) ----------
 const willkommen = () => melden('Willkommen in Cremona. Der Senat erwartet die ersten Hütten an der Landstraße.');
 const start = startseite({
-  hatStand: () => { try { return !!localStorage.getItem(SPEICHER); } catch (e) { return false; } },
+  hatStand: () => { try { return !!localStorage.getItem(SPEICHER_VON()); } catch (e) { return false; } },
   weiter: () => {},
-  standText: () => { try { const s = JSON.parse(localStorage.getItem(SPEICHER)); if (!s) return '';
-    const e = s.geb.reduce((n, b) => n + (b.bew || 0), 0), r = RAENGE[s.rang || 0].n, a = s.familie ? AEMTER[s.familie.amt].n : 'Quästor';
-    return `${r} · ${sim.datumText(s)} · ${e} Einwohner · ${a}`; } catch (e) { return ''; } },
+  standText: () => standTextVon(slot),
   gruenden: r => {
     if (szene.modus() === 'region') umland(false);
     S = sim.neuesSpiel(); S.region = r.id; auswahl = 0; bauTyp = ''; uhr = 0;

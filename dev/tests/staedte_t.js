@@ -701,6 +701,17 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { frueh, ruf, zweimal, bonus, vt, geliefert, gekuendigt, buch };
   });
   ok('Ruf der Stadt, Lieferverträge (Lieferung, Kündigung), Stadtbuch-Kapitel', /Kleinstadt/.test(rv.frueh) && rv.ruf && /steht schon/.test(rv.zweimal) && rv.bonus && rv.vt && rv.geliefert && rv.gekuendigt && rv.buch, JSON.stringify(rv));
+  const sp = await p.evaluate(() => {
+    const m0 = SR.S.monat, e0 = SR.S.geb.length;
+    document.querySelector('#menue [data-m="staende"]').click();
+    const plaetze = document.querySelectorAll('#staende .stand').length;
+    document.querySelector('#staende [data-st="speichern"][data-n="2"]').click();
+    const text = document.querySelectorAll('#staende .stand small')[1].textContent;
+    const d0 = SR.S.gut.denare; SR.S.gut.denare = 12345; document.querySelector('#staende [data-st="laden"][data-n="2"]').click();
+    const zurueck = SR.S.monat === m0 && SR.S.geb.length === e0 && SR.S.gut.denare === d0, zu = document.querySelector('#staende').hidden;
+    return { plaetze, text, zurueck, zu };
+  });
+  ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

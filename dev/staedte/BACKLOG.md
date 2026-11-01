@@ -333,6 +333,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       dreimal nicht geliefert → Kündigung, Ansehen −5. **Stadtbuch**: Wissen, Familie, Chronik, Inschriften, Hilfe mit gemeinsamer
       Kapitelleiste oben. Test 87/87.
 
+## Phase E – Feinschliff (1.11.)
+- [x] Drei Spielstände (Menü „Spielstände“): je Platz Zusammenfassung, „Hier speichern“ (mit Rückfrage beim Überschreiben), „Laden“;
+      Autospeichern in den gespielten Platz; Platz 1 = bisheriger Speicher (nichts geht verloren). Test 88/88.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.
