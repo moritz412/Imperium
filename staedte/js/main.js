@@ -357,6 +357,8 @@ function infoZeichnen() {
       <div class="zeile"><span>Gehen zur Arbeit</span><b>${arbeiten}</b></div>
       <div class="naehe">${[['Brot', S.versorgt.brot], ['Brunnen', sim.inReichweite(S, b, 'brunnen')], ['Markt', sim.inReichweite(S, b, 'markt')],
         ['Wache', sim.wacheNah(S, b)], ['Latrine', sim.latrineNah(S, b)], ['Thermen', sim.thermeNah(S, b)]].map(([n, v]) => `<span class="${v ? 'ja' : 'nein'}">${v ? '✓' : '✗'} ${n}</span>`).join('')}</div>
+      <h3 class="fh">Speiseplan</h3><div class="naehe">${sim.speiseplan(S).map(([n, v]) => `<span class="${v ? 'ja' : 'nein'}">${v ? '✓' : '✗'} ${n}</span>`).join('')}</div>
+      <p class="fp">Je mehr verschiedene Speisen es in der Stadt gibt, desto zufriedener sind die Bürger.</p>
       <div class="zeile"><span>Bodenwert (Lage)</span><b>${zahl(sim.bodenwert(S, b))}</b></div>
       <div class="zeile"><span>Seuchengefahr</span><b>${b.krank > 0 ? 'krank' : (p => p < 0.001 ? 'gering' : p < 0.003 ? 'mittel' : 'hoch')(sim.seuchenGefahr(S, b))}</b></div>`;
     if (b.stufe !== 3) {   // Hinterhof (1.11.)

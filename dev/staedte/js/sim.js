@@ -192,6 +192,9 @@ export function wintervorrat(S) {
   const essen = (S.gut.getreide || 0) + (S.gut.brot || 0) + (S.gut.fisch || 0);
   return { holzBrauch, essenBrauch, holz: S.gut.holz || 0, essen, ok: (S.gut.holz || 0) >= holzBrauch && essen >= essenBrauch };
 }
+// Speiseplan (1.11.): Vielfalt der Nahrung hebt die Stimmung – Brei (Getreide), Brot, Fisch, Öl, Wein
+export const SPEISEN = [['getreide', 'Brei'], ['brot', 'Brot'], ['fisch', 'Fisch'], ['oel', 'Öl'], ['wein', 'Wein']];
+export const speiseplan = S => SPEISEN.map(([g, n]) => [n, (S.gut[g] || 0) >= 1]);
 export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
 // Lagergrenze je Ware (1.11.): Nahrung im Kornspeicher, alles andere im Speicher; alte Stände (kornImSpeicher) zählen den Speicher für beides
 export const lagerTyp = (S, g) => NAHRUNG.has(g) && !S.kornImSpeicher ? 'horreum' : 'speicher';
@@ -521,6 +524,7 @@ export function monat(S, welt) {
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
   if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
   if (S.versorgt.tuch) ziel += 6;
+  ziel += [0, 0, 3, 6, 9, 12][speiseplan(S).filter(x => x[1]).length];   // Vielfalt der Speisen (1.11.)
   if (haeuser >= 5 && mauerSchutz(S) >= 0.8) ziel += 3;   // Sicherheit hinter der Mauer
   const tempel = S.geb.filter(b => b.t === 'tempel' && b.w > 0);
   if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;
