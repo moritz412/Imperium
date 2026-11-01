@@ -208,3 +208,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .fkarte.zensus.u2 span{color:#9ccb8e}.fkarte.zensus.u1 span{color:#e9b44c}.fkarte.zensus.u0 span{color:#f28c6e}
 .karte .bild.foto{width:46px;height:46px;background:radial-gradient(circle at 50% 60%,#5a4a36,#2e261e);padding:0;align-items:center;overflow:hidden}
 .karte .bild.foto img{width:46px;height:46px;display:block;pointer-events:none;-webkit-user-drag:none}
+.naehe{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.naehe span{font-size:13px;padding:4px 9px;border-radius:999px;border:1px solid var(--rand)}
+.naehe .ja{color:#9ccb8e;border-color:#5f7d52;background:rgba(156,203,142,.08)}
+.naehe .nein{color:#c9b9a0;opacity:.75}

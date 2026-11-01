@@ -237,11 +237,8 @@ function infoZeichnen() {
     const arbeiten = S.geb.reduce((s, o) => s + (o.von || []).filter(v => v[0] === b.id).reduce((t, v) => t + v[1], 0), 0);
     html += `<div class="zeile"><span>Bewohner</span><b>${b.bew} / ${sim.wohnraum(b)}</b></div>
       <div class="zeile"><span>Gehen zur Arbeit</span><b>${arbeiten}</b></div>
-      <div class="zeile"><span>Brot</span><b>${ja(S.versorgt.brot)}</b></div>
-      <div class="zeile"><span>Brunnen in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'brunnen'))}</b></div>
-      <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>
-      <div class="zeile"><span>Feuerwache in der Nähe</span><b>${ja(sim.wacheNah(S, b))}</b></div>
-      <div class="zeile"><span>Latrine in der Nähe</span><b>${ja(sim.latrineNah(S, b))}</b></div>
+      <div class="naehe">${[['Brot', S.versorgt.brot], ['Brunnen', sim.inReichweite(S, b, 'brunnen')], ['Markt', sim.inReichweite(S, b, 'markt')],
+        ['Wache', sim.wacheNah(S, b)], ['Latrine', sim.latrineNah(S, b)], ['Thermen', sim.thermeNah(S, b)]].map(([n, v]) => `<span class="${v ? 'ja' : 'nein'}">${v ? '✓' : '✗'} ${n}</span>`).join('')}</div>
       <div class="zeile"><span>Bodenwert (Lage)</span><b>${zahl(sim.bodenwert(S, b))}</b></div>
       <div class="zeile"><span>Seuchengefahr</span><b>${b.krank > 0 ? 'krank' : (p => p < 0.001 ? 'gering' : p < 0.003 ? 'mittel' : 'hoch')(sim.seuchenGefahr(S, b))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
@@ -270,7 +267,6 @@ function infoZeichnen() {
   const gefahr = sim.brandGefahr(S, b);
   if (gefahr) html += `<div class="zeile"><span>Brandgefahr</span><b>${gefahr < 0.002 ? 'gering' : gefahr < 0.006 ? 'mittel' : 'hoch'}</b></div>`;
   if (b.t === 'thermen') html += `<div class="zeile"><span>Heizung</span><b>${b.geheizt ? 'geheizt (3 Holz im Monat)' : 'kalt – braucht Holz und Personal'}</b></div>`;
-  if (b.t === 'huette') html += `<div class="zeile"><span>Thermen in der Nähe</span><b>${sim.thermeNah(S, b) ? 'ja' : 'nein'}</b></div>`;
   if (d.unterhalt) html += `<div class="zeile"><span>Lohn/Sold im Monat</span><b>${d.unterhalt} Denare${b.unbezahlt ? ' – nicht bezahlt!' : ''}</b></div>`;
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
