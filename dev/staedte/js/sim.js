@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -611,7 +611,7 @@ function gefahren(S, meld) {
     meld.push('Hochwasser am Padus! ' + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
   }
   if (S.frieden > 0) S.frieden--;
-  else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && einwohner(S) >= G.gallier.einwohner && wurf(S, 1002) < G.gallier.chance) {
+  else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && einwohner(S) >= G.gallier.einwohner && wurf(S, 1002) < G.gallier.chance * (S.familie && eigenschaft(S.familie, 'Veteran') ? 0.5 : 1)) {
     if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
     const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
@@ -643,7 +643,7 @@ export function preis(S, g, id = 'placentia') {
 }
 // Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
 export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + aufschlag(S) : 1 - aufschlag(S))));
-const aufschlag = S => hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag;
+const aufschlag = S => (hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag) - (S.familie && (S.familie.buende || []).includes('Sempronii') ? 0.05 : 0);
 export function handeln(S, g, art, id = 'placentia') {
   const p = PARTNER[id];
   if (!p || !p.waren[g]) return { ok: false, grund: `Diese Ware handelt ${p ? p.n : 'niemand'} nicht` };
@@ -879,9 +879,9 @@ export function familieS(S) {
 }
 export const amt = S => (S.familie ? S.familie.amt : 0);
 const oberhaupt = F => F.mitglieder.find(m => m.rolle === 'Oberhaupt');
-const eigenschaft = (F, e) => F.mitglieder.some(m => m.eig === e && (m.rolle === 'Oberhaupt' || m.rolle === 'Ehefrau'));
-export const ansehenProMonat = S => { const F = familieS(S); return (0.3 + 0.35 * rang(S) + (gunst(S) >= 70 ? 0.4 : 0)) * (eigenschaft(F, 'Redner') ? 1.2 : 1); };
-export const staerksterRivale = S => { familieS(S); return S.rivalen.reduce((a, r) => r.ansehen > a.ansehen ? r : a); };
+const eigenschaft = (F, e) => F.mitglieder.some(m => m.eig === e && m.alter >= 16 && !m.ausbildung);   // jedes erwachsene Mitglied hilft (S4.2)
+export const ansehenProMonat = S => { const F = familieS(S); return (0.3 + 0.35 * rang(S) + (gunst(S) >= 70 ? 0.4 : 0) + (F.klienten || 0) * KLIENTEN.ansehen) * (eigenschaft(F, 'Redner') ? 1.2 : 1); };
+export const staerksterRivale = S => { const F = familieS(S); const g = S.rivalen.filter(r => !(F.buende || []).includes(r.gens)); return g.length ? g.reduce((a, r) => r.ansehen > a.ansehen ? r : a) : null; };
 export function amtFehlt(S) {
   const F = familieS(S), a = AEMTER[F.amt + 1]; if (!a) return 'Kein höheres Amt';
   if (a.bald) return 'Kommt mit der Kaiserzeit';
@@ -889,7 +889,7 @@ export function amtFehlt(S) {
   if (a.epoche && epoche(S) < a.epoche) f.push('Späte Republik');
   if (a.rang && rang(S) < a.rang) f.push(`Stadtrang ${RAENGE[a.rang].n}`);
   if (F.ansehen < a.ansehen) f.push(`Ansehen ${a.ansehen}`);
-  const r = staerksterRivale(S); if (F.ansehen <= r.ansehen) f.push(`mehr Ansehen als die ${RIVALEN.find(x => x.gens === r.gens).n} (${Math.round(r.ansehen)})`);
+  const r = staerksterRivale(S); if (r && F.ansehen <= r.ansehen) f.push(`mehr Ansehen als die ${RIVALEN.find(x => x.gens === r.gens).n} (${Math.round(r.ansehen)})`);
   if (F.vermoegen < a.kosten) f.push(`${a.kosten} Denare Familienvermögen für den Wahlkampf`);
   return f.join(', ');
 }
@@ -916,7 +916,14 @@ export function spieleAusrichten(S) {
 }
 function familieMonat(S, meld) {
   const F = familieS(S);
-  F.vermoegen += 1;   // kleines Landgut der Familie
+  F.vermoegen += 1 + (F.annier ? 3 : 0);   // kleines Landgut der Familie, Geschäfte mit den Anniern
+  // Klienten: Zuwendungen (sportula) aus dem Vermögen; fehlt es, gehen sie
+  if (F.klienten > 0) { const k = F.klienten * KLIENTEN.kosten; if (F.vermoegen >= k) F.vermoegen -= k; else { F.klienten = Math.max(0, F.klienten - KLIENTEN.schritt); meld.push('Die Familie kann ihre Klienten nicht mehr versorgen – einige bleiben der salutatio fern.'); } }
+  // Ausbildung
+  for (const m of F.mitglieder) if (m.ausbildung && --m.ausbildung.rest <= 0) {
+    const a = AUSBILDUNG[m.ausbildung.art]; m.eig = a.eig; m.text = a.text; delete m.ausbildung;
+    meld.push(`${m.n} kehrt zurück: ${a.n} abgeschlossen.`);
+  }
   // Familiengeschäfte: Gewinn für die Familie, bezahlt aus der Stadtkasse (Versuchung); ab 3 Gerede im Senat
   const gesch = geschaefte(S).filter(b => b.w > 0);
   const gewinn = gesch.length * FAMILIE.geschaeftGewinn * (eigenschaft(F, 'Geschäftssinn') ? 1.25 : 1);
@@ -929,7 +936,17 @@ function familieMonat(S, meld) {
     for (const m of F.mitglieder) {
       m.alter++;
       if (m.rolle === 'Sohn' && m.alter === 16) meld.push(`${m.n} ist mündig und kann einmal die Familie führen.`);
+      if (m.rolle === 'Tochter' && m.alter === HEIRAT.alterTochter && !m.verheiratet) meld.push(`${m.n} ist im heiratsfähigen Alter. Die Familien der Stadt machen Angebote.`);
     }
+    // Enkel: verheirateter Sohn (oder Oberhaupt mit Ehefrau unter 40) bekommt Kinder
+    const vater = F.mitglieder.find(m => m.rolle === 'Sohn' && m.verheiratet);
+    if (vater && F.mitglieder.length < 9 && wurf(S, 9002) < HEIRAT.kindChance) {
+      const sohn = wurf(S, 9003) < 0.5, gens = vater.n.split(' ')[1] || 'Valerius';
+      const k = { n: sohn ? ['Publius', 'Quintus', 'Gaius'][F.mitglieder.length % 3] + ' ' + gens : ['Valeria Minor', 'Valeria Tertia'][F.mitglieder.length % 2], alter: 0, rolle: sohn ? 'Enkel' : 'Enkelin', eig: '–', text: `Kind von ${vater.n}.` };
+      F.mitglieder.push(k); meld.push(`Freude im Haus der Valerier: ${k.n} ist geboren.`);
+    }
+    for (const m of F.mitglieder) if (m.rolle === 'Enkel' && m.alter >= 14) { m.rolle = 'Sohn'; m.text = 'Enkel des Hauses, möglicher Erbe.'; }
+    for (const m of F.mitglieder) if (m.rolle === 'Enkelin' && m.alter >= 12) { m.rolle = 'Tochter'; m.text = 'Eine gute Heirat stärkt die Familie.'; }
     const o = oberhaupt(F);
     if (o && o.alter >= 62 && wurf(S, 9001) < 0.2) {
       const erbe = F.mitglieder.filter(m => m.rolle === 'Sohn' && m.alter >= 16).sort((a, b) => b.alter - a.alter)[0];
@@ -938,5 +955,40 @@ function familieMonat(S, meld) {
       else meld.push(`${o.n} ist gestorben. Ohne mündigen Sohn führt die Witwe die Familie.`);
     }
   }
+}
+
+// ---------- Heirat, Klienten, Ausbildung (S4.2) ----------
+export function heiratsAngebote(S, m) {
+  if (!m || m.verheiratet || m.ausbildung) return [];
+  if (m.rolle === 'Tochter' && m.alter >= HEIRAT.alterTochter) return HEIRAT.tochter;
+  if (m.rolle === 'Sohn' && m.alter >= HEIRAT.alterSohn) return HEIRAT.sohn;
+  return [];
+}
+export function heiraten(S, name, id) {
+  const F = familieS(S), m = F.mitglieder.find(x => x.n === name), o = heiratsAngebote(S, m).find(x => x.id === id);
+  if (!o) return { ok: false, grund: 'Diese Heirat ist nicht möglich' };
+  if (o.bund && (F.buende || []).includes(o.bund)) return { ok: false, grund: `Mit den ${o.haus}n besteht schon ein Bündnis` };
+  if (m.rolle === 'Tochter') {
+    if (F.vermoegen < o.mitgift) return { ok: false, grund: `Für die Mitgift fehlen ${Math.ceil(o.mitgift - F.vermoegen)} Denare` };
+    F.vermoegen -= o.mitgift; F.mitglieder = F.mitglieder.filter(x => x !== m);   // sie zieht in das Haus ihres Mannes
+    if (o.id === 'annii') F.annier = true;
+  } else { F.vermoegen += o.mitgift; m.verheiratet = o.n; F.mitglieder.push({ n: o.n, alter: Math.max(15, m.alter - 4), rolle: 'Schwiegertochter', eig: '–', text: `Aus dem Haus der ${o.haus}.` }); }
+  if (o.bund) F.buende = [...new Set([...(F.buende || []), o.bund])];
+  F.ansehen += 5;
+  return { ok: true, text: m.rolle === 'Tochter' ? `${m.n} heiratet ${o.n}. ${o.text}` : `${m.n} heiratet ${o.n}. ${o.text}` };
+}
+export const klientenMax = S => KLIENTEN.grund + KLIENTEN.jeRang * rang(S);
+export function klienten(S, mehr) {
+  const F = familieS(S), n = (F.klienten || 0) + (mehr ? KLIENTEN.schritt : -KLIENTEN.schritt);
+  if (n < 0) return { ok: false, grund: 'Keine Klienten mehr' };
+  if (n > klientenMax(S)) return { ok: false, grund: `Mehr als ${klientenMax(S)} Klienten folgen einer Familie in einer Stadt dieser Größe nicht` };
+  F.klienten = n; return { ok: true };
+}
+export function ausbilden(S, name, art) {
+  const F = familieS(S), m = F.mitglieder.find(x => x.n === name), a = AUSBILDUNG[art];
+  if (!m || m.rolle !== 'Sohn' || m.alter < 14 || m.ausbildung || m.gelernt) return { ok: false, grund: 'Nur ein Sohn ab 14 Jahren, einmal' };
+  if (F.vermoegen < a.kosten) return { ok: false, grund: `Es fehlen ${Math.ceil(a.kosten - F.vermoegen)} Denare` };
+  F.vermoegen -= a.kosten; m.ausbildung = { art, rest: a.monate }; m.gelernt = true;
+  return { ok: true, text: `${m.n} beginnt: ${a.n}.` };
 }
 

@@ -197,8 +197,14 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Wahl nur mit mehr Ansehen als die stärkste **Rivalen-Familie** (Fabier +0,6/Monat, Sempronier +0,75/Monat).
       Knopf „Familie“ (Ansichten-Spalte), Familienseite, Zeile unter dem Senatsauftrag. Test 64/64, Bild angesehen.
       **Nicht getestet:** iPad, Balance (Rennen gegen die Rivalen nicht nachgespielt).
-- [ ] S4.2 Heirat und Bündnisse (Tochter verheiraten: Mitgift ↔ Bündnis mit einer Rivalen-Familie oder Placentia), Klienten
-      (Bürger, die für Getreide/Geld Stimmen bringen), Ausbildung des Sohnes (Rhetor/Militär).
+- [x] S4.2 Heirat, Bündnisse, Klienten, Ausbildung (1.11., `HEIRAT`, `KLIENTEN`, `AUSBILDUNG`): Tochter ab 14 – die Familie
+      zahlt die Mitgift (Fabier 200, Sempronier 150, Annier aus Placentia 80); Bündnis: diese Rivalen treten bei Wahlen nicht mehr
+      an (Sempronier zusätzlich Aufschlag −5 %, Annier +3 Denare/Monat); sie verlässt das Haus. Sohn ab 18 – die Braut bringt
+      Mitgift (120/150/250) und ggf. Bündnis; danach Enkel (35 % je Jahr), Enkel werden mit 14 Söhne/Töchter (Erben).
+      Klienten in 5er-Schritten (max. 10 + 10 × Rang): je 1,5 Denare/Monat aus dem Vermögen, +0,06 Ansehen/Monat; ohne Geld
+      gehen sie. Sohn ab 14: Rhetorenschule (100 Denare, 36 Monate → „Redner“) oder Militärdienst (36 Monate → „Veteran“: Gallier
+      halb so oft); Eigenschaften zählen jetzt für jedes erwachsene Mitglied. Test 66/66.
+      **Nicht getestet:** iPad, Balance.
 - [ ] S4.3 Ereignisse mit 2–3 Entscheidungen (Konzept „Jahreszeiten & Ereignisse“): Bestechung, Bittsteller, Seuche, Unruhen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).

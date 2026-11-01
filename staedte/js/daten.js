@@ -300,6 +300,27 @@ export const RIVALEN = [
   { gens: 'Fabii', n: 'Fabier', ansehen: 22, wachstum: 0.6, text: 'Alte Grundbesitzer, stolz und vorsichtig.' },
   { gens: 'Sempronii', n: 'Sempronier', ansehen: 14, wachstum: 0.75, text: 'Händlerfamilie mit Freunden in Placentia.' },
 ];
+// Heirat (S4.2). Tochter: Die Familie zahlt die Mitgift (dos) und gewinnt ein Bündnis. Sohn: Die Braut bringt die Mitgift mit.
+export const HEIRAT = {
+  tochter: [
+    { id: 'fabii', n: 'Gnaeus Fabius', haus: 'Fabier', mitgift: 200, bund: 'Fabii', text: 'Bündnis: Die Fabier treten bei Wahlen nicht mehr gegen euch an.' },
+    { id: 'sempronii', n: 'Tiberius Sempronius', haus: 'Sempronier', mitgift: 150, bund: 'Sempronii', text: 'Bündnis: Die Sempronier treten nicht mehr gegen euch an und öffnen ihre Handelskontakte (Aufschlag −5 %).' },
+    { id: 'annii', n: 'Titus Annius', haus: 'Kaufmann aus Placentia', mitgift: 80, text: 'Gemeinsame Geschäfte mit Placentia: 3 Denare im Monat für das Familienvermögen.' },
+  ],
+  sohn: [
+    { id: 'fabia', n: 'Fabia', haus: 'Fabier', mitgift: 120, bund: 'Fabii', text: 'Sie bringt eine Mitgift von 120 Denaren und das Bündnis mit den Fabiern.' },
+    { id: 'sempronia', n: 'Sempronia', haus: 'Sempronier', mitgift: 150, bund: 'Sempronii', text: 'Sie bringt 150 Denare und das Bündnis mit den Sempronieren.' },
+    { id: 'annia', n: 'Annia', haus: 'Kaufmannsfamilie aus Placentia', mitgift: 250, text: 'Eine reiche Mitgift von 250 Denaren, aber kein politisches Bündnis.' },
+  ],
+  alterTochter: 14, alterSohn: 18, kindChance: 0.35,
+};
+// Klienten (S4.2): kommen jeden Morgen zur salutatio; kosten Zuwendungen (sportula), bringen Ansehen und Stimmen
+export const KLIENTEN = { kosten: 1.5, ansehen: 0.06, schritt: 5, grund: 10, jeRang: 10 };
+// Ausbildung des Sohnes (S4.2) ab 14 Jahren, 36 Monate
+export const AUSBILDUNG = {
+  rhetor: { n: 'Rhetorenschule', kosten: 100, monate: 36, eig: 'Redner', text: 'Lernt bei einem griechischen Rhetor: Ansehen wächst 20 % schneller.' },
+  militaer: { n: 'Militärdienst', kosten: 0, monate: 36, eig: 'Veteran', text: 'Dient in einer Legion: Gallier fallen nur halb so oft ein.' },
+};
 export const FAMILIE = {
   geschaeftMax: 3, geschaeftGewinn: 4, gerede: 3,   // ab 3 Familiengeschäften: Gunst −1 im Monat
   spiele: { vermoegen: 150, ansehen: 15, stimmung: 10 }, auftragAnsehen: 5,

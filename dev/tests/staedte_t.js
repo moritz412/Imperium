@@ -467,6 +467,25 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Spiele einmal im Jahr, Prätor braucht Kolonie', fa.sp1 && /schon/.test(fa.sp2) && /Kolonie/.test(fa.praetor));
   ok('Familiengeschäfte füllen das Vermögen, Gerede im Senat, Altern', fa.plus >= 12 && fa.gunst < 60 && /duldet/.test(fa.vierter) && fa.gealtert);
   ok('Familienseite: Mitglieder, Ämterlaufbahn, Zeile im Auftrag', fa.ui.karten === 8 && /Valerier/.test(fa.ui.titel) && /Quästor/.test(fa.ui.zeile), JSON.stringify(fa.ui));
+  // S4.2 Heirat, Bündnisse, Klienten, Ausbildung, Enkel
+  const hz = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, H = JSON.parse(JSON.stringify(S)), F = sim.familieS(H);
+    F.vermoegen = 1000; F.ansehen = 10;
+    const toch = F.mitglieder.find(m => m.rolle === 'Tochter'), sohn = F.mitglieder.find(m => m.rolle === 'Sohn');
+    const jung = sim.heiratsAngebote(H, toch).length; toch.alter = 14; sohn.alter = 18;
+    const angebote = sim.heiratsAngebote(H, toch).length, h1 = sim.heiraten(H, toch.n, 'fabii'), v1 = F.vermoegen;
+    const h2 = sim.heiraten(H, sohn.n, 'sempronia'), v2 = F.vermoegen, bund = (F.buende || []).join(',');
+    H.epoche = 2; F.ansehen = 70; const rivale = sim.staerksterRivale(H), wahlFehlt = sim.amtFehlt(H);
+    const k1 = sim.klienten(H, true).ok, k2 = sim.klienten(H, true).ok, kl = F.klienten, ans = sim.ansehenProMonat(H);
+    const enkel0 = F.mitglieder.length; H.monat = 11; sim.setzeZufall(() => 0); sim.monat(H, SR.welt); sim.setzeZufall(null);
+    const enkel = F.mitglieder.length > enkel0;
+    const L = JSON.parse(JSON.stringify(S)), FL = sim.familieS(L), s2 = FL.mitglieder.find(m => m.rolle === 'Sohn'); s2.alter = 14; FL.vermoegen = 500;
+    const ler = sim.ausbilden(L, s2.n, 'rhetor').ok; for (let i = 0; i < 36; i++) sim.monat(L, SR.welt);
+    SR.familie(); const ui = !!document.querySelector('#familie [data-fa="klientPlus"]'); document.querySelector('#familie [data-fa="zu"]').click();
+    return { jung, angebote, h1: h1.ok, mitgiftBezahlt: v1 === 800, h2: h2.ok, mitgiftErhalten: v2 === 950, bund, rivale: rivale ? rivale.gens : 'keiner', wahlFehlt, k1, k2, kl, ans, enkel, ler, redner: s2.eig, ui };
+  });
+  ok('Heirat: Mitgift, Bündnisse mit Fabiern und Semproniern, keine Rivalen mehr', hz.jung === 0 && hz.angebote === 3 && hz.h1 && hz.mitgiftBezahlt && hz.h2 && hz.mitgiftErhalten && hz.bund === 'Fabii,Sempronii' && hz.rivale === 'keiner' && !/Fabier|Sempronier/.test(hz.wahlFehlt), JSON.stringify(hz));
+  ok('Klienten, Enkel, Rhetorenschule macht den Sohn zum Redner', hz.k1 && hz.k2 && hz.kl === 10 && hz.enkel && hz.ler && hz.redner === 'Redner' && hz.ui);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

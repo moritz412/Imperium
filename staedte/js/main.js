@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -397,21 +397,40 @@ function hexInfo(f) {
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
 // ---------- Familie und Ämter (S4.1) ----------
+let heiratWahl = '';
 function familieZeigen() {
   const F = sim.familieS(S), naechstes = AEMTER[F.amt + 1], fehlt = sim.amtFehlt(S);
-  const mitglieder = F.mitglieder.map(m => `<div class="fkarte"><b>${m.n}</b><span>${m.rolle}, ${m.alter} Jahre · ${m.eig}</span><small>${m.text}</small></div>`).join('');
+  const mitglieder = F.mitglieder.map(m => {
+    const angebote = sim.heiratsAngebote(S, m), esc = m.n.replace(/"/g, '');
+    let knoepfe = '';
+    if (m.rolle === 'Sohn' && m.alter >= 14 && !m.gelernt) knoepfe += Object.entries(AUSBILDUNG).map(([k, a]) => `<button class="knopf klein" data-fa="lernen" data-m="${esc}" data-o="${k}">${a.n}${a.kosten ? ' (' + a.kosten + ' Denare)' : ''}</button>`).join('');
+    if (angebote.length) knoepfe += `<button class="knopf klein" data-fa="angebote" data-m="${esc}">Heirat arrangieren</button>`;
+    const zusatz = m.ausbildung ? `<small>${AUSBILDUNG[m.ausbildung.art].n}: noch ${m.ausbildung.rest} Monate</small>` : m.verheiratet ? `<small>verheiratet mit ${m.verheiratet}</small>` : '';
+    return `<div class="fkarte"><b>${m.n}</b><span>${m.rolle}, ${m.alter} Jahre · ${m.eig}</span><small>${m.text}</small>${zusatz}${knoepfe}</div>`;
+  }).join('');
+  const wahl = F.mitglieder.find(m => m.n === heiratWahl), angebote = wahl ? sim.heiratsAngebote(S, wahl) : [];
+  const heiratBlock = angebote.length ? `<div class="fziel"><b>Heiratsangebote für ${wahl.n}</b>${angebote.map(o => {
+      const vergeben = o.bund && (F.buende || []).includes(o.bund);
+      const geld = wahl.rolle === 'Tochter' ? `Mitgift ${o.mitgift} Denare zahlen` : `bringt ${o.mitgift} Denare mit`;
+      return `<div class="handel" style="grid-template-columns:1fr 180px"><div><b>${o.n} (${o.haus})</b><small>${o.text}</small></div><button class="knopf" data-fa="heirat" data-m="${wahl.n}" data-o="${o.id}"${vergeben ? ' disabled' : ''}>${vergeben ? 'schon verbündet' : geld}</button></div>`; }).join('')}</div>` : '';
   const laufbahn = AEMTER.map((a, i) => {
     const st = i < F.amt ? 'fertig' : i === F.amt ? 'ziel' : a.bald ? 'bald' : 'offen';
     const unten = i < F.amt ? 'bekleidet' : i === F.amt ? 'jetziges Amt' : a.bald ? 'kommt später' : `Ansehen ${a.ansehen} · ${a.kosten} Denare`;
     return `<div class="fkarte ${st}"><b>${a.n}</b><span>${a.text}</span><small>${unten}</small></div>`;
   }).join('');
-  const rivalen = S.rivalen.map(r => { const d = RIVALEN.find(x => x.gens === r.gens); return `<div class="zeile"><span>${d.n} – ${d.text}</span><b>Ansehen ${Math.round(r.ansehen)}</b></div>`; }).join('');
+  const rivalen = S.rivalen.map(r => { const d = RIVALEN.find(x => x.gens === r.gens), bund = (F.buende || []).includes(r.gens); return `<div class="zeile"><span>${d.n} – ${bund ? 'verbündet durch Heirat' : d.text}</span><b>Ansehen ${Math.round(r.ansehen)}</b></div>`; }).join('');
   const gesch = sim.geschaefte(S);
   const spieleOk = F.amt >= 1 && F.spieleJahr !== sim.jahr(S);
   $('#familie').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-fa="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>Familie der ${F.name}</h2><div class="untertitel">${AEMTER[F.amt].n} · Ansehen ${Math.round(F.ansehen)} (+${zahl(sim.ansehenProMonat(S))} im Monat) · Familienvermögen ${rund(F.vermoegen)} Denare</div>
     <div class="fbaum fam">${mitglieder}</div>
+    ${heiratBlock}
+    <h3 class="fh">Klienten (salutatio)</h3>
+    <p class="fp">Jeden Morgen erscheinen Klienten im Atrium und erhalten eine Zuwendung (sportula): ${KLIENTEN.kosten.toString().replace('.', ',')} Denare im Monat je Klient aus dem Familienvermögen. Dafür bringen sie Ansehen und Stimmen.</p>
+    <div class="handel" style="grid-template-columns:1fr 120px 120px"><div><b>${F.klienten || 0} von höchstens ${sim.klientenMax(S)} Klienten</b><small>+${zahl((F.klienten || 0) * KLIENTEN.ansehen)} Ansehen, −${zahl((F.klienten || 0) * KLIENTEN.kosten)} Denare im Monat</small></div>
+      <button class="knopf" data-fa="klientMinus">${KLIENTEN.schritt} entlassen</button><button class="knopf" data-fa="klientPlus">${KLIENTEN.schritt} aufnehmen</button></div>
+    ${(F.buende || []).length ? `<div class="zeile"><span>Bündnisse durch Heirat</span><b>${F.buende.map(g => RIVALEN.find(r => r.gens === g).n).join(', ')}</b></div>` : ''}
     <h3 class="fh">Ämterlaufbahn (cursus honorum)</h3>
     <div class="fbaum fam">${laufbahn}</div>
     ${naechstes && !naechstes.bald ? `<div class="fziel"><b>Kandidatur als ${naechstes.n}</b><small>${fehlt ? 'Es fehlt: ' + fehlt : 'Alles bereit – die Bürger warten auf die Wahl.'}</small>
@@ -429,7 +448,14 @@ function familieZeigen() {
 $('#familie').addEventListener('click', e => {
   const b = e.target.closest('[data-fa]');
   if (!b) { if (e.target.id === 'familie') $('#familie').hidden = true; return; }
-  if (b.dataset.fa === 'zu') { $('#familie').hidden = true; return; }
+  if (b.dataset.fa === 'zu') { $('#familie').hidden = true; heiratWahl = ''; return; }
+  if (b.dataset.fa === 'angebote') { heiratWahl = b.dataset.m; familieZeigen(); return; }
+  const fa = b.dataset.fa;
+  if (['heirat', 'lernen', 'klientPlus', 'klientMinus'].includes(fa)) {
+    const r = fa === 'heirat' ? sim.heiraten(S, b.dataset.m, b.dataset.o) : fa === 'lernen' ? sim.ausbilden(S, b.dataset.m, b.dataset.o) : sim.klienten(S, fa === 'klientPlus');
+    if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else { ton.sfx(fa === 'heirat' ? 'aufstieg' : 'klick'); if (r.text) melden(r.text); if (fa === 'heirat') heiratWahl = ''; }
+    familieZeigen(); kopfleiste(); return;
+  }
   const r = b.dataset.fa === 'wahl' ? sim.kandidieren(S) : sim.spieleAusrichten(S);
   if (!r.ok) { melden(r.grund); ton.sfx('fehler'); }
   else { ton.sfx('aufstieg'); melden(b.dataset.fa === 'wahl' ? r.text : 'Die Spiele begeistern die Stadt! Ansehen und Stimmung steigen.'); }
