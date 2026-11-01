@@ -423,6 +423,21 @@ export const EREIGNISSE = [
   { id: 'enteignung', nurAusgeloest: true, titel: 'Land für die Veteranen', bild: 'krieg',
     text: 'Nach Philippi verlangen Oktavians Veteranen Land. Cremona stand auf der falschen Seite – nun sollen die Höfe im Umland an die Soldaten gehen.',
     wahl: [{ t: 'Die Höfe abgeben', w: { hoefe: 3, gunst: 10 } }, { t: 'Freikaufen (300 Denare)', w: { gut: { denare: -300 }, gunst: 3 } }, { t: 'Widerstand leisten', w: { gunst: -20, ansehen: 10, stimmung: 5 } }] },
+  { id: 'rubikon', nurAusgeloest: true, titel: 'Caesar überschreitet den Rubikon', bild: 'krieg',
+    text: 'Caesar ist mit einer Legion über den Rubikon gezogen, Pompeius flieht aus Rom. Beide Seiten verlangen, dass Florentia sich erklärt.',
+    wahl: [{ t: 'Für Caesar, den Gründer der Stadt', w: { gut: { denare: -60 }, gunst: 8 } }, { t: 'Für Pompeius und den Senat', w: { gunst: -12, ansehen: 6 } }, { t: 'Abwarten', w: { gunst: -3 } }] },
+  { id: 'clanis', nurAusgeloest: true, titel: 'Der Clanis soll in den Arnus', bild: 'ernte',
+    text: 'Um Rom vor Hochwasser zu schützen, will der Senat den Clanis in den Arnus leiten. Dann stünde das Tal von Florentia jedes Frühjahr unter Wasser.',
+    wahl: [{ t: 'Gesandte nach Rom schicken', w: { gut: { denare: -80 }, ansehen: 8, stimmung: 5 } }, { t: 'Dämme am Arnus bauen', w: { gut: { denare: -40, stein: -30 }, gunst: 4 } }, { t: 'Hinnehmen', w: { stimmung: -10, gunst: 3 } }] },
+  { id: 'bacchanalien', nurAusgeloest: true, titel: 'Die Bacchanalien', bild: 'volk',
+    text: 'Der Senat hat die nächtlichen Feiern für Bacchus verboten. Auch in Puteoli treffen sich Eingeweihte heimlich. Der Konsul erwartet, dass die Stadt durchgreift.',
+    wahl: [{ t: 'Die Kultgemeinde verfolgen', w: { gunst: 6, stimmung: -6 } }, { t: 'Nur die Anführer ausweisen', w: { gunst: 2, stimmung: -2 } }, { t: 'Wegsehen', w: { gunst: -8, stimmung: 3 } }] },
+  { id: 'pyrrhus', nurAusgeloest: true, titel: 'Pyrrhus in Apulien', bild: 'krieg',
+    text: 'Bei Ausculum stehen sich Pyrrhus und die Konsuln gegenüber. Der römische Feldherr verlangt Getreide, ein Gesandter des Königs bietet Silber für offene Tore.',
+    wahl: [{ t: 'Getreide für die Legionen', w: { gut: { getreide: -25 }, gunst: 8 } }, { t: 'Das Silber des Königs nehmen', w: { vermoegen: 80, gunst: -20 } }, { t: 'Die Tore geschlossen halten', w: { gunst: -3 } }] },
+  { id: 'bundesgenossen', nurAusgeloest: true, titel: 'Der Bundesgenossenkrieg', bild: 'krieg',
+    text: 'Marser und Samniten erheben sich gegen Rom. Als latinische Kolonie muss Luceria wählen: Treue zu Rom oder Bündnis mit den Nachbarn.',
+    wahl: [{ t: 'Rom die Treue halten', w: { gut: { denare: -60 }, gunst: 10 } }, { t: 'Mit den Italikern', w: { gunst: -20, ansehen: 8 } }, { t: 'Abwarten', w: { gunst: -4 } }] },
 ];
 export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
 
@@ -460,9 +475,31 @@ export const GESCHICHTE = [
   { id: 'siedler', jahr: -190, art: 'pruefung', bild: 'trebia', titel: 'Neue Siedler aus Rom',
     warnung: 'Der Senat will Cremona mit neuen Familien stärken. In zwei Jahren kommen sie – sie brauchen Häuser und Getreide.' },
   { id: 'via', jahr: -148, art: 'wahl', warnung: 'In Rom plant man eine große Straße durch die Po-Ebene. Sie soll in zwei Jahren Cremona erreichen.' },
-  { id: 'spartacus', jahr: -72, art: 'pruefung', bild: 'volk', titel: 'Spartacus in der Po-Ebene',
+  { id: 'spartacus', jahr: -72, art: 'pruefung', typ: 'aufstand', bild: 'volk', titel: 'Spartacus in der Po-Ebene',
     warnung: 'Ein entlaufener Gladiator führt ein Heer von Sklaven nach Norden. In zwei Jahren erreicht er die Po-Ebene. Wache, Mauer – und wie viele Sklaven hat Cremona?' },
   { id: 'enteignung', jahr: -41, art: 'wahl', warnung: 'Die Triumvirn suchen Land für ihre Veteranen. Man sagt, Cremona sei auf der Liste.' },
+  // Florentia (Etrurien, gegründet 59 v. Chr. für Caesars Veteranen)
+  { id: 'rubikon', reg: 'etrurien', jahr: -49, art: 'wahl', warnung: 'Caesar und Pompeius stehen sich feindlich gegenüber. In Rom spricht man offen von Bürgerkrieg.' },
+  { id: 'perusia', reg: 'etrurien', jahr: -41, art: 'pruefung', typ: 'belagerung', bild: 'krieg', titel: 'Krieg um Perusia', feind: 'die Truppen des Lucius Antonius',
+    warnung: 'Lucius Antonius sammelt Truppen in Etrurien gegen Oktavian. In zwei Jahren zieht der Krieg durch das Arnustal. Mauer, Kastell und Vorräte entscheiden.' },
+  { id: 'veteranen', reg: 'etrurien', jahr: -30, art: 'pruefung', typ: 'siedler', bild: 'trebia', titel: 'Veteranen nach Actium', weiter: 'Pisae',
+    warnung: 'Nach dem Sieg über Antonius und Kleopatra sollen Veteranen in Etrurien angesiedelt werden. In zwei Jahren kommen sie nach Florentia – sie brauchen Häuser und Getreide.' },
+  { id: 'clanis', reg: 'etrurien', jahr: 15, art: 'wahl', warnung: 'Nach schweren Überschwemmungen des Tiber erwägt der Senat, den Clanis in den Arnus umzuleiten.' },
+  // Puteoli (Kampanien, gegründet 194 v. Chr. als Bürgerkolonie am Hafen)
+  { id: 'bacchanalien', reg: 'kampanien', jahr: -186, art: 'wahl', warnung: 'Aus Kampanien hört man von nächtlichen Feiern für Bacchus. Der Senat in Rom ist beunruhigt.' },
+  { id: 'kaufleute', reg: 'kampanien', jahr: -150, art: 'pruefung', typ: 'siedler', bild: 'handel', titel: 'Kaufleute aus dem Osten', weiter: 'Neapolis',
+    warnung: 'Händler aus Alexandria, Tyros und Delos wollen sich am Hafen niederlassen. In zwei Jahren kommen sie – sie brauchen Häuser und Getreide.' },
+  { id: 'spartacus_k', reg: 'kampanien', jahr: -73, art: 'pruefung', typ: 'aufstand', bild: 'volk', titel: 'Aufstand in Capua',
+    warnung: 'In der Gladiatorenschule von Capua gärt es. Man fürchtet einen Ausbruch – und dass sich die Sklaven Kampaniens anschließen. Wache, Mauer und wenige Sklaven helfen.' },
+  { id: 'piraten', reg: 'kampanien', jahr: -68, art: 'pruefung', typ: 'belagerung', bild: 'tor', titel: 'Seeräuber im Golf', feind: 'die kilikischen Seeräuber',
+    warnung: 'Kilikische Seeräuber plündern die Küsten Italiens, selbst Ostia wurde überfallen. In zwei Jahren könnten sie den Golf erreichen. Mauer, Kastell und Vorräte entscheiden.' },
+  // Luceria (Apulien, latinische Kolonie seit 314 v. Chr.)
+  { id: 'samniten', reg: 'apulien', jahr: -294, art: 'pruefung', typ: 'belagerung', bild: 'tor', titel: 'Die Samniten vor Luceria', feind: 'die Samniten',
+    warnung: 'Die Samniten rüsten zum Krieg. Späher melden, dass sie in zwei Jahren gegen Luceria ziehen wollen. Mauer, Kastell und Vorräte entscheiden.' },
+  { id: 'pyrrhus', reg: 'apulien', jahr: -279, art: 'wahl', warnung: 'König Pyrrhus von Epirus ist mit Elefanten in Italien gelandet. Sein Heer zieht nach Apulien.' },
+  { id: 'cannae', reg: 'apulien', jahr: -216, art: 'pruefung', typ: 'siedler', bild: 'trebia', titel: 'Flüchtlinge aus Cannae', weiter: 'Venusia',
+    warnung: 'Hannibal steht in Apulien, die Konsuln ziehen ihm mit acht Legionen entgegen. Siegt er, werden Flüchtlinge Schutz in Luceria suchen – sie brauchen Häuser und Getreide.' },
+  { id: 'bundesgenossen', reg: 'apulien', jahr: -90, art: 'wahl', warnung: 'Die italischen Bundesgenossen fordern das römische Bürgerrecht. Man spricht von Krieg.' },
 ];
 export const PRAEFEKT = { monate: 24, steuer: 0.7 };   // Gunst 0 → Rom schickt einen Präfekten
 

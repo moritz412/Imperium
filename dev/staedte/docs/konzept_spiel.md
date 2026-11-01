@@ -133,8 +133,8 @@ tendenziell **für alle Gebäude**. 4. Bürgerfiguren: **erst Machbarkeit prüfe
 | Phase | Umgesetzt | Offen |
 | --- | --- | --- |
 | A Bauen fühlt sich echt an | Bauzeit für alle Gebäude, Bauarbeiter, Zeltlager der Kolonisten, Materialträger, Baustellenfenster, Stadtmauer + Tore mit Schutzberechnung | Lager als Orte mit sichtbaren Warenstapeln |
-| B Geschichte | Zeitleiste Po-Ebene: Belagerung 200, Siedler 190, Via Postumia 148, Spartacus 72, Landenteignung 41 mit Vorwarnung; Präfekt; Menü an/Kulisse/aus | Zeitleisten für Florentia, Puteoli, Luceria; Bundesgenossenkrieg/Bürgerrecht |
+| B Geschichte | Zeitleiste Po-Ebene: Belagerung 200, Siedler 190, Via Postumia 148, Spartacus 72, Landenteignung 41 mit Vorwarnung; Präfekt; Menü an/Kulisse/aus. Florentia: Rubikon 49, Perusia 41, Veteranen 30, Clanis 15 n. Chr.; Puteoli: Bacchanalien 186, Kaufleute 150, Capua 73, Seeräuber 68; Luceria: Samniten 294, Pyrrhus 279, Cannae 216, Bundesgenossenkrieg 90 | – |
 | C Lebendige Stadt | Bürger mit Wegen zu Markt/Brunnen, Markttreiben (gemessen: Draw-Calls gleich, 0,035 ms/Bild), Menüschalter | Blender-Modelle, Musik je Jahreszeit, Sprecher → `dev/pc/staedte_auftrag.md`; **Bildrate auf dem iPad** |
-| D Stadt-Tiefe | Bodenwert/Lage, Läden, Garten, Statue, Platz, Ruf der Stadt, Lieferverträge, Stadtbuch-Kapitel | Meldungen antippbar (zum Gebäude springen) |
+| D Stadt-Tiefe | Bodenwert/Lage, Läden, Garten, Statue, Platz, Ruf der Stadt, Lieferverträge, Stadtbuch-Kapitel, Meldungen antippbar (Bau fertig, Aufstieg, Feuer, Seuche → springt zum Gebäude) | – |
 | E Feinschliff | 3 Spielstände, 4 Regionen spielbar, offline (PWA), iPad-Layout, Abgabe nach Reichtum | Spieltest mit Moritz, Balance mit echtem Spiel, Offline auf dem iPad prüfen |
 

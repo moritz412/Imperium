@@ -214,8 +214,12 @@ export function insulaFehlt(S, b, wasser = inReichweite(S, b, 'brunnen'), markt 
 }
 
 // Ein Monat: Arbeit verteilen, produzieren, essen, wachsen, Steuern, Stimmung, Aufträge
+// Meldungen mit Ort (antippbar): Text → { id, x, z } des Gebäudes, gilt für die Meldungen des letzten Monats
+const orte = new Map();
+export const meldOrt = text => orte.get(text) || null;
+const mitOrt = (meld, text, b) => { meld.push(text); if (b) orte.set(text, { id: b.id, x: b.x, z: b.z }); };
 export function monat(S, welt) {
-  const meld = [];
+  const meld = []; orte.clear();
   for (const g of Object.keys(WAREN)) S.gut[g] = S.gut[g] || 0;   // neue Waren in alten Spielständen
   const js = jahreszeit(S), grenze = lagerGrenze(S);
   const bew = einwohner(S);
@@ -254,7 +258,7 @@ export function monat(S, welt) {
       if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true }); continue; }
       delete b.bau; delete b.bauFort; b.w = 0;
       if (b.t === 'basilika') S.ereignis = 'eroeffnung';
-      if (d.wahrzeichen || bauzeit(b.t) >= 3) meld.push(b.t === 'thermen' ? 'Die Thermen sind fertig!' : `${artikel(b.t)} ${d.n} ist fertig!`);
+      if (d.wahrzeichen || bauzeit(b.t) >= 3) mitOrt(meld, b.t === 'thermen' ? 'Die Thermen sind fertig!' : `${artikel(b.t)} ${d.n} ist fertig!`, b);
       continue; }
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
@@ -319,7 +323,7 @@ export function monat(S, welt) {
     if (b.stufe === 1 && wasser && markt && S.versorgt.brot && b.bew >= wohnraum(b)) {
       if (kannBezahlen(S, CASA.kosten)) {
         for (const [g, n] of Object.entries(CASA.kosten)) S.gut[g] -= n;
-        b.stufe = 2; meld.push('Eine Hütte ist zur Casa aufgestiegen.');
+        b.stufe = 2; mitOrt(meld, 'Eine Hütte ist zur Casa aufgestiegen.', b);
       } else b.status.push({ art: 'rohstoff', gut: 'ziegel', text: 'Für die Casa fehlen 10 Ziegel', leicht: true });
     }
     // Insula (S3.2): volle Casa, Kleinstadt, Wasser, Markt, Brot und ein Schrein in der Nähe
@@ -328,7 +332,7 @@ export function monat(S, welt) {
       if (fehlt) b.status.push({ art: 'markt', text: 'Für die Insula fehlt: ' + fehlt, leicht: true });
       else if (kannBezahlen(S, INSULA.kosten)) {
         for (const [g, n] of Object.entries(INSULA.kosten)) S.gut[g] -= n;
-        b.stufe = 3; meld.push('Eine Casa wird zur Insula aufgestockt – Platz für 30 Bewohner.');
+        b.stufe = 3; mitOrt(meld, 'Eine Casa wird zur Insula aufgestockt – Platz für 30 Bewohner.', b);
       } else b.status.push({ art: 'rohstoff', gut: 'ziegel', text: 'Für die Insula fehlen ' + fehlendeKosten(S, INSULA.kosten).join(', '), leicht: true });
     }
   }
@@ -908,15 +912,15 @@ function feuerMonat(S, meld) {
   const brennt = S.geb.filter(b => b.brand > 0);
   for (const b of brennt) {
     const name = b.t === 'huette' ? (b.stufe === 3 ? INSULA.n : b.stufe === 2 ? CASA.n : GEB.huette.n) : GEB[b.t].n;
-    if (wacheNah(S, b)) { b.brand = 0; meld.push(`Brand gelöscht: ${name}. Die Wache war rechtzeitig da.`); continue; }
-    if (wurf(S, 99000 + b.id) < FEUER.eimer) { b.brand = 0; if (b.bew) b.bew = Math.floor(b.bew * 0.75); meld.push(`Nachbarn haben den Brand mit Eimerketten gelöscht: ${name}.`); continue; }
+    if (wacheNah(S, b)) { b.brand = 0; mitOrt(meld, `Brand gelöscht: ${name}. Die Wache war rechtzeitig da.`, b); continue; }
+    if (wurf(S, 99000 + b.id) < FEUER.eimer) { b.brand = 0; if (b.bew) b.bew = Math.floor(b.bew * 0.75); mitOrt(meld, `Nachbarn haben den Brand mit Eimerketten gelöscht: ${name}.`, b); continue; }
     for (const o of S.geb) {
       if (o.brand > 0 || brandGefahr(S, o) === 0 || abstand(o, b) > FEUER.nachbar) continue;
       if (wurf(S, 7000 + o.id * 3 + b.id) < (wacheNah(S, o) ? FEUER.ueberWache : FEUER.ueber)) { o.brand = 1; o.neu = true; }
     }
     if (++b.brand > FEUER.monate) {
       const i = S.geb.indexOf(b); if (i >= 0) S.geb.splice(i, 1);
-      meld.push(`${name} ist abgebrannt.${b.bew ? ' ' + b.bew + ' Bewohner haben ihr Heim verloren.' : ''}`);
+      mitOrt(meld, `${name} ist abgebrannt.${b.bew ? ' ' + b.bew + ' Bewohner haben ihr Heim verloren.' : ''}`, { x: b.x, z: b.z });
     }
   }
   // neue Brände (ab dem 2. Jahr)
@@ -927,7 +931,7 @@ function feuerMonat(S, meld) {
     if (wurf(S, 5000 + b.id) < brandGefahr(S, b)) { b.brand = 1; neu.push(b); }
   }
   const nameVon = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.n : b.stufe === 2 ? CASA.n : GEB.huette.n) : GEB[b.t].n;
-  if (neu.length) meld.push(neu.length === 1 ? `Feuer! ${nameVon(neu[0])} brennt.` : `Feuer! ${neu.length} Gebäude brennen.`);
+  if (neu.length) mitOrt(meld, neu.length === 1 ? `Feuer! ${nameVon(neu[0])} brennt.` : `Feuer! ${neu.length} Gebäude brennen.`, neu[0]);
 }
 
 // ---------- Stadterweiterung (1.11.): der Senat gibt Land im Osten frei ----------
@@ -1176,13 +1180,13 @@ function seucheMonat(S, meld) {
     }
     if (--b.krank <= 0) delete b.krank;
   }
-  let neu = 0;
-  for (const b of S.geb) if (b.neuKrank) { delete b.neuKrank; neu++; }
+  let neu = 0, erstes = null;
+  for (const b of S.geb) if (b.neuKrank) { delete b.neuKrank; neu++; erstes = erstes || b; }
   if (S.monat >= X.ab) for (const b of S.geb) {
     if (b.krank > 0 || b.t !== 'huette') continue;
-    if (wurf(S, 6000 + b.id) < seuchenGefahr(S, b)) { b.krank = X.monate; neu++; }
+    if (wurf(S, 6000 + b.id) < seuchenGefahr(S, b)) { b.krank = X.monate; neu++; erstes = erstes || b; }
   }
-  if (neu) meld.push(neu === 1 ? 'Krankheit! In einem Haus liegen die Menschen mit Fieber.' : `Eine Seuche breitet sich aus: ${neu} Häuser sind betroffen.`);
+  if (neu) mitOrt(meld, neu === 1 ? 'Krankheit! In einem Haus liegen die Menschen mit Fieber.' : `Eine Seuche breitet sich aus: ${neu} Häuser sind betroffen.`, erstes);
   if (tote) meld.push(`${tote} Menschen sind an der Krankheit gestorben.`);
 }
 
@@ -1256,21 +1260,24 @@ export const setzeWelt = w => { mauerWelt = w; };
 export const geschichteMonatVon = (S, g) => (g.jahr - S.jahr0) * 12 + 4;   // Sommer des Jahres
 export function geschichteKommend(S) {
   const log = S.gesch || {};
-  const g = GESCHICHTE.find(x => log[x.id] === 'gewarnt'); if (!g) return null;
+  const g = zeitleiste(S).find(x => log[x.id] === 'gewarnt'); if (!g) return null;
   return { g, monate: Math.max(0, geschichteMonatVon(S, g) - S.monat) };
 }
+// Zeitleiste der gewählten Region (Po: Einträge ohne reg)
+export const zeitleiste = S => GESCHICHTE.filter(g => (g.reg || 'po') === (S.region || 'po'));
+const jahrName = j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.';
 function geschichteMonat(S, meld) {
-  const art = S.geschichte || 'an'; if (art === 'aus' || (S.region && S.region !== 'po')) return;   // Zeitleiste: nur Po-Ebene
+  const art = S.geschichte || 'an'; if (art === 'aus') return;
   const log = S.gesch = S.gesch || {};
-  for (const g of GESCHICHTE) {
+  for (const g of zeitleiste(S)) {
     const m = geschichteMonatVon(S, g);
     if (!log[g.id] && S.monat >= m - 24 && S.monat < m) { log[g.id] = 'gewarnt'; meld.push('Vorzeichen: ' + g.warnung); }
     if (log[g.id] !== 'fertig' && S.monat >= m) {
       if (S.ereignis) return;   // erst, wenn kein anderes Ereignis offen ist
       log[g.id] = 'fertig';
       const titel = g.titel || (ereignis(g.id) || {}).titel || g.id;
-      if (art === 'kulisse') { meld.push(`Im Jahr ${-g.jahr} v. Chr.: ${titel}.`); continue; }
-      if (g.art === 'wahl') { if (S.ereignisseAus) { meld.push(`Im Jahr ${-g.jahr} v. Chr.: ${titel}.`); continue; } S.ereignis = g.id; return; }
+      if (art === 'kulisse') { meld.push(`Im Jahr ${jahrName(g.jahr)}: ${titel}.`); continue; }
+      if (g.art === 'wahl') { if (S.ereignisseAus) { meld.push(`Im Jahr ${jahrName(g.jahr)}: ${titel}.`); continue; } S.ereignis = g.id; return; }
       const text = pruefung(S, g);
       if (S.ereignisseAus) { meld.push(`${titel}: ${text}`); continue; }
       Object.assign(S, { ereignis: 'g:' + g.id, gTitel: titel, gText: text, gBild: g.bild });
@@ -1282,6 +1289,17 @@ const vorratsMonate = S => { const b = (einwohner(S) + sklaven(S)) * ESSEN_JE_MO
 function brennen(S, n) { const h = S.geb.filter(b => b.t === 'huette' && !(b.brand > 0) && b.bew > 0); for (let i = 0; i < n && h.length; i++) h.splice(Math.floor(wurf(S, 9100 + i) * h.length), 1)[0].brand = 1; }
 function pruefung(S, g) {
   const F = familieS(S), klein = einwohner(S) < 60 ? 0.5 : 1, verlust = a => { for (const w of ['getreide', 'brot', 'holz']) S.gut[w] = (S.gut[w] || 0) * (1 - a * klein); };
+  const typ = g.typ || g.id, st = stadtName(), feind = g.feind || 'die Feinde', weiter = g.weiter || 'Bononia';
+  if (typ === 'belagerung' && g.id !== 'belagerung') {
+    const wert = 0.5 * mauerSchutz(S) + 0.2 * (hatKastell(S) ? 1 : 0) + 0.3 * Math.min(1, vorratsMonate(S) / 6);
+    (S.zaehler = S.zaehler || {})[g.id] = wert >= 0.7 ? 'gehalten' : 'gelitten';
+    if (wert >= 0.7) { F.ansehen += 15; S.gunst = Math.min(100, gunst(S) + 10); S.stimmung = Math.min(100, S.stimmung + 5);
+      return `${feind[0].toUpperCase() + feind.slice(1)} rennen gegen ${st} an – vergeblich. Mauer und Vorräte halten, sie ziehen ab. (Ansehen +15, Gunst Roms +10)`; }
+    if (wert >= 0.4) { verlust(0.3); S.stimmung = Math.max(0, S.stimmung - 8);
+      return `${feind[0].toUpperCase() + feind.slice(1)} plündern die Vorstädte und das Umland. Ein Teil der Vorräte ist verloren. (Vorräte −30 %, Stimmung −8) Mehr Mauer, Kastell und Vorräte hätten geholfen.`; }
+    verlust(0.6); brennen(S, 2 * klein); S.stimmung = Math.max(0, S.stimmung - 15); S.gunst = Math.max(0, gunst(S) - 5);
+    return `${st} wird schwer verwüstet: Häuser brennen, die Speicher sind geplündert. (Vorräte −60 %, Brände, Stimmung −15) Eine geschlossene Mauer, ein Kastell und Vorräte für sechs Monate sichern die Stadt.`;
+  }
   if (g.id === 'belagerung') {
     const wert = 0.5 * mauerSchutz(S) + 0.2 * (hatKastell(S) ? 1 : 0) + 0.3 * Math.min(1, vorratsMonate(S) / 6);
     (S.zaehler = S.zaehler || {}).belagerung = wert >= 0.7 ? 'gehalten' : 'gelitten';
@@ -1292,23 +1310,23 @@ function pruefung(S, g) {
     verlust(0.6); brennen(S, 2 * klein); S.stimmung = Math.max(0, S.stimmung - 15); S.gunst = Math.max(0, gunst(S) - 5);
     return 'Cremona wird schwer verwüstet: Häuser brennen, die Speicher sind geplündert. Erst ein römisches Heer befreit die Stadt. (Vorräte −60 %, Brände, Stimmung −15) Eine geschlossene Mauer, ein Kastell und Vorräte für sechs Monate sichern die Stadt.';
   }
-  if (g.id === 'siedler') {
+  if (typ === 'siedler') {
     const frei = S.geb.filter(b => b.t === 'huette' && !(b.bau > 0)).reduce((n, h) => n + wohnraum(h) - h.bew, 0), korn = (S.gut.getreide || 0) >= 60;
     const n = Math.min(frei, 30);
     if (n > 0) { let rest = n; for (const h of S.geb.filter(b => b.t === 'huette' && !(b.bau > 0))) { const k = Math.min(rest, wohnraum(h) - h.bew); h.bew += k; rest -= k; if (!rest) break; } }
-    if (n >= 20 && korn) { S.gunst = Math.min(100, gunst(S) + 8); S.gut.getreide -= 30; return `${n} neue Familien aus Latium ziehen in die Häuser. Cremona wächst, und Rom ist zufrieden. (Gunst +8, Getreide −30)`; }
-    if (n > 0) { S.gunst = Math.min(100, gunst(S) + 2); return `Nur ${n} Familien finden Platz${korn ? '' : ' und Brot'}, die übrigen ziehen weiter nach Bononia. (Gunst +2) Freie Häuser und 60 Getreide hätten alle aufgenommen.`; }
-    S.gunst = Math.max(0, gunst(S) - 5); return 'Kein Haus ist frei – die Siedler ziehen weiter nach Bononia. Rom ist enttäuscht. (Gunst −5)';
+    if (n >= 20 && korn) { S.gunst = Math.min(100, gunst(S) + 8); S.gut.getreide -= 30; return `${n} neue Familien ziehen in die Häuser. ${st} wächst, und Rom ist zufrieden. (Gunst +8, Getreide −30)`; }
+    if (n > 0) { S.gunst = Math.min(100, gunst(S) + 2); return `Nur ${n} Familien finden Platz${korn ? '' : ' und Brot'}, die übrigen ziehen weiter nach ${weiter}. (Gunst +2) Freie Häuser und 60 Getreide hätten alle aufgenommen.`; }
+    S.gunst = Math.max(0, gunst(S) - 5); return `Kein Haus ist frei – die Neuankömmlinge ziehen weiter nach ${weiter}. Rom ist enttäuscht. (Gunst −5)`;
   }
-  if (g.id === 'spartacus') {
+  if (typ === 'aufstand') {
     const skl = sklaven(S);
-    if (!skl) { F.ansehen += 3; return 'Spartacus zieht durch die Po-Ebene. In Cremona gibt es keine Sklaven, die sich ihm anschließen – das Heer zieht vorbei. (Ansehen +3)'; }
+    if (!skl) { F.ansehen += 3; return `Der Aufstand zieht vorbei. In ${st} gibt es keine Sklaven, die sich ihm anschließen – das Heer zieht weiter. (Ansehen +3)`; }
     const wert = (S.geb.some(b => b.t === 'wache' && b.w > 0) ? 0.4 : 0) + 0.4 * mauerSchutz(S) + (skl < einwohner(S) * 0.3 ? 0.2 : 0);
     const flucht = wert >= 0.6 ? 0.2 : 0.6;
     for (const q of S.geb.filter(b => b.t === 'quartier')) q.skl = Math.floor((q.skl || 0) * (1 - flucht));
     if (wert >= 0.6) return 'Spartacus zieht vorbei. Wache und Mauer halten die Ordnung, nur wenige Sklaven fliehen zu ihm. (Sklaven −20 %)';
     brennen(S, 2); S.stimmung = Math.max(0, S.stimmung - 10);
-    return 'Die Sklaven Cremonas erheben sich und schließen sich Spartacus an. Häuser brennen, viele Sklaven sind fort. (Sklaven −60 %, Brände, Stimmung −10) Eine Feuerwache, die Mauer und weniger Sklaven hätten geholfen.';
+    return `Die Sklaven von ${st} erheben sich und schließen sich Spartacus an. Häuser brennen, viele Sklaven sind fort. (Sklaven −60 %, Brände, Stimmung −10) Eine Feuerwache, die Mauer und weniger Sklaven hätten geholfen.`;
   }
   return '';
 }

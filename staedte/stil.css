@@ -200,3 +200,4 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .stand.aktiv{border-color:var(--gold);background:rgba(233,180,76,.07)}
 /* Ansichten-Spalte bei wenig Höhe zweispaltig (9 Knöpfe, 1.11.) */
 @media (max-height:860px){#ansicht{display:grid;grid-template-columns:repeat(2,64px);gap:4px}#ansicht button{height:54px}}
+#meldung div.tipp{pointer-events:auto;cursor:pointer;border-color:#c9a24a}

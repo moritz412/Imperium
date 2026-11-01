@@ -33,6 +33,12 @@ function speichern(still) {
 // ---------- Meldungen ----------
 function melden(text) {
   const d = document.createElement('div'); d.textContent = text; $('#meldung').appendChild(d);
+  const ort = sim.meldOrt(text);   // antippbar: springt zum Gebäude
+  if (ort) { d.className = 'tipp'; d.textContent = text + ' ➜'; d.addEventListener('click', () => {
+    if (szene.modus() === 'region') umland(false);
+    szene.zentrieren(ort.x + 0.5, ort.z + 0.5); d.remove();
+    if (ort.id && S.geb.some(b => b.id === ort.id)) oeffneInfo(ort.id);
+  }); }
   setTimeout(() => d.remove(), 4600);
   while ($('#meldung').children.length > 3) $('#meldung').firstChild.remove();
 }
@@ -795,7 +801,7 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
-  modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
+  modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f), melden,
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };

@@ -338,13 +338,16 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     sim.setzeZufall(nur()); sim.monat(W, SR.welt); sim.setzeZufall(() => 1);
     const wz = W.geb.find(b => b.id === ziel.id), vorW = wz.brand, nah = sim.wacheNah(W, wz), m2 = sim.monat(W, SR.welt).join(' | ');
     sim.setzeZufall(null);
+    const gt = m2.split(' | ').find(t => /gelöscht/.test(t)), ort = gt && sim.meldOrt(gt);
+    SR.melden(gt); const tipp = document.querySelector('#meldung div.tipp'); if (tipp) tipp.click();
+    const springt = !!ort && ort.id === ziel.id && !!tipp && !document.querySelector('#info').hidden; SR.oeffne(0);
     const ins = { t: 'huette', stufe: 3, x: ziel.x, z: ziel.z, id: -1 }, hut = { t: 'huette', stufe: 1, x: ziel.x, z: ziel.z, id: -2 };
     const art = SR.ansicht('feuer'); SR.ansicht('');
-    return { m1: /Feuer/.test(m1), brennt, weg, ueber, wache: !!wache, vorW, nah, geloescht: wz.brand === 0 && /gelöscht/.test(m2),
+    return { m1: /Feuer/.test(m1), brennt, weg, ueber, wache: !!wache, vorW, nah, geloescht: wz.brand === 0 && /gelöscht/.test(m2), springt,
       insulaGefaehrlicher: sim.brandGefahr(S, ins) > sim.brandGefahr(S, hut), legende: art && art.legende.length, knopf: !!document.querySelector('#ansicht [data-ansicht="feuer"]') };
   });
   ok('Feuer: Brand bricht aus, greift über, brennt ab', fe.m1 && fe.brennt && fe.weg && fe.ueber > 0, JSON.stringify(fe));
-  ok('Feuerwache löscht den Brand', fe.wache && fe.vorW === 1 && fe.nah && fe.geloescht);
+  ok('Feuerwache löscht den Brand, Meldung antippbar (springt zum Haus)', fe.wache && fe.vorW === 1 && fe.nah && fe.geloescht && fe.springt, JSON.stringify(fe));
   ok('Brandgefahr Insula höher, Ansicht Feuer', fe.insulaGefaehrlicher && fe.legende === 5 && fe.knopf);
   // Stadterweiterung (1.11.): Land im Osten gesperrt, Senat gibt frei, Via Postumia wird verlängert
   const ew = await p.evaluate(() => {
@@ -717,12 +720,16 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const po = { w: wasser(sim.erzeugeWelt('po')), wald: wald(sim.erzeugeWelt('po')) };
     const K = sim.neuesSpiel('kampanien'), k = { stadt: sim.stadtName(), jahr: K.jahr0, fisch: K.gut.fisch, partner: sim.PARTNER.placentia.n, w: wasser(sim.erzeugeWelt('kampanien')) };
     const A = sim.neuesSpiel('apulien'), a = { stadt: sim.stadtName(), weide: sim.regionKarte().filter(f => f.typ === 'weide').length, wald: wald(sim.erzeugeWelt('apulien')), duerre: sim.bonus(A, 'feld', 'getreide') < 1 };
-    const E = sim.neuesSpiel('etrurien'), e = { stadt: sim.stadtName(), jahr: E.jahr0, stein: sim.regionKarte().filter(f => f.typ === 'stein').length, keineGeschichte: (() => { E.monat = 200; E.ereignisseAus = true; sim.monat(E, SR.welt); return !E.gesch; })() };
+    const E = sim.neuesSpiel('etrurien'), e = { stadt: sim.stadtName(), jahr: E.jahr0, stein: sim.regionKarte().filter(f => f.typ === 'stein').length, eigeneGeschichte: (() => { E.monat = 200; E.ereignisseAus = true; sim.monat(E, SR.welt); return E.gesch.rubikon === 'fertig' && E.gesch.perusia === 'gewarnt' && !('belagerung' in E.gesch) && /Krieg um Perusia/.test(document.querySelector('#ahnungZeile') ? sim.geschichteKommend(E).g.titel : ''); })() };
+    sim.regionSetzen('kampanien'); const P = sim.neuesSpiel('kampanien'); P.ereignisseAus = true; P.gesch = { bacchanalien: 'fertig', kaufleute: 'fertig', spartacus_k: 'fertig', piraten: 'gewarnt' }; P.monat = (-68 + 194) * 12 + 4;
+    const pm = sim.monat(P, SR.welt).join(' | '); e.piraten = /Seeräuber/.test(pm) && /Puteoli/.test(pm) && P.gesch.piraten === 'fertig';
+    sim.regionSetzen('apulien'); const L = sim.neuesSpiel('apulien'); L.ereignisseAus = true; L.gesch = { samniten: 'fertig', pyrrhus: 'fertig', cannae: 'gewarnt' }; L.monat = (-216 + 314) * 12 + 4;
+    const lm = sim.monat(L, SR.welt).join(' | '); e.cannae = /Flüchtlinge aus Cannae/.test(lm) && /Venusia/.test(lm);
     sim.regionSetzen('po'); const zurueck = sim.stadtName() === 'Cremona' && sim.PARTNER.placentia.n === 'Placentia';
     const poWeide = sim.regionKarte().filter(f => f.typ === 'weide').length, poStein = sim.regionKarte().filter(f => f.typ === 'stein').length;
     return { po, k, a, e, zurueck, poWeide, poStein };
   });
-  ok('Regionen: Puteoli am Meer, Luceria trocken, Florentia mit Stein, Geschichte nur Po', rgn.k.stadt === 'Puteoli' && rgn.k.jahr === -194 && rgn.k.fisch === 30 && rgn.k.partner === 'Neapolis' && rgn.k.w > rgn.po.w && rgn.a.stadt === 'Luceria' && rgn.a.weide > rgn.poWeide && rgn.a.wald < rgn.po.wald && rgn.a.duerre && rgn.e.stadt === 'Florentia' && rgn.e.stein > rgn.poStein && rgn.e.keineGeschichte && rgn.zurueck, JSON.stringify(rgn));
+  ok('Regionen: Puteoli am Meer, Luceria trocken, Florentia mit Stein, eigene Zeitleisten je Region', rgn.k.stadt === 'Puteoli' && rgn.k.jahr === -194 && rgn.k.fisch === 30 && rgn.k.partner === 'Neapolis' && rgn.k.w > rgn.po.w && rgn.a.stadt === 'Luceria' && rgn.a.weide > rgn.poWeide && rgn.a.wald < rgn.po.wald && rgn.a.duerre && rgn.e.stadt === 'Florentia' && rgn.e.stein > rgn.poStein && rgn.e.eigeneGeschichte && rgn.e.piraten && rgn.e.cannae && rgn.zurueck, JSON.stringify(rgn));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
