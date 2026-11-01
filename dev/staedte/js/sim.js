@@ -168,7 +168,7 @@ function feldMonat(S, b, anteil, grenze, meld) {
   const arbeitszeit = m <= 3 || (m >= 6 && m <= 8);
   if (arbeitszeit && anteil === 0 && (m <= 3 ? f.gesaet < 1 : f.gesaet - f.geerntet > 0.01)) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Feldarbeiter' }); if (m <= 3) return; }
   if (m <= 3) {
-    if (f.gesaet < 1) { f.gesaet = Math.min(1, f.gesaet + anteil * 0.5); b.status.push({ art: 'feld', text: `Pflügen und säen – ${pct(f.gesaet)} bestellt`, leicht: true }); }
+    if (f.gesaet < 1) { f.gesaet = Math.min(1, f.gesaet + anteil * (ochsenNah(S, b) ? 1 : 0.5)); b.status.push({ art: 'feld', text: `Pflügen und säen – ${pct(f.gesaet)} bestellt`, leicht: true }); }
     else b.status.push({ art: 'feld', text: 'Bestellt – das Korn keimt', leicht: true });
     if (m === 3 && f.gesaet < 1) b.status.push({ art: 'feld', text: 'Letzter Monat zum Säen!', leicht: true });
     return;
@@ -177,7 +177,7 @@ function feldMonat(S, b, anteil, grenze, meld) {
   if (m <= 8) {
     const offen = f.gesaet - f.geerntet; if (offen <= 0.01) { b.status.push({ art: 'feld', text: f.gesaet > 0.05 ? 'Abgeerntet' : 'Keine Ernte dieses Jahr', leicht: true }); return; }
     if (!lagerNah(S, b, 'getreide')) { b.status.push({ art: 'lager', text: `Kein Kornspeicher in ${LAGERWEG} Feldern – die Ernte bleibt auf dem Feld` }); return; }
-    const teil = Math.min(offen, anteil * 0.45); f.geerntet += teil;
+    const teil = Math.min(offen, anteil * (ochsenNah(S, b) ? 0.7 : 0.45)); f.geerntet += teil;
     S.gut.getreide = Math.min(grenze('getreide'), (S.gut.getreide || 0) + teil * feldErtrag(S) * bonus(S, 'feld', 'getreide'));
     b.status.push({ art: 'feld', text: `Ernte – ${pct(f.geerntet / Math.max(0.01, f.gesaet))} eingebracht`, leicht: true });
     return;
@@ -198,6 +198,8 @@ export function wintervorrat(S) {
 // Speiseplan (1.11.): Vielfalt der Nahrung hebt die Stimmung – Brei (Getreide), Brot, Fisch, Öl, Wein
 export const SPEISEN = [['getreide', 'Brei'], ['brot', 'Brot'], ['fisch', 'Fisch'], ['oel', 'Öl'], ['wein', 'Wein']];
 export const speiseplan = S => SPEISEN.map(([g, n]) => [n, (S.gut[g] || 0) >= 1]);
+// Ochsengespanne (1.11.): besetzter, gefütterter Stall in Reichweite
+export const ochsenNah = (S, b) => S.geb.some(o => o.t === 'stall' && o.w > 0 && !(o.bau > 0) && o.gefuettert !== false && abstand(o, b) <= GEB.stall.reichweite);
 export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
 // Lagergrenze je Ware (1.11.): Nahrung im Kornspeicher, alles andere im Speicher; alte Stände (kornImSpeicher) zählen den Speicher für beides
 export const lagerTyp = (S, g) => NAHRUNG.has(g) && !S.kornImSpeicher ? 'horreum' : 'speicher';
@@ -367,13 +369,15 @@ export function monat(S, welt) {
   S.letzte = { arbeitslos: wohnorte.filter(x => !x.skl && !x.lager).reduce((s, x) => s + x.frei, 0), sklavenFrei: wohnorte.filter(x => x.skl).reduce((s, x) => s + x.frei, 0), arbeiter: alle };
   S.letzte.unterhalt = unterhaltZahlen(S);
 
+  // Ochsen fressen (1.11.)
+  for (const o of S.geb.filter(b => b.t === 'stall' && b.w > 0 && !(b.bau > 0))) { o.gefuettert = (S.gut.getreide || 0) >= GEB.stall.futter; if (o.gefuettert) S.gut.getreide -= GEB.stall.futter; }
   // Produktion
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
     if (b.brand > 0) { b.status.push({ art: 'brand', text: b.brand === 1 ? 'Es brennt!' : `Es brennt seit ${b.brand} Monaten!` }); continue; }
     if (b.bau > 0) {   // Baustelle: kommt nur mit Bauarbeitern voran
       if (!(b.bw > 0)) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Baustelle: keine Häuser in Laufweite' : 'Baustelle: keine Bauarbeiter frei' }); continue; }
-      b.bauFort = (b.bauFort || 0) + b.bw / bauarbeiter(b.t);
+      b.bauFort = (b.bauFort || 0) + b.bw / bauarbeiter(b.t) * (GEB[b.t].kosten.stein && ochsenNah(S, b) ? 1.5 : 1);   // Ochsen ziehen die Steine
       while (b.bauFort >= 1 && b.bau > 0) { b.bauFort -= 1; b.bau--; }
       if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true }); continue; }
       delete b.bau; delete b.bauFort; b.w = 0;
@@ -390,6 +394,7 @@ export function monat(S, welt) {
     if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
     if (b.w < Math.min(d.arbeiter, b.soll ?? d.arbeiter)) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${Math.min(d.arbeiter, b.soll ?? d.arbeiter)} Arbeitern`, leicht: true });
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
+    if (b.t === 'stall' && b.gefuettert === false) b.status.push({ art: 'rohstoff', gut: 'getreide', text: 'Kein Futtergetreide – die Ochsen arbeiten nicht' });
     if (!d.erzeugt) continue;
     // Lager als Orte (1.11.): ohne Speicher/Zeltlager in der Nähe bleiben die Waren am Betrieb liegen (Halde bis 8), Rohstoffe gibt es nicht
     const g0 = Object.keys(d.erzeugt)[0], lagerN = GEB[lagerTyp(S, g0)].n;

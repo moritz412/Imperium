@@ -537,5 +537,32 @@ def horreum():
     korb(bm, (0.1, -0.6, 0.0), "korn", 0.07)
     ablegen("horreum", bm)
 
+def ochse(bm, x, y, rz=0.0):
+    with lage((x, y, 0), rz):
+        kasten(bm, (0, 0, 0.13), (0.34, 0.14, 0.13), "stoff_hell")
+        kasten(bm, (0.2, 0, 0.16), (0.1, 0.1, 0.1), "stoff_hell")
+        for dx in (-0.12, 0.12):
+            for dy in (-0.05, 0.05): kasten(bm, (dx, dy, 0.04), (0.04, 0.04, 0.08), "fell")
+        for dy in (-0.06, 0.06): kasten(bm, (0.24, dy, 0.22), (0.02, 0.06, 0.02), "stein_hell")
+
+def stall():
+    """Ochsenstall: Stall mit Strohdach, Pferch mit zwei Ochsen, Pflug, Heuhaufen, Wassertrog."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.02), (1.7, 1.6, 0.04), "erde")
+    kasten(bm, (-0.35, 0.35, 0.3), (1.0, 0.8, 0.5), "holz")
+    satteldach(bm, -0.35, 0.35, 0.55, 0.5, 0.4, 0.3, "stroh", "holz", ue=0.1, dicke=0.06, rippe=None, first="holz_hell")
+    kasten(bm, (-0.35, -0.05, 0.25), (0.4, 0.02, 0.4), "dunkel")
+    for x in (-0.8, -0.3, 0.2, 0.75):                                      # Pferch
+        kasten(bm, (x, -0.75, 0.12), (0.04, 0.04, 0.24), "holz")
+    kasten(bm, (0, -0.75, 0.18), (1.6, 0.03, 0.03), "holz_hell")
+    for y in (-0.4, 0.1, 0.6): kasten(bm, (0.78, y, 0.12), (0.04, 0.04, 0.24), "holz")
+    kasten(bm, (0.78, 0.0, 0.18), (0.03, 1.5, 0.03), "holz_hell")
+    ochse(bm, 0.15, -0.4, 0.3); ochse(bm, 0.45, -0.2, -0.4)
+    kuppel(bm, (0.5, 0.45, 0.0), 0.22, 0.28, "stroh", 8, 3, 0.2, 61)
+    kasten(bm, (-0.1, -0.5, 0.06), (0.36, 0.12, 0.1), "holz"); kasten(bm, (-0.1, -0.5, 0.115), (0.3, 0.08, 0.01), "wasser")
+    stamm(bm, (-0.75, -0.3, 0.05), (-0.45, -0.45, 0.15), 0.02, "holz", 4)   # Pflug
+    kasten(bm, (-0.78, -0.28, 0.03), (0.08, 0.03, 0.06), "eisen", rz=0.5)
+    ablegen("stall", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia, horreum): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia, horreum, stall): fn()
