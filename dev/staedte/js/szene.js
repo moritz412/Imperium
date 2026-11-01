@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, handelOffen, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -225,6 +225,13 @@ export function erzeugeSzene(leinwand, welt) {
       teil(new THREE.CylinderGeometry(0.8, 0.8, 1.1, 16, 1, false, Math.PI / 2, Math.PI).rotateY(Math.PI / 2), 0xe6dccb, -2.3, 0.75, 0);
       for (let i = 0; i < 6; i++) box(0.16, 0.22, 0.02, 0x3a2a1e, -1.9 + i * 0.75, 1.55, 0.71);
       g.userData.h = 2.3; return g; },
+    zeltlager: geist => { const { g, box, teil } = teileBau(geist);   // Lederzelte der Kolonisten, Feuerstelle, Werkzeugkiste
+      const zelt = (x, z, ry) => { const f = new THREE.Shape(); f.moveTo(-0.32, 0); f.lineTo(0.32, 0); f.lineTo(0, 0.45); f.lineTo(-0.32, 0);
+        teil(new THREE.ExtrudeGeometry(f, { depth: 0.7, bevelEnabled: false }).translate(0, 0, -0.35), 0xc8b08a, x, 0, z, ry); };
+      zelt(-0.9, -0.3, 0); zelt(0, -0.35, 0); zelt(0.9, -0.3, 0); zelt(-0.5, 0.55, Math.PI / 2);
+      teil(new THREE.CylinderGeometry(0.15, 0.18, 0.06, 8), 0x5a4a3a, 0.5, 0.03, 0.5); teil(new THREE.ConeGeometry(0.08, 0.2, 5), 0xe8903a, 0.5, 0.14, 0.5);
+      box(0.35, 0.18, 0.22, 0x7a5a3a, 1.0, 0.09, 0.55); box(0.04, 0.5, 0.04, 0x6b4a2a, 1.3, 0.25, -0.75); box(0.02, 0.18, 0.3, 0xa8261f, 1.3, 0.55, -0.62);
+      g.userData.h = 0.7; return g; },
     latrine: geist => { const { g, box, dach } = teileBau(geist);   // langer Raum mit Bogenöffnungen, Wasserrinne
       box(1.7, 0.5, 0.7, 0xd8ccb0, 0, 0.25, -0.05); dach(1.8, 0.8, 0.2, 0xa9583a, 0, 0.5, -0.05);
       for (const x of [-0.5, 0, 0.5]) box(0.24, 0.3, 0.02, 0x3a2a1e, x, 0.17, 0.31);
@@ -269,6 +276,12 @@ export function erzeugeSzene(leinwand, welt) {
   // Baustelle (Wahrzeichen): Fundament, halbhohe Mauern, Gerüst aus Stangen, Kran (Tretkran), Steinstapel
   function baueBaustelle(t) {
     const { g, box, teil } = teileBau(false), [gw, gd] = groesse(t), W = gw - 0.3, D = gd - 0.3;
+    if (GEB[t].flach || Math.min(gw, gd) < 2 || bauzeit(t) <= 1) {   // kleine oder flache Bauten: abgesteckt, Erdhaufen, Balken
+      box(W, 0.05, D, 0x9a7a52, 0, 0.025, 0);
+      for (const [x, z] of [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2], [W / 2, D / 2]]) box(0.05, 0.5, 0.05, 0x8a6a46, x, 0.25, z);
+      box(Math.min(0.6, W * 0.6), 0.12, 0.12, 0x9c7a55, 0, 0.11, D * 0.2); box(0.3, 0.2, 0.3, 0x8a6e52, -W * 0.25, 0.1, -D * 0.2);
+      g.userData.h = 0.6; return g;
+    }
     box(W, 0.15, D, 0xc8bca4, 0, 0.07, 0);
     for (const [x, z, w, d] of [[0, -D / 2 + 0.1, W, 0.2], [0, D / 2 - 0.1, W, 0.2], [-W / 2 + 0.1, 0, 0.2, D], [W / 2 - 0.1, 0, 0.2, D]]) box(w, 0.6, d, 0xe6dccb, x, 0.45, z);
     for (let x = -W / 2; x <= W / 2 + 0.01; x += W / 5) for (const z of [-D / 2 - 0.15, D / 2 + 0.15]) box(0.05, 1.3, 0.05, 0x8a6a46, x, 0.65, z);
@@ -516,13 +529,18 @@ export function erzeugeSzene(leinwand, welt) {
       return best;
     };
     for (const b of S.geb) {
-      if (!b.von || !b.w) continue;
+      if (!b.von || !(b.w || b.bw)) continue;
       b.von.forEach(([hid, n], k) => {
         const h = nach.get(hid); if (!h) return;
         for (let i = 0; i < Math.min(n, 2); i++)
           neu.push(weg(punkte(maske, h, b), TUNIKA[(hid + i + k) % TUNIKA.length], '', `${hid}-${b.id}-${i}`));
       });
       const d = GEB[b.t];
+      if (b.bau > 0 && b.bw > 0) {   // Materialfuhren: Träger bringen Baustoffe aus Speicher oder Werkstatt zur Baustelle
+        const st = Object.keys(d.kosten).find(g => g !== 'denare') || 'holz', quelle = nachste(b, ['speicher', st === 'holz' ? 'holzfaeller' : st === 'ziegel' ? 'ziegelei' : 'markt']);
+        if (quelle) for (let i = 0; i < 2; i++) neu.push(weg(punkte(maske, quelle, b), TUNIKA[(b.id + i) % TUNIKA.length], st, `m${b.id}-${i}`));
+        continue;
+      }
       if (d.erzeugt && !b.status.some(s => !s.leicht)) {
         const g = Object.keys(d.erzeugt)[0], ziel = nachste(b, ABNEHMER(g));
         if (ziel) neu.push(weg(punkte(maske, b, ziel), TUNIKA[(b.id + 3) % TUNIKA.length], g, `t${b.id}-${ziel.id}`));

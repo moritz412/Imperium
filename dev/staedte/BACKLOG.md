@@ -287,6 +287,17 @@ Phasen A–E. **Entschieden (Moritz 1.11.):** freies Spiel im Vordergrund, Stadt
 Bauzeit tendenziell für alle Gebäude, Bürgerfiguren erst auf Machbarkeit prüfen, Bürgerkrieg/Landenteignung okay, Reihenfolge frei.
 Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rückschläge statt Game over, Fahrplan A–E neu).
 
+## Phase A – Bauen fühlt sich echt an (begonnen 1.11.)
+- [x] Bauzeit für alle Gebäude außer Straßen: 1 Monat je 30 Baustoffe (1–4), feste Bauzeit für große (Basilika 8).
+      **Bauarbeiter** (2, große Bauten 4) kommen aus Häusern in Laufweite – vor den Betrieben, getrennt gezählt (`b.bw`), Sklaven
+      dürfen mitbauen; ohne Bauarbeiter ruht die Baustelle. **Zeltlager der Kolonisten** beim Neustart (Bautrupp 4 Mann, nur
+      für Baustellen) – sonst blockiert der Start, weil ohne Häuser niemand baut (vom Balance-Spieler gefunden).
+      **Materialfuhren**: Träger laufen sichtbar vom Speicher/Holzfäller/Ziegelei zur Baustelle. Baustellenfenster mit Fortschritt,
+      Bauarbeitern, Vorrang und „Bau abbrechen (alle Baustoffe zurück)“. Kleine Bauten: abgesteckte Fläche; große: Gerüst + Kran.
+      Brunnen/Schrein/Latrine/Häuser wirken erst nach Fertigstellung. Tests nutzen `S.sofortBauen` (außer Wahrzeichen) + eigene
+      Prüfung. Balance-Spieler: Dorf nach 10 min, Kleinstadt nach 27 min (vorher 11/23). Test 82/82, Bild angesehen.
+- [ ] Stadtmauer in Abschnitten (ziehen wie Straßen) mit Toren, Wirkung bei Gallierüberfällen.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

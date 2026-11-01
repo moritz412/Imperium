@@ -37,6 +37,8 @@ export function neuesSpiel() {
   const welt = erzeugeWelt();
   for (let x = 0; x < GRENZE[0]; x++) if (welt.typ[START_STRASSE * RASTER + x] === GRAS)
     S.geb.push({ id: S.naechste++, t: 'strasse', x, z: START_STRASSE, w: 0, prio: false, stufe: 1, bew: 0, status: [] });
+  // Zeltlager der Kolonisten (Phase A): Bautrupp für die ersten Baustellen
+  S.geb.push({ id: S.naechste++, t: 'zeltlager', x: 26, z: START_STRASSE - 2, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: 0 });
   return S;
 }
 
@@ -143,7 +145,8 @@ export function bauen(S, welt, t, x, z) {
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
   const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
-  if (GEB[t].bauzeit) b.bau = GEB[t].bauzeit;   // Wahrzeichen: Baustelle über mehrere Monate
+  // Bauzeit (Phase A): jedes Gebäude außer Straßen ist erst eine Baustelle; S.sofortBauen nur für Tests (Wahrzeichen immer)
+  if (bauzeit(t) > 0 && (!S.sofortBauen || GEB[t].wahrzeichen)) { b.bau = bauzeit(t); b.bezahlt = k; }
   S.geb.push(b);
   return { ok: true, b };
 }
@@ -152,7 +155,8 @@ export function abreissen(S, id) {
   const i = S.geb.findIndex(b => b.id === id);
   if (i < 0) return false;
   const b = S.geb[i];
-  for (const [g, n] of Object.entries(GEB[b.t].kosten)) if (g !== 'denare') S.gut[g] += Math.floor(n / 2);
+  if (b.bau > 0) { for (const [g, n] of Object.entries(b.bezahlt || baukosten(S, b.t))) S.gut[g] += n; }   // Baustelle abbrechen: alles zurück
+  else for (const [g, n] of Object.entries(GEB[b.t].kosten)) if (g !== 'denare') S.gut[g] += Math.floor(n / 2);
   S.geb.splice(i, 1);
   return true;
 }
@@ -163,7 +167,7 @@ export const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math
 export const reichweite = (S, typ) => typ === 'brunnen' && hat(S, 'aquaedukt') ? 12 : GEB[typ].reichweite;
 export function inReichweite(S, b, typ, maske) {
   const d = GEB[typ];
-  if (!d.strassen) return S.geb.some(o => o.t === typ && abstand(o, b) <= reichweite(S, typ));
+  if (!d.strassen) return S.geb.some(o => o.t === typ && !(o.bau > 0) && abstand(o, b) <= reichweite(S, typ));
   // über Straßen: Weg vom Versorger bis zu einem Straßenfeld vor dem Haus
   maske = maske || strassenMaske(S);
   const vorHaus = randFelder(b.t, b.x, b.z);
@@ -185,7 +189,7 @@ export function waldNah(welt, b) {
 export const wohnraum = b => b.t === 'huette' ? (b.stufe === 3 ? INSULA.wohnt : b.stufe === 2 ? CASA.wohnt : GEB.huette.wohnt) : b.t === 'domus' ? GEB.domus.wohnt : 0;
 export function insulaFehlt(S, b, wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt')) {
   if (!wasser) return 'Brunnen'; if (!markt) return 'Markt'; if (!S.versorgt.brot) return 'Brot';
-  if (!S.geb.some(o => o.t === 'schrein' && abstand(o, b) <= GEB.schrein.reichweite)) return 'Schrein in der Nähe';
+  if (!S.geb.some(o => o.t === 'schrein' && !(o.bau > 0) && abstand(o, b) <= GEB.schrein.reichweite)) return 'Schrein in der Nähe';
   return '';
 }
 
@@ -200,26 +204,38 @@ export function monat(S, welt) {
   // in Laufweite. b.von = [[Haus-Id, Anzahl], …] für die Laufwege in der Szene.
   // Sklaven (S3.2) arbeiten vollständig, aber nur in Betrieben mit „sklaven“; dort gehen sie vor den Freien hin.
   const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }))
-    .concat(S.geb.filter(b => b.t === 'quartier' && b.skl > 0).map(h => ({ h, frei: h.skl, skl: true })));
+    .concat(S.geb.filter(b => b.t === 'quartier' && b.skl > 0).map(h => ({ h, frei: h.skl, skl: true })))
+    .concat(S.geb.filter(b => b.t === 'zeltlager').map(h => ({ h, frei: GEB.zeltlager.bautrupp, lager: true })));   // Bautrupp, nur für Baustellen
   const alle = wohnorte.reduce((s, x) => s + x.frei, 0);
-  const betriebe = S.geb.filter(b => GEB[b.t].arbeiter).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
-  for (const b of betriebe) {
-    const brauch = GEB[b.t].arbeiter, nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || GEB[b.t].sklaven));
-    b.w = 0; b.von = []; b.einzug = nah.length;
+  // Baustellen (Phase A, 1.11.) holen ihre Bauarbeiter zuerst (b.bw, getrennt von b.w); Sklaven dürfen mitbauen
+  const baustellen = S.geb.filter(b => b.bau > 0).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
+  const betriebe = S.geb.filter(b => GEB[b.t].arbeiter && !(b.bau > 0)).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
+  for (const b of [...baustellen, ...betriebe]) {
+    const bau = b.bau > 0, brauch = bau ? bauarbeiter(b.t) : GEB[b.t].arbeiter;
+    const nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || bau || GEB[b.t].sklaven) && (!x.lager || bau));
+    let n0 = 0; b.w = 0; b.bw = 0; b.von = []; b.einzug = nah.length;
     for (const x of nah.filter(x => x.frei > 0).sort((p, q) => (q.skl ? 1 : 0) - (p.skl ? 1 : 0) || abstand(p.h, b) - abstand(q.h, b))) {
-      if (b.w >= brauch) break;
-      const n = Math.min(x.frei, brauch - b.w); x.frei -= n; b.w += n; b.von.push([x.h.id, n]);
+      if (n0 >= brauch) break;
+      const n = Math.min(x.frei, brauch - n0); x.frei -= n; n0 += n; b.von.push([x.h.id, n]);
     }
+    if (bau) b.bw = n0; else b.w = n0;
   }
-  S.letzte = { arbeitslos: wohnorte.filter(x => !x.skl).reduce((s, x) => s + x.frei, 0), sklavenFrei: wohnorte.filter(x => x.skl).reduce((s, x) => s + x.frei, 0), arbeiter: alle };
+  S.letzte = { arbeitslos: wohnorte.filter(x => !x.skl && !x.lager).reduce((s, x) => s + x.frei, 0), sklavenFrei: wohnorte.filter(x => x.skl).reduce((s, x) => s + x.frei, 0), arbeiter: alle };
   S.letzte.unterhalt = unterhaltZahlen(S);
 
   // Produktion
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
     if (b.brand > 0) { b.status.push({ art: 'brand', text: b.brand === 1 ? 'Es brennt!' : `Es brennt seit ${b.brand} Monaten!` }); continue; }
-    if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true });
-      if (--b.bau === 0) { delete b.bau; if (b.t === 'basilika') S.ereignis = 'eroeffnung'; meld.push(`Die ${d.n} ist fertig!`); } continue; }
+    if (b.bau > 0) {   // Baustelle: kommt nur mit Bauarbeitern voran
+      if (!(b.bw > 0)) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Baustelle: keine Häuser in Laufweite' : 'Baustelle: keine Bauarbeiter frei' }); continue; }
+      b.bauFort = (b.bauFort || 0) + b.bw / bauarbeiter(b.t);
+      while (b.bauFort >= 1 && b.bau > 0) { b.bauFort -= 1; b.bau--; }
+      if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true }); continue; }
+      delete b.bau; delete b.bauFort; b.w = 0;
+      if (b.t === 'basilika') S.ereignis = 'eroeffnung';
+      if (d.wahrzeichen || bauzeit(b.t) >= 3) meld.push(b.t === 'thermen' ? 'Die Thermen sind fertig!' : `${artikel(b.t)} ${d.n} ist fertig!`);
+      continue; }
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
@@ -270,7 +286,7 @@ export function monat(S, welt) {
   // Häuser: Wasser, Markt, Wachstum, Aufstieg
   let wasserN = 0, marktN = 0, haeuser = 0;
   const maske = strassenMaske(S);
-  for (const b of S.geb.filter(b => b.t === 'huette')) {
+  for (const b of S.geb.filter(b => b.t === 'huette' && !(b.bau > 0))) {
     haeuser++;
     const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske);
     if (wasser) wasserN++; if (markt) marktN++;
@@ -305,7 +321,7 @@ export function monat(S, welt) {
   // Domus der Equites (Späte Republik): wachsen mit Brot, Wasser, Markt und Wein; trinken Wein, zahlen hohe Steuern
   let equites = 0;
   for (const b of S.geb.filter(b => b.t === 'domus')) {
-    if (b.brand > 0) continue;
+    if (b.brand > 0 || b.bau > 0) continue;
     const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske), wein = S.gut.wein >= Math.max(0.5, b.bew * 0.1);
     if (b.bew > 0) { if (wein) S.gut.wein -= b.bew * 0.1; else { b.status.push({ art: 'rohstoff', gut: 'wein', text: 'Kein Wein – die Equites ziehen weg' }); b.bew--; } }
     // Luxus (Späte Republik): Öl und Garum – je +25 % Steuern
@@ -338,7 +354,7 @@ export function monat(S, welt) {
     const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
     ziel -= FEUER.unruhe * ohne / haeuser;
   }   // S3.2: Furcht vor einem Sklavenaufstand
-  const schreine = S.geb.filter(b => b.t === 'schrein');   // S3.1: Schreine in der Nähe
+  const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
   S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70);   // ×1,1: Quästor   // Equites zahlen vierfach
@@ -1077,7 +1093,7 @@ export function wirkungText(w) {
 }
 
 // ---------- Seuchen (1.11.) ----------
-export const latrineNah = (S, b) => S.geb.some(o => o.t === 'latrine' && abstand(o, b) <= GEB.latrine.reichweite);
+export const latrineNah = (S, b) => S.geb.some(o => o.t === 'latrine' && !(o.bau > 0) && abstand(o, b) <= GEB.latrine.reichweite);
 export function seuchenGefahr(S, b) {
   if (b.t !== 'huette' || !(b.bew > 0)) return 0;
   const X = SEUCHE;
@@ -1138,4 +1154,16 @@ export function rat(S) {
   if (haeuser.every(h => h.bew >= wohnraum(h)) && S.stimmung >= 40) return 'Alle Häuser sind voll. Neue Hütten bringen neue Siedler.';
   return '';
 }
+
+// ---------- Bauzeit (Phase A, 1.11.) ----------
+// Monate mit voller Bauarbeiterschaft: fest (bauzeit in GEB) oder nach Baustoffmenge (1 Monat je 30 Einheiten, 1–4).
+export function bauzeit(t) {
+  const d = GEB[t]; if (t === 'strasse') return 0;
+  if (d.bauzeit) return d.bauzeit;
+  const n = Object.entries(d.kosten).filter(([g]) => g !== 'denare').reduce((s, [, v]) => s + v, 0);
+  return Math.max(1, Math.min(4, Math.round(n / 30)));
+}
+export const bauarbeiter = t => bauzeit(t) >= 6 ? 4 : 2;
+const WEIBLICH = new Set(['huette', 'muehle', 'baeckerei', 'lehmgrube', 'ziegelei', 'schmiede', 'kelter', 'oelmuehle', 'weberei', 'garumsiederei', 'schule', 'feuerwache', 'latrine', 'basilika', 'domus']);
+const artikel = t => t === 'ludus' || t === 'wache' ? 'Die' : WEIBLICH.has(t) ? 'Die' : ['markt', 'speicher', 'brunnen', 'schrein', 'tempel', 'holzfaeller'].includes(t) ? 'Der' : 'Das';
 

@@ -191,6 +191,7 @@ function schliesseInfo() { auswahl = 0; $('#info').hidden = true; szene.abgleich
 function infoZeichnen() {
   const b = S.geb.find(x => x.id === auswahl);
   if (!b) { schliesseInfo(); return; }
+  if (b.bau > 0) { baustelleZeichnen(b); return; }
   const d = GEB[b.t], casa = b.t === 'huette' && b.stufe >= 2;
   const name = b.t === 'huette' && b.stufe === 3 ? INSULA.n : casa ? CASA.n : d.n;
   const schwer = b.status.find(s => !s.leicht), leicht = b.status.find(s => s.leicht && s.art !== 'winter');
@@ -254,6 +255,23 @@ function infoZeichnen() {
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
   $('#info').innerHTML = html; $('#info').hidden = false;
+}
+// Baustelle (Phase A): Fortschritt, Bauarbeiter, Vorrang, Abbrechen
+function baustelleZeichnen(b) {
+  const d = GEB[b.t], ges = sim.bauzeit(b.t), fertig = ges - b.bau + (b.bauFort || 0), brauch = sim.bauarbeiter(b.t);
+  const lage = b.bw === undefined ? '<div class="lage warn">Neu abgesteckt – Bauarbeiter kommen zu Beginn des nächsten Monats</div>'
+    : b.bw > 0 ? `<div class="lage warn">Im Bau – noch etwa ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}</div>`
+    : `<div class="lage schlecht">${b.einzug === 0 ? 'Keine Häuser in Laufweite – niemand kommt zum Bauen' : 'Keine Bauarbeiter frei'}</div>`;
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>${d.n}</h2><div class="unter">Baustelle</div>${lage}
+    <div class="balken"><i style="width:${Math.round(fertig / ges * 100)}%"></i></div>
+    <p>Bauarbeiter kommen aus den Häusern in Laufweite, Träger bringen die Baustoffe. Ohne Bauarbeiter ruht die Baustelle.</p>
+    <div class="zeile"><span>Bauarbeiter</span><b>${b.bw || 0} / ${brauch}</b></div>
+    <div class="zeile"><span>Bauzeit mit allen Arbeitern</span><b>${ges} ${ges === 1 ? 'Monat' : 'Monate'}</b></div>
+    <div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}</b></div>
+    <button class="knopf${b.prio ? ' an' : ''}" data-a="prio" aria-pressed="${!!b.prio}">${b.prio ? 'Hat Vorrang vor anderen Baustellen' : 'Vorrang geben'}</button>
+    <div style="flex:1"></div><button class="knopf weg" data-a="weg">Bau abbrechen (alle Baustoffe zurück)</button>`;
+  $('#info').hidden = false;
 }
 $('#info').addEventListener('click', e => {
   const a = e.target.closest('[data-a]'); if (!a) return;

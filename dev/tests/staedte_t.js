@@ -25,7 +25,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.click('.startknoepfe [data-s="neu"]');
   const zu = await p.evaluate(() => document.querySelector('#startseite').hidden && SR.S.region === 'po');
   ok('Startseite: 4 Regionen, Kampanien gesperrt, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
-  await p.evaluate(() => { SR.S.ereignisseAus = true; });   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
+  await p.evaluate(() => { SR.S.ereignisseAus = true; SR.S.sofortBauen = true; });   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
   await p.evaluate(() => SR.tempo(0));
 
   // S1.3: Landstraße beim Start, Bauen nur an der Straße
@@ -622,6 +622,19 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const wt = await p.evaluate(() => { SR.szene.jahreszeitFarbe(3); const winter = SR.szene.wetterSichtbar(); SR.szene.jahreszeitFarbe(1); const sommer = SR.szene.wetterSichtbar();
     SR.szene.jahreszeitFarbe(SR.sim.jahreszeit(SR.S)); return { winter, sommer, knopf: !!document.querySelector('#menue [data-m="wetter"]') }; });
   ok('Wetter: Schnee im Winter, klar im Sommer, Schalter im Menü', wt.winter && !wt.sommer && wt.knopf, JSON.stringify(wt));
+  // Phase A: Bauzeit für alle Gebäude, Bauarbeiter, Abbruch mit voller Erstattung
+  const bz = await p.evaluate(() => {
+    const sim = SR.sim, B = JSON.parse(JSON.stringify(SR.S)); B.sofortBauen = false; B.ereignisseAus = true; Object.assign(B.gut, { holz: 500, ziegel: 300, denare: 900 });
+    const haus = B.geb.find(b => b.t === 'huette' && b.bew > 0);
+    let h = null; for (let r = 2; r <= 10 && !h; r++) for (let dz = -r; dz <= r && !h; dz++) for (let dx = -r; dx <= r && !h; dx++) { const q = sim.bauen(B, SR.welt, 'huette', haus.x + dx, haus.z + dz); if (q.ok) h = q.b; }
+    const imBau = h.bau === 1 && h.bew === 0, strasse = sim.bauen(B, SR.welt, 'strasse', 39, 30); const strasseSofort = strasse.ok && !(strasse.b.bau > 0);
+    sim.monat(B, SR.welt); const fertig = !(h.bau > 0), arbeiter = h.bw === undefined || h.bw >= 0;
+    const markt = sim.bauzeit('markt'), tempel = sim.bauzeit('tempel'), basilika = sim.bauzeit('basilika');
+    const h0 = B.gut.holz; let m = null; for (let r = 2; r <= 12 && !m; r++) for (let dz = -r; dz <= r && !m; dz++) for (let dx = -r; dx <= r && !m; dx++) { const q = sim.bauen(B, SR.welt, 'markt', haus.x + dx, haus.z + dz); if (q.ok) m = q.b; }
+    const nachBau = B.gut.holz; sim.abreissen(B, m.id); const zurueck = B.gut.holz === h0 && nachBau < h0;
+    return { imBau, strasseSofort, fertig, markt, tempel, basilika, zurueck };
+  });
+  ok('Bauzeit: Hütte erst Baustelle, Straße sofort, Abbruch gibt alles zurück', bz.imBau && bz.strasseSofort && bz.fertig && bz.markt >= 1 && bz.tempel > bz.markt && bz.basilika === 8 && bz.zurueck, JSON.stringify(bz));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

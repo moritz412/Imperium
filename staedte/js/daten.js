@@ -52,6 +52,8 @@ export const GEB = {
     text: 'Stadthaus mit Atrium für die Equites (Ritter). Sie brauchen Brot, Wasser, Markt und Wein, arbeiten nicht selbst und zahlen hohe Steuern.' },
   huette: { n: 'Hütte', kat: 'Wohnen', g: [2, 2], h: 0.7, wand: 0xd8b88a, dach: 0xa9583a,
     kosten: { holz: 12 }, wohnt: 8, text: 'Wohnraum für 8 Plebejer. Wird zur Casa mit Brot, Brunnen und Markt in der Nähe.' },
+  zeltlager: { n: 'Zeltlager der Kolonisten', kat: '', g: [3, 2], h: 0.5, wand: 0xd8c8a8, dach: 0xb89a70, kosten: {}, bautrupp: 4,
+    text: 'Hier lagern die Kolonisten, bis die ersten Häuser stehen. Ihr Bautrupp (4 Mann) arbeitet auf Baustellen in Laufweite – auch ohne Häuser.' },
   quartier: { n: 'Sklavenquartier', kat: 'Wohnen', g: [2, 2], h: 0.55, wand: 0xa08a6a, dach: 0x6e5236,
     kosten: { holz: 20 }, sklavenPlatz: 10,
     text: 'Enge Unterkunft für 10 Sklaven. Sklaven arbeiten auf Feldern, in Gruben und Werkstätten, essen Getreidebrei und zahlen keine Steuern.' },
