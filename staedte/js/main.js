@@ -55,6 +55,9 @@ function kopfleiste() {
   $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
   const verwalter = sim.rat(S); $('#ratZeile').textContent = verwalter ? 'Rat des Verwalters: ' + verwalter : ''; $('#ratZeile').hidden = !verwalter;
+  const ko = sim.geschichteKommend(S), pr = S.praefekt > 0;
+  $('#ahnungZeile').hidden = !ko && !pr;
+  $('#ahnungZeile').textContent = pr ? `Ein Präfekt aus Rom verwaltet die Stadt – noch ${S.praefekt} Monate.` : ko ? `Vorzeichen: ${ko.g.titel || sim.ereignis(ko.g.id, S).titel} – in etwa ${ko.monate} Monaten.` : '';
   const Fa = sim.familieS(S);
   $('#familieZeile').textContent = `Familie der ${Fa.name} · ${AEMTER[Fa.amt].n} · Ansehen ${Math.round(Fa.ansehen)} · Vermögen ${rund(Fa.vermoegen)}`;
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';
@@ -327,6 +330,7 @@ $('#menue').addEventListener('click', e => {
   if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
   if (m === 'chronik') { $('#menue').hidden = true; chronikZeigen(); return; }
   if (m === 'inschriften') { $('#menue').hidden = true; inschriftenZeigen(); return; }
+  if (m === 'geschichte') { S.geschichte = { an: 'kulisse', kulisse: 'aus', aus: 'an' }[S.geschichte || 'an']; tonKnopf(); return; }
   if (m === 'wetter') { wetterAn = !wetterAn; try { localStorage.setItem('staedte_wetter', wetterAn ? '1' : '0'); } catch (e) {} szene.wetterSchalten(wetterAn); tonKnopf(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
@@ -358,7 +362,7 @@ async function evBilderLaden() {
   evBilder = {};
 }
 function ereignisZeigen() {
-  const e = S.ereignis && sim.ereignis(S.ereignis);
+  const e = S.ereignis && sim.ereignis(S.ereignis, S);
   if (!e) { $('#ereignis').hidden = true; return; }
   if (!evBilder) evBilderLaden();
   const bild = evBilder && evBilder[e.bild];
@@ -697,7 +701,8 @@ function schleife(jetzt) {
 }
 const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus';
   $('#menue [data-m="ereignisse"]').textContent = S.ereignisseAus ? 'Ereignisse: aus' : 'Ereignisse: an';
-  $('#menue [data-m="wetter"]').textContent = wetterAn ? 'Wetter: an' : 'Wetter: aus'; };
+  $('#menue [data-m="wetter"]').textContent = wetterAn ? 'Wetter: an' : 'Wetter: aus';
+  $('#menue [data-m="geschichte"]').textContent = 'Geschichte: ' + ({ an: 'Wendepunkte', kulisse: 'nur Kulisse', aus: 'aus' })[S.geschichte || 'an']; };
 let wetterAn = (() => { try { return localStorage.getItem('staedte_wetter') !== '0'; } catch (e) { return true; } })();
 szene.wetterSchalten(wetterAn);
 tonKnopf();

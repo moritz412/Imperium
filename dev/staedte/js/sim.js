@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -361,7 +361,8 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70);   // ×1,1: Quästor   // Equites zahlen vierfach
+  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia   // Equites zahlen vierfach
   if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
@@ -382,6 +383,8 @@ export function monat(S, welt) {
   seucheMonat(S, meld);
 
   familieMonat(S, meld);
+  geschichteMonat(S, meld);
+  praefektMonat(S, meld);
   ereignisMonat(S);
   inschriftenMonat(S, meld);
 
@@ -698,7 +701,7 @@ export function preis(S, g, id = 'placentia') {
 }
 // Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
 export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + aufschlag(S) : 1 - aufschlag(S))));
-const aufschlag = S => (hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag) - (S.familie && (S.familie.buende || []).includes('Sempronii') ? 0.05 : 0);
+const aufschlag = S => (hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag) - (S.via ? 0.03 : 0) - (S.familie && (S.familie.buende || []).includes('Sempronii') ? 0.05 : 0);
 export function handeln(S, g, art, id = 'placentia') {
   const p = PARTNER[id];
   if (!p || !p.waren[g]) return { ok: false, grund: `Diese Ware handelt ${p ? p.n : 'niemand'} nicht` };
@@ -1050,7 +1053,9 @@ export function ausbilden(S, name, art) {
 }
 
 // ---------- Ereignisse mit Entscheidungen (S4.3) ----------
-export const ereignis = id => EREIGNISSE.find(e => e.id === id);
+export const ereignis = (id, S) => id && id.startsWith('g:') && S
+  ? { id, titel: S.gTitel || 'Geschichte', text: S.gText || '', bild: S.gBild || 'krieg', wahl: [{ t: 'Weiter', w: {} }] }
+  : EREIGNISSE.find(e => e.id === id);
 function ereignisMonat(S) {
   if (S.ereignis || S.ereignisseAus) return;
   const log = S.ereignisLog = S.ereignisLog || {};
@@ -1069,7 +1074,7 @@ export function wahlMoeglich(S, w) {
   return '';
 }
 export function ereignisWaehlen(S, i) {
-  const e = ereignis(S.ereignis), w = e && e.wahl[i];
+  const e = ereignis(S.ereignis, S), w = e && e.wahl[i];
   if (!w) return { ok: false, grund: 'Kein Ereignis' };
   const fehlt = wahlMoeglich(S, w); if (fehlt) return { ok: false, grund: fehlt };
   const F = familieS(S), x = w.w;
@@ -1079,6 +1084,8 @@ export function ereignisWaehlen(S, i) {
   if (x.gunst) S.gunst = Math.max(0, Math.min(100, gunst(S) + x.gunst));
   if (x.stimmung) S.stimmung = Math.max(0, Math.min(100, S.stimmung + x.stimmung));
   if (x.frieden) S.frieden = Math.max(S.frieden || 0, x.frieden);
+  if (x.via) S.via = true;
+  if (x.hoefe) { let n = x.hoefe; for (const l of Object.values(S.land || {})) if (n > 0 && l.betrieb === 'gehoeft') { l.betrieb = ''; l.villa = false; n--; } }
   if (x.leute) for (const h of S.geb.filter(b => b.bew > 0)) h.bew = Math.max(0, h.bew - Math.ceil(h.bew * -x.leute));
   if (x.zuzug) { let rest = x.zuzug; for (const h of S.geb.filter(b => b.t === 'huette')) { const k = Math.min(rest, wohnraum(h) - h.bew); if (k > 0) { h.bew += k; rest -= k; } if (!rest) break; } }
   (S.ereignisLog = S.ereignisLog || {})[e.id] = S.monat; S.ereignis = null;
@@ -1095,6 +1102,8 @@ export function wirkungText(w) {
   if (x.leute) t.push(`${Math.round(-x.leute * 100)} % der Einwohner sterben`);
   if (x.zuzug) t.push(`bis ${x.zuzug} neue Einwohner`);
   if (x.frieden) t.push(`${x.frieden} Monate Frieden`);
+  if (x.via) t.push('Fernstraße: Handel und Zoll');
+  if (x.hoefe) t.push(`${x.hoefe} Höfe im Umland gehen verloren`);
   return t.join(' · ') || 'keine Folgen';
 }
 
@@ -1198,4 +1207,78 @@ export function mauerSchutz(S, welt = mauerWelt) {
 }
 let mauerWelt = null;
 export const setzeWelt = w => { mauerWelt = w; };
+
+// ---------- Zeitleiste der Geschichte (Phase B) und Präfekt ----------
+export const geschichteMonatVon = (S, g) => (g.jahr - S.jahr0) * 12 + 4;   // Sommer des Jahres
+export function geschichteKommend(S) {
+  const log = S.gesch || {};
+  const g = GESCHICHTE.find(x => log[x.id] === 'gewarnt'); if (!g) return null;
+  return { g, monate: Math.max(0, geschichteMonatVon(S, g) - S.monat) };
+}
+function geschichteMonat(S, meld) {
+  const art = S.geschichte || 'an'; if (art === 'aus') return;
+  const log = S.gesch = S.gesch || {};
+  for (const g of GESCHICHTE) {
+    const m = geschichteMonatVon(S, g);
+    if (!log[g.id] && S.monat >= m - 24 && S.monat < m) { log[g.id] = 'gewarnt'; meld.push('Vorzeichen: ' + g.warnung); }
+    if (log[g.id] !== 'fertig' && S.monat >= m) {
+      if (S.ereignis) return;   // erst, wenn kein anderes Ereignis offen ist
+      log[g.id] = 'fertig';
+      const titel = g.titel || (ereignis(g.id) || {}).titel || g.id;
+      if (art === 'kulisse') { meld.push(`Im Jahr ${-g.jahr} v. Chr.: ${titel}.`); continue; }
+      if (g.art === 'wahl') { if (S.ereignisseAus) { meld.push(`Im Jahr ${-g.jahr} v. Chr.: ${titel}.`); continue; } S.ereignis = g.id; return; }
+      const text = pruefung(S, g);
+      if (S.ereignisseAus) { meld.push(`${titel}: ${text}`); continue; }
+      Object.assign(S, { ereignis: 'g:' + g.id, gTitel: titel, gText: text, gBild: g.bild });
+      return;
+    }
+  }
+}
+const vorratsMonate = S => { const b = (einwohner(S) + sklaven(S)) * ESSEN_JE_MONAT; return b > 0 ? ((S.gut.getreide || 0) + (S.gut.brot || 0) + (S.gut.fisch || 0)) / b : 99; };
+function brennen(S, n) { const h = S.geb.filter(b => b.t === 'huette' && !(b.brand > 0) && b.bew > 0); for (let i = 0; i < n && h.length; i++) h.splice(Math.floor(wurf(S, 9100 + i) * h.length), 1)[0].brand = 1; }
+function pruefung(S, g) {
+  const F = familieS(S), klein = einwohner(S) < 60 ? 0.5 : 1, verlust = a => { for (const w of ['getreide', 'brot', 'holz']) S.gut[w] = (S.gut[w] || 0) * (1 - a * klein); };
+  if (g.id === 'belagerung') {
+    const wert = 0.5 * mauerSchutz(S) + 0.2 * (hatKastell(S) ? 1 : 0) + 0.3 * Math.min(1, vorratsMonate(S) / 6);
+    (S.zaehler = S.zaehler || {}).belagerung = wert >= 0.7 ? 'gehalten' : 'gelitten';
+    if (wert >= 0.7) { F.ansehen += 15; S.gunst = Math.min(100, gunst(S) + 10); S.stimmung = Math.min(100, S.stimmung + 5);
+      return 'Hamilkar und die Gallier stürmen gegen Cremona – vergeblich. Mauer und Vorräte halten, die Belagerer ziehen ab. Placentia ist gefallen, Cremona steht. (Ansehen +15, Gunst Roms +10)'; }
+    if (wert >= 0.4) { verlust(0.3); S.stimmung = Math.max(0, S.stimmung - 8);
+      return 'Die Gallier plündern die Vorstädte und das Umland, bevor ein römisches Heer sie vertreibt. Ein Teil der Vorräte ist verloren. (Vorräte −30 %, Stimmung −8) Mehr Mauer, Kastell und Vorräte hätten geholfen.'; }
+    verlust(0.6); brennen(S, 2 * klein); S.stimmung = Math.max(0, S.stimmung - 15); S.gunst = Math.max(0, gunst(S) - 5);
+    return 'Cremona wird schwer verwüstet: Häuser brennen, die Speicher sind geplündert. Erst ein römisches Heer befreit die Stadt. (Vorräte −60 %, Brände, Stimmung −15) Eine geschlossene Mauer, ein Kastell und Vorräte für sechs Monate sichern die Stadt.';
+  }
+  if (g.id === 'siedler') {
+    const frei = S.geb.filter(b => b.t === 'huette' && !(b.bau > 0)).reduce((n, h) => n + wohnraum(h) - h.bew, 0), korn = (S.gut.getreide || 0) >= 60;
+    const n = Math.min(frei, 30);
+    if (n > 0) { let rest = n; for (const h of S.geb.filter(b => b.t === 'huette' && !(b.bau > 0))) { const k = Math.min(rest, wohnraum(h) - h.bew); h.bew += k; rest -= k; if (!rest) break; } }
+    if (n >= 20 && korn) { S.gunst = Math.min(100, gunst(S) + 8); S.gut.getreide -= 30; return `${n} neue Familien aus Latium ziehen in die Häuser. Cremona wächst, und Rom ist zufrieden. (Gunst +8, Getreide −30)`; }
+    if (n > 0) { S.gunst = Math.min(100, gunst(S) + 2); return `Nur ${n} Familien finden Platz${korn ? '' : ' und Brot'}, die übrigen ziehen weiter nach Bononia. (Gunst +2) Freie Häuser und 60 Getreide hätten alle aufgenommen.`; }
+    S.gunst = Math.max(0, gunst(S) - 5); return 'Kein Haus ist frei – die Siedler ziehen weiter nach Bononia. Rom ist enttäuscht. (Gunst −5)';
+  }
+  if (g.id === 'spartacus') {
+    const skl = sklaven(S);
+    if (!skl) { F.ansehen += 3; return 'Spartacus zieht durch die Po-Ebene. In Cremona gibt es keine Sklaven, die sich ihm anschließen – das Heer zieht vorbei. (Ansehen +3)'; }
+    const wert = (S.geb.some(b => b.t === 'wache' && b.w > 0) ? 0.4 : 0) + 0.4 * mauerSchutz(S) + (skl < einwohner(S) * 0.3 ? 0.2 : 0);
+    const flucht = wert >= 0.6 ? 0.2 : 0.6;
+    for (const q of S.geb.filter(b => b.t === 'quartier')) q.skl = Math.floor((q.skl || 0) * (1 - flucht));
+    if (wert >= 0.6) return 'Spartacus zieht vorbei. Wache und Mauer halten die Ordnung, nur wenige Sklaven fliehen zu ihm. (Sklaven −20 %)';
+    brennen(S, 2); S.stimmung = Math.max(0, S.stimmung - 10);
+    return 'Die Sklaven Cremonas erheben sich und schließen sich Spartacus an. Häuser brennen, viele Sklaven sind fort. (Sklaven −60 %, Brände, Stimmung −10) Eine Feuerwache, die Mauer und weniger Sklaven hätten geholfen.';
+  }
+  return '';
+}
+function praefektMonat(S, meld) {
+  if (S.praefekt > 0) {
+    S.gunst = Math.min(100, gunst(S) + 1);
+    if (--S.praefekt === 0) { S.gunst = Math.max(gunst(S), 20); meld.push('Der Präfekt kehrt nach Rom zurück. Die Stadt verwaltet sich wieder selbst.'); }
+    return;
+  }
+  if (gunst(S) <= 0 && S.monat > 12) {
+    S.praefekt = PRAEFEKT.monate; const F = familieS(S); F.amt = 0; F.ansehen *= 0.7;
+    if (S.ereignisseAus) { meld.push('Ein Präfekt aus Rom übernimmt die Verwaltung (Steuern −30 %, die Valerier verlieren ihr Amt).'); return; }
+    Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
+      gText: 'Der Senat hat das Vertrauen in Cremona verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
+  }
+}
 

@@ -408,6 +408,13 @@ export const EREIGNISSE = [
   { id: 'eroeffnung', nurAusgeloest: true, titel: 'Die Basilika wird eröffnet', bild: 'spiele',
     text: 'Nach Monaten voller Lärm, Staub und Ochsenkarren steht die Basilika am Forum. Die ganze Stadt drängt sich unter den Säulen, ein Stier wird geopfert, der Name der Valerier steht in Stein über dem Eingang.',
     wahl: [{ t: 'Ein Festmahl für die ganze Stadt', w: { gut: { brot: -30 }, ansehen: 30, gunst: 10, stimmung: 15 } }, { t: 'Eine feierliche Rede', w: { ansehen: 25, gunst: 10, stimmung: 8 } }] },
+  // Entscheidungen der Geschichte (Phase B), nur durch die Zeitleiste ausgelöst
+  { id: 'via', nurAusgeloest: true, titel: 'Die Via Postumia', bild: 'handel',
+    text: 'Der Konsul Spurius Postumius Albinus lässt eine Fernstraße von Genua nach Aquileia bauen – mitten durch Cremona. Händler und Reisende werden kommen, aber die Stadt muss Baustoffe und Arbeit stellen.',
+    wahl: [{ t: 'Die Straße durch die Stadt führen', w: { gut: { denare: -150, ziegel: -40 }, gunst: 6, via: true } }, { t: 'Nur einen Abzweig bauen', w: { gut: { denare: -60 }, gunst: 2 } }, { t: 'Ablehnen – zu teuer', w: { gunst: -6 } }] },
+  { id: 'enteignung', nurAusgeloest: true, titel: 'Land für die Veteranen', bild: 'krieg',
+    text: 'Nach Philippi verlangen Oktavians Veteranen Land. Cremona stand auf der falschen Seite – nun sollen die Höfe im Umland an die Soldaten gehen.',
+    wahl: [{ t: 'Die Höfe abgeben', w: { hoefe: 3, gunst: 10 } }, { t: 'Freikaufen (300 Denare)', w: { gut: { denare: -300 }, gunst: 3 } }, { t: 'Widerstand leisten', w: { gunst: -20, ansehen: 10, stimmung: 5 } }] },
 ];
 export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
 
@@ -433,6 +440,21 @@ export const INSCHRIFTEN = [
   { id: 'handel', n: 'Händler am Tor', text: 'Die erste Ladung ging nach Placentia oder Mantua.', ok: (S) => (S.zaehler || {}).handel >= 1 },
   { id: 'umland', n: 'Herr des Umlands', text: 'Zehn Felder im Umland sind vermessen.', ok: (S) => Object.keys(S.land || {}).length >= 10 },
   { id: 'basilika', n: 'Die Basilika', text: 'Das Wahrzeichen am Forum ist eröffnet.', ok: (S) => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)) },
+  { id: 'gehalten', n: 'Cremona hielt stand', text: 'Die Gallier stürmten vergeblich gegen die Mauern.', ok: (S) => (S.zaehler || {}).belagerung === 'gehalten' },
   { id: 'zehn', n: 'Zehn Jahre Cremona', text: 'Seit zehn Jahren steht die Kolonie am Padus.', ok: (S) => S.monat >= 122 },
 ];
+
+// Zeitleiste der Geschichte (Phase B, 1.11.): Wendepunkte als Prüfung der Stadt, Vorwarnung 24 Monate vorher.
+// art 'pruefung' = Ausgang nach Vorbereitung, art 'wahl' = Ereignis mit Entscheidung (EREIGNISSE). Menü: an / Kulisse / aus.
+export const GESCHICHTE = [
+  { id: 'belagerung', jahr: -200, art: 'pruefung', bild: 'tor', titel: 'Die Gallier vor den Mauern',
+    warnung: 'Späher melden: Insubrer und Cenomanen sammeln sich unter dem Punier Hamilkar. In zwei Jahren könnten sie vor Cremona stehen. Mauer, Kastell und Vorräte entscheiden.' },
+  { id: 'siedler', jahr: -190, art: 'pruefung', bild: 'trebia', titel: 'Neue Siedler aus Rom',
+    warnung: 'Der Senat will Cremona mit neuen Familien stärken. In zwei Jahren kommen sie – sie brauchen Häuser und Getreide.' },
+  { id: 'via', jahr: -148, art: 'wahl', warnung: 'In Rom plant man eine große Straße durch die Po-Ebene. Sie soll in zwei Jahren Cremona erreichen.' },
+  { id: 'spartacus', jahr: -72, art: 'pruefung', bild: 'volk', titel: 'Spartacus in der Po-Ebene',
+    warnung: 'Ein entlaufener Gladiator führt ein Heer von Sklaven nach Norden. In zwei Jahren erreicht er die Po-Ebene. Wache, Mauer – und wie viele Sklaven hat Cremona?' },
+  { id: 'enteignung', jahr: -41, art: 'wahl', warnung: 'Die Triumvirn suchen Land für ihre Veteranen. Man sagt, Cremona sei auf der Liste.' },
+];
+export const PRAEFEKT = { monate: 24, steuer: 0.7 };   // Gunst 0 → Rom schickt einen Präfekten
 

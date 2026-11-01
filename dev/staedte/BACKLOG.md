@@ -302,6 +302,17 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Ab 80 % Schutz Stimmung +3. Zeichnung als Instanced-Mesh (fertig/im Bau), Tor mit zwei Türmen. Anzeige im Cremona-Fenster.
       Test 83/83, Bild angesehen.
 
+## Phase B – Geschichte als Prüfung der Stadt (1.11.)
+- [x] Zeitleiste `GESCHICHTE` (daten.js): Vorwarnung 24 Monate vorher (Meldung + blaue Zeile „Vorzeichen … in etwa N Monaten“
+      unter dem Auftrag), Wendepunkt im Sommer des Jahres. **Belagerung 200 v. Chr.**: Wert = 0,5 × Mauerschutz + 0,2 × Kastell
+      + 0,3 × Vorräte (6 Monate = voll) → hält (Ansehen +15, Gunst +10, Inschrift „Cremona hielt stand“) / plündert Vorstädte
+      (Vorräte −30 %) / verwüstet (−60 %, Brände); kleine Städte halbe Verluste. **Siedler 190**: freier Wohnraum + 60 Getreide →
+      bis 30 neue Bewohner. **Via Postumia 148** (Wahl: durch die Stadt → +6 Denare/Monat, Aufschlag −3 %). **Spartacus 72**:
+      Wache, Mauer, Sklavenanteil → 20 % oder 60 % fliehen, Brände. **Landenteignung 41** (Wahl: Höfe abgeben / freikaufen /
+      Widerstand). Ausgang als Fenster mit Text, was geholfen hätte. **Präfekt**: Gunst 0 → 24 Monate Präfekt (Steuern −30 %,
+      Familie verliert Amt, Gunst +1/Monat). Menü „Geschichte: Wendepunkte / nur Kulisse / aus“; bei „Ereignisse aus“ nur Meldungen.
+      Test 85/85. **Nicht nachgespielt:** Belagerung erst nach ≈ 55 Minuten Spielzeit.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

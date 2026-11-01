@@ -187,3 +187,4 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .weiterknopf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .weiterknopf small{font-size:12px;font-weight:400;opacity:.8}
 #auftrag .ratzeile{margin-top:8px;padding:6px 8px;border-radius:8px;background:rgba(232,163,58,.12);border:1px solid #a8762a;color:#f2c27a;font-size:13px;line-height:1.35}
+#auftrag .ahnungzeile{margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(127,182,224,.1);border:1px solid #4f6f8a;color:#b8d4ea;font-size:13px;line-height:1.35}

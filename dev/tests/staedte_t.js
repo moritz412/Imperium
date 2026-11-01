@@ -548,7 +548,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { zuKlein, bau0, zweite, fertig, eroeffnung, ansehen, tafel, steine };
   });
   ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung && wz.ansehen >= 25, JSON.stringify(wz));
-  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 15);
+  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
   const auf = await p.evaluate(() => {
     const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};
     const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
@@ -652,6 +652,28 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { vor, nach, loch, tor: tor.ok, ersetzt, maske, haelt: /Stadtmauer hält/.test(mG), knopf: !!document.querySelector('.karte[data-t="mauer"]') || true };
   });
   ok('Stadtmauer: Ring schützt alle Häuser, Lücke nicht, Tor auf der Straße, Gallier verschonen die Stadt', mu.vor === 0 && mu.nach === 1 && mu.loch < 1 && mu.tor && mu.ersetzt && mu.maske && mu.haelt, JSON.stringify(mu));
+  // Phase B: Geschichte als Prüfung – Vorwarnung, Belagerung nach Vorbereitung, Siedler, Spartacus, Via-Wahl, Präfekt, Kulisse
+  const gs = await p.evaluate(() => {
+    const sim = SR.sim, basis = () => { const G = JSON.parse(JSON.stringify(SR.S)); G.ereignisseAus = false; G.ereignis = null; G.gesch = {}; return G; };
+    const mB = 220;   // Sommer 200 v. Chr.
+    const W = basis(); W.monat = mB - 20; sim.monat(W, SR.welt); const warn = W.gesch.belagerung === 'gewarnt' && sim.geschichteKommend(W).monate > 0;
+    const A = basis(); A.gesch = { belagerung: 'gewarnt' }; A.monat = mB; A.gut.getreide = 0; A.gut.brot = 0; A.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 };
+    sim.monat(A, SR.welt); const schlecht = A.ereignis === 'g:belagerung' && /verwüstet|plündern/.test(A.gText);
+    const B = basis(); B.gesch = { belagerung: 'gewarnt' }; B.monat = mB; B.gut.getreide = 2000; B.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 };
+    const h = B.geb.filter(b => b.t === 'huette' || b.t === 'domus'); let id = 90000;
+    const x0 = Math.min(...h.map(b => b.x)) - 2, x1 = Math.max(...h.map(b => b.x)) + 4, z0 = Math.min(...h.map(b => b.z)) - 2, z1 = Math.max(...h.map(b => b.z)) + 4;
+    const ring = (x, z) => B.geb.push({ id: id++, t: 'mauer', x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [] });
+    for (let x = x0; x <= x1; x++) { ring(x, z0); ring(x, z1); } for (let z = z0 + 1; z < z1; z++) { ring(x0, z); ring(x1, z); }
+    const hang = sim.regionKarte().find(f => f.typ === 'hang'); B.land[sim.landKey(hang)] = { verm: 2, betrieb: 'kastell' };
+    const g0 = sim.gunst(B); sim.monat(B, SR.welt); const gut = /vergeblich/.test(B.gText) && sim.gunst(B) > g0;
+    const V = basis(); V.gesch = { belagerung: 'fertig', siedler: 'fertig', via: 'gewarnt' }; V.monat = (-148 + 218) * 12 + 4; V.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 }; sim.monat(V, SR.welt);
+    const via = V.ereignis === 'via'; V.gut.denare = 500; V.gut.ziegel = 100; sim.ereignisWaehlen(V, 0); const viaAn = V.via === true;
+    const P = basis(); P.gunst = 0; P.monat = 30; P.familie = P.familie || sim.familieS(P); P.familie.amt = 1; sim.monat(P, SR.welt); const praef = P.praefekt > 0 && P.familie.amt === 0;
+    const K = basis(); K.geschichte = 'kulisse'; K.gesch = { belagerung: 'gewarnt' }; K.monat = mB; const mk = sim.monat(K, SR.welt).join(' | '); const kulisse = !K.ereignis && /Im Jahr 200/.test(mk);
+    return { warn, schlecht, gut, via, viaAn, praef, kulisse, gText: B.gText.slice(0, 60) };
+  });
+  ok('Geschichte: Vorwarnung, Belagerung nach Vorbereitung (gut/schlecht), Via Postumia', gs.warn && gs.schlecht && gs.gut && gs.via && gs.viaAn, JSON.stringify(gs));
+  ok('Präfekt bei Gunst 0, Geschichte als Kulisse ohne Folgen', gs.praef && gs.kulisse);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
