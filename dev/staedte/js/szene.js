@@ -312,6 +312,8 @@ export function erzeugeSzene(leinwand, welt) {
   }
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
+    const mname = t === 'huette' ? ['huette', 'huette', 'casa', 'insula'][stufe || 1] : t;   // Blender-Modell vor Ersatzform (1.11.)
+    if (modelle && modelle[mname]) return baueModell(mname, geist);
     if (t === 'huette' && stufe === 3) return baueInsula();
     if (t === 'domus') return baueDomus(geist);
     if (EIGEN[t]) return EIGEN[t](geist);

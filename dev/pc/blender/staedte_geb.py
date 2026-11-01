@@ -390,5 +390,6 @@ def brunnen():
     ablegen("brunnen", bm)
 
 for fn in (huette, casa, mola_dreh, muehle, baeckerei, markt, speicher, holzfaeller, lehmgrube, ziegelei, brunnen): fn()
+import os; exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'staedte_geb_mehr.py'), encoding='utf-8').read())   # weitere Gebäude (1.11.)
 json.dump({"format": "staedte_geb_v1", "teile": TEILE}, open(OUT, "w"), separators=(",", ":"))
 print("STAEDTE_GEB", sum(len(t["pos"]) // 9 for t in TEILE.values()), "Dreiecke gesamt")

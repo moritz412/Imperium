@@ -4,6 +4,10 @@ Rest von Phase C des Konzepts `dev/staedte/docs/konzept_spiel.md`. Alles läuft 
 die Aufträge verbessern nur Aussehen und Klang. Nicht kommerziell (MusicGen CC-BY-NC).
 
 ## 1. Blender-Modelle (Erweiterung von `dev/pc/blender/staedte_geb.py` → `models/staedte_geb.json`)
+**Erledigt 1.11. in der Cloud** (`pip install bpy`, Blender 5.2.3 headless): alle unten genannten Gebäude in
+`dev/pc/blender/staedte_geb_mehr.py` (21 Modelle, zusammen 26.533 Dreiecke mit den alten). Nur noch nötig, falls Moritz
+nachbessern will.
+
 Heute als Blender-Modell: Hütte, Casa, Mühle, Bäckerei, Markt, Speicher, Holzfäller, Lehmgrube, Ziegelei, Brunnen.
 Fehlen (im Spiel als einfache Form, Vorderseite = +z, Größe in Feldern):
 
