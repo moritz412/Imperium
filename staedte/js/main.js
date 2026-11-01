@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -297,6 +297,10 @@ $('#info').addEventListener('click', e => {
       const r = a.dataset.a === 'villa' ? sim.villaBauen(S, hexWahl) : sim.schutzBauen(S, hexWahl, a.dataset.t);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('bauen');
       allesZeichnen(); hexInfo(hexWahl);
+    } else if (a.dataset.a === 'vertrag' || a.dataset.a === 'ruf') {
+      const r = a.dataset.a === 'ruf' ? sim.rufWaehlen(S, a.dataset.r) : sim.vertragUmschalten(S, a.dataset.p, a.dataset.g);
+      if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else { ton.sfx(a.dataset.a === 'ruf' ? 'aufstieg' : 'klick'); melden(r.text); }
+      allesZeichnen(); hexInfo(hexWahl);
     } else if (a.dataset.a === 'handel') {
       const r = sim.handeln(S, a.dataset.g, a.dataset.art, a.dataset.p);
       if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else ton.sfx('klick');
@@ -441,6 +445,15 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Stadtbuch (Phase D): gemeinsame Kapitelleiste für Wissen, Familie, Chronik, Inschriften, Hilfe ----------
+const BUCH = [['forschung', 'Wissen'], ['familie', 'Familie'], ['chronik', 'Chronik'], ['inschriften', 'Inschriften'], ['hilfe', 'Hilfe']];
+const buchReiter = aktiv => `<nav class="buchreiter" aria-label="Stadtbuch">${BUCH.map(([k, n]) => `<button data-buch="${k}" class="${k === aktiv ? 'an' : ''}" aria-pressed="${k === aktiv}">${n}</button>`).join('')}</nav>`;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-buch]'); if (!b) return;
+  for (const [k] of BUCH) $('#' + k).hidden = true;
+  ({ forschung: forschungZeigen, familie: familieZeigen, chronik: chronikZeigen, inschriften: inschriftenZeigen, hilfe: hilfeZeigen })[b.dataset.buch]();
+});
+
 // ---------- Chronik der Stadt (1.11.): Verlauf je Jahr, letzte Meldungen ----------
 function kurve(daten, feld, titel, farbe, einheit = '') {
   const W = 300, H = 90, P = 6, w = daten.map(x => x[feld]), max = Math.max(1, ...w), min = Math.min(0, ...w);
@@ -456,7 +469,7 @@ function chronikZeigen() {
   const c = S.chronik || [], t = S.tagebuch || [];
   $('#chronik').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} Cremona · Stand am Ende jedes Jahres</div>
+    ${buchReiter('chronik')}<h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} Cremona · Stand am Ende jedes Jahres</div>
     <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}${kurve(c, 'a', 'Ansehen der Familie', '#f28c6e')}</div>
     <h3 class="fh">Zuletzt geschehen</h3>
     ${t.length ? t.map(([d, x]) => `<div class="zeile"><span>${x}</span><b>${d}</b></div>`).join('') : '<p class="fp">Noch nichts Erwähnenswertes.</p>'}</div>`;
@@ -478,7 +491,7 @@ const HILFE = [
 function hilfeZeigen() {
   $('#hilfe').innerHTML = `<div class="feld forschungsseite hilfeseite">
     <button class="schliessen" data-hi="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>So wird gespielt</h2><div class="untertitel">Cremona, 218 v. Chr. – vom Feldlager zur Kolonie</div>
+    ${buchReiter('hilfe')}<h2>So wird gespielt</h2><div class="untertitel">Cremona, 218 v. Chr. – vom Feldlager zur Kolonie</div>
     <div class="hilfekapitel">${HILFE.map(([t, l]) => `<section><h3 class="fh">${t}</h3><ul>${l.map(x => `<li>${x}</li>`).join('')}</ul></section>`).join('')}</div></div>`;
   $('#hilfe').hidden = false;
 }
@@ -490,7 +503,7 @@ function inschriftenZeigen() {
   const jahrText = m => { const j = S.jahr0 + Math.floor(m / 12); return j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.'; };
   $('#inschriften').innerHTML = `<div class="feld forschungsseite tafel">
     <button class="schliessen" data-in="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>Inschriften des Forums</h2><div class="untertitel">${n} von ${INSCHRIFTEN.length} Taten in Stein gemeißelt</div>
+    ${buchReiter('inschriften')}<h2>Inschriften des Forums</h2><div class="untertitel">${n} von ${INSCHRIFTEN.length} Taten in Stein gemeißelt</div>
     <div class="fbaum fam">${INSCHRIFTEN.map(i => da[i.id] !== undefined
       ? `<div class="fkarte fertig stein"><b>${i.n.toUpperCase()}</b><span>${i.text}</span><small>${jahrText(da[i.id])}</small></div>`
       : `<div class="fkarte epoche stein"><b>· · ·</b><span>${i.text}</span><small>noch nicht erreicht</small></div>`).join('')}</div></div>`;
@@ -525,7 +538,7 @@ function familieZeigen() {
   const spieleOk = F.amt >= 1 && F.spieleJahr !== sim.jahr(S);
   $('#familie').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-fa="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>Familie der ${F.name}</h2><div class="untertitel">${AEMTER[F.amt].n} · Ansehen ${Math.round(F.ansehen)} (+${zahl(sim.ansehenProMonat(S))} im Monat) · Familienvermögen ${rund(F.vermoegen)} Denare</div>
+    ${buchReiter('familie')}<h2>Familie der ${F.name}</h2><div class="untertitel">${AEMTER[F.amt].n} · Ansehen ${Math.round(F.ansehen)} (+${zahl(sim.ansehenProMonat(S))} im Monat) · Familienvermögen ${rund(F.vermoegen)} Denare</div>
     <div class="fbaum fam">${mitglieder}</div>
     ${heiratBlock}
     <h3 class="fh">Klienten (salutatio)</h3>
@@ -580,7 +593,7 @@ function forschungZeigen() {
   const rest = ziel ? Math.max(0, ziel.kosten - F.wissen) : 0, mon = Math.ceil(rest / w);
   $('#forschung').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>Forschung</h2><div class="untertitel">Epoche ${sim.epoche(S) === 2 ? 'II' : 'I'} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    ${buchReiter('forschung')}<h2>Forschung</h2><div class="untertitel">Epoche ${sim.epoche(S) === 2 ? 'II' : 'I'} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
     ${epocheBlock()}
     <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
       <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
@@ -632,6 +645,10 @@ function romInfo() {
   const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
   return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
     <div class="zeile"><span>Schutz vor Galliern</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
+    ${S.ruf ? `<div class="zeile"><span>Ruf der Stadt</span><b>${RUF[S.ruf].n}</b></div>` : sim.rang(S) >= 2
+      ? `<div class="fziel"><b>Wofür soll Cremona bekannt sein?</b><small>Einmalige Wahl.</small>${Object.entries(RUF).map(([k, r]) => `<button class="knopf" data-a="ruf" data-r="${k}">${r.n}<small style="display:block;font-weight:400">${r.text}</small></button>`).join('')}</div>`
+      : '<div class="zeile"><span>Ruf der Stadt</span><b>wählbar ab der Kleinstadt</b></div>'}
+    ${(S.vertraege || []).length ? `<div class="zeile"><span>Lieferverträge</span><b>${S.vertraege.map(v => `${WAREN[v.g].n} → ${sim.PARTNER[v.p].n}`).join(', ')}</b></div>` : ''}
     <div class="zeile"><span>Stadtmauer schützt</span><b>${Math.round(sim.mauerSchutz(S) * 100)} % der Häuser</b></div>
     <div class="zeile"><span>Unterhalt (Löhne, Sold) im Monat</span><b>${sim.unterhaltSumme(S)} Denare</b></div>
     <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
@@ -644,14 +661,15 @@ function handelInfo(id = 'placentia') {
     const p = sim.preis(S, g, id), rel = p / P.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
     return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · ${P.n}: ${zahl(p)} je Stück, ${wort}</small></div>
       <button class="knopf" data-a="handel" data-p="${id}" data-art="verkauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} verkaufen<small>+${sim.handelSumme(S, g, 'verkauf', id)} Denare</small></button>
-      <button class="knopf" data-a="handel" data-p="${id}" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf', id)} Denare</small></button></div>`;
+      <button class="knopf" data-a="handel" data-p="${id}" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf', id)} Denare</small></button>
+      <button class="knopf vtr${(S.vertraege || []).some(v => v.p === id && v.g === g) ? ' an' : ''}" data-a="vertrag" data-p="${id}" data-g="${g}"${offen ? '' : ' disabled'}>Vertrag<small>${VERTRAG.menge}/Monat · ${sim.vertragPreis(id, g)}</small></button></div>`;
   }).join('');
   const weg = P.anleger ? 'Lege Feldwege bis an Placentia heran oder baue einen Anleger am Padus – dann fahren die Boote flussaufwärts.'
     : `Nach ${P.n} kommt man nur über Land: Lege Feldwege bis an die Stadt im Osten heran.`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${d.unter}</div><p>${d.text}</p>
     ${offen ? `<div class="lage gut">Händler fahren zwischen Cremona und ${P.n}</div>` : `<div class="lage warn">Noch kein Weg nach ${P.n}</div><p>${weg}</p>`}
-    <p>Was du verkaufst, wird dort billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus.</p>
+    <p>Was du verkaufst, wird dort billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus. Ein Liefervertrag verkauft jeden Monat ${VERTRAG.menge} Stück zum festen Preis (höchstens ${VERTRAG.max}; dreimal nicht geliefert = gekündigt).</p>
     ${zeilen}`;
   $('#info').hidden = false;
 }

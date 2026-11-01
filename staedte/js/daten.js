@@ -473,3 +473,12 @@ export const BODENWERT = {
 };
 export const LAGE = { gut: 4, hoch: 8, domus: 4, steuer: 0.2 };   // Domus braucht Bodenwert ≥ 4; ab 8 zahlen Häuser 20 % mehr
 
+// Ruf der Stadt (Phase D): einmal ab der Kleinstadt wählbar
+export const RUF = {
+  kornkammer: { n: 'Kornkammer der Po-Ebene', text: 'Getreide und Brot +15 %, Abgaben an Rom −20 % (Rom braucht Getreide).' },
+  handel: { n: 'Handelsstadt am Padus', text: 'Händler nehmen 5 % weniger Aufschlag, Zoll: 5 Denare im Monat je offener Handelsstraße.' },
+  handwerk: { n: 'Stadt der Werkstätten', text: 'Alle Handwerksbetriebe arbeiten 15 % schneller.' },
+};
+// Lieferverträge (Phase D): monatlich 5 Einheiten zu festem Preis (95 % des Grundpreises), höchstens 3; dreimal nicht geliefert → Bruch
+export const VERTRAG = { menge: 5, preis: 0.95, max: 3, fehlschlag: 3, ansehen: 5 };
+

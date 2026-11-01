@@ -382,7 +382,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Ring 4: Steinbruch und Erz, Mantua nur über Land, Handel', r4.stein && r4.erz && !r4.zu && r4.offen && !r4.plOffen && r4.v && r4.kf, JSON.stringify(r4));
   ok('Gallier: Geschenke bringen Frieden, Schmiede macht Werkzeug', r4.gs && r4.fr === 24 && r4.friedlich && r4.schmiede && r4.werkzeug > 0);
-  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 2 * Object.keys(r4.mWaren).length && r4.ui.geschenk, JSON.stringify(r4.ui));
+  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 3 * Object.keys(r4.mWaren).length && r4.ui.geschenk, JSON.stringify(r4.ui));
   // Späte Republik (1.11.): Übergang, Weinberg → Kelter → Wein, Domus der Equites, Archiv
   const ep = await p.evaluate(() => {
     const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
@@ -688,6 +688,19 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { v0, v1, v2, g, z, laden, legende: ans.legende.length };
   });
   ok('Bodenwert: Garten hebt, Ziegelei senkt; Läden versorgen wie ein Markt; Ansicht Lage', bw.g && bw.v1 > bw.v0 && bw.z && bw.v2 < bw.v1 && bw.laden === true && bw.legende === 4, JSON.stringify(bw));
+  const rv = await p.evaluate(() => {
+    const sim = SR.sim, R = JSON.parse(JSON.stringify(SR.S)); R.ereignisseAus = true; R.ruf = undefined; R.rang = 1;
+    const frueh = sim.rufWaehlen(R, 'kornkammer').grund || ''; R.rang = 2; const ruf = sim.rufWaehlen(R, 'kornkammer').ok, zweimal = sim.rufWaehlen(R, 'handel').grund || '';
+    const bonus = sim.bonus(R, 'feld', 'getreide') > sim.bonus(JSON.parse(JSON.stringify(SR.S)), 'feld', 'getreide');
+    const V = JSON.parse(JSON.stringify(SR.S)); V.ereignisseAus = true; V.vertraege = []; V.gut.holz = 200; V.geb = V.geb.filter(b => b.t !== 'holzfaeller'); V.land = Object.fromEntries(Object.entries(V.land).filter(([k, l]) => l.betrieb !== 'holzlager'));
+    const vt = sim.vertragUmschalten(V, 'placentia', 'holz').ok, d0 = V.gut.denare, h0 = V.gut.holz; sim.monat(V, SR.welt);
+    const geliefert = h0 - V.gut.holz >= 5;
+    V.gut.holz = 0; for (let i = 0; i < 3; i++) { V.gut.holz = 0; sim.monat(V, SR.welt); } const gekuendigt = !V.vertraege.length;
+    SR.forschung(); document.querySelector('[data-buch="chronik"]').click(); const buch = !document.querySelector('#chronik').hidden && document.querySelector('#forschung').hidden && document.querySelectorAll('#chronik .buchreiter button').length === 5;
+    document.querySelector('#chronik [data-ch="zu"]').click();
+    return { frueh, ruf, zweimal, bonus, vt, geliefert, gekuendigt, buch };
+  });
+  ok('Ruf der Stadt, Lieferverträge (Lieferung, Kündigung), Stadtbuch-Kapitel', /Kleinstadt/.test(rv.frueh) && rv.ruf && /steht schon/.test(rv.zweimal) && rv.bonus && rv.vt && rv.geliefert && rv.gekuendigt && rv.buch, JSON.stringify(rv));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

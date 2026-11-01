@@ -188,3 +188,9 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .weiterknopf small{font-size:12px;font-weight:400;opacity:.8}
 #auftrag .ratzeile{margin-top:8px;padding:6px 8px;border-radius:8px;background:rgba(232,163,58,.12);border:1px solid #a8762a;color:#f2c27a;font-size:13px;line-height:1.35}
 #auftrag .ahnungzeile{margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(127,182,224,.1);border:1px solid #4f6f8a;color:#b8d4ea;font-size:13px;line-height:1.35}
+/* Stadtbuch (Phase D) */
+.buchreiter{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 60px 4px 0}
+.buchreiter button{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--rand);background:transparent;font-size:13px;font-weight:600}
+.buchreiter button.an{background:var(--gold);border-color:var(--gold);color:#1f1a15}
+.handel{grid-template-columns:1fr 84px 84px 74px}.handel .knopf.vtr{font-size:12px}.handel .knopf.vtr.an{background:rgba(90,70,40,.9);border-color:var(--gold)}
+

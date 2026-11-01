@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -366,6 +366,8 @@ export function monat(S, welt) {
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
   S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
   if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
+  if (S.ruf === 'handel') S.gut.denare += 5 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
+  vertraegeMonat(S, meld);
   // Lage (Phase D): Häuser in bester Lage zahlen mehr
   const teuer = S.geb.filter(h => h.t === 'huette' && h.bew > 0 && bodenwert(S, h) >= LAGE.hoch).reduce((n, h) => n + h.bew, 0);
   S.gut.denare += teuer * STEUER * LAGE.steuer * (S.stimmung / 70);   // Equites zahlen vierfach
@@ -714,7 +716,7 @@ export function preis(S, g, id = 'placentia') {
 }
 // Summe für eine Ladung (HANDEL.menge): Kauf mit Aufschlag, Verkauf mit Abschlag
 export const handelSumme = (S, g, art, id = 'placentia') => Math.max(1, Math.round(preis(S, g, id) * HANDEL.menge * (art === 'kauf' ? 1 + aufschlag(S) : 1 - aufschlag(S))));
-const aufschlag = S => (hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag) - (S.via ? 0.03 : 0) - (S.familie && (S.familie.buende || []).includes('Sempronii') ? 0.05 : 0);
+const aufschlag = S => (hat(S, 'archiv') ? 0.08 : HANDEL.aufschlag) - (S.via ? 0.03 : 0) - (S.ruf === 'handel' ? 0.05 : 0) - (S.familie && (S.familie.buende || []).includes('Sempronii') ? 0.05 : 0);
 export function handeln(S, g, art, id = 'placentia') {
   const p = PARTNER[id];
   if (!p || !p.waren[g]) return { ok: false, grund: `Diese Ware handelt ${p ? p.n : 'niemand'} nicht` };
@@ -749,7 +751,7 @@ export function geschenk(S) {
 // Abgaben an Rom: am Ende des Herbstes; bezahlt → Gunst steigt, sonst sinkt sie stark
 export const gunst = S => S.gunst ?? ABGABE.gunst;
 export const lohnFaktor = S => 0.5 + gunst(S) / 100;
-export const abgabeBetrag = S => Math.round(ABGABE.grund + einwohner(S) * ABGABE.je);
+export const abgabeBetrag = S => Math.round((ABGABE.grund + einwohner(S) * ABGABE.je) * (S.ruf === 'kornkammer' ? 0.8 : 1));
 function abgabeZahlen(S) {
   const n = abgabeBetrag(S);
   if (S.gut.denare >= n) {
@@ -792,6 +794,8 @@ export function bonus(S, t, g) {
   let m = 1;
   if (g === 'getreide' && hat(S, 'fruchtwechsel')) m *= 1.25;
   if (t === 'ziegelei' && hat(S, 'ziegelbrand')) m *= 1.5;
+  if (S.ruf === 'kornkammer' && (g === 'getreide' || g === 'brot')) m *= 1.15;
+  if (S.ruf === 'handwerk' && GEB[t] && GEB[t].kat === 'Handwerk') m *= 1.15;
   return m;
 }
 export function wissenProMonat(S) {
@@ -1304,5 +1308,30 @@ export function bodenwert(S, b) {
     const d = abstand(o, b); if (d <= w[1]) v += w[0] * (1 - 0.5 * d / w[1]);
   }
   return Math.round(v * 10) / 10;
+}
+
+// ---------- Ruf der Stadt und Lieferverträge (Phase D) ----------
+export function rufWaehlen(S, id) {
+  if (S.ruf) return { ok: false, grund: 'Der Ruf der Stadt steht schon fest' };
+  if (rang(S) < 2) return { ok: false, grund: 'Erst ab der Kleinstadt' };
+  if (!RUF[id]) return { ok: false, grund: 'Unbekannt' };
+  S.ruf = id; return { ok: true, text: `Cremona wird bekannt als ${RUF[id].n}.` };
+}
+export const vertragPreis = (id, g) => Math.round(PARTNER[id].waren[g].basis * VERTRAG.preis * VERTRAG.menge);
+export function vertragUmschalten(S, id, g) {
+  const v = S.vertraege = S.vertraege || [], i = v.findIndex(x => x.p === id && x.g === g);
+  if (i >= 0) { v.splice(i, 1); return { ok: true, text: 'Vertrag beendet.' }; }
+  if (!handelOffen(S, id)) return { ok: false, grund: 'Noch kein Weg nach ' + PARTNER[id].n };
+  if (v.length >= VERTRAG.max) return { ok: false, grund: `Höchstens ${VERTRAG.max} Lieferverträge` };
+  v.push({ p: id, g, fehl: 0 }); return { ok: true, text: `Vertrag: jeden Monat ${VERTRAG.menge} ${WAREN[g].n} nach ${PARTNER[id].n} für ${vertragPreis(id, g)} Denare.` };
+}
+function vertraegeMonat(S, meld) {
+  for (const v of [...(S.vertraege || [])]) {
+    if ((S.gut[v.g] || 0) >= VERTRAG.menge && handelOffen(S, v.p)) { S.gut[v.g] -= VERTRAG.menge; S.gut.denare += vertragPreis(v.p, v.g); v.fehl = 0; continue; }
+    if (++v.fehl >= VERTRAG.fehlschlag) {
+      S.vertraege = S.vertraege.filter(x => x !== v); familieS(S).ansehen = Math.max(0, familieS(S).ansehen - VERTRAG.ansehen);
+      meld.push(`${PARTNER[v.p].n} kündigt den Vertrag über ${WAREN[v.g].n}: dreimal nicht geliefert. (Ansehen −${VERTRAG.ansehen})`);
+    }
+  }
 }
 

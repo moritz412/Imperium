@@ -327,6 +327,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Lage ≥ 4, Häuser ab 8 zahlen 20 % mehr Steuern. Ansicht „Lage“, Zeilen im Haus-/Domus-Fenster. Neue Gebäude: **Läden
       (tabernae)** – versorgen Häuser im Umkreis 8 wie ein Markt; Reiter **Schmuck**: **Garten**, **Statue**, **Platz** (gilt als
       Straße), alle mit eigener Form. Test 86/86.
+- [x] **Ruf der Stadt** (einmal ab Kleinstadt, im Cremona-Fenster im Umland): Kornkammer (Getreide/Brot +15 %, Abgaben −20 %),
+      Handelsstadt (Aufschlag −5 %, Zoll 5 Denare je offener Handelsstraße), Stadt der Werkstätten (Handwerk +15 %).
+      **Lieferverträge** (Knopf „Vertrag“ je Ware im Handelsfenster): jeden Monat 5 Stück zu 95 % des Grundpreises, höchstens 3,
+      dreimal nicht geliefert → Kündigung, Ansehen −5. **Stadtbuch**: Wissen, Familie, Chronik, Inschriften, Hilfe mit gemeinsamer
+      Kapitelleiste oben. Test 87/87.
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
