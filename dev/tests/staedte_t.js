@@ -552,6 +552,17 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { zuKlein, bau0, zweite, fertig, eroeffnung, ansehen, tafel, steine };
   });
   ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung && wz.ansehen >= 25, JSON.stringify(wz));
+  const weihe = await p.evaluate(() => {
+    const sim = SR.sim, B = JSON.parse(JSON.stringify(SR.S)); B.sofortBauen = false; B.ereignisseAus = false; B.ereignis = null; B.epoche = 2;
+    B.forschung = B.forschung || {}; B.forschung.fertig = [...(B.forschung.fertig || []), 'tempel']; B.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 };
+    Object.assign(B.gut, { stein: 500, ziegel: 500, holz: 500, denare: 2000 }); B.gesch = { belagerung: 'fertig', siedler: 'fertig', via: 'fertig', spartacus: 'fertig', enteignung: 'fertig' };
+    let t = null; for (let z = 0; z <= 34 && !t; z++) for (let x = 0; x <= 56 && !t; x++) { const r = sim.bauen(B, SR.welt, 'tempel', x, z); if (r.ok) t = r.b; else if (/Forsch|Epoche|erst/.test(r.grund || '')) return { grund: r.grund }; }
+    if (!t) return { grund: 'kein Platz' };
+    let n = 0; while (t.bau > 0 && n++ < 30) { if (B.ereignis && B.ereignis !== 'eroeffnung_tempel') B.ereignis = null; sim.monat(B, SR.welt); }
+    const ev = B.ereignis; const a0 = B.familie.ansehen; const r = ev ? sim.ereignisWaehlen(B, 1) : {};
+    return { ev, n, plus: B.familie.ansehen - a0, ok: r.ok };
+  });
+  ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.plus >= 15, JSON.stringify(weihe));
   ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
   const auf = await p.evaluate(() => {
     const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};

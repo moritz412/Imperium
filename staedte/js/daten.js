@@ -416,6 +416,16 @@ export const EREIGNISSE = [
   { id: 'eroeffnung', nurAusgeloest: true, titel: 'Die Basilika wird eröffnet', bild: 'spiele',
     text: 'Nach Monaten voller Lärm, Staub und Ochsenkarren steht die Basilika am Forum. Die ganze Stadt drängt sich unter den Säulen, ein Stier wird geopfert, der Name der Valerier steht in Stein über dem Eingang.',
     wahl: [{ t: 'Ein Festmahl für die ganze Stadt', w: { gut: { brot: -30 }, ansehen: 30, gunst: 10, stimmung: 15 } }, { t: 'Eine feierliche Rede', w: { ansehen: 25, gunst: 10, stimmung: 8 } }] },
+  // Eröffnung der ersten großen Bauten (1.11.): einmal je Spiel, wenn der erste fertig ist
+  { id: 'eroeffnung_tempel', nurAusgeloest: true, titel: 'Der Tempel wird geweiht', bild: 'spiele',
+    text: 'Der Tempel auf dem Podium ist fertig. Die Priester warten auf das Zeichen: Ein weißer Stier steht bekränzt vor dem Altar, die ganze Stadt drängt sich auf der Freitreppe.',
+    wahl: [{ t: 'Ein großes Opferfest aus der Stadtkasse', w: { gut: { denare: -40 }, stimmung: 10, ansehen: 6 } }, { t: 'Die Familie stiftet das Opfer', w: { vermoegen: -60, ansehen: 15, stimmung: 6 } }, { t: 'Eine schlichte Weihe', w: { stimmung: 4, ansehen: 3 } }] },
+  { id: 'eroeffnung_theater', nurAusgeloest: true, titel: 'Das erste Stück im Theater', bild: 'spiele',
+    text: 'Die Ränge des neuen Theaters sind bis oben gefüllt. Welches Stück soll zur Eröffnung gespielt werden?',
+    wahl: [{ t: 'Eine Komödie des Plautus', w: { gut: { denare: -30 }, stimmung: 12 } }, { t: 'Eine Tragödie des Ennius', w: { gut: { denare: -30 }, stimmung: 6, ansehen: 8 } }, { t: 'Die Familie bezahlt Schauspieler aus Rom', w: { vermoegen: -50, stimmung: 10, ansehen: 12 } }] },
+  { id: 'eroeffnung_thermen', nurAusgeloest: true, titel: 'Die Thermen öffnen', bild: 'spiele',
+    text: 'Die Öfen sind seit Tagen geheizt, das Wasser im Caldarium dampft. Vor dem Eingang warten Bürger, Händler und Sklaven auf den ersten Badetag.',
+    wahl: [{ t: 'Freier Eintritt am ersten Monat', w: { gut: { denare: -20 }, stimmung: 10, ansehen: 4 } }, { t: 'Eintritt: ein Quadrans', w: { gut: { denare: 20 }, stimmung: 4 } }] },
   // Entscheidungen der Geschichte (Phase B), nur durch die Zeitleiste ausgelöst
   { id: 'via', nurAusgeloest: true, titel: 'Die Via Postumia', bild: 'handel',
     text: 'Der Konsul Spurius Postumius Albinus lässt eine Fernstraße von Genua nach Aquileia bauen – mitten durch Cremona. Händler und Reisende werden kommen, aber die Stadt muss Baustoffe und Arbeit stellen.',

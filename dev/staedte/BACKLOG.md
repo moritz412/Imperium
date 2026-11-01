@@ -351,6 +351,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Quartier, Schrein, Latrine, fünf Werkstätten, Läden, Tempel, Theater, Thermen, Basilika, Tor, Zeltlager, Statue, Garten),
       Skript `dev/pc/blender/staedte_geb_mehr.py`; Modell geht vor Ersatzform. `models/staedte_geb.json` 0,75 → 2,3 MB.
       Große Teststadt: 247 Draw-Calls (vorher 244), 213.000 Dreiecke. Bilder aller Modelle angesehen. Nicht getestet: iPad (Bildrate, Ladezeit).
+- [x] **Eröffnungen** (1.11.): erster Tempel (Weihe), erstes Theater (erstes Stück), erste Thermen (erster Badetag) als
+      Entscheidung mit Festklang, einmal je Spiel. Startkarte: Ortsnamen überlappen nicht mehr. Test 91/91.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
       beantwortete jede Seitenanfrage unter /Imperium/ – auch /staedte/ – mit der Index-Seite des Hauptspiels; jetzt bleibt staedte/

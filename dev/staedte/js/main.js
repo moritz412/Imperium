@@ -393,7 +393,7 @@ function ereignisZeigen() {
     <div class="einhalt"><small>${sim.datumText(S)}</small><h2>${e.titel}</h2><p>${e.text}</p>
     ${e.wahl.map((w, i) => { const f = sim.wahlMoeglich(S, w);
       return `<button class="knopf ewahl" data-e="${i}"${f ? ' disabled' : ''}><b>${w.t}</b><small>${f || sim.wirkungText(w)}</small></button>`; }).join('')}</div></div>`;
-  if ($('#ereignis').hidden) ton.sfx(['cerealia', 'ludi', 'saturnalia', 'eroeffnung'].includes(e.id) ? 'fest' : 'ereignis');
+  if ($('#ereignis').hidden) ton.sfx((['cerealia', 'ludi', 'saturnalia'].includes(e.id) || e.id.startsWith('eroeffnung')) ? 'fest' : 'ereignis');
   $('#ereignis').hidden = false;
 }
 $('#ereignis').addEventListener('click', e => {

@@ -258,6 +258,8 @@ export function monat(S, welt) {
       if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true }); continue; }
       delete b.bau; delete b.bauFort; b.w = 0;
       if (b.t === 'basilika') S.ereignis = 'eroeffnung';
+      else if (['tempel', 'theater', 'thermen'].includes(b.t) && !S.ereignis && !S.ereignisseAus && !(S.ereignisLog || {})['eroeffnung_' + b.t]) {
+        S.ereignis = 'eroeffnung_' + b.t; (S.ereignisLog = S.ereignisLog || {})['eroeffnung_' + b.t] = S.monat; }
       if (d.wahrzeichen || bauzeit(b.t) >= 3) mitOrt(meld, b.t === 'thermen' ? 'Die Thermen sind fertig!' : `${artikel(b.t)} ${d.n} ist fertig!`, b);
       continue; }
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
