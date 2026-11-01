@@ -424,13 +424,14 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * stimmungsFaktor(S) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
   if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
   if (S.ruf === 'handel') S.gut.denare += 5 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
   vertraegeMonat(S, meld);
   // Lage (Phase D): Häuser in bester Lage zahlen mehr
   const teuer = S.geb.filter(h => h.t === 'huette' && h.bew > 0 && bodenwert(S, h) >= LAGE.hoch).reduce((n, h) => n + h.bew, 0);
-  S.gut.denare += teuer * STEUER * LAGE.steuer * (S.stimmung / 70);   // Equites zahlen vierfach
+  S.gut.denare += teuer * STEUER * LAGE.steuer * stimmungsFaktor(S);
+  if (rang(S) >= 2) S.gut.denare = Math.max(0, S.gut.denare - einwohner(S) * 0.1);   // Stadtverwaltung (Schreiber, Boten) ab der Kleinstadt   // Equites zahlen vierfach
   if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
@@ -822,7 +823,9 @@ export function geschenk(S) {
 // Abgaben an Rom: am Ende des Herbstes; bezahlt → Gunst steigt, sonst sinkt sie stark
 export const gunst = S => S.gunst ?? ABGABE.gunst;
 export const lohnFaktor = S => 0.5 + gunst(S) / 100;
-export const abgabeBetrag = S => Math.round((ABGABE.grund + einwohner(S) * ABGABE.je + 0.05 * Math.max(0, (S.gut.denare || 0) - 1000)) * (S.ruf === 'kornkammer' ? 0.8 : 1));   // + 5 % des Reichtums über 1.000 (Kriegsbeiträge)
+// Balance 1.11.: hohe Stimmung bringt höchstens 20 % mehr Steuern (vorher bis 43 %)
+export const stimmungsFaktor = S => Math.min(1.2, S.stimmung / 70);
+export const abgabeBetrag = S => Math.round((ABGABE.grund + einwohner(S) * ABGABE.je + 0.1 * Math.max(0, (S.gut.denare || 0) - 1000)) * (S.ruf === 'kornkammer' ? 0.8 : 1));   // + 5 % des Reichtums über 1.000 (Kriegsbeiträge)
 function abgabeZahlen(S) {
   const n = abgabeBetrag(S);
   if (S.gut.denare >= n) {

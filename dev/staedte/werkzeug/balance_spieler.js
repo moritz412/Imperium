@@ -33,6 +33,7 @@ for (let m = 0; m < JAHRE * 12; m++) {
   if (voll && S.stimmung >= 45) versuch('huette');
   if (anz('feld') >= 2 && anz('muehle') < Math.ceil(anz('feld') / 3)) versuch('muehle');
   if (anz('muehle') > anz('baeckerei')) versuch('baeckerei');
+  if (!S.versorgt.brot && anz('muehle') <= anz('baeckerei') && S.gut.getreide > 40) versuch('muehle');   // Brot fehlt: Kette verlängern
   if (anz('lehmgrube') < 1 + Math.floor(bew / 80)) versuch('lehmgrube');
   if (anz('ziegelei') < anz('lehmgrube')) versuch('ziegelei');
   if (haeuser.some(h => !sim.inReichweite(S, h, 'brunnen'))) versuch('brunnen');
