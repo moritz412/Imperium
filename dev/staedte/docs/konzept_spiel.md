@@ -1,8 +1,8 @@
 # Städte Roms – vom Prototyp zum Spiel (Konzept 1.11.2026)
 
-Ergänzt `konzept.md`. Ziel: aus der Systemsammlung (Stufen 1–4) ein Spiel machen, das man von Anfang bis Ende spielt,
-bei dem Entscheidungen weh tun und das sich wie ein eigenes Spiel anfühlt – Manor-Lords-Nähe, aber römisch und mit
-Familie als Hauptfigur. Kein Nachbau von Anno.
+Ergänzt `konzept.md`. Ziel: aus der Systemsammlung (Stufen 1–4) ein Spiel machen, bei dem Entscheidungen weh tun und das sich
+wie ein eigenes Spiel anfühlt – Manor-Lords-Nähe, aber römisch, freies Spiel mit der Stadt im Vordergrund und der Geschichte
+als Bühne. Kein Nachbau von Anno.
 
 ## 1. Befund: Was fehlt zum „echten Spiel“
 | Bereich | Stand heute | Was fehlt |
@@ -17,29 +17,38 @@ Familie als Hauptfigur. Kein Nachbau von Anno.
 | Balance | nur per Skript-Spieler | Spieltests mit Moritz, Kurven je Akt |
 | Technik | 81 Prüfungen, Draw-Calls gesenkt | **iPad nie getestet**, ein Spielstand, keine Versionierung der Stände |
 
-## 2. Leitbild – fünf Säulen
-1. **Die Familie ist die Hauptfigur.** Man spielt die Valerier über Generationen; die Stadt ist ihr Werkzeug und ihre Bühne.
-   Das unterscheidet uns klar von Anno (dort gibt es keine Dynastie) und Manor Lords (dort ein Herr ohne Familie).
-2. **Die Stadt lebt sichtbar.** Was im Lager steht, ist auch zu sehen: Baustellen, Karren, Märkte, Menschen, Jahreszeiten.
-3. **Geschichte als Bühne.** Cremona 218–27 v. Chr. ist echte Geschichte mit Wendepunkten – Hannibal, Gallier, Via Postumia,
-   Krise der Republik, Bürgerrecht, Bürgerkrieg, Landenteignung. Jede Epoche bringt eine neue Frage.
-4. **Knappheit erzwingt Entscheidungen.** Land, Arbeitskräfte, Gunst Roms und Familienvermögen reichen nie für alles.
-5. **Klare Ziele, klare Enden.** Jeder Akt hat Ziele, eine Krise und eine Bewertung; man kann scheitern und neu anfangen.
+## 2. Leitbild – fünf Säulen (überarbeitet nach Moritz' Entscheidungen 1.11.)
+1. **Die Stadt ist die Hauptfigur.** Bauen, Versorgen, Wachsen stehen vorn. Die Familie (Valerier) ist eine zweite Ebene für
+   Politik und Ansehen – wichtig, aber nicht der Held.
+2. **Die Stadt lebt sichtbar.** Was im Lager steht, ist auch zu sehen: Baustellen, Materialfuhren, Märkte, Menschen, Jahreszeiten.
+3. **Geschichte als Bühne.** Cremona 218–27 v. Chr. läuft als Zeitleiste im Hintergrund des freien Spiels mit – Hannibal, Gallier,
+   Via Postumia, Krise der Republik, Bürgerrecht, Bürgerkrieg, Landenteignung (Moritz: „okay“).
+4. **Knappheit erzwingt Entscheidungen.** Land, Arbeitskräfte, Gunst Roms und Geld reichen nie für alles.
+5. **Selbst gesetzte Ziele, sichtbarer Fortschritt.** Freies Spiel ohne Zwang; Ziele aus Senat, Rängen, Inschriften, Wahrzeichen.
 
-## 3. Spielstruktur: Kampagne in vier Akten + freies Spiel
-| Akt | Zeit | Frage | Krise am Ende | Neu im Akt |
-| --- | --- | --- | --- | --- |
-| I Gründung | 218–201 v. Chr. | Überlebt die Kolonie den Krieg? | Gallier-Belagerung 200 v. Chr. (historisch: Placentia zerstört, Cremona hält) | Grundbedürfnisse, Umland, Kastell |
-| II Aufstieg | 200–134 | Wird Cremona reich? | Seuche oder Missernte | Via Postumia (148), Handel, Epoche II, Ädil |
-| III Krise der Republik | 133–50 | Wem gehört das Land? | Sklavenaufstand (Spartacus zieht 72 v. Chr. durch die Po-Ebene) | Landreform (Gracchen), Sklaven gegen Freie, Bürgerrecht für die Transpadaner |
-| IV Bürgerkrieg | 49–27 | Wem hält Cremona die Treue? | 41 v. Chr.: Landenteignung für Veteranen (historisch traf es Cremona) | Caesar oder Pompeius, Oktavian oder Antonius |
-| Epilog | ab 27 v. Chr. | Augustus | – | Kaiserzeit als freies Weiterspielen |
+## 3. Spielstruktur: Freies Spiel im Vordergrund, Geschichte als Zeitleiste
+- **Hauptmodus freies Spiel** (Moritz 1.11.): Keine Akte mit Zwangsende. Die Stadt wächst, solange man spielt.
+- **Zeitleiste der Geschichte**: Große Ereignisse kommen zu ihrem Jahr als Ereignisketten mit Entscheidungen und Folgen –
+  sie geben dem freien Spiel einen Bogen, ohne es zu beenden:
 
-- Jeder Akt: 3–5 Ziele (Stadt, Familie, Rom), dazwischen frei bauen; Ende mit Bewertung (Inschrift + Chronik-Seite),
-  Familie und Stadt gehen in den nächsten Akt über. Dauer je Akt 60–90 Minuten bei 15 s/Monat.
-- **Niederlage** (weich, mit Ausweg): Gunst Roms auf 0 → Senat setzt die Familie ab (Neustart des Akts);
-  Stadt unter 20 Einwohner für 2 Jahre → Kolonie aufgegeben; Familie ohne Erben → Ende der Dynastie.
-- **Freies Spiel**: ohne Akte, mit allen Freischaltungen; weitere Regionen (Florentia, Puteoli, Luceria) als Szenarien.
+| Jahr (v. Chr.) | Ereignis | Frage an die Stadt |
+| --- | --- | --- |
+| 218 | Hannibal, Trebia (vorhanden) | Getreide für das Heer? Flüchtlinge? |
+| 200 | Gallier belagern Cremona (Placentia fällt) | Mauer, Vorräte, Kastell – hält die Stadt? |
+| 190 | Neue Siedler aus Rom | Land für 6.000 Familien – wohin? |
+| 148 | Via Postumia | Straße durch die Stadt: Handel, aber Abriss |
+| 133–121 | Landreform der Gracchen | Wem gehört das Umland? |
+| 89 | Bundesgenossenkrieg, latinisches Recht | Rom gegen die Verbündeten – auf wessen Seite? |
+| 72 | Spartacus zieht durch die Po-Ebene | Sklaven, Mauern, Furcht |
+| 49 | Caesar: Bürgerrecht für die Transpadaner | Dank an Caesar – Bruch mit dem Senat? |
+| 41 | Landenteignung für Veteranen | Wessen Land geht verloren? |
+| 27 | Augustus | Kaiserzeit – weiter frei spielen |
+
+- **Ziele** statt Zwang: Senatsaufträge (vorhanden), Stadtränge, Wahrzeichen, Inschriften, „Ehrenziele“ je Epoche.
+- **Rückschläge** statt Spielende: Gunst Roms 0 → Rom schickt einen Präfekten (Steuern höher, Familie verliert Ämter);
+  Stadt fast leer → Senat kürzt Unterstützung. Kein Game over.
+- **Familie** bleibt (Ämter, Heirat, Rivalen) als Politik-Ebene; Ausbau nur, wo es der Stadt dient.
+- Weitere Regionen als zusätzliche freie Spiele (Florentia, Puteoli, Luceria).
 
 ## 4. Kernschleifen
 | Rhythmus | Spieler tut | Spiel antwortet |
@@ -103,22 +112,19 @@ Keine Inseln/Schiffsrouten-Wirtschaft, keine Bedarfsstufen-Treppe nach Anno-Must
 keine kopierten Oberflächen, Gebäudelisten oder Ketten. Stattdessen: Laufwege, Hex-Umland mit Vermessen, Jahreszeiten,
 Familie über Generationen, echte Ortsgeschichte.
 
-## 7. Fahrplan
+## 7. Fahrplan (überarbeitet 1.11.; Reihenfolge „wie es gerade besser passt“)
 | Phase | Inhalt | Umfang (grob) |
 | --- | --- | --- |
-| A Spielbar von Anfang bis Ende | Akt I komplett (Ziele, Belagerung 200 v. Chr., Bewertung), Niederlage/Sieg, geführte erste 20 min, Baustellen für alle Gebäude, Stadtbuch-Oberfläche, **Spieltest Moritz** | 10–12 h |
-| B Lebendige Stadt | Bürger mit Tageswegen, Markttreiben, Bauarbeiter + Materialfuhren, Stadtmauer, Blender-Modelle für ~15 Gebäude, Musik je Jahreszeit | ~10 h + PC-Pipeline |
-| C Dynastie und Rom | Charakterwerte, Generationen, aktive Rivalen, Wahlen mit Stimmen, Patron, Ereignisketten Akt II | ~12 h |
-| D Krise der Republik | Akt III und IV, Landreform, Spartacus, Bürgerrecht, Bürgerkrieg, Landenteignung 41 v. Chr., Epilog | ~10 h |
-| E Szenarien und Feinschliff | weitere Regionen, mehrere Spielstände, PWA/offline, iPad-Feinschliff, Balance je Akt | offen |
+| A Bauen fühlt sich echt an | Bauzeit und Baustellen für **alle** Gebäude (Moritz: „tendenziell für alle“), Material per Träger/Karren aus dem Lager, Bauarbeiter; Stadtmauer in Abschnitten | ~8 h |
+| B Geschichte als Zeitleiste | Ereignisketten 200–27 v. Chr. (Tabelle oben) mit Folgen für Stadt und Umland; Präfekt als Rückschlag | ~8 h |
+| C Lebendige Stadt | **Machbarkeit Bürgerfiguren prüfen** (Prototyp, Draw-Calls/Dreiecke messen, iPad-Test durch Moritz), dann Tageswege, Markttreiben; Blender-Modelle, Musik je Jahreszeit | ~10 h + PC-Pipeline |
+| D Stadt-Tiefe | Bodenwert/Viertel, Spezialisierung der Stadt, Handelsverträge, Stadtbuch-Oberfläche | ~8 h |
+| E Feinschliff | mehrere Spielstände, offline, weitere Regionen, Balance mit Spieltests | offen |
 
-Erfolgskriterien: erste 10 Minuten ohne Hilfe verständlich (Spieltest), ein Akt 60–90 Minuten, je Akt mindestens drei echte
-Zielkonflikte, Testsatz grün, Draw-Calls im Rahmen, Bildrate **auf dem iPad gemessen** (nicht geschätzt).
+Erfolgskriterien: erste 10 Minuten ohne Hilfe verständlich (Spieltest), echte Zielkonflikte, Testsatz grün, Draw-Calls im
+Rahmen, Bildrate **auf dem iPad gemessen** (nicht geschätzt).
 
-## 8. Entscheidungen für Moritz
-1. Kampagne in Akten entlang der Geschichte – oder lieber freies Spiel als Hauptmodus?
-2. Familie als Hauptfigur mit Generationen – passt das, oder Stadt im Vordergrund lassen?
-3. Bauzeit und Materialfuhren für **alle** Gebäude (langsamer, mehr Manor Lords) – oder nur für große?
-4. Bürger als einzelne Figuren mit Tageswegen (iPad-Last!) – oder weiter nur Arbeiter-/Trägerwege?
-5. Akt III/IV mit Bürgerkrieg und Landenteignung – zu düster oder genau richtig?
-6. Reihenfolge: zuerst Phase A (spielbar) oder zuerst B (Optik)?
+## 8. Entscheidungen (Moritz, 1.11.)
+1. Hauptmodus: **freies Spiel**. 2. **Stadt im Vordergrund**, Familie als zweite Ebene. 3. Bauzeit: gerade nicht wichtig,
+tendenziell **für alle Gebäude**. 4. Bürgerfiguren: **erst Machbarkeit prüfen**, an sich gewünscht. 5. Bürgerkrieg/Landenteignung:
+**okay**. 6. Reihenfolge: **wie es gerade besser passt**.
