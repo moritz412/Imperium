@@ -146,11 +146,20 @@ function vorschauAn(t, px, py) {
 }
 function bauenAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
+  bauenFeld(t, p);
+}
+function bauenFeld(t, p) {
+  const versorger = t === 'brunnen' || t === 'markt', ohne = versorger ? S.geb.filter(h => h.t === 'huette' && !sim.inReichweite(S, h, t)) : [];
   const r = sim.bauen(S, welt, t, p.x, p.z);
-  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
+  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return false; }
   ton.sfx('bauen');
+  if (versorger) {   // 1.11.: zeigen, ob der neue Brunnen/Markt überhaupt Häuser neu versorgt (gerechnet wie fertig gebaut)
+    const bau = r.b.bau, w = r.b.w; delete r.b.bau; r.b.w = GEB[t].arbeiter || 1; const n = ohne.filter(h => sim.inReichweite(S, h, t)).length; r.b.w = w; if (bau) r.b.bau = bau;
+    melden(n ? `${GEB[t].n}: versorgt ${n} ${n === 1 ? 'Haus' : 'Häuser'} neu.` : `${GEB[t].n}: versorgt kein neues Haus – hier gibt es schon einen.`);
+  }
   if (t === 'holzfaeller' && !sim.waldNah(welt, r.b)) melden('Achtung: Kein Wald in der Nähe dieses Holzfällers.');
   allesZeichnen();
+  return true;
 }
 function baumodus() {
   $('#baumodus').hidden = !bauTyp;
@@ -868,6 +877,7 @@ window.SR = {
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), kasse: () => kasseZeigen(), titel: () => titelZeigen(), zensus: () => zensusZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  bauenFeld: (t, x, z) => bauenFeld(t, { x, z }),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f), melden,
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

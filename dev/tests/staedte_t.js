@@ -816,6 +816,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     SR.titel(); const seite = /Splendidissima|SPLENDIDISSIMA/.test(document.querySelector('#chronik').innerText); document.querySelector('#chronik [data-ch="zu"]').click();
     return { vor, titel: !!T.titel, meld: /Ehrentitel/.test(m), seite, alle: sim.zielStand(T).every(z => z[1]) }; });
   ok('Großes Ziel: Ehrentitel „Splendidissima“ mit Festseite', tit.titel && tit.meld && tit.seite && tit.alle && tit.vor < 4, JSON.stringify(tit));
+  const br = await p.evaluate(() => { const S = SR.S; S.gut.ziegel += 50; const h = S.geb.find(b => b.t === 'huette'); const texte = [];
+    const beob = new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(n => texte.push(n.textContent)))); beob.observe(document.querySelector('#meldung'), { childList: true });
+    let fertig = false; for (let r = 1; r < 6 && !fertig; r++) for (const [dx, dz] of [[r, 0], [0, r], [-r, 0], [0, -r]]) { if (fertig) break; fertig = SR.bauenFeld('brunnen', h.x + dx, h.z + dz); }
+    return new Promise(res => setTimeout(() => { beob.disconnect(); res(texte.filter(t => /Brunnen:/.test(t))); }, 50)); });
+  ok('Brunnen bauen meldet, wie viele Häuser neu versorgt werden', br.length === 1 && /versorgt (kein neues Haus|\d+ Häuser? neu)/.test(br[0]), JSON.stringify(br));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();
