@@ -381,6 +381,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       **Nicht nachgespielt** – Moritz' Spieltest entscheidet. Offen: Stimmung erreicht im Spätspiel 100 (zu leicht?).
 - [x] **Stadtkasse** (1.11.): Denare in der Kopfleiste antippen → Steuern, Zoll/Handel, Unterhalt, Verwaltung, Abgabe an Rom
       (ersetzt den Tooltip, den es auf dem iPad nicht gibt). Test 98/98, Bild angesehen.
+- [x] **Zeitleisten bis in die Kaiserzeit** (1.11.): Cremona Vierkaiserjahr 69 n. Chr. (Belagerung), Puteoli Caligulas
+      Schiffsbrücke 39 n. Chr., Luceria Veteranen des Augustus 27 v. Chr. Test 98/98.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

@@ -459,6 +459,9 @@ export const EREIGNISSE = [
     text: 'Boten melden: Augustus reist mit Gefolge durch die Provinz und will in der Stadt übernachten. Die ganze Stadt putzt, schmückt und rechnet.',
     wahl: [{ t: 'Ein Empfang, von dem man in Rom spricht', w: { gut: { denare: -200, brot: -30 }, gunst: 20, ansehen: 20, stimmung: 6 } }, { t: 'Würdig, aber bescheiden', w: { gut: { denare: -60 }, gunst: 8, ansehen: 6 } }, { t: 'Eine Bittschrift überreichen: Steuern senken', w: { gunst: -5, stimmung: 8 } }] },
   // Entscheidungen der Geschichte (Phase B), nur durch die Zeitleiste ausgelöst
+  { id: 'schiffsbruecke', nurAusgeloest: true, titel: 'Die Brücke aus Schiffen', bild: 'handel',
+    text: 'Caligula lässt alle Lastschiffe des Golfs beschlagnahmen und zu einer Brücke binden, über die er in Rüstung reitet. Puteolis Händler sehen ihre Schiffe wochenlang festliegen.',
+    wahl: [{ t: 'Dem Kaiser zujubeln und ein Fest geben', w: { gut: { denare: -80 }, gunst: 10, stimmung: 4 } }, { t: 'Die Kaufleute entschädigen', w: { gut: { denare: -120 }, ansehen: 8 } }, { t: 'Leise murren', w: { gunst: -6, stimmung: -4 } }] },
   { id: 'via', nurAusgeloest: true, titel: 'Die Via Postumia', bild: 'handel',
     text: 'Der Konsul Spurius Postumius Albinus lässt eine Fernstraße von Genua nach Aquileia bauen – mitten durch Cremona. Händler und Reisende werden kommen, aber die Stadt muss Baustoffe und Arbeit stellen.',
     wahl: [{ t: 'Die Straße durch die Stadt führen', w: { gut: { denare: -150, ziegel: -40 }, gunst: 6, via: true } }, { t: 'Nur einen Abzweig bauen', w: { gut: { denare: -60 }, gunst: 2 } }, { t: 'Ablehnen – zu teuer', w: { gunst: -6 } }] },
@@ -522,6 +525,8 @@ export const GESCHICHTE = [
   { id: 'spartacus', jahr: -72, art: 'pruefung', typ: 'aufstand', bild: 'volk', titel: 'Spartacus in der Po-Ebene',
     warnung: 'Ein entlaufener Gladiator führt ein Heer von Sklaven nach Norden. In zwei Jahren erreicht er die Po-Ebene. Wache, Mauer – und wie viele Sklaven hat Cremona?' },
   { id: 'enteignung', jahr: -41, art: 'wahl', warnung: 'Die Triumvirn suchen Land für ihre Veteranen. Man sagt, Cremona sei auf der Liste.' },
+  { id: 'vierkaiser', jahr: 69, art: 'pruefung', typ: 'belagerung', bild: 'krieg', titel: 'Das Vierkaiserjahr', feind: 'die Legionen Vespasians',
+    warnung: 'Nach Neros Tod kämpfen die Heere um den Thron. Die Legionen Vitellius’ und Vespasians ziehen durch die Po-Ebene – Cremona liegt mitten auf ihrem Weg.' },
   // Florentia (Etrurien, gegründet 59 v. Chr. für Caesars Veteranen)
   { id: 'rubikon', reg: 'etrurien', jahr: -49, art: 'wahl', warnung: 'Caesar und Pompeius stehen sich feindlich gegenüber. In Rom spricht man offen von Bürgerkrieg.' },
   { id: 'perusia', reg: 'etrurien', jahr: -41, art: 'pruefung', typ: 'belagerung', bild: 'krieg', titel: 'Krieg um Perusia', feind: 'die Truppen des Lucius Antonius',
@@ -537,6 +542,7 @@ export const GESCHICHTE = [
     warnung: 'In der Gladiatorenschule von Capua gärt es. Man fürchtet einen Ausbruch – und dass sich die Sklaven Kampaniens anschließen. Wache, Mauer und wenige Sklaven helfen.' },
   { id: 'piraten', reg: 'kampanien', jahr: -68, art: 'pruefung', typ: 'belagerung', bild: 'tor', titel: 'Seeräuber im Golf', feind: 'die kilikischen Seeräuber',
     warnung: 'Kilikische Seeräuber plündern die Küsten Italiens, selbst Ostia wurde überfallen. In zwei Jahren könnten sie den Golf erreichen. Mauer, Kastell und Vorräte entscheiden.' },
+  { id: 'schiffsbruecke', reg: 'kampanien', jahr: 39, art: 'wahl', warnung: 'Man erzählt, Kaiser Caligula wolle über den Golf von Baiae nach Puteoli reiten – auf einer Brücke aus Schiffen.' },
   // Luceria (Apulien, latinische Kolonie seit 314 v. Chr.)
   { id: 'samniten', reg: 'apulien', jahr: -294, art: 'pruefung', typ: 'belagerung', bild: 'tor', titel: 'Die Samniten vor Luceria', feind: 'die Samniten',
     warnung: 'Die Samniten rüsten zum Krieg. Späher melden, dass sie in zwei Jahren gegen Luceria ziehen wollen. Mauer, Kastell und Vorräte entscheiden.' },
@@ -544,6 +550,8 @@ export const GESCHICHTE = [
   { id: 'cannae', reg: 'apulien', jahr: -216, art: 'pruefung', typ: 'siedler', bild: 'trebia', titel: 'Flüchtlinge aus Cannae', weiter: 'Venusia',
     warnung: 'Hannibal steht in Apulien, die Konsuln ziehen ihm mit acht Legionen entgegen. Siegt er, werden Flüchtlinge Schutz in Luceria suchen – sie brauchen Häuser und Getreide.' },
   { id: 'bundesgenossen', reg: 'apulien', jahr: -90, art: 'wahl', warnung: 'Die italischen Bundesgenossen fordern das römische Bürgerrecht. Man spricht von Krieg.' },
+  { id: 'augustveteranen', reg: 'apulien', jahr: -27, art: 'pruefung', typ: 'siedler', bild: 'trebia', titel: 'Veteranen des Augustus', weiter: 'Venusia',
+    warnung: 'Augustus siedelt die Soldaten seiner Bürgerkriege in Apulien an. In zwei Jahren kommen sie nach Luceria – sie brauchen Häuser und Getreide.' },
 ];
 export const PRAEFEKT = { monate: 24, steuer: 0.7 };   // Gunst 0 → Rom schickt einen Präfekten
 
