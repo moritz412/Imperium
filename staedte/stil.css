@@ -65,7 +65,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 #reiter button{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--rand);background:transparent;font-size:14px;font-weight:600}
 #reiter button.an{background:var(--gold);border-color:var(--gold);color:#1f1a15}
 #karten{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;touch-action:pan-x}
-.karte{flex:0 0 112px;height:104px;border-radius:12px;border:1px solid #4a3b28;background:rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;touch-action:none}
+.karte{flex:0 0 112px;height:104px;border-radius:12px;border:1px solid #4a3b28;background:rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;touch-action:pan-x}
 .karte.an{border-color:var(--gold);background:rgba(90,70,40,.9)}
 .karte.teuer{opacity:.55}
 .karte.gesperrt{opacity:.45;filter:grayscale(.8)}

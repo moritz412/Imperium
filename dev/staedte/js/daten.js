@@ -9,7 +9,7 @@ export const ERWEITERUNG = [
   { rang: 1, gunst: 50, kosten: { denare: 150 }, text: 'Der Senat weist der Kolonie Land östlich der Mauer zu.' },
   { rang: 2, gunst: 60, kosten: { denare: 400 }, text: 'Entlang der Via Postumia darf die Stadt bis an die Grenzsteine wachsen.' },
 ];
-export const MONAT_S = 15;           // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9 → 15, Moritz: „mehr wie Manor Lords, aber nicht so langsam“)
+export const MONAT_S = 25;           // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9 → 15 → 25; Moritz: Jahreszeiten viel zu schnell)
 export const STEUER = 0.3;           // Denare je Einwohner und Monat bei Stimmung 70 (1.11.: 0,4 → 0,3)
 export const LAGER_GRUND = 150;      // Lagergrenze je Ware ohne Speicher
 export const ARBEIT_ANTEIL = 0.7;    // Anteil der Einwohner, der arbeitet

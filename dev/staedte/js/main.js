@@ -117,9 +117,12 @@ window.addEventListener('pointermove', e => {
   if (!zug || e.pointerId !== zug.id) return;
   // Touch hält das Ereignis an der Karte fest – deshalb nach Lage statt nach Ziel-Element entscheiden
   const ueberLeiste = e.clientY >= $('#leiste').getBoundingClientRect().top;
+  // Waagerechtes Wischen in der Leiste = blättern, nicht bauen (1.11., iPad)
+  if (!zug.raus && ueberLeiste && Math.abs(e.clientX - zug.x0) > 12 && Math.abs(e.clientX - zug.x0) > Math.abs(e.clientY - zug.y0)) { zug = null; return; }
   if (!zug.raus && Math.hypot(e.clientX - zug.x0, e.clientY - zug.y0) > 18 && !ueberLeiste) zug.raus = true;
   if (zug.raus) vorschauAn(zug.t, e.clientX, e.clientY);
 });
+window.addEventListener('pointercancel', e => { if (zug && e.pointerId === zug.id && !zug.raus) zug = null; });   // Browser übernimmt das Blättern
 window.addEventListener('pointerup', e => {
   if (!zug || e.pointerId !== zug.id) return;
   const z = zug; zug = null;

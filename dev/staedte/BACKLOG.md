@@ -399,6 +399,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Puteoli: Puzzolanerde halbiert die Forschung Opus caementicium, Erdbeben-Ereignis (nur Kampanien). Startseite nennt die Besonderheiten.
 - [x] **Handy (zweitrangig):** Warenleiste in eigener Zeile (unter 560 px), Denare/Stadtkasse erreichbar, Stadtname gekürzt.
       Offen: Meldungen überdecken auf dem Handy das Seitenfenster.
+- [x] **Rückmeldung Moritz (Spieltest 1.11. abends)**: Bauleiste auf dem iPad nicht verschiebbar (Karten hatten touch-action:none) →
+      pan-x + waagerechtes Wischen blättert; Jahreszeiten zu schnell → 1 Monat 15 → 25 s (Jahreszeit 75 s, Jahr 5 min). Test 103/103.
+      Offen aus derselben Rückmeldung: Familie und Chronik – Nutzen erschließt sich nicht; Wissen zu tabellarisch, keine
+      Prozent-Verbesserungen.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
