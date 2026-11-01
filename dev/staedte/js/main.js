@@ -89,8 +89,6 @@ function kopfleiste() {
   const ko = sim.geschichteKommend(S), pr = S.praefekt > 0;
   $('#ahnungZeile').hidden = !ko && !pr;
   $('#ahnungZeile').textContent = pr ? `Ein Präfekt aus Rom verwaltet die Stadt – noch ${S.praefekt} Monate.` : ko ? `Vorzeichen: ${ko.g.titel || sim.ereignis(ko.g.id, S).titel} – in etwa ${ko.monate} Monaten.` : '';
-  const Fa = sim.familieS(S);
-  $('#familieZeile').textContent = `Familie der ${Fa.name} · ${AEMTER[Fa.amt].n} · Ansehen ${Math.round(Fa.ansehen)} · Vermögen ${rund(Fa.vermoegen)}`;
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / sim.forschungsKosten(S, F.ziel) * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
 
@@ -258,7 +256,6 @@ function infoZeichnen() {
     html += `<div class="zeile"><span>Häuser in Laufweite (${sim.EINZUG} Felder)</span><b>${b.einzug ?? '–'}</b></div>`;
     html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}${S.letzte.sklavenFrei ? ' + ' + S.letzte.sklavenFrei + ' Sklaven' : ''}</b></div>`;
     html += `<div class="zeile"><span>Sklaven</span><b>${d.sklaven ? 'arbeiten hier' : 'nicht hier'}</b></div>`;
-    if (d.erzeugt) html += `<button class="knopf${b.familie ? ' an' : ''}" data-a="familie">${b.familie ? 'Familiengeschäft der ' + sim.familieS(S).name + ' (zurückgeben)' : 'Der Familie übertragen (Gewinn ins Familienvermögen)'}</button>`;
     html += `<button class="knopf${b.prio ? ' an' : ''}" data-a="prio" aria-pressed="${b.prio}">${b.prio ? 'Arbeiter gehen zuerst hierher' : 'Arbeiter zuerst hierher schicken'}</button>`;
   }
   if (b.t === 'huette') {
@@ -496,8 +493,8 @@ const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
 // ---------- Spielstände (Phase E) ----------
 function standTextVon(n) {
   try { const s = JSON.parse(localStorage.getItem(slotKey(n))); if (!s) return '';
-    const e = s.geb.reduce((k, b) => k + (b.bew || 0), 0), r = RAENGE[s.rang || 0].n, a = s.familie ? AEMTER[s.familie.amt].n : 'Quästor';
-    return `${r} · ${sim.datumText(s)} · ${e} Einwohner · ${a}`; } catch (e) { return ''; }
+    const e = s.geb.reduce((k, b) => k + (b.bew || 0), 0), r = RAENGE[s.rang || 0].n;
+    return `${r} · ${sim.datumText(s)} · ${e} Einwohner`; } catch (e) { return ''; }
 }
 function staendeZeigen() {
   $('#staende').innerHTML = `<div class="feld menuespalte staendeseite">
@@ -522,13 +519,13 @@ $('#staende').addEventListener('click', e => {
   $('#staende').hidden = true; melden(`Platz ${n} geladen.`);
 });
 
-// ---------- Stadtbuch (Phase D): gemeinsame Kapitelleiste für Wissen, Familie, Chronik, Inschriften, Hilfe ----------
-const BUCH = [['forschung', 'Wissen'], ['familie', 'Familie'], ['chronik', 'Chronik'], ['inschriften', 'Inschriften'], ['hilfe', 'Hilfe']];
+// ---------- Stadtbuch (Phase D): gemeinsame Kapitelleiste für Wissen, Chronik, Inschriften, Hilfe ----------
+const BUCH = [['forschung', 'Wissen'], ['chronik', 'Chronik'], ['inschriften', 'Inschriften'], ['hilfe', 'Hilfe']];
 const buchReiter = aktiv => `<nav class="buchreiter" aria-label="Stadtbuch">${BUCH.map(([k, n]) => `<button data-buch="${k}" class="${k === aktiv ? 'an' : ''}" aria-pressed="${k === aktiv}">${n}</button>`).join('')}</nav>`;
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-buch]'); if (!b) return;
   for (const [k] of BUCH) $('#' + k).hidden = true;
-  ({ forschung: forschungZeigen, familie: familieZeigen, chronik: chronikZeigen, inschriften: inschriftenZeigen, hilfe: hilfeZeigen })[b.dataset.buch]();
+  ({ forschung: forschungZeigen, chronik: chronikZeigen, inschriften: inschriftenZeigen, hilfe: hilfeZeigen })[b.dataset.buch]();
 });
 
 // ---------- Chronik der Stadt (1.11.): Verlauf je Jahr, letzte Meldungen ----------
@@ -547,8 +544,8 @@ function chronikZeigen() {
   $('#chronik').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     ${buchReiter('chronik')}<h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} ${sim.stadtName()} · Stand am Ende jedes Jahres</div>
-    <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}${kurve(c, 'a', 'Ansehen der Familie', '#f28c6e')}</div>
-    ${(S.zensus || []).length ? `<h3 class="fh">Zensus</h3>${S.zensus.map(z => `<div class="zeile"><span>${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(z.j)} · ${zahl(z.e)} Bürger</span><b>${sim.ZENSUS_URTEIL.stadt[z.u[0]]} · ${sim.ZENSUS_URTEIL.familie[z.u[1]]} · Rom ${sim.ZENSUS_URTEIL.rom[z.u[2]]}</b></div>`).join('')}` : ''}
+    <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}</div>
+    ${(S.zensus || []).length ? `<h3 class="fh">Zensus</h3>${S.zensus.map(z => `<div class="zeile"><span>${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(z.j)} · ${zahl(z.e)} Bürger</span><b>${sim.ZENSUS_URTEIL.stadt[z.u[0]]} · Versorgung ${sim.ZENSUS_URTEIL.versorgung[z.u[1]]} · Rom ${sim.ZENSUS_URTEIL.rom[z.u[2]]}</b></div>`).join('')}` : ''}
     <h3 class="fh">Das große Ziel: Ehrentitel „Splendidissima“</h3>
     <div class="naehe">${sim.zielStand(S).map(([t, ok]) => `<span class="${ok ? 'ja' : 'nein'}">${ok ? '✓' : '✗'} ${t}</span>`).join('')}</div>
     ${S.titel ? `<p class="fp">Verliehen im Jahr ${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(S.jahr0 + Math.floor(S.titel / 12))}.</p>` : ''}
@@ -566,12 +563,11 @@ function titelZeigen() {
     ${bild ? `<div class="titelbild" style="background-image:url(${bild})"></div>` : ''}
     <div class="titelkranz">SPLENDIDISSIMA</div>
     <h2>${sim.stadtName()}, die glänzendste Stadt</h2>
-    <div class="untertitel">Der Senat und das Volk von Rom ehren ${sim.stadtName()} und die Familie der ${sim.familieS(S).name}.</div>
+    <div class="untertitel">Der Senat und das Volk von Rom ehren ${sim.stadtName()} und ihre Bürger.</div>
     <div class="zeile"><span>Jahre seit der Gründung</span><b>${jahre}</b></div>
     <div class="zeile"><span>Höchste Einwohnerzahl</span><b>${zahl(maxE)}</b></div>
     <div class="zeile"><span>Inschriften auf dem Forum</span><b>${insch}</b></div>
-    <div class="zeile"><span>Ansehen der Familie</span><b>${zahl(sim.familieS(S).ansehen)}</b></div>
-    <p class="fp">Gunst Roms +20, Ansehen +50. Das Spiel geht weiter – die Stadt kann noch wachsen.</p>
+    <p class="fp">Gunst Roms +20. Das Spiel geht weiter – die Stadt kann noch wachsen.</p>
     <button class="knopf haupt" data-ch="zu">Weiterspielen</button></div>`;
   $('#chronik').hidden = false; ton.sfx('fest');
 }
@@ -583,14 +579,13 @@ function zensusZeigen() {
   $('#chronik').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>Zensus im Jahr ${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(z.j)}</h2><div class="untertitel">Alle fünf Jahre zählen die Zensoren Bürger, Vermögen und Gebäude von ${sim.stadtName()}.</div>
-    <div class="zensusurteil">${karte('Die Stadt', 0, 'stadt')}${karte('Die Familie', 1, 'familie')}${karte('Rom', 2, 'rom')}</div>
-    ${z.lohn ? '<p class="fp">Ein glänzendes Lustrum! Der Senat lobt die Stadt (Gunst +5, Ansehen +5).</p>' : ''}
+    <div class="zensusurteil">${karte('Die Stadt', 0, 'stadt')}${karte('Die Versorgung', 1, 'versorgung')}${karte('Rom', 2, 'rom')}</div>
+    ${z.lohn ? '<p class="fp">Ein glänzendes Lustrum! Der Senat lobt die Stadt (Gunst Roms +10).</p>' : ''}
     <div class="zeile"><span>Bürger</span><b>${zahl(z.e)}${diff('e')}</b></div>
     <div class="zeile"><span>davon Equites</span><b>${zahl(z.eq)}</b></div>
     <div class="zeile"><span>Sklaven</span><b>${zahl(z.skl)}${diff('skl')}</b></div>
     <div class="zeile"><span>Gebäude</span><b>${zahl(z.geb)}${diff('geb')}</b></div>
     <div class="zeile"><span>Stadtkasse</span><b>${zahl(z.d)} Denare${diff('d')}</b></div>
-    <div class="zeile"><span>Ansehen der Familie</span><b>${zahl(z.a)}${diff('a')}</b></div>
     <div class="zeile"><span>Gunst Roms</span><b>${zahl(z.g)}${diff('g')}</b></div>
     <button class="knopf haupt" data-ch="zu">Weiter</button></div>`;
   $('#chronik').hidden = false; ton.sfx('fest');
@@ -599,13 +594,12 @@ $('#chronik').addEventListener('click', e => { if (e.target.id === 'chronik' || 
 
 // ---------- Hilfe in Kapiteln (1.11.) ----------
 const HILFE = [
-  ['Bedienung', ['Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.', 'Wischen verschiebt die Karte, zwei Finger zoomen. Ein Gebäude antippen öffnet sein Fenster.', 'Ein Symbol über einem Gebäude zeigt ein Problem; im Fenster steht die Ursache.', 'Links: Umland, Familie, Wissen und die Ansichten Wasser, Stimmung, Gesundheit, Feuer, Arbeit.']],
+  ['Bedienung', ['Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.', 'Wischen verschiebt die Karte, zwei Finger zoomen. Ein Gebäude antippen öffnet sein Fenster.', 'Ein Symbol über einem Gebäude zeigt ein Problem; im Fenster steht die Ursache.', 'Links: Umland, Wissen und die Ansichten Wasser, Stimmung, Gesundheit, Feuer, Arbeit.']],
   ['Stadt', ['Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei. Im Herbst wird geerntet, im Winter wächst nichts.', 'Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen; „Entfernen“ im Straßen-Modus reißt sie ab.', 'Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.', 'Hütte → Casa (Brot, Brunnen, Markt) → Insula (ab Kleinstadt, Schrein, Stein). Markt, Schule, Wache und Speicher kosten Lohn.', 'Gesperrtes Land im Osten antippen: Der Senat gibt es frei.']],
   ['Umland und Handel', ['Knopf „Umland“: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Fluss verbinden per Boot.', 'Die Nachbarstädte im Westen und Osten kaufen und verkaufen, sobald ein Weg hinführt. Was du verkaufst, wird dort billiger.', 'Rom verlangt jeden Herbst Abgaben. Pünktlich zahlen hält die Gunst Roms hoch.']],
   ['Gefahren', ['Räuber plündern ferne Betriebe (Wachturm), der Fluss tritt im Frühling über die Ufer (Deich), Feinde kommen aus dem Norden (Kastell, Stadtmauer oder Geschenke an ihr Dorf).', 'Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Die Feuerwache löscht, sonst nur manchmal die Nachbarn.', 'Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen.']],
   ['Bevölkerung', ['Plebejer wohnen in Hütten, Casae und Insulae. Equites leben in der Domus, brauchen Wein und zahlen viel Steuern.', 'Sklaven kauft man im Sklavenquartier. Sie arbeiten auf Feldern und in Werkstätten und essen Getreidebrei. Freigelassene werden Plebejer.']],
   ['Forschung und Epochen', ['Knopf „Wissen“: ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.', 'Mit Kolonie, 6 Erfindungen und Gunst 50 beginnt die Späte Republik: Wein, Öl, Tuch, Garum, Tempel, Theater.', 'Mit Basilika, 5 Erfindungen der Späten Republik und Gunst 60 beginnt die Kaiserzeit: Beton, Municipium, Macellum, Augusteum, Amphitheater – und fünf Jahre Frieden.']],
-  ['Familie und Politik', ['Knopf „Familie“: Ansehen sammeln und gegen die Rivalen zum Ädil und Prätor gewählt werden.', 'Familienvermögen und Stadtkasse sind getrennt. Familiengeschäfte füllen das Vermögen – auf Kosten der Stadt.', 'Heirat bringt Bündnisse, Klienten bringen Ansehen, der Sohn lernt beim Rhetor oder dient in der Legion.']],
   ['Regionen', ['Cremona (Po-Ebene): fruchtbar, Hochwasser im Frühling, Gallier im Norden; Geschichte von Hannibal bis zum Vierkaiserjahr.', 'Florentia (Etrurien): wenig Bauland, Stein und Erz; Töpferei für Terra sigillata – teures rotes Geschirr.', 'Puteoli (Kampanien): Hafen am Golf mit Seehandel nach Alexandria, Puzzolanerde für Beton, Erdbeben.', 'Luceria (Apulien): trocken, berühmte Wolle (Schäfereien +50 %), Samniten und Pyrrhus.']],
   ['Ereignisse und Ziele', ['Ereignisse verlangen eine Entscheidung; die Folgen stehen auf den Knöpfen. Im Menü lassen sie sich abschalten.', 'Feste im Jahreslauf: Cerealia, Ludi Romani, Saturnalien.', 'Senatsaufträge führen durch das Spiel. Erfolge stehen als Inschriften auf dem Forum (Menü).', 'Das große Ziel: Metropole, Kaiserzeit, Amphitheater und ein Valerier als Prätor – dann verleiht Rom den Ehrentitel „Splendidissima“ (Fortschritt in der Chronik). Alle fünf Jahre zieht ein Zensus Bilanz.']],
 ];

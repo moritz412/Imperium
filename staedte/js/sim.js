@@ -466,7 +466,7 @@ export function monat(S, welt) {
   feuerMonat(S, meld);
   seucheMonat(S, meld);
 
-  familieMonat(S, meld);
+  // Familie entfernt (Moritz 1.11. abends: „Familie ganz weg“) – familieMonat läuft nicht mehr
   geschichteMonat(S, meld);
   praefektMonat(S, meld);
   ereignisMonat(S);
@@ -1222,8 +1222,6 @@ export function ereignisWaehlen(S, i) {
 export function wirkungText(w) {
   const x = w.w, t = [], z = n => (n > 0 ? '+' : '−') + Math.abs(n);
   for (const [g, n] of Object.entries(x.gut || {})) t.push(`${z(n)} ${WAREN[g].n}`);
-  if (x.vermoegen) t.push(`${z(x.vermoegen)} Familienvermögen`);
-  if (x.ansehen) t.push(`Ansehen ${z(x.ansehen)}`);
   if (x.gunst) t.push(`Gunst Roms ${z(x.gunst)}`);
   if (x.stimmung) t.push(`Stimmung ${z(x.stimmung)}`);
   if (x.leute) t.push(`${Math.round(-x.leute * 100)} % der Einwohner sterben`);
@@ -1373,7 +1371,7 @@ function pruefung(S, g) {
     const wert = 0.5 * mauerSchutz(S) + 0.2 * (hatKastell(S) ? 1 : 0) + 0.3 * Math.min(1, vorratsMonate(S) / 6);
     (S.zaehler = S.zaehler || {})[g.id] = wert >= 0.7 ? 'gehalten' : 'gelitten';
     if (wert >= 0.7) { F.ansehen += 15; S.gunst = Math.min(100, gunst(S) + 10); S.stimmung = Math.min(100, S.stimmung + 5);
-      return `${feind[0].toUpperCase() + feind.slice(1)} rennen gegen ${st} an – vergeblich. Mauer und Vorräte halten, sie ziehen ab. (Ansehen +15, Gunst Roms +10)`; }
+      return `${feind[0].toUpperCase() + feind.slice(1)} rennen gegen ${st} an – vergeblich. Mauer und Vorräte halten, sie ziehen ab. (Gunst Roms +10)`; }
     if (wert >= 0.4) { verlust(0.3); S.stimmung = Math.max(0, S.stimmung - 8);
       return `${feind[0].toUpperCase() + feind.slice(1)} plündern die Vorstädte und das Umland. Ein Teil der Vorräte ist verloren. (Vorräte −30 %, Stimmung −8) Mehr Mauer, Kastell und Vorräte hätten geholfen.`; }
     verlust(0.6); brennen(S, 2 * klein); S.stimmung = Math.max(0, S.stimmung - 15); S.gunst = Math.max(0, gunst(S) - 5);
@@ -1383,7 +1381,7 @@ function pruefung(S, g) {
     const wert = 0.5 * mauerSchutz(S) + 0.2 * (hatKastell(S) ? 1 : 0) + 0.3 * Math.min(1, vorratsMonate(S) / 6);
     (S.zaehler = S.zaehler || {}).belagerung = wert >= 0.7 ? 'gehalten' : 'gelitten';
     if (wert >= 0.7) { F.ansehen += 15; S.gunst = Math.min(100, gunst(S) + 10); S.stimmung = Math.min(100, S.stimmung + 5);
-      return 'Hamilkar und die Gallier stürmen gegen Cremona – vergeblich. Mauer und Vorräte halten, die Belagerer ziehen ab. Placentia ist gefallen, Cremona steht. (Ansehen +15, Gunst Roms +10)'; }
+      return 'Hamilkar und die Gallier stürmen gegen Cremona – vergeblich. Mauer und Vorräte halten, die Belagerer ziehen ab. Placentia ist gefallen, Cremona steht. (Gunst Roms +10)'; }
     if (wert >= 0.4) { verlust(0.3); S.stimmung = Math.max(0, S.stimmung - 8);
       return 'Die Gallier plündern die Vorstädte und das Umland, bevor ein römisches Heer sie vertreibt. Ein Teil der Vorräte ist verloren. (Vorräte −30 %, Stimmung −8) Mehr Mauer, Kastell und Vorräte hätten geholfen.'; }
     verlust(0.6); brennen(S, 2 * klein); S.stimmung = Math.max(0, S.stimmung - 15); S.gunst = Math.max(0, gunst(S) - 5);
@@ -1399,7 +1397,7 @@ function pruefung(S, g) {
   }
   if (typ === 'aufstand') {
     const skl = sklaven(S);
-    if (!skl) { F.ansehen += 3; return `Der Aufstand zieht vorbei. In ${st} gibt es keine Sklaven, die sich ihm anschließen – das Heer zieht weiter. (Ansehen +3)`; }
+    if (!skl) { F.ansehen += 3; return `Der Aufstand zieht vorbei. In ${st} gibt es keine Sklaven, die sich ihm anschließen – das Heer zieht weiter.`; }
     const wert = (S.geb.some(b => b.t === 'wache' && b.w > 0) ? 0.4 : 0) + 0.4 * mauerSchutz(S) + (skl < einwohner(S) * 0.3 ? 0.2 : 0);
     const flucht = wert >= 0.6 ? 0.2 : 0.6;
     for (const q of S.geb.filter(b => b.t === 'quartier')) q.skl = Math.floor((q.skl || 0) * (1 - flucht));
@@ -1417,9 +1415,9 @@ function praefektMonat(S, meld) {
   }
   if (gunst(S) <= 0 && S.monat > 12) {
     S.praefekt = PRAEFEKT.monate; const F = familieS(S); F.amt = 0; F.ansehen *= 0.7;
-    if (S.ereignisseAus) { meld.push('Ein Präfekt aus Rom übernimmt die Verwaltung (Steuern −30 %, die Valerier verlieren ihr Amt).'); return; }
+    if (S.ereignisseAus) { meld.push('Ein Präfekt aus Rom übernimmt die Verwaltung (Steuern −30 % für zwei Jahre).'); return; }
     Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
-      gText: 'Der Senat hat das Vertrauen in die Stadt verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
+      gText: 'Der Senat hat das Vertrauen in die Stadt verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt). In zwei Jahren entscheidet Rom neu.' });
   }
 }
 
@@ -1429,7 +1427,7 @@ export function zielStand(S) {
     ['Metropole mit 800 Einwohnern', rang(S) >= 4],
     ['Die Kaiserzeit hat begonnen', epoche(S) >= 3],
     ['Ein Amphitheater steht', S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0))],
-    ['Ein Valerier ist Prätor', familieS(S).amt >= 2],
+    ['Theater und Thermen stehen', ['theater', 'thermen'].every(t => S.geb.some(b => b.t === t && !(b.bau > 0)))],
   ];
 }
 function zielMonat(S, meld) {
@@ -1438,17 +1436,18 @@ function zielMonat(S, meld) {
   meld.push(`Der Senat verleiht ${REG.stadt} den Ehrentitel „Splendidissima“!`);
 }
 
-// ---------- Zensus (Lustrum) alle fünf Jahre (1.11.): Bilanz mit Urteil für Stadt, Familie und Rom ----------
-export const ZENSUS_URTEIL = { stadt: ['in Not', 'solide', 'blühend'], familie: ['vergessen', 'geachtet', 'angesehen'], rom: ['unzufrieden', 'abwartend', 'zufrieden'] };
+// ---------- Zensus (Lustrum) alle fünf Jahre (1.11.): Bilanz mit Urteil für Stadt, Versorgung und Rom ----------
+export const ZENSUS_URTEIL = { stadt: ['in Not', 'solide', 'blühend'], versorgung: ['mangelhaft', 'ausreichend', 'gut'], rom: ['unzufrieden', 'abwartend', 'zufrieden'] };
 function zensus(S, meld) {
   const liste = S.zensus = S.zensus || [], alt = liste[liste.length - 1];
   const e = einwohner(S), a = Math.round(familieS(S).ansehen), g = Math.round(gunst(S)), plus = e - (alt ? alt.e : 0);
   const stadt = plus < 0 || S.stimmung < 35 ? 0 : (plus >= 20 || e >= 300) && S.stimmung >= 55 ? 2 : 1;
-  const familie = a < (alt ? alt.a : 10) ? 0 : a >= (alt ? alt.a + 15 : 40) ? 2 : 1;
+  const hs = S.geb.filter(b => b.t === 'huette' && !(b.bau > 0)), gutV = hs.length ? hs.filter(h => inReichweite(S, h, 'brunnen') && inReichweite(S, h, 'markt')).length / hs.length : 0;
+  const versorgung = gutV >= 0.9 ? 2 : gutV >= 0.6 ? 1 : 0;
   const rom = g <= 25 ? 0 : g >= 60 ? 2 : 1;
   const z = { j: jahr(S) - 1, e, eq: S.geb.filter(b => b.t === 'domus').reduce((n, b) => n + (b.bew || 0), 0), skl: sklaven(S), d: Math.round(S.gut.denare), a, g,
-    geb: S.geb.filter(b => !['strasse', 'mauer'].includes(b.t) && !(b.bau > 0)).length, u: [stadt, familie, rom] };
-  if (stadt + familie + rom === 6) { S.gunst = Math.min(100, gunst(S) + 5); familieS(S).ansehen += 5; z.lohn = true; }
+    geb: S.geb.filter(b => !['strasse', 'mauer'].includes(b.t) && !(b.bau > 0)).length, u: [stadt, versorgung, rom] };
+  if (stadt + versorgung + rom === 6) { S.gunst = Math.min(100, gunst(S) + 10); z.lohn = true; }
   liste.push(z); S.zensusNeu = true;
   meld.push(`Zensus: ${e} Bürger gezählt – die Stadt ist ${ZENSUS_URTEIL.stadt[stadt]}.`);
 }
@@ -1484,7 +1483,7 @@ function vertraegeMonat(S, meld) {
     if ((S.gut[v.g] || 0) >= VERTRAG.menge && handelOffen(S, v.p)) { S.gut[v.g] -= VERTRAG.menge; S.gut.denare += vertragPreis(v.p, v.g); v.fehl = 0; continue; }
     if (++v.fehl >= VERTRAG.fehlschlag) {
       S.vertraege = S.vertraege.filter(x => x !== v); familieS(S).ansehen = Math.max(0, familieS(S).ansehen - VERTRAG.ansehen);
-      meld.push(`${PARTNER[v.p].n} kündigt den Vertrag über ${WAREN[v.g].n}: dreimal nicht geliefert. (Ansehen −${VERTRAG.ansehen})`);
+      meld.push(`${PARTNER[v.p].n} kündigt den Vertrag über ${WAREN[v.g].n}: dreimal nicht geliefert.`);
     }
   }
 }

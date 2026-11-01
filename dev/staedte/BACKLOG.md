@@ -401,8 +401,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Offen: Meldungen überdecken auf dem Handy das Seitenfenster.
 - [x] **Rückmeldung Moritz (Spieltest 1.11. abends)**: Bauleiste auf dem iPad nicht verschiebbar (Karten hatten touch-action:none) →
       pan-x + waagerechtes Wischen blättert; Jahreszeiten zu schnell → 1 Monat 15 → 25 s (Jahreszeit 75 s, Jahr 5 min). Test 103/103.
-      Offen aus derselben Rückmeldung: Familie und Chronik – Nutzen erschließt sich nicht; Wissen zu tabellarisch, keine
-      Prozent-Verbesserungen.
+      **Entscheidung Moritz:** Familie ganz weg; Wissen als Bilderpfad je Epoche ohne Prozent-Verbesserungen; Fokus auf Bauen und
+      Ressourcen wie Manor Lords; Bauen mit Bauplänen (verschieben, drehen, bestätigen, rückgängig).
+- [x] **Familie entfernt** (1.11.): Knopf, Kapitel, Ämter, Ansehen, Heirat, Familiengeschäfte; Ereignis-Wahlen mit Familiengeld
+      gestrichen, Zensus urteilt Stadt/Versorgung/Rom, Ziel „Splendidissima“ braucht Theater und Thermen statt Prätor. Test 97/97.
+- [ ] **Bausystem mit Bauplänen** (nächstes Paket), dann Ressourcen-Fokus, danach Wissen als Bilderpfad.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

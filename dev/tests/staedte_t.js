@@ -450,47 +450,6 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { n, mantua: SR.sim.handelOffen(S, 'mantua'), placentia: SR.sim.handelOffen(S, 'placentia') };
   });
   ok('Händler fahren nach Mantua und Placentia', hd.mantua && hd.placentia && hd.n === 2, JSON.stringify(hd));
-  // S4.1 Familie und Ämter: Wahl gegen Rivalen, Ädil-Vorteile, Spiele, Familiengeschäfte, Altern
-  const fa = await p.evaluate(() => {
-    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
-    const F0 = sim.familieS(S), start = { amt: F0.amt, mitglieder: F0.mitglieder.length };
-    const vorher = sim.kandidieren(kopie()).grund || '';
-    const A = kopie(), FA = sim.familieS(A); A.epoche = 2; FA.ansehen = 50; FA.vermoegen = 900;
-    const zuWenig = sim.kandidieren(A).grund || '';
-    FA.ansehen = 120; const holz0 = sim.baukosten(A, 'markt').holz, wahl = sim.kandidieren(A).ok, holz1 = sim.baukosten(A, 'markt').holz;
-    const sp1 = sim.spieleAusrichten(A).ok, sp2 = sim.spieleAusrichten(A).grund || '';
-    const praetor = sim.amtFehlt(A);
-    const G = kopie(), FG = sim.familieS(G); G.gut.denare = 500; G.gunst = 60;
-    const betr = G.geb.filter(b => SR.GEB[b.t].erzeugt).slice(0, 3); betr.forEach(b => sim.familienGeschaeft(G, b));
-    const v0 = FG.vermoegen, vierter = sim.familienGeschaeft(G, G.geb.find(b => SR.GEB[b.t].erzeugt && !b.familie)).grund || '';
-    G.monat = 11; const alter0 = FG.mitglieder[2].alter; sim.monat(G, SR.welt);
-    SR.familie(); const ui = { karten: document.querySelectorAll('#familie .fkarte').length, titel: document.querySelector('#familie h2').textContent, zeile: document.querySelector('#familieZeile').textContent };
-    document.querySelector('#familie [data-fa="zu"]').click();
-    return { start, vorher, zuWenig, wahl, amt: FA.amt, holz0, holz1, sp1, sp2, praetor, plus: Math.round(FG.vermoegen - v0), gunst: G.gunst, vierter, gealtert: FG.mitglieder[2].alter === alter0 + 1, ui };
-  });
-  ok('Familie: Start als Quästor, Wahl zum Ädil gegen Rivalen, Bauen billiger', fa.start.amt === 0 && fa.start.mitglieder === 4 && /Späte Republik/.test(fa.vorher) && /Ansehen/.test(fa.zuWenig) && fa.wahl && fa.amt === 1 && fa.holz1 < fa.holz0, JSON.stringify(fa));
-  ok('Spiele einmal im Jahr, Prätor braucht Kolonie', fa.sp1 && /schon/.test(fa.sp2) && /Kolonie/.test(fa.praetor));
-  ok('Familiengeschäfte füllen das Vermögen, Gerede im Senat, Altern', fa.plus >= 12 && fa.gunst < 60 && /duldet/.test(fa.vierter) && fa.gealtert);
-  ok('Familienseite: Mitglieder, Ämterlaufbahn, Zeile im Auftrag', fa.ui.karten === 8 && /Valerier/.test(fa.ui.titel) && /Quästor/.test(fa.ui.zeile), JSON.stringify(fa.ui));
-  // S4.2 Heirat, Bündnisse, Klienten, Ausbildung, Enkel
-  const hz = await p.evaluate(() => {
-    const sim = SR.sim, S = SR.S, H = JSON.parse(JSON.stringify(S)), F = sim.familieS(H);
-    F.vermoegen = 1000; F.ansehen = 10;
-    const toch = F.mitglieder.find(m => m.rolle === 'Tochter'), sohn = F.mitglieder.find(m => m.rolle === 'Sohn');
-    const jung = sim.heiratsAngebote(H, toch).length; toch.alter = 14; sohn.alter = 18;
-    const angebote = sim.heiratsAngebote(H, toch).length, h1 = sim.heiraten(H, toch.n, 'fabii'), v1 = F.vermoegen;
-    const h2 = sim.heiraten(H, sohn.n, 'sempronia'), v2 = F.vermoegen, bund = (F.buende || []).join(',');
-    H.epoche = 2; F.ansehen = 70; const rivale = sim.staerksterRivale(H), wahlFehlt = sim.amtFehlt(H);
-    const k1 = sim.klienten(H, true).ok, k2 = sim.klienten(H, true).ok, kl = F.klienten, ans = sim.ansehenProMonat(H);
-    const enkel0 = F.mitglieder.length; H.monat = 11; sim.setzeZufall(() => 0); sim.monat(H, SR.welt); sim.setzeZufall(null);
-    const enkel = F.mitglieder.length > enkel0;
-    const L = JSON.parse(JSON.stringify(S)), FL = sim.familieS(L), s2 = FL.mitglieder.find(m => m.rolle === 'Sohn'); s2.alter = 14; FL.vermoegen = 500;
-    const ler = sim.ausbilden(L, s2.n, 'rhetor').ok; for (let i = 0; i < 36; i++) sim.monat(L, SR.welt);
-    SR.familie(); const ui = !!document.querySelector('#familie [data-fa="klientPlus"]'); document.querySelector('#familie [data-fa="zu"]').click();
-    return { jung, angebote, h1: h1.ok, mitgiftBezahlt: v1 === 800, h2: h2.ok, mitgiftErhalten: v2 === 950, bund, rivale: rivale ? rivale.gens : 'keiner', wahlFehlt, k1, k2, kl, ans, enkel, ler, redner: s2.eig, ui };
-  });
-  ok('Heirat: Mitgift, Bündnisse mit Fabiern und Semproniern, keine Rivalen mehr', hz.jung === 0 && hz.angebote === 3 && hz.h1 && hz.mitgiftBezahlt && hz.h2 && hz.mitgiftErhalten && hz.bund === 'Fabii,Sempronii' && hz.rivale === 'keiner' && !/Fabier|Sempronier/.test(hz.wahlFehlt), JSON.stringify(hz));
-  ok('Klienten, Enkel, Rhetorenschule macht den Sohn zum Redner', hz.k1 && hz.k2 && hz.kl === 10 && hz.enkel && hz.ler && hz.redner === 'Redner' && hz.ui);
   // S4.3 Ereignisse: Hannibal-Ereignisse fest, Zufallsereignisse, Wahl mit Folgen, Fenster mit Bild
   const ev = await p.evaluate(async () => {
     const sim = SR.sim, S = SR.S, E = JSON.parse(JSON.stringify(S)); E.ereignisseAus = false; E.ereignisLog = {}; E.ereignis = null;
@@ -499,7 +458,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const w = sim.ereignisWaehlen(E, 0).ok, gunst = sim.gunst(E) - g0, korn = k1 - E.gut.getreide;
     E.monat = 10; sim.monat(E, SR.welt); const trebia = E.ereignis; sim.ereignisWaehlen(E, 2);
     E.monat = 30; sim.setzeZufall(() => 0); sim.monat(E, SR.welt); sim.setzeZufall(null); const zufall = E.ereignis;
-    const arm = JSON.parse(JSON.stringify(E)); arm.ereignis = 'bestechung'; arm.familie.vermoegen = 0;
+    const arm = JSON.parse(JSON.stringify(E)); arm.ereignis = 'bestechung';
     const text = sim.wirkungText(sim.ereignis('heer').wahl[0]);
     // Fenster im Spiel
     S.ereignisseAus = false; S.ereignis = 'trebia'; document.querySelector('#ereignis').hidden = true;
@@ -515,7 +474,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const fest = await p.evaluate(() => {
     const sim = SR.sim, E = JSON.parse(JSON.stringify(SR.S)); E.ereignisseAus = false; E.ereignisLog = {}; E.ereignis = null;
     const r = [];
-    for (const m of [13, 18, 21, 25]) { E.monat = m; sim.monat(E, SR.welt); r.push(E.ereignis || '-'); if (E.ereignis) sim.ereignisWaehlen(E, 2); }
+    for (const m of [13, 18, 21, 25]) { E.monat = m; sim.monat(E, SR.welt); r.push(E.ereignis || '-'); if (E.ereignis) sim.ereignisWaehlen(E, sim.ereignis(E.ereignis).wahl.length - 1); }
     E.monat = 26; sim.setzeZufall(() => 0.99); sim.monat(E, SR.welt); sim.setzeZufall(null); r.push(E.ereignis || '-');
     return r.join(',');
   });
@@ -546,12 +505,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     if (!ba) return { fehler: 'kein Platz' };
     const zweite = (() => { for (let z = 0; z <= 34; z++) for (let x = 0; x <= 56; x++) { const r = sim.bauen(B, SR.welt, 'basilika', x, z); if (!/Platz|Straße|schon etwas|Wald|Fluss|freigegeben|Außerhalb/.test(r.grund || '')) return r.grund || 'ok'; } return ''; })();
     const bau0 = ba.bau; for (let i = 0; i < 8; i++) sim.monat(B, SR.welt);
-    const fertig = !(ba.bau > 0), eroeffnung = B.ereignis === 'eroeffnung'; const a0 = B.familie.ansehen; sim.ereignisWaehlen(B, 1); const ansehen = B.familie.ansehen - a0;
+    const fertig = !(ba.bau > 0), eroeffnung = B.ereignis === 'eroeffnung'; sim.ereignisWaehlen(B, 1);
     sim.monat(B, SR.welt); const tafel = Object.keys(B.inschriften || {});
     SR.inschriften(); const steine = document.querySelectorAll('#inschriften .fkarte').length; document.querySelector('#inschriften [data-in="zu"]').click();
-    return { zuKlein, bau0, zweite, fertig, eroeffnung, ansehen, tafel, steine };
+    return { zuKlein, bau0, zweite, fertig, eroeffnung, tafel, steine };
   });
-  ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung && wz.ansehen >= 25, JSON.stringify(wz));
+  ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung, JSON.stringify(wz));
   const weihe = await p.evaluate(() => {
     const sim = SR.sim, B = JSON.parse(JSON.stringify(SR.S)); B.sofortBauen = false; B.ereignisseAus = false; B.ereignis = null; B.epoche = 2;
     B.forschung = B.forschung || {}; B.forschung.fertig = [...(B.forschung.fertig || []), 'tempel']; B.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 };
@@ -559,11 +518,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     let t = null; for (let z = 0; z <= 34 && !t; z++) for (let x = 0; x <= 56 && !t; x++) { const r = sim.bauen(B, SR.welt, 'tempel', x, z); if (r.ok) t = r.b; else if (/Forsch|Epoche|erst/.test(r.grund || '')) return { grund: r.grund }; }
     if (!t) return { grund: 'kein Platz' };
     let n = 0; while (t.bau > 0 && n++ < 30) { if (B.ereignis && B.ereignis !== 'eroeffnung_tempel') B.ereignis = null; sim.monat(B, SR.welt); }
-    const ev = B.ereignis; const a0 = B.familie.ansehen; const r = ev ? sim.ereignisWaehlen(B, 1) : {};
-    return { ev, n, plus: B.familie.ansehen - a0, ok: r.ok };
+    const ev = B.ereignis; const r = ev ? sim.ereignisWaehlen(B, 1) : {};
+    return { ev, n, ok: r.ok };
   });
-  ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.plus >= 15, JSON.stringify(weihe));
-  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 18);
+  ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.ok, JSON.stringify(weihe));
+  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
   const auf = await p.evaluate(() => {
     const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};
     const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
@@ -585,7 +544,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
       geb: jetzt.geb.filter(b => ['strasse', 'huette', 'feld', 'muehle', 'baeckerei', 'brunnen', 'markt', 'holzfaeller'].includes(b.t)).map(b => ({ id: b.id, t: b.t, x: b.x, z: b.z, w: 0, prio: false, stufe: Math.min(2, b.stufe || 1), bew: b.bew || 0, status: [] })) };
     A.naechste = Math.max(...A.geb.map(b => b.id)) + 1;
     try {
-      SR.setzeStand(A); SR.monate(3); SR.familie(); document.querySelector('#familie [data-fa="zu"]').click(); SR.forschung(); document.querySelector('#forschung [data-f="zu"]').click();
+      SR.setzeStand(A); SR.monate(3); SR.forschung(); document.querySelector('#forschung [data-f="zu"]').click();
       SR.umland(true); SR.hexInfo(SR.sim.regionKarte()[1]); SR.hexInfo(null); SR.umland(false); SR.inschriften(); document.querySelector('#inschriften [data-in="zu"]').click();
     } catch (e) { fehler.push(e.message); }
     const ok = { monat: SR.S.monat, familie: !!SR.S.familie, fisch: SR.S.gut.fisch === 0 || SR.S.gut.fisch > 0, dreh: SR.S.geb.every(b => b.t === 'strasse' || b.dreh !== undefined) };
@@ -593,8 +552,8 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     SR.hilfe(); const kapitel = document.querySelectorAll('#hilfe section').length; document.querySelector('#hilfe [data-hi="zu"]').click();
     return { fehler, ...ok, kapitel };
   });
-  ok('Alter Spielstand aus Stufe 1 läuft weiter (Familie, Waren, Drehung ergänzt)', !alt.fehler.length && alt.monat === 33 && alt.familie && alt.fisch && alt.dreh, JSON.stringify(alt));
-  ok('Hilfe in 9 Kapiteln (mit Regionen)', alt.kapitel === 9);
+  ok('Alter Spielstand aus Stufe 1 läuft weiter (Waren, Drehung ergänzt)', !alt.fehler.length && alt.monat === 33 && alt.fisch && alt.dreh, JSON.stringify(alt));
+  ok('Hilfe in 8 Kapiteln (mit Regionen, ohne Familie)', alt.kapitel === 8);
   const th = await p.evaluate(() => {
     const sim = SR.sim, T = JSON.parse(JSON.stringify(SR.S)); T.ereignisseAus = true; T.epoche = 2;
     const vor = sim.bauen(T, SR.welt, 'thermen', 30, 13).grund || '';
@@ -624,7 +583,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     document.querySelector('#chronik [data-ch="zu"]').click();
     return { c, t, kurven, zeilen };
   });
-  ok('Chronik: Jahreswerte, Kurven, letzte Meldungen', ch.c >= 2 && ch.t >= 3 && ch.kurven === 4 && ch.zeilen === ch.t, JSON.stringify(ch));
+  ok('Chronik: Jahreswerte, Kurven, letzte Meldungen', ch.c >= 2 && ch.t >= 3 && ch.kurven === 3 && ch.zeilen === ch.t, JSON.stringify(ch));
   const rt = await p.evaluate(() => {
     const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.monat = 10; A.gut.getreide = 1; A.gut.brot = 0; A.gut.fisch = 0;
     const hunger = sim.rat(A); const B = JSON.parse(JSON.stringify(SR.S)); Object.assign(B.gut, { getreide: 999, holz: 2, denare: 999 });
@@ -683,7 +642,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const g0 = sim.gunst(B); sim.monat(B, SR.welt); const gut = /vergeblich/.test(B.gText) && sim.gunst(B) > g0;
     const V = basis(); V.gesch = { belagerung: 'fertig', siedler: 'fertig', via: 'gewarnt' }; V.monat = (-148 + 218) * 12 + 4; V.ereignisLog = { cerealia: 1e9, ludi: 1e9, saturnalia: 1e9 }; sim.monat(V, SR.welt);
     const via = V.ereignis === 'via'; V.gut.denare = 500; V.gut.ziegel = 100; sim.ereignisWaehlen(V, 0); const viaAn = V.via === true;
-    const P = basis(); P.gunst = 0; P.monat = 30; P.familie = P.familie || sim.familieS(P); P.familie.amt = 1; sim.monat(P, SR.welt); const praef = P.praefekt > 0 && P.familie.amt === 0;
+    const P = basis(); P.gunst = 0; P.monat = 30; sim.monat(P, SR.welt); const praef = P.praefekt > 0;
     const K = basis(); K.geschichte = 'kulisse'; K.gesch = { belagerung: 'gewarnt' }; K.monat = mB; const mk = sim.monat(K, SR.welt).join(' | '); const kulisse = !K.ereignis && /Im Jahr 200/.test(mk);
     return { warn, schlecht, gut, via, viaAn, praef, kulisse, gText: B.gText.slice(0, 60) };
   });
@@ -710,7 +669,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const vt = sim.vertragUmschalten(V, 'placentia', 'holz').ok, d0 = V.gut.denare, h0 = V.gut.holz; sim.monat(V, SR.welt);
     const geliefert = h0 - V.gut.holz >= 5;
     V.gut.holz = 0; for (let i = 0; i < 3; i++) { V.gut.holz = 0; sim.monat(V, SR.welt); } const gekuendigt = !V.vertraege.length;
-    SR.forschung(); document.querySelector('[data-buch="chronik"]').click(); const buch = !document.querySelector('#chronik').hidden && document.querySelector('#forschung').hidden && document.querySelectorAll('#chronik .buchreiter button').length === 5;
+    SR.forschung(); document.querySelector('[data-buch="chronik"]').click(); const buch = !document.querySelector('#chronik').hidden && document.querySelector('#forschung').hidden && document.querySelectorAll('#chronik .buchreiter button').length === 4;
     document.querySelector('#chronik [data-ch="zu"]').click();
     return { frueh, ruf, zweimal, bonus, vt, geliefert, gekuendigt, buch };
   });
@@ -810,7 +769,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     document.querySelector('#info [data-a="zu"]').click(); return { offen, steuern: /Steuern der Bürger/.test(t), saldo: /Überschuss|Fehlbetrag/.test(t), zu: document.querySelector('#info').hidden, k: SR.S.kasse }; });
   ok('Stadtkasse: Denare antippen zeigt Einnahmen und Ausgaben', kas.offen && kas.steuern && kas.saldo && kas.zu && kas.k.steuern > 0, JSON.stringify(kas));
   const tit = await p.evaluate(() => { const sim = SR.sim, T = JSON.parse(JSON.stringify(SR.S)); T.ereignisseAus = true; const vor = sim.zielStand(T).filter(z => z[1]).length;
-    T.rang = 4; T.epoche = 3; sim.familieS(T).amt = 2; T.geb.forEach(h => { if (h.t === 'huette') h.bew = 60; });
+    T.rang = 4; T.epoche = 3; T.geb.push({ id: 90004, t: 'theater', x: 40, z: 30, stufe: 1, bew: 0, w: 4, status: [], dreh: 0 }, { id: 90005, t: 'thermen', x: 44, z: 30, stufe: 1, bew: 0, w: 3, status: [], dreh: 0 }); T.geb.forEach(h => { if (h.t === 'huette') h.bew = 60; });
     T.geb.push({ id: 90002, t: 'amphitheater', x: 50, z: 30, stufe: 1, bew: 0, w: 6, status: [], dreh: 0 });
     const m = sim.monat(T, SR.welt).join(' | '); const S = SR.S, alt = { t: S.titel, n: S.titelNeu };
     SR.titel(); const seite = /Splendidissima|SPLENDIDISSIMA/.test(document.querySelector('#chronik').innerText); document.querySelector('#chronik [data-ch="zu"]').click();
