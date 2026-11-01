@@ -252,3 +252,4 @@ body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
 .pkarte.fertig{border-color:#5f7d52}.pkarte.fertig small{color:#9ccb8e}
 .pkarte.ziel{border-color:var(--gold);background:rgba(233,180,76,.08)}
 .pkarte.offen small{color:var(--gold)}
+#auftrag .winter.warn{color:#f2a46e}#auftrag .winter.gut{color:#9ccb8e}

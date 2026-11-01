@@ -424,6 +424,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 - [x] **Kornspeicher getrennt** (1.11.): Nahrung (Getreide, Mehl, Brot, Fisch) lagert im Kornspeicher (horreum, Blender-Modell),
       alles andere im Speicher; Betriebe brauchen das passende Lager in 16 Feldern. Alte Stände: Speicher fasst beides.
 - [x] **Tempo wie Manor Lords** (1.11.): 1× = 60 s je Monat (Jahr 12 min), dazu 4× und 12×. Test 101/101.
+- [x] **Winter mit Brennholz** (1.11., Moritz: „erster Winter kritisch“): jedes Haus verbrennt im Winter Holz (Po 0,6, Etrurien 0,5,
+      Apulien 0,3, Kampanien 0,2 je Monat, Insula doppelt); ohne Holz frieren die Menschen (Stimmung −6, Abwanderung, Seuchen ×1,5).
+      Ab Herbst „Wintervorrat“ im Senatskasten (Brennholz und Nahrung für 3 Monate), Warnung zu Herbstbeginn, früher Senatsauftrag
+      „Den ersten Winter vorbereiten“. Test 102/102. Balance-Spieler: erste Winter knapp, kein Erfrieren; Dorf 42 min bei 1×.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

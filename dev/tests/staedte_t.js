@@ -533,12 +533,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.ok, JSON.stringify(weihe));
   ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
   const auf = await p.evaluate(() => {
-    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};
+    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 7; A.land = {};
     const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
-    const alt = SR.S.auftrag; SR.S.auftrag = 6; SR.bauen('huette', -9, -9); const text = document.querySelector('#auftragText').textContent; SR.S.auftrag = alt; SR.bauen('huette', -9, -9);
+    const alt = SR.S.auftrag; SR.S.auftrag = 7; SR.bauen('huette', -9, -9); const text = document.querySelector('#auftragText').textContent; SR.S.auftrag = alt; SR.bauen('huette', -9, -9);
     return { vor, nach: A.auftrag, text };
   });
-  ok('Senatsaufträge führen weiter ins Umland', auf.vor === 6 && auf.nach === 7 && /Umland/.test(auf.text), JSON.stringify(auf));
+  ok('Senatsaufträge führen weiter ins Umland', auf.vor === 7 && auf.nach === 8 && /Umland/.test(auf.text), JSON.stringify(auf));
   const eimer = await p.evaluate(() => {
     const sim = SR.sim, E = JSON.parse(JSON.stringify(SR.S)); E.ereignisseAus = true; E.geb = E.geb.filter(b => b.t !== 'wache');
     const h = E.geb.find(b => b.t === 'huette' && b.bew > 0); h.brand = 1; E.monat = 30;
@@ -829,6 +829,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { liegt, kasseGleich, abgeholt: !(hh2.halde > 0) && L.gut.holz > 0, alt: !!sim.aufbereiten({ ...JSON.parse(JSON.stringify(SR.S)), stand: 2 }).lagerFrei, ohneKorn,
       typ: sim.lagerTyp(K, 'getreide') === 'horreum' && sim.lagerTyp(K, 'holz') === 'speicher' }; });
   ok('Lager als Orte: Speicher für Waren, Kornspeicher für Nahrung; ohne Lager stapelt sich die Ware am Betrieb', lg.liegt && lg.kasseGleich && lg.abgeholt && lg.alt && lg.ohneKorn && lg.typ, JSON.stringify(lg));
+  const wi = await p.evaluate(() => { const sim = SR.sim, W = JSON.parse(JSON.stringify(SR.S)); W.ereignisseAus = true; W.monat = 9; W.gut.holz = 0; W.geb = W.geb.filter(b => b.t !== 'holzfaeller'); W.land = {};   // Wintermonat ohne Holz
+    const st0 = W.stimmung; const m = sim.monat(W, SR.welt).join(' | '); const kalt = W.frieren && /frieren/.test(m) && W.stimmung < st0 + 1;
+    const V = JSON.parse(JSON.stringify(SR.S)); V.ereignisseAus = true; V.monat = 9; V.gut.holz = 500; const h0 = V.gut.holz; sim.monat(V, SR.welt); const verbrannt = V.gut.holz < h0 && !V.frieren;
+    const wv = sim.wintervorrat(SR.S); sim.regionSetzen('kampanien'); const mild = sim.brennholzBedarf(SR.S); sim.regionSetzen('po'); const po = sim.brennholzBedarf(SR.S);
+    return { kalt, verbrannt, wv: wv.holzBrauch > 0 && wv.essenBrauch > 0, mild: mild < po }; });
+  ok('Winter: Brennholz wird verbraucht, ohne Holz frieren die Menschen; Kampanien milder', wi.kalt && wi.verbrannt && wi.wv && wi.mild, JSON.stringify(wi));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

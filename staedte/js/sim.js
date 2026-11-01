@@ -153,6 +153,13 @@ export const ernteFaktor = (S, js) => js === 0 && hat(S, 'fruchtwechsel') ? 1 : 
 // Lager in Laufweite (1.11.): fertiger, besetzter Speicher oder das Zeltlager der Kolonisten; alte Spielstände ohne Regel (S.lagerFrei)
 export const LAGERWEG = 16, HALDE = 8;
 export const lagerNah = (S, b, g = 'holz') => S.lagerFrei || S.geb.some(o => ((o.t === lagerTyp(S, g) && o.w > 0 && !(o.bau > 0)) || o.t === 'zeltlager') && abstand(o, b) <= LAGERWEG);
+// Winter: Brennholz je Haus und Monat nach Region (Insula 2 Feuerstellen), Vorrat für drei Wintermonate
+export const brennholzBedarf = S => Math.round(S.geb.filter(b => b.t === 'huette' && b.bew > 0 && !(b.bau > 0)).reduce((n, h) => n + (h.stufe === 3 ? 2 : 1), 0) * (REG.brennholz ?? 0.5) * 10) / 10;
+export function wintervorrat(S) {
+  const holzBrauch = Math.ceil(brennholzBedarf(S) * 3), essenBrauch = Math.ceil((einwohner(S) + sklaven(S)) * ESSEN_JE_MONAT * 3);
+  const essen = (S.gut.getreide || 0) + (S.gut.brot || 0) + (S.gut.fisch || 0);
+  return { holzBrauch, essenBrauch, holz: S.gut.holz || 0, essen, ok: (S.gut.holz || 0) >= holzBrauch && essen >= essenBrauch };
+}
 export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
 // Lagergrenze je Ware (1.11.): Nahrung im Kornspeicher, alles andere im Speicher; alte Stände (kornImSpeicher) zählen den Speicher für beides
 export const lagerTyp = (S, g) => NAHRUNG.has(g) && !S.kornImSpeicher ? 'horreum' : 'speicher';
@@ -386,6 +393,19 @@ export function monat(S, welt) {
       meld.push('Die Sklaven hungern – einige sind geflohen.');
     }
   }
+
+  // Winter (1.11., Moritz: „erster Winter kritisch, in Italien milder“): jedes Haus heizt und kocht mit Brennholz
+  S.frieren = false;
+  if (js === 3) {
+    const hs = S.geb.filter(b => b.t === 'huette' && b.bew > 0 && !(b.bau > 0)), brauch = brennholzBedarf(S);
+    if (brauch > 0) {
+      if (S.gut.holz >= brauch) S.gut.holz -= brauch;
+      else { S.gut.holz = 0; S.frieren = true; S.stimmung = Math.max(0, S.stimmung - 6);
+        for (const h of hs) { h.status.push({ art: 'rohstoff', gut: 'holz', text: 'Kein Brennholz – die Familie friert' }); if (wurf(S, 8800 + h.id) < 0.3) h.bew = Math.max(0, h.bew - 1); }
+        meld.push('Das Brennholz ist aufgebraucht – die Menschen frieren. Holzfäller und Holzvorräte helfen.'); }
+    }
+  }
+  if (S.monat % 12 === 6) meld.push(`Der Winter naht: ${wintervorrat(S).holzBrauch} Holz Brennholz und ${wintervorrat(S).essenBrauch} Nahrung für drei Monate anlegen.`);
 
   // Häuser: Wasser, Markt, Wachstum, Aufstieg
   let wasserN = 0, marktN = 0, haeuser = 0;
@@ -1273,6 +1293,7 @@ export function seuchenGefahr(S, b) {
   let p = X.basis * (1 + X.dichte * S.geb.filter(o => o !== b && o.t === 'huette' && abstand(o, b) <= X.umkreis).length);
   if (b.stufe === 3) p *= X.insula;
   if (jahreszeit(S) === 1) p *= X.sommer;
+  if (S.frieren) p *= 1.5;   // Kälte ohne Brennholz
   if (latrineNah(S, b)) p *= X.latrine;
   if (inReichweite(S, b, 'brunnen')) p *= X.brunnen;
   if (hat(S, 'aquaedukt')) p *= X.aquaedukt;

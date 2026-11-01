@@ -288,6 +288,7 @@ const anzahl = (S, t) => S.geb.filter(b => b.t === t).length;
 export const AUFTRAEGE = [
   { n: 'Baue zwei Hütten an der Landstraße für die ersten Siedler.', ok: S => anzahl(S, 'huette') >= 2, lohn: { denare: 50, holz: 30 } },
   { n: 'Baue einen Holzfäller am Waldrand.', ok: S => anzahl(S, 'holzfaeller') >= 1, lohn: { denare: 40 } },
+  { n: 'Bereite den ersten Winter vor: 60 Holz (Brennholz) und 60 Getreide oder Brot im Lager.', ok: S => S.gut.holz >= 60 && (S.gut.getreide || 0) + (S.gut.brot || 0) >= 60, lohn: { denare: 50 } },
   { n: 'Brotkette: Getreidefeld, Mühle und Bäckerei.', ok: S => ['feld', 'muehle', 'baeckerei'].every(t => anzahl(S, t) >= 1), lohn: { denare: 80, ziegel: 20 } },
   { n: 'Ziegelkette: Lehmgrube und Ziegelei.', ok: S => anzahl(S, 'lehmgrube') >= 1 && anzahl(S, 'ziegelei') >= 1, lohn: { denare: 80 } },
   { n: 'Brunnen und Markt: Lass eine Hütte zur Casa aufsteigen.', ok: S => S.geb.some(b => b.t === 'huette' && b.stufe === 2), lohn: { denare: 120 } },
@@ -595,16 +596,16 @@ export const VERTRAG = { menge: 5, preis: 0.95, max: 3, fehlschlag: 3, ansehen: 
 
 // Spielbare Regionen (Phase E, 1.11.): Namen, Startjahr, Gelände, Partner, Feinde, Startvorrat. Geschichte (Hannibal usw.) nur Po.
 export const REGION_DATEN = {
-  po: { stadt: 'Cremona', ebeneGen: 'der Po-Ebene', jahr0: -218, fluss: 'Padus', flussText: 'Der Fluss Padus, schiffbar bis zur Adria.', west: 'Placentia', westText: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.',
+  po: { stadt: 'Cremona', ebeneGen: 'der Po-Ebene', brennholz: 0.6, jahr0: -218, fluss: 'Padus', flussText: 'Der Fluss Padus, schiffbar bis zur Adria.', west: 'Placentia', westText: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.',
     ost: 'Mantua', ostText: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
     feind: 'Gallier', dorf: 'Dorf der Insubrer', dorfText: 'Ein keltisches Dorf hinter Palisaden. Die Insubrer haben Rom nicht vergessen, dass es ihr Land nahm.', start: {} },
-  etrurien: { stadt: 'Florentia', ebeneGen: 'Etruriens', jahr0: -59, fluss: 'Arnus', flussText: 'Der Arnus fließt durch das Tal nach Pisae und ins Meer.', west: 'Pisae', westText: 'Hafenstadt an der Mündung des Arnus.',
+  etrurien: { stadt: 'Florentia', ebeneGen: 'Etruriens', brennholz: 0.5, jahr0: -59, fluss: 'Arnus', flussText: 'Der Arnus fließt durch das Tal nach Pisae und ins Meer.', west: 'Pisae', westText: 'Hafenstadt an der Mündung des Arnus.',
     ost: 'Arretium', ostText: 'Etruskische Stadt der Töpfer – berühmt für rotes Tafelgeschirr. Kauft Erz und verkauft Werkzeug.',
     feind: 'Räuberbanden', dorf: 'Räubernest im Apennin', dorfText: 'Entlaufene Sklaven und verarmte Bauern hausen in den Bergen.', start: { stein: 40 }, welt: { flussZ: 35.5, wald: [[12, 26, 3], [6, 18, 2.5]] }, hang: true },
-  kampanien: { stadt: 'Puteoli', ebeneGen: 'Kampaniens', jahr0: -194, fluss: 'Golf von Puteoli', flussText: 'Das Meer am Golf – Fischgründe und Hafen.', west: 'Neapolis', westText: 'Griechische Stadt am Golf, reich an Wein und Kunst.',
+  kampanien: { stadt: 'Puteoli', ebeneGen: 'Kampaniens', brennholz: 0.2, jahr0: -194, fluss: 'Golf von Puteoli', flussText: 'Das Meer am Golf – Fischgründe und Hafen.', west: 'Neapolis', westText: 'Griechische Stadt am Golf, reich an Wein und Kunst.',
     ost: 'Capua', ostText: 'Reiche Stadt im fruchtbaren Hinterland. Kauft Erz und verkauft Werkzeug.',
     feind: 'Seeräuber', dorf: 'Seeräuberbucht', dorfText: 'Kilikische Piraten ankern in einer versteckten Bucht.', start: { fisch: 30 }, welt: { flussZ: 32.5 }, meer: true },
-  apulien: { stadt: 'Luceria', ebeneGen: 'Apuliens', jahr0: -314, fluss: 'Bach Celone', flussText: 'Ein Bach, der im Sommer fast versiegt.', west: 'Arpi', westText: 'Alte daunische Stadt in der Ebene.',
+  apulien: { stadt: 'Luceria', ebeneGen: 'Apuliens', brennholz: 0.3, jahr0: -314, fluss: 'Bach Celone', flussText: 'Ein Bach, der im Sommer fast versiegt.', west: 'Arpi', westText: 'Alte daunische Stadt in der Ebene.',
     ost: 'Venusia', ostText: 'Latinische Kolonie an der Straße nach Süden. Kauft Erz und verkauft Werkzeug.',
     feind: 'Samniten', dorf: 'Lager der Samniten', dorfText: 'Die Samniten kämpfen um ihre Berge – und um Luceria.', start: { getreide: 80, holz: 100 }, welt: { flussZ: 38.2, wenigWald: true }, duerre: true },
 };

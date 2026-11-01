@@ -112,6 +112,10 @@ function kopfleiste() {
   const ko = sim.geschichteKommend(S), pr = S.praefekt > 0;
   $('#ahnungZeile').hidden = !ko && !pr;
   $('#ahnungZeile').textContent = pr ? `Ein Präfekt aus Rom verwaltet die Stadt – noch ${S.praefekt} Monate.` : ko ? `Vorzeichen: ${ko.g.titel || sim.ereignis(ko.g.id, S).titel} – in etwa ${ko.monate} Monaten.` : '';
+  { const js = sim.jahreszeit(S), wv = sim.wintervorrat(S), zeigen = (js === 2 || js === 3) && wv.holzBrauch > 0;   // Wintervorrat (1.11.)
+    $('#winterZeile').hidden = !zeigen;
+    if (zeigen) { $('#winterZeile').className = 'forschzeile winter ' + (wv.ok ? 'gut' : 'warn');
+      $('#winterZeile').textContent = `${js === 3 ? 'Winter' : 'Wintervorrat'}: Brennholz ${rund(wv.holz)} von ${wv.holzBrauch} · Nahrung ${rund(wv.essen)} von ${wv.essenBrauch}${wv.ok ? ' ✓' : ''}`; } }
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / sim.forschungsKosten(S, F.ziel) * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
 
