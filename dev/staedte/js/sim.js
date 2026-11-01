@@ -534,6 +534,10 @@ export function monat(S, welt) {
   if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
   if (S.versorgt.tuch) ziel += 6;
   ziel += [0, 0, 3, 6, 9, 12][speiseplan(S).filter(x => x[1]).length];   // Vielfalt der Speisen (1.11.)
+  // Thermopolium (1.11.): schenkt Wein aus – Nachbarschaft zufriedener
+  const garkuechen = S.geb.filter(b => b.t === 'thermopolium' && b.w > 0 && !(b.bau > 0));
+  for (const g of garkuechen) { g.ausschank = (S.gut.wein || 0) >= GEB.thermopolium.wein; if (g.ausschank) S.gut.wein -= GEB.thermopolium.wein; else g.status.push({ art: 'rohstoff', gut: 'wein', text: 'Kein Wein zum Ausschenken' }); }
+  if (haeuser && garkuechen.some(g => g.ausschank)) ziel += 8 * S.geb.filter(h => h.t === 'huette' && garkuechen.some(g => g.ausschank && abstand(g, h) <= GEB.thermopolium.reichweite)).length / haeuser;
   if (haeuser >= 5 && mauerSchutz(S) >= 0.8) ziel += 3;   // Sicherheit hinter der Mauer
   const tempel = S.geb.filter(b => b.t === 'tempel' && b.w > 0);
   if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;

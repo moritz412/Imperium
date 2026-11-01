@@ -564,5 +564,23 @@ def stall():
     kasten(bm, (-0.78, -0.28, 0.03), (0.08, 0.03, 0.06), "eisen", rz=0.5)
     ablegen("stall", bm)
 
+def thermopolium():
+    """Thermopolium: Garküche mit L-förmiger Marmortheke, eingelassene Krüge (dolia), Vordach, Bänke, Amphoren."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.03), (1.7, 1.6, 0.06), "stein")
+    kasten(bm, (0, 0.4, 0.38), (1.6, 0.75, 0.65), "putz")
+    satteldach(bm, 0, 0.4, 0.7, 0.8, 0.38, 0.24, "dach", "putz")
+    pultdach(bm, -0.82, 0.82, -0.55, 0.55, 0.0, 0.7, "dach", 0.03, "dach_dunkel")
+    for x in (-0.78, 0.78): kasten(bm, (x, -0.52, 0.29), (0.05, 0.05, 0.52), "holz")
+    kasten(bm, (-0.1, -0.15, 0.2), (1.1, 0.24, 0.34), "stein_hell")            # Theke
+    kasten(bm, (0.5, 0.0, 0.2), (0.24, 0.5, 0.34), "stein_hell")
+    for x in (-0.45, -0.1, 0.25): zyl(bm, (x, -0.15, 0.37), 0.07, 0.07, 0.01, "dunkel", 8)   # dolia in der Theke
+    for x in (-0.3, 0.05): amphore(bm, (x, 0.0, 0.37), "ocker", 1.0)
+    kasten(bm, (0, -0.15, 0.36), (1.14, 0.28, 0.02), "stein_hell")
+    for x in (-0.5, 0.2): kasten(bm, (x, -0.62, 0.1), (0.4, 0.1, 0.04), "holz_hell")   # Bank
+    for i, x in enumerate((0.62, 0.7, 0.66)): amphore(bm, (x, -0.65 + i * 0.05, 0.06), "rot", 1.4)
+    tuer(bm, -0.55, 0.02, 0.2, 0.4, z0=0.06)
+    ablegen("thermopolium", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia, horreum, stall): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia, horreum, stall, thermopolium): fn()

@@ -446,6 +446,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Senatskasten aus (iPad-Breite). Test 105/105, Bilder 1024×768 angesehen.
 - [x] **Ochsenstall** (1.11.): 2 Gespanne, frisst 0,5 Getreide/Monat; Felder in 16 Feldern doppelt so schnell gepflügt, Ernte
       schneller; Baustellen mit Stein in der Nähe ×1,5. Blender-Modell (Stall, Pferch, zwei Ochsen, Pflug). Test 106/106.
+- [x] **Thermopolium** (1.11.): Garküche ab Späte Republik, schenkt 0,3 Wein/Monat aus, Häuser in 14 Feldern zufriedener;
+      Blender-Modell (Theke mit Krügen). Test 107/107.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

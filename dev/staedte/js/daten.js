@@ -132,6 +132,9 @@ export const GEB = {
   toepferei: { n: 'Töpferei (Sigillata)', kat: 'Handwerk', g: [2, 2], h: 0.75, wand: 0xc9a27a, dach: 0x9e4e30, region: 'etrurien', sklaven: true,
     kosten: { holz: 25, ziegel: 15 }, arbeiter: 3, braucht: { lehm: 2, holz: 1 }, erzeugt: { sigillata: 1 },
     text: 'Terra sigillata: glänzend rotes Tafelgeschirr nach Art von Arretium. Aus Lehm und Holz – teuer im Handel. Nur in Florentia.' },
+  thermopolium: { n: 'Thermopolium', kat: 'Öffentlich', g: [2, 2], h: 0.9, wand: 0xd8c8a0, dach: 0xa9482a, epoche: 2,
+    kosten: { holz: 20, ziegel: 20 }, arbeiter: 2, unterhalt: 1, reichweite: 14, wein: 0.3,
+    text: 'Garküche mit Theke und Weinkrügen: Hier essen und trinken die Leute aus der Nachbarschaft. Schenkt 0,3 Wein im Monat aus – Häuser in 14 Feldern sind zufriedener.' },
   // Verwaltung (1.11.: Wissen schaltet Bauten frei statt Prozent-Boni)
   tabularium: { n: 'Tabularium', kat: 'Öffentlich', g: [2, 2], h: 0.9, wand: 0xe6dccb, dach: 0xa9482a, forschung: 'steuerlisten', wahrzeichen: true,
     kosten: { holz: 20, ziegel: 25, denare: 60 }, arbeiter: 2, unterhalt: 2,
