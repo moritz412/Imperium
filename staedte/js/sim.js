@@ -63,7 +63,7 @@ export function erzeugeWelt(rid = REG_ID) {
 
 // Spielstand-Revision (1.11.): alte Stände werden beim Laden ergänzt statt verworfen. Bei neuen Pflichtfeldern STAND erhöhen
 // und hier nachtragen.
-export const STAND = 4;
+export const STAND = 5;
 export function aufbereiten(S) {
   if (!S || S.v !== 1 || !Array.isArray(S.geb) || !S.gut) return null;
   S.land = S.land || {}; S.letzte = S.letzte || {}; S.versorgt = S.versorgt || { brot: false, essen: true };
@@ -74,7 +74,8 @@ export function aufbereiten(S) {
   if (typeof S.stimmung !== 'number') S.stimmung = START.stimmung;
   if (S.region && !REGION_DATEN[S.region]) S.region = 'po';
   if ((S.stand || 1) < 3) S.lagerFrei = true;
-  if ((S.stand || 1) < 4) S.kornImSpeicher = true;   // vor dem Kornspeicher (1.11.): Speicher fasst auch Nahrung   // Stände vor der Lager-Regel (1.11.) spielen ohne sie weiter
+  if ((S.stand || 1) < 4) S.kornImSpeicher = true;
+  if ((S.stand || 1) < 5) for (const b of S.geb) if (b.t === 'feld' && !b.feld) b.feld = { gesaet: 1, geerntet: S.monat % 12 >= 9 ? 1 : 0 };   // Felder vor dem Jahreslauf gelten als bestellt   // vor dem Kornspeicher (1.11.): Speicher fasst auch Nahrung   // Stände vor der Lager-Regel (1.11.) spielen ohne sie weiter
   S.stand = STAND;
   return S;
 }

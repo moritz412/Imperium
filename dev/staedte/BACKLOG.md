@@ -442,6 +442,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Frisches Spiel: erste Ernte +32 im Herbst des 1. Jahres. Test 105/105.
 - [x] **Senatsaufträge führen durch die Kernsysteme** (1.11.): Hütten → Feld im Frühling → Holzfäller → Kornspeicher → Winter →
       Mühle/Bäckerei → … Test 105/105.
+- [x] **Feinschliff** (1.11.): Feld-Zustände ohne Dauer-Symbol, alte Stände: Felder gelten als bestellt, Meldungen weichen auch dem
+      Senatskasten aus (iPad-Breite). Test 105/105, Bilder 1024×768 angesehen.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

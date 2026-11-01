@@ -219,6 +219,8 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .titelseite .knopf{display:block;margin:12px auto 0}
 .titelbild{height:170px;border-radius:12px;background-size:cover;background-position:center;margin:4px 0 10px}
 @media (min-width: 900px) {
+body:has(#auftrag:not([hidden])) #meldung{left:calc((100% - 140px) / 2)}
+body:has(#auftrag:not([hidden])) #meldung div{max-width:calc(100vw - 480px)}
 body:has(#info:not([hidden])) #meldung{left:calc((100% - 180px) / 2)}
 body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
 }

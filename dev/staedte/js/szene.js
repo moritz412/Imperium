@@ -491,7 +491,7 @@ export function erzeugeSzene(leinwand, welt) {
         objekte.set(b.id, o);
       }
       // Symbol: schwerstes Problem zuerst
-      const p = b.status.find(s => !s.leicht) || b.status.find(s => s.leicht && s.art !== 'winter');
+      const p = b.status.find(s => !s.leicht) || b.status.find(s => s.leicht && s.art !== 'winter' && s.art !== 'feld');
       const art = p ? p.art : '';
       if (art !== o.art) {
         if (o.symbol) { o.g.remove(o.symbol); o.symbol = null; }
