@@ -27,7 +27,7 @@ export function erzeugeWelt() {
   });
   flecken([[30, 5, 3.5], [12, 4, 2.5], [33, 24, 2.8]], [0, 40]);
   flecken([[49, 4, 3], [60, 15, 3.5], [55, 29, 2.5]], [40, RASTER]);
-  return { typ };
+  const w = { typ }; mauerWelt = w; return w;
 }
 
 export function neuesSpiel() {
@@ -44,13 +44,14 @@ export function neuesSpiel() {
 
 // ---------- Straßen (S1.3) ----------
 export const START_STRASSE = 12;
-export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein', 'latrine']);
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein', 'latrine', 'mauer', 'tor']);
+export const ZIEHBAR = new Set(['strasse', 'mauer']);
 export const sklaven = S => S.geb.reduce((s, b) => s + (b.skl || 0), 0);   // brauchen keine Straße vor der Tür
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export function strassenMaske(S) {
   const m = new Uint8Array(RASTER * TIEFE);
-  for (const b of S.geb) if (b.t === 'strasse') m[b.z * RASTER + b.x] = 1;
+  for (const b of S.geb) if (b.t === 'strasse' || (b.t === 'tor' && !(b.bau > 0))) m[b.z * RASTER + b.x] = 1;
   return m;
 }
 // Felder rings um die Grundfläche (ohne Ecken)
@@ -121,9 +122,10 @@ export function pruefePlatz(S, welt, t, x, z, bel = belegung(S)) {
     const i = zz * RASTER + xx;
     if (welt.typ[i] === WASSER) return 'Hier fließt der Fluss';
     if (welt.typ[i] === WALD) return 'Hier steht Wald';
-    if (bel[i]) return 'Hier steht schon etwas';
+    if (bel[i] && !(t === 'tor' && S.geb.some(b => b.id === bel[i] && b.t === 'strasse'))) return 'Hier steht schon etwas';
   }
   if (!OHNE_STRASSE.has(t) && !anStrasse(t, x, z, strassenMaske(S))) return 'Hier fehlt eine Straße vor der Tür';
+  if (t === 'tor' && !S.geb.some(b => b.t === 'strasse' && b.x === x && b.z === z)) return 'Ein Tor gehört auf eine Straße';
   return '';
 }
 
@@ -144,6 +146,7 @@ export function bauen(S, welt, t, x, z) {
   const k = baukosten(S, t);
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
+  if (t === 'tor') { const st = S.geb.findIndex(o => o.t === 'strasse' && o.x === x && o.z === z); if (st >= 0) S.geb.splice(st, 1); }   // Tor ersetzt die Straße
   const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
   // Bauzeit (Phase A): jedes Gebäude außer Straßen ist erst eine Baustelle; S.sofortBauen nur für Tests (Wahrzeichen immer)
   if (bauzeit(t) > 0 && (!S.sofortBauen || GEB[t].wahrzeichen)) { b.bau = bauzeit(t); b.bezahlt = k; }
@@ -344,6 +347,7 @@ export function monat(S, welt) {
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
   if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
   if (S.versorgt.tuch) ziel += 6;
+  if (haeuser >= 5 && mauerSchutz(S) >= 0.8) ziel += 3;   // Sicherheit hinter der Mauer
   const tempel = S.geb.filter(b => b.t === 'tempel' && b.w > 0);
   if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;
   if (tempel.length && S.monat % 12 === 8) S.gunst = Math.min(100, gunst(S) + 2);
@@ -664,9 +668,11 @@ function gefahren(S, meld) {
     if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
     const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5).sort((a, b) => hexAbstand(a, gallierFeld) - hexAbstand(b, gallierFeld)).slice(0, 4);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
-    for (const g of ['getreide', 'holz']) S.gut[g] = (S.gut[g] || 0) * (1 - G.gallier.raub);
-    S.stimmung = Math.max(0, S.stimmung - G.gallier.stimmung);
-    meld.push(`Gallier fallen aus dem Norden ein! Sie rauben Getreide und Holz${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''}. Ein Kastell auf den Hügeln hielte sie ab.`);
+    const offen = 1 - mauerSchutz(S);   // Stadtmauer: geschützter Anteil der Häuser bleibt verschont
+    for (const g of ['getreide', 'holz']) S.gut[g] = (S.gut[g] || 0) * (1 - G.gallier.raub * offen);
+    S.stimmung = Math.max(0, S.stimmung - G.gallier.stimmung * offen);
+    meld.push(offen < 0.05 ? `Gallier fallen ins Umland ein${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''} – doch die Stadtmauer hält, die Stadt bleibt verschont.`
+      : `Gallier fallen aus dem Norden ein! Sie rauben Getreide und Holz${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''}. Kastell oder Stadtmauer hielten sie ab.`);
   }
 }
 
@@ -1163,7 +1169,33 @@ export function bauzeit(t) {
   const n = Object.entries(d.kosten).filter(([g]) => g !== 'denare').reduce((s, [, v]) => s + v, 0);
   return Math.max(1, Math.min(4, Math.round(n / 30)));
 }
-export const bauarbeiter = t => bauzeit(t) >= 6 ? 4 : 2;
+export const bauarbeiter = t => GEB[t].bauarbeiter || (bauzeit(t) >= 6 ? 4 : 2);
 const WEIBLICH = new Set(['huette', 'muehle', 'baeckerei', 'lehmgrube', 'ziegelei', 'schmiede', 'kelter', 'oelmuehle', 'weberei', 'garumsiederei', 'schule', 'feuerwache', 'latrine', 'basilika', 'domus']);
 const artikel = t => t === 'ludus' || t === 'wache' ? 'Die' : WEIBLICH.has(t) ? 'Die' : ['markt', 'speicher', 'brunnen', 'schrein', 'tempel', 'holzfaeller'].includes(t) ? 'Der' : 'Das';
+
+// ---------- Stadtmauer (Phase A): Anteil der Häuser, die vom Kartenrand aus nicht erreichbar sind ----------
+// Mauer und fertige Tore sperren (Tore werden bei Gefahr geschlossen), Wasser sperrt, Wald nicht.
+let mauerCache = { k: '', v: 0 };
+export function mauerSchutz(S, welt = mauerWelt) {
+  const haeuser = S.geb.filter(b => (b.t === 'huette' || b.t === 'domus') && !(b.bau > 0));
+  const mauern = S.geb.filter(b => (b.t === 'mauer' || b.t === 'tor') && !(b.bau > 0));
+  if (!haeuser.length || mauern.length < 4 || !welt) return 0;
+  const k = mauern.length + ':' + mauern.reduce((s, b) => s + b.x * 41 + b.z * 7, 0) + ':' + haeuser.length;
+  if (mauerCache.k === k) return mauerCache.v;
+  const zu = new Uint8Array(RASTER * TIEFE), weg = new Uint8Array(RASTER * TIEFE), q = [];
+  for (const b of mauern) zu[b.z * RASTER + b.x] = 1;
+  for (let i = 0; i < zu.length; i++) if (welt.typ[i] === WASSER) zu[i] = 1;
+  const rein = (x, z) => { const i = z * RASTER + x; if (!zu[i] && !weg[i]) { weg[i] = 1; q.push(i); } };
+  for (let x = 0; x < RASTER; x++) { rein(x, 0); rein(x, TIEFE - 1); }
+  for (let z = 0; z < TIEFE; z++) { rein(0, z); rein(RASTER - 1, z); }
+  for (let n = 0; n < q.length; n++) {
+    const i = q[n], x = i % RASTER, z = (i - x) / RASTER;
+    if (x > 0) rein(x - 1, z); if (x < RASTER - 1) rein(x + 1, z); if (z > 0) rein(x, z - 1); if (z < TIEFE - 1) rein(x, z + 1);
+  }
+  const sicher = haeuser.filter(h => { const [w, d] = groesse(h.t); for (let z = h.z; z < h.z + d; z++) for (let x = h.x; x < h.x + w; x++) if (weg[z * RASTER + x]) return false; return true; });
+  mauerCache = { k, v: sicher.length / haeuser.length };
+  return mauerCache.v;
+}
+let mauerWelt = null;
+export const setzeWelt = w => { mauerWelt = w; };
 

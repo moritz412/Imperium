@@ -123,6 +123,10 @@ export const GEB = {
   basilika: { n: 'Basilika', kat: 'Öffentlich', g: [6, 4], h: 1.6, wand: 0xeee6d4, dach: 0xa9482a, wahrzeichen: true, rang: 2,
     kosten: { stein: 120, ziegel: 150, holz: 80, denare: 300 }, bauzeit: 8, arbeiter: 4, unterhalt: 6,
     text: 'Wahrzeichen am Forum: Markthalle und Gerichtssaal unter einem Dach. Einmal je Stadt, ab der Kleinstadt, 8 Monate Bauzeit. Danach Stimmung +5 in der ganzen Stadt und jeden Monat Ansehen für die Familie.' },
+  mauer: { n: 'Stadtmauer', kat: 'Öffentlich', g: [1, 1], h: 0.9, wand: 0xcfc4a8, kosten: { ziegel: 3, holz: 1 }, bauarbeiter: 1, bauzeit: 1,
+    text: 'Ein Abschnitt der Stadtmauer – durch Ziehen gebaut. Häuser, die die Mauer ganz umschließt, sind bei Überfällen sicher. Fluss und Mauer sperren, Tore lassen Straßen hindurch.' },
+  tor: { n: 'Stadttor', kat: 'Öffentlich', g: [1, 1], h: 1.2, wand: 0xcfc4a8, kosten: { ziegel: 12, holz: 6 }, bauarbeiter: 2, bauzeit: 2,
+    text: 'Tor in der Stadtmauer. Wird auf eine Straße gebaut: Wagen fahren hindurch, bei Gefahr wird es geschlossen.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };

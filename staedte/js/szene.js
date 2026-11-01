@@ -232,6 +232,10 @@ export function erzeugeSzene(leinwand, welt) {
       teil(new THREE.CylinderGeometry(0.15, 0.18, 0.06, 8), 0x5a4a3a, 0.5, 0.03, 0.5); teil(new THREE.ConeGeometry(0.08, 0.2, 5), 0xe8903a, 0.5, 0.14, 0.5);
       box(0.35, 0.18, 0.22, 0x7a5a3a, 1.0, 0.09, 0.55); box(0.04, 0.5, 0.04, 0x6b4a2a, 1.3, 0.25, -0.75); box(0.02, 0.18, 0.3, 0xa8261f, 1.3, 0.55, -0.62);
       g.userData.h = 0.7; return g; },
+    tor: geist => { const { g, box } = teileBau(geist);   // zwei Tortürme mit Bogen
+      for (const x of [-0.42, 0.42]) { box(0.3, 1.3, 0.9, 0xc4b89c, x, 0.65, 0); box(0.34, 0.1, 0.94, 0xa9482a, x, 1.33, 0); }
+      box(0.6, 0.35, 0.9, 0xcfc4a8, 0, 1.0, 0); box(0.54, 0.02, 0.92, 0x3a2a1e, 0, 0.82, 0);
+      g.userData.h = 1.4; return g; },
     latrine: geist => { const { g, box, dach } = teileBau(geist);   // langer Raum mit Bogenöffnungen, Wasserrinne
       box(1.7, 0.5, 0.7, 0xd8ccb0, 0, 0.25, -0.05); dach(1.8, 0.8, 0.2, 0xa9583a, 0, 0.5, -0.05);
       for (const x of [-0.5, 0, 0.5]) box(0.24, 0.3, 0.02, 0x3a2a1e, x, 0.17, 0.31);
@@ -413,13 +417,28 @@ export function erzeugeSzene(leinwand, welt) {
     strassenMesh.count = liste.length; strassenMesh.receiveShadow = true; szene.add(strassenMesh);
   }
 
+  // Stadtmauer als zwei Instanced-Meshes: fertig (Mauer mit Zinnen) und im Bau (halbhoch, heller)
+  let mauerMesh = null, mauerBau = null, mauerSchl = '';
+  function mauernZeichnen(liste) {
+    const k = liste.map(b => b.x * 41 + b.z * 7 + (b.bau > 0 ? 1e6 : 0)).reduce((a, v) => a + v, liste.length);
+    if (k === mauerSchl) return; mauerSchl = k;
+    for (const m of [mauerMesh, mauerBau]) if (m) { szene.remove(m); m.geometry.dispose(); }
+    const geo = new THREE.BoxGeometry(1, 0.9, 1).translate(0, 0.45, 0), zinne = new THREE.BoxGeometry(0.3, 0.18, 1).translate(0, 0.99, 0);
+    const mm = new THREE.Matrix4(), fertig = liste.filter(b => !(b.bau > 0)), bau = liste.filter(b => b.bau > 0);
+    const baue = (arr, h, farbe) => { const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: farbe }), Math.max(1, arr.length));
+      arr.forEach((b, i) => m.setMatrixAt(i, mm.compose(new THREE.Vector3(welt0 + b.x + 0.5, 0, welt0 + b.z + 0.5), new THREE.Quaternion(), new THREE.Vector3(0.96, h, 0.96))));
+      m.count = arr.length; m.castShadow = true; m.receiveShadow = true; szene.add(m); return m; };
+    mauerMesh = baue(fertig, 1, 0xcfc4a8); mauerBau = baue(bau, 0.4, 0xe2d8c0);
+  }
+
   let letzter = null;
   function abgleichen(S, auswahlId) {
     letzter = [S, auswahlId];
     const da = new Set();
-    const strassen = [];
+    const strassen = [], mauern = [];
     for (const b of S.geb) {
       if (b.t === 'strasse') { strassen.push(b); continue; }   // alle Straßen zusammen als ein Instanced-Mesh (1.11.)
+      if (b.t === 'mauer') { mauern.push(b); continue; }        // Stadtmauer ebenso (Phase A)
       da.add(b.id);
       if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
       const schluessel = b.t + b.stufe + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
@@ -467,7 +486,7 @@ export function erzeugeSzene(leinwand, welt) {
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
-    strassenZeichnen(strassen);
+    strassenZeichnen(strassen); mauernZeichnen(mauern);
     laufwege(S);
   }
 

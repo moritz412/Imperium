@@ -296,7 +296,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Bauarbeitern, Vorrang und „Bau abbrechen (alle Baustoffe zurück)“. Kleine Bauten: abgesteckte Fläche; große: Gerüst + Kran.
       Brunnen/Schrein/Latrine/Häuser wirken erst nach Fertigstellung. Tests nutzen `S.sofortBauen` (außer Wahrzeichen) + eigene
       Prüfung. Balance-Spieler: Dorf nach 10 min, Kleinstadt nach 27 min (vorher 11/23). Test 82/82, Bild angesehen.
-- [ ] Stadtmauer in Abschnitten (ziehen wie Straßen) mit Toren, Wirkung bei Gallierüberfällen.
+- [x] Stadtmauer (Öffentlich, 1×1, Ziegel 3 + Holz 1, 1 Bauarbeiter, ziehen wie Straßen, „Entfernen“ geht auch) und Stadttor
+      (auf eine Straße gebaut, ersetzt sie, Wagen fahren hindurch). Schutz = Anteil der Häuser, die vom Kartenrand nicht erreichbar
+      sind (Mauer/Tor/Fluss sperren). Gallier rauben nur noch im ungeschützten Anteil; ganz geschützt: „die Stadtmauer hält“.
+      Ab 80 % Schutz Stimmung +3. Zeichnung als Instanced-Mesh (fertig/im Bau), Tor mit zwei Türmen. Anzeige im Cremona-Fenster.
+      Test 83/83, Bild angesehen.
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·

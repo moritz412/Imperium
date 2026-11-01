@@ -120,9 +120,10 @@ function bauenAn(t, px, py) {
 }
 function baumodus() {
   $('#baumodus').hidden = !bauTyp;
-  if (bauTyp !== 'strasse') entfernen = false;
-  const wk = $('#baumodusWeg'); wk.hidden = bauTyp !== 'strasse'; wk.classList.toggle('an', entfernen); wk.setAttribute('aria-pressed', entfernen);
-  if (bauTyp) { $('#baumodusText').textContent = bauTyp === 'strasse' ? (entfernen ? 'Straße entfernen: Felder antippen oder ziehen' : 'Straße bauen: Felder antippen oder ziehen') : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
+  if (!sim.ZIEHBAR.has(bauTyp)) entfernen = false;
+  const wk = $('#baumodusWeg'); wk.hidden = !sim.ZIEHBAR.has(bauTyp); wk.classList.toggle('an', entfernen); wk.setAttribute('aria-pressed', entfernen);
+  const zn = bauTyp === 'mauer' ? 'Mauer' : 'Straße';
+  if (bauTyp) { $('#baumodusText').textContent = sim.ZIEHBAR.has(bauTyp) ? (entfernen ? `${zn} entfernen: Felder antippen oder ziehen` : `${zn} bauen: Felder antippen oder ziehen`) : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
   else szene.vorschau('');
   bauleiste();
 }
@@ -139,7 +140,7 @@ lw.addEventListener('pointerdown', e => {
   bewegt = false;
   if (finger.size === 1) wisch = szene.bodenPunkt(e.clientX, e.clientY);
   // Straßen-Baumodus: mit einem Finger ziehen legt Straße statt die Karte zu verschieben
-  malen = bauTyp === 'strasse' && finger.size === 1 ? new Set() : null;
+  malen = sim.ZIEHBAR.has(bauTyp) && finger.size === 1 ? new Set() : null;
   if (malen) strasseMalen(e.clientX, e.clientY);
   if (finger.size === 2) { const [a, b] = [...finger.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
 });
@@ -160,12 +161,12 @@ function strasseMalen(px, py) {
   const p = platzFuer('strasse', px, py); if (!p) return;
   const k = p.x + ',' + p.z; if (malen.has(k)) return; malen.add(k);
   if (entfernen) {   // Straßen korrigieren: vorhandene Straße auf dem Feld abreißen
-    const st = S.geb.find(b => b.t === 'strasse' && b.x === p.x && b.z === p.z);
+    const st = S.geb.find(b => b.t === bauTyp && b.x === p.x && b.z === p.z);
     if (st) { sim.abreissen(S, st.id); allesZeichnen(); ton.sfx('abreissen'); }
     return;
   }
-  const r = sim.bauen(S, welt, 'strasse', p.x, p.z);
-  if (r.ok) { allesZeichnen(); ton.sfx('strasse'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
+  const r = sim.bauen(S, welt, bauTyp, p.x, p.z);
+  if (r.ok) { allesZeichnen(); ton.sfx(bauTyp === 'strasse' ? 'strasse' : 'bauen'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
 }
 function fingerWeg(e) {
   const war = finger.has(e.pointerId); finger.delete(e.pointerId);
@@ -624,6 +625,7 @@ function romInfo() {
   const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
   return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
     <div class="zeile"><span>Schutz vor Galliern</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
+    <div class="zeile"><span>Stadtmauer schützt</span><b>${Math.round(sim.mauerSchutz(S) * 100)} % der Häuser</b></div>
     <div class="zeile"><span>Unterhalt (Löhne, Sold) im Monat</span><b>${sim.unterhaltSumme(S)} Denare</b></div>
     <div class="zeile"><span>Abgabe am Ende des Herbstes</span><b>${sim.abgabeBetrag(S)} Denare${S.monat < 12 ? ' (ab dem 2. Jahr)' : ''}</b></div>
     <p>Wer pünktlich zahlt, gewinnt die Gunst des Senats – dann fällt auch der Lohn für Aufträge höher aus (jetzt ${Math.round(sim.lohnFaktor(S) * 100)} %).</p>`;

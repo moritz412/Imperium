@@ -635,6 +635,23 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { imBau, strasseSofort, fertig, markt, tempel, basilika, zurueck };
   });
   ok('Bauzeit: Hütte erst Baustelle, Straße sofort, Abbruch gibt alles zurück', bz.imBau && bz.strasseSofort && bz.fertig && bz.markt >= 1 && bz.tempel > bz.markt && bz.basilika === 8 && bz.zurueck, JSON.stringify(bz));
+  // Stadtmauer (Phase A): Ring schützt die Häuser, Tor ersetzt Straße, Gallier verschonen die Stadt
+  const mu = await p.evaluate(() => {
+    const sim = SR.sim, M = JSON.parse(JSON.stringify(SR.S)); M.ereignisseAus = true;
+    const h = M.geb.filter(b => b.t === 'huette'), x0 = Math.min(...h.map(b => b.x)) - 2, x1 = Math.max(...h.map(b => b.x)) + 3, z0 = Math.min(...h.map(b => b.z)) - 2, z1 = Math.max(...h.map(b => b.z)) + 3;
+    const vor = sim.mauerSchutz(M);
+    let id = 90000; const ring = (x, z) => M.geb.push({ id: id++, t: 'mauer', x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [] });
+    for (let x = x0; x <= x1; x++) { ring(x, z0); ring(x, z1); } for (let z = z0 + 1; z < z1; z++) { ring(x0, z); ring(x1, z); }
+    const nach = sim.mauerSchutz(M);
+    const L = JSON.parse(JSON.stringify(M)); L.geb = L.geb.filter(b => !(b.t === 'mauer' && b.x === x0 && b.z === z0 + 3)); const loch = sim.mauerSchutz(L);
+    const T = JSON.parse(JSON.stringify(SR.S)); T.gut.ziegel += 50; T.gut.holz += 20; const st = T.geb.find(b => b.t === 'strasse' && b.x === 30);
+    const tor = sim.bauen(T, SR.welt, 'tor', st.x, st.z); const ersetzt = !T.geb.some(b => b.t === 'strasse' && b.x === st.x && b.z === st.z);
+    const maske = sim.strassenMaske(T)[st.z * 64 + st.x] === 1;
+    const G = JSON.parse(JSON.stringify(M)); G.monat = 40; G.gut.getreide = 100; G.gunst = 50; G.frieden = 0; G.land = {};
+    sim.setzeZufall(z => z === 1002 ? 0 : 1); const mG = sim.monat(G, SR.welt).join(' | '); sim.setzeZufall(null);
+    return { vor, nach, loch, tor: tor.ok, ersetzt, maske, haelt: /Stadtmauer hält/.test(mG), knopf: !!document.querySelector('.karte[data-t="mauer"]') || true };
+  });
+  ok('Stadtmauer: Ring schützt alle Häuser, Lücke nicht, Tor auf der Straße, Gallier verschonen die Stadt', mu.vor === 0 && mu.nach === 1 && mu.loch < 1 && mu.tor && mu.ersetzt && mu.maske && mu.haelt, JSON.stringify(mu));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
