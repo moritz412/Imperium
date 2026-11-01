@@ -776,7 +776,7 @@ export function geschenk(S) {
 // Abgaben an Rom: am Ende des Herbstes; bezahlt → Gunst steigt, sonst sinkt sie stark
 export const gunst = S => S.gunst ?? ABGABE.gunst;
 export const lohnFaktor = S => 0.5 + gunst(S) / 100;
-export const abgabeBetrag = S => Math.round((ABGABE.grund + einwohner(S) * ABGABE.je) * (S.ruf === 'kornkammer' ? 0.8 : 1));
+export const abgabeBetrag = S => Math.round((ABGABE.grund + einwohner(S) * ABGABE.je + 0.05 * Math.max(0, (S.gut.denare || 0) - 1000)) * (S.ruf === 'kornkammer' ? 0.8 : 1));   // + 5 % des Reichtums über 1.000 (Kriegsbeiträge)
 function abgabeZahlen(S) {
   const n = abgabeBetrag(S);
   if (S.gut.denare >= n) {

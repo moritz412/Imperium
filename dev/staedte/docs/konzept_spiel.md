@@ -128,3 +128,13 @@ Rahmen, Bildrate **auf dem iPad gemessen** (nicht geschätzt).
 1. Hauptmodus: **freies Spiel**. 2. **Stadt im Vordergrund**, Familie als zweite Ebene. 3. Bauzeit: gerade nicht wichtig,
 tendenziell **für alle Gebäude**. 4. Bürgerfiguren: **erst Machbarkeit prüfen**, an sich gewünscht. 5. Bürgerkrieg/Landenteignung:
 **okay**. 6. Reihenfolge: **wie es gerade besser passt**.
+
+## 9. Stand der Umsetzung (1.11., Cloud, Test staedte_t 89/89)
+| Phase | Umgesetzt | Offen |
+| --- | --- | --- |
+| A Bauen fühlt sich echt an | Bauzeit für alle Gebäude, Bauarbeiter, Zeltlager der Kolonisten, Materialträger, Baustellenfenster, Stadtmauer + Tore mit Schutzberechnung | Lager als Orte mit sichtbaren Warenstapeln |
+| B Geschichte | Zeitleiste Po-Ebene: Belagerung 200, Siedler 190, Via Postumia 148, Spartacus 72, Landenteignung 41 mit Vorwarnung; Präfekt; Menü an/Kulisse/aus | Zeitleisten für Florentia, Puteoli, Luceria; Bundesgenossenkrieg/Bürgerrecht |
+| C Lebendige Stadt | Bürger mit Wegen zu Markt/Brunnen, Markttreiben (gemessen: Draw-Calls gleich, 0,035 ms/Bild), Menüschalter | Blender-Modelle, Musik je Jahreszeit, Sprecher → `dev/pc/staedte_auftrag.md`; **Bildrate auf dem iPad** |
+| D Stadt-Tiefe | Bodenwert/Lage, Läden, Garten, Statue, Platz, Ruf der Stadt, Lieferverträge, Stadtbuch-Kapitel | Meldungen antippbar (zum Gebäude springen) |
+| E Feinschliff | 3 Spielstände, 4 Regionen spielbar, offline (PWA), iPad-Layout, Abgabe nach Reichtum | Spieltest mit Moritz, Balance mit echtem Spiel, Offline auf dem iPad prüfen |
+

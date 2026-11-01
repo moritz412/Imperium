@@ -347,6 +347,9 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       beantwortete jede Seitenanfrage unter /Imperium/ – auch /staedte/ – mit der Index-Seite des Hauptspiels; jetzt bleibt staedte/
       ausgenommen (`dev/tools/build.py` und gleichlautend im erzeugten `service-worker.js`). **Nicht getestet:** Offline-Betrieb,
       „Zum Home-Bildschirm“ auf dem iPad (in Tests ist der Service Worker abgeschaltet).
+- [x] Balance Spätspiel: Abgabe an Rom + 5 % der Kasse über 1.000 Denare (Kriegsbeiträge). Balance-Spieler 20 Jahre: 273 Einwohner,
+      Kasse 6.500 statt 8.000 (der Spieler gibt nichts für Wahrzeichen/Mauer aus). PC-Aufträge für Modelle/Musik/Sprecher:
+      `dev/pc/staedte_auftrag.md`. Konzept-Stand: Abschnitt 9 in `docs/konzept_spiel.md`.
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
