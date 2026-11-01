@@ -98,7 +98,7 @@ function kopfleiste() {
 function kostenText(k) { return Object.entries(k).map(([g, n]) => `${WAREN[g].n} ${n}`).join(' · ') || 'frei'; }
 function bauleiste() {
   $('#reiter').innerHTML = KATEGORIEN.map(k => `<button role="tab" aria-selected="${k === reiter}" class="${k === reiter ? 'an' : ''}" data-k="${k}">${k}</button>`).join('');
-  $('#karten').innerHTML = Object.entries(GEB).filter(([, d]) => d.kat === reiter).sort(([a], [b]) => sim.gesperrt(S, a) - sim.gesperrt(S, b)).map(([t, d]) => {
+  $('#karten').innerHTML = Object.entries(GEB).filter(([, d]) => d.kat === reiter && (!d.region || d.region === (S.region || 'po'))).sort(([a], [b]) => sim.gesperrt(S, a) - sim.gesperrt(S, b)).map(([t, d]) => {
     const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26), k = sim.baukosten(S, t), zu = sim.gesperrt(S, t);
     return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, k) ? '' : ' teuer'}${zu ? ' gesperrt' : ''}" data-t="${t}" aria-pressed="${t === bauTyp}">
       ${szene.bilder[t] ? `<span class="bild foto"><img src="${szene.bilder[t]}" alt="" draggable="false"></span>` : `<span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>`}
@@ -280,6 +280,7 @@ function infoZeichnen() {
       <div class="zeile"><span>Luxus (Öl, Garum)</span><b>${b.lux > 1.4 ? 'beides' : b.lux > 1.1 ? 'eins davon' : 'nichts'}</b></div>
       <p>Equites zahlen viermal so viel Steuern wie Plebejer, mit Öl und Garum je ein Viertel mehr. Sie trinken jeden Monat Wein (0,1 je Kopf).</p>`;
   }
+  if (b.t === 'hafen') html += `<button class="knopf haupt" data-a="seehandel"${b.bau > 0 ? ' disabled' : ''}>Seehandel mit Alexandria</button>`;
   if (b.t === 'quartier') {
     const frei = GEB.quartier.sklavenPlatz - (b.skl || 0), n = Math.min(SKLAVEN.los, frei);
     const arbeiten = S.geb.reduce((s, o) => s + (o.von || []).filter(v => v[0] === b.id).reduce((t, v) => t + v[1], 0), 0);
@@ -323,6 +324,13 @@ $('#info').addEventListener('click', e => {
     ton.sfx('aufstieg'); melden('Der Senat stimmt zu: ' + r.text); schliesseInfo(); allesZeichnen(); return;
   }
   if (a.dataset.a === 'zu' && !auswahl && szene.modus() !== 'region') { schliesseInfo(); return; }
+  // Seehandel (1.11.): Handelsfenster Alexandria in der Stadtansicht, geöffnet aus dem Hafen
+  if (a.dataset.a === 'seehandel') { auswahl = 0; szene.abgleichen(S, 0); handelInfo('alexandria'); return; }
+  if (szene.modus() !== 'region' && a.dataset.p === 'alexandria' && (a.dataset.a === 'handel' || a.dataset.a === 'vertrag')) {
+    const r = a.dataset.a === 'handel' ? sim.handeln(S, a.dataset.g, a.dataset.art, 'alexandria') : sim.vertragUmschalten(S, 'alexandria', a.dataset.g);
+    if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else { ton.sfx('klick'); if (r.text) melden(r.text); }
+    allesZeichnen(); handelInfo('alexandria'); return;
+  }
   if (szene.modus() === 'region') {
     if (a.dataset.a === 'stadt') umland(false);
     else if (a.dataset.a === 'geschenk') {
@@ -781,7 +789,7 @@ function handelInfo(id = 'placentia') {
       <button class="knopf" data-a="handel" data-p="${id}" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf', id)} Denare</small></button>
       <button class="knopf vtr${(S.vertraege || []).some(v => v.p === id && v.g === g) ? ' an' : ''}" data-a="vertrag" data-p="${id}" data-g="${g}"${offen ? '' : ' disabled'}>Vertrag<small>${VERTRAG.menge}/Monat · ${sim.vertragPreis(id, g)}</small></button></div>`;
   }).join('');
-  const weg = P.anleger ? `Lege Feldwege bis an ${P.n} heran oder baue einen Anleger am ${sim.region().fluss} – dann fahren die Boote hin.`
+  const weg = P.see ? 'Erst muss der Hafen fertig gebaut und mit Arbeitern besetzt sein.' : P.anleger ? `Lege Feldwege bis an ${P.n} heran oder baue einen Anleger am ${sim.region().fluss} – dann fahren die Boote hin.`
     : `Nach ${P.n} kommt man nur über Land: Lege Feldwege bis an die Stadt im Osten heran.`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${d.unter}</div><p>${d.text}</p>

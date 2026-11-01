@@ -821,6 +821,14 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     let fertig = false; for (let r = 1; r < 6 && !fertig; r++) for (const [dx, dz] of [[r, 0], [0, r], [-r, 0], [0, -r]]) { if (fertig) break; fertig = SR.bauenFeld('brunnen', h.x + dx, h.z + dz); }
     return new Promise(res => setTimeout(() => { beob.disconnect(); res(texte.filter(t => /Brunnen:/.test(t))); }, 50)); });
   ok('Brunnen bauen meldet, wie viele Häuser neu versorgt werden', br.length === 1 && /versorgt (kein neues Haus|\d+ Häuser? neu)/.test(br[0]), JSON.stringify(br));
+  const see = await p.evaluate(() => { const sim = SR.sim, po = sim.pruefePlatz(SR.S, SR.welt, 'hafen', 10, 10);
+    sim.regionSetzen('kampanien'); const K = sim.neuesSpiel('kampanien'), w = sim.erzeugeWelt('kampanien'); let trocken = '', nass = null;
+    for (let z = 0; z < 38 && !nass; z++) for (let x = 0; x < 36 && !nass; x++) { const g = sim.pruefePlatz(K, w, 'hafen', x, z); if (/ans Wasser/.test(g)) trocken = g; else if (!g || /Straße/.test(g)) nass = [x, z, g]; }
+    const zu = sim.handelOffen(K, 'alexandria'); K.geb.push({ id: 90003, t: 'hafen', x: 1, z: 1, stufe: 1, bew: 0, w: 4, status: [], dreh: 0 });
+    const auf = sim.handelOffen(K, 'alexandria'), billig = sim.preis(K, 'getreide', 'alexandria') < sim.preis(K, 'getreide', 'placentia');
+    const verkauf = sim.handeln(K, 'getreide', 'kauf', 'alexandria').ok;
+    sim.regionSetzen('po'); return { po, trocken, nass, zu, auf, billig, verkauf }; });
+  ok('Hafen nur in Puteoli und am Wasser, Seehandel mit Alexandria', /Puteoli/.test(see.po) && /ans Wasser/.test(see.trocken) && !!see.nass && !see.zu && see.auf && see.billig && see.verkauf, JSON.stringify(see));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

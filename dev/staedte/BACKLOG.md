@@ -391,6 +391,9 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       **schnell; Spieltest entscheidet**. Test 99/99.
 - [x] **Brunnen/Markt melden Nutzen** (1.11.): nach dem Setzen „versorgt N Häuser neu“ oder „kein neues Haus – hier gibt es schon
       einen“ (gerechnet wie fertig gebaut). Test 100/100.
+- [x] **Hafen in Puteoli + Seehandel mit Alexandria** (1.11.): Hafen (portus) nur in Kampanien, muss ans Wasser grenzen, Schiffsseite
+      dreht zum Wasser; Alexandria verkauft billiges Getreide, kauft Wein, Öl, Garum, Tuch, Werkzeug teuer (Handel + Verträge).
+      Blender-Modell (Kai, Lagerhaus, Kran, Schiff). Test 101/101, Bild angesehen.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

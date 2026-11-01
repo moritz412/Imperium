@@ -442,5 +442,33 @@ def macellum():
     for x, y in ((-0.6, -0.7), (0.6, -0.6), (-0.3, -0.9)): korb(bm, (x, y, 0.04), ("obst", "korn", "gruen")[int(x * 10) % 3], 0.05)
     ablegen("macellum", bm)
 
+def hafen():
+    """Hafen: Kaimauer mit Pollern, Lagerhaus (horreum), Tretradkran, Handelsschiff am Kai, Amphoren."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0.2, 0.08), (3.8, 2.2, 0.16), "stein")                  # Kai
+    kasten(bm, (0, 1.32, 0.04), (3.8, 0.06, 0.08), "stein_hell")
+    for i in range(5): zyl(bm, (-1.6 + i * 0.8, 1.2, 0.16), 0.04, 0.035, 0.1, "dunkel", 6)
+    kasten(bm, (-0.8, -0.35, 0.5), (2.0, 0.9, 0.7), "putz")                 # Lagerhaus
+    kasten(bm, (-0.8, -0.35, 0.18), (2.02, 0.92, 0.06), "backstein")
+    satteldach(bm, -0.8, -0.35, 0.85, 1.0, 0.45, 0.25, "dach", "putz")
+    for x in (-1.4, -0.8, -0.2): kasten(bm, (x, -0.805, 0.4), (0.24, 0.02, 0.36), "dunkel")
+    stamm(bm, (1.2, 0.6, 0.16), (1.3, 0.85, 1.25), 0.035, "holz", 6)           # Kran
+    stamm(bm, (1.4, 0.6, 0.16), (1.3, 0.85, 1.25), 0.035, "holz", 6)
+    stamm(bm, (1.3, 0.85, 1.25), (1.3, 1.5, 1.05), 0.03, "holz", 6)
+    stamm(bm, (1.3, 1.5, 1.05), (1.3, 1.5, 0.55), 0.006, "dunkel", 4)
+    kasten(bm, (1.3, 1.5, 0.5), (0.14, 0.14, 0.1), "holz_hell")
+    with lage((1.2, 0.55, 0.42)):
+        stamm(bm, (-0.16, 0, 0), (0.16, 0, 0), 0.26, "holz_hell", 12)
+    with lage((0.1, 1.75, 0)):                                               # Schiff
+        kasten(bm, (0, 0, 0.1), (2.2, 0.5, 0.2), "holz")
+        kasten(bm, (0, 0, 0.21), (2.0, 0.42, 0.03), "holz_hell")
+        for sx in (-1, 1): kasten(bm, (sx * 1.15, 0, 0.2), (0.2, 0.36, 0.3), "holz", ry=-sx * 0.5)
+        stamm(bm, (0, 0, 0.2), (0, 0, 1.15), 0.025, "holz", 6)
+        kasten(bm, (0, 0, 0.95), (0.9, 0.02, 0.5), "stoff_hell")
+        for x in (-0.6, -0.4, 0.4): amphore(bm, (x, 0.05, 0.22), "ocker", 1.6)
+    for x, y in ((0.4, 0.6), (0.55, 0.65), (0.5, 0.45), (0.7, 0.5)): amphore(bm, (x, y, 0.16), "ocker", 1.8)
+    for k in range(2): kasten(bm, (-0.1, 0.65, 0.22 + k * 0.1), (0.3, 0.22, 0.09), "stoff_ocker")
+    ablegen("hafen", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen): fn()

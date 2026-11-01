@@ -114,6 +114,10 @@ export const GEB = {
   theater: { n: 'Theater', kat: 'Öffentlich', g: [4, 3], h: 0.9, wand: 0xe0d4bc, dach: 0xb5522f, forschung: 'theater',
     kosten: { ziegel: 80, stein: 60, holz: 40 }, arbeiter: 4, unterhalt: 8,
     text: 'Komödien des Plautus und Terenz. Ein bespieltes Theater hebt die Stimmung der ganzen Stadt.' },
+  // Region (1.11.): Hafen nur in Kampanien, am Wasser – Seehandel mit Alexandria
+  hafen: { n: 'Hafen (portus)', kat: 'Öffentlich', g: [4, 3], h: 1.1, wand: 0xd8ccb0, dach: 0xa9482a, region: 'kampanien', amWasser: true, wahrzeichen: true,
+    kosten: { stein: 60, holz: 60, ziegel: 40, denare: 200 }, bauzeit: 6, arbeiter: 4, unterhalt: 6,
+    text: 'Kai, Lagerhaus und Kran am Golf. Schiffe aus Alexandria bringen billiges Getreide und kaufen Wein, Öl, Garum und Tuch teuer. Muss ans Wasser grenzen.' },
   // Kaiserzeit (Epoche III, 1.11.)
   amphitheater: { n: 'Amphitheater', kat: 'Öffentlich', g: [5, 4], h: 1.4, wand: 0xe0d4bc, dach: 0xb5522f, epoche: 3, forschung: 'amphitheater', wahrzeichen: true,
     kosten: { stein: 200, ziegel: 150, holz: 60, denare: 400 }, bauzeit: 10, arbeiter: 6, unterhalt: 10,
@@ -184,6 +188,9 @@ export const MANTUA = { q: 5, r: -1, n: 'Mantua', unter: 'Stadt am Mincius · Ha
   waren: { holz: { basis: 3, normal: 100 }, getreide: { basis: 2.5, normal: 90 }, fisch: { basis: 2, normal: 120 }, ziegel: { basis: 3.5, normal: 80 },
     stein: { basis: 3, normal: 60 }, erz: { basis: 4, normal: 40 }, werkzeug: { basis: 6, normal: 50 },
     wein: { basis: 6.5, normal: 30 }, tuch: { basis: 7.5, normal: 40 }, garum: { basis: 11, normal: 40 } } };
+// Seehandel (1.11.): Alexandria, nur mit fertigem Hafen in Kampanien
+export const ALEXANDRIA = { n: 'Alexandria', unter: 'Seehandel über den Hafen', text: 'Die größte Hafenstadt der Welt. Getreideschiffe vom Nil, Händler aus dem ganzen Osten – sie zahlen gut für italischen Wein, Öl und Garum.',
+  waren: { getreide: { basis: 1.6, normal: 300 }, wein: { basis: 8.5, normal: 30 }, oel: { basis: 8.5, normal: 30 }, garum: { basis: 13, normal: 30 }, tuch: { basis: 9, normal: 30 }, werkzeug: { basis: 6.5, normal: 40 } } };
 // Gallier (1.11.): das Dorf, von dem die Überfälle kommen. Geschenke kaufen Frieden.
 export const GALLIER = { q: -1, r: -4, geschenk: { brot: 40, denare: 60 }, monate: 24 };
 export const HANDEL = {

@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, ALEXANDRIA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -115,6 +115,10 @@ export function frontSeite(S, t, x, z, maske = strassenMaske(S)) {
   if (GEB[t].flach || t === 'strasse') return 0;
   const [w, d] = groesse(t), hat = feld => feld.some(([a, c]) => a >= 0 && c >= 0 && a < RASTER && c < TIEFE && maske[c * RASTER + a]);
   const reihe = (zz) => Array.from({ length: w }, (_, i) => [x + i, zz]), spalte = (xx) => Array.from({ length: d }, (_, i) => [xx, z + i]);
+  if (GEB[t].amWasser && mauerWelt) {   // Hafen: Kai und Schiff (Rückseite) zum Wasser
+    const nass = (z0, z1) => { let n = 0; for (let c = z0; c <= z1; c++) for (let a = x - 3; a <= x + w + 2; a++) if (a >= 0 && c >= 0 && a < RASTER && c < TIEFE && mauerWelt.typ[c * RASTER + a] === WASSER) n++; return n; };
+    return nass(z + Math.ceil(d / 2), z + d + 2) > nass(z - 3, z + Math.floor(d / 2) - 1) ? 2 : 0;
+  }
   if (hat(reihe(z + d))) return 0;
   if (hat(reihe(z - 1))) return 2;
   if (w !== d) return 0;
@@ -163,14 +167,21 @@ export function belegung(S) {
 }
 
 export function pruefePlatz(S, welt, t, x, z, bel = belegung(S)) {
+  if (GEB[t].region && GEB[t].region !== REG_ID) return 'Gibt es nur in ' + REGION_DATEN[GEB[t].region].stadt;
   const [w, d] = groesse(t);
   if (x < 0 || z < 0 || x + w > RASTER || z + d > TIEFE) return 'Außerhalb der Stadt';
   if (x + w > stadtGrenze(S)) return 'Dieses Land hat der Senat noch nicht freigegeben';
   for (let zz = z; zz < z + d; zz++) for (let xx = x; xx < x + w; xx++) {
     const i = zz * RASTER + xx;
-    if (welt.typ[i] === WASSER) return 'Hier fließt der Fluss';
+    if (welt.typ[i] === WASSER) return REG.meer ? 'Hier ist das Meer' : 'Hier fließt der Fluss';
     if (welt.typ[i] === WALD) return 'Hier steht Wald';
     if (bel[i] && !(t === 'tor' && S.geb.some(b => b.id === bel[i] && b.t === 'strasse'))) return 'Hier steht schon etwas';
+  }
+  if (GEB[t].amWasser) {   // Hafen: mindestens ein Feld am Rand grenzt ans Wasser
+    let nass = false;
+    for (let zz = z - 1; zz <= z + d && !nass; zz++) for (let xx = x - 1; xx <= x + w && !nass; xx++)
+      if ((zz < z || zz >= z + d || xx < x || xx >= x + w) && xx >= 0 && zz >= 0 && xx < RASTER && zz < TIEFE && welt.typ[zz * RASTER + xx] === WASSER) nass = true;
+    if (!nass) return 'Ein Hafen gehört ans Wasser';
   }
   if (!OHNE_STRASSE.has(t) && !anStrasse(t, x, z, strassenMaske(S))) return 'Hier fehlt eine Straße vor der Tür';
   if (t === 'tor' && !S.geb.some(b => b.t === 'strasse' && b.x === x && b.z === z)) return 'Ein Tor gehört auf eine Straße';
@@ -777,10 +788,12 @@ export const gallierFeld = { q: GALLIER.q, r: GALLIER.r, typ: 'gallier' };
 export const sonderFelder = () => [nachbarFeld, mantuaFeld, gallierFeld];
 export const GALLIER_GESCHENK = GALLIER.geschenk;
 // Handelspartner: Placentia (Fluss oder Weg) und Mantua (nur Weg)
-export const PARTNER = { placentia: { ...NACHBAR, n: 'Placentia', anleger: true, waren: HANDEL.waren }, mantua: { ...MANTUA, anleger: false } };
+export const PARTNER = { placentia: { ...NACHBAR, n: 'Placentia', anleger: true, waren: HANDEL.waren }, mantua: { ...MANTUA, anleger: false }, alexandria: { ...ALEXANDRIA, see: true } };
 PARTNER_OBJ = PARTNER; regionSetzen(REG_ID);
 export function handelOffen(S, id = 'placentia') {
-  const p = PARTNER[id], netz = wegNetz(S);
+  const p = PARTNER[id];
+  if (p.see) return REG_ID === 'kampanien' && S.geb.some(b => b.t === 'hafen' && !(b.bau > 0) && b.w > 0);   // Seehandel nur über den Hafen
+  const netz = wegNetz(S);
   if (p.anleger && regionKarte().some(f => istAnleger(S, f) && netz.has(landKey(f)))) return true;   // Boote fahren flussaufwärts
   return HEX_NACHBARN.some(([dq, dr]) => netz.has((p.q + dq) + ',' + (p.r + dr)));
 }
