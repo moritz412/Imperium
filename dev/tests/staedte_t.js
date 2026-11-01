@@ -725,6 +725,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const zurueck = SR.S.monat === m0 && SR.S.geb.length === e0 && SR.S.gut.denare === d0, zu = document.querySelector('#staende').hidden;
     return { plaetze, text, zurueck, zu };
   });
+  const altStand = await p.evaluate(() => { const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S));
+    delete A.stand; delete A.land; delete A.letzte; delete A.gut.wolle; A.geb[0].status = undefined; A.geb.push({ id: 99999, t: 'abgerissen', x: 0, z: 0 });
+    const B = sim.aufbereiten(A); let lauf = true; try { sim.monat(B, SR.welt); } catch (e) { lauf = e.message; }
+    return { ok: !!B, stand: B && B.stand, land: B && !!B.land, wolle: B && B.gut.wolle === 0, weg: B && !B.geb.some(b => b.t === 'abgerissen'), lauf, kaputt: sim.aufbereiten({ v: 1 }) === null }; });
+  ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand === 2 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
   ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
   const rgn = await p.evaluate(() => {
     const sim = SR.sim, wasser = w => w.typ.reduce((n, t) => n + (t === 2 ? 1 : 0), 0), wald = w => w.typ.reduce((n, t) => n + (t === 1 ? 1 : 0), 0);

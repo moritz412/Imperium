@@ -23,7 +23,7 @@ function laden() {
   return ladenVon(slot);
 }
 function ladenVon(n) {
-  try { const s = JSON.parse(localStorage.getItem(slotKey(n))); if (s) s.land = s.land || {}; return s && s.v === 1 ? s : null; } catch (e) { return null; }
+  try { return sim.aufbereiten(JSON.parse(localStorage.getItem(slotKey(n)))); } catch (e) { return null; }
 }
 function speichern(still) {
   try { localStorage.setItem(SPEICHER_VON(), JSON.stringify(S)); localStorage.setItem('staedte_slot', slot); if (!still) melden(`Gespeichert (Platz ${slot}).`); }
@@ -760,7 +760,8 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden && $('#chronik').hidden && $('#staende').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden && $('#chronik').hidden && $('#staende').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; try { monatAblaufen(); } catch (e) {   // Absturzschutz: anhalten statt hängen, Spielstand bleibt
+    tempo = 0; kopfleiste(); melden('Ein Fehler hat das Spiel angehalten. Der zuletzt gespeicherte Stand bleibt erhalten.'); console.warn(e); } } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }

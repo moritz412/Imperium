@@ -44,9 +44,24 @@ export function erzeugeWelt(rid = REG_ID) {
   const w = { typ }; mauerWelt = w; return w;
 }
 
+// Spielstand-Revision (1.11.): alte Stände werden beim Laden ergänzt statt verworfen. Bei neuen Pflichtfeldern STAND erhöhen
+// und hier nachtragen.
+export const STAND = 2;
+export function aufbereiten(S) {
+  if (!S || S.v !== 1 || !Array.isArray(S.geb) || !S.gut) return null;
+  S.land = S.land || {}; S.letzte = S.letzte || {}; S.versorgt = S.versorgt || { brot: false, essen: true };
+  S.naechste = Math.max(S.naechste || 1, ...S.geb.map(b => (b.id || 0) + 1));
+  for (const b of S.geb) { if (!Array.isArray(b.status)) b.status = []; b.bew = b.bew || 0; b.w = b.w || 0; b.stufe = b.stufe || 1; }
+  S.geb = S.geb.filter(b => GEB[b.t]);                          // entfernte Gebäudearten
+  for (const g of Object.keys(WAREN)) S.gut[g] = Number.isFinite(S.gut[g]) ? S.gut[g] : 0;
+  if (typeof S.stimmung !== 'number') S.stimmung = START.stimmung;
+  if (S.region && !REGION_DATEN[S.region]) S.region = 'po';
+  S.stand = STAND;
+  return S;
+}
 export function neuesSpiel(rid = REG_ID) {
   regionSetzen(rid);
-  const S = { v: 1, region: REG_ID, jahr0: REG.jahr0, monat: 2, gut: { ...START.gut, ...REG.start }, geb: [], naechste: 1, stimmung: START.stimmung,
+  const S = { v: 1, stand: STAND, region: REG_ID, jahr0: REG.jahr0, monat: 2, gut: { ...START.gut, ...REG.start }, geb: [], naechste: 1, stimmung: START.stimmung,
     auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true }, land: {} };
   // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
   const welt = erzeugeWelt();
