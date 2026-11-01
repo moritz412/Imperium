@@ -104,6 +104,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .italien .ort{cursor:pointer}
 .italien .ort circle{fill:#8a8378;stroke:#3a3026;stroke-width:2}
 .italien .ort .ring{fill:transparent;stroke:transparent}
+.italien .ort text,.italien .roma text{paint-order:stroke;stroke:#e6d6b0;stroke-width:3px;stroke-linejoin:round}
 .italien .ort text{font:700 12px Cinzel,serif;fill:#3a3026}
 .italien .ort.aktiv circle{fill:var(--gold)}
 .italien .ort.gewaehlt .ring{stroke:var(--gold);stroke-width:3;fill:rgba(233,180,76,.25)}

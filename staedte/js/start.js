@@ -26,11 +26,11 @@ export function startseite({ hatStand, weiter, gruenden, standText = () => '' })
     ${UMRISSE.map(u => `<path class="land" d="${pfad(u)}Z"/>`).join('')}
     ${FLUESSE.map(f => `<path class="fluss" d="${pfad(f)}"/>`).join('')}
     <g class="roma"><path d="M${P(12.5, 41.9).join(',')}m0,-6l1.8,4.2 4.4,.3 -3.4,2.9 1.1,4.3 -3.9,-2.4 -3.9,2.4 1.1,-4.3 -3.4,-2.9 4.4,-.3z"/>
-      <text x="${+P(12.5, 41.9)[0] - 10}" y="${+P(12.5, 41.9)[1] + 16}">Roma</text></g>
+      <text x="${+P(12.5, 41.9)[0] - 9}" y="${+P(12.5, 41.9)[1] + 4}" text-anchor="end">Roma</text></g>
     ${REGIONEN.map(r => { const [x, y] = P(r.lon, r.lat);
       return `<g class="ort${r.aktiv ? ' aktiv' : ''}" data-r="${r.id}" tabindex="0" role="button" aria-label="${r.n}, ${r.stadt}">
         <circle class="ring" cx="${x}" cy="${y}" r="15"/><circle cx="${x}" cy="${y}" r="8"/>
-        <text x="${x}" y="${y - 19}" text-anchor="middle">${r.stadt}</text></g>`; }).join('')}
+        ${r.id === 'apulien' ? `<text x="${x}" y="${+y + 30}" text-anchor="middle">${r.stadt}</text>` : r.id === 'kampanien' ? `<text x="${+x + 6}" y="${y - 19}" text-anchor="end">${r.stadt}</text>` : `<text x="${x}" y="${y - 19}" text-anchor="middle">${r.stadt}</text>`}</g>`; }).join('')}
   </svg>`;
   const el = $('#startseite');
   // Hintergrundbild aus dem Hauptspiel: veröffentlicht unter ../img, in der Entwicklung unter ../../img
