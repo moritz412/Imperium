@@ -212,3 +212,4 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .naehe span{font-size:13px;padding:4px 9px;border-radius:999px;border:1px solid var(--rand)}
 .naehe .ja{color:#9ccb8e;border-color:#5f7d52;background:rgba(156,203,142,.08)}
 .naehe .nein{color:#c9b9a0;opacity:.75}
+.ware.kasse{cursor:pointer}

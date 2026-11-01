@@ -424,15 +424,19 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * stimmungsFaktor(S) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  const steuern = (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * stimmungsFaktor(S) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  S.gut.denare += steuern; const handel0 = S.gut.denare;
   if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
   if (S.ruf === 'handel') S.gut.denare += 5 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
   vertraegeMonat(S, meld);
   // Lage (Phase D): Häuser in bester Lage zahlen mehr
   const teuer = S.geb.filter(h => h.t === 'huette' && h.bew > 0 && bodenwert(S, h) >= LAGE.hoch).reduce((n, h) => n + h.bew, 0);
-  S.gut.denare += teuer * STEUER * LAGE.steuer * stimmungsFaktor(S);
-  if (rang(S) >= 2) S.gut.denare = Math.max(0, S.gut.denare - einwohner(S) * 0.1);   // Stadtverwaltung (Schreiber, Boten) ab der Kleinstadt   // Equites zahlen vierfach
-  if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
+  const handel = S.gut.denare - handel0, lage = teuer * STEUER * LAGE.steuer * stimmungsFaktor(S);
+  S.gut.denare += lage;
+  const verwaltung = rang(S) >= 2 ? einwohner(S) * 0.1 : 0;   // Stadtverwaltung (Schreiber, Boten) ab der Kleinstadt
+  S.gut.denare = Math.max(0, S.gut.denare - verwaltung);
+  const zoll = hat(S, 'zoelle') ? 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length : 0; S.gut.denare += zoll;
+  S.kasse = { steuern: steuern + lage, handel: handel + zoll, verwaltung, unterhalt: unterhaltSumme(S) };   // für das Fenster „Stadtkasse“
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
   const a = AUFTRAEGE[S.auftrag];

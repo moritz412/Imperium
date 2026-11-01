@@ -30,6 +30,23 @@ function speichern(still) {
   catch (e) { if (!still) melden('Speichern nicht möglich.'); }
 }
 
+// ---------- Stadtkasse (1.11.): Denare in der Kopfleiste antippen ----------
+function kasseZeigen() {
+  const k = S.kasse || { steuern: 0, handel: 0, verwaltung: 0, unterhalt: sim.unterhaltSumme(S) };
+  const plus = k.steuern + k.handel, minus = k.verwaltung + k.unterhalt, saldo = plus - minus;
+  $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Stadtkasse</h2><div class="unter">${rund(S.gut.denare)} Denare · letzter Monat</div>
+    <div class="lage ${saldo >= 0 ? 'gut' : 'schlecht'}">${saldo >= 0 ? 'Überschuss' : 'Fehlbetrag'}: ${saldo >= 0 ? '+' : ''}${zahl(saldo)} Denare im Monat</div>
+    <div class="zeile"><span>Steuern der Bürger</span><b>+${zahl(k.steuern)}</b></div>
+    ${k.handel ? `<div class="zeile"><span>Zoll und Handel</span><b>+${zahl(k.handel)}</b></div>` : ''}
+    <div class="zeile"><span>Löhne und Sold (Unterhalt)</span><b>−${zahl(k.unterhalt)}</b></div>
+    ${k.verwaltung ? `<div class="zeile"><span>Stadtverwaltung</span><b>−${zahl(k.verwaltung)}</b></div>` : ''}
+    <div class="zeile"><span>Abgabe an Rom (Ende Herbst)</span><b>${zahl(sim.abgabeBetrag(S))}</b></div>
+    <p>Rom nimmt jedes Jahr einen Grundbetrag, etwas je Einwohner und zehn Prozent des Vermögens über 1.000 Denare. Hohe Stimmung bringt bis zu 20 % mehr Steuern.</p>`;
+  $('#info').hidden = false; kopfleiste();
+}
+$('#waren').addEventListener('click', e => { if (e.target.closest('[data-kasse]')) { auswahl = 0; kasseZeigen(); } });
+
 // ---------- Meldungen ----------
 function melden(text) {
   const d = document.createElement('div'); d.textContent = text; $('#meldung').appendChild(d);
@@ -55,8 +72,8 @@ function kopfleiste() {
   const zellen = ANZEIGE.filter(g => !NUR_WENN_DA.has(g) || S.gut[g] >= 1).map(g => {
     const knapp = g !== 'denare' && S.gut[g] < 5 ? ' knapp' : '';
     const voll = WAREN[g].lager && S.gut[g] >= grenze ? ' (voll)' : '';
-    const titel = g === 'denare' ? ` title="Unterhalt ${sim.unterhaltSumme(S)} Denare im Monat"` : '';
-    return `<div class="ware${knapp}"${titel}><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
+    const titel = g === 'denare' ? ' data-kasse="1" role="button" tabindex="0"' : '';
+    return `<div class="ware${knapp}${g === 'denare' ? ' kasse' : ''}"${titel}><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
   });
   const st = Math.round(S.stimmung), skl0 = sim.sklaven(S);
   $('#leute').textContent = `${rund(sim.einwohner(S))} Einwohner${skl0 ? ' · ' + rund(skl0) + ' Sklaven' : ''} · Stimmung ${st} %`;
@@ -828,7 +845,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), zensus: () => zensusZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), kasse: () => kasseZeigen(), zensus: () => zensusZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f), melden,
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

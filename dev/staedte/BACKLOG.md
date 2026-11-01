@@ -379,6 +379,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Stimmung 100 („zu leicht“). Jetzt: Stimmungsbonus auf Steuern höchstens +20 %, Stadtverwaltung 0,1 Denare je Einwohner ab der
       Kleinstadt, Abgabe 10 % (statt 5 %) der Kasse über 1.000. Ergebnis: 5.400 nach 20 Jahren, Kolonie 48 min, Kaiserzeit 71 min.
       **Nicht nachgespielt** – Moritz' Spieltest entscheidet. Offen: Stimmung erreicht im Spätspiel 100 (zu leicht?).
+- [x] **Stadtkasse** (1.11.): Denare in der Kopfleiste antippen → Steuern, Zoll/Handel, Unterhalt, Verwaltung, Abgabe an Rom
+      (ersetzt den Tooltip, den es auf dem iPad nicht gibt). Test 98/98, Bild angesehen.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
