@@ -205,6 +205,10 @@ export function erzeugeSzene(leinwand, welt) {
       teil(new THREE.SphereGeometry(0.16, 8, 6), 0xff7a2a, 0.55, 0.3, -0.05).material.emissive = new THREE.Color(0x8a2a00);
       box(0.3, 0.2, 0.15, 0x3a3a3a, -0.35, 0.22, 0.45); box(0.12, 0.12, 0.12, 0x3a3a3a, -0.35, 0.06, 0.45);
       box(0.4, 0.15, 0.3, 0x7a5848, 0.3, 0.07, 0.6); g.userData.h = 1.4; return g; },
+    latrine: geist => { const { g, box, dach } = teileBau(geist);   // langer Raum mit Bogenöffnungen, Wasserrinne
+      box(1.7, 0.5, 0.7, 0xd8ccb0, 0, 0.25, -0.05); dach(1.8, 0.8, 0.2, 0xa9583a, 0, 0.5, -0.05);
+      for (const x of [-0.5, 0, 0.5]) box(0.24, 0.3, 0.02, 0x3a2a1e, x, 0.17, 0.31);
+      box(1.7, 0.04, 0.12, 0x5e8fb0, 0, 0.03, 0.42); g.userData.h = 0.75; return g; },
     kelter: geist => { const { g, box, dach, teil } = teileBau(geist);   // Kelterhaus mit Baumpresse und Dolia
       box(1.5, 0.65, 1.0, 0xd2b48c, -0.1, 0.33, -0.35); dach(1.6, 1.1, 0.3, 0x7a3a2a, -0.1, 0.65, -0.35);
       box(1.3, 0.08, 0.1, 0x5a4330, 0.05, 0.55, 0.45); box(0.1, 0.6, 0.1, 0x5a4330, -0.55, 0.3, 0.45);
@@ -298,7 +302,7 @@ export function erzeugeSzene(leinwand, welt) {
   }
 
   // Problem-Symbole als Sprite (gezeichnet, keine Schrift)
-  const FARBE = { brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
+  const FARBE = { krank: '#9ccb8e', brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
   function symbol(art) {
     if (symbolTex.has(art)) return symbolTex.get(art);
     const c = document.createElement('canvas'); c.width = c.height = 64;
@@ -314,6 +318,7 @@ export function erzeugeSzene(leinwand, welt) {
     else if (art === 'voll') { x.rect(20, 18, 24, 22); x.moveTo(20, 26); x.lineTo(44, 26); }
     else if (art === 'wald') { x.moveTo(32, 14); x.lineTo(44, 36); x.lineTo(20, 36); x.closePath(); x.moveTo(32, 36); x.lineTo(32, 44); }
     else if (art === 'hunger') { x.moveTo(20, 38); x.quadraticCurveTo(20, 20, 32, 20); x.quadraticCurveTo(44, 20, 44, 38); x.closePath(); }
+    else if (art === 'krank') { x.moveTo(26, 18); x.lineTo(38, 18); x.moveTo(32, 18); x.lineTo(32, 44); x.moveTo(26, 30); x.quadraticCurveTo(32, 24, 38, 30); x.quadraticCurveTo(32, 36, 26, 30); }
     else if (art === 'brand') { x.moveTo(32, 12); x.quadraticCurveTo(46, 28, 42, 38); x.quadraticCurveTo(38, 46, 32, 46); x.quadraticCurveTo(22, 46, 22, 36); x.quadraticCurveTo(22, 28, 28, 24); x.quadraticCurveTo(30, 30, 33, 30); x.quadraticCurveTo(36, 22, 32, 12); }
     else if (art === 'markt') { x.moveTo(18, 26); x.lineTo(22, 16); x.lineTo(42, 16); x.lineTo(46, 26); x.closePath(); x.moveTo(22, 26); x.lineTo(22, 42); x.lineTo(42, 42); x.lineTo(42, 26); }
     else { x.arc(32, 30, 8, 0, Math.PI * 2); }

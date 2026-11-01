@@ -221,7 +221,9 @@ function infoZeichnen() {
       <div class="zeile"><span>Brot</span><b>${ja(S.versorgt.brot)}</b></div>
       <div class="zeile"><span>Brunnen in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'brunnen'))}</b></div>
       <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>
-      <div class="zeile"><span>Feuerwache in der Nähe</span><b>${ja(sim.wacheNah(S, b))}</b></div>`;
+      <div class="zeile"><span>Feuerwache in der Nähe</span><b>${ja(sim.wacheNah(S, b))}</b></div>
+      <div class="zeile"><span>Latrine in der Nähe</span><b>${ja(sim.latrineNah(S, b))}</b></div>
+      <div class="zeile"><span>Seuchengefahr</span><b>${b.krank > 0 ? 'krank' : (p => p < 0.001 ? 'gering' : p < 0.003 ? 'mittel' : 'hoch')(sim.seuchenGefahr(S, b))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
     else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
       ? `<p>Ab der Kleinstadt (${RAENGE[INSULA.rang].ab} Einwohner) kann eine volle Casa zur Insula aufgestockt werden (30 Bewohner).</p>`
@@ -320,6 +322,7 @@ $('#menue').addEventListener('click', e => {
       <li>Sklaven: im Sklavenquartier kaufen. Sie arbeiten auf Feldern und in Werkstätten und essen Getreide. Freigelassene werden Plebejer.</li>
       <li>Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Eine Feuerwache löscht Brände und hält Ordnung. Ansicht „Feuer“ zeigt die Gefahr.</li>
       <li>Familie (Knopf „Familie“): Ansehen sammeln, gegen die Rivalen zum Ädil und Prätor gewählt werden. Familiengeschäfte füllen das Familienvermögen – auf Kosten der Stadtkasse.</li>
+      <li>Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen. Ansicht „Gesundheit“.</li>
       <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
   }
 });
@@ -592,7 +595,7 @@ function gallierInfo() {
 
 // ---------- Ansichten (S1.4) ----------
 let ansicht = '';
-const ANSICHT_NAME = { feuer: 'Feuer: Brandgefahr', wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
+const ANSICHT_NAME = { gesundheit: 'Gesundheit: Seuchengefahr', feuer: 'Feuer: Brandgefahr', wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
 function ansichtZeichnen() {
   const d = ansicht ? sim.ansicht(S, welt, ansicht) : null;
   szene.ansicht(d);

@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -42,7 +42,7 @@ export function neuesSpiel() {
 
 // ---------- Straßen (S1.3) ----------
 export const START_STRASSE = 12;
-export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein']);
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein', 'latrine']);
 export const sklaven = S => S.geb.reduce((s, b) => s + (b.skl || 0), 0);   // brauchen keine Straße vor der Tür
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
@@ -270,6 +270,7 @@ export function monat(S, welt) {
     const wasser = inReichweite(S, b, 'brunnen'), markt = inReichweite(S, b, 'markt', maske);
     if (wasser) wasserN++; if (markt) marktN++;
     if (b.brand > 0) continue;
+    if (b.krank > 0) { b.status.push({ art: 'krank', text: 'Krankheit im Haus' }); continue; }
     if (!essen) { b.status.push({ art: 'hunger', text: 'Hunger' }); b.bew = Math.max(0, b.bew - 1); continue; }
     if (b.bew < wohnraum(b) && S.stimmung >= 40) b.bew++;
     if (!wasser) b.status.push({ art: 'wasser', text: 'Kein Brunnen in der Nähe', leicht: true });
@@ -345,6 +346,7 @@ export function monat(S, welt) {
   if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
   feuerMonat(S, meld);
+  seucheMonat(S, meld);
 
   familieMonat(S, meld);
   ereignisMonat(S);
@@ -420,6 +422,18 @@ function ansichtRoh(S, welt, art) {
       geb.push([b.id, p < 0.002 ? GRUEN : p < 0.006 ? GELB : ORANGE]);
     }
     return { felder, geb, legende: [[BLAU, 'Feuerwache erreicht'], [GRUEN, 'geringe Brandgefahr'], [GELB, 'mittel'], [ORANGE, 'hoch'], [ROT, 'brennt']] };
+  }
+  if (art === 'gesundheit') {   // Seuchengefahr je Haus, Bereich der Latrinen
+    for (const o of S.geb.filter(b => b.t === 'latrine')) {
+      const [cx, cz] = mitte(o), r = GEB.latrine.reichweite;
+      for (let z = 0; z < TIEFE; z++) for (let x = 0; x < RASTER; x++)
+        if (welt.typ[z * RASTER + x] === GRAS && Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r) felder.push([x, z, BLAU]);
+    }
+    for (const h of haeuser) {
+      if (h.krank > 0) { geb.push([h.id, ROT]); continue; }
+      const p = seuchenGefahr(S, h); geb.push([h.id, p < 0.001 ? GRUEN : p < 0.003 ? GELB : ORANGE]);
+    }
+    return { felder, geb, legende: [[BLAU, 'Latrine erreicht'], [GRUEN, 'gesund'], [GELB, 'mittlere Seuchengefahr'], [ORANGE, 'hohe Seuchengefahr'], [ROT, 'krank']] };
   }
   if (art === 'arbeit') {
     const geht = new Map();
@@ -1040,5 +1054,39 @@ export function wirkungText(w) {
   if (x.zuzug) t.push(`bis ${x.zuzug} neue Einwohner`);
   if (x.frieden) t.push(`${x.frieden} Monate Frieden`);
   return t.join(' · ') || 'keine Folgen';
+}
+
+// ---------- Seuchen (1.11.) ----------
+export const latrineNah = (S, b) => S.geb.some(o => o.t === 'latrine' && abstand(o, b) <= GEB.latrine.reichweite);
+export function seuchenGefahr(S, b) {
+  if (b.t !== 'huette' || !(b.bew > 0)) return 0;
+  const X = SEUCHE;
+  let p = X.basis * (1 + X.dichte * S.geb.filter(o => o !== b && o.t === 'huette' && abstand(o, b) <= X.umkreis).length);
+  if (b.stufe === 3) p *= X.insula;
+  if (jahreszeit(S) === 1) p *= X.sommer;
+  if (latrineNah(S, b)) p *= X.latrine;
+  if (inReichweite(S, b, 'brunnen')) p *= X.brunnen;
+  if (hat(S, 'aquaedukt')) p *= X.aquaedukt;
+  return p;
+}
+function seucheMonat(S, meld) {
+  const X = SEUCHE, krank = S.geb.filter(b => b.krank > 0);
+  let tote = 0;
+  for (const b of krank) {
+    const n = Math.ceil(b.bew * X.verlust); b.bew = Math.max(0, b.bew - n); tote += n;
+    for (const o of S.geb) {
+      if (o.t !== 'huette' || o.krank > 0 || !(o.bew > 0) || abstand(o, b) > X.nachbar) continue;
+      if (wurf(S, 8000 + o.id * 3 + b.id) < (latrineNah(S, o) ? X.ueberLatrine : X.ueber)) { o.krank = X.monate + 1; o.neuKrank = true; }
+    }
+    if (--b.krank <= 0) delete b.krank;
+  }
+  let neu = 0;
+  for (const b of S.geb) if (b.neuKrank) { delete b.neuKrank; neu++; }
+  if (S.monat >= X.ab) for (const b of S.geb) {
+    if (b.krank > 0 || b.t !== 'huette') continue;
+    if (wurf(S, 6000 + b.id) < seuchenGefahr(S, b)) { b.krank = X.monate; neu++; }
+  }
+  if (neu) meld.push(neu === 1 ? 'Krankheit! In einem Haus liegen die Menschen mit Fieber.' : `Eine Seuche breitet sich aus: ${neu} Häuser sind betroffen.`);
+  if (tote) meld.push(`${tote} Menschen sind an der Krankheit gestorben.`);
 }
 

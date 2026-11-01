@@ -214,6 +214,10 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Menü: „Ereignisse: an/aus“. Test 68/68 (alter Testteil mit Ereignissen aus), Bild angesehen. **Nicht getestet:** iPad.
 - [x] Feste im Jahreslauf (ab dem 2. Jahr, als feste Ereignisse): Cerealia (2. Frühlingsmonat), Ludi Romani (1. Herbstmonat,
       neues Bild Stadion), Saturnalien (1. Wintermonat) – je groß feiern / bescheiden / ausfallen. Test 69/69.
+- [x] Seuchen und Latrinen (`SEUCHE`): Gefahr je Haus ab dem 2. Jahr (Dichte, Insula ×2, Sommer ×1,5; Latrine ×0,3, Brunnen
+      ×0,8, Aquädukt ×0,7). Kranke Häuser: 3 Monate, je Monat −10 % Bewohner, kein Wachstum, stecken Häuser im Umkreis 3 an
+      (30 %, mit Latrine 8 %). Neues Gebäude **Latrine** (2×1, ohne Straße, Reichweite 9, eigene Form), Symbol, Ansicht
+      „Gesundheit“, Zeilen im Hausfenster. Balance-Lauf: kleine Stadt (≈ 10 Häuser) 5 Jahre ohne Seuche. Test 70/70.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

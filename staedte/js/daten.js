@@ -112,6 +112,9 @@ export const GEB = {
   theater: { n: 'Theater', kat: 'Öffentlich', g: [4, 3], h: 0.9, wand: 0xe0d4bc, dach: 0xb5522f, forschung: 'theater',
     kosten: { ziegel: 80, stein: 60, holz: 40 }, arbeiter: 4, unterhalt: 8,
     text: 'Komödien des Plautus und Terenz. Ein bespieltes Theater hebt die Stimmung der ganzen Stadt.' },
+  latrine: { n: 'Latrine', kat: 'Öffentlich', g: [2, 1], h: 0.55, wand: 0xd8ccb0, dach: 0xa9583a,
+    kosten: { ziegel: 12, holz: 6 }, reichweite: 9,
+    text: 'Öffentliche Latrine mit fließendem Wasser in der Rinne. Häuser im Umkreis von 9 Feldern erkranken viel seltener.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -378,4 +381,10 @@ export const EREIGNISSE = [
     wahl: [{ t: 'Ein Festmahl für alle', w: { gut: { brot: -20 }, stimmung: 8 } }, { t: 'Geschenke an die Klienten', w: { vermoegen: -30, ansehen: 4, stimmung: 3 } }, { t: 'Still feiern', w: {} }] },
 ];
 export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
+
+// Seuchen (1.11.): Chance je Haus und Monat ab dem 2. Jahr = basis × Dichte (+20 % je Haus im Umkreis 4) × Insula 2 × Sommer 1,5
+// × Latrine in der Nähe 0,3 × Brunnen 0,8 × Aquädukt 0,7. Kranke Häuser verlieren 10 % der Bewohner je Monat (3 Monate) und
+// stecken Häuser im Umkreis 3 mit 30 % an (mit Latrine 8 %).
+export const SEUCHE = { ab: 12, basis: 0.0008, dichte: 0.2, umkreis: 4, insula: 2, sommer: 1.5, latrine: 0.3, brunnen: 0.8, aquaedukt: 0.7,
+  monate: 3, verlust: 0.1, ueber: 0.3, ueberLatrine: 0.08, nachbar: 3 };
 

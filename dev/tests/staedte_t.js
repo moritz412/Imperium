@@ -517,6 +517,22 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Feste: Cerealia, Ludi Romani, Saturnalien jedes Jahr, nicht doppelt', fest === 'cerealia,ludi,saturnalia,cerealia,-', fest);
   ok('Ereignisfenster mit Bild, 3 Wahlmöglichkeiten, schließt nach der Wahl', ev.fenster && ev.knoepfe === 3 && /Trebia/.test(ev.titel) && ev.bild && ev.zu && /Getreide/.test(ev.text));
+  // Seuchen (1.11.): Ausbruch, Ansteckung, Tote; Latrine senkt die Gefahr; Ansicht Gesundheit
+  const se = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
+    const haus = S.geb.find(b => b.t === 'huette' && b.bew > 4);
+    const A = kopie(); A.monat = 14; A.ereignisseAus = true;
+    sim.setzeZufall(z => z === 6000 + haus.id ? 0 : 1); sim.monat(A, SR.welt);
+    const ah = A.geb.find(b => b.id === haus.id), krank = ah.krank > 0, bew0 = ah.bew;
+    sim.setzeZufall(z => z >= 8000 ? 0 : 1); sim.monat(A, SR.welt); sim.setzeZufall(null);
+    const angesteckt = A.geb.filter(b => b.krank > 0 && b.id !== haus.id).length, weniger = ah.bew < bew0;
+    const L = kopie(); const p0 = sim.seuchenGefahr(L, L.geb.find(b => b.id === haus.id)); L.gut.ziegel += 30; L.gut.holz += 20;
+    let lat = false; for (let dz = -5; dz <= 5 && !lat; dz++) for (let dx = -5; dx <= 5 && !lat; dx++) lat = sim.bauen(L, SR.welt, 'latrine', haus.x + dx, haus.z + dz).ok;
+    const p1 = sim.seuchenGefahr(L, L.geb.find(b => b.id === haus.id));
+    const ans = SR.ansicht('gesundheit'); SR.ansicht('');
+    return { krank, angesteckt, weniger, lat, senkt: p1 < p0 * 0.5, legende: ans.legende.length, knopf: !!document.querySelector('#ansicht [data-ansicht="gesundheit"]') };
+  });
+  ok('Seuche: Ausbruch, Ansteckung, Tote; Latrine senkt die Gefahr; Ansicht Gesundheit', se.krank && se.angesteckt > 0 && se.weniger && se.lat && se.senkt && se.legende === 5 && se.knopf, JSON.stringify(se));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
