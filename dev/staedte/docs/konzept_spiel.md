@@ -120,6 +120,7 @@ Familie über Generationen, echte Ortsgeschichte.
 | C Lebendige Stadt | **Machbarkeit Bürgerfiguren prüfen** (Prototyp, Draw-Calls/Dreiecke messen, iPad-Test durch Moritz), dann Tageswege, Markttreiben; Blender-Modelle, Musik je Jahreszeit | ~10 h + PC-Pipeline |
 | D Stadt-Tiefe | Bodenwert/Viertel, Spezialisierung der Stadt, Handelsverträge, Stadtbuch-Oberfläche | ~8 h |
 | E Feinschliff | mehrere Spielstände, offline, weitere Regionen, Balance mit Spieltests | offen |
+| Nach dem Konzept (1.11.) | Blender-Modelle für alle Gebäude (Cloud), Bauleiste mit Bildern, Eröffnungsfeiern, Zensus alle 5 Jahre, Spielstand-Revision, Texte je Region, Klangkulisse je Jahreszeit, **Epoche III Kaiserzeit** (Amphitheater, Augusteum, Macellum, 6 Erfindungen, Pax Augusta, Munus, Kaiserbesuch), eigenes Icon, Wissensgrenze | Musik/Sprecher (PC), Geldüberschuss im Spätspiel prüfen, iPad |
 
 Erfolgskriterien: erste 10 Minuten ohne Hilfe verständlich (Spieltest), echte Zielkonflikte, Testsatz grün, Draw-Calls im
 Rahmen, Bildrate **auf dem iPad gemessen** (nicht geschätzt).
