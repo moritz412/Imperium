@@ -222,3 +222,10 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 body:has(#info:not([hidden])) #meldung{left:calc((100% - 180px) / 2)}
 body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
 }
+/* Handy (1.11.): Warenleiste in eigener Zeile, Fenster darunter */
+@media (max-width:560px){
+  #oben{flex-wrap:wrap}.waren{order:5;flex-basis:100%;min-height:46px}
+  .stadt{flex:1 1 0;min-width:0;overflow:hidden}.stadt span,.stadt .leute{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #ansicht{top:calc(max(10px,env(safe-area-inset-top)) + 128px)!important}
+  #auftrag,#info{top:calc(max(10px,env(safe-area-inset-top)) + 128px)!important}
+}
