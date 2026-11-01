@@ -196,7 +196,7 @@ export function fehlendeKosten(S, kosten) {
   return Object.entries(kosten).filter(([g, n]) => (S.gut[g] || 0) < n).map(([g, n]) => `${n - Math.floor(S.gut[g] || 0)} ${WAREN[g].n}`);
 }
 
-export function bauen(S, welt, t, x, z) {
+export function bauen(S, welt, t, x, z, dreh) {
   if (gesperrt(S, t)) return { ok: false, grund: sperrGrund(S, t) };
   if (GEB[t].wahrzeichen && S.geb.some(b => b.t === t)) return { ok: false, grund: `${REG.stadt} hat schon eine ${GEB[t].n}` };
   if (GEB[t].rang && rang(S) < GEB[t].rang) return { ok: false, grund: `Erst ab Stadtrang ${RAENGE[GEB[t].rang].n}` };
@@ -206,10 +206,11 @@ export function bauen(S, welt, t, x, z) {
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
   if (t === 'tor') { const st = S.geb.findIndex(o => o.t === 'strasse' && o.x === x && o.z === z); if (st >= 0) S.geb.splice(st, 1); }   // Tor ersetzt die Straße
-  const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
+  const [gw, gd] = groesse(t), drehOk = dreh !== undefined && (gw === gd || dreh % 2 === 0);   // eigene Drehung (Bauplan, 1.11.): nicht quadratische nur 0/180°
+  const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: drehOk ? dreh : frontSeite(S, t, x, z), k };
   // Bauzeit (Phase A): jedes Gebäude außer Straßen ist erst eine Baustelle; S.sofortBauen nur für Tests (Wahrzeichen immer)
   if (bauzeit(t) > 0 && (!S.sofortBauen || GEB[t].wahrzeichen)) { b.bau = hat(S, 'beton') ? Math.max(1, Math.ceil(bauzeit(t) * 0.67)) : bauzeit(t); b.bezahlt = k; }
-  S.geb.push(b);
+  b.monat0 = S.monat; S.geb.push(b);
   return { ok: true, b };
 }
 
@@ -221,6 +222,15 @@ export function abreissen(S, id) {
   else for (const [g, n] of Object.entries(GEB[b.t].kosten)) if (g !== 'denare') S.gut[g] += Math.floor(n / 2);
   S.geb.splice(i, 1);
   return true;
+}
+// Rückgängig (1.11.): Baustelle oder frisch gelegte Straße/Mauer zurücknehmen – volle Erstattung
+export function zuruecknehmen(S, id) {
+  const i = S.geb.findIndex(b => b.id === id); if (i < 0) return { ok: false, grund: 'Steht nicht mehr' };
+  const b = S.geb[i];
+  if (!(b.bau > 0) && !ZIEHBAR.has(b.t) && !(b.k && b.monat0 === S.monat)) return { ok: false, grund: `${GEB[b.t].n} ist schon fertig – abreißen statt rückgängig` };
+  for (const [g, n] of Object.entries(b.bezahlt || b.k || baukosten(S, b.t))) S.gut[g] = (S.gut[g] || 0) + n;
+  S.geb.splice(i, 1);
+  return { ok: true };
 }
 
 export const mitte = b => { const [w, d] = groesse(b.t); return [b.x + w / 2, b.z + d / 2]; };

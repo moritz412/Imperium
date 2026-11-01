@@ -48,8 +48,9 @@ function kasseZeigen() {
 $('#waren').addEventListener('click', e => { if (e.target.closest('[data-kasse]')) { auswahl = 0; kasseZeigen(); } });
 
 // ---------- Meldungen ----------
-function melden(text) {
+function melden(text, aktion, knopf) {
   const d = document.createElement('div'); d.textContent = text; $('#meldung').appendChild(d);
+  if (typeof aktion === 'function') { d.className = 'tipp'; d.textContent = text + ' ↶ ' + (knopf || ''); d.addEventListener('click', () => { d.remove(); aktion(); }); }
   const ort = sim.meldOrt(text);   // antippbar: springt zum Gebäude
   if (ort) { d.className = 'tipp'; d.textContent = text + ' ➜'; d.addEventListener('click', () => {
     if (szene.modus() === 'region') umland(false);
@@ -126,12 +127,14 @@ window.addEventListener('pointerup', e => {
   const z = zug; zug = null;
   if (z.raus) {
     const leiste = $('#leiste').getBoundingClientRect();
-    if (e.clientY < leiste.top) bauenAn(z.t, e.clientX, e.clientY);
+    if (e.clientY < leiste.top) { if (sim.ZIEHBAR.has(z.t)) bauenAn(z.t, e.clientX, e.clientY); else { bauTyp = z.t; planSetzen(z.t, e.clientX, e.clientY); baumodus(); } }
     if (!bauTyp) szene.vorschau('');
   } else if (sim.gesperrt(S, z.t)) {
     melden(sim.sperrGrund(S, z.t)); ton.sfx('fehler');
   } else {
-    bauTyp = bauTyp === z.t ? '' : z.t; baumodus();
+    bauTyp = bauTyp === z.t ? '' : z.t; plan = null;
+    if (bauTyp && !sim.ZIEHBAR.has(bauTyp)) planSetzen(bauTyp, innerWidth / 2, innerHeight * 0.45);
+    baumodus();
   }
 });
 
@@ -149,9 +152,9 @@ function bauenAn(t, px, py) {
   const p = platzFuer(t, px, py); if (!p) return;
   bauenFeld(t, p);
 }
-function bauenFeld(t, p) {
+function bauenFeld(t, p, dreh) {
   const versorger = t === 'brunnen' || t === 'markt', ohne = versorger ? S.geb.filter(h => h.t === 'huette' && !sim.inReichweite(S, h, t)) : [];
-  const r = sim.bauen(S, welt, t, p.x, p.z);
+  const r = sim.bauen(S, welt, t, p.x, p.z, dreh);
   if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return false; }
   ton.sfx('bauen');
   if (versorger) {   // 1.11.: zeigen, ob der neue Brunnen/Markt überhaupt Häuser neu versorgt (gerechnet wie fertig gebaut)
@@ -162,16 +165,72 @@ function bauenFeld(t, p) {
   allesZeichnen();
   return true;
 }
+// ---------- Bauplan (1.11., Moritz: „nicht sofort bauen, verschieben, drehen, rückgängig“) ----------
+let plan = null, planZug = false;
+const zurueck = [];   // Rückgängig-Stapel: { art: 'bau', ids } oder { art: 'abriss', b, erstattung }
+function planGueltig() { return plan && !sim.pruefePlatz(S, welt, plan.t, plan.x, plan.z) && sim.kannBezahlen(S, sim.baukosten(S, plan.t)); }
+function planZeigen() {
+  if (!plan) { szene.vorschau(''); return; }
+  if (plan.dreh === undefined) plan.dreh = sim.frontSeite(S, plan.t, plan.x, plan.z);
+  szene.vorschau(plan.t, plan.x, plan.z, planGueltig(), plan.dreh);
+  const grund = sim.pruefePlatz(S, welt, plan.t, plan.x, plan.z), k = sim.baukosten(S, plan.t);
+  $('#baumodusText').textContent = `${GEB[plan.t].n} · ${kostenText(k)} – ${grund || (sim.kannBezahlen(S, k) ? 'Plan verschieben, drehen, dann bauen' : 'Es fehlen ' + sim.fehlendeKosten(S, k).join(', '))}`;
+  $('#baumodusOk').disabled = !planGueltig();
+}
+function planSetzen(t, px, py) {
+  const p = platzFuer(t, px, py); if (!p) return;
+  const eigeneDrehung = plan && plan.t === t && plan.eigen;
+  plan = { t, x: p.x, z: p.z, dreh: eigeneDrehung ? plan.dreh : undefined, eigen: eigeneDrehung };
+  planZeigen();
+}
+function planDrehen() {
+  if (!plan) return; const [w, d] = GEB[plan.t].g;
+  plan.dreh = ((plan.dreh || 0) + (w === d ? 1 : 2)) % 4; plan.eigen = true; ton.sfx('klick'); planZeigen();
+}
+function planBauen() {
+  if (!plan) return;
+  const ids = S.geb.map(b => b.id), ok = bauenFeld(plan.t, plan, plan.dreh);
+  if (!ok) return;
+  const neu = S.geb.filter(b => !ids.includes(b.id)).map(b => b.id); if (neu.length) zurueckMerken({ art: 'bau', ids: neu });
+  const [w] = GEB[plan.t].g; plan = { ...plan, x: plan.x + w + 1 };   // nächster Plan gleich daneben
+  if (sim.gesperrt(S, plan.t) || (GEB[plan.t].wahrzeichen && S.geb.some(b => b.t === plan.t))) { bauTyp = ''; plan = null; baumodus(); return; }
+  planZeigen();
+}
+function zurueckMerken(x) { zurueck.push(x); if (zurueck.length > 30) zurueck.shift(); $('#baumodusZurueck').hidden = !bauTyp; }
+function rueckgaengig() {
+  const x = zurueck.pop(); if (!x) { melden('Nichts zum Rückgängigmachen.'); return false; }
+  if (x.art === 'bau') {
+    let n = 0, grund = ''; for (const id of x.ids) { const r = sim.zuruecknehmen(S, id); if (r.ok) n++; else grund = r.grund; }
+    melden(n ? 'Rückgängig: ' + (n === 1 ? 'Bau zurückgenommen, Baustoffe erstattet.' : `${n} Felder zurückgenommen, Baustoffe erstattet.`) : grund); ton.sfx(n ? 'abreissen' : 'fehler');
+  } else if (x.art === 'abriss') {
+    if (!sim.kannBezahlen(S, x.erstattung)) { melden('Rückgängig nicht möglich: Die erstatteten Baustoffe sind schon verbraucht.'); ton.sfx('fehler'); return false; }
+    for (const [g, n] of Object.entries(x.erstattung)) S.gut[g] -= n;
+    S.geb.push(x.b); melden(`Rückgängig: ${GEB[x.b.t].n} steht wieder.`); ton.sfx('bauen');
+  }
+  allesZeichnen(); if (plan) planZeigen(); return true;
+}
 function baumodus() {
   $('#baumodus').hidden = !bauTyp;
   if (!sim.ZIEHBAR.has(bauTyp)) entfernen = false;
   const wk = $('#baumodusWeg'); wk.hidden = !sim.ZIEHBAR.has(bauTyp); wk.classList.toggle('an', entfernen); wk.setAttribute('aria-pressed', entfernen);
   const zn = bauTyp === 'mauer' ? 'Mauer' : 'Straße';
-  if (bauTyp) { $('#baumodusText').textContent = sim.ZIEHBAR.has(bauTyp) ? (entfernen ? `${zn} entfernen: Felder antippen oder ziehen` : `${zn} bauen: Felder antippen oder ziehen`) : `${GEB[bauTyp].n} bauen: Feld antippen`; schliesseInfo(); }
-  else szene.vorschau('');
+  const plane = !!bauTyp && !sim.ZIEHBAR.has(bauTyp);
+  $('#baumodusDreh').hidden = !plane; $('#baumodusOk').hidden = !plane; $('#baumodusZurueck').hidden = !bauTyp;
+  if (bauTyp) { $('#baumodusText').textContent = sim.ZIEHBAR.has(bauTyp) ? (entfernen ? `${zn} entfernen: Felder antippen oder ziehen` : `${zn} bauen: Felder antippen oder ziehen`) : `${GEB[bauTyp].n}: Feld antippen`; schliesseInfo(); if (plane) planZeigen(); }
+  else { plan = null; szene.vorschau(''); }
   bauleiste();
 }
-$('#baumodusEnde').addEventListener('click', () => { bauTyp = ''; baumodus(); });
+$('#baumodusEnde').addEventListener('click', () => { bauTyp = ''; plan = null; baumodus(); });
+$('#baumodusDreh').addEventListener('click', planDrehen);
+$('#baumodusOk').addEventListener('click', planBauen);
+$('#baumodusZurueck').addEventListener('click', rueckgaengig);
+window.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); rueckgaengig(); return; }
+  if (!plan) return;
+  if (e.key === 'r' || e.key === 'R') planDrehen();
+  else if (e.key === 'Enter') planBauen();
+  else if (e.key === 'Escape') { bauTyp = ''; plan = null; baumodus(); }
+});
 $('#baumodusWeg').addEventListener('click', () => { entfernen = !entfernen; baumodus(); szene.vorschau(''); });
 
 // ---------- Eingabe auf der Karte: wischen, Zwei-Finger-Zoom, antippen ----------
@@ -183,6 +242,9 @@ lw.addEventListener('pointerdown', e => {
   finger.set(e.pointerId, { x: e.clientX, y: e.clientY });
   bewegt = false;
   if (finger.size === 1) wisch = szene.bodenPunkt(e.clientX, e.clientY);
+  planZug = false;
+  if (plan && finger.size === 1) { const f = szene.feldAn(e.clientX, e.clientY), [w, d] = GEB[plan.t].g;
+    if (f) { const fx = Math.floor(f.p.x + 20), fz = Math.floor(f.p.z + 20); planZug = fx >= plan.x - 1 && fx <= plan.x + w && fz >= plan.z - 1 && fz <= plan.z + d; } }
   // Straßen-Baumodus: mit einem Finger ziehen legt Straße statt die Karte zu verschieben
   malen = sim.ZIEHBAR.has(bauTyp) && finger.size === 1 ? new Set() : null;
   if (malen) strasseMalen(e.clientX, e.clientY);
@@ -198,6 +260,7 @@ lw.addEventListener('pointermove', e => {
     if (pinch) szene.zoom(d / pinch); pinch = d; return;
   }
   if (finger.size === 1 && malen) { strasseMalen(e.clientX, e.clientY); return; }
+  if (finger.size === 1 && planZug && plan) { planSetzen(plan.t, e.clientX, e.clientY); return; }
   if (finger.size === 1 && bewegt && wisch) szene.verschieben(wisch, szene.bodenPunkt(e.clientX, e.clientY));
 });
 let malen = null;
@@ -206,19 +269,21 @@ function strasseMalen(px, py) {
   const k = p.x + ',' + p.z; if (malen.has(k)) return; malen.add(k);
   if (entfernen) {   // Straßen korrigieren: vorhandene Straße auf dem Feld abreißen
     const st = S.geb.find(b => b.t === bauTyp && b.x === p.x && b.z === p.z);
-    if (st) { sim.abreissen(S, st.id); allesZeichnen(); ton.sfx('abreissen'); }
+    if (st) { const kopie = JSON.parse(JSON.stringify(st)); sim.abreissen(S, st.id); zurueckMerken({ art: 'abriss', b: kopie, erstattung: {} }); allesZeichnen(); ton.sfx('abreissen'); }
     return;
   }
   const r = sim.bauen(S, welt, bauTyp, p.x, p.z);
-  if (r.ok) { allesZeichnen(); ton.sfx(bauTyp === 'strasse' ? 'strasse' : 'bauen'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
+  if (r.ok) { (malen.ids = malen.ids || []).push(r.b.id); allesZeichnen(); ton.sfx(bauTyp === 'strasse' ? 'strasse' : 'bauen'); } else if (/fehlen/.test(r.grund)) melden(r.grund);
 }
 function fingerWeg(e) {
   const war = finger.has(e.pointerId); finger.delete(e.pointerId);
   if (finger.size < 2) pinch = 0;
   if (finger.size === 1) { const [a] = [...finger.values()]; wisch = szene.bodenPunkt(a.x, a.y); }
-  if (malen && !finger.size) { malen = null; return; }
+  if (malen && !finger.size) { if (malen.ids && malen.ids.length) zurueckMerken({ art: 'bau', ids: malen.ids }); malen = null; return; }
+  if (planZug && !finger.size) { planZug = false; if (bewegt) return; }
   if (!war || bewegt || finger.size) return;
   if (szene.modus() === 'region') { hexInfo(szene.hexAn(e.clientX, e.clientY)); return; }
+  if (bauTyp && !sim.ZIEHBAR.has(bauTyp)) { planSetzen(bauTyp, e.clientX, e.clientY); return; }   // Tippen setzt den Plan, ✓ baut
   if (bauTyp) { bauenAn(bauTyp, e.clientX, e.clientY); return; }
   const id = szene.gebaeudeAn(e.clientX, e.clientY);
   if (id) { oeffneInfo(id); return; }
@@ -366,7 +431,12 @@ $('#info').addEventListener('click', e => {
     else { ton.sfx('klick'); melden(a.dataset.a === 'kaufen' ? `${r.n} Sklaven gekauft (${r.preis} Denare).` : `${r.n} Sklaven freigelassen – sie ziehen als Liberti in die Häuser. Freilassungssteuer: ${zahl(r.steuer)} Denare.`); }
     allesZeichnen();
   }
-  if (a.dataset.a === 'weg') { sim.abreissen(S, b.id); ton.sfx('abreissen'); schliesseInfo(); allesZeichnen(); }
+  if (a.dataset.a === 'weg') {   // Abriss (oder Baustelle abbrechen) – mit Rückgängig (1.11.)
+    const kopie = JSON.parse(JSON.stringify(b)), vor = { ...S.gut }; sim.abreissen(S, b.id);
+    const erstattung = {}; for (const g of Object.keys(S.gut)) if (S.gut[g] > (vor[g] || 0)) erstattung[g] = S.gut[g] - (vor[g] || 0);
+    zurueckMerken({ art: 'abriss', b: kopie, erstattung }); ton.sfx('abreissen'); schliesseInfo(); allesZeichnen();
+    melden(`${GEB[kopie.t].n} ${kopie.bau > 0 ? 'abgebrochen' : 'abgerissen'}.`, rueckgaengig, 'Rückgängig');
+  }
 });
 
 // ---------- Tempo und Menü ----------
@@ -884,6 +954,7 @@ window.SR = {
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
   tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), kasse: () => kasseZeigen(), titel: () => titelZeigen(), zensus: () => zensusZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   bauenFeld: (t, x, z) => bauenFeld(t, { x, z }),
+  plan: (t, x, z) => { bauTyp = t; plan = { t, x, z }; baumodus(); return plan; }, planStand: () => plan && { ...plan, gueltig: planGueltig() }, planDrehen, planBauen, rueckgaengig,
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f), melden,
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

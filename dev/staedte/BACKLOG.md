@@ -405,7 +405,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Ressourcen wie Manor Lords; Bauen mit Bauplänen (verschieben, drehen, bestätigen, rückgängig).
 - [x] **Familie entfernt** (1.11.): Knopf, Kapitel, Ämter, Ansehen, Heirat, Familiengeschäfte; Ereignis-Wahlen mit Familiengeld
       gestrichen, Zensus urteilt Stadt/Versorgung/Rom, Ziel „Splendidissima“ braucht Theater und Thermen statt Prätor. Test 97/97.
-- [ ] **Bausystem mit Bauplänen** (nächstes Paket), dann Ressourcen-Fokus, danach Wissen als Bilderpfad.
+- [x] **Bausystem mit Bauplänen** (1.11.): Karte antippen/ziehen setzt einen Plan (durchscheinend, grün/rot), Plan ziehen oder Feld
+      antippen verschiebt, ↻ dreht (quadratisch 90°, sonst 180°), ✓ baut (nächster Plan gleich daneben), Fertig beendet.
+      ↶ Rückgängig für Bauten, Straßenzüge und Abriss (Baustellen und frische Straßen mit voller Erstattung); Abriss-Meldung
+      antippbar zum Rückgängigmachen; Tasten R/Enter/Esc/Strg+Z. Test 98/98, Bild angesehen. Nicht getestet: iPad-Gesten.
+- [ ] Ressourcen-Fokus (nächstes Paket), danach Wissen als Bilderpfad.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

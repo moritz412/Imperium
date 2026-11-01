@@ -62,8 +62,17 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.mouse.move(kb.x + kb.width / 2, kb.y + kb.height / 2); await p.mouse.down();
   for (let i = 1; i <= 12; i++) await p.mouse.move(kb.x + kb.width / 2 + i * 10, kb.y - i * 30);
   await p.mouse.move(330, 480); await p.mouse.up();
+  const nurPlan = await p.evaluate(() => SR.S.geb.length);   // Ziehen setzt nur den Bauplan (1.11.)
+  const planVor = await p.evaluate(() => SR.planStand());
+  await p.click('#baumodusDreh'); const planDreh = await p.evaluate(() => SR.planStand());
+  await p.click('#baumodusOk'); await p.click('#baumodusEnde');
   const nachher = await p.evaluate(() => SR.S.geb.length);
-  ok('Hütte per Ziehen gebaut', nachher === vorher + 1, `${vorher} → ${nachher}`);
+  ok('Hütte per Ziehen: erst Bauplan (drehbar), dann ✓ baut', nurPlan === vorher && !!planVor && planDreh.dreh !== planVor.dreh && nachher === vorher + 1, `${vorher} → Plan ${nurPlan} → ${nachher} ${JSON.stringify(planDreh)}`);
+  const rz = await p.evaluate(() => { const S = SR.S; S.gut.holz += 60; const n0 = S.geb.length, h0 = S.gut.holz; let pos = null; for (let z = 2; z < 36 && !pos; z++) for (let x = 2; x < 38 && !pos; x++) if (!SR.sim.pruefePlatz(S, SR.welt, 'huette', x, z)) pos = [x, z];
+    SR.plan('huette', pos[0], pos[1]); SR.planBauen(); const n1 = S.geb.length, h1 = S.gut.holz;
+    SR.rueckgaengig(); const n2 = S.geb.length, h2 = S.gut.holz; SR.plan(''); return { n0, n1, n2, kost: h0 - h1, erst: h2 === h0 }; });
+  await p.evaluate(() => { document.querySelector('#baumodusEnde').click(); });
+  ok('Rückgängig nimmt den Bau zurück und erstattet die Baustoffe', rz.n1 === rz.n0 + 1 && rz.n2 === rz.n0 && rz.kost > 0 && rz.erst, JSON.stringify(rz));
 
   // Zwei Jahre laufen lassen, Markt nach dem ersten Herbst
   const lauf = await p.evaluate(() => {

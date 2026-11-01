@@ -74,7 +74,7 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .karte b{font-size:13px}
 .karte small{font-size:11px;color:var(--leise);text-align:center;line-height:1.2}
 
-#baumodus{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;padding:8px 8px 8px 16px;display:flex;align-items:center;gap:12px;font-size:14px;z-index:2}
+#baumodus{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(10px,env(safe-area-inset-bottom)) + 178px);max-width:calc(100vw - 20px);padding:8px 8px 8px 16px;display:flex;align-items:center;gap:12px;font-size:14px;z-index:2}
 #baumodus button{height:40px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:700;padding:0 14px}
 #baumodus button.an{background:#9a4a2b;border-color:#e0603c;color:#fff}
 
@@ -229,3 +229,7 @@ body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
   #ansicht{top:calc(max(10px,env(safe-area-inset-top)) + 128px)!important}
   #auftrag,#info{top:calc(max(10px,env(safe-area-inset-top)) + 128px)!important}
 }
+#baumodus button.haupt{background:var(--gold);color:#2a2016}
+#baumodus button:disabled{opacity:.4}
+#baumodusText{max-width:300px}
+@media (max-width:700px){#baumodus{flex-wrap:wrap}}
