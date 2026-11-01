@@ -345,6 +345,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 - [x] **Zeitleisten aller Regionen + antippbare Meldungen** (1.11.): je Region 4 Wendepunkte mit Vorwarnung (Belagerung/Siedler/
       Aufstand als Prüfungsarten, dazu Entscheidungen); Meldungen zu Bau, Aufstieg, Feuer, Seuche springen beim Antippen zum
       Gebäude. Test 89/89. Nicht getestet: iPad.
+- [x] **Warenstapel am Speicher** (1.11.): vor jedem Speicher die vier vollsten Waren als farbige Stapel, Höhe nach Füllstand
+      (ein Instanced-Mesh). Test 90/90, Bild angesehen. Nicht getestet: iPad.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
       beantwortete jede Seitenanfrage unter /Imperium/ – auch /staedte/ – mit der Index-Seite des Hauptspiels; jetzt bleibt staedte/

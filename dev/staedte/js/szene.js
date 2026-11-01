@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, lagerGrenze, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -503,8 +503,31 @@ export function erzeugeSzene(leinwand, welt) {
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
-    strassenZeichnen(strassen); mauernZeichnen(mauern);
+    strassenZeichnen(strassen); mauernZeichnen(mauern); stapelZeichnen(S);
     laufwege(S);
+  }
+
+  // Warenstapel vor den Speichern (1.11.): die vier vollsten Waren, Höhe nach Füllstand des Lagers
+  const STAPEL_FARBE = { holz: 0x6b4a2a, ziegel: 0xa94c2c, lehm: 0x8a5a3a, getreide: 0xe0c464, mehl: 0xf0e8d6, brot: 0x9a5a2a, fisch: 0x8fa3ad,
+    stein: 0xa8a29a, erz: 0x5a4e48, werkzeug: 0x7a7a80, wein: 0x6a2238, trauben: 0x5a3a6a, oel: 0xc8b048, oliven: 0x6a7a3a, wolle: 0xe8e2d0, tuch: 0xb04a3a, garum: 0x9a7040 };
+  const STAPEL_PLATZ = [[-1.3, 0.8], [-1.02, 0.8], [-0.74, 0.8], [1.33, 0.8]];
+  const stapel = new THREE.InstancedMesh(new THREE.BoxGeometry(0.24, 1, 0.3).translate(0, 0.5, 0), new THREE.MeshLambertMaterial({ color: 0xffffff }), 4 * 60);
+  for (let i = 0; i < 4 * 60; i++) stapel.setColorAt(i, new THREE.Color(0xffffff));   // Farbpuffer vor dem ersten Bild anlegen
+  stapel.count = 0; stapel.castShadow = true; stapel.frustumCulled = false; szene.add(stapel);
+  function stapelZeichnen(S) {
+    const grenze = lagerGrenze(S), waren = Object.keys(STAPEL_FARBE).map(g => [g, (S.gut[g] || 0) / grenze]).filter(([, f]) => f > 0.02).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const sp = S.geb.filter(b => b.t === 'speicher' && !(b.bau > 0)).slice(0, 60), mm = new THREE.Matrix4(), q = new THREE.Quaternion(), farbe = new THREE.Color();
+    let n = 0;
+    for (const b of sp) {
+      const [gw, gd] = groesse(b.t), mitte = weltPos(b.x + gw / 2, b.z + gd / 2), dreh = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), dreh);
+      waren.forEach(([g, f], i) => {
+        const [lx, lz] = STAPEL_PLATZ[i], p = new THREE.Vector3(lx, 0, lz).applyQuaternion(q).add(mitte);
+        stapel.setMatrixAt(n, mm.compose(p, q, new THREE.Vector3(1, 0.06 + 0.32 * Math.min(1, f), 1)));
+        stapel.setColorAt(n++, farbe.setHex(STAPEL_FARBE[g]));
+      });
+    }
+    stapel.count = n; stapel.instanceMatrix.needsUpdate = true; if (stapel.instanceColor) stapel.instanceColor.needsUpdate = true;
   }
 
   // Laufwege (S1.2): Arbeiter zwischen Haus und Betrieb, Träger vom Erzeuger zum Abnehmer (Instancing, Farbe je Figur)
@@ -967,5 +990,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, stapelZahl: () => stapel.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

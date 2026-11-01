@@ -756,6 +756,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.evaluate(() => SR.ansicht(''));
   ok('Ansicht wieder aus', await p.evaluate(() => SR.szene.ansichtZahl() === 0 && document.querySelector('#legende').hidden));
 
+  const stp = await p.evaluate(() => { const S = SR.S; S.gut.holz += 60; S.gut.ziegel += 30; if (!S.geb.some(b => b.t === 'speicher')) { const st = S.geb.find(b => b.t === 'strasse'); let ok = false; for (let r = 1; r < 12 && !ok; r++) for (let dz = -r; dz <= r && !ok; dz++) for (let dx = -r; dx <= r && !ok; dx++) ok = SR.bauen('speicher', st.x + dx, st.z + dz).ok; }
+    const sp = S.geb.filter(b => b.t === 'speicher' && !(b.bau > 0)); S.gut.holz = Math.max(S.gut.holz, 120); S.gut.ziegel = Math.max(S.gut.ziegel, 60); SR.setzeStand(S);
+    if (sp[0]) SR.szene.zentrieren(sp[0].x + 1.5, sp[0].z + 1); return { sp: sp.length, n: SR.szene.stapelZahl() }; });
+  ok('Warenstapel vor den Speichern', stp.sp > 0 && stp.n >= stp.sp * 2 && stp.n <= stp.sp * 4, JSON.stringify(stp));
+  if (BILD) { await p.evaluate(() => SR.szene.zoom(2.2)); await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_lager.png') }); await p.evaluate(() => SR.szene.zoom(1 / 2.2)); }
   if (BILD) { await p.evaluate(() => SR.tempo(0)); await p.waitForTimeout(500); await p.screenshot({ path: BILD }); console.log('  Bild: ' + BILD); }
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
