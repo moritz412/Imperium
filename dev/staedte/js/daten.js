@@ -60,8 +60,8 @@ export const GEB = {
     kosten: { holz: 20 }, sklavenPlatz: 10,
     text: 'Enge Unterkunft für 10 Sklaven. Sklaven arbeiten auf Feldern, in Gruben und Werkstätten, essen Getreidebrei und zahlen keine Steuern.' },
   feld: { n: 'Getreidefeld', kat: 'Nahrung', g: [3, 3], flach: true, wand: 0xd9c26e, sklaven: true,
-    kosten: { holz: 10 }, arbeiter: 3, erzeugt: { getreide: 3 }, ernte: true,
-    text: 'Getreide. Wenig im Frühling, viel im Herbst, nichts im Winter.' },
+    kosten: { holz: 10 }, arbeiter: 3, erzeugt: { getreide: 3 }, ernte: true, ertrag: 32,
+    text: 'Getreide im Jahreslauf: im Frühling pflügen und säen, im Sommer wächst das Korn, im Herbst ernten. Erst die Ernte füllt den Kornspeicher – was im Winter noch auf dem Feld steht, verdirbt.' },
   muehle: { n: 'Mühle', kat: 'Nahrung', g: [2, 2], h: 1.1, wand: 0xc9a27a, dach: 0x8a5a3a, sklaven: true,
     kosten: { holz: 25, ziegel: 10 }, arbeiter: 3, braucht: { getreide: 3 }, erzeugt: { mehl: 3 },
     text: 'Mahlt Getreide zu Mehl.' },
@@ -279,7 +279,7 @@ export const REGIONEN = [
 ];
 
 export const START = {
-  gut: { denare: 220, holz: 130, lehm: 0, ziegel: 30, getreide: 40, mehl: 0, brot: 20, fisch: 0 },
+  gut: { denare: 220, holz: 130, lehm: 0, ziegel: 30, getreide: 80, mehl: 0, brot: 20, fisch: 0 },   // 1.11.: Vorrat der Kolonisten bis zur ersten Ernte
   stimmung: 60,
 };
 
@@ -314,7 +314,7 @@ export const AUFTRAEGE = [
 export const WISSEN_GRUND = 1;
 export const ZWEIGE = ['Landwirtschaft', 'Handwerk', 'Bauwesen', 'Verwaltung & Recht', 'Kultur & Glaube'];
 export const FORSCHUNG = {
-  fruchtwechsel:  { n: 'Fruchtwechsel', zweig: 0, ep: 1, kosten: 30, text: 'Bohnen und Getreide im Wechsel: Felder tragen schon im Frühling volle Ernte.' },
+  fruchtwechsel:  { n: 'Fruchtwechsel', zweig: 0, ep: 1, kosten: 30, text: 'Bohnen und Getreide im Wechsel: Der Boden bleibt fruchtbar – jedes Feld trägt 40 statt 32 Getreide.' },
   villa:          { n: 'Villa rustica', zweig: 0, ep: 1, kosten: 60, braucht: 'fruchtwechsel', text: 'Gehöfte im Umland lassen sich zum Gutshof mit Herrenhaus ausbauen – fast doppelte Ernte.' },
   ziegelbrand:    { n: 'Ziegelbrand', zweig: 1, ep: 1, kosten: 30, text: 'Heißere Öfen: jede Ziegelei brennt 3 statt 2 Ziegel im Monat.' },
   toepferscheibe: { n: 'Töpferscheibe', zweig: 1, ep: 1, kosten: 40, braucht: 'ziegelbrand', text: 'Amphoren und Dolia für die Vorräte: das Lager fasst 50 mehr von jeder Ware.' },

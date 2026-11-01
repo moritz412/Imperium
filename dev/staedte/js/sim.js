@@ -148,8 +148,40 @@ export const jahreszeit = S => Math.floor((S.monat % 12) / 3);
 export const jahr = S => S.jahr0 + Math.floor(S.monat / 12);
 export const einwohner = S => S.geb.reduce((s, b) => s + (b.bew || 0), 0);
 export const def = b => GEB[b.t];
-// Fruchtwechsel (1.11.): Felder tragen schon im Frühling volle Ernte statt der halben
-export const ernteFaktor = (S, js) => js === 0 && hat(S, 'fruchtwechsel') ? 1 : JAHRESZEITEN[js].ernte;
+export const ernteFaktor = (S, js) => JAHRESZEITEN[js].ernte;   // Umland-Betriebe: weiter monatlich nach Jahreszeit
+// Felder im Jahreslauf (1.11., Moritz: „wie Manor Lords“): Frühling (+1. Sommermonat) säen, Sommer wachsen, Herbst ernten, Winter verdirbt der Rest
+export const feldErtrag = S => (hat(S, 'fruchtwechsel') ? 40 : GEB.feld.ertrag);
+export function feldStand(S, b) {
+  const f = b.feld || {}, m = S.monat % 12;
+  if (m >= 9) return 'brach';
+  if (m <= 3) return (f.gesaet || 0) > 0.05 ? 'gesaet' : 'leer';
+  if (m <= 5) return (f.gesaet || 0) > 0.05 ? 'gruen' : 'leer';
+  return (f.gesaet || 0) - (f.geerntet || 0) > 0.05 ? 'reif' : (f.gesaet || 0) > 0.05 ? 'stoppel' : 'leer';
+}
+function feldMonat(S, b, anteil, grenze, meld) {
+  const m = S.monat % 12, f = b.feld = b.feld || { gesaet: 0, geerntet: 0 };
+  if (m === 0) { f.gesaet = 0; f.geerntet = 0; }
+  const pct = x => x >= 0.99 ? 'ganz' : x >= 0.5 ? 'zum größten Teil' : x > 0.05 ? 'zum Teil' : 'noch nicht';
+  const arbeitszeit = m <= 3 || (m >= 6 && m <= 8);
+  if (arbeitszeit && anteil === 0 && (m <= 3 ? f.gesaet < 1 : f.gesaet - f.geerntet > 0.01)) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Feldarbeiter' }); if (m <= 3) return; }
+  if (m <= 3) {
+    if (f.gesaet < 1) { f.gesaet = Math.min(1, f.gesaet + anteil * 0.5); b.status.push({ art: 'feld', text: `Pflügen und säen – ${pct(f.gesaet)} bestellt`, leicht: true }); }
+    else b.status.push({ art: 'feld', text: 'Bestellt – das Korn keimt', leicht: true });
+    if (m === 3 && f.gesaet < 1) b.status.push({ art: 'feld', text: 'Letzter Monat zum Säen!', leicht: true });
+    return;
+  }
+  if (m <= 5) { b.status.push({ art: 'feld', text: f.gesaet > 0.05 ? 'Das Korn wächst' : 'Nicht gesät – dieses Jahr keine Ernte', leicht: true }); return; }
+  if (m <= 8) {
+    const offen = f.gesaet - f.geerntet; if (offen <= 0.01) { b.status.push({ art: 'feld', text: f.gesaet > 0.05 ? 'Abgeerntet' : 'Keine Ernte dieses Jahr', leicht: true }); return; }
+    if (!lagerNah(S, b, 'getreide')) { b.status.push({ art: 'lager', text: `Kein Kornspeicher in ${LAGERWEG} Feldern – die Ernte bleibt auf dem Feld` }); return; }
+    const teil = Math.min(offen, anteil * 0.45); f.geerntet += teil;
+    S.gut.getreide = Math.min(grenze('getreide'), (S.gut.getreide || 0) + teil * feldErtrag(S) * bonus(S, 'feld', 'getreide'));
+    b.status.push({ art: 'feld', text: `Ernte – ${pct(f.geerntet / Math.max(0.01, f.gesaet))} eingebracht`, leicht: true });
+    return;
+  }
+  if (m === 9 && f.gesaet - f.geerntet > 0.05) { mitOrt(meld, 'Ein Teil der Ernte stand im Winter noch auf dem Feld und ist verdorben. Mehr Arbeiter auf die Felder!', b); f.geerntet = f.gesaet; }
+  b.status.push({ art: 'winter', text: 'Winterbrache', leicht: true });
+}
 // Lager in Laufweite (1.11.): fertiger, besetzter Speicher oder das Zeltlager der Kolonisten; alte Spielstände ohne Regel (S.lagerFrei)
 export const LAGERWEG = 16, HALDE = 8;
 export const lagerNah = (S, b, g = 'holz') => S.lagerFrei || S.geb.some(o => ((o.t === lagerTyp(S, g) && o.w > 0 && !(o.bau > 0)) || o.t === 'zeltlager') && abstand(o, b) <= LAGERWEG);
@@ -307,7 +339,8 @@ export function monat(S, welt) {
   const baustellen = S.geb.filter(b => b.bau > 0).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   const betriebe = S.geb.filter(b => GEB[b.t].arbeiter && !(b.bau > 0)).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   for (const b of [...baustellen, ...betriebe]) {
-    const bau = b.bau > 0, brauch = bau ? bauarbeiter(b.t) : Math.min(GEB[b.t].arbeiter, b.soll ?? GEB[b.t].arbeiter);   // b.soll: von Hand begrenzt (1.11.)
+    const bau = b.bau > 0, ruht = b.t === 'feld' && [4, 5, 9, 10, 11].includes(S.monat % 12);   // Felder: Sommer und Winter ohne Feldarbeit
+    const brauch = bau ? bauarbeiter(b.t) : ruht ? 0 : Math.min(GEB[b.t].arbeiter, b.soll ?? GEB[b.t].arbeiter);   // b.soll: von Hand begrenzt (1.11.)
     const nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || bau || GEB[b.t].sklaven) && (!x.lager || bau));
     let n0 = 0; b.w = 0; b.bw = 0; b.von = []; b.einzug = nah.length;
     for (const x of nah.filter(x => x.frei > 0).sort((p, q) => (q.skl ? 1 : 0) - (p.skl ? 1 : 0) || abstand(p.h, b) - abstand(q.h, b))) {
@@ -337,6 +370,7 @@ export function monat(S, welt) {
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
+    if (b.t === 'feld') { feldMonat(S, b, anteil, grenze, meld); continue; }   // Jahreslauf der Felder (1.11.)
     if (b.soll === 0) { b.status.push({ art: 'still', text: 'Stillgelegt – keine Arbeiter zugeteilt', leicht: true }); continue; }
     if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
     if (b.w < Math.min(d.arbeiter, b.soll ?? d.arbeiter)) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${Math.min(d.arbeiter, b.soll ?? d.arbeiter)} Arbeitern`, leicht: true });

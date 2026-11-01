@@ -428,6 +428,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Apulien 0,3, Kampanien 0,2 je Monat, Insula doppelt); ohne Holz frieren die Menschen (Stimmung −6, Abwanderung, Seuchen ×1,5).
       Ab Herbst „Wintervorrat“ im Senatskasten (Brennholz und Nahrung für 3 Monate), Warnung zu Herbstbeginn, früher Senatsauftrag
       „Den ersten Winter vorbereiten“. Test 102/102. Balance-Spieler: erste Winter knapp, kein Erfrieren; Dorf 42 min bei 1×.
+- [x] **Felder im Jahreslauf** (1.11.): Frühling + 1. Sommermonat pflügen/säen, Sommer wächst (keine Feldarbeiter nötig – die gehen
+      anderswohin), Herbst ernten (Getreide erst jetzt in den Kornspeicher), im Winter verdirbt Ungeerntetes; Felder sichtbar
+      braun/Furchen/grün/golden/Stoppeln. Ertrag 32 je Feld und Jahr (Fruchtwechsel 40). Start-Getreide 40 → 80.
+      Test 103/103, Bild angesehen. Balance-Spieler 20 J.: kein Hunger, Dorf 42 min, Kolonie 235 min bei 1× (Ziegel knapp).
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

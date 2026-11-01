@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, lagerGrenze, lagerTyp, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, lagerGrenze, lagerTyp, feldStand, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -324,11 +324,14 @@ export function erzeugeSzene(leinwand, welt) {
     const wand = casa ? CASA.wand : d.wand, dach = casa ? CASA.dach : d.dach, h = casa ? CASA.h : d.h;
     const rand = 0.12, w = gw - rand * 2, tief = gd - rand * 2;
     if (d.flach) {
-      const fuge = t === 'strasse' ? 0 : 0.06, f = new THREE.Mesh(new THREE.BoxGeometry(gw - fuge, t === 'strasse' ? 0.03 : 0.05, gd - fuge), new THREE.MeshLambertMaterial({ color: wand }));
+      const FELD = { leer: [0x8a6a46, 0], gesaet: [0x7a5a3a, 0x5e4430], gruen: [0x7d8f46, 0x5c8a2e], reif: [0xd9c26e, 0xb59e48], stoppel: [0xc4ab72, 0x9c8550], brach: [0x9a8a62, 0] };
+      const fs = t === 'feld' ? (FELD[stufe] || FELD.reif) : null;
+      const fuge = t === 'strasse' ? 0 : 0.06, f = new THREE.Mesh(new THREE.BoxGeometry(gw - fuge, t === 'strasse' ? 0.03 : 0.05, gd - fuge), new THREE.MeshLambertMaterial({ color: fs ? fs[0] : wand }));
       f.position.y = 0.025; f.receiveShadow = true; g.add(f);
-      if (t === 'feld') for (let i = 0; i < 6; i++) {
-        const reihe = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.3, 0.06, 0.08), new THREE.MeshLambertMaterial({ color: 0xb59e48 }));
-        reihe.position.set(0, 0.06, -gd / 2 + 0.35 + i * (gd - 0.7) / 5); g.add(reihe);
+      if (t === 'feld' && fs[1]) for (let i = 0; i < 6; i++) {
+        const hoch = stufe === 'reif' ? 0.16 : stufe === 'gruen' ? 0.11 : 0.06;
+        const reihe = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.3, hoch, stufe === 'gesaet' ? 0.05 : 0.14), new THREE.MeshLambertMaterial({ color: fs[1] }));
+        reihe.position.set(0, 0.03 + hoch / 2, -gd / 2 + 0.35 + i * (gd - 0.7) / 5); g.add(reihe);
       }
       if (t === 'lehmgrube') {
         const grube = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.6, 0.07, gd - 0.6), new THREE.MeshLambertMaterial({ color: 0x7a4f34 }));
@@ -462,11 +465,12 @@ export function erzeugeSzene(leinwand, welt) {
       if (b.t === 'mauer') { mauern.push(b); continue; }        // Stadtmauer ebenso (Phase A)
       da.add(b.id);
       if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
-      const schluessel = b.t + b.stufe + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
+      const st = b.t === 'feld' && !(b.bau > 0) ? feldStand(S, b) : b.stufe;   // Felder im Jahreslauf (1.11.)
+      const schluessel = b.t + st + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
       let o = objekte.get(b.id);
       if (!o || o.schluessel !== schluessel) {
         if (o) gruppe.remove(o.g);
-        const g = verschmelzen(b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, b.stufe));
+        const g = verschmelzen(b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, st));
         const [gw, gd] = groesse(b.t);
         g.position.copy(weltPos(b.x + gw / 2, b.z + gd / 2));
         g.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];
