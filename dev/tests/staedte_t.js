@@ -806,6 +806,10 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   const leiste = await p.evaluate(() => { document.querySelector('#reiter [data-k="Öffentlich"]').click(); const k = document.querySelector('#karten'), c = document.querySelector('#karten .karte');
     const ta = getComputedStyle(c).touchAction, breit = k.scrollWidth > k.clientWidth; k.scrollLeft = 200; return { ta, breit, scroll: k.scrollLeft > 0 }; });
   ok('Bauleiste lässt sich waagerecht verschieben (iPad: Karten erlauben pan-x)', leiste.ta === 'pan-x' && leiste.breit && leiste.scroll, JSON.stringify(leiste));
+  const wf = await p.evaluate(() => { SR.monate(1); const z = document.querySelector('#waren [data-ware="getreide"]'); z.click(); const t = document.querySelector('#info').innerText;
+    const sprung = document.querySelector('#info [data-ziel]'); let offen = false; if (sprung) { sprung.click(); offen = !document.querySelector('#info').hidden && /Getreidefeld|Mühle|Gehöft/.test(document.querySelector('#info h2').textContent); }
+    SR.oeffne(0); return { titel: /Getreide/.test(t), her: /Hergestellt in/.test(t), feld: /Getreidefeld/.test(t), weg: /Gebraucht von/.test(t), offen, delta: SR.S.delta && 'getreide' in SR.S.delta }; });
+  ok('Warenfenster: Herkunft, Verbraucher, Sprung zum Betrieb, Bilanz', wf.titel && wf.her && wf.feld && wf.weg && wf.offen && wf.delta, JSON.stringify(wf));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

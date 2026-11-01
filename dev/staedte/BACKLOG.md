@@ -409,7 +409,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       antippen verschiebt, ↻ dreht (quadratisch 90°, sonst 180°), ✓ baut (nächster Plan gleich daneben), Fertig beendet.
       ↶ Rückgängig für Bauten, Straßenzüge und Abriss (Baustellen und frische Straßen mit voller Erstattung); Abriss-Meldung
       antippbar zum Rückgängigmachen; Tasten R/Enter/Esc/Strg+Z. Test 98/98, Bild angesehen. Nicht getestet: iPad-Gesten.
-- [ ] Ressourcen-Fokus (nächstes Paket), danach Wissen als Bilderpfad.
+- [x] **Ressourcen 1: Trendpfeile + Warenfenster** (1.11.): Kopfleiste zeigt ▲/▼ je Ware (Bilanz letzter Monat); Ware antippen →
+      Bestand/Lager, Bilanz, „reicht noch N Monate“, Hersteller und Verbraucher mit Arbeitsstand und Grund, Antippen springt
+      zum Betrieb. Test 99/99, Bild angesehen.
+- [ ] Ressourcen 2 (Ideen): Arbeiter je Betrieb von Hand verteilen, Lager als Orte (Waren liegen im Speicher, Wege zählen),
+      Engpass-Hinweise auf der Karte. Danach Wissen als Bilderpfad.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

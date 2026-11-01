@@ -275,6 +275,7 @@ const mitOrt = (meld, text, b) => { meld.push(text); if (b) orte.set(text, { id:
 export function monat(S, welt) {
   const meld = []; orte.clear();
   for (const g of Object.keys(WAREN)) S.gut[g] = S.gut[g] || 0;   // neue Waren in alten Spielständen
+  const gutVor = { ...S.gut };   // Warenbilanz des Monats (1.11.: Trendpfeile, Warenfenster)
   const js = jahreszeit(S), grenze = lagerGrenze(S);
   const bew = einwohner(S);
 
@@ -499,6 +500,7 @@ export function monat(S, welt) {
   if (jahreszeit(S) !== altJs) meld.push(JAHRESZEITEN[jahreszeit(S)].n + ' beginnt.');
   if (S.monat % 12 === 6 && S.monat >= 12) meld.push(`Rom erwartet am Ende des Herbstes ${abgabeBetrag(S)} Denare Abgaben.`);
   if (bedarf > 0 && !essen) meld.push('Die Vorräte reichen nicht – die Menschen hungern.');
+  S.delta = {}; for (const g of Object.keys(WAREN)) S.delta[g] = Math.round(((S.gut[g] || 0) - (gutVor[g] || 0)) * 10) / 10;
   return meld;
 }
 

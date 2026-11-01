@@ -233,3 +233,6 @@ body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
 #baumodus button:disabled{opacity:.4}
 #baumodusText{max-width:300px}
 @media (max-width:700px){#baumodus{flex-wrap:wrap}}
+.trend{font-style:normal;font-size:9px;margin-left:2px;vertical-align:2px}.trend.auf{color:#9ccb8e}.trend.ab{color:#f28c6e}
+.warenzeile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--rand);border-radius:10px;padding:8px 10px;color:var(--text);cursor:pointer}
+.warenzeile small{color:var(--leise);font-size:12px}
