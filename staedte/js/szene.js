@@ -992,5 +992,24 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, stapelZahl: () => stapel.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  // Vorschaubilder für die Bauleiste (1.11.): jedes Gebäude einmal klein gerendert, eigener kurzlebiger Renderer
+  const bilder = {};
+  function bilderMachen(typen) {
+    let r; try { r = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true }); } catch (e) { return bilder; }
+    const N = 96; r.setSize(N, N); r.setPixelRatio(1);
+    const sz = new THREE.Scene(); sz.add(new THREE.AmbientLight(0xffffff, 0.62)); const l = new THREE.DirectionalLight(0xfff2dd, 0.75); l.position.set(-3, 6, 4); sz.add(l);
+    const kam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+    for (const t of typen) {
+      if (bilder[t]) continue;
+      let g; try { g = baueMesh(t, 1); } catch (e) { continue; }
+      const box = new THREE.Box3().setFromObject(g), mitte = box.getCenter(new THREE.Vector3()), gr = box.getSize(new THREE.Vector3());
+      const halb = Math.max(gr.x, gr.z) * 0.62 + gr.y * 0.25 + 0.1;
+      Object.assign(kam, { left: -halb, right: halb, top: halb, bottom: -halb }); kam.updateProjectionMatrix();
+      kam.position.copy(mitte).addScaledVector(BLICK, 50); kam.lookAt(mitte);
+      sz.add(g); r.render(sz, kam); bilder[t] = r.domElement.toDataURL('image/png'); sz.remove(g);
+    }
+    r.dispose(); if (r.forceContextLoss) r.forceContextLoss();
+    return bilder;
+  }
+  return { bilderMachen, bilder, laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, stapelZahl: () => stapel.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

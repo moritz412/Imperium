@@ -81,10 +81,10 @@ function kopfleiste() {
 function kostenText(k) { return Object.entries(k).map(([g, n]) => `${WAREN[g].n} ${n}`).join(' · ') || 'frei'; }
 function bauleiste() {
   $('#reiter').innerHTML = KATEGORIEN.map(k => `<button role="tab" aria-selected="${k === reiter}" class="${k === reiter ? 'an' : ''}" data-k="${k}">${k}</button>`).join('');
-  $('#karten').innerHTML = Object.entries(GEB).filter(([, d]) => d.kat === reiter).map(([t, d]) => {
+  $('#karten').innerHTML = Object.entries(GEB).filter(([, d]) => d.kat === reiter).sort(([a], [b]) => sim.gesperrt(S, a) - sim.gesperrt(S, b)).map(([t, d]) => {
     const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26), k = sim.baukosten(S, t), zu = sim.gesperrt(S, t);
     return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, k) ? '' : ' teuer'}${zu ? ' gesperrt' : ''}" data-t="${t}" aria-pressed="${t === bauTyp}">
-      <span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>
+      ${szene.bilder[t] ? `<span class="bild foto"><img src="${szene.bilder[t]}" alt="" draggable="false"></span>` : `<span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>`}
       <b>${d.n}</b><small>${zu ? (d.epoche > sim.epoche(S) ? 'Späte Republik' : 'Erforschen: ' + FORSCHUNG[d.forschung].n) : kostenText(k)}</small></button>`;
   }).join('');
 }
@@ -817,6 +817,7 @@ if ((() => { try { const d = sessionStorage.getItem('staedte_direkt'); sessionSt
 else start.zeigen();
 
 // Für Tests und Fehlersuche
+szene.modelleBereit.then(() => { szene.bilderMachen(Object.keys(GEB).filter(t => GEB[t].kat)); bauleiste(); }).catch(() => {});
 window.SR = {
   get S() { return S; }, welt, sim, GEB,
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },

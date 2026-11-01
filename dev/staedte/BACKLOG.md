@@ -359,6 +359,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Liste in der Chronik. Test 93/93, Bild angesehen.
 - [x] **Texte je Region** (1.11.): Inschriften, Ereignisse, Aufträge, Ruf, Heirat, Umland nennen Stadt, Fluss, Nachbarn und Feind
       der gewählten Region (Platzhalter, gefüllt in `regionSetzen`). Test 94/94.
+- [x] **Bauleiste mit Gebäudebildern** (1.11.): beim Start aus den Modellen gerendert (eigener kurzlebiger Renderer, 96 px),
+      gesperrte Gebäude ans Ende. Test 94/94, Bild angesehen. Nicht getestet: iPad (Zeit fürs Rendern beim Start).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
