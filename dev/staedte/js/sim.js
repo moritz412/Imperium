@@ -80,7 +80,8 @@ export function aufbereiten(S) {
 }
 export function neuesSpiel(rid = REG_ID) {
   regionSetzen(rid);
-  const S = { v: 1, stand: STAND, region: REG_ID, jahr0: REG.jahr0, monat: 2, gut: { ...START.gut, ...REG.start }, geb: [], naechste: 1, stimmung: START.stimmung,
+  const S = { v: 1, stand: STAND, region: REG_ID, jahr0: REG.jahr0, monat: 0,   // Start im ersten Frühlingsmonat (1.11.: Zeit zum Säen)
+    gut: { ...START.gut, ...REG.start }, geb: [], naechste: 1, stimmung: START.stimmung,
     auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true }, land: {} };
   // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
   const welt = erzeugeWelt();
@@ -158,6 +159,7 @@ export function feldStand(S, b) {
   if (m <= 5) return (f.gesaet || 0) > 0.05 ? 'gruen' : 'leer';
   return (f.gesaet || 0) - (f.geerntet || 0) > 0.05 ? 'reif' : (f.gesaet || 0) > 0.05 ? 'stoppel' : 'leer';
 }
+let verdorben = [];
 function feldMonat(S, b, anteil, grenze, meld) {
   const m = S.monat % 12, f = b.feld = b.feld || { gesaet: 0, geerntet: 0 };
   if (m === 0) { f.gesaet = 0; f.geerntet = 0; }
@@ -179,7 +181,7 @@ function feldMonat(S, b, anteil, grenze, meld) {
     b.status.push({ art: 'feld', text: `Ernte – ${pct(f.geerntet / Math.max(0.01, f.gesaet))} eingebracht`, leicht: true });
     return;
   }
-  if (m === 9 && f.gesaet - f.geerntet > 0.05) { mitOrt(meld, 'Ein Teil der Ernte stand im Winter noch auf dem Feld und ist verdorben. Mehr Arbeiter auf die Felder!', b); f.geerntet = f.gesaet; }
+  if (m === 9 && f.gesaet - f.geerntet > 0.05) { verdorben.push(b); f.geerntet = f.gesaet; }
   b.status.push({ art: 'winter', text: 'Winterbrache', leicht: true });
 }
 // Lager in Laufweite (1.11.): fertiger, besetzter Speicher oder das Zeltlager der Kolonisten; alte Spielstände ohne Regel (S.lagerFrei)
@@ -350,10 +352,10 @@ export function monat(S, welt) {
   // Baustellen (Phase A, 1.11.) holen ihre Bauarbeiter zuerst (b.bw, getrennt von b.w); Sklaven dürfen mitbauen
   const baustellen = S.geb.filter(b => b.bau > 0).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   const betriebe = S.geb.filter(b => GEB[b.t].arbeiter && !(b.bau > 0)).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
-  for (const b of [...baustellen, ...betriebe]) {
+  for (const b of [...baustellen, ...betriebe].sort((a, b) => (b.prio ? 1 : 0) - (a.prio ? 1 : 0))) {   // Vorrang gilt auch vor Baustellen (1.11.)
     const bau = b.bau > 0, ruht = b.t === 'feld' && [4, 5, 9, 10, 11].includes(S.monat % 12);   // Felder: Sommer und Winter ohne Feldarbeit
     const brauch = bau ? bauarbeiter(b.t) : ruht ? 0 : Math.min(GEB[b.t].arbeiter, b.soll ?? GEB[b.t].arbeiter);   // b.soll: von Hand begrenzt (1.11.)
-    const nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || bau || GEB[b.t].sklaven) && (!x.lager || bau));
+    const nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || bau || GEB[b.t].sklaven) && (!x.lager || bau || b.t === 'feld'));   // Kolonisten bestellen auch Felder (1.11.)
     let n0 = 0; b.w = 0; b.bw = 0; b.von = []; b.einzug = nah.length;
     for (const x of nah.filter(x => x.frei > 0).sort((p, q) => (q.skl ? 1 : 0) - (p.skl ? 1 : 0) || abstand(p.h, b) - abstand(q.h, b))) {
       if (n0 >= brauch) break;
@@ -416,6 +418,7 @@ export function monat(S, welt) {
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze(g), S.gut[g] + n * faktor * bonus(S, b.t, g));
   }
 
+  if (verdorben.length) { mitOrt(meld, `${verdorben.length === 1 ? 'Auf einem Feld' : `Auf ${verdorben.length} Feldern`} stand im Winter noch Korn und ist verdorben. Mehr Arbeiter auf die Felder!`, verdorben[0]); verdorben = []; }
   // Umland (S2.2): Vermessung schreitet fort, Betriebe liefern
   landMonat(S, js, grenze, meld);
 
@@ -1408,7 +1411,7 @@ export function rat(S) {
 // ---------- Bauzeit (Phase A, 1.11.) ----------
 // Monate mit voller Bauarbeiterschaft: fest (bauzeit in GEB) oder nach Baustoffmenge (1 Monat je 30 Einheiten, 1–4).
 export function bauzeit(t) {
-  const d = GEB[t]; if (t === 'strasse') return 0;
+  const d = GEB[t]; if (t === 'strasse' || t === 'feld') return 0;   // Felder werden nur abgesteckt (1.11.) – die Arbeit ist das Pflügen
   if (d.bauzeit) return d.bauzeit;
   const n = Object.entries(d.kosten).filter(([g]) => g !== 'denare').reduce((s, [, v]) => s + v, 0);
   return Math.max(1, Math.min(4, Math.round(n / 30)));
