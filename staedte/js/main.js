@@ -308,24 +308,7 @@ $('#menue').addEventListener('click', e => {
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
-  if (m === 'hilfe') {
-    b.closest('.menuespalte').querySelector('.klein').outerHTML = `<ol class="hilfe">
-      <li>Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.</li>
-      <li>Wischen verschiebt die Karte, zwei Finger zoomen.</li>
-      <li>Ein Symbol über einem Gebäude zeigt ein Problem. Antippen zeigt die Ursache.</li>
-      <li>Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei.</li>
-      <li>Im Herbst wird geerntet, im Winter wächst nichts – Vorräte anlegen.</li>
-      <li>Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen. Der Markt versorgt nur Häuser an seinen Straßen.</li>
-      <li>Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.</li>
-      <li>Umland: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.</li>
-      <li>Placentia im Westen kauft und verkauft Waren, sobald ein Weg oder Anleger hinführt. Rom will jeden Herbst Abgaben.</li>
-      <li>Gefahren: Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell auf einem Hang).</li>
-      <li>Sklaven: im Sklavenquartier kaufen. Sie arbeiten auf Feldern und in Werkstätten und essen Getreide. Freigelassene werden Plebejer.</li>
-      <li>Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Eine Feuerwache löscht Brände und hält Ordnung. Ansicht „Feuer“ zeigt die Gefahr.</li>
-      <li>Familie (Knopf „Familie“): Ansehen sammeln, gegen die Rivalen zum Ädil und Prätor gewählt werden. Familiengeschäfte füllen das Familienvermögen – auf Kosten der Stadtkasse.</li>
-      <li>Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen. Ansicht „Gesundheit“.</li>
-      <li>Forschung (Knopf „Wissen“): ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.</li></ol>`;
-  }
+  if (m === 'hilfe') { $('#menue').hidden = true; hilfeZeigen(); }
 });
 
 // ---------- Spielschleife ----------
@@ -372,7 +355,7 @@ $('#ereignis').addEventListener('click', e => {
 
 let grenzeGezeigt = -1;
 function allesZeichnen() { if (grenzeGezeigt !== sim.stadtGrenze(S)) { grenzeGezeigt = sim.stadtGrenze(S); szene.grenze(grenzeGezeigt); }
-  szene.abgleichen(S, auswahl); if (S.ereignis && $('#ereignis').hidden) ereignisZeigen(); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+  szene.abgleichen(S, auswahl); if (S.ereignis && $('#ereignis').hidden) ereignisZeigen(); else if (!S.ereignis) $('#ereignis').hidden = true; szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
 // ---------- Umland (S2.1) ----------
 function umland(an) {
@@ -427,6 +410,26 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Hilfe in Kapiteln (1.11.) ----------
+const HILFE = [
+  ['Bedienung', ['Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.', 'Wischen verschiebt die Karte, zwei Finger zoomen. Ein Gebäude antippen öffnet sein Fenster.', 'Ein Symbol über einem Gebäude zeigt ein Problem; im Fenster steht die Ursache.', 'Links: Umland, Familie, Wissen und die Ansichten Wasser, Stimmung, Gesundheit, Feuer, Arbeit.']],
+  ['Stadt', ['Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei. Im Herbst wird geerntet, im Winter wächst nichts.', 'Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen; „Entfernen“ im Straßen-Modus reißt sie ab.', 'Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.', 'Hütte → Casa (Brot, Brunnen, Markt) → Insula (ab Kleinstadt, Schrein, Stein). Markt, Schule, Wache und Speicher kosten Lohn.', 'Gesperrtes Land im Osten antippen: Der Senat gibt es frei.']],
+  ['Umland und Handel', ['Knopf „Umland“: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.', 'Placentia (Westen) und Mantua (Osten) kaufen und verkaufen, sobald ein Weg hinführt. Was du verkaufst, wird dort billiger.', 'Rom verlangt jeden Herbst Abgaben. Pünktlich zahlen hält die Gunst Roms hoch.']],
+  ['Gefahren', ['Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell oder Geschenke an die Insubrer).', 'Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Die Feuerwache löscht, sonst nur manchmal die Nachbarn.', 'Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen.']],
+  ['Bevölkerung', ['Plebejer wohnen in Hütten, Casae und Insulae. Equites leben in der Domus, brauchen Wein und zahlen viel Steuern.', 'Sklaven kauft man im Sklavenquartier. Sie arbeiten auf Feldern und in Werkstätten und essen Getreidebrei. Freigelassene werden Plebejer.']],
+  ['Forschung und Epochen', ['Knopf „Wissen“: ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.', 'Mit Kolonie, 6 Erfindungen und Gunst 50 beginnt die Späte Republik: Wein, Öl, Tuch, Garum, Tempel, Theater.']],
+  ['Familie und Politik', ['Knopf „Familie“: Ansehen sammeln und gegen die Rivalen zum Ädil und Prätor gewählt werden.', 'Familienvermögen und Stadtkasse sind getrennt. Familiengeschäfte füllen das Vermögen – auf Kosten der Stadt.', 'Heirat bringt Bündnisse, Klienten bringen Ansehen, der Sohn lernt beim Rhetor oder dient in der Legion.']],
+  ['Ereignisse und Ziele', ['Ereignisse verlangen eine Entscheidung; die Folgen stehen auf den Knöpfen. Im Menü lassen sie sich abschalten.', 'Feste im Jahreslauf: Cerealia, Ludi Romani, Saturnalien.', 'Senatsaufträge führen durch das Spiel. Erfolge stehen als Inschriften auf dem Forum (Menü).']],
+];
+function hilfeZeigen() {
+  $('#hilfe').innerHTML = `<div class="feld forschungsseite hilfeseite">
+    <button class="schliessen" data-hi="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>So wird gespielt</h2><div class="untertitel">Cremona, 218 v. Chr. – vom Feldlager zur Kolonie</div>
+    <div class="hilfekapitel">${HILFE.map(([t, l]) => `<section><h3 class="fh">${t}</h3><ul>${l.map(x => `<li>${x}</li>`).join('')}</ul></section>`).join('')}</div></div>`;
+  $('#hilfe').hidden = false;
+}
+$('#hilfe').addEventListener('click', e => { if (e.target.id === 'hilfe' || e.target.closest('[data-hi="zu"]')) $('#hilfe').hidden = true; });
+
 // ---------- Inschriften des Forums (1.11.) ----------
 function inschriftenZeigen() {
   const da = S.inschriften || {}, n = INSCHRIFTEN.filter(i => da[i.id] !== undefined).length;
@@ -635,7 +638,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -665,7 +668,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

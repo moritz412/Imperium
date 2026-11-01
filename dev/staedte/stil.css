@@ -171,4 +171,9 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .fkarte.stein{background:linear-gradient(#d8d0be,#c4bba6);border-color:#8a7e66;color:#3a3026}
 .fkarte.stein b{font-family:Cinzel,serif;letter-spacing:1.5px;color:#4a3a28}.fkarte.stein span{color:#4a4030}.fkarte.stein small{color:#6a5a40}
 .fkarte.stein.epoche{opacity:.45}
+/* Hilfe (1.11.) */
+.hilfekapitel{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px}
+.hilfekapitel ul{margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.45;color:#dcd0bc}
+.hilfekapitel li{margin-bottom:4px}
+@media (max-width:820px){.hilfekapitel{grid-template-columns:1fr}}
 

@@ -237,6 +237,10 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       mit Eimerketten (35 %/Monat, Bewohner −25 %), Gallier verwüsten höchstens die 4 Betriebe nächst ihrem Dorf. Danach:
       Dorf nach 43 Monaten (≈ 11 min), Kleinstadt nach 93 (≈ 23 min), keine Brandketten. Ab Jahr 8 Überschuss an Holz/Denaren
       (Spieler baut zu wenig Neues) – nächster Balance-Schritt: mehr Bedarf im Spätspiel. Test 74/74.
+- [x] Hilfe in 8 Kapiteln als eigene Seite (Bedienung, Stadt, Umland und Handel, Gefahren, Bevölkerung, Forschung und Epochen,
+      Familie und Politik, Ereignisse und Ziele). Prüfung: Spielstand aus Stufe 1 (ohne Umland/Familie/Forschung/neue Waren/
+      Drehung) läuft 3 Monate samt allen Seiten ohne Fehler. Dabei behoben: Ereignisfenster blieb nach Wechsel des Spielstands
+      offen. Test 76/76, Bild angesehen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

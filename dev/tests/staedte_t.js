@@ -563,6 +563,23 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { aus: !(h.brand > 0), text: /Eimerketten/.test(m) };
   });
   ok('Feuer: Nachbarn löschen auch ohne Wache mit Eimerketten', eimer.aus && eimer.text, JSON.stringify(eimer));
+  // Alter Spielstand aus Stufe 1 (ohne Umland, Familie, Forschung, neue Waren, dreh) läuft weiter; Hilfe in Kapiteln
+  const alt = await p.evaluate(async () => {
+    const jetzt = SR.S, fehler = [];
+    const A = { v: 1, jahr0: -218, monat: 30, gut: { denare: 300, holz: 100, lehm: 10, ziegel: 40, getreide: 80, mehl: 5, brot: 30 }, naechste: 50, stimmung: 60, auftrag: 4, letzte: {}, versorgt: { brot: true, essen: true },
+      geb: jetzt.geb.filter(b => ['strasse', 'huette', 'feld', 'muehle', 'baeckerei', 'brunnen', 'markt', 'holzfaeller'].includes(b.t)).map(b => ({ id: b.id, t: b.t, x: b.x, z: b.z, w: 0, prio: false, stufe: Math.min(2, b.stufe || 1), bew: b.bew || 0, status: [] })) };
+    A.naechste = Math.max(...A.geb.map(b => b.id)) + 1;
+    try {
+      SR.setzeStand(A); SR.monate(3); SR.familie(); document.querySelector('#familie [data-fa="zu"]').click(); SR.forschung(); document.querySelector('#forschung [data-f="zu"]').click();
+      SR.umland(true); SR.hexInfo(SR.sim.regionKarte()[1]); SR.hexInfo(null); SR.umland(false); SR.inschriften(); document.querySelector('#inschriften [data-in="zu"]').click();
+    } catch (e) { fehler.push(e.message); }
+    const ok = { monat: SR.S.monat, familie: !!SR.S.familie, fisch: SR.S.gut.fisch === 0 || SR.S.gut.fisch > 0, dreh: SR.S.geb.every(b => b.t === 'strasse' || b.dreh !== undefined) };
+    SR.setzeStand(jetzt);
+    SR.hilfe(); const kapitel = document.querySelectorAll('#hilfe section').length; document.querySelector('#hilfe [data-hi="zu"]').click();
+    return { fehler, ...ok, kapitel };
+  });
+  ok('Alter Spielstand aus Stufe 1 läuft weiter (Familie, Waren, Drehung ergänzt)', !alt.fehler.length && alt.monat === 33 && alt.familie && alt.fisch && alt.dreh, JSON.stringify(alt));
+  ok('Hilfe in 8 Kapiteln', alt.kapitel === 8);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
