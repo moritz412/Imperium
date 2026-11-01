@@ -310,7 +310,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
       for (let dz = -4; dz <= 5 && !sch; dz++) for (let dx = -4; dx <= 5 && !sch; dx++) sch = sim.bauen(I, SR.welt, 'schrein', casa.x + dx, casa.z + dz).ok;
       sim.monat(I, SR.welt); ins = sch && casa.stufe === 3 && sim.wohnraum(casa) === 30 ? true : 'Schrein ' + sch + ', Stufe ' + casa.stufe + ', ' + JSON.stringify(casa.status);
     }
-    return { k1, k2, voll, bei, nurErlaubt, hunger, frei, furcht, ins, kopf: document.querySelector('#waren').textContent.includes('Sklaven') };
+    return { k1, k2, voll, bei, nurErlaubt, hunger, frei, furcht, ins, kopf: document.querySelector('#leute').textContent.includes('Sklaven') };
   });
   ok('Sklaven: kaufen, Quartier voll, arbeiten nur auf Feldern/Werkstätten', st3.k1 === 5 && st3.k2 && /voll/.test(st3.voll) && st3.nurErlaubt && st3.kopf, JSON.stringify(st3));
   ok('Sklaven: Hunger, Freilassung mit Steuer, Furcht bei vielen Sklaven', st3.hunger && st3.frei && st3.furcht);

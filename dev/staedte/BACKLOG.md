@@ -241,6 +241,9 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Familie und Politik, Ereignisse und Ziele). Prüfung: Spielstand aus Stufe 1 (ohne Umland/Familie/Forschung/neue Waren/
       Drehung) läuft 3 Monate samt allen Seiten ohne Fehler. Dabei behoben: Ereignisfenster blieb nach Wechsel des Spielstands
       offen. Test 76/76, Bild angesehen.
+- [x] iPad-Formate (Bilder 820×1180 hoch, 1024×768 quer): Warenleiste lief über, Einwohner/Stimmung waren abgeschnitten.
+      Jetzt stehen Einwohner, Sklaven und Stimmung in der Cremona-Kachel, die Warenleiste ist seitlich wischbar, im Hochformat
+      mit kleiner Beschriftung. Familienseite zweispaltig geprüft. Test 76/76. **Nicht getestet:** echtes iPad.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

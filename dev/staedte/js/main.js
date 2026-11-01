@@ -45,10 +45,9 @@ function kopfleiste() {
     const titel = g === 'denare' ? ` title="Unterhalt ${sim.unterhaltSumme(S)} Denare im Monat"` : '';
     return `<div class="ware${knapp}"${titel}><b>${rund(S.gut[g])}</b><small>${WAREN[g].n}${voll}</small></div>`;
   });
-  const st = Math.round(S.stimmung);
-  zellen.push(`<div class="ware"><b>${rund(sim.einwohner(S))}</b><small>Einwohner</small></div>`);
-  const skl = sim.sklaven(S); if (skl) zellen.push(`<div class="ware"><b>${rund(skl)}</b><small>Sklaven</small></div>`);
-  zellen.push(`<div class="ware${st < 40 ? ' knapp' : ''}"><b>${st} %</b><small>Stimmung</small></div>`);
+  const st = Math.round(S.stimmung), skl0 = sim.sklaven(S);
+  $('#leute').textContent = `${rund(sim.einwohner(S))} Einwohner${skl0 ? ' · ' + rund(skl0) + ' Sklaven' : ''} · Stimmung ${st} %`;
+  $('#leute').classList.toggle('knapp', st < 40);
   $('#waren').innerHTML = zellen.join('');
   document.querySelectorAll('.tempo button').forEach(b => b.classList.toggle('an', +b.dataset.tempo === tempo));
   const a = AUFTRAEGE[S.auftrag];
