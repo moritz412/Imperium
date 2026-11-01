@@ -385,6 +385,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Schiffsbrücke 39 n. Chr., Luceria Veteranen des Augustus 27 v. Chr. Test 98/98.
 - [x] **Großes Ziel „Splendidissima“** (1.11.): Metropole, Kaiserzeit, Amphitheater, Prätor → Ehrentitel mit Festseite (Bild, Bilanz),
       Gunst +20, Ansehen +50, danach weiterspielen. Fortschritt in der Chronik. Test 99/99, Bild angesehen.
+- [x] **Testspieler realistischer, Grundstimmung 40** (1.11.): Moritz sah auf den Bildern zu viele Brunnen – lag am Testspieler
+      (setzte Brunnen nahe der Mitte statt am unversorgten Haus: 124 Brunnen für 23 Häuser). Jetzt 10 Brunnen, 3 Märkte für 28 Häuser.
+      Grundstimmung 50 → 40 (Stimmung 79–94 statt dauerhaft 100). Mit Brotkette und Insulae: Kolonie 32 min, Kaiserzeit 64 min –
+      **schnell; Spieltest entscheidet**. Test 99/99.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

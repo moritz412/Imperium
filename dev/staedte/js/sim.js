@@ -400,7 +400,7 @@ export function monat(S, welt) {
   if (S.versorgt.tuch) S.gut.tuch -= tuchBedarf;
 
   // Stimmung und Steuern
-  let ziel = 50 + (S.versorgt.brot ? 20 : essen ? 5 : -35);
+  let ziel = 40 + (S.versorgt.brot ? 20 : essen ? 5 : -35);   // Balance 1.11.: Grundstimmung 40 (vorher 50) – Tempel, Schreine, Thermen werden wichtiger
   if (haeuser) ziel += 15 * wasserN / haeuser + 10 * marktN / haeuser;
   if (skl > SKLAVEN.furcht * Math.max(1, bew)) ziel -= 8;
   if (S.versorgt.tuch) ziel += 6;

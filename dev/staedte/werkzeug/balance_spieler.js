@@ -36,8 +36,10 @@ for (let m = 0; m < JAHRE * 12; m++) {
   if (!S.versorgt.brot && anz('muehle') <= anz('baeckerei') && S.gut.getreide > 40) versuch('muehle');   // Brot fehlt: Kette verlängern
   if (anz('lehmgrube') < 1 + Math.floor(bew / 80)) versuch('lehmgrube');
   if (anz('ziegelei') < anz('lehmgrube')) versuch('ziegelei');
-  if (haeuser.some(h => !sim.inReichweite(S, h, 'brunnen'))) versuch('brunnen');
-  if (haeuser.length >= 3 && haeuser.some(h => !sim.inReichweite(S, h, 'markt'))) versuch('markt');
+  { const ohne = haeuser.find(h => !sim.inReichweite(S, h, 'brunnen'));   // Brunnen neben das unversorgte Haus (vorher: nahe der Mitte → viel zu viele)
+    if (ohne) versuch('brunnen', (x, z) => Math.abs(x - ohne.x) + Math.abs(z - ohne.z) <= 3); }
+  { const ohne = haeuser.length >= 3 && haeuser.find(h => !sim.inReichweite(S, h, 'markt'));
+    if (ohne && anz('markt') < 1 + Math.floor(haeuser.length / 8)) versuch('markt', (x, z) => Math.abs(x - ohne.x) + Math.abs(z - ohne.z) <= 16); }
   if (sim.rang(S) >= 1 && anz('ludus') < 1) versuch('ludus');
   if (S.monat >= 20 && anz('wache') < 1 + Math.floor(haeuser.length / 12)) versuch('wache');
   if (haeuser.length >= 8 && anz('latrine') < Math.floor(haeuser.length / 8)) versuch('latrine');
