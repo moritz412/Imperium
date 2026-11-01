@@ -342,8 +342,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Fenstern, Umland und Handel kommen aus der Region; Hannibal, Trebia, Weidestreit, Insubrer und die Zeitleiste nur in der Po-Ebene.
       Neue Region → Seite lädt einmal neu (neues Gelände), danach direkt ins Spiel. Ansichten-Spalte bei wenig Höhe zweispaltig
       (iPad quer). Test 89/89, Bilder Puteoli und 1024×768 angesehen. Offen: eigene Zeitleisten für die anderen Regionen.
-
-## Später
+- [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
+      der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
+      beantwortete jede Seitenanfrage unter /Imperium/ – auch /staedte/ – mit der Index-Seite des Hauptspiels; jetzt bleibt staedte/
+      ausgenommen (`dev/tools/build.py` und gleichlautend im erzeugten `service-worker.js`). **Nicht getestet:** Offline-Betrieb,
+      „Zum Home-Bildschirm“ auf dem iPad (in Tests ist der Service Worker abgeschaltet).
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·

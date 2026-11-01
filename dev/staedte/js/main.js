@@ -799,3 +799,7 @@ window.SR = {
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
 };
+
+// Offline (Phase E): eigener Service Worker für Städte Roms (Netz zuerst)
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !navigator.webdriver) navigator.serviceWorker.register('sw.js').catch(() => {});
+

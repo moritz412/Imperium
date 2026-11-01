@@ -25,7 +25,7 @@ self.addEventListener('activate',e=>{e.waitUntil((async()=>{
 
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting();});
 
-self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET')return;const p=rel(q.url);if(p===null)return;
+self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET')return;const p=rel(q.url);if(p===null||p.startsWith('staedte/'))return;
   if(q.mode==='navigate'||p===''||p==='index.html'){
     e.respondWith(caches.open(SHELL_CACHE).then(c=>c.match('index.html')).then(r=>r||fetch(q)));return;}
   if(RX.test(p)){e.respondWith((async()=>{const ac=await caches.open(ASSETS);const hit=await ac.match(p);if(hit)return hit;
