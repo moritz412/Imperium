@@ -440,6 +440,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 - [x] **Erstes Jahr spielbar mit Ernte** (1.11., Selbsttest): Felder ohne Baustelle (nur abgesteckt), Start im 1. Frühlingsmonat,
       Kolonisten aus dem Zeltlager bestellen auch Felder, „Vorrang“ gilt auch vor Baustellen; Verderb-Meldung zusammengefasst.
       Frisches Spiel: erste Ernte +32 im Herbst des 1. Jahres. Test 105/105.
+- [x] **Senatsaufträge führen durch die Kernsysteme** (1.11.): Hütten → Feld im Frühling → Holzfäller → Kornspeicher → Winter →
+      Mühle/Bäckerei → … Test 105/105.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

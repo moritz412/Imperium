@@ -294,9 +294,11 @@ const anzahl = (S, t) => S.geb.filter(b => b.t === t).length;
 
 export const AUFTRAEGE = [
   { n: 'Baue zwei Hütten an der Landstraße für die ersten Siedler.', ok: S => anzahl(S, 'huette') >= 2, lohn: { denare: 50, holz: 30 } },
+  { n: 'Lege ein Getreidefeld an – nur was bis zum ersten Sommermonat gesät ist, wird im Herbst geerntet.', ok: S => anzahl(S, 'feld') >= 1, lohn: { denare: 30, getreide: 20 } },
   { n: 'Baue einen Holzfäller am Waldrand.', ok: S => anzahl(S, 'holzfaeller') >= 1, lohn: { denare: 40 } },
+  { n: 'Baue einen Kornspeicher in die Nähe der Felder – die Ernte braucht ein Lager.', ok: S => anzahl(S, 'horreum') >= 1, lohn: { denare: 40, holz: 20 } },
   { n: 'Bereite den ersten Winter vor: 60 Holz (Brennholz) und 60 Getreide oder Brot im Lager.', ok: S => S.gut.holz >= 60 && (S.gut.getreide || 0) + (S.gut.brot || 0) >= 60, lohn: { denare: 50 } },
-  { n: 'Brotkette: Getreidefeld, Mühle und Bäckerei.', ok: S => ['feld', 'muehle', 'baeckerei'].every(t => anzahl(S, t) >= 1), lohn: { denare: 80, ziegel: 20 } },
+  { n: 'Brot: Mühle und Bäckerei verarbeiten das Getreide.', ok: S => ['feld', 'muehle', 'baeckerei'].every(t => anzahl(S, t) >= 1), lohn: { denare: 80, ziegel: 20 } },
   { n: 'Ziegelkette: Lehmgrube und Ziegelei.', ok: S => anzahl(S, 'lehmgrube') >= 1 && anzahl(S, 'ziegelei') >= 1, lohn: { denare: 80 } },
   { n: 'Brunnen und Markt: Lass eine Hütte zur Casa aufsteigen.', ok: S => S.geb.some(b => b.t === 'huette' && b.stufe === 2), lohn: { denare: 120 } },
   { n: 'Siedle 60 Einwohner an.', ok: S => S.geb.reduce((s, b) => s + (b.bew || 0), 0) >= 60, lohn: { denare: 150 } },

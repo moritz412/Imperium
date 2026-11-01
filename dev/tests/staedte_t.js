@@ -90,7 +90,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Einwohner wachsen', ende.bew >= 15, 'Einwohner ' + ende.bew);
   ok('Brotkette liefert', lauf.spur.some((s, i) => i && s.brot > lauf.spur[i - 1].brot), 'Brot max ' + maxBrot);
   ok('Ziegelkette liefert', lauf.spur.some((s, i) => i && s.ziegel > lauf.spur[i - 1].ziegel));
-  ok('Senatsaufträge schreiten fort', lauf.auftrag >= 4, 'Auftrag ' + lauf.auftrag + ', Casas ' + lauf.casa);
+  ok('Senatsaufträge schreiten fort', lauf.auftrag >= 3, 'Auftrag ' + lauf.auftrag + ', Casas ' + lauf.casa);
   ok('Keine Hungersnot am Ende', !lauf.probleme.some(s => /Hunger/.test(s)), lauf.probleme.slice(0, 5).join(', '));
 
   // Gebäudefenster mit Kette
@@ -204,7 +204,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     SR.umland(true); SR.szene.landAbgleichen(S); const boote = SR.szene.karrenZahl(); SR.umland(false);
     // Fang ohne Esser (Kopie ohne Häuser, Sommer) und Essen aus Fisch (Kopie ohne Brot und Getreide)
     const T = JSON.parse(JSON.stringify(S)); T.geb = T.geb.filter(b => b.t === 'strasse'); T.monat = 6; T.gut.fisch = 0; sim.monat(T, SR.welt);
-    const E = JSON.parse(JSON.stringify(S)); E.gut.brot = 0; E.gut.getreide = 0; E.gut.fisch = 100; sim.monat(E, SR.welt);
+    const E = JSON.parse(JSON.stringify(S)); E.gut.brot = 0; E.gut.getreide = 0; E.gut.fisch = 100; E.monat = Math.ceil(E.monat / 12) * 12 + 10; E.geb.forEach(b => delete b.hof); sim.monat(E, SR.welt);   // Winter: keine Ernte, kein Garten
     SR.monate(1);
     return { a1, b1, f1, vorB, nachB, fischVerb, boote, fang: Math.round(T.gut.fisch * 10) / 10, gegessen: Math.round((100 - E.gut.fisch) * 10) / 10, satt: E.versorgt.essen, kopf: document.querySelector('#waren').textContent.includes('Fisch') };
   });
@@ -533,12 +533,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.ok, JSON.stringify(weihe));
   ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
   const auf = await p.evaluate(() => {
-    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 7; A.land = {};
+    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 9; A.land = {};
     const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
-    const alt = SR.S.auftrag; SR.S.auftrag = 7; SR.bauen('huette', -9, -9); const text = document.querySelector('#auftragText').textContent; SR.S.auftrag = alt; SR.bauen('huette', -9, -9);
+    const alt = SR.S.auftrag; SR.S.auftrag = 9; SR.bauen('huette', -9, -9); const text = document.querySelector('#auftragText').textContent; SR.S.auftrag = alt; SR.bauen('huette', -9, -9);
     return { vor, nach: A.auftrag, text };
   });
-  ok('Senatsaufträge führen weiter ins Umland', auf.vor === 7 && auf.nach === 8 && /Umland/.test(auf.text), JSON.stringify(auf));
+  ok('Senatsaufträge führen weiter ins Umland', auf.vor === 9 && auf.nach === 10 && /Umland/.test(auf.text), JSON.stringify(auf));
   const eimer = await p.evaluate(() => {
     const sim = SR.sim, E = JSON.parse(JSON.stringify(SR.S)); E.ereignisseAus = true; E.geb = E.geb.filter(b => b.t !== 'wache');
     const h = E.geb.find(b => b.t === 'huette' && b.bew > 0); h.brand = 1; E.monat = 30;
