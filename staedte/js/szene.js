@@ -529,7 +529,7 @@ export function erzeugeSzene(leinwand, welt) {
 
   // Warenstapel vor den Speichern (1.11.): die vier vollsten Waren, Höhe nach Füllstand des Lagers
   const STAPEL_FARBE = { holz: 0x6b4a2a, ziegel: 0xa94c2c, lehm: 0x8a5a3a, getreide: 0xe0c464, mehl: 0xf0e8d6, brot: 0x9a5a2a, fisch: 0x8fa3ad,
-    stein: 0xa8a29a, erz: 0x5a4e48, werkzeug: 0x7a7a80, wein: 0x6a2238, trauben: 0x5a3a6a, oel: 0xc8b048, oliven: 0x6a7a3a, wolle: 0xe8e2d0, tuch: 0xb04a3a, garum: 0x9a7040 };
+    stein: 0xa8a29a, erz: 0x5a4e48, werkzeug: 0x7a7a80, wein: 0x6a2238, trauben: 0x5a3a6a, oel: 0xc8b048, oliven: 0x6a7a3a, wolle: 0xe8e2d0, tuch: 0xb04a3a, garum: 0x9a7040, sigillata: 0xb5402a };
   const STAPEL_PLATZ = [[-1.3, 0.8], [-1.02, 0.8], [-0.74, 0.8], [1.33, 0.8]];
   const stapel = new THREE.InstancedMesh(new THREE.BoxGeometry(0.24, 1, 0.3).translate(0, 0.5, 0), new THREE.MeshLambertMaterial({ color: 0xffffff }), 4 * 60);
   for (let i = 0; i < 4 * 60; i++) stapel.setColorAt(i, new THREE.Color(0xffffff));   // Farbpuffer vor dem ersten Bild anlegen

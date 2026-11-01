@@ -34,6 +34,7 @@ export const WAREN = {
   wolle:    { n: 'Wolle',    lager: true },
   tuch:     { n: 'Tuch',     lager: true },
   garum:    { n: 'Garum',    lager: true },
+  sigillata: { n: 'Sigillata', lager: true, region: 'etrurien' },   // rotes Tafelgeschirr (Florentia)
 };
 
 export const JAHRESZEITEN = [
@@ -114,6 +115,9 @@ export const GEB = {
   theater: { n: 'Theater', kat: 'Öffentlich', g: [4, 3], h: 0.9, wand: 0xe0d4bc, dach: 0xb5522f, forschung: 'theater',
     kosten: { ziegel: 80, stein: 60, holz: 40 }, arbeiter: 4, unterhalt: 8,
     text: 'Komödien des Plautus und Terenz. Ein bespieltes Theater hebt die Stimmung der ganzen Stadt.' },
+  toepferei: { n: 'Töpferei (Sigillata)', kat: 'Handwerk', g: [2, 2], h: 0.75, wand: 0xc9a27a, dach: 0x9e4e30, region: 'etrurien', sklaven: true,
+    kosten: { holz: 25, ziegel: 15 }, arbeiter: 3, braucht: { lehm: 2, holz: 1 }, erzeugt: { sigillata: 1 },
+    text: 'Terra sigillata: glänzend rotes Tafelgeschirr nach Art von Arretium. Aus Lehm und Holz – teuer im Handel. Nur in Florentia.' },
   // Region (1.11.): Hafen nur in Kampanien, am Wasser – Seehandel mit Alexandria
   hafen: { n: 'Hafen (portus)', kat: 'Öffentlich', g: [4, 3], h: 1.1, wand: 0xd8ccb0, dach: 0xa9482a, region: 'kampanien', amWasser: true, wahrzeichen: true,
     kosten: { stein: 60, holz: 60, ziegel: 40, denare: 200 }, bauzeit: 6, arbeiter: 4, unterhalt: 6,
@@ -187,10 +191,10 @@ export const MANTUA = { q: 5, r: -1, n: 'Mantua', unter: 'Stadt am Mincius · Ha
   text: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
   waren: { holz: { basis: 3, normal: 100 }, getreide: { basis: 2.5, normal: 90 }, fisch: { basis: 2, normal: 120 }, ziegel: { basis: 3.5, normal: 80 },
     stein: { basis: 3, normal: 60 }, erz: { basis: 4, normal: 40 }, werkzeug: { basis: 6, normal: 50 },
-    wein: { basis: 6.5, normal: 30 }, tuch: { basis: 7.5, normal: 40 }, garum: { basis: 11, normal: 40 } } };
+    wein: { basis: 6.5, normal: 30 }, tuch: { basis: 7.5, normal: 40 }, garum: { basis: 11, normal: 40 }, sigillata: { basis: 9, normal: 30 } } };
 // Seehandel (1.11.): Alexandria, nur mit fertigem Hafen in Kampanien
 export const ALEXANDRIA = { n: 'Alexandria', unter: 'Seehandel über den Hafen', text: 'Die größte Hafenstadt der Welt. Getreideschiffe vom Nil, Händler aus dem ganzen Osten – sie zahlen gut für italischen Wein, Öl und Garum.',
-  waren: { getreide: { basis: 1.6, normal: 300 }, wein: { basis: 8.5, normal: 30 }, oel: { basis: 8.5, normal: 30 }, garum: { basis: 13, normal: 30 }, tuch: { basis: 9, normal: 30 }, werkzeug: { basis: 6.5, normal: 40 } } };
+  waren: { getreide: { basis: 1.6, normal: 300 }, wein: { basis: 8.5, normal: 30 }, oel: { basis: 8.5, normal: 30 }, garum: { basis: 13, normal: 30 }, tuch: { basis: 9, normal: 30 }, werkzeug: { basis: 6.5, normal: 40 }, sigillata: { basis: 12, normal: 20 } } };
 // Gallier (1.11.): das Dorf, von dem die Überfälle kommen. Geschenke kaufen Frieden.
 export const GALLIER = { q: -1, r: -4, geschenk: { brot: 40, denare: 60 }, monate: 24 };
 export const HANDEL = {
@@ -199,7 +203,7 @@ export const HANDEL = {
     holz:     { basis: 2, normal: 160 }, lehm: { basis: 1, normal: 120 }, ziegel: { basis: 4, normal: 50 },
     getreide: { basis: 2, normal: 140 }, mehl: { basis: 3, normal: 80 }, brot: { basis: 4, normal: 60 },
     fisch:    { basis: 3, normal: 60 },
-    wein: { basis: 6, normal: 40 }, oel: { basis: 6, normal: 40 }, tuch: { basis: 7, normal: 30 }, garum: { basis: 12, normal: 30 },
+    wein: { basis: 6, normal: 40 }, oel: { basis: 6, normal: 40 }, tuch: { basis: 7, normal: 30 }, garum: { basis: 12, normal: 30 }, sigillata: { basis: 8, normal: 30 },
   },
 };
 // Abgaben an Rom (S2.5): am Ende jedes Herbstes ab dem zweiten Jahr. Gunst Roms (0–100) ändert den Lohn der Senatsaufträge.
@@ -260,7 +264,7 @@ export const REGIONEN = [
   { id: 'kampanien', n: 'Kampanien', stadt: 'Puteoli', lon: 14.1, lat: 40.82, gruendung: '194 v. Chr.', roh: 'Wein, Oliven, Fisch, Puzzolanerde',
     text: 'Hafenstadt am Golf. Puzzolanerde für römischen Beton – und die Erde bebt unter dem Vesuv.', schwer: 'Leicht', aktiv: true },
   { id: 'apulien', n: 'Apulien', stadt: 'Luceria', lon: 15.33, lat: 41.5, gruendung: '314 v. Chr.', roh: 'Oliven, Wolle, Getreide',
-    text: 'Weite Ebenen und Schafweiden, Dürre im Sommer, fern von Rom.', schwer: 'Schwer', aktiv: true },
+    text: 'Weite Ebenen und Schafweiden – apulische Wolle ist berühmt (Schäfereien +50 %). Dürre im Sommer, fern von Rom.', schwer: 'Schwer', aktiv: true },
 ];
 
 export const START = {

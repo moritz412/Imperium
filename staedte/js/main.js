@@ -61,8 +61,8 @@ function melden(text) {
 }
 
 // ---------- Kopfleiste ----------
-const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum'];
-const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum']);   // erscheinen erst, wenn vorhanden
+const ANZEIGE = ['denare', 'holz', 'ziegel', 'lehm', 'getreide', 'mehl', 'brot', 'fisch', 'stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum', 'sigillata'];
+const NUR_WENN_DA = new Set(['stein', 'erz', 'werkzeug', 'trauben', 'wein', 'oliven', 'oel', 'wolle', 'tuch', 'garum', 'sigillata']);   // erscheinen erst, wenn vorhanden
 const rund = n => Math.floor(n || 0).toLocaleString('de-DE');
 function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
@@ -782,7 +782,7 @@ function romInfo() {
 function handelInfo(id = 'placentia') {
   const P = sim.PARTNER[id], offen = sim.handelOffen(S, id), n = HANDEL.menge;
   const d = id === 'placentia' ? { n: P.n, unter: `Nachbarstadt am ${sim.region().fluss} · Handel`, text: REGION_TYPEN.nachbar.text } : P;
-  const zeilen = Object.keys(P.waren).map(g => {
+  const zeilen = Object.keys(P.waren).filter(g => !WAREN[g].region || WAREN[g].region === (S.region || 'po') || S.gut[g] > 0).map(g => {
     const p = sim.preis(S, g, id), rel = p / P.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
     return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · ${P.n}: ${zahl(p)} je Stück, ${wort}</small></div>
       <button class="knopf" data-a="handel" data-p="${id}" data-art="verkauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} verkaufen<small>+${sim.handelSumme(S, g, 'verkauf', id)} Denare</small></button>

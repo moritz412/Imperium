@@ -895,6 +895,7 @@ export function bonus(S, t, g) {
   let m = 1;
   if (g === 'getreide' && hat(S, 'fruchtwechsel')) m *= 1.25;
   if (REG.duerre && (g === 'getreide' || g === 'trauben' || g === 'oliven')) m *= 0.85;   // Apulien: Dürre
+  if (REG_ID === 'apulien' && g === 'wolle') m *= 1.5;   // apulische Wolle (1.11.)
   if (t === 'ziegelei' && hat(S, 'ziegelbrand')) m *= 1.5;
   if (S.ruf === 'kornkammer' && (g === 'getreide' || g === 'brot')) m *= 1.15;
   if (S.ruf === 'handwerk' && GEB[t] && GEB[t].kat === 'Handwerk') m *= 1.15;

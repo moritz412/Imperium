@@ -217,7 +217,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const knoepfe = [...document.querySelectorAll('#info [data-a="handel"]')], ui = { n: knoepfe.length, frei: knoepfe.every(b => !b.disabled), titel: document.querySelector('#info h2').textContent };
     const h0 = S.gut.holz; S.gut.holz += 10; knoepfe[0].click(); ui.klick = Math.round(S.gut.holz) === Math.round(h0);
     SR.hexInfo(null); SR.umland(false);
-    return { pWaren: Object.keys(sim.PARTNER.placentia.waren).length, zu, zuGrund, offen, v: v.ok, plus, billiger: p1 < p0, k: k.ok, mehrZiegel: zi1 - zi0, teurer: z1 > z0, erholt: rueck > p1,
+    return { pWaren: Object.keys(sim.PARTNER.placentia.waren).filter(g => g !== 'sigillata').length, zu, zuGrund, offen, v: v.ok, plus, billiger: p1 < p0, k: k.ok, mehrZiegel: zi1 - zi0, teurer: z1 > z0, erholt: rueck > p1,
       gunstA: A.gunst, mA: /bezahlt/.test(mA), gunstB: B.gunst, mB: /reicht nicht/.test(mB), ui };
   });
   ok('Placentia: Handel erst mit Verbindung, Preise nach Angebot und Nachfrage', !handel.zu && /kein Weg/.test(handel.zuGrund) && handel.offen && handel.v && handel.plus > 0 && handel.billiger && handel.k && handel.mehrZiegel === 10 && handel.teurer && handel.erholt, JSON.stringify(handel));
@@ -385,7 +385,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Ring 4: Steinbruch und Erz, Mantua nur über Land, Handel', r4.stein && r4.erz && !r4.zu && r4.offen && !r4.plOffen && r4.v && r4.kf, JSON.stringify(r4));
   ok('Gallier: Geschenke bringen Frieden, Schmiede macht Werkzeug', r4.gs && r4.fr === 24 && r4.friedlich && r4.schmiede && r4.werkzeug > 0);
-  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 3 * Object.keys(r4.mWaren).length && r4.ui.geschenk, JSON.stringify(r4.ui));
+  ok('Fenster Mantua und Insubrer-Dorf', r4.ui.titel === 'Mantua' && r4.ui.knoepfe === 3 * Object.keys(r4.mWaren).filter(g => g !== 'sigillata').length && r4.ui.geschenk, JSON.stringify(r4.ui));
   // Späte Republik (1.11.): Übergang, Weinberg → Kelter → Wein, Domus der Equites, Archiv
   const ep = await p.evaluate(() => {
     const sim = SR.sim, S = SR.S, kopie = () => JSON.parse(JSON.stringify(S));
@@ -829,6 +829,11 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const verkauf = sim.handeln(K, 'getreide', 'kauf', 'alexandria').ok;
     sim.regionSetzen('po'); return { po, trocken, nass, zu, auf, billig, verkauf }; });
   ok('Hafen nur in Puteoli und am Wasser, Seehandel mit Alexandria', /Puteoli/.test(see.po) && /ans Wasser/.test(see.trocken) && !!see.nass && !see.zu && see.auf && see.billig && see.verkauf, JSON.stringify(see));
+  const reg2 = await p.evaluate(() => { const sim = SR.sim, po = sim.pruefePlatz(SR.S, SR.welt, 'toepferei', 10, 10);
+    sim.regionSetzen('apulien'); const A = sim.neuesSpiel('apulien'), wolle = sim.bonus(A, 'schaeferei', 'wolle');
+    sim.regionSetzen('etrurien'); const E = sim.neuesSpiel('etrurien'), et = sim.pruefePlatz(E, sim.erzeugeWelt('etrurien'), 'toepferei', 0, 0), preis = sim.preis(E, 'sigillata', 'mantua');
+    sim.regionSetzen('po'); return { po, wolle, et, preis }; });
+  ok('Regionen: Töpferei (Sigillata) nur in Florentia, apulische Wolle +50 %', /Florentia/.test(reg2.po) && reg2.wolle >= 1.5 && !/Florentia/.test(reg2.et) && reg2.preis > 8, JSON.stringify(reg2));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

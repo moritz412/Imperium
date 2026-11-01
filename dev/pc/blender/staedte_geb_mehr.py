@@ -1,7 +1,7 @@
 # Städte Roms – weitere Gebäudemodelle (1.11., Cloud). Wird von staedte_geb.py eingelesen und nutzt dessen Grundformen.
 # Vorderseite = −y (zur Kamera), 1 Einheit = 1 Feld, Grundfläche innerhalb der Feldgröße mit Rand.
 
-for _n, _c in (('trauben', (0.25, 0.08, 0.2)), ('garum', (0.4, 0.22, 0.08))):
+for _n, _c in (('trauben', (0.25, 0.08, 0.2)), ('garum', (0.4, 0.22, 0.08)), ('sigillata', (0.55, 0.13, 0.06))):
     PAL[_n] = _c; NAMEN.append(_n); MI[_n] = len(NAMEN) - 1
 
 def saeule(bm, x, y, z0, h, r=0.045, mi="stein_hell", seg=6):
@@ -470,5 +470,21 @@ def hafen():
     for k in range(2): kasten(bm, (-0.1, 0.65, 0.22 + k * 0.1), (0.3, 0.22, 0.09), "stoff_ocker")
     ablegen("hafen", bm)
 
+def toepferei():
+    """Töpferei (Terra sigillata): Werkstatt, runder Brennofen mit Kuppel, Töpferscheibe, Stapel roter Teller und Schalen."""
+    bm = bmesh.new(); werkstatt(bm, "putz_hell")
+    zyl(bm, (0.45, -0.3, 0.04), 0.32, 0.3, 0.3, "backstein", 12)
+    kuppel(bm, (0.45, -0.3, 0.34), 0.3, 0.26, "backstein", 12, 3)
+    kasten(bm, (0.45, -0.62, 0.16), (0.14, 0.02, 0.16), "dunkel")
+    zyl(bm, (0.45, -0.3, 0.58), 0.05, 0.04, 0.12, "stein", 6)
+    zyl(bm, (-0.25, -0.35, 0.04), 0.03, 0.03, 0.18, "holz", 6)            # Töpferscheibe
+    zyl(bm, (-0.25, -0.35, 0.22), 0.12, 0.12, 0.02, "holz_hell", 10)
+    zyl(bm, (-0.25, -0.35, 0.24), 0.05, 0.04, 0.05, "lehm", 8)
+    for i, (x, y) in enumerate(((-0.65, -0.6), (-0.5, -0.65), (-0.6, -0.45))):
+        for k in range(4): zyl(bm, (x, y, 0.04 + k * 0.025), 0.07, 0.08, 0.02, "sigillata", 9)
+    for x in (0.0, 0.12): zyl(bm, (x, -0.68, 0.04), 0.04, 0.06, 0.05, "sigillata", 8)
+    for i, x in enumerate((0.8, 0.88)): stamm(bm, (x, -0.1, 0.06), (x, -0.6, 0.06), 0.035, "holz", 6)
+    ablegen("toepferei", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei): fn()
