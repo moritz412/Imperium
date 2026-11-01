@@ -1119,3 +1119,23 @@ function inschriftenMonat(S, meld) {
 }
 export const thermeNah = (S, b) => S.geb.some(o => o.t === 'thermen' && o.geheizt && o.w > 0 && abstand(o, b) <= GEB.thermen.reichweite);
 
+// ---------- Rat des Verwalters (1.11.): das dringendste Problem mit Vorschlag ----------
+export function rat(S) {
+  const bew = einwohner(S), skl = sklaven(S), haeuser = S.geb.filter(b => b.t === 'huette');
+  if (!haeuser.length) return '';
+  const bedarf = (bew + skl) * ESSEN_JE_MONAT, vorrat = (S.gut.getreide || 0) + (S.gut.brot || 0) + (S.gut.fisch || 0);
+  const ernteBald = jahreszeit(S) === 1 || (jahreszeit(S) === 0 && S.monat % 3 === 2);
+  if (bedarf > 0 && vorrat / bedarf < 3 && !ernteBald) { const m = Math.floor(vorrat / bedarf);
+    return `${m < 1 ? 'Die Vorräte sind aufgebraucht' : `Die Vorräte reichen nur noch ${m} ${m === 1 ? 'Monat' : 'Monate'}`}. Baue Getreidefelder oder Gehöfte – oder kaufe Getreide in Placentia.`; }
+  if (S.gut.denare < (S.letzte.unterhalt || 0) * 2 && S.gut.denare < 30) return 'Die Kasse ist fast leer. Ohne Lohn stehen Markt, Schule und Wache still. Mehr Einwohner bringen mehr Steuern.';
+  const leer = S.geb.filter(b => GEB[b.t].arbeiter && b.w === 0 && !(b.bau > 0) && !b.unbezahlt);
+  if (leer.length) return `${leer.length === 1 ? GEB[leer[0].t].n + ' steht' : leer.length + ' Betriebe stehen'} ohne Arbeiter. ${leer.some(b => b.einzug === 0) ? 'Baue Hütten in höchstens 16 Feldern Entfernung.' : 'Es fehlen Arbeitskräfte: Baue mehr Hütten oder gib wichtigen Betrieben Vorrang.'}`;
+  if ((S.gut.holz || 0) < 15) return 'Holz wird knapp. Baue einen weiteren Holzfäller am Waldrand oder ein Holzfällerlager im Umland.';
+  const ohneWasser = haeuser.filter(h => !inReichweite(S, h, 'brunnen')).length;
+  if (ohneWasser) return `${ohneWasser === 1 ? 'Ein Haus hat' : ohneWasser + ' Häuser haben'} keinen Brunnen in der Nähe. Ansicht „Wasser“ zeigt die Lücken.`;
+  if ((S.letzte.arbeitslos || 0) >= 10) return `${S.letzte.arbeitslos} Menschen finden keine Arbeit. Neue Betriebe in ihrer Nähe bringen Waren und Stimmung.`;
+  if (S.stimmung < 45) return 'Die Stimmung sinkt. Brot statt Getreidebrei, Brunnen, Markt, Schreine und Feste helfen.';
+  if (haeuser.every(h => h.bew >= wohnraum(h)) && S.stimmung >= 40) return 'Alle Häuser sind voll. Neue Hütten bringen neue Siedler.';
+  return '';
+}
+

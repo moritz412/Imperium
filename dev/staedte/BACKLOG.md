@@ -252,6 +252,9 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
 - [x] Chronik der Stadt (Menü): Jahreswerte (Einwohner, Stadtkasse, Stimmung, Ansehen) als Verlaufskurven, darunter die
       letzten 30 Meldungen mit Datum (ohne Jahreszeitwechsel, Wiederholungen als „(3×)“). Startseite: „Weiterspielen“ zeigt
       Rang, Datum, Einwohner und Amt des Spielstands. Test 79/79, Bild angesehen.
+- [x] Rat des Verwalters (unter dem Senatsauftrag): das dringendste Problem mit Vorschlag – Vorräte < 3 Monate (außer kurz vor
+      der Ernte), leere Kasse, Betriebe ohne Arbeiter (Häuser zu weit vs. zu wenig Arbeitskräfte), Holz < 15, Häuser ohne
+      Brunnen, ≥ 10 Arbeitslose, Stimmung < 45, alle Häuser voll. Test 80/80.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

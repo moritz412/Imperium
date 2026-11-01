@@ -54,6 +54,7 @@ function kopfleiste() {
   $('#auftragText').textContent = a ? a.n : 'Alle Aufträge des Senats erfüllt. Cremona gehört dir – das Konsulat wartet in einer späteren Stufe.';
   $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
+  const verwalter = sim.rat(S); $('#ratZeile').textContent = verwalter ? 'Rat des Verwalters: ' + verwalter : ''; $('#ratZeile').hidden = !verwalter;
   const Fa = sim.familieS(S);
   $('#familieZeile').textContent = `Familie der ${Fa.name} · ${AEMTER[Fa.amt].n} · Ansehen ${Math.round(Fa.ansehen)} · Vermögen ${rund(Fa.vermoegen)}`;
   $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';

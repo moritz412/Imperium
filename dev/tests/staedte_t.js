@@ -610,6 +610,15 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { c, t, kurven, zeilen };
   });
   ok('Chronik: Jahreswerte, Kurven, letzte Meldungen', ch.c >= 2 && ch.t >= 3 && ch.kurven === 4 && ch.zeilen === ch.t, JSON.stringify(ch));
+  const rt = await p.evaluate(() => {
+    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.monat = 10; A.gut.getreide = 1; A.gut.brot = 0; A.gut.fisch = 0;
+    const hunger = sim.rat(A); const B = JSON.parse(JSON.stringify(SR.S)); Object.assign(B.gut, { getreide: 999, holz: 2, denare: 999 });
+    B.geb.forEach(b => { if (SR.GEB[b.t].arbeiter) b.w = 1; });
+    const holz = sim.rat(B);
+    SR.bauen('huette', -9, -9); const zeile = document.querySelector('#ratZeile');
+    return { hunger, holz, anzeige: zeile.hidden ? '' : zeile.textContent };
+  });
+  ok('Rat des Verwalters: Vorräte, Holz', /Vorräte (reichen nur noch|sind aufgebraucht)/.test(rt.hunger) && /Holz wird knapp/.test(rt.holz), JSON.stringify(rt));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
