@@ -349,18 +349,62 @@ export function erzeugeSzene(leinwand, welt) {
     const tex = new THREE.CanvasTexture(c); symbolTex.set(art, tex); return tex;
   }
 
+  // Leistung (1.11.): Teile eines Gebäudes zu einem Mesh mit Farben je Ecke verschmelzen → 1 Draw-Call je Gebäude.
+  // Bewegte (Mühlstein), durchsichtige und Flammen-Teile bleiben einzeln.
+  function verschmelzen(g) {
+    g.updateMatrixWorld(true);
+    const pos = [], nor = [], col = [], weg = [], farbe = new THREE.Color();
+    const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), m4 = new THREE.Matrix4();
+    let schatten = false;
+    g.traverse(m => {
+      if (!m.isMesh || m.isInstancedMesh || Array.isArray(m.material) || m.material.transparent || m.userData.dreht || m.userData.drehY || m.userData.flamme !== undefined) return;
+      let anim = false; for (let o = m.parent; o && o !== g; o = o.parent) if (o.userData.dreht || o.userData.drehY) anim = true;
+      if (anim) return;
+      const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
+      geo.applyMatrix4(m4.multiplyMatrices(inv, m.matrixWorld));
+      if (!geo.attributes.normal) geo.computeVertexNormals();
+      const P = geo.attributes.position, N = geo.attributes.normal, C = m.material.vertexColors ? geo.attributes.color : null;
+      farbe.copy(m.material.color || new THREE.Color(1, 1, 1));
+      for (let i = 0; i < P.count; i++) {
+        pos.push(P.getX(i), P.getY(i), P.getZ(i)); nor.push(N.getX(i), N.getY(i), N.getZ(i));
+        if (C) col.push(C.getX(i) * farbe.r, C.getY(i) * farbe.g, C.getZ(i) * farbe.b); else col.push(farbe.r, farbe.g, farbe.b);
+      }
+      schatten = schatten || m.castShadow; weg.push(m);
+    });
+    if (weg.length < 2) return g;
+    for (const m of weg) m.parent.remove(m);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    const ein = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    ein.castShadow = schatten; ein.receiveShadow = true; g.add(ein);
+    return g;
+  }
+  // Straßen als ein Instanced-Mesh
+  let strassenMesh = null, strassenSchluessel = '';
+  function strassenZeichnen(liste) {
+    const k = liste.length + ':' + liste.reduce((s, b) => s + b.x * 41 + b.z * 7, 0);
+    if (k === strassenSchluessel) return; strassenSchluessel = k;
+    if (strassenMesh) { szene.remove(strassenMesh); strassenMesh.geometry.dispose(); }
+    strassenMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.03, 1), new THREE.MeshLambertMaterial({ color: GEB.strasse.wand }), Math.max(1, liste.length));
+    const mm = new THREE.Matrix4();
+    liste.forEach((b, i) => strassenMesh.setMatrixAt(i, mm.makeTranslation(welt0 + b.x + 0.5, 0.025, welt0 + b.z + 0.5)));
+    strassenMesh.count = liste.length; strassenMesh.receiveShadow = true; szene.add(strassenMesh);
+  }
+
   let letzter = null;
   function abgleichen(S, auswahlId) {
     letzter = [S, auswahlId];
     const da = new Set();
+    const strassen = [];
     for (const b of S.geb) {
+      if (b.t === 'strasse') { strassen.push(b); continue; }   // alle Straßen zusammen als ein Instanced-Mesh (1.11.)
       da.add(b.id);
       if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
       const schluessel = b.t + b.stufe + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
       let o = objekte.get(b.id);
       if (!o || o.schluessel !== schluessel) {
         if (o) gruppe.remove(o.g);
-        const g = b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, b.stufe);
+        const g = verschmelzen(b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, b.stufe));
         const [gw, gd] = groesse(b.t);
         g.position.copy(weltPos(b.x + gw / 2, b.z + gd / 2));
         g.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];
@@ -401,6 +445,7 @@ export function erzeugeSzene(leinwand, welt) {
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
+    strassenZeichnen(strassen);
     laufwege(S);
   }
 

@@ -226,6 +226,11 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
 - [x] Senatsaufträge als roter Faden: 6 → 18 Aufträge (Umland vermessen + Gehöft, Feldweg, Schule + Forschungsziel, Handel mit
       Placentia, Feuerwache, Kleinstadt, Latrine + Insula, Späte Republik, Ädil, Basilika, Kolonie, Prätor), Lohn steigend.
       Test 73/73.
+- [x] Leistung: Messskript `dev/staedte/werkzeug/leistung.js [port]` (238 Gebäude + Straßennetz auf 64×40, misst Draw-Calls/
+      Dreiecke, **keine FPS** – Software-Rendering). Vorher 2.875 Draw-Calls, nachher **244** (−92 %) bei gleicher Dreieckszahl
+      (≈ 138.000): jedes Gebäude wird beim Bauen zu einem Mesh mit Farben je Ecke verschmolzen (bewegte/durchsichtige Teile
+      bleiben einzeln), alle Straßen sind ein Instanced-Mesh. Bild vorher/nachher gleich. Test 73/73.
+      **Nicht gemessen:** Bildrate auf dem iPad.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.
