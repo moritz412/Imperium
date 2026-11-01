@@ -63,7 +63,7 @@ export function erzeugeWelt(rid = REG_ID) {
 
 // Spielstand-Revision (1.11.): alte Stände werden beim Laden ergänzt statt verworfen. Bei neuen Pflichtfeldern STAND erhöhen
 // und hier nachtragen.
-export const STAND = 2;
+export const STAND = 3;
 export function aufbereiten(S) {
   if (!S || S.v !== 1 || !Array.isArray(S.geb) || !S.gut) return null;
   S.land = S.land || {}; S.letzte = S.letzte || {}; S.versorgt = S.versorgt || { brot: false, essen: true };
@@ -73,6 +73,7 @@ export function aufbereiten(S) {
   for (const g of Object.keys(WAREN)) S.gut[g] = Number.isFinite(S.gut[g]) ? S.gut[g] : 0;
   if (typeof S.stimmung !== 'number') S.stimmung = START.stimmung;
   if (S.region && !REGION_DATEN[S.region]) S.region = 'po';
+  if ((S.stand || 1) < 3) S.lagerFrei = true;   // Stände vor der Lager-Regel (1.11.) spielen ohne sie weiter
   S.stand = STAND;
   return S;
 }
@@ -148,6 +149,9 @@ export const einwohner = S => S.geb.reduce((s, b) => s + (b.bew || 0), 0);
 export const def = b => GEB[b.t];
 // Fruchtwechsel (1.11.): Felder tragen schon im Frühling volle Ernte statt der halben
 export const ernteFaktor = (S, js) => js === 0 && hat(S, 'fruchtwechsel') ? 1 : JAHRESZEITEN[js].ernte;
+// Lager in Laufweite (1.11.): fertiger, besetzter Speicher oder das Zeltlager der Kolonisten; alte Spielstände ohne Regel (S.lagerFrei)
+export const LAGERWEG = 16, HALDE = 8;
+export const lagerNah = (S, b) => S.lagerFrei || S.geb.some(o => ((o.t === 'speicher' && o.w > 0 && !(o.bau > 0)) || o.t === 'zeltlager') && abstand(o, b) <= LAGERWEG);
 export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
 export const lagerGrenze = S => LAGER_GRUND + (hat(S, 'toepferscheibe') ? 50 : 0) + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
 export const groesse = t => GEB[t].g;
@@ -328,6 +332,18 @@ export function monat(S, welt) {
     if (b.w < Math.min(d.arbeiter, b.soll ?? d.arbeiter)) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${Math.min(d.arbeiter, b.soll ?? d.arbeiter)} Arbeitern`, leicht: true });
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
     if (!d.erzeugt) continue;
+    // Lager als Orte (1.11.): ohne Speicher/Zeltlager in der Nähe bleiben die Waren am Betrieb liegen (Halde bis 8), Rohstoffe gibt es nicht
+    const lager = lagerNah(S, b);
+    if (!lager) {
+      const g0 = Object.keys(d.erzeugt)[0];
+      if (d.braucht) { b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – keine Rohstoffe` }); continue; }
+      if ((b.halde || 0) >= HALDE) { b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – ${WAREN[g0].n} stapelt sich, Arbeit ruht` }); continue; }
+      b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – ${WAREN[g0].n} bleibt hier liegen`, leicht: true });
+      const f0 = anteil * (d.ernte ? ernteFaktor(S, js) : 1);
+      b.halde = Math.min(HALDE, (b.halde || 0) + Object.values(d.erzeugt)[0] * f0 * bonus(S, b.t, g0)); b.haldeGut = g0;
+      continue;
+    }
+    if (b.halde > 0) { S.gut[b.haldeGut] = Math.min(grenze, (S.gut[b.haldeGut] || 0) + b.halde); b.halde = 0; }   // Träger bringen die Halde ins Lager
     let faktor = anteil * (d.ernte ? ernteFaktor(S, js) : 1);
     if (d.ernte && js === 3) b.status.push({ art: 'winter', text: 'Winterruhe', leicht: true });
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) {

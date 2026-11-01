@@ -44,7 +44,8 @@ for (let m = 0; m < JAHRE * 12; m++) {
   if (S.monat >= 20 && anz('wache') < 1 + Math.floor(haeuser.length / 12)) versuch('wache');
   if (haeuser.length >= 8 && anz('latrine') < Math.floor(haeuser.length / 8)) versuch('latrine');
   if (haeuser.length >= 6 && anz('schrein') < 1 && sim.hat(S, 'schreine')) versuch('schrein');
-  if (anz('speicher') < 1 && haeuser.length >= 6) versuch('speicher');
+  { const fern = S.geb.find(b => (b.status || []).some(x => x.art === 'lager'));   // Lager-Regel (1.11.): Speicher dorthin, wo Waren liegen bleiben
+    if (fern) versuch('speicher', (x, z) => Math.abs(x - fern.x) + Math.abs(z - fern.z) <= 10); else if (anz('speicher') < 1 && haeuser.length >= 6) versuch('speicher'); }
   if (sim.rang(S) >= 2 && anz('basilika') < 1) versuch('basilika');   // Wahrzeichen (1.11.: Weg in die Kaiserzeit)
   if (sim.epoche(S) >= 2 && sim.hat(S, 'tempel') && anz('tempel') < 1) versuch('tempel');
   if (sim.epoche(S) >= 3 && sim.hat(S, 'kaiserkult') && anz('augusteum') < 1) versuch('augusteum');

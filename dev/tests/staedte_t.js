@@ -25,7 +25,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.click('.startknoepfe [data-s="neu"]');
   const zu = await p.evaluate(() => document.querySelector('#startseite').hidden && SR.S.region === 'po');
   ok('Startseite: 4 Regionen, Kampanien wählbar, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
-  await p.evaluate(() => { SR.S.ereignisseAus = true; SR.S.sofortBauen = true; });   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
+  await p.evaluate(() => { SR.S.ereignisseAus = true; SR.S.sofortBauen = true; SR.S.lagerFrei = true; });   // lagerFrei: Lager-Regel (1.11.) wird eigens geprüft   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
   await p.evaluate(() => SR.tempo(0));
 
   // S1.3: Landstraße beim Start, Bauen nur an der Straße
@@ -703,7 +703,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     document.querySelector('#chronik [data-ch="zu"]').click(); SR.chronik(); const inChronik = /Zensus/.test(document.querySelector('#chronik').textContent); document.querySelector('#chronik [data-ch="zu"]').click();
     return { meld: /Zensus/.test(m), z: !!z && z.u.length === 3, seite, offen, inChronik, zu: document.querySelector('#chronik').hidden }; });
   ok('Zensus alle fünf Jahre: Bilanz mit drei Urteilen, Seite und Chronik', zen.meld && zen.z && zen.seite === 3 && zen.offen && zen.inChronik && zen.zu, JSON.stringify(zen));
-  ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand === 2 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
+  ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand === 3 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
   ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
   const rgn = await p.evaluate(() => {
     const sim = SR.sim, wasser = w => w.typ.reduce((n, t) => n + (t === 2 ? 1 : 0), 0), wald = w => w.typ.reduce((n, t) => n + (t === 1 ? 1 : 0), 0);
@@ -816,6 +816,14 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const echt = S.geb.find(b => b.t === 'feld'); SR.oeffne(echt.id); document.querySelector('#info [data-a="soll-"]').click(); const ui = echt.soll === SR.GEB.feld.arbeiter - 1 && /zugeteilt/.test(document.querySelector('#info').innerText);
     document.querySelector('#info [data-a="soll+"]').click(); const zurueck = echt.soll === undefined; SR.oeffne(0); return { begrenzt, still, ui, zurueck }; });
   ok('Arbeiter von Hand verteilen: begrenzen, stilllegen, − und + im Fenster', av.begrenzt && av.still && av.ui && av.zurueck, JSON.stringify(av));
+  const lg = await p.evaluate(() => { const sim = SR.sim, L = JSON.parse(JSON.stringify(SR.S)); L.lagerFrei = false; L.ereignisseAus = true;
+    L.geb = L.geb.filter(b => b.t !== 'speicher' && b.t !== 'zeltlager'); const h = L.geb.find(b => b.t === 'holzfaeller' && b.w > 0) || L.geb.find(b => b.t === 'holzfaeller');
+    const holz0 = L.gut.holz; sim.monat(L, SR.welt); const hh = L.geb.find(b => b.id === h.id);
+    const liegt = hh.halde > 0 && hh.status.some(s => s.art === 'lager'), kasseGleich = L.gut.holz <= holz0;
+    L.geb.push({ id: 90010, t: 'speicher', x: h.x + 3, z: h.z, stufe: 1, bew: 0, w: 1, status: [], dreh: 0 }); L.gut.holz = 0;
+    const st = L.geb.find(b => b.id === 90010); sim.monat(L, SR.welt); const hh2 = L.geb.find(b => b.id === h.id);
+    return { liegt, kasseGleich, abgeholt: !(hh2.halde > 0) && L.gut.holz > 0, alt: !!sim.aufbereiten({ ...JSON.parse(JSON.stringify(SR.S)), stand: 2 }).lagerFrei }; });
+  ok('Lager als Orte: ohne Speicher stapelt sich die Ware am Betrieb, mit Speicher wird abgeholt', lg.liegt && lg.kasseGleich && lg.abgeholt && lg.alt, JSON.stringify(lg));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

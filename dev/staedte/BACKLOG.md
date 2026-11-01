@@ -418,7 +418,12 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Fortschrittsbalken; keine Prozent-Boni mehr: Fruchtwechsel = volle Frühlingsernte, Bauhütte = Bautrupp 8 statt 4,
       Steuerlisten → Tabularium (Steueramt, neues Gebäude), Municipium → Curia (Rathaus, neues Gebäude). Blender-Modelle für
       beide. Test 100/100, Bild angesehen.
-- [ ] Ressourcen 3 (Ideen): Lager als Orte (Waren liegen im Speicher, Wege zählen), Engpass-Hinweise auf der Karte.
+- [x] **Lager als Orte, Stufe 1** (1.11.): Betriebe brauchen Speicher/Zeltlager in 16 Feldern; sonst stapelt sich die Ware sichtbar am
+      Betrieb (Halde bis 8, Kisten-Symbol), Rohstoffe gibt es nur mit Lager in der Nähe. Alte Stände ohne Regel (lagerFrei).
+      Balance-Spieler 30 J. (25 s/Monat): Dorf 17 min, Kolonie 72 min, Kaiserzeit 110 min. Test 101/101.
+- [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
+      Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
+      (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

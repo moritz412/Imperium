@@ -368,7 +368,7 @@ export function erzeugeSzene(leinwand, welt) {
   }
 
   // Problem-Symbole als Sprite (gezeichnet, keine Schrift)
-  const FARBE = { still: '#a89f8f',  krank: '#9ccb8e', brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
+  const FARBE = { lager: '#d9a441', still: '#a89f8f',  krank: '#9ccb8e', brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
   function symbol(art) {
     if (symbolTex.has(art)) return symbolTex.get(art);
     const c = document.createElement('canvas'); c.width = c.height = 64;
@@ -379,6 +379,7 @@ export function erzeugeSzene(leinwand, welt) {
     x.strokeStyle = '#1f1a15'; x.fillStyle = '#1f1a15'; x.lineWidth = 3.5; x.lineCap = 'round'; x.lineJoin = 'round';
     x.beginPath();
     if (art === 'arbeiter') { x.arc(32, 22, 6, 0, Math.PI * 2); x.moveTo(20, 42); x.quadraticCurveTo(32, 26, 44, 42); }
+    else if (art === 'lager') { x.rect(20, 22, 24, 18); x.moveTo(20, 28); x.lineTo(44, 28); x.moveTo(32, 22); x.lineTo(32, 16); }   // Kiste
     else if (art === 'still') { x.moveTo(26, 18); x.lineTo(26, 42); x.moveTo(38, 18); x.lineTo(38, 42); }   // stillgelegt: Pause
     else if (art === 'wasser') { x.moveTo(32, 14); x.quadraticCurveTo(46, 32, 42, 38); x.arc(32, 36, 10, 0.2, Math.PI - 0.2); x.quadraticCurveTo(18, 32, 32, 14); }
     else if (art === 'rohstoff') { x.moveTo(26, 16); x.lineTo(38, 16); x.lineTo(35, 22); x.quadraticCurveTo(46, 30, 42, 40); x.lineTo(22, 40); x.quadraticCurveTo(18, 30, 29, 22); x.closePath(); }
@@ -547,6 +548,14 @@ export function erzeugeSzene(leinwand, welt) {
         stapel.setMatrixAt(n, mm.compose(p, q, new THREE.Vector3(1, 0.06 + 0.32 * Math.min(1, f), 1)));
         stapel.setColorAt(n++, farbe.setHex(STAPEL_FARBE[g]));
       });
+    }
+    // Halden an Betrieben ohne Lager in der Nähe (1.11.)
+    for (const b of S.geb) {
+      if (!(b.halde > 0.5) || n >= 4 * 60) continue;
+      const [gw, gd] = groesse(b.t), dreh = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0]; q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), dreh);
+      const p = new THREE.Vector3(gw / 2 - 0.3, 0, gd / 2 - 0.25).applyQuaternion(q).add(weltPos(b.x + gw / 2, b.z + gd / 2));
+      stapel.setMatrixAt(n, mm.compose(p, q, new THREE.Vector3(1.3, 0.06 + 0.06 * b.halde, 1.2)));
+      stapel.setColorAt(n++, farbe.setHex(STAPEL_FARBE[b.haldeGut] || 0xd9c26e));
     }
     stapel.count = n; stapel.instanceMatrix.needsUpdate = true; if (stapel.instanceColor) stapel.instanceColor.needsUpdate = true;
   }
