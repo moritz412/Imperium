@@ -198,4 +198,5 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .stand{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border:1px solid var(--rand);border-radius:11px}
 .stand b,.stand small{grid-column:1 / -1}.stand small{color:var(--leise);font-size:13px}
 .stand.aktiv{border-color:var(--gold);background:rgba(233,180,76,.07)}
-
+/* Ansichten-Spalte bei wenig Höhe zweispaltig (9 Knöpfe, 1.11.) */
+@media (max-height:860px){#ansicht{display:grid;grid-template-columns:repeat(2,64px);gap:4px}#ansicht button{height:54px}}

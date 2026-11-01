@@ -1,17 +1,30 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
 
 // Gelände: Fluss am unteren Rand, Wald links und in einigen Flecken (fest, nicht zufällig je Start)
-export function erzeugeWelt() {
+// ---------- Regionen (Phase E) ----------
+let REG = REGION_DATEN.po, REG_ID = 'po';
+export const region = () => REG;
+export const stadtName = () => REG.stadt;
+export function regionSetzen(id) {
+  REG_ID = REGION_DATEN[id] ? id : 'po'; REG = REGION_DATEN[REG_ID]; regionFelder = null;
+  REGION_TYPEN.stadt.n = REG.stadt; REGION_TYPEN.fluss.n = REG.fluss; REGION_TYPEN.fluss.text = REG.flussText;
+  REGION_TYPEN.nachbar.n = REG.west; REGION_TYPEN.nachbar.text = REG.westText;
+  REGION_TYPEN.gallier.n = REG.dorf; REGION_TYPEN.gallier.text = REG.dorfText;
+  if (PARTNER_OBJ) { PARTNER_OBJ.placentia.n = REG.west; PARTNER_OBJ.mantua.n = REG.ost; PARTNER_OBJ.mantua.text = REG.ostText; PARTNER_OBJ.mantua.unter = `Stadt im Osten · Handel`; }
+}
+let PARTNER_OBJ = null;
+export function erzeugeWelt(rid = REG_ID) {
+  const RW = (REGION_DATEN[rid] || REGION_DATEN.po).welt || {};
   const typ = new Uint8Array(RASTER * TIEFE);
   let s = 7;
   const zufall = () => (s = (s * 16807) % 2147483647) / 2147483647;
   // Reihenfolge wie beim alten 40×40-Gelände (gleiche Zufallsfolge → alte Spielstände passen), danach der Osten
   const feld = (x, z) => {
-    const fluss = 36.5 + Math.sin(x * 0.25) * 1.2;
+    const fluss = (RW.flussZ || 36.5) + Math.sin(x * 0.25) * 1.2;
     let t = GRAS;
     if (z >= fluss) t = WASSER;
     else if (x < 3 + Math.sin(z * 0.4) * 1.5 + zufall() * 1.2) t = WALD;
@@ -25,13 +38,15 @@ export function erzeugeWelt() {
       if (Math.hypot(x - cx, z - cz) < r + zufall() * 0.8 && typ[z * RASTER + x] === GRAS) typ[z * RASTER + x] = WALD;
     }
   });
-  flecken([[30, 5, 3.5], [12, 4, 2.5], [33, 24, 2.8]], [0, 40]);
-  flecken([[49, 4, 3], [60, 15, 3.5], [55, 29, 2.5]], [40, RASTER]);
+  flecken(RW.wenigWald ? [[30, 5, 2]] : [[30, 5, 3.5], [12, 4, 2.5], [33, 24, 2.8], ...(RW.wald || [])], [0, 40]);
+  flecken(RW.wenigWald ? [[55, 6, 2]] : [[49, 4, 3], [60, 15, 3.5], [55, 29, 2.5]], [40, RASTER]);
+  if (RW.wenigWald) for (let z = 0; z < TIEFE; z++) for (let x = 0; x < 2; x++) if (typ[z * RASTER + x] === WALD && (x + z) % 2) typ[z * RASTER + x] = GRAS;
   const w = { typ }; mauerWelt = w; return w;
 }
 
-export function neuesSpiel() {
-  const S = { v: 1, jahr0: -218, monat: 2, gut: { ...START.gut }, geb: [], naechste: 1, stimmung: START.stimmung,
+export function neuesSpiel(rid = REG_ID) {
+  regionSetzen(rid);
+  const S = { v: 1, region: REG_ID, jahr0: REG.jahr0, monat: 2, gut: { ...START.gut, ...REG.start }, geb: [], naechste: 1, stimmung: START.stimmung,
     auftrag: 0, letzte: {}, versorgt: { brot: false, essen: true }, land: {} };
   // Landstraße quer durch das Bauland (S1.3), an ihr entstehen die ersten Häuser
   const welt = erzeugeWelt();
@@ -140,7 +155,7 @@ export function fehlendeKosten(S, kosten) {
 
 export function bauen(S, welt, t, x, z) {
   if (gesperrt(S, t)) return { ok: false, grund: sperrGrund(S, t) };
-  if (GEB[t].wahrzeichen && S.geb.some(b => b.t === t)) return { ok: false, grund: `Cremona hat schon eine ${GEB[t].n}` };
+  if (GEB[t].wahrzeichen && S.geb.some(b => b.t === t)) return { ok: false, grund: `${REG.stadt} hat schon eine ${GEB[t].n}` };
   if (GEB[t].rang && rang(S) < GEB[t].rang) return { ok: false, grund: `Erst ab Stadtrang ${RAENGE[GEB[t].rang].n}` };
   const grund = pruefePlatz(S, welt, t, x, z);
   if (grund) return { ok: false, grund };
@@ -385,7 +400,7 @@ export function monat(S, welt) {
 
   // Stadtrang steigt mit den Einwohnern (fällt nicht zurück)
   const r = rang(S);
-  if (r > (S.rang || 0)) { S.rang = r; meld.push(`Cremona ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
+  if (r > (S.rang || 0)) { S.rang = r; meld.push(`${REG.stadt} ist jetzt ${RAENGE[r].art} ${RAENGE[r].n}!`); }
 
   feuerMonat(S, meld);
   seucheMonat(S, meld);
@@ -541,6 +556,15 @@ export function erzeugeRegion() {
     else typ = z4() < 0.65 ? 'acker' : 'weide';
     felder.push({ q, r, typ });
   }
+  // Regionen (Phase E): Gelände umfärben (fest je Feld)
+  for (const f of felder) {
+    const h = ((f.q + 9) * 7 + (f.r + 9) * 13) % 10;
+    if (REG.hang && f.typ === 'acker' && h < 4) f.typ = 'hang';
+    if (REG.hang && f.typ === 'hang' && h >= 7) f.typ = 'stein';
+    if (REG.duerre && f.typ === 'wald' && h < 7) f.typ = 'weide';
+    if (REG.duerre && f.typ === 'acker' && h < 2) f.typ = 'weide';
+    if (REG.meer && f.typ === 'lehm' && h < 5) f.typ = 'acker';
+  }
   return felder;
 }
 
@@ -679,18 +703,18 @@ function gefahren(S, meld) {
   if (m >= G.hochwasser.ab && m % 12 === G.hochwasser.monat && wurf(S, 1001) < G.hochwasser.chance) {
     const nass = betriebe.filter(f => amFluss(f) && !land[landKey(f)].deich);
     nass.forEach(f => stoeren(land[landKey(f)], 'hochwasser', G.hochwasser.monate));
-    meld.push('Hochwasser am Padus! ' + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
+    meld.push(`Hochwasser am ${REG.fluss}! ` + (nass.length ? `${nass.length === 1 ? 'Ein Betrieb steht' : nass.length + ' Betriebe stehen'} unter Wasser.` : 'Die Aue ist überflutet, aber kein Betrieb ist betroffen.'));
   }
   if (S.frieden > 0) S.frieden--;
   else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && einwohner(S) >= G.gallier.einwohner && wurf(S, 1002) < G.gallier.chance * (S.familie && eigenschaft(S.familie, 'Veteran') ? 0.5 : 1)) {
-    if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
+    if (hatKastell(S)) { meld.push(`${REG.feind} ziehen heran – die Besatzung des Kastells schlägt sie zurück.`); return; }
     const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5).sort((a, b) => hexAbstand(a, gallierFeld) - hexAbstand(b, gallierFeld)).slice(0, 4);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
     const offen = 1 - mauerSchutz(S);   // Stadtmauer: geschützter Anteil der Häuser bleibt verschont
     for (const g of ['getreide', 'holz']) S.gut[g] = (S.gut[g] || 0) * (1 - G.gallier.raub * offen);
     S.stimmung = Math.max(0, S.stimmung - G.gallier.stimmung * offen);
-    meld.push(offen < 0.05 ? `Gallier fallen ins Umland ein${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''} – doch die Stadtmauer hält, die Stadt bleibt verschont.`
-      : `Gallier fallen aus dem Norden ein! Sie rauben Getreide und Holz${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''}. Kastell oder Stadtmauer hielten sie ab.`);
+    meld.push(offen < 0.05 ? `${REG.feind} fallen ins Umland ein${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''} – doch die Stadtmauer hält, die Stadt bleibt verschont.`
+      : `${REG.feind} fallen ein! Sie rauben Getreide und Holz${nord.length ? ' und verwüsten ' + nord.length + ' Betriebe' : ''}. Kastell oder Stadtmauer hielten sie ab.`);
   }
 }
 
@@ -702,6 +726,7 @@ export const sonderFelder = () => [nachbarFeld, mantuaFeld, gallierFeld];
 export const GALLIER_GESCHENK = GALLIER.geschenk;
 // Handelspartner: Placentia (Fluss oder Weg) und Mantua (nur Weg)
 export const PARTNER = { placentia: { ...NACHBAR, n: 'Placentia', anleger: true, waren: HANDEL.waren }, mantua: { ...MANTUA, anleger: false } };
+PARTNER_OBJ = PARTNER; regionSetzen(REG_ID);
 export function handelOffen(S, id = 'placentia') {
   const p = PARTNER[id], netz = wegNetz(S);
   if (p.anleger && regionKarte().some(f => istAnleger(S, f) && netz.has(landKey(f)))) return true;   // Boote fahren flussaufwärts
@@ -793,6 +818,7 @@ export function baukosten(S, t) {
 export function bonus(S, t, g) {
   let m = 1;
   if (g === 'getreide' && hat(S, 'fruchtwechsel')) m *= 1.25;
+  if (REG.duerre && (g === 'getreide' || g === 'trauben' || g === 'oliven')) m *= 0.85;   // Apulien: Dürre
   if (t === 'ziegelei' && hat(S, 'ziegelbrand')) m *= 1.5;
   if (S.ruf === 'kornkammer' && (g === 'getreide' || g === 'brot')) m *= 1.15;
   if (S.ruf === 'handwerk' && GEB[t] && GEB[t].kat === 'Handwerk') m *= 1.15;
@@ -1076,11 +1102,12 @@ export const ereignis = (id, S) => id && id.startsWith('g:') && S
 function ereignisMonat(S) {
   if (S.ereignis || S.ereignisseAus) return;
   const log = S.ereignisLog = S.ereignisLog || {};
-  const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined)
+  const po = !S.region || S.region === 'po';
+  const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined && (po || !e.nurPo))
     || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
   if (fest) { S.ereignis = fest.id; return; }
   if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
-  const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
+  const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && (po || !e.nurPo) && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
   if (moegl.length) S.ereignis = moegl[Math.floor(wurf(S, 4243) * moegl.length)].id;
 }
 export function wahlMoeglich(S, w) {
@@ -1233,7 +1260,7 @@ export function geschichteKommend(S) {
   return { g, monate: Math.max(0, geschichteMonatVon(S, g) - S.monat) };
 }
 function geschichteMonat(S, meld) {
-  const art = S.geschichte || 'an'; if (art === 'aus') return;
+  const art = S.geschichte || 'an'; if (art === 'aus' || (S.region && S.region !== 'po')) return;   // Zeitleiste: nur Po-Ebene
   const log = S.gesch = S.gesch || {};
   for (const g of GESCHICHTE) {
     const m = geschichteMonatVon(S, g);
@@ -1295,7 +1322,7 @@ function praefektMonat(S, meld) {
     S.praefekt = PRAEFEKT.monate; const F = familieS(S); F.amt = 0; F.ansehen *= 0.7;
     if (S.ereignisseAus) { meld.push('Ein Präfekt aus Rom übernimmt die Verwaltung (Steuern −30 %, die Valerier verlieren ihr Amt).'); return; }
     Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
-      gText: 'Der Senat hat das Vertrauen in Cremona verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
+      gText: 'Der Senat hat das Vertrauen in die Stadt verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
   }
 }
 
@@ -1315,7 +1342,7 @@ export function rufWaehlen(S, id) {
   if (S.ruf) return { ok: false, grund: 'Der Ruf der Stadt steht schon fest' };
   if (rang(S) < 2) return { ok: false, grund: 'Erst ab der Kleinstadt' };
   if (!RUF[id]) return { ok: false, grund: 'Unbekannt' };
-  S.ruf = id; return { ok: true, text: `Cremona wird bekannt als ${RUF[id].n}.` };
+  S.ruf = id; return { ok: true, text: `${REG.stadt} wird bekannt als ${RUF[id].n}.` };
 }
 export const vertragPreis = (id, g) => Math.round(PARTNER[id].waren[g].basis * VERTRAG.preis * VERTRAG.menge);
 export function vertragUmschalten(S, id, g) {

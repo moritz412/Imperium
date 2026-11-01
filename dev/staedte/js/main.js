@@ -10,8 +10,9 @@ const slotKey = n => n === 1 ? 'staedte_roms.v1' : 'staedte_roms.v1.s' + n;
 let slot = (() => { try { return +localStorage.getItem('staedte_slot') || 1; } catch (e) { return 1; } })();
 const SPEICHER_VON = () => slotKey(slot);
 const $ = s => document.querySelector(s);
-const welt = sim.erzeugeWelt();
 let S = laden() || sim.neuesSpiel();
+sim.regionSetzen(S.region || 'po');
+const welt = sim.erzeugeWelt(S.region || 'po');
 let tempo = 1, uhr = 0, auswahl = 0, bauTyp = '', reiter = 'Wohnen', entfernen = false;
 const szene = erzeugeSzene($('#welt'), welt);
 szene.zentrieren(20, 20);
@@ -57,7 +58,8 @@ function kopfleiste() {
   $('#waren').innerHTML = zellen.join('');
   document.querySelectorAll('.tempo button').forEach(b => b.classList.toggle('an', +b.dataset.tempo === tempo));
   const a = AUFTRAEGE[S.auftrag];
-  $('#auftragText').textContent = a ? a.n : 'Alle Aufträge des Senats erfüllt. Cremona gehört dir – das Konsulat wartet in einer späteren Stufe.';
+  $('#auftragText').textContent = a ? a.n : `Alle Aufträge des Senats erfüllt. ${sim.stadtName()} gehört dir – das Konsulat wartet in einer späteren Stufe.`;
+  $('.stadt b').textContent = sim.stadtName().toUpperCase();
   $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
   const verwalter = sim.rat(S); $('#ratZeile').textContent = verwalter ? 'Rat des Verwalters: ' + verwalter : ''; $('#ratZeile').hidden = !verwalter;
@@ -406,7 +408,7 @@ function umland(an) {
   document.body.classList.toggle('umland', an);
   const k = $('#ansicht [data-umland]'); k.classList.toggle('an', an); k.setAttribute('aria-pressed', an);
   k.querySelector('small').textContent = an ? 'Stadt' : 'Umland';
-  if (an) melden('Das Umland von Cremona. Tippe ein Feld an.');
+  if (an) melden(`Das Umland von ${sim.stadtName()}. Tippe ein Feld an.`);
 }
 let hexWahl = null;
 function hexInfo(f) {
@@ -505,7 +507,7 @@ function chronikZeigen() {
   const c = S.chronik || [], t = S.tagebuch || [];
   $('#chronik').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    ${buchReiter('chronik')}<h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} Cremona · Stand am Ende jedes Jahres</div>
+    ${buchReiter('chronik')}<h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} ${sim.stadtName()} · Stand am Ende jedes Jahres</div>
     <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}${kurve(c, 'a', 'Ansehen der Familie', '#f28c6e')}</div>
     <h3 class="fh">Zuletzt geschehen</h3>
     ${t.length ? t.map(([d, x]) => `<div class="zeile"><span>${x}</span><b>${d}</b></div>`).join('') : '<p class="fp">Noch nichts Erwähnenswertes.</p>'}</div>`;
@@ -517,8 +519,8 @@ $('#chronik').addEventListener('click', e => { if (e.target.id === 'chronik' || 
 const HILFE = [
   ['Bedienung', ['Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.', 'Wischen verschiebt die Karte, zwei Finger zoomen. Ein Gebäude antippen öffnet sein Fenster.', 'Ein Symbol über einem Gebäude zeigt ein Problem; im Fenster steht die Ursache.', 'Links: Umland, Familie, Wissen und die Ansichten Wasser, Stimmung, Gesundheit, Feuer, Arbeit.']],
   ['Stadt', ['Brot: Getreidefeld → Mühle → Bäckerei. Ziegel: Lehmgrube → Ziegelei. Im Herbst wird geerntet, im Winter wächst nichts.', 'Jedes Gebäude braucht eine Straße vor der Tür. Straßen legt man durch Ziehen; „Entfernen“ im Straßen-Modus reißt sie ab.', 'Arbeiter gehen zu Fuß: Betriebe brauchen Häuser in höchstens 16 Feldern Entfernung.', 'Hütte → Casa (Brot, Brunnen, Markt) → Insula (ab Kleinstadt, Schrein, Stein). Markt, Schule, Wache und Speicher kosten Lohn.', 'Gesperrtes Land im Osten antippen: Der Senat gibt es frei.']],
-  ['Umland und Handel', ['Knopf „Umland“: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Padus verbinden per Boot.', 'Placentia (Westen) und Mantua (Osten) kaufen und verkaufen, sobald ein Weg hinführt. Was du verkaufst, wird dort billiger.', 'Rom verlangt jeden Herbst Abgaben. Pünktlich zahlen hält die Gunst Roms hoch.']],
-  ['Gefahren', ['Räuber plündern ferne Betriebe (Wachturm), der Padus tritt im Frühling über die Ufer (Deich), Gallier kommen aus dem Norden (Kastell oder Geschenke an die Insubrer).', 'Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Die Feuerwache löscht, sonst nur manchmal die Nachbarn.', 'Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen.']],
+  ['Umland und Handel', ['Knopf „Umland“: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Fluss verbinden per Boot.', 'Placentia (Westen) und Mantua (Osten) kaufen und verkaufen, sobald ein Weg hinführt. Was du verkaufst, wird dort billiger.', 'Rom verlangt jeden Herbst Abgaben. Pünktlich zahlen hält die Gunst Roms hoch.']],
+  ['Gefahren', ['Räuber plündern ferne Betriebe (Wachturm), der Fluss tritt im Frühling über die Ufer (Deich), Feinde kommen aus dem Norden (Kastell, Stadtmauer oder Geschenke an ihr Dorf).', 'Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Die Feuerwache löscht, sonst nur manchmal die Nachbarn.', 'Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen.']],
   ['Bevölkerung', ['Plebejer wohnen in Hütten, Casae und Insulae. Equites leben in der Domus, brauchen Wein und zahlen viel Steuern.', 'Sklaven kauft man im Sklavenquartier. Sie arbeiten auf Feldern und in Werkstätten und essen Getreidebrei. Freigelassene werden Plebejer.']],
   ['Forschung und Epochen', ['Knopf „Wissen“: ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.', 'Mit Kolonie, 6 Erfindungen und Gunst 50 beginnt die Späte Republik: Wein, Öl, Tuch, Garum, Tempel, Theater.']],
   ['Familie und Politik', ['Knopf „Familie“: Ansehen sammeln und gegen die Rivalen zum Ädil und Prätor gewählt werden.', 'Familienvermögen und Stadtkasse sind getrennt. Familiengeschäfte füllen das Vermögen – auf Kosten der Stadt.', 'Heirat bringt Bündnisse, Klienten bringen Ansehen, der Sohn lernt beim Rhetor oder dient in der Legion.']],
@@ -527,7 +529,7 @@ const HILFE = [
 function hilfeZeigen() {
   $('#hilfe').innerHTML = `<div class="feld forschungsseite hilfeseite">
     <button class="schliessen" data-hi="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    ${buchReiter('hilfe')}<h2>So wird gespielt</h2><div class="untertitel">Cremona, 218 v. Chr. – vom Feldlager zur Kolonie</div>
+    ${buchReiter('hilfe')}<h2>So wird gespielt</h2><div class="untertitel">${sim.stadtName()}, ${-S.jahr0} v. Chr. – vom Feldlager zur Kolonie</div>
     <div class="hilfekapitel">${HILFE.map(([t, l]) => `<section><h3 class="fh">${t}</h3><ul>${l.map(x => `<li>${x}</li>`).join('')}</ul></section>`).join('')}</div></div>`;
   $('#hilfe').hidden = false;
 }
@@ -651,7 +653,7 @@ $('#forschung').addEventListener('click', e => {
   if (b && b.dataset.f === 'epoche') {
     const r = sim.epocheWechseln(S);
     if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
-    ton.sfx('aufstieg'); melden('Die Späte Republik beginnt. Cremona ist eine blühende Kolonie – neue Erfindungen und Bauten warten.');
+    ton.sfx('aufstieg'); melden(`Die Späte Republik beginnt. ${sim.stadtName()} ist eine blühende Kolonie – neue Erfindungen und Bauten warten.`);
     forschungZeigen(); allesZeichnen(); return;
   }
   if (!b) { if (e.target.id === 'forschung') $('#forschung').hidden = true; return; }
@@ -662,7 +664,7 @@ $('#forschung').addEventListener('click', e => {
 });
 
 // ---------- Gefahren (S2.6) ----------
-const STOER = { raeuber: 'Von Räubern geplündert', hochwasser: 'Vom Hochwasser überflutet', gallier: 'Von Galliern verwüstet' };
+const STOER = { raeuber: 'Von Räubern geplündert', hochwasser: 'Vom Hochwasser überflutet', gallier: 'Von Feinden verwüstet' };
 function schutzInfo(f, l, bt) {
   let h = '';
   const knopf = t => `<button class="knopf" data-a="schutz" data-t="${t}">${SCHUTZ[t].n} bauen (${kostenText(SCHUTZ[t].kosten)})</button>`;
@@ -680,9 +682,9 @@ function schutzInfo(f, l, bt) {
 function romInfo() {
   const gu = Math.round(sim.gunst(S)), wort = gu >= 70 ? 'wohlgesonnen' : gu >= 40 ? 'abwartend' : 'verärgert';
   return `<div class="zeile"><span>Gunst Roms</span><b>${gu} von 100 (${wort})</b></div>
-    <div class="zeile"><span>Schutz vor Galliern</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
+    <div class="zeile"><span>Schutz vor ${sim.region().feind}</span><b>${sim.hatKastell(S) ? 'Kastell besetzt' : 'kein Kastell'}</b></div>
     ${S.ruf ? `<div class="zeile"><span>Ruf der Stadt</span><b>${RUF[S.ruf].n}</b></div>` : sim.rang(S) >= 2
-      ? `<div class="fziel"><b>Wofür soll Cremona bekannt sein?</b><small>Einmalige Wahl.</small>${Object.entries(RUF).map(([k, r]) => `<button class="knopf" data-a="ruf" data-r="${k}">${r.n}<small style="display:block;font-weight:400">${r.text}</small></button>`).join('')}</div>`
+      ? `<div class="fziel"><b>Wofür soll ${sim.stadtName()} bekannt sein?</b><small>Einmalige Wahl.</small>${Object.entries(RUF).map(([k, r]) => `<button class="knopf" data-a="ruf" data-r="${k}">${r.n}<small style="display:block;font-weight:400">${r.text}</small></button>`).join('')}</div>`
       : '<div class="zeile"><span>Ruf der Stadt</span><b>wählbar ab der Kleinstadt</b></div>'}
     ${(S.vertraege || []).length ? `<div class="zeile"><span>Lieferverträge</span><b>${S.vertraege.map(v => `${WAREN[v.g].n} → ${sim.PARTNER[v.p].n}`).join(', ')}</b></div>` : ''}
     <div class="zeile"><span>Stadtmauer schützt</span><b>${Math.round(sim.mauerSchutz(S) * 100)} % der Häuser</b></div>
@@ -692,7 +694,7 @@ function romInfo() {
 }
 function handelInfo(id = 'placentia') {
   const P = sim.PARTNER[id], offen = sim.handelOffen(S, id), n = HANDEL.menge;
-  const d = id === 'placentia' ? { n: 'Placentia', unter: 'Nachbarstadt am Padus · Handel', text: REGION_TYPEN.nachbar.text } : P;
+  const d = id === 'placentia' ? { n: P.n, unter: `Nachbarstadt am ${sim.region().fluss} · Handel`, text: REGION_TYPEN.nachbar.text } : P;
   const zeilen = Object.keys(P.waren).map(g => {
     const p = sim.preis(S, g, id), rel = p / P.waren[g].basis, wort = rel < 0.8 ? 'billig' : rel > 1.25 ? 'teuer' : 'üblich';
     return `<div class="handel"><div><b>${WAREN[g].n}</b><small>${rund(S.gut[g])} im Lager · ${P.n}: ${zahl(p)} je Stück, ${wort}</small></div>
@@ -700,11 +702,11 @@ function handelInfo(id = 'placentia') {
       <button class="knopf" data-a="handel" data-p="${id}" data-art="kauf" data-g="${g}"${offen ? '' : ' disabled'}>${n} kaufen<small>−${sim.handelSumme(S, g, 'kauf', id)} Denare</small></button>
       <button class="knopf vtr${(S.vertraege || []).some(v => v.p === id && v.g === g) ? ' an' : ''}" data-a="vertrag" data-p="${id}" data-g="${g}"${offen ? '' : ' disabled'}>Vertrag<small>${VERTRAG.menge}/Monat · ${sim.vertragPreis(id, g)}</small></button></div>`;
   }).join('');
-  const weg = P.anleger ? 'Lege Feldwege bis an Placentia heran oder baue einen Anleger am Padus – dann fahren die Boote flussaufwärts.'
+  const weg = P.anleger ? `Lege Feldwege bis an ${P.n} heran oder baue einen Anleger am ${sim.region().fluss} – dann fahren die Boote hin.`
     : `Nach ${P.n} kommt man nur über Land: Lege Feldwege bis an die Stadt im Osten heran.`;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2>${d.n}</h2><div class="unter">${d.unter}</div><p>${d.text}</p>
-    ${offen ? `<div class="lage gut">Händler fahren zwischen Cremona und ${P.n}</div>` : `<div class="lage warn">Noch kein Weg nach ${P.n}</div><p>${weg}</p>`}
+    ${offen ? `<div class="lage gut">Händler fahren zwischen ${sim.stadtName()} und ${P.n}</div>` : `<div class="lage warn">Noch kein Weg nach ${P.n}</div><p>${weg}</p>`}
     <p>Was du verkaufst, wird dort billiger; was du kaufst, teurer. Mit der Zeit gleichen sich die Preise wieder aus. Ein Liefervertrag verkauft jeden Monat ${VERTRAG.menge} Stück zum festen Preis (höchstens ${VERTRAG.max}; dreimal nicht geliefert = gekündigt).</p>
     ${zeilen}`;
   $('#info').hidden = false;
@@ -712,7 +714,7 @@ function handelInfo(id = 'placentia') {
 function gallierInfo() {
   const d = REGION_TYPEN.gallier, fr = S.frieden > 0;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>${d.n}</h2><div class="unter">Gallier im Norden</div><p>${d.text}</p>
+    <h2>${d.n}</h2><div class="unter">${sim.region().feind} im Norden</div><p>${d.text}</p>
     ${fr ? `<div class="lage gut">Frieden – noch ${S.frieden} Monate</div>` : '<div class="lage warn">Im Sommer können ihre Krieger einfallen</div>'}
     <div class="zeile"><span>Kastell auf den Hügeln</span><b>${sim.hatKastell(S) ? 'besetzt' : 'keins'}</b></div>
     <p>Geschenke an den Häuptling – Brot und Silber – sichern zwei Jahre Frieden. Ein Kastell hält sie auch ohne Geschenke ab.</p>
@@ -768,21 +770,23 @@ szene.buergerSchalten(buergerAn);
 tonKnopf();
 
 // ---------- Startseite (S1.5) ----------
-const willkommen = () => melden('Willkommen in Cremona. Der Senat erwartet die ersten Hütten an der Landstraße.');
+const willkommen = () => melden(`Willkommen in ${sim.stadtName()}. Der Senat erwartet die ersten Hütten an der Landstraße.`);
 const start = startseite({
   hatStand: () => { try { return !!localStorage.getItem(SPEICHER_VON()); } catch (e) { return false; } },
   weiter: () => {},
   standText: () => standTextVon(slot),
   gruenden: r => {
     if (szene.modus() === 'region') umland(false);
-    S = sim.neuesSpiel(); S.region = r.id; auswahl = 0; bauTyp = ''; uhr = 0;
+    if (r.id !== (S.region || 'po')) { S = sim.neuesSpiel(r.id); speichern(true); try { sessionStorage.setItem('staedte_direkt', '1'); } catch (e) {} location.reload(); return; }   // andere Region: neues Gelände
+    S = sim.neuesSpiel(r.id); auswahl = 0; bauTyp = ''; uhr = 0;
     speichern(true); szene.jahreszeitFarbe(sim.jahreszeit(S)); szene.zentrieren(20, 20); allesZeichnen(); willkommen();
   },
 });
 
 allesZeichnen();
 requestAnimationFrame(schleife);
-start.zeigen();
+if ((() => { try { const d = sessionStorage.getItem('staedte_direkt'); sessionStorage.removeItem('staedte_direkt'); return d; } catch (e) { return null; } })()) { szene.zentrieren(20, 20); willkommen(); }
+else start.zeigen();
 
 // Für Tests und Fehlersuche
 window.SR = {

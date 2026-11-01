@@ -239,11 +239,11 @@ export const REGIONEN = [
   { id: 'po', n: 'Po-Ebene', stadt: 'Cremona', lon: 10.02, lat: 45.13, gruendung: '218 v. Chr.', roh: 'Getreide, Holz, Lehm',
     text: 'Latinische Kolonie am Fluss Padus, vorgeschobener Posten gegen die Gallier. Fruchtbare Ebene, Hochwasser im Frühling.', schwer: 'Mittel', aktiv: true },
   { id: 'etrurien', n: 'Etrurien', stadt: 'Florentia', lon: 11.25, lat: 43.77, gruendung: '59 v. Chr.', roh: 'Eisenerz, Wein, Marmor',
-    text: 'Veteranenstadt am Arnus. Marmor aus Luna, aber wenig Bauland zwischen den Hügeln.', schwer: 'Mittel' },
+    text: 'Veteranenstadt am Arnus. Marmor aus Luna, aber wenig Bauland zwischen den Hügeln.', schwer: 'Mittel', aktiv: true },
   { id: 'kampanien', n: 'Kampanien', stadt: 'Puteoli', lon: 14.1, lat: 40.82, gruendung: '194 v. Chr.', roh: 'Wein, Oliven, Fisch, Puzzolanerde',
-    text: 'Hafenstadt am Golf. Puzzolanerde für römischen Beton – und die Erde bebt unter dem Vesuv.', schwer: 'Leicht' },
+    text: 'Hafenstadt am Golf. Puzzolanerde für römischen Beton – und die Erde bebt unter dem Vesuv.', schwer: 'Leicht', aktiv: true },
   { id: 'apulien', n: 'Apulien', stadt: 'Luceria', lon: 15.33, lat: 41.5, gruendung: '314 v. Chr.', roh: 'Oliven, Wolle, Getreide',
-    text: 'Weite Ebenen und Schafweiden, Dürre im Sommer, fern von Rom.', schwer: 'Schwer' },
+    text: 'Weite Ebenen und Schafweiden, Dürre im Sommer, fern von Rom.', schwer: 'Schwer', aktiv: true },
 ];
 
 export const START = {
@@ -264,7 +264,7 @@ export const AUFTRAEGE = [
   { n: 'Umland: Lass drei Felder vermessen und baue ein Gehöft (Knopf „Umland“).', ok: S => Object.keys(S.land || {}).length >= 3 && Object.values(S.land || {}).some(l => l.betrieb === 'gehoeft'), lohn: { denare: 100, holz: 40 } },
   { n: 'Lege Feldwege, bis ein Betrieb im Umland mit der Stadt verbunden ist.', ok: S => Object.values(S.land || {}).some(l => l.betrieb && l.weg), lohn: { denare: 80 } },
   { n: 'Baue eine Schule und wähle ein Ziel auf der Forschungsseite (Knopf „Wissen“).', ok: S => anzahl(S, 'ludus') >= 1 && !!S.forschung && (!!S.forschung.ziel || S.forschung.fertig.length > 0), lohn: { denare: 100, ziegel: 20 } },
-  { n: 'Handle mit Placentia: Lege einen Weg oder Anleger bis zur Nachbarstadt.', ok: S => ((S.zaehler || {}).handel || 0) >= 1, lohn: { denare: 120 } },
+  { n: 'Handle mit einer Nachbarstadt: Lege einen Weg oder Anleger bis zu ihr (Knopf „Umland“).', ok: S => ((S.zaehler || {}).handel || 0) >= 1, lohn: { denare: 120 } },
   { n: 'Schütze die Stadt: Baue eine Feuerwache.', ok: S => anzahl(S, 'wache') >= 1, lohn: { denare: 80, ziegel: 20 } },
   { n: 'Werde eine Kleinstadt mit 120 Einwohnern.', ok: S => (S.rang || 0) >= 2, lohn: { denare: 200 } },
   { n: 'Baue eine Latrine und lass eine Casa zur Insula aufstocken.', ok: S => anzahl(S, 'latrine') >= 1 && S.geb.some(b => b.t === 'huette' && b.stufe === 3), lohn: { denare: 150, stein: 20 } },
@@ -367,10 +367,10 @@ export const FAMILIE = {
 // Einwohner, negativ = Verlust), zuzug (Einwohner in freie Häuser), frieden (Monate). Negative Waren/Vermögen = Kosten (müssen da sein).
 // fest = Spielmonat, an dem das Ereignis sicher kommt (Hannibal 218 v. Chr.); sonst Zufall (12 % je Monat ab Monat 6).
 export const EREIGNISSE = [
-  { id: 'heer', fest: 7, titel: 'Der Konsul braucht Getreide', bild: 'krieg',
+  { id: 'heer', nurPo: true, fest: 7, titel: 'Der Konsul braucht Getreide', bild: 'krieg',
     text: 'Hannibal hat die Alpen überquert. Der Konsul Tiberius Sempronius Longus zieht mit seinem Heer nach Norden und verlangt Getreide von der jungen Kolonie.',
     wahl: [{ t: 'Getreide liefern', w: { gut: { getreide: -20 }, gunst: 8 } }, { t: 'Silber statt Getreide schicken', w: { gut: { denare: -40 }, gunst: 4 } }, { t: 'Nichts geben – wir brauchen es selbst', w: { gunst: -10 } }] },
-  { id: 'trebia', fest: 10, titel: 'Niederlage an der Trebia', bild: 'trebia',
+  { id: 'trebia', nurPo: true, fest: 10, titel: 'Niederlage an der Trebia', bild: 'trebia',
     text: 'Bei Placentia hat Hannibal das römische Heer geschlagen. Versprengte Soldaten und Bauern fliehen nach Cremona und bitten um Aufnahme.',
     wahl: [{ t: 'Alle aufnehmen', w: { zuzug: 12, gut: { getreide: -10 }, ansehen: 4, stimmung: -2 } }, { t: 'Nur die Bauern aufnehmen', w: { zuzug: 6 } }, { t: 'Die Tore geschlossen halten', w: { stimmung: -4, ansehen: -3 } }] },
   { id: 'bestechung', titel: 'Ein Angebot unter vier Augen', bild: 'geld', ab: 6,
@@ -394,13 +394,13 @@ export const EREIGNISSE = [
   { id: 'erbschaft', titel: 'Ein Testament', bild: 'geld', ab: 12,
     text: 'Ein kinderloser Klient der Familie ist gestorben und hat den Valeriern sein Vermögen vermacht.',
     wahl: [{ t: 'Das Erbe annehmen', w: { vermoegen: 60 } }, { t: 'Der Stadt stiften', w: { gut: { denare: 60 }, ansehen: 6 } }] },
-  { id: 'grenzstreit', titel: 'Streit um die Weiden', bild: 'ernte', ab: 12,
+  { id: 'grenzstreit', nurPo: true, titel: 'Streit um die Weiden', bild: 'ernte', ab: 12,
     text: 'Hirten aus Placentia treiben ihre Herden auf Cremoneser Weiden. Beide Städte berufen sich auf alte Grenzsteine.',
     wahl: [{ t: 'Nachgeben', w: { stimmung: -2, gunst: 1 } }, { t: 'Den Senat in Rom entscheiden lassen', w: { gut: { denare: -40 }, gunst: 3 } }, { t: 'Hart bleiben', w: { ansehen: 4, gunst: -3 } }] },
   { id: 'priester', titel: 'Die Priester bitten', bild: 'ernte', ab: 6,
     text: 'Die Priester der Ceres bitten um eine Spende für das Fest der Aussaat.',
     wahl: [{ t: '30 Denare spenden', w: { gut: { denare: -30 }, stimmung: 5 } }, { t: 'Getreide als Opfer geben', w: { gut: { getreide: -10 }, stimmung: 3 } }, { t: 'Ablehnen', w: { stimmung: -2 } }] },
-  { id: 'insubrer', titel: 'Gesandte der Insubrer', bild: 'tor', ab: 24, wenn: S => !(S.frieden > 0),
+  { id: 'insubrer', nurPo: true, titel: 'Gesandte der Insubrer', bild: 'tor', ab: 24, wenn: S => !(S.frieden > 0),
     text: 'Zwei Krieger mit goldenen Halsringen stehen vor dem Tor. Ihr Häuptling bietet Frieden – gegen Wein und Silber.',
     wahl: [{ t: 'Frieden kaufen (60 Denare)', w: { gut: { denare: -60 }, frieden: 18 } }, { t: 'Mit Gastgeschenken empfangen (20 Brot)', w: { gut: { brot: -20 }, frieden: 8, ansehen: 2 } }, { t: 'Fortschicken', w: { ansehen: 2 } }] },
   // Feste im Jahreslauf (jährlich ab dem 2. Jahr; jaehrlich = Monat im Jahr, 0 = erster Frühlingsmonat)
@@ -481,4 +481,20 @@ export const RUF = {
 };
 // Lieferverträge (Phase D): monatlich 5 Einheiten zu festem Preis (95 % des Grundpreises), höchstens 3; dreimal nicht geliefert → Bruch
 export const VERTRAG = { menge: 5, preis: 0.95, max: 3, fehlschlag: 3, ansehen: 5 };
+
+// Spielbare Regionen (Phase E, 1.11.): Namen, Startjahr, Gelände, Partner, Feinde, Startvorrat. Geschichte (Hannibal usw.) nur Po.
+export const REGION_DATEN = {
+  po: { stadt: 'Cremona', jahr0: -218, fluss: 'Padus', flussText: 'Der Fluss Padus, schiffbar bis zur Adria.', west: 'Placentia', westText: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.',
+    ost: 'Mantua', ostText: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
+    feind: 'Gallier', dorf: 'Dorf der Insubrer', dorfText: 'Ein keltisches Dorf hinter Palisaden. Die Insubrer haben Rom nicht vergessen, dass es ihr Land nahm.', start: {} },
+  etrurien: { stadt: 'Florentia', jahr0: -59, fluss: 'Arnus', flussText: 'Der Arnus fließt durch das Tal nach Pisae und ins Meer.', west: 'Pisae', westText: 'Hafenstadt an der Mündung des Arnus.',
+    ost: 'Arretium', ostText: 'Etruskische Stadt der Töpfer – berühmt für rotes Tafelgeschirr. Kauft Erz und verkauft Werkzeug.',
+    feind: 'Räuberbanden', dorf: 'Räubernest im Apennin', dorfText: 'Entlaufene Sklaven und verarmte Bauern hausen in den Bergen.', start: { stein: 40 }, welt: { flussZ: 35.5, wald: [[12, 26, 3], [6, 18, 2.5]] }, hang: true },
+  kampanien: { stadt: 'Puteoli', jahr0: -194, fluss: 'Golf von Puteoli', flussText: 'Das Meer am Golf – Fischgründe und Hafen.', west: 'Neapolis', westText: 'Griechische Stadt am Golf, reich an Wein und Kunst.',
+    ost: 'Capua', ostText: 'Reiche Stadt im fruchtbaren Hinterland. Kauft Erz und verkauft Werkzeug.',
+    feind: 'Seeräuber', dorf: 'Seeräuberbucht', dorfText: 'Kilikische Piraten ankern in einer versteckten Bucht.', start: { fisch: 30 }, welt: { flussZ: 32.5 }, meer: true },
+  apulien: { stadt: 'Luceria', jahr0: -314, fluss: 'Bach Celone', flussText: 'Ein Bach, der im Sommer fast versiegt.', west: 'Arpi', westText: 'Alte daunische Stadt in der Ebene.',
+    ost: 'Venusia', ostText: 'Latinische Kolonie an der Straße nach Süden. Kauft Erz und verkauft Werkzeug.',
+    feind: 'Samniten', dorf: 'Lager der Samniten', dorfText: 'Die Samniten kämpfen um ihre Berge – und um Luceria.', start: { getreide: 80, holz: 100 }, welt: { flussZ: 38.2, wenigWald: true }, duerre: true },
+};
 

@@ -336,6 +336,14 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 ## Phase E – Feinschliff (1.11.)
 - [x] Drei Spielstände (Menü „Spielstände“): je Platz Zusammenfassung, „Hier speichern“ (mit Rückfrage beim Überschreiben), „Laden“;
       Autospeichern in den gespielten Platz; Platz 1 = bisheriger Speicher (nichts geht verloren). Test 88/88.
+- [x] **Alle vier Regionen spielbar** (`REGION_DATEN`): Florentia (59 v. Chr., Arnus, Hügel/Stein, Pisae/Arretium, Räuberbanden, Start
+      +40 Stein), Puteoli (194 v. Chr., Golf statt Fluss – breiteres Wasser, Neapolis/Capua, Seeräuber, +30 Fisch), Luceria (314 v. Chr.,
+      Bach, wenig Wald, viele Weiden, Dürre: Getreide/Trauben/Oliven −15 %, Arpi/Venusia, Samniten). Namen in Kopfleiste, Meldungen,
+      Fenstern, Umland und Handel kommen aus der Region; Hannibal, Trebia, Weidestreit, Insubrer und die Zeitleiste nur in der Po-Ebene.
+      Neue Region → Seite lädt einmal neu (neues Gelände), danach direkt ins Spiel. Ansichten-Spalte bei wenig Höhe zweispaltig
+      (iPad quer). Test 89/89, Bilder Puteoli und 1024×768 angesehen. Offen: eigene Zeitleisten für die anderen Regionen.
+
+## Später
 
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·

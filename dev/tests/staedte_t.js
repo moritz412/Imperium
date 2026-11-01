@@ -19,12 +19,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   // S1.5 Startseite: vier Regionen, nur Cremona wählbar
   const st = await p.evaluate(() => ({ offen: !document.querySelector('#startseite').hidden, orte: document.querySelectorAll('#startseite .ort').length }));
   await p.click('#startseite .ort[data-r="kampanien"]');
-  const gesperrt = await p.evaluate(() => !!document.querySelector('#regionKarte .gesperrt') && !!document.querySelector('.startknoepfe button:disabled'));
+  const gesperrt = await p.evaluate(() => !document.querySelector('#regionKarte .gesperrt') && /Puteoli gründen/.test(document.querySelector('.startknoepfe').textContent));   // Phase E: alle Regionen spielbar
   if (BILD) await p.screenshot({ path: BILD.replace(/\.png$/, '_start.png') });
   await p.click('#startseite .ort[data-r="po"]');
   await p.click('.startknoepfe [data-s="neu"]');
   const zu = await p.evaluate(() => document.querySelector('#startseite').hidden && SR.S.region === 'po');
-  ok('Startseite: 4 Regionen, Kampanien gesperrt, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
+  ok('Startseite: 4 Regionen, Kampanien wählbar, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
   await p.evaluate(() => { SR.S.ereignisseAus = true; SR.S.sofortBauen = true; });   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
   await p.evaluate(() => SR.tempo(0));
 
@@ -712,6 +712,17 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { plaetze, text, zurueck, zu };
   });
   ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
+  const rgn = await p.evaluate(() => {
+    const sim = SR.sim, wasser = w => w.typ.reduce((n, t) => n + (t === 2 ? 1 : 0), 0), wald = w => w.typ.reduce((n, t) => n + (t === 1 ? 1 : 0), 0);
+    const po = { w: wasser(sim.erzeugeWelt('po')), wald: wald(sim.erzeugeWelt('po')) };
+    const K = sim.neuesSpiel('kampanien'), k = { stadt: sim.stadtName(), jahr: K.jahr0, fisch: K.gut.fisch, partner: sim.PARTNER.placentia.n, w: wasser(sim.erzeugeWelt('kampanien')) };
+    const A = sim.neuesSpiel('apulien'), a = { stadt: sim.stadtName(), weide: sim.regionKarte().filter(f => f.typ === 'weide').length, wald: wald(sim.erzeugeWelt('apulien')), duerre: sim.bonus(A, 'feld', 'getreide') < 1 };
+    const E = sim.neuesSpiel('etrurien'), e = { stadt: sim.stadtName(), jahr: E.jahr0, stein: sim.regionKarte().filter(f => f.typ === 'stein').length, keineGeschichte: (() => { E.monat = 200; E.ereignisseAus = true; sim.monat(E, SR.welt); return !E.gesch; })() };
+    sim.regionSetzen('po'); const zurueck = sim.stadtName() === 'Cremona' && sim.PARTNER.placentia.n === 'Placentia';
+    const poWeide = sim.regionKarte().filter(f => f.typ === 'weide').length, poStein = sim.regionKarte().filter(f => f.typ === 'stein').length;
+    return { po, k, a, e, zurueck, poWeide, poStein };
+  });
+  ok('Regionen: Puteoli am Meer, Luceria trocken, Florentia mit Stein, Geschichte nur Po', rgn.k.stadt === 'Puteoli' && rgn.k.jahr === -194 && rgn.k.fisch === 30 && rgn.k.partner === 'Neapolis' && rgn.k.w > rgn.po.w && rgn.a.stadt === 'Luceria' && rgn.a.weide > rgn.poWeide && rgn.a.wald < rgn.po.wald && rgn.a.duerre && rgn.e.stadt === 'Florentia' && rgn.e.stein > rgn.poStein && rgn.e.keineGeschichte && rgn.zurueck, JSON.stringify(rgn));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
