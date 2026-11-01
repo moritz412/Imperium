@@ -223,6 +223,9 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Stimmung); danach Stimmung +5 stadtweit und Ansehen +0,5/Monat; eigene Form (Säulenumgang, Obergaden, Apsis).
       **Inschriften des Forums** (Menü): 15 Erfolge (Ränge, erste Casa/Insula, Erfindungen, Späte Republik, Ädil/Prätor, volle
       Kasse, Handel, Umland, Basilika, zehn Jahre) als Steintafel mit Jahr. Test 72/72, Bild angesehen.
+- [x] Senatsaufträge als roter Faden: 6 → 18 Aufträge (Umland vermessen + Gehöft, Feldweg, Schule + Forschungsziel, Handel mit
+      Placentia, Feuerwache, Kleinstadt, Latrine + Insula, Späte Republik, Ädil, Basilika, Kolonie, Prätor), Lohn steigend.
+      Test 73/73.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

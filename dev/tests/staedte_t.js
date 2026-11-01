@@ -212,7 +212,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const z0 = sim.preis(S, 'ziegel'), zi0 = S.gut.ziegel, k = SR.handeln('ziegel', 'kauf'), z1 = sim.preis(S, 'ziegel'), zi1 = S.gut.ziegel;
     const M = kopie(); sim.monat(M, SR.welt); const rueck = sim.preis(M, 'holz');
     const A = kopie(); A.monat = 20; A.gut.denare = 1000; A.gunst = 50; const mA = sim.monat(A, SR.welt).join(' | ');
-    const B = kopie(); B.monat = 20; B.gut.denare = 0; B.gunst = 50; const mB = sim.monat(B, SR.welt).join(' | ');
+    const B = kopie(); B.monat = 20; B.gut.denare = 0; B.gunst = 50; B.auftrag = 999; const mB = sim.monat(B, SR.welt).join(' | ');
     SR.umland(true); SR.hexInfo(sim.nachbarFeld);
     const knoepfe = [...document.querySelectorAll('#info [data-a="handel"]')], ui = { n: knoepfe.length, frei: knoepfe.every(b => !b.disabled), titel: document.querySelector('#info h2').textContent };
     const h0 = S.gut.holz; S.gut.holz += 10; knoepfe[0].click(); ui.klick = Math.round(S.gut.holz) === Math.round(h0);
@@ -549,6 +549,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung && wz.ansehen >= 25, JSON.stringify(wz));
   ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 15);
+  const auf = await p.evaluate(() => {
+    const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};
+    const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
+    const alt = SR.S.auftrag; SR.S.auftrag = 6; SR.bauen('huette', -9, -9); const text = document.querySelector('#auftragText').textContent; SR.S.auftrag = alt; SR.bauen('huette', -9, -9);
+    return { vor, nach: A.auftrag, text };
+  });
+  ok('Senatsaufträge führen weiter ins Umland', auf.vor === 6 && auf.nach === 7 && /Umland/.test(auf.text), JSON.stringify(auf));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

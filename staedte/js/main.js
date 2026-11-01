@@ -52,7 +52,7 @@ function kopfleiste() {
   $('#waren').innerHTML = zellen.join('');
   document.querySelectorAll('.tempo button').forEach(b => b.classList.toggle('an', +b.dataset.tempo === tempo));
   const a = AUFTRAEGE[S.auftrag];
-  $('#auftragText').textContent = a ? a.n : 'Alle Aufträge erfüllt. Die Stadt wächst weiter – bald folgt die Region.';
+  $('#auftragText').textContent = a ? a.n : 'Alle Aufträge des Senats erfüllt. Cremona gehört dir – das Konsulat wartet in einer späteren Stufe.';
   $('#auftrag').hidden = !!auswahl || !$('#info').hidden;
   const F = sim.forschungS(S), fz = FORSCHUNG[F.ziel];
   const Fa = sim.familieS(S);

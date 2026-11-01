@@ -243,6 +243,19 @@ export const AUFTRAEGE = [
   { n: 'Ziegelkette: Lehmgrube und Ziegelei.', ok: S => anzahl(S, 'lehmgrube') >= 1 && anzahl(S, 'ziegelei') >= 1, lohn: { denare: 80 } },
   { n: 'Brunnen und Markt: Lass eine Hütte zur Casa aufsteigen.', ok: S => S.geb.some(b => b.t === 'huette' && b.stufe === 2), lohn: { denare: 120 } },
   { n: 'Siedle 60 Einwohner an.', ok: S => S.geb.reduce((s, b) => s + (b.bew || 0), 0) >= 60, lohn: { denare: 150 } },
+  // ab hier (1.11.): roter Faden durch Umland, Handel, Forschung, Gefahren und Familie
+  { n: 'Umland: Lass drei Felder vermessen und baue ein Gehöft (Knopf „Umland“).', ok: S => Object.keys(S.land || {}).length >= 3 && Object.values(S.land || {}).some(l => l.betrieb === 'gehoeft'), lohn: { denare: 100, holz: 40 } },
+  { n: 'Lege Feldwege, bis ein Betrieb im Umland mit der Stadt verbunden ist.', ok: S => Object.values(S.land || {}).some(l => l.betrieb && l.weg), lohn: { denare: 80 } },
+  { n: 'Baue eine Schule und wähle ein Ziel auf der Forschungsseite (Knopf „Wissen“).', ok: S => anzahl(S, 'ludus') >= 1 && !!S.forschung && (!!S.forschung.ziel || S.forschung.fertig.length > 0), lohn: { denare: 100, ziegel: 20 } },
+  { n: 'Handle mit Placentia: Lege einen Weg oder Anleger bis zur Nachbarstadt.', ok: S => ((S.zaehler || {}).handel || 0) >= 1, lohn: { denare: 120 } },
+  { n: 'Schütze die Stadt: Baue eine Feuerwache.', ok: S => anzahl(S, 'wache') >= 1, lohn: { denare: 80, ziegel: 20 } },
+  { n: 'Werde eine Kleinstadt mit 120 Einwohnern.', ok: S => (S.rang || 0) >= 2, lohn: { denare: 200 } },
+  { n: 'Baue eine Latrine und lass eine Casa zur Insula aufstocken.', ok: S => anzahl(S, 'latrine') >= 1 && S.geb.some(b => b.t === 'huette' && b.stufe === 3), lohn: { denare: 150, stein: 20 } },
+  { n: 'Führe Cremona in die Späte Republik (Forschungsseite).', ok: S => (S.epoche || 1) >= 2, lohn: { denare: 250 } },
+  { n: 'Lass einen Valerier zum Ädil wählen (Knopf „Familie“).', ok: S => !!S.familie && S.familie.amt >= 1, lohn: { denare: 200 } },
+  { n: 'Errichte die Basilika am Forum.', ok: S => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)), lohn: { denare: 300 } },
+  { n: 'Werde eine Kolonie mit 300 Einwohnern.', ok: S => (S.rang || 0) >= 3, lohn: { denare: 400 } },
+  { n: 'Lass einen Valerier zum Prätor wählen.', ok: S => !!S.familie && S.familie.amt >= 2, lohn: { denare: 500 } },
 ];
 
 // Forschung (S3.1): Wissen aus dem Stadtrat (1 im Monat) und Schulen (je 3), ein Ziel gleichzeitig.
