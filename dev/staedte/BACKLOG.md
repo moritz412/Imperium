@@ -361,6 +361,9 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       der gewählten Region (Platzhalter, gefüllt in `regionSetzen`). Test 94/94.
 - [x] **Bauleiste mit Gebäudebildern** (1.11.): beim Start aus den Modellen gerendert (eigener kurzlebiger Renderer, 96 px),
       gesperrte Gebäude ans Ende. Test 94/94, Bild angesehen. Nicht getestet: iPad (Zeit fürs Rendern beim Start).
+- [x] **Hausfenster mit Nähe-Kärtchen** und **Klangkulisse je Jahreszeit** (1.11.): Vögel im Frühling, Grillen im Sommer,
+      Krähen im Herbst, Wind im Winter, Stadtgemurmel nach Einwohnern, Hämmern bei Baustellen (WebAudio, erzeugt). Test 95/95.
+      **Nicht gehört** – Klang nur über Werte geprüft.
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker

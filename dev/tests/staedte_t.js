@@ -788,6 +788,8 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   ok('Warenstapel vor den Speichern', stp.sp > 0 && stp.n >= stp.sp * 2 && stp.n <= stp.sp * 4, JSON.stringify(stp));
   if (BILD) { await p.evaluate(() => SR.szene.zoom(2.2)); await p.waitForTimeout(400); await p.screenshot({ path: BILD.replace(/\.png$/, '_lager.png') }); await p.evaluate(() => SR.szene.zoom(1 / 2.2)); }
   if (BILD) { await p.evaluate(() => SR.tempo(0)); await p.waitForTimeout(500); await p.screenshot({ path: BILD }); console.log('  Bild: ' + BILD); }
+  const umg = await p.evaluate(() => { SR.monate(1); const u = SR.ton.umgebungStand(); return { ...u, js2: SR.sim.jahreszeit(SR.S), ein: SR.sim.einwohner(SR.S) }; });
+  ok('Klangkulisse folgt Jahreszeit und Einwohnern (Werte, Klang selbst nicht gehört)', umg.js >= 0 && umg.js <= 3 && umg.einwohner > 0, JSON.stringify(umg));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

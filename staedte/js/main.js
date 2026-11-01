@@ -764,6 +764,7 @@ $('#ansicht').addEventListener('click', e => {
 });
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
+  ton.umgebung({ js: sim.jahreszeit(S), einwohner: sim.einwohner(S), baustellen: S.geb.filter(b => b.bau > 0).length });
   const meld = sim.monat(S, welt); meld.forEach(melden);
   const wichtig = meld.filter(t => !/ beginnt\.$/.test(t));   // Jahreszeitwechsel nicht ins Tagebuch
   if (wichtig.length) { const d = sim.datumText(S); let tb = S.tagebuch || [];

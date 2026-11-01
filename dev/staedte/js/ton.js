@@ -53,8 +53,21 @@ function starten() {
   const wf = ac.createBiquadFilter(); wf.type = 'lowpass'; wf.frequency.value = 380;
   const wg = ac.createGain(); wg.gain.value = 0.018;
   const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 0.01;
-  lfo.connect(lg); lg.connect(wg.gain); w.connect(wf); wf.connect(wg); wg.connect(geraeusch); w.start(); lfo.start();
-  setInterval(() => { if (ac.state === 'running' && Math.random() < 0.12) sfx('vogel'); }, 1500);
+  lfo.connect(lg); lg.connect(wg.gain); w.connect(wf); wf.connect(wg); wg.connect(geraeusch); w.start(); lfo.start(); starten.wind = { wg, wf };
+  // Stadtgemurmel (1.11.): gefiltertes Rauschen, Lautstärke nach Einwohnern
+  const m = ac.createBufferSource(); m.buffer = rauschen; m.loop = true;
+  const mf = ac.createBiquadFilter(); mf.type = 'bandpass'; mf.frequency.value = 520; mf.Q.value = 0.8;
+  const mg = ac.createGain(); mg.gain.value = 0; m.connect(mf); mf.connect(mg); mg.connect(geraeusch); m.start(); starten.murmeln = mg;
+  umgebung(U);
+  // Jahreszeit-Geräusche: Vögel (Frühling viel, Sommer wenig), Grillen (Sommer), Krähen (Herbst), Hämmern bei Baustellen
+  setInterval(() => {
+    if (ac.state !== 'running' || !an) return;
+    const js = U.js;
+    if (Math.random() < [0.3, 0.1, 0.04, 0][js]) sfx('vogel');
+    if (js === 1 && Math.random() < 0.35) sfx('grille');
+    if (js === 2 && Math.random() < 0.06) sfx('kraehe');
+    if (U.baustellen > 0 && Math.random() < Math.min(0.5, 0.12 * U.baustellen)) sfx('hammer');
+  }, 1500);
   musikLaden().then(puffer => {
     if (!puffer) return;
     const s = ac.createBufferSource(); s.buffer = puffer; s.loop = true; s.connect(musik); s.start();
@@ -88,10 +101,23 @@ export function sfx(name, arg) {
     case 'fest':   // Leier: aufsteigender Dreiklang
       [0, 4, 7, 12].forEach((m, i) => ton({ t: t + i * 0.12, f: mtof(62 + m), dauer: 1.2, v: 0.1 })); break;
     case 'klick': ton({ t, f: 880, f2: 620, dauer: 0.07, v: 0.06, typ: 'sine' }); break;
+    case 'grille': { const f = 4300 + Math.random() * 600; for (let i = 0; i < 6; i++) ton({ t: t + i * 0.045, f, dauer: 0.03, v: 0.006, typ: 'sine', a: 0.003 }); break; }
+    case 'kraehe': [0, 0.32].forEach(x => { ton({ t: t + x, f: 620, f2: 480, dauer: 0.22, v: 0.02, typ: 'sawtooth', a: 0.01 }); stoss({ t: t + x, f: 900, q: 3, dauer: 0.2, v: 0.03 }); }); break;
+    case 'hammer': [0, 0.42].forEach(x => stoss({ t: t + x + Math.random() * 0.05, f: 1300, q: 2.5, dauer: 0.06, v: 0.09 })); break;
     case 'vogel': { const f = 2400 + Math.random() * 1400; for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) ton({ t: t + i * 0.11, f, f2: f * 1.25, dauer: 0.08, v: 0.012, typ: 'sine', a: 0.005 }); break; }
   }
 }
 
+// Umgebung nach Jahreszeit (0 Frühling … 3 Winter), Einwohnern und Baustellen; main ruft das monatlich auf
+const U = { js: 0, einwohner: 0, baustellen: 0 };
+export function umgebung(neu) {
+  Object.assign(U, neu || {});
+  if (!ac || !starten.wind) return;
+  const t = ac.currentTime, { wg, wf } = starten.wind;
+  wg.gain.setTargetAtTime([0.016, 0.012, 0.024, 0.032][U.js], t, 2); wf.frequency.setTargetAtTime([420, 360, 520, 300][U.js], t, 2);
+  starten.murmeln.gain.setTargetAtTime(Math.min(0.03, U.einwohner / 12000), t, 3);
+}
+export const umgebungStand = () => ({ ...U });
 export const istAn = () => an;
 export function schalten() {
   an = !an;
