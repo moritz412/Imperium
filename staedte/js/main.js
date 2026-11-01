@@ -295,13 +295,14 @@ $('#info').addEventListener('click', e => {
 
 // ---------- Tempo und Menü ----------
 document.querySelector('.tempo').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { tempo = +b.dataset.tempo; kopfleiste(); } });
-$('#menueKnopf').addEventListener('click', () => { $('#menue').hidden = false; });
+$('#menueKnopf').addEventListener('click', () => { tonKnopf(); $('#menue').hidden = false; });
 $('#menue').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) { if (e.target.id === 'menue') $('#menue').hidden = true; return; }
   const m = b.dataset.m;
   if (m === 'weiter') $('#menue').hidden = true;
   if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
+  if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
   if (m === 'hilfe') {
@@ -339,9 +340,35 @@ function erweiterungInfo() {
     <button class="knopf${alles ? ' haupt' : ''}" data-a="erweitern"${alles ? '' : ' disabled'}>Beim Senat beantragen</button>`;
   $('#info').hidden = false; kopfleiste();
 }
+// ---------- Ereignisse (S4.3) ----------
+let evBilder = null;
+const BILD_PFADE = ['../img/st_ev.json', '../../img/st_ev.json'];
+async function evBilderLaden() {
+  for (const p of BILD_PFADE) { try { const r = await fetch(p); if (r.ok) { evBilder = await r.json(); if (!$('#ereignis').hidden) ereignisZeigen(); return; } } catch (e) {} }
+  evBilder = {};
+}
+function ereignisZeigen() {
+  const e = S.ereignis && sim.ereignis(S.ereignis);
+  if (!e) { $('#ereignis').hidden = true; return; }
+  if (!evBilder) evBilderLaden();
+  const bild = evBilder && evBilder[e.bild];
+  $('#ereignis').innerHTML = `<div class="feld ereigniskarte">
+    <div class="ebild"${bild ? ` style="background-image:url(${bild})"` : ''}></div>
+    <div class="einhalt"><small>${sim.datumText(S)}</small><h2>${e.titel}</h2><p>${e.text}</p>
+    ${e.wahl.map((w, i) => { const f = sim.wahlMoeglich(S, w);
+      return `<button class="knopf ewahl" data-e="${i}"${f ? ' disabled' : ''}><b>${w.t}</b><small>${f || sim.wirkungText(w)}</small></button>`; }).join('')}</div></div>`;
+  $('#ereignis').hidden = false;
+}
+$('#ereignis').addEventListener('click', e => {
+  const b = e.target.closest('[data-e]'); if (!b) return;
+  const r = sim.ereignisWaehlen(S, +b.dataset.e);
+  if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
+  ton.sfx('klick'); $('#ereignis').hidden = true; allesZeichnen();
+});
+
 let grenzeGezeigt = -1;
 function allesZeichnen() { if (grenzeGezeigt !== sim.stadtGrenze(S)) { grenzeGezeigt = sim.stadtGrenze(S); szene.grenze(grenzeGezeigt); }
-  szene.abgleichen(S, auswahl); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
+  szene.abgleichen(S, auswahl); if (S.ereignis && $('#ereignis').hidden) ereignisZeigen(); szene.landAbgleichen(S); if (hexWahl && szene.modus() === 'region') hexInfo(hexWahl); ansichtZeichnen(); kopfleiste(); bauleiste(); if (auswahl) infoZeichnen(); }
 
 // ---------- Umland (S2.1) ----------
 function umland(an) {
@@ -590,11 +617,12 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
-const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus'; };
+const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus';
+  $('#menue [data-m="ereignisse"]').textContent = S.ereignisseAus ? 'Ereignisse: aus' : 'Ereignisse: an'; };
 tonKnopf();
 
 // ---------- Startseite (S1.5) ----------
@@ -619,7 +647,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

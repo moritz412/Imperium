@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -347,6 +347,7 @@ export function monat(S, welt) {
   feuerMonat(S, meld);
 
   familieMonat(S, meld);
+  ereignisMonat(S);
 
   // Handel und Abgaben (S2.5), Forschung und Erntefest (S3.1)
   handelMonat(S);
@@ -990,5 +991,53 @@ export function ausbilden(S, name, art) {
   if (F.vermoegen < a.kosten) return { ok: false, grund: `Es fehlen ${Math.ceil(a.kosten - F.vermoegen)} Denare` };
   F.vermoegen -= a.kosten; m.ausbildung = { art, rest: a.monate }; m.gelernt = true;
   return { ok: true, text: `${m.n} beginnt: ${a.n}.` };
+}
+
+// ---------- Ereignisse mit Entscheidungen (S4.3) ----------
+export const ereignis = id => EREIGNISSE.find(e => e.id === id);
+function ereignisMonat(S) {
+  if (S.ereignis || S.ereignisseAus) return;
+  const log = S.ereignisLog = S.ereignisLog || {};
+  const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined);
+  if (fest) { S.ereignis = fest.id; return; }
+  if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
+  const moegl = EREIGNISSE.filter(e => !e.fest && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
+  if (moegl.length) S.ereignis = moegl[Math.floor(wurf(S, 4243) * moegl.length)].id;
+}
+export function wahlMoeglich(S, w) {
+  const F = familieS(S), x = w.w;
+  for (const [g, n] of Object.entries(x.gut || {})) if (n < 0 && (S.gut[g] || 0) < -n) return `Es fehlen ${Math.ceil(-n - (S.gut[g] || 0))} ${WAREN[g].n}`;
+  if (x.vermoegen < 0 && F.vermoegen < -x.vermoegen) return `Es fehlen ${Math.ceil(-x.vermoegen - F.vermoegen)} Denare im Familienvermögen`;
+  if (w.braucht && w.braucht.ansehen && F.ansehen < w.braucht.ansehen) return `Braucht Ansehen ${w.braucht.ansehen}`;
+  return '';
+}
+export function ereignisWaehlen(S, i) {
+  const e = ereignis(S.ereignis), w = e && e.wahl[i];
+  if (!w) return { ok: false, grund: 'Kein Ereignis' };
+  const fehlt = wahlMoeglich(S, w); if (fehlt) return { ok: false, grund: fehlt };
+  const F = familieS(S), x = w.w;
+  for (const [g, n] of Object.entries(x.gut || {})) S.gut[g] = Math.max(0, (S.gut[g] || 0) + n);
+  if (x.vermoegen) F.vermoegen += x.vermoegen;
+  if (x.ansehen) F.ansehen = Math.max(0, F.ansehen + x.ansehen);
+  if (x.gunst) S.gunst = Math.max(0, Math.min(100, gunst(S) + x.gunst));
+  if (x.stimmung) S.stimmung = Math.max(0, Math.min(100, S.stimmung + x.stimmung));
+  if (x.frieden) S.frieden = Math.max(S.frieden || 0, x.frieden);
+  if (x.leute) for (const h of S.geb.filter(b => b.bew > 0)) h.bew = Math.max(0, h.bew - Math.ceil(h.bew * -x.leute));
+  if (x.zuzug) { let rest = x.zuzug; for (const h of S.geb.filter(b => b.t === 'huette')) { const k = Math.min(rest, wohnraum(h) - h.bew); if (k > 0) { h.bew += k; rest -= k; } if (!rest) break; } }
+  (S.ereignisLog = S.ereignisLog || {})[e.id] = S.monat; S.ereignis = null;
+  return { ok: true };
+}
+// Wirkung als kurzer Text für die Knöpfe
+export function wirkungText(w) {
+  const x = w.w, t = [], z = n => (n > 0 ? '+' : '−') + Math.abs(n);
+  for (const [g, n] of Object.entries(x.gut || {})) t.push(`${z(n)} ${WAREN[g].n}`);
+  if (x.vermoegen) t.push(`${z(x.vermoegen)} Familienvermögen`);
+  if (x.ansehen) t.push(`Ansehen ${z(x.ansehen)}`);
+  if (x.gunst) t.push(`Gunst Roms ${z(x.gunst)}`);
+  if (x.stimmung) t.push(`Stimmung ${z(x.stimmung)}`);
+  if (x.leute) t.push(`${Math.round(-x.leute * 100)} % der Einwohner sterben`);
+  if (x.zuzug) t.push(`bis ${x.zuzug} neue Einwohner`);
+  if (x.frieden) t.push(`${x.frieden} Monate Frieden`);
+  return t.join(' · ') || 'keine Folgen';
 }
 

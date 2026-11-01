@@ -205,7 +205,13 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       gehen sie. Sohn ab 14: Rhetorenschule (100 Denare, 36 Monate → „Redner“) oder Militärdienst (36 Monate → „Veteran“: Gallier
       halb so oft); Eigenschaften zählen jetzt für jedes erwachsene Mitglied. Test 66/66.
       **Nicht getestet:** iPad, Balance.
-- [ ] S4.3 Ereignisse mit 2–3 Entscheidungen (Konzept „Jahreszeiten & Ereignisse“): Bestechung, Bittsteller, Seuche, Unruhen.
+- [x] S4.3 Ereignisse mit Entscheidungen (1.11., `EREIGNISSE` in daten.js): Fenster mit Bild (10 Antike-Ereignisbilder aus
+      `img/pb_ev_a.json` auf 640 px verkleinert → `img/st_ev.json`, 370 KB), Datum, Text, 2–3 Wahlmöglichkeiten untereinander mit
+      Folgen auf dem Knopf (zu teure Wahl gesperrt); Spiel pausiert. **Fest:** Monat 7 der Konsul Sempronius will Getreide gegen
+      Hannibal, Monat 10 Flüchtlinge von der Trebia (218 v. Chr.). **Zufall** (12 % je Monat ab Monat 6, dasselbe frühestens nach
+      36 Monaten): Bestechung, Witwe eines Legionärs, Getreideschiff (bei Getreide < 60), Fieber (ab 80 Einwohnern), Murren auf dem
+      Markt (Stimmung < 45), Münzfund, Testament, Weidestreit mit Placentia, Priester der Ceres, Gesandte der Insubrer.
+      Menü: „Ereignisse: an/aus“. Test 68/68 (alter Testteil mit Ereignissen aus), Bild angesehen. **Nicht getestet:** iPad.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

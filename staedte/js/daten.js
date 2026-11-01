@@ -326,3 +326,46 @@ export const FAMILIE = {
   spiele: { vermoegen: 150, ansehen: 15, stimmung: 10 }, auftragAnsehen: 5,
 };
 
+// Ereignisse mit Entscheidungen (S4.3). w = Wirkung: gut {Ware: ±}, vermoegen, ansehen, gunst, stimmung, leute (Anteil der
+// Einwohner, negativ = Verlust), zuzug (Einwohner in freie Häuser), frieden (Monate). Negative Waren/Vermögen = Kosten (müssen da sein).
+// fest = Spielmonat, an dem das Ereignis sicher kommt (Hannibal 218 v. Chr.); sonst Zufall (12 % je Monat ab Monat 6).
+export const EREIGNISSE = [
+  { id: 'heer', fest: 7, titel: 'Der Konsul braucht Getreide', bild: 'krieg',
+    text: 'Hannibal hat die Alpen überquert. Der Konsul Tiberius Sempronius Longus zieht mit seinem Heer nach Norden und verlangt Getreide von der jungen Kolonie.',
+    wahl: [{ t: 'Getreide liefern', w: { gut: { getreide: -20 }, gunst: 8 } }, { t: 'Silber statt Getreide schicken', w: { gut: { denare: -40 }, gunst: 4 } }, { t: 'Nichts geben – wir brauchen es selbst', w: { gunst: -10 } }] },
+  { id: 'trebia', fest: 10, titel: 'Niederlage an der Trebia', bild: 'trebia',
+    text: 'Bei Placentia hat Hannibal das römische Heer geschlagen. Versprengte Soldaten und Bauern fliehen nach Cremona und bitten um Aufnahme.',
+    wahl: [{ t: 'Alle aufnehmen', w: { zuzug: 12, gut: { getreide: -10 }, ansehen: 4, stimmung: -2 } }, { t: 'Nur die Bauern aufnehmen', w: { zuzug: 6 } }, { t: 'Die Tore geschlossen halten', w: { stimmung: -4, ansehen: -3 } }] },
+  { id: 'bestechung', titel: 'Ein Angebot unter vier Augen', bild: 'geld', ab: 6,
+    text: 'Ein Bauunternehmer (redemptor) legt einen Beutel auf den Tisch: 80 Denare für die Familie, wenn er die nächsten Straßen der Stadt bauen darf.',
+    wahl: [{ t: 'Annehmen', w: { vermoegen: 80, gunst: -5 } }, { t: 'Höflich ablehnen', w: { ansehen: 3 } }, { t: 'Ihn vor dem Rat anzeigen', w: { ansehen: 6, gunst: 2 } }] },
+  { id: 'witwe', titel: 'Die Witwe eines Legionärs', bild: 'witwe', ab: 6,
+    text: 'Eine Witwe mit drei Kindern bittet um Hilfe. Ihr Mann fiel im Krieg, die Felder liegen brach.',
+    wahl: [{ t: 'Getreide aus dem Speicher geben', w: { gut: { getreide: -15 }, stimmung: 4, ansehen: 2 } }, { t: 'Aus dem Familienvermögen helfen', w: { vermoegen: -20, ansehen: 5 } }, { t: 'Abweisen', w: { stimmung: -3 } }] },
+  { id: 'getreidehaendler', titel: 'Ein Getreideschiff am Anleger', bild: 'handel', ab: 6, wenn: S => S.gut.getreide < 60,
+    text: 'Ein Händler aus Ariminum bietet eine Schiffsladung Weizen an – teuer, aber sofort.',
+    wahl: [{ t: '60 Getreide für 90 Denare kaufen', w: { gut: { denare: -90, getreide: 60 } } }, { t: 'Ablehnen', w: {} }] },
+  { id: 'fieber', titel: 'Fieber in den Gassen', bild: 'seuche', ab: 12, wenn: S => S.geb.reduce((s, b) => s + (b.bew || 0), 0) >= 80,
+    text: 'Aus den Sümpfen am Padus zieht ein Fieber in die dichten Viertel. Die ersten Familien liegen krank.',
+    wahl: [{ t: 'Griechische Ärzte holen', w: { gut: { denare: -60 }, leute: -0.02 } }, { t: 'Apollo ein Opfer bringen', w: { gut: { denare: -20 }, stimmung: 3, leute: -0.06 } }, { t: 'Abwarten', w: { leute: -0.1, stimmung: -6 } }] },
+  { id: 'unruhe', titel: 'Murren auf dem Markt', bild: 'volk', ab: 6, wenn: S => S.stimmung < 45,
+    text: 'Plebejer versammeln sich auf dem Markt. Sie klagen über Preise, Hunger und die Herren im Rat.',
+    wahl: [{ t: 'Brot verteilen', w: { gut: { brot: -25 }, stimmung: 10 } }, { t: 'Eine Rede halten', w: { stimmung: 5, ansehen: 3 }, braucht: { ansehen: 30 } }, { t: 'Die Wache räumen lassen', w: { stimmung: -6, gunst: 2 } }] },
+  { id: 'muenzen', titel: 'Ein Fund beim Pflügen', bild: 'ernte', ab: 6,
+    text: 'Ein Bauer stößt beim Pflügen auf einen Topf voller alter Silbermünzen der Etrusker.',
+    wahl: [{ t: 'In die Stadtkasse', w: { gut: { denare: 40 } } }, { t: 'Der Familie zuschlagen', w: { vermoegen: 40, ansehen: -2 } }, { t: 'Den Göttern weihen', w: { stimmung: 5, ansehen: 2 } }] },
+  { id: 'erbschaft', titel: 'Ein Testament', bild: 'geld', ab: 12,
+    text: 'Ein kinderloser Klient der Familie ist gestorben und hat den Valeriern sein Vermögen vermacht.',
+    wahl: [{ t: 'Das Erbe annehmen', w: { vermoegen: 60 } }, { t: 'Der Stadt stiften', w: { gut: { denare: 60 }, ansehen: 6 } }] },
+  { id: 'grenzstreit', titel: 'Streit um die Weiden', bild: 'ernte', ab: 12,
+    text: 'Hirten aus Placentia treiben ihre Herden auf Cremoneser Weiden. Beide Städte berufen sich auf alte Grenzsteine.',
+    wahl: [{ t: 'Nachgeben', w: { stimmung: -2, gunst: 1 } }, { t: 'Den Senat in Rom entscheiden lassen', w: { gut: { denare: -40 }, gunst: 3 } }, { t: 'Hart bleiben', w: { ansehen: 4, gunst: -3 } }] },
+  { id: 'priester', titel: 'Die Priester bitten', bild: 'ernte', ab: 6,
+    text: 'Die Priester der Ceres bitten um eine Spende für das Fest der Aussaat.',
+    wahl: [{ t: '30 Denare spenden', w: { gut: { denare: -30 }, stimmung: 5 } }, { t: 'Getreide als Opfer geben', w: { gut: { getreide: -10 }, stimmung: 3 } }, { t: 'Ablehnen', w: { stimmung: -2 } }] },
+  { id: 'insubrer', titel: 'Gesandte der Insubrer', bild: 'tor', ab: 24, wenn: S => !(S.frieden > 0),
+    text: 'Zwei Krieger mit goldenen Halsringen stehen vor dem Tor. Ihr Häuptling bietet Frieden – gegen Wein und Silber.',
+    wahl: [{ t: 'Frieden kaufen (60 Denare)', w: { gut: { denare: -60 }, frieden: 18 } }, { t: 'Mit Gastgeschenken empfangen (20 Brot)', w: { gut: { brot: -20 }, frieden: 8, ansehen: 2 } }, { t: 'Fortschicken', w: { ansehen: 2 } }] },
+];
+export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
+

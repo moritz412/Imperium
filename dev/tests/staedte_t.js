@@ -25,6 +25,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   await p.click('.startknoepfe [data-s="neu"]');
   const zu = await p.evaluate(() => document.querySelector('#startseite').hidden && SR.S.region === 'po');
   ok('Startseite: 4 Regionen, Kampanien gesperrt, Cremona gegründet', st.offen && st.orte === 4 && gesperrt && zu, JSON.stringify({ st, gesperrt, zu }));
+  await p.evaluate(() => { SR.S.ereignisseAus = true; });   // Ereignisse eigens geprüft (S4.3), hier würden sie die Bedienung verdecken
   await p.evaluate(() => SR.tempo(0));
 
   // S1.3: Landstraße beim Start, Bauen nur an der Straße
@@ -486,6 +487,28 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Heirat: Mitgift, Bündnisse mit Fabiern und Semproniern, keine Rivalen mehr', hz.jung === 0 && hz.angebote === 3 && hz.h1 && hz.mitgiftBezahlt && hz.h2 && hz.mitgiftErhalten && hz.bund === 'Fabii,Sempronii' && hz.rivale === 'keiner' && !/Fabier|Sempronier/.test(hz.wahlFehlt), JSON.stringify(hz));
   ok('Klienten, Enkel, Rhetorenschule macht den Sohn zum Redner', hz.k1 && hz.k2 && hz.kl === 10 && hz.enkel && hz.ler && hz.redner === 'Redner' && hz.ui);
+  // S4.3 Ereignisse: Hannibal-Ereignisse fest, Zufallsereignisse, Wahl mit Folgen, Fenster mit Bild
+  const ev = await p.evaluate(async () => {
+    const sim = SR.sim, S = SR.S, E = JSON.parse(JSON.stringify(S)); E.ereignisseAus = false; E.ereignisLog = {}; E.ereignis = null;
+    E.monat = 7; sim.monat(E, SR.welt); const heer = E.ereignis;
+    const g0 = sim.gunst(E), k0 = E.gut.getreide; E.gut.getreide = Math.max(E.gut.getreide, 30); const k1 = E.gut.getreide;
+    const w = sim.ereignisWaehlen(E, 0).ok, gunst = sim.gunst(E) - g0, korn = k1 - E.gut.getreide;
+    E.monat = 10; sim.monat(E, SR.welt); const trebia = E.ereignis; sim.ereignisWaehlen(E, 2);
+    E.monat = 30; sim.setzeZufall(() => 0); sim.monat(E, SR.welt); sim.setzeZufall(null); const zufall = E.ereignis;
+    const arm = JSON.parse(JSON.stringify(E)); arm.ereignis = 'bestechung'; arm.familie.vermoegen = 0;
+    const text = sim.wirkungText(sim.ereignis('heer').wahl[0]);
+    // Fenster im Spiel
+    S.ereignisseAus = false; S.ereignis = 'trebia'; document.querySelector('#ereignis').hidden = true;
+    SR.monate(0); SR.bauen('huette', -9, -9);
+    await new Promise(r => setTimeout(r, 400));
+    const fenster = !document.querySelector('#ereignis').hidden, knoepfe = document.querySelectorAll('#ereignis .ewahl').length, titel = (document.querySelector('#ereignis h2') || {}).textContent;
+    const bild = getComputedStyle(document.querySelector('#ereignis .ebild')).backgroundImage.startsWith('url');
+    document.querySelector('#ereignis [data-e="1"]').click();
+    const zu = document.querySelector('#ereignis').hidden && !S.ereignis; S.ereignisseAus = true;
+    return { heer, w, gunst, korn, trebia, zufall, text, fenster, knoepfe, titel, bild, zu };
+  });
+  ok('Ereignisse: Konsul will Getreide (fest), Trebia, Zufall', ev.heer === 'heer' && ev.w && ev.gunst === 8 && ev.korn === 20 && ev.trebia === 'trebia' && !!ev.zufall, JSON.stringify(ev));
+  ok('Ereignisfenster mit Bild, 3 Wahlmöglichkeiten, schließt nach der Wahl', ev.fenster && ev.knoepfe === 3 && /Trebia/.test(ev.titel) && ev.bild && ev.zu && /Getreide/.test(ev.text));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
