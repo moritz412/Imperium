@@ -146,6 +146,9 @@ export const jahreszeit = S => Math.floor((S.monat % 12) / 3);
 export const jahr = S => S.jahr0 + Math.floor(S.monat / 12);
 export const einwohner = S => S.geb.reduce((s, b) => s + (b.bew || 0), 0);
 export const def = b => GEB[b.t];
+// Fruchtwechsel (1.11.): Felder tragen schon im Frühling volle Ernte statt der halben
+export const ernteFaktor = (S, js) => js === 0 && hat(S, 'fruchtwechsel') ? 1 : JAHRESZEITEN[js].ernte;
+export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
 export const lagerGrenze = S => LAGER_GRUND + (hat(S, 'toepferscheibe') ? 50 : 0) + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
 export const groesse = t => GEB[t].g;
 
@@ -284,7 +287,7 @@ export function monat(S, welt) {
   // Sklaven (S3.2) arbeiten vollständig, aber nur in Betrieben mit „sklaven“; dort gehen sie vor den Freien hin.
   const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }))
     .concat(S.geb.filter(b => b.t === 'quartier' && b.skl > 0).map(h => ({ h, frei: h.skl, skl: true })))
-    .concat(S.geb.filter(b => b.t === 'zeltlager').map(h => ({ h, frei: GEB.zeltlager.bautrupp, lager: true })));   // Bautrupp, nur für Baustellen
+    .concat(S.geb.filter(b => b.t === 'zeltlager').map(h => ({ h, frei: GEB.zeltlager.bautrupp * (hat(S, 'bauhuette') ? 2 : 1), lager: true })));   // Bautrupp, nur für Baustellen
   const alle = wohnorte.reduce((s, x) => s + x.frei, 0);
   // Baustellen (Phase A, 1.11.) holen ihre Bauarbeiter zuerst (b.bw, getrennt von b.w); Sklaven dürfen mitbauen
   const baustellen = S.geb.filter(b => b.bau > 0).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
@@ -325,7 +328,7 @@ export function monat(S, welt) {
     if (b.w < Math.min(d.arbeiter, b.soll ?? d.arbeiter)) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${Math.min(d.arbeiter, b.soll ?? d.arbeiter)} Arbeitern`, leicht: true });
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
     if (!d.erzeugt) continue;
-    let faktor = anteil * (d.ernte ? JAHRESZEITEN[js].ernte : 1);
+    let faktor = anteil * (d.ernte ? ernteFaktor(S, js) : 1);
     if (d.ernte && js === 3) b.status.push({ art: 'winter', text: 'Winterruhe', leicht: true });
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) {
       const moeglich = Math.min(1, (S.gut[g] || 0) / (n * anteil || 1));
@@ -447,7 +450,7 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  const steuern = (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * stimmungsFaktor(S) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  const steuern = (einwohner(S) + equites * 3) * STEUER * (besetzt(S, 'tabularium') ? 1.2 : 1) * (besetzt(S, 'curia') ? 1.15 : 1) * 1.1 * stimmungsFaktor(S) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
   S.gut.denare += steuern; const handel0 = S.gut.denare;
   if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
   if (S.ruf === 'handel') S.gut.denare += 5 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
@@ -456,7 +459,7 @@ export function monat(S, welt) {
   const teuer = S.geb.filter(h => h.t === 'huette' && h.bew > 0 && bodenwert(S, h) >= LAGE.hoch).reduce((n, h) => n + h.bew, 0);
   const handel = S.gut.denare - handel0, lage = teuer * STEUER * LAGE.steuer * stimmungsFaktor(S);
   S.gut.denare += lage;
-  const verwaltung = rang(S) >= 2 ? einwohner(S) * 0.1 : 0;   // Stadtverwaltung (Schreiber, Boten) ab der Kleinstadt
+  const verwaltung = rang(S) >= 2 ? einwohner(S) * (besetzt(S, 'curia') ? 0.05 : 0.1) : 0;   // Stadtverwaltung (Schreiber, Boten) ab der Kleinstadt
   S.gut.denare = Math.max(0, S.gut.denare - verwaltung);
   const zoll = hat(S, 'zoelle') ? 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length : 0; S.gut.denare += zoll;
   S.kasse = { steuern: steuern + lage, handel: handel + zoll, verwaltung, unterhalt: unterhaltSumme(S) };   // für das Fenster „Stadtkasse“
@@ -730,7 +733,7 @@ function landMonat(S, js, grenze, meld) {
     // Vicus (1.11.): nach 36 verbundenen Monaten wächst um die Villa rustica ein Dorf – Marktabgaben für die Stadt
     if (l.villa) { l.villaMonate = (l.villaMonate || 0) + 1; if (!l.vicus && l.villaMonate >= 36) { l.vicus = true; meld.push('Rund um eine Villa rustica ist ein Dorf (vicus) entstanden.'); } }
     if (l.vicus) { S.gut.denare += 3; if (S.familie) S.familie.ansehen += 0.05; }
-    const faktor = landFaktor(f, S) * (d.ernte ? JAHRESZEITEN[js].ernte : 1) * (l.villa ? (hat(S, 'villenwirtschaft') ? 2.2 : 1.75) : 1);
+    const faktor = landFaktor(f, S) * (d.ernte ? ernteFaktor(S, js) : 1) * (l.villa ? (hat(S, 'villenwirtschaft') ? 2.2 : 1.75) : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
   }
   gefahren(S, meld);
@@ -900,13 +903,11 @@ export const vermMonate = S => hat(S, 'landvermessung') ? 1 : VERMESSEN.monate;
 export const vermKosten = S => hat(S, 'landvermessung') ? { denare: 10 } : VERMESSEN.kosten;
 export function baukosten(S, t) {
   const k = { ...GEB[t].kosten };
-  if (k.holz && hat(S, 'bauhuette')) k.holz = Math.ceil(k.holz * 0.8);
   if (amt(S) >= 1) for (const g of Object.keys(k)) k[g] = Math.ceil(k[g] * 0.9);   // Ädil
   return k;
 }
 export function bonus(S, t, g) {
   let m = 1;
-  if (g === 'getreide' && hat(S, 'fruchtwechsel')) m *= 1.25;
   if (REG.duerre && (g === 'getreide' || g === 'trauben' || g === 'oliven')) m *= 0.85;   // Apulien: Dürre
   if (REG_ID === 'apulien' && g === 'wolle') m *= 1.5;   // apulische Wolle (1.11.)
   if (t === 'ziegelei' && hat(S, 'ziegelbrand')) m *= 1.5;

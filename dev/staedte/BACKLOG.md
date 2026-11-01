@@ -414,8 +414,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       zum Betrieb. Test 99/99, Bild angesehen.
 - [x] **Arbeiter von Hand verteilen** (1.11.): − / + im Betriebsfenster begrenzt die Arbeiter (0 = stillgelegt, Pause-Symbol),
       die übrigen gehen in andere Betriebe. Test 100/100, Bild angesehen.
+- [x] **Wissen als Bilderpfad je Epoche** (1.11.): drei Reihen (I/II/III) aus Bildkarten mit Gebäudebild, Wirkung in Alltagssprache,
+      Fortschrittsbalken; keine Prozent-Boni mehr: Fruchtwechsel = volle Frühlingsernte, Bauhütte = Bautrupp 8 statt 4,
+      Steuerlisten → Tabularium (Steueramt, neues Gebäude), Municipium → Curia (Rathaus, neues Gebäude). Blender-Modelle für
+      beide. Test 100/100, Bild angesehen.
 - [ ] Ressourcen 3 (Ideen): Lager als Orte (Waren liegen im Speicher, Wege zählen), Engpass-Hinweise auf der Karte.
-      Danach Wissen als Bilderpfad.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

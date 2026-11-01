@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { ESSEN_JE_MONAT, RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, EPOCHE3, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
+import { ESSEN_JE_MONAT, RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, FORSCHUNG_BILD, ZWEIGE, EPOCHEN, EPOCHE2, EPOCHE3, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -792,26 +792,29 @@ $('#familie').addEventListener('click', e => {
 // ---------- Forschung (S3.1) ----------
 const STAND_TEXT = { fertig: 'erforscht', ziel: 'wird erforscht', epoche: 'Späte Republik', bald: 'kommt in einer späteren Ausbaustufe' };
 function forschungZeigen() {
-  const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel];
-  const karte = id => {
-    const d = FORSCHUNG[id], st = sim.forschungsStand(S, id);
-    const unten = st === 'offen' ? `${sim.forschungsKosten(S, id)} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : st === 'epoche' ? EPOCHEN[d.ep] : STAND_TEXT[st];
-    return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' || st === 'bald' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
-  };
-  const spalten = ZWEIGE.map((z, i) => {
-    const ids = ep => Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].zweig === i && FORSCHUNG[id].ep === ep);
-    return `<div class="fzweig"><h3>${z}</h3>${ids(1).map(karte).join('')}<div class="fepoche">${EPOCHEN[2]}</div>${ids(2).map(karte).join('')}<div class="fepoche">${EPOCHEN[3]}</div>${ids(3).map(karte).join('')}</div>`;
-  }).join('');
+  // Wissen als Bilderpfad je Epoche (1.11., Moritz): Bildkarten in einer Reihe, jede schaltet etwas Sichtbares frei
+  const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel], ep = sim.epoche(S);
+  const fehlend = Object.values(FORSCHUNG_BILD).filter(t => GEB[t] && !szene.bilder[t]); if (fehlend.length) szene.bilderMachen(fehlend);
   const zk = ziel ? sim.forschungsKosten(S, F.ziel) : 0, rest = ziel ? Math.max(0, zk - F.wissen) : 0, mon = Math.ceil(rest / w);
+  const karte = id => {
+    const d = FORSCHUNG[id], st = sim.forschungsStand(S, id), bild = szene.bilder[FORSCHUNG_BILD[id]];
+    const unten = st === 'fertig' ? '✓ erforscht' : st === 'ziel' ? `wird erforscht – noch ${zahl(rest)} Wissen` : st === 'offen' ? `${sim.forschungsKosten(S, id)} Wissen – antippen`
+      : st === 'gesperrt' ? 'erst ' + FORSCHUNG[d.braucht].n : st === 'epoche' ? 'ab ' + EPOCHEN[d.ep] : STAND_TEXT[st];
+    return `<button class="fkarte pkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' || st === 'bald' ? ' disabled' : ''}>
+      <span class="pbild">${bild ? `<img src="${bild}" alt="" draggable="false">` : ''}</span><b>${d.n}</b><span class="ptext">${d.text}</span>
+      ${st === 'ziel' ? `<span class="balken"><i style="width:${Math.min(100, F.wissen / zk * 100)}%"></i></span>` : ''}<small>${unten}</small></button>`;
+  };
+  const reihe = e => { const ids = Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].ep === e).sort((a, b) => (FORSCHUNG[a].braucht === b) - (FORSCHUNG[b].braucht === a) || FORSCHUNG[a].kosten - FORSCHUNG[b].kosten);
+    return `<section class="pfadabschnitt${e > ep ? ' zukunft' : ''}${e === ep ? ' jetzt' : ''}"><h3 class="fh">${['', 'I', 'II', 'III'][e]} · ${EPOCHEN[e]}${e > ep ? ' <small>– noch nicht erreicht</small>' : e === ep ? ' <small>– jetzt</small>' : ''}</h3>
+      <div class="pfad">${ids.map(karte).join('<i class="pfeil">›</i>')}</div></section>`; };
   $('#forschung').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    ${buchReiter('forschung')}<h2>Forschung</h2><div class="untertitel">Epoche ${['', 'I', 'II', 'III'][sim.epoche(S)]} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    ${buchReiter('forschung')}<h2>Wissen</h2><div class="untertitel">${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat (Stadtrat und Schulen)${ziel ? ` · ${ziel.n} in etwa ${mon} ${mon === 1 ? 'Monat' : 'Monaten'}` : ' · Wähle eine Karte als nächstes Ziel'}</div>
     ${epocheBlock()}
-    <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / zk * 100)}%"></i></div>
-      <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
-      : '<b>Wähle ein Ziel</b><small>Ohne Ziel sammelt sich nur wenig Wissen an. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
-    <div class="fbaum">${spalten}</div></div>`;
+    ${[1, 2, 3].map(reihe).join('')}</div>`;
   $('#forschung').hidden = false;
+  const jetzt = $('#forschung .pfadabschnitt.jetzt');
+  if (jetzt && ep > 1) jetzt.scrollIntoView({ block: 'nearest' });
 }
 function epocheBlock() {
   if (sim.epoche(S) >= 3) return '';

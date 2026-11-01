@@ -272,10 +272,10 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const wahl = sim.forschungWaehlen(S, 'fruchtwechsel').ok;
     SR.monate(2); const w1 = sim.wissenProMonat(S);
     F.wissen = Math.max(F.wissen, 29); SR.monate(1);
-    const fertig = sim.hat(S, 'fruchtwechsel'), bonus = sim.bonus(S, 'feld', 'getreide');
+    const fertig = sim.hat(S, 'fruchtwechsel'), bonus = sim.ernteFaktor(S, 0);
     F.fertig.push('schreine', 'landvermessung', 'bauhuette', 'villa');
     const schreinNach = SR.bauen('schrein', 30, 13).ok || SR.bauen('schrein', 31, 13).ok || SR.bauen('schrein', 32, 13).ok;
-    const verm = sim.vermMonate(S), holzK = sim.baukosten(S, 'markt').holz;
+    const verm = sim.vermMonate(S), holzK = (sim.forschungS(S).fertig.includes('bauhuette') ? 1 : 0);
     // Villa rustica: Gehöft ausbauen bringt mehr Getreide (Kopie, Sommer)
     const V = kopie(), karte = sim.regionKarte(), hof = karte.find(f => (V.land[sim.landKey(f)] || {}).betrieb === 'gehoeft' && sim.verbunden(V, f));
     let villa = 'kein Gehöft';
@@ -288,8 +288,8 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     document.querySelector('#forschung [data-f="zu"]').click();
     return { schreinVor, villaVor, ep2, w0, schule: !!schule, wahl, w1, fertig, bonus, schreinNach, verm, holzK, villa, karten, offen, ziel, zeile, zu: document.querySelector('#forschung').hidden };
   });
-  ok('Forschung: Ziel, Schule bringt Wissen, Fruchtwechsel wirkt', /erforschen/.test(fo.schreinVor) && /Fruchtwechsel/.test(fo.villaVor) && /Republik/.test(fo.ep2) && fo.schule && fo.wahl && fo.w1 > fo.w0 && fo.fertig && fo.bonus === 1.25, JSON.stringify(fo));
-  ok('Erfindungen: Schrein, Landvermessung, Bauhütte, Villa rustica', fo.schreinNach && fo.verm === 1 && fo.holzK === 28 && fo.villa === true);
+  ok('Forschung: Ziel, Schule bringt Wissen, Fruchtwechsel: volle Frühlingsernte', /erforschen/.test(fo.schreinVor) && /Fruchtwechsel/.test(fo.villaVor) && /Republik/.test(fo.ep2) && fo.schule && fo.wahl && fo.w1 > fo.w0 && fo.fertig && fo.bonus === 1, JSON.stringify(fo));
+  ok('Erfindungen: Schrein, Landvermessung, Bauhütte (größerer Bautrupp), Villa rustica', fo.schreinNach && fo.verm === 1 && fo.holzK === 1 && fo.villa === true);
   ok('Forschungsseite: 26 Karten (drei Epochen), Ziel per Antippen, Anzeige im Auftrag', fo.offen && fo.karten === 26 && fo.ziel === 'ziegelbrand' && /Ziegelbrand/.test(fo.zeile) && fo.zu);
   // S3.2 Stände: Sklavenquartier (kaufen, arbeiten nur in Sklaven-Betrieben, Hunger, Freilassung, Furcht), Insula
   const st3 = await p.evaluate(() => {

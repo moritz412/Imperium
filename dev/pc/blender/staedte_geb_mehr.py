@@ -486,5 +486,40 @@ def toepferei():
     for i, x in enumerate((0.8, 0.88)): stamm(bm, (x, -0.1, 0.06), (x, -0.6, 0.06), 0.035, "holz", 6)
     ablegen("toepferei", bm)
 
+def tabularium():
+    """Tabularium (Steueramt): Steinbau mit Vorhalle, Regale mit Schriftrollen, Tisch mit Waage."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.04), (1.7, 1.6, 0.08), "stein_hell")
+    kasten(bm, (0, 0.3, 0.42), (1.5, 0.9, 0.7), "stein_hell")
+    satteldach(bm, 0, 0.3, 0.77, 0.75, 0.45, 0.24, "dach", "stein_hell")
+    for x in (-0.6, -0.2, 0.2, 0.6): saeule(bm, x, -0.5, 0.08, 0.62, 0.035)
+    kasten(bm, (0, -0.5, 0.72), (1.5, 0.12, 0.06), "stein")
+    pultdach(bm, -0.78, 0.78, -0.6, 0.72, -0.15, 0.8, "dach", 0.03, "dach_dunkel")
+    tuer(bm, 0, -0.15, 0.26, 0.46, rahmen="bronze", z0=0.08)
+    for x in (-0.55, 0.55):                                                 # Regale mit Rollen
+        kasten(bm, (x, -0.17, 0.35), (0.3, 0.04, 0.5), "holz")
+        for k in range(3):
+            for i in range(3): zyl(bm, (x - 0.09 + i * 0.09, -0.2, 0.17 + k * 0.15), 0.025, 0.025, 0.02, "stoff_hell", 6)
+    kasten(bm, (0, -0.35, 0.2), (0.4, 0.2, 0.04), "holz_hell")             # Tisch mit Waage
+    stamm(bm, (0.1, -0.35, 0.22), (0.1, -0.35, 0.36), 0.008, "bronze", 4)
+    kasten(bm, (0.1, -0.35, 0.36), (0.18, 0.01, 0.01), "bronze")
+    ablegen("tabularium", bm)
+
+def curia():
+    """Curia (Rathaus): hoher Saal mit Giebel, Bronzetür, Freitreppe, Rednerpult davor."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.04), (2.7, 1.8, 0.08), "stein_hell")
+    kasten(bm, (0, 0.25, 0.68), (1.8, 1.1, 1.2), "backstein")
+    kasten(bm, (0, 0.25, 0.1), (1.84, 1.14, 0.08), "stein")
+    giebeldach_y(bm, 0, 0.25, 1.28, 0.95, 0.6, 0.32, "dach", "stein_hell", ue=0.04)
+    kasten(bm, (0, -0.31, 0.95), (1.82, 0.04, 0.06), "stein_hell")
+    tuer(bm, 0, -0.3, 0.36, 0.7, rahmen="bronze", z0=0.08)
+    for x in (-0.55, 0.55): fenster(bm, x, -0.3, 1.05, 0.22, 0.28)
+    treppe(bm, 0, -0.32, 1.0, 3, 0.08, 0.3)
+    kasten(bm, (0, -0.75, 0.2), (0.6, 0.25, 0.32), "stein_hell")            # Rednerbühne (rostra)
+    for x in (-0.24, 0.24): kasten(bm, (x, -0.88, 0.23), (0.08, 0.02, 0.06), "bronze")
+    for x in (-1.1, 1.1): kasten(bm, (x, -0.6, 0.35), (0.22, 0.22, 0.62), "stein_hell")
+    ablegen("curia", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia): fn()
