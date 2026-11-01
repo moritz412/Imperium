@@ -244,6 +244,11 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
 - [x] iPad-Formate (Bilder 820×1180 hoch, 1024×768 quer): Warenleiste lief über, Einwohner/Stimmung waren abgeschnitten.
       Jetzt stehen Einwohner, Sklaven und Stimmung in der Cremona-Kachel, die Warenleiste ist seitlich wischbar, im Hochformat
       mit kleiner Beschriftung. Familienseite zweispaltig geprüft. Test 76/76. **Nicht getestet:** echtes iPad.
+- [x] Thermen (nach Aquädukt, 4×3, Ziegel 80/Stein 40/Holz 40, 3 Arbeiter, Lohn 6): Heizung verbraucht 3 Holz/Monat; geheizt
+      Stimmung bis +8 im Umkreis 16, Equites in der Nähe +25 % Steuern, Seuchengefahr ×0,7. Eigene Form (Kuppeln, Becken,
+      Schornstein). Holz-Senke fürs Spätspiel. **Vicus**: Villa rustica nach 36 verbundenen Monaten → Dorf mit Hütten,
+      +3 Denare/Monat, +0,05 Ansehen. **Töne**: Feuer (Knistern), Ereignis (Hornruf), Feste/Eröffnung (Leier).
+      Töne nicht angehört. Test 78/78, Bild angesehen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

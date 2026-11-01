@@ -580,6 +580,29 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Alter Spielstand aus Stufe 1 läuft weiter (Familie, Waren, Drehung ergänzt)', !alt.fehler.length && alt.monat === 33 && alt.familie && alt.fisch && alt.dreh, JSON.stringify(alt));
   ok('Hilfe in 8 Kapiteln', alt.kapitel === 8);
+  const th = await p.evaluate(() => {
+    const sim = SR.sim, T = JSON.parse(JSON.stringify(SR.S)); T.ereignisseAus = true; T.epoche = 2;
+    const vor = sim.bauen(T, SR.welt, 'thermen', 30, 13).grund || '';
+    sim.forschungS(T).fertig.push('aquaedukt'); Object.assign(T.gut, { ziegel: 500, stein: 500, holz: 500, denare: 2000 });
+    const haus = T.geb.find(b => b.t === 'huette' && b.bew > 0); let th = null;
+    for (let r = 2; r <= 14 && !th; r++) for (let dz = -r; dz <= r && !th; dz++) for (let dx = -r; dx <= r && !th; dx++) { const q = sim.bauen(T, SR.welt, 'thermen', haus.x + dx, haus.z + dz); if (q.ok) th = q.b; }
+    if (!th) return { vor, fehler: 'kein Platz' };
+    th.prio = true; const p0 = sim.seuchenGefahr(T, haus), h0 = T.gut.holz; sim.monat(T, SR.welt);
+    const geheizt = th.geheizt, nah = sim.thermeNah(T, haus), p1 = sim.seuchenGefahr(T, haus);
+    const K = JSON.parse(JSON.stringify(T)); K.gut.holz = 0; K.land = {}; K.geb = K.geb.filter(b => b.t !== 'holzfaeller'); sim.monat(K, SR.welt); const kalt = K.geb.find(b => b.id === th.id).geheizt === false;
+    return { vor, geheizt, nah, seuche: p1 < p0, kalt };
+  });
+  ok('Thermen: erst mit Aquädukt, heizen mit Holz, Nähe senkt Seuchengefahr, kalt ohne Holz', /Aquädukt/.test(th.vor) && th.geheizt && th.nah && th.seuche && th.kalt, JSON.stringify(th));
+  const vc = await p.evaluate(() => {
+    const sim = SR.sim, V = JSON.parse(JSON.stringify(SR.S)); V.ereignisseAus = true;
+    const hof = sim.regionKarte().find(f => (V.land[sim.landKey(f)] || {}).betrieb === 'gehoeft' && sim.verbunden(V, f));
+    if (!hof) return { fehler: 'kein verbundenes Gehöft' };
+    const l = V.land[sim.landKey(hof)]; l.villa = true; l.villaMonate = 35; l.stoer = 0;
+    const m = sim.monat(V, SR.welt).join(' | ');
+    SR.umland(true); SR.szene.landAbgleichen(V); SR.szene.landAbgleichen(SR.S); SR.umland(false);
+    return { vicus: !!l.vicus, text: /vicus/.test(m), ton: typeof SR.ton.sfx === 'function' };
+  });
+  ok('Vicus: Dorf wächst um die Villa rustica', vc.vicus && vc.text, JSON.stringify(vc));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

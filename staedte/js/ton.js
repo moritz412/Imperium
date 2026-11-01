@@ -80,6 +80,13 @@ export function sfx(name, arg) {
     case 'aufstieg': [0, 0.07, 0.15].forEach((x, i) => ton({ t: t + x, f: [2100, 2600, 3150][i], dauer: 0.3, v: 0.08, typ: 'sine' })); break;
     case 'jahreszeit': (JAHRESZEIT_AKKORD[arg] || JAHRESZEIT_AKKORD[0]).forEach((m, i) => ton({ t: t + i * 0.1, f: mtof(m), dauer: 1.8, v: 0.12 })); break;
     case 'fehler': ton({ t, f: 150, dauer: 0.18, v: 0.07, typ: 'square' }); break;
+    case 'feuer':   // Knistern: kurze Rauschstöße
+      for (let i = 0; i < 9; i++) stoss({ t: t + i * 0.09 + Math.random() * 0.05, f: 1800 + Math.random() * 2500, q: 2, dauer: 0.05, v: 0.12 });
+      stoss({ t, f: 220, q: 0.6, dauer: 1.0, v: 0.18, typ: 'lowpass' }); break;
+    case 'ereignis':   // Hornruf (tuba): zwei Töne
+      ton({ t, f: 196, dauer: 0.45, v: 0.1, typ: 'sawtooth' }); ton({ t: t + 0.42, f: 294, dauer: 0.7, v: 0.1, typ: 'sawtooth' }); break;
+    case 'fest':   // Leier: aufsteigender Dreiklang
+      [0, 4, 7, 12].forEach((m, i) => ton({ t: t + i * 0.12, f: mtof(62 + m), dauer: 1.2, v: 0.1 })); break;
     case 'klick': ton({ t, f: 880, f2: 620, dauer: 0.07, v: 0.06, typ: 'sine' }); break;
     case 'vogel': { const f = 2400 + Math.random() * 1400; for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) ton({ t: t + i * 0.11, f, f2: f * 1.25, dauer: 0.08, v: 0.012, typ: 'sine', a: 0.005 }); break; }
   }

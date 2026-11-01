@@ -247,6 +247,8 @@ function infoZeichnen() {
   }
   const gefahr = sim.brandGefahr(S, b);
   if (gefahr) html += `<div class="zeile"><span>Brandgefahr</span><b>${gefahr < 0.002 ? 'gering' : gefahr < 0.006 ? 'mittel' : 'hoch'}</b></div>`;
+  if (b.t === 'thermen') html += `<div class="zeile"><span>Heizung</span><b>${b.geheizt ? 'geheizt (3 Holz im Monat)' : 'kalt – braucht Holz und Personal'}</b></div>`;
+  if (b.t === 'huette') html += `<div class="zeile"><span>Thermen in der Nähe</span><b>${sim.thermeNah(S, b) ? 'ja' : 'nein'}</b></div>`;
   if (d.unterhalt) html += `<div class="zeile"><span>Lohn/Sold im Monat</span><b>${d.unterhalt} Denare${b.unbezahlt ? ' – nicht bezahlt!' : ''}</b></div>`;
   if (d.reichweite) html += `<div class="zeile"><span>Reichweite${d.strassen ? ' über Straßen' : ''}</span><b>${d.reichweite} Felder</b></div>`;
   html += `<div style="flex:1"></div><button class="knopf weg" data-a="weg">Abreißen (Hälfte der Baustoffe zurück)</button>`;
@@ -343,6 +345,7 @@ function ereignisZeigen() {
     <div class="einhalt"><small>${sim.datumText(S)}</small><h2>${e.titel}</h2><p>${e.text}</p>
     ${e.wahl.map((w, i) => { const f = sim.wahlMoeglich(S, w);
       return `<button class="knopf ewahl" data-e="${i}"${f ? ' disabled' : ''}><b>${w.t}</b><small>${f || sim.wirkungText(w)}</small></button>`; }).join('')}</div></div>`;
+  if ($('#ereignis').hidden) ton.sfx(['cerealia', 'ludi', 'saturnalia', 'eroeffnung'].includes(e.id) ? 'fest' : 'ereignis');
   $('#ereignis').hidden = false;
 }
 $('#ereignis').addEventListener('click', e => {
@@ -630,7 +633,8 @@ $('#ansicht').addEventListener('click', e => {
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
   const meld = sim.monat(S, welt); meld.forEach(melden);
-  if (meld.some(m => /Casa|ist jetzt/.test(m))) ton.sfx('aufstieg');
+  if (meld.some(m => /Casa|ist jetzt|Insula|vicus/.test(m))) ton.sfx('aufstieg');
+  if (meld.some(m => /^Feuer!/.test(m))) ton.sfx('feuer');
   if (sim.jahreszeit(S) !== js) { szene.jahreszeitFarbe(sim.jahreszeit(S)); speichern(true); ton.sfx('jahreszeit', sim.jahreszeit(S)); }
   allesZeichnen();
 }

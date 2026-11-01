@@ -297,6 +297,11 @@ export function monat(S, welt) {
     }
   }
 
+  // Thermen (1.11.): geheizt nur mit Holz
+  for (const b of S.geb.filter(b => b.t === 'thermen' && b.w > 0 && !(b.brand > 0))) {
+    b.geheizt = S.gut.holz >= GEB.thermen.heizen;
+    if (b.geheizt) S.gut.holz -= GEB.thermen.heizen; else b.status.push({ art: 'rohstoff', gut: 'holz', text: 'Kein Holz zum Heizen' });
+  }
   // Domus der Equites (Späte Republik): wachsen mit Brot, Wasser, Markt und Wein; trinken Wein, zahlen hohe Steuern
   let equites = 0;
   for (const b of S.geb.filter(b => b.t === 'domus')) {
@@ -306,6 +311,7 @@ export function monat(S, welt) {
     // Luxus (Späte Republik): Öl und Garum – je +25 % Steuern
     let lux = 1;
     for (const [g, n] of [['oel', 0.05], ['garum', 0.02]]) if (b.bew > 0 && S.gut[g] >= b.bew * n) { S.gut[g] -= b.bew * n; lux += 0.25; }
+    if (b.bew > 0 && thermeNah(S, b)) lux += 0.25;
     b.lux = lux;
     const fehlt = !wasser ? 'Brunnen' : !markt ? 'Markt' : !S.versorgt.brot ? 'Brot' : !wein ? 'Wein' : '';
     if (fehlt && b.bew === 0) b.status.push({ art: 'markt', text: 'Equites ziehen erst ein mit ' + fehlt, leicht: true });
@@ -326,6 +332,7 @@ export function monat(S, welt) {
   if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;
   if (tempel.length && S.monat % 12 === 8) S.gunst = Math.min(100, gunst(S) + 2);
   if (S.geb.some(b => b.t === 'theater' && b.w > 0)) ziel += 8;
+  if (haeuser && S.geb.some(b => b.t === 'thermen' && b.geheizt)) ziel += 8 * S.geb.filter(h => h.t === 'huette' && thermeNah(S, h)).length / haeuser;
   if (S.geb.some(b => b.t === 'basilika' && !(b.bau > 0) && b.w > 0)) { ziel += 5; familieS(S).ansehen += 0.5; }
   if (haeuser && rang(S) >= INSULA.rang) {   // S3.3: Ordnung – Häuser ohne Wache in der Nähe
     const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
@@ -581,6 +588,9 @@ function landMonat(S, js, grenze, meld) {
     if (l.verm < vermMonate(S)) { if (++l.verm === vermMonate(S)) meld.push('Die Landvermesser haben ein Feld im Umland abgesteckt.'); continue; }
     if (l.stoer > 0) { l.stoer--; continue; }   // geplündert oder überschwemmt (S2.6)
     const d = LAND_BETRIEBE[l.betrieb]; if (!d || !netz.has(landKey(f))) continue;
+    // Vicus (1.11.): nach 36 verbundenen Monaten wächst um die Villa rustica ein Dorf – Marktabgaben für die Stadt
+    if (l.villa) { l.villaMonate = (l.villaMonate || 0) + 1; if (!l.vicus && l.villaMonate >= 36) { l.vicus = true; meld.push('Rund um eine Villa rustica ist ein Dorf (vicus) entstanden.'); } }
+    if (l.vicus) { S.gut.denare += 3; if (S.familie) S.familie.ansehen += 0.05; }
     const faktor = landFaktor(f, S) * (d.ernte ? JAHRESZEITEN[js].ernte : 1) * (l.villa ? 1.75 : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
   }
@@ -1076,6 +1086,7 @@ export function seuchenGefahr(S, b) {
   if (latrineNah(S, b)) p *= X.latrine;
   if (inReichweite(S, b, 'brunnen')) p *= X.brunnen;
   if (hat(S, 'aquaedukt')) p *= X.aquaedukt;
+  if (thermeNah(S, b)) p *= 0.7;
   return p;
 }
 function seucheMonat(S, meld) {
@@ -1105,4 +1116,5 @@ function inschriftenMonat(S, meld) {
   const da = S.inschriften = S.inschriften || {};
   for (const i of INSCHRIFTEN) if (!da[i.id] && i.ok(S, SIM)) { da[i.id] = S.monat; meld.push(`Inschrift auf dem Forum: „${i.n}“`); }
 }
+export const thermeNah = (S, b) => S.geb.some(o => o.t === 'thermen' && o.geheizt && o.w > 0 && abstand(o, b) <= GEB.thermen.reichweite);
 

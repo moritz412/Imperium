@@ -205,6 +205,15 @@ export function erzeugeSzene(leinwand, welt) {
       teil(new THREE.SphereGeometry(0.16, 8, 6), 0xff7a2a, 0.55, 0.3, -0.05).material.emissive = new THREE.Color(0x8a2a00);
       box(0.3, 0.2, 0.15, 0x3a3a3a, -0.35, 0.22, 0.45); box(0.12, 0.12, 0.12, 0x3a3a3a, -0.35, 0.06, 0.45);
       box(0.4, 0.15, 0.3, 0x7a5848, 0.3, 0.07, 0.6); g.userData.h = 1.4; return g; },
+    thermen: geist => { const { g, box, teil } = teileBau(geist);   // Badehaus mit Kuppeln, Becken im Hof, Schornstein der Heizung
+      box(3.7, 0.15, 2.7, 0xd8ccb0, 0, 0.07, 0);
+      box(2.4, 0.8, 1.4, 0xe6dccb, -0.5, 0.55, -0.55); box(2.5, 0.08, 1.5, 0xa9482a, -0.5, 0.98, -0.55);
+      for (const x of [-1.2, -0.5, 0.2]) teil(new THREE.SphereGeometry(0.42, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), 0xd8d0c0, x, 1.0, -0.55);
+      box(1.0, 0.5, 2.2, 0xe0d4bc, 1.3, 0.4, 0); box(1.1, 0.06, 2.3, 0xa9482a, 1.3, 0.68, 0);
+      box(2.2, 0.08, 0.9, 0x5e8fb0, -0.5, 0.17, 0.75); box(2.4, 0.16, 0.08, 0xd8ccb0, -0.5, 0.22, 1.24);
+      box(0.25, 1.4, 0.25, 0x8a7a68, 1.55, 0.85, -0.95);
+      for (let i = 0; i < 5; i++) teil(new THREE.CylinderGeometry(0.05, 0.06, 0.5, 6), 0xf6f0e2, -1.6 + i * 0.55, 0.4, 1.2);
+      g.userData.h = 1.6; return g; },
     basilika: geist => { const { g, box, teil } = teileBau(geist);   // Hallenbau mit Säulenumgang, Obergaden und Apsis
       box(5.6, 0.2, 3.6, 0xd8ccb0, 0, 0.1, 0);
       box(4.6, 1.1, 2.6, 0xeee6d4, 0, 0.75, 0); box(4.6, 0.55, 1.4, 0xe6dccb, 0, 1.55, 0);
@@ -694,7 +703,7 @@ export function erzeugeSzene(leinwand, welt) {
     for (const f of region.felder) {
       const k = landKey(f), stand = landStand(S, f), l = (S.land || {})[k];
       const wegNach = hatWeg(S, f) ? nachbarn(f).map(n => n && hatWeg(S, n) ? 1 : 0).join('') : '';
-      const schl = stand + (l && l.betrieb || '') + wegNach + (l && l.turm ? 'T' : '') + (l && l.deich ? 'D' : '') + (l && l.stoer > 0 ? 'S' + l.stoerArt : '') + (l && l.villa ? 'V' : '') + (hat(S, 'schotter') ? 'G' : '');
+      const schl = stand + (l && l.betrieb || '') + wegNach + (l && l.turm ? 'T' : '') + (l && l.deich ? 'D' : '') + (l && l.stoer > 0 ? 'S' + l.stoerArt : '') + (l && l.villa ? 'V' : '') + (l && l.vicus ? 'Vc' : '') + (hat(S, 'schotter') ? 'G' : '');
       const alt = landObj.get(k); if (alt && alt.schl === schl) continue;
       if (alt) region.g.remove(alt.g);
       const g = new THREE.Group(), [x, z] = hexMitte(f.q, f.r), top = HOEHE[f.typ] ?? 0.32;
@@ -710,6 +719,10 @@ export function erzeugeSzene(leinwand, welt) {
         st.position.set(x + dx / 4 * ganz, top + 0.03, z + dz / 4 * ganz); st.rotation.y = Math.atan2(dx, dz); st.receiveShadow = true; g.add(st);
       });
       if (l) gefahrZeichnen(g, f, l, x, z, top);
+      if (l && l.vicus) for (const [a, c] of [[-1.3, -0.6], [-0.4, -1.4], [0.6, -1.3], [-1.5, 0.6], [1.6, -0.2]]) {   // Hütten des Dorfes
+        const mo = modelle && modelle.huette, m = mo ? new THREE.Mesh(mo.geo, new THREE.MeshLambertMaterial({ vertexColors: true })) : new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.4, 0.6), new THREE.MeshLambertMaterial({ color: 0xd8b88a }));
+        m.scale.setScalar(mo ? 0.45 : 1); m.position.set(x + a, top, z + c); m.rotation.y = a * 2; m.castShadow = true; g.add(m);
+      }
       if (stand === 'betrieb' && l.betrieb === 'kastell') {
         const lam = c => new THREE.MeshLambertMaterial({ color: c }), A = 1.1;
         for (const [a, b, w, d] of [[0, -A, 2 * A, 0.2], [0, A, 2 * A, 0.2], [-A, 0, 0.2, 2 * A], [A, 0, 0.2, 2 * A]]) {
