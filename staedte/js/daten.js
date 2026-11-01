@@ -114,6 +114,16 @@ export const GEB = {
   theater: { n: 'Theater', kat: 'Öffentlich', g: [4, 3], h: 0.9, wand: 0xe0d4bc, dach: 0xb5522f, forschung: 'theater',
     kosten: { ziegel: 80, stein: 60, holz: 40 }, arbeiter: 4, unterhalt: 8,
     text: 'Komödien des Plautus und Terenz. Ein bespieltes Theater hebt die Stimmung der ganzen Stadt.' },
+  // Kaiserzeit (Epoche III, 1.11.)
+  amphitheater: { n: 'Amphitheater', kat: 'Öffentlich', g: [5, 4], h: 1.4, wand: 0xe0d4bc, dach: 0xb5522f, epoche: 3, forschung: 'amphitheater', wahrzeichen: true,
+    kosten: { stein: 200, ziegel: 150, holz: 60, denare: 400 }, bauzeit: 10, arbeiter: 6, unterhalt: 10,
+    text: 'Arena für Gladiatoren und Tierhetzen. Einmal je Stadt, 10 Monate Bauzeit. Stimmung +10 in der ganzen Stadt, jeden Sommer ein Munus.' },
+  augusteum: { n: 'Augusteum', kat: 'Öffentlich', g: [3, 3], h: 1.3, wand: 0xf2ece0, dach: 0xa9482a, epoche: 3, forschung: 'kaiserkult', wahrzeichen: true,
+    kosten: { stein: 80, ziegel: 40, denare: 150 }, bauzeit: 5, arbeiter: 2, unterhalt: 4, reichweite: 16, bodenwert: [3, 10],
+    text: 'Tempel für den Kaiser und den Genius des Augustus. Häuser im Umkreis von 16 Feldern sind zufriedener, die Gunst Roms steigt jede Jahreszeit.' },
+  macellum: { n: 'Macellum', kat: 'Öffentlich', g: [3, 3], h: 0.9, wand: 0xeadbc0, dach: 0xa9482a, epoche: 3, forschung: 'macellum',
+    kosten: { stein: 40, ziegel: 60, holz: 30 }, arbeiter: 3, unterhalt: 4, reichweite: 26, bodenwert: [2, 8],
+    text: 'Lebensmittelmarkt um einen Rundbau mit Brunnen: wirkt wie ein Markt im Umkreis von 26 Feldern und hebt dort die Stimmung.' },
   latrine: { n: 'Latrine', kat: 'Öffentlich', g: [2, 1], h: 0.55, wand: 0xd8ccb0, dach: 0xa9583a,
     kosten: { ziegel: 12, holz: 6 }, reichweite: 9,
     text: 'Öffentliche Latrine mit fließendem Wasser in der Rinne. Häuser im Umkreis von 9 Feldern erkranken viel seltener.' },
@@ -273,6 +283,9 @@ export const AUFTRAEGE = [
   { n: 'Errichte die Basilika am Forum.', ok: S => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)), lohn: { denare: 300 } },
   { n: 'Werde eine Kolonie mit 300 Einwohnern.', ok: S => (S.rang || 0) >= 3, lohn: { denare: 400 } },
   { n: 'Lass einen Valerier zum Prätor wählen.', ok: S => !!S.familie && S.familie.amt >= 2, lohn: { denare: 500 } },
+  { n: 'Führe {stadt} in die Kaiserzeit (Forschungsseite).', ok: S => (S.epoche || 1) >= 3, lohn: { denare: 400, stein: 60 } },
+  { n: 'Weihe ein Augusteum für den Kaiser.', ok: S => S.geb.some(b => b.t === 'augusteum' && !(b.bau > 0)), lohn: { denare: 300 } },
+  { n: 'Errichte das Amphitheater.', ok: S => S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0)), lohn: { denare: 600 } },
 ];
 
 // Forschung (S3.1): Wissen aus dem Stadtrat (1 im Monat) und Schulen (je 3), ein Ziel gleichzeitig.
@@ -299,6 +312,12 @@ export const FORSCHUNG = {
   archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit den Nachbarstädten: Händler nehmen nur 8 statt 15 % Aufschlag.' },
   zoelle:         { n: 'Zölle', zweig: 3, ep: 2, kosten: 90, braucht: 'archiv', text: 'Zoll auf durchziehende Händler: 8 Denare im Monat je offener Handelsstraße.' },
   tempel:         { n: 'Tempelbau', zweig: 4, ep: 2, kosten: 90, text: 'Ein Tempel für Jupiter: Stimmung im Umkreis, jeden Herbst Gunst Roms.' },
+  villenwirtschaft: { n: 'Villenwirtschaft', zweig: 0, ep: 3, kosten: 140, text: 'Große Güter mit Sklaven und Verwaltern: Villae rusticae bringen noch mehr.' },
+  macellum:       { n: 'Macellum', zweig: 1, ep: 3, kosten: 130, text: 'Ein Lebensmittelmarkt mit Rundbau: weite Versorgung, zufriedene Viertel.' },
+  beton:          { n: 'Opus caementicium', zweig: 2, ep: 3, kosten: 150, text: 'Römischer Beton: alle Bauten stehen ein Drittel schneller.' },
+  municipium:     { n: 'Municipium', zweig: 3, ep: 3, kosten: 140, text: 'Eigenes Stadtrecht mit Duumvirn und Stadtrat: Steuern +15 %.' },
+  kaiserkult:     { n: 'Kaiserkult', zweig: 4, ep: 3, kosten: 120, text: 'Ein Augusteum für den Genius des Kaisers: Gunst Roms, Stimmung im Umkreis.' },
+  amphitheater:   { n: 'Amphitheater', zweig: 4, ep: 3, kosten: 180, braucht: 'kaiserkult', text: 'Gladiatoren und Tierhetzen: Stimmung in der ganzen Stadt.' },
   theater:        { n: 'Theater', zweig: 4, ep: 2, kosten: 110, braucht: 'tempel', text: 'Komödien des Plautus: Stimmung in der ganzen Stadt.' },
 };
 export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
@@ -315,6 +334,7 @@ export const FEUER = {
 
 // Übergang in die Späte Republik (1.11., Moritz: Rang + Forschung): Kolonie, 6 Erfindungen, Gunst Roms ab 50
 export const EPOCHE2 = { rang: 3, erfindungen: 6, gunst: 50 };
+export const EPOCHE3 = { erfindungen: 5, gunst: 60, wahrzeichen: 'basilika' };   // Kaiserzeit: Basilika, 5 Erfindungen der Späten Republik, Gunst 60
 
 // Familie und Ämter (S4.1). Stadtkasse (S.gut.denare) und Familienvermögen (S.familie.vermoegen) sind getrennt.
 export const FAMILIE_START = {
@@ -426,6 +446,18 @@ export const EREIGNISSE = [
   { id: 'eroeffnung_thermen', nurAusgeloest: true, titel: 'Die Thermen öffnen', bild: 'spiele',
     text: 'Die Öfen sind seit Tagen geheizt, das Wasser im Caldarium dampft. Vor dem Eingang warten Bürger, Händler und Sklaven auf den ersten Badetag.',
     wahl: [{ t: 'Freier Eintritt am ersten Monat', w: { gut: { denare: -20 }, stimmung: 10, ansehen: 4 } }, { t: 'Eintritt: ein Quadrans', w: { gut: { denare: 20 }, stimmung: 4 } }] },
+  { id: 'eroeffnung_amphitheater', nurAusgeloest: true, titel: 'Das Amphitheater wird eröffnet', bild: 'spiele',
+    text: 'Zehntausend Menschen drängen sich auf den Rängen. Sonnensegel flattern, im Sand warten Gladiatoren auf das Zeichen des Spielgebers.',
+    wahl: [{ t: 'Hundert Paare Gladiatoren (Familie zahlt)', w: { vermoegen: -150, ansehen: 35, stimmung: 15, gunst: 5 } }, { t: 'Spiele aus der Stadtkasse', w: { gut: { denare: -150 }, ansehen: 15, stimmung: 15 } }, { t: 'Eine Tierhetze mit Bären aus dem Norden', w: { gut: { denare: -60 }, stimmung: 10, ansehen: 8 } }] },
+  { id: 'eroeffnung_augusteum', nurAusgeloest: true, titel: 'Das Augusteum wird geweiht', bild: 'spiele',
+    text: 'Auf dem Forum steht nun ein Tempel für den Genius des Augustus. Die Augustalen – reiche Freigelassene – bitten um das Recht, den Kult zu führen.',
+    wahl: [{ t: 'Den Augustalen den Kult überlassen', w: { gut: { denare: 80 }, gunst: 5 } }, { t: 'Die Familie stellt den Priester', w: { vermoegen: -40, ansehen: 15, gunst: 8 } }] },
+  { id: 'munus', jaehrlich: 3, wenn: S => S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0)), titel: 'Ein Munus im Amphitheater', bild: 'spiele',
+    text: 'Der Sommer ist da, und die Stadt erwartet Gladiatorenspiele. Wer gibt sie – und wie prächtig?',
+    wahl: [{ t: 'Prächtige Spiele (Familie zahlt)', w: { vermoegen: -80, ansehen: 12, stimmung: 8 } }, { t: 'Spiele aus der Stadtkasse', w: { gut: { denare: -80 }, stimmung: 8 } }, { t: 'Dieses Jahr keine Spiele', w: { stimmung: -6 } }] },
+  { id: 'kaiserbesuch', titel: 'Der Kaiser auf der Durchreise', bild: 'krieg', ab: 24, wenn: S => (S.epoche || 1) >= 3 && !(S.ereignisLog || {}).kaiserbesuch,
+    text: 'Boten melden: Augustus reist mit Gefolge durch die Provinz und will in der Stadt übernachten. Die ganze Stadt putzt, schmückt und rechnet.',
+    wahl: [{ t: 'Ein Empfang, von dem man in Rom spricht', w: { gut: { denare: -200, brot: -30 }, gunst: 20, ansehen: 20, stimmung: 6 } }, { t: 'Würdig, aber bescheiden', w: { gut: { denare: -60 }, gunst: 8, ansehen: 6 } }, { t: 'Eine Bittschrift überreichen: Steuern senken', w: { gunst: -5, stimmung: 8 } }] },
   // Entscheidungen der Geschichte (Phase B), nur durch die Zeitleiste ausgelöst
   { id: 'via', nurAusgeloest: true, titel: 'Die Via Postumia', bild: 'handel',
     text: 'Der Konsul Spurius Postumius Albinus lässt eine Fernstraße von Genua nach Aquileia bauen – mitten durch Cremona. Händler und Reisende werden kommen, aber die Stadt muss Baustoffe und Arbeit stellen.',
@@ -474,6 +506,8 @@ export const INSCHRIFTEN = [
   { id: 'umland', n: 'Herr des Umlands', text: 'Zehn Felder im Umland sind vermessen.', ok: (S) => Object.keys(S.land || {}).length >= 10 },
   { id: 'basilika', n: 'Die Basilika', text: 'Das Wahrzeichen am Forum ist eröffnet.', ok: (S) => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)) },
   { id: 'gehalten', n: '{stadt} hielt stand', text: 'Die Feinde stürmten vergeblich gegen die Mauern.', ok: (S) => Object.values(S.zaehler || {}).includes('gehalten') },
+  { id: 'kaiserzeit', n: 'Unter Augustus', text: 'Die Kaiserzeit hat begonnen. {stadt} ist eine Stadt des Reiches.', ok: (S) => (S.epoche || 1) >= 3 },
+  { id: 'arena', n: 'Brot und Spiele', text: 'Das Amphitheater von {stadt} ist eröffnet.', ok: (S) => S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0)) },
   { id: 'zehn', n: 'Zehn Jahre {stadt}', text: 'Seit zehn Jahren steht die Kolonie am {fluss}.', ok: (S) => S.monat >= 122 },
 ];
 

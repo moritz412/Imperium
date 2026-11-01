@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, EPOCHE3, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -85,7 +85,7 @@ function bauleiste() {
     const [w] = d.g, hoch = d.flach ? 6 : Math.round(d.h * 26), k = sim.baukosten(S, t), zu = sim.gesperrt(S, t);
     return `<button class="karte${t === bauTyp ? ' an' : ''}${sim.kannBezahlen(S, k) ? '' : ' teuer'}${zu ? ' gesperrt' : ''}" data-t="${t}" aria-pressed="${t === bauTyp}">
       ${szene.bilder[t] ? `<span class="bild foto"><img src="${szene.bilder[t]}" alt="" draggable="false"></span>` : `<span class="bild" style="background:#3a3026"><i style="width:${10 + w * 8}px;height:${hoch}px;background:#${d.wand.toString(16).padStart(6, '0')};border-top:5px solid #${(d.dach || d.wand).toString(16).padStart(6, '0')}"></i></span>`}
-      <b>${d.n}</b><small>${zu ? (d.epoche > sim.epoche(S) ? 'Späte Republik' : 'Erforschen: ' + FORSCHUNG[d.forschung].n) : kostenText(k)}</small></button>`;
+      <b>${d.n}</b><small>${zu ? (d.epoche > sim.epoche(S) ? EPOCHEN[d.epoche] : 'Erforschen: ' + FORSCHUNG[d.forschung].n) : kostenText(k)}</small></button>`;
   }).join('');
 }
 $('#reiter').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { reiter = b.dataset.k; bauleiste(); } });
@@ -545,7 +545,7 @@ const HILFE = [
   ['Umland und Handel', ['Knopf „Umland“: Felder vermessen, Betriebe bauen, Feldwege bis zur Stadt legen. Anleger am Fluss verbinden per Boot.', 'Die Nachbarstädte im Westen und Osten kaufen und verkaufen, sobald ein Weg hinführt. Was du verkaufst, wird dort billiger.', 'Rom verlangt jeden Herbst Abgaben. Pünktlich zahlen hält die Gunst Roms hoch.']],
   ['Gefahren', ['Räuber plündern ferne Betriebe (Wachturm), der Fluss tritt im Frühling über die Ufer (Deich), Feinde kommen aus dem Norden (Kastell, Stadtmauer oder Geschenke an ihr Dorf).', 'Feuer: Dichte Häuser, Bäckereien und Ziegeleien brennen leicht. Die Feuerwache löscht, sonst nur manchmal die Nachbarn.', 'Seuchen: Dichte Viertel und Insulae erkranken leichter. Latrinen, Brunnen und das Aquädukt schützen.']],
   ['Bevölkerung', ['Plebejer wohnen in Hütten, Casae und Insulae. Equites leben in der Domus, brauchen Wein und zahlen viel Steuern.', 'Sklaven kauft man im Sklavenquartier. Sie arbeiten auf Feldern und in Werkstätten und essen Getreidebrei. Freigelassene werden Plebejer.']],
-  ['Forschung und Epochen', ['Knopf „Wissen“: ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.', 'Mit Kolonie, 6 Erfindungen und Gunst 50 beginnt die Späte Republik: Wein, Öl, Tuch, Garum, Tempel, Theater.']],
+  ['Forschung und Epochen', ['Knopf „Wissen“: ein Ziel wählen. Wissen kommt vom Stadtrat und aus Schulen.', 'Mit Kolonie, 6 Erfindungen und Gunst 50 beginnt die Späte Republik: Wein, Öl, Tuch, Garum, Tempel, Theater.', 'Mit Basilika, 5 Erfindungen der Späten Republik und Gunst 60 beginnt die Kaiserzeit: Beton, Municipium, Macellum, Augusteum, Amphitheater – und fünf Jahre Frieden.']],
   ['Familie und Politik', ['Knopf „Familie“: Ansehen sammeln und gegen die Rivalen zum Ädil und Prätor gewählt werden.', 'Familienvermögen und Stadtkasse sind getrennt. Familiengeschäfte füllen das Vermögen – auf Kosten der Stadt.', 'Heirat bringt Bündnisse, Klienten bringen Ansehen, der Sohn lernt beim Rhetor oder dient in der Legion.']],
   ['Ereignisse und Ziele', ['Ereignisse verlangen eine Entscheidung; die Folgen stehen auf den Knöpfen. Im Menü lassen sie sich abschalten.', 'Feste im Jahreslauf: Cerealia, Ludi Romani, Saturnalien.', 'Senatsaufträge führen durch das Spiel. Erfolge stehen als Inschriften auf dem Forum (Menü).']],
 ];
@@ -644,17 +644,17 @@ function forschungZeigen() {
   const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel];
   const karte = id => {
     const d = FORSCHUNG[id], st = sim.forschungsStand(S, id);
-    const unten = st === 'offen' ? `${d.kosten} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : STAND_TEXT[st];
+    const unten = st === 'offen' ? `${d.kosten} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : st === 'epoche' ? EPOCHEN[d.ep] : STAND_TEXT[st];
     return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' || st === 'bald' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
   };
   const spalten = ZWEIGE.map((z, i) => {
     const ids = ep => Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].zweig === i && FORSCHUNG[id].ep === ep);
-    return `<div class="fzweig"><h3>${z}</h3>${ids(1).map(karte).join('')}<div class="fepoche">${EPOCHEN[2]}</div>${ids(2).map(karte).join('')}</div>`;
+    return `<div class="fzweig"><h3>${z}</h3>${ids(1).map(karte).join('')}<div class="fepoche">${EPOCHEN[2]}</div>${ids(2).map(karte).join('')}<div class="fepoche">${EPOCHEN[3]}</div>${ids(3).map(karte).join('')}</div>`;
   }).join('');
   const rest = ziel ? Math.max(0, ziel.kosten - F.wissen) : 0, mon = Math.ceil(rest / w);
   $('#forschung').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    ${buchReiter('forschung')}<h2>Forschung</h2><div class="untertitel">Epoche ${sim.epoche(S) === 2 ? 'II' : 'I'} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
+    ${buchReiter('forschung')}<h2>Forschung</h2><div class="untertitel">Epoche ${['', 'I', 'II', 'III'][sim.epoche(S)]} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
     ${epocheBlock()}
     <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
       <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
@@ -663,7 +663,15 @@ function forschungZeigen() {
   $('#forschung').hidden = false;
 }
 function epocheBlock() {
-  if (sim.epoche(S) >= 2) return '';
+  if (sim.epoche(S) >= 3) return '';
+  if (sim.epoche(S) === 2) {   // Weg in die Kaiserzeit (1.11.)
+    const n = sim.forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 2).length, fehlt = sim.epocheFehlt(S), bas = S.geb.some(b => b.t === 'basilika' && !(b.bau > 0));
+    const z = (t, ok) => `<span class="${ok ? 'ok' : 'nein'}">${t}</span>`;
+    return `<div class="fziel fepochewahl"><b>Der Weg in die Kaiserzeit</b>
+      <div class="fbeding">${z('Basilika am Forum', bas)}${z(`${n} von ${EPOCHE3.erfindungen} Erfindungen`, n >= EPOCHE3.erfindungen)}${z(`Gunst Roms ${Math.round(sim.gunst(S))} von ${EPOCHE3.gunst}`, sim.gunst(S) >= EPOCHE3.gunst)}</div>
+      <small>Augustus bringt Frieden (fünf Jahre ohne Überfälle). Dann öffnen sich Beton, Municipium, Villenwirtschaft, Macellum, Augusteum und Amphitheater.</small>
+      <button class="knopf${fehlt ? '' : ' haupt'}" data-f="epoche"${fehlt ? ' disabled' : ''}>Kaiserzeit beginnen</button></div>`;
+  }
   const n = sim.forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 1).length, fehlt = sim.epocheFehlt(S);
   const z = (t, ok) => `<span class="${ok ? 'ok' : 'nein'}">${t}</span>`;
   return `<div class="fziel fepochewahl"><b>Der Weg in die Späte Republik</b>
@@ -676,7 +684,7 @@ $('#forschung').addEventListener('click', e => {
   if (b && b.dataset.f === 'epoche') {
     const r = sim.epocheWechseln(S);
     if (!r.ok) { melden(r.grund); ton.sfx('fehler'); return; }
-    ton.sfx('aufstieg'); melden(`Die Späte Republik beginnt. ${sim.stadtName()} ist eine blühende Kolonie – neue Erfindungen und Bauten warten.`);
+    ton.sfx('aufstieg'); melden(sim.epoche(S) === 3 ? `Die Kaiserzeit beginnt. Augustus schließt den Janustempel – Frieden im Reich. ${sim.stadtName()} wächst weiter.` : `Die Späte Republik beginnt. ${sim.stadtName()} ist eine blühende Kolonie – neue Erfindungen und Bauten warten.`);
     forschungZeigen(); allesZeichnen(); return;
   }
   if (!b) { if (e.target.id === 'forschung') $('#forschung').hidden = true; return; }

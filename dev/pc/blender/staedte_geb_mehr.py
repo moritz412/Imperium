@@ -375,5 +375,72 @@ def garten():
     kasten(bm, (0, 0, 0.101), (0.22, 0.22, 0.004), "wasser")
     ablegen("garten", bm)
 
+def amphitheater():
+    """Amphitheater: ovale Arena, Ränge, Außenmauer mit zwei Bogenreihen, Tore an den Enden."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.02), (4.8, 3.8, 0.04), "stein")
+    A, B, n = 2.3, 1.8, 20
+    for i in range(n):
+        a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n; am = (a0 + a1) / 2
+        ca, sa = math.cos(am), math.sin(am)
+        for k in range(4):                                            # Ränge, außen höher
+            f = 0.45 + k * 0.13; h = 0.25 + k * 0.28
+            L = math.hypot(A * f * (math.cos(a1) - math.cos(a0)), B * f * (math.sin(a1) - math.sin(a0))) + 0.03
+            kasten(bm, (A * f * ca, B * f * sa, h / 2), (L, 0.24, h), "stein_hell" if k % 2 else "stein", rz=math.atan2(B * ca, -A * sa))
+        L = math.hypot(A * (math.cos(a1) - math.cos(a0)), B * (math.sin(a1) - math.sin(a0))) + 0.02
+        rz = math.atan2(B * ca, -A * sa)
+        kasten(bm, (A * 1.0 * ca, B * 1.0 * sa, 0.66), (L, 0.08, 1.32), "putz_hell", rz=rz)
+        for z in (0.3, 0.8):
+            kasten(bm, (A * 1.02 * ca, B * 1.02 * sa, z), (L * 0.55, 0.02, 0.3), "dunkel", rz=rz)
+        kasten(bm, (A * 1.0 * ca, B * 1.0 * sa, 1.34), (L + 0.02, 0.12, 0.05), "stein", rz=rz)
+    kasten(bm, (0, 0, 0.045), (A * 0.85, B * 0.85, 0.01), "korn")          # Sand
+    for sx in (-1, 1): kasten(bm, (sx * A * 0.95, 0, 0.3), (0.3, 0.36, 0.56), "dunkel")
+    ablegen("amphitheater", bm)
+
+def augusteum():
+    """Augusteum: Tempel auf Podium in einem Säulenhof, Altar, Statue des Kaisers."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.03), (2.8, 2.8, 0.06), "stein_hell")
+    for i in range(7):                                                # Säulenhof hinten und seitlich
+        saeule(bm, -1.25 + i * 0.4167, 1.25, 0.06, 0.55, 0.03)
+    for sx in (-1, 1):
+        for i in range(5): saeule(bm, sx * 1.25, -0.9 + i * 0.5, 0.06, 0.55, 0.03)
+        kasten(bm, (sx * 1.25, 0.15, 0.63), (0.1, 2.3, 0.05), "stein_hell")
+    kasten(bm, (0, 1.25, 0.63), (2.6, 0.1, 0.05), "stein_hell")
+    with lage((0, 0.35, 0)):
+        kasten(bm, (0, 0, 0.18), (1.1, 1.4, 0.3), "stein")
+        treppe(bm, 0, -0.7, 0.8, 4, 0.3, 0.3)
+        kasten(bm, (0, 0.25, 0.65), (0.8, 0.8, 0.66), "putz_hell")
+        for i in range(4): saeule(bm, -0.39 + i * 0.26, -0.45, 0.33, 0.66, 0.04)
+        giebeldach_y(bm, 0, 0.0, 0.99, 0.55, 0.68, 0.24, "dach", "stein_hell", ue=0.03)
+        tuer(bm, 0, -0.15, 0.2, 0.4, rahmen="bronze", z0=0.33)
+    kasten(bm, (0, -0.95, 0.12), (0.3, 0.2, 0.2), "stein_hell")
+    kasten(bm, (0.75, -0.95, 0.2), (0.22, 0.22, 0.34), "stein_hell")
+    zyl(bm, (0.75, -0.95, 0.37), 0.07, 0.05, 0.3, "bronze", 7)
+    kuppel(bm, (0.75, -0.95, 0.67), 0.05, 0.07, "bronze", 6, 2)
+    ablegen("augusteum", bm)
+
+def macellum():
+    """Macellum: Hof mit Ladenreihen ringsum, Rundbau (tholos) mit Brunnen in der Mitte."""
+    bm = bmesh.new()
+    kasten(bm, (0, 0, 0.02), (2.8, 2.8, 0.04), "stein_hell")
+    for (x, y, w, d) in ((0, 1.15, 2.7, 0.5), (-1.15, 0.0, 0.5, 1.8), (1.15, 0.0, 0.5, 1.8)):
+        kasten(bm, (x, y, 0.3), (w, d, 0.52), "putz")
+    satteldach(bm, 0, 1.15, 0.56, 1.35, 0.25, 0.18, "dach", "putz", rippe=None)
+    for sx in (-1, 1):
+        with lage((sx * 1.15, 0, 0), math.pi / 2): satteldach(bm, 0, 0, 0.56, 0.9, 0.25, 0.18, "dach", "putz", rippe=None)
+    for i in range(5): kasten(bm, (-1.0 + i * 0.5, 0.895, 0.22), (0.26, 0.02, 0.32), "dunkel")
+    for sx in (-1, 1):
+        for i in range(3): kasten(bm, (sx * 0.895, -0.6 + i * 0.6, 0.22), (0.02, 0.26, 0.32), "dunkel")
+    for x in (-1.1, 1.1): kasten(bm, (x, -1.15, 0.3), (0.5, 0.5, 0.52), "putz")   # Eingangsbauten vorne
+    for i in range(8):                                               # Tholos
+        a = 2 * math.pi * i / 8; saeule(bm, 0.45 * math.cos(a), 0.45 * math.sin(a), 0.1, 0.5, 0.03)
+    zyl(bm, (0, 0, 0.04), 0.55, 0.55, 0.06, "stein", 12)
+    kuppel(bm, (0, 0, 0.6), 0.55, 0.3, "dach", 12, 3)
+    zyl(bm, (0, 0, 0.1), 0.2, 0.2, 0.08, "stein_hell", 10)
+    kasten(bm, (0, 0, 0.181), (0.26, 0.26, 0.004), "wasser")
+    for x, y in ((-0.6, -0.7), (0.6, -0.6), (-0.3, -0.9)): korb(bm, (x, y, 0.04), ("obst", "korn", "gruen")[int(x * 10) % 3], 0.05)
+    ablegen("macellum", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum): fn()

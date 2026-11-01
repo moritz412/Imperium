@@ -364,6 +364,11 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 - [x] **Hausfenster mit Nähe-Kärtchen** und **Klangkulisse je Jahreszeit** (1.11.): Vögel im Frühling, Grillen im Sommer,
       Krähen im Herbst, Wind im Winter, Stadtgemurmel nach Einwohnern, Hämmern bei Baustellen (WebAudio, erzeugt). Test 95/95.
       **Nicht gehört** – Klang nur über Werte geprüft.
+- [x] **Epoche III Kaiserzeit** (1.11.): Übergang mit Basilika, 5 Erfindungen der Späten Republik, Gunst 60; Pax Augusta
+      (5 Jahre ohne Überfälle). Erfindungen Villenwirtschaft, Macellum, Opus caementicium (Bauzeit ×0,67), Municipium (Steuern
+      +15 %), Kaiserkult, Amphitheater. Bauten Amphitheater (Wahrzeichen, 10 Monate), Augusteum, Macellum (wirkt als Markt,
+      26 Felder) mit Blender-Modellen; Eröffnungen, jährliches Munus, Kaiserbesuch, 2 Inschriften, 3 Senatsaufträge.
+      Test 96/96, Bilder angesehen. **Balance der Kaiserzeit nicht nachgespielt.**
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker

@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -197,7 +197,7 @@ export function bauen(S, welt, t, x, z) {
   if (t === 'tor') { const st = S.geb.findIndex(o => o.t === 'strasse' && o.x === x && o.z === z); if (st >= 0) S.geb.splice(st, 1); }   // Tor ersetzt die Straße
   const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
   // Bauzeit (Phase A): jedes Gebäude außer Straßen ist erst eine Baustelle; S.sofortBauen nur für Tests (Wahrzeichen immer)
-  if (bauzeit(t) > 0 && (!S.sofortBauen || GEB[t].wahrzeichen)) { b.bau = bauzeit(t); b.bezahlt = k; }
+  if (bauzeit(t) > 0 && (!S.sofortBauen || GEB[t].wahrzeichen)) { b.bau = hat(S, 'beton') ? Math.max(1, Math.ceil(bauzeit(t) * 0.67)) : bauzeit(t); b.bezahlt = k; }
   S.geb.push(b);
   return { ok: true, b };
 }
@@ -219,6 +219,7 @@ export const reichweite = (S, typ) => typ === 'brunnen' && hat(S, 'aquaedukt') ?
 export function inReichweite(S, b, typ, maske) {
   const d = GEB[typ];
   if (typ === 'markt' && S.geb.some(o => o.t === 'tabernae' && o.w > 0 && abstand(o, b) <= GEB.tabernae.reichweite)) return true;   // Läden
+  if (typ === 'markt' && S.geb.some(o => o.t === 'macellum' && !(o.bau > 0) && o.w > 0 && abstand(o, b) <= GEB.macellum.reichweite)) return true;   // Macellum
   if (!d.strassen) return S.geb.some(o => o.t === typ && !(o.bau > 0) && abstand(o, b) <= reichweite(S, typ));
   // über Straßen: Weg vom Versorger bis zu einem Straßenfeld vor dem Haus
   maske = maske || strassenMaske(S);
@@ -290,7 +291,7 @@ export function monat(S, welt) {
       if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true }); continue; }
       delete b.bau; delete b.bauFort; b.w = 0;
       if (b.t === 'basilika') S.ereignis = 'eroeffnung';
-      else if (['tempel', 'theater', 'thermen'].includes(b.t) && !S.ereignis && !S.ereignisseAus && !(S.ereignisLog || {})['eroeffnung_' + b.t]) {
+      else if (['tempel', 'theater', 'thermen', 'amphitheater', 'augusteum'].includes(b.t) && !S.ereignis && !S.ereignisseAus && !(S.ereignisLog || {})['eroeffnung_' + b.t]) {
         S.ereignis = 'eroeffnung_' + b.t; (S.ereignisLog = S.ereignisLog || {})['eroeffnung_' + b.t] = S.monat; }
       if (d.wahrzeichen || bauzeit(b.t) >= 3) mitOrt(meld, b.t === 'thermen' ? 'Die Thermen sind fertig!' : `${artikel(b.t)} ${d.n} ist fertig!`, b);
       continue; }
@@ -410,6 +411,12 @@ export function monat(S, welt) {
   if (S.geb.some(b => b.t === 'theater' && b.w > 0)) ziel += 8;
   if (haeuser && S.geb.some(b => b.t === 'thermen' && b.geheizt)) ziel += 8 * S.geb.filter(h => h.t === 'huette' && thermeNah(S, h)).length / haeuser;
   if (S.geb.some(b => b.t === 'basilika' && !(b.bau > 0) && b.w > 0)) { ziel += 5; familieS(S).ansehen += 0.5; }
+  // Kaiserzeit (1.11.): Amphitheater, Augusteum, Macellum
+  if (S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0) && b.w > 0)) { ziel += 10; familieS(S).ansehen += 0.3; }
+  const aug = S.geb.filter(b => b.t === 'augusteum' && !(b.bau > 0) && b.w > 0);
+  if (aug.length) { if (haeuser) ziel += 8 * S.geb.filter(h => h.t === 'huette' && aug.some(o => abstand(o, h) <= GEB.augusteum.reichweite)).length / haeuser; if (S.monat % 3 === 0) S.gunst = Math.min(100, gunst(S) + 1); }
+  const mac = S.geb.filter(b => b.t === 'macellum' && !(b.bau > 0) && b.w > 0);
+  if (mac.length && haeuser) ziel += 6 * S.geb.filter(h => h.t === 'huette' && mac.some(o => abstand(o, h) <= GEB.macellum.reichweite)).length / haeuser;
   if (haeuser && rang(S) >= INSULA.rang) {   // S3.3: Ordnung – Häuser ohne Wache in der Nähe
     const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
     ziel -= FEUER.unruhe * ohne / haeuser;
@@ -417,7 +424,7 @@ export function monat(S, welt) {
   const schreine = S.geb.filter(b => b.t === 'schrein' && !(b.bau > 0));   // S3.1: Schreine in der Nähe
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
-  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
+  S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * (hat(S, 'municipium') ? 1.15 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
   if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
   if (S.ruf === 'handel') S.gut.denare += 5 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
   vertraegeMonat(S, meld);
@@ -693,7 +700,7 @@ function landMonat(S, js, grenze, meld) {
     // Vicus (1.11.): nach 36 verbundenen Monaten wächst um die Villa rustica ein Dorf – Marktabgaben für die Stadt
     if (l.villa) { l.villaMonate = (l.villaMonate || 0) + 1; if (!l.vicus && l.villaMonate >= 36) { l.vicus = true; meld.push('Rund um eine Villa rustica ist ein Dorf (vicus) entstanden.'); } }
     if (l.vicus) { S.gut.denare += 3; if (S.familie) S.familie.ansehen += 0.05; }
-    const faktor = landFaktor(f, S) * (d.ernte ? JAHRESZEITEN[js].ernte : 1) * (l.villa ? 1.75 : 1);
+    const faktor = landFaktor(f, S) * (d.ernte ? JAHRESZEITEN[js].ernte : 1) * (l.villa ? (hat(S, 'villenwirtschaft') ? 2.2 : 1.75) : 1);
     for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
   }
   gefahren(S, meld);
@@ -830,11 +837,18 @@ function abgabeZahlen(S) {
 export const forschungS = S => (S.forschung = S.forschung || { ziel: '', wissen: 0, fertig: [] });
 export const hat = (S, id) => !!(S.forschung && S.forschung.fertig.includes(id));
 export const gesperrt = (S, t) => (!!GEB[t].forschung && !hat(S, GEB[t].forschung)) || (GEB[t].epoche || 1) > epoche(S);
-export const sperrGrund = (S, t) => (GEB[t].epoche || 1) > epoche(S) ? 'Erst in der Späten Republik' : 'Erst erforschen: ' + FORSCHUNG[GEB[t].forschung].n;
+export const sperrGrund = (S, t) => (GEB[t].epoche || 1) > epoche(S) ? 'Erst in der ' + (GEB[t].epoche === 3 ? 'Kaiserzeit' : 'Späten Republik') : 'Erst erforschen: ' + FORSCHUNG[GEB[t].forschung].n;
 // Epochen (1.11.): Übergang in die Späte Republik
 export const epoche = S => S.epoche || 1;
 export function epocheFehlt(S) {
-  if (epoche(S) >= 2) return '';
+  if (epoche(S) >= 3) return '';
+  if (epoche(S) === 2) {   // Kaiserzeit (1.11.)
+    const f = [], n = forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 2).length;
+    if (!S.geb.some(b => b.t === EPOCHE3.wahrzeichen && !(b.bau > 0))) f.push('die Basilika am Forum');
+    if (n < EPOCHE3.erfindungen) f.push(`${EPOCHE3.erfindungen} Erfindungen der Späten Republik (${n} erforscht)`);
+    if (gunst(S) < EPOCHE3.gunst) f.push(`Gunst Roms ${EPOCHE3.gunst}`);
+    return f.join(', ');
+  }
   const f = [], n = forschungS(S).fertig.filter(id => FORSCHUNG[id].ep === 1).length;
   if (rang(S) < EPOCHE2.rang) f.push(`Stadtrang ${RAENGE[EPOCHE2.rang].n} (${RAENGE[EPOCHE2.rang].ab} Einwohner)`);
   if (n < EPOCHE2.erfindungen) f.push(`${EPOCHE2.erfindungen} Erfindungen (${n} erforscht)`);
@@ -842,9 +856,11 @@ export function epocheFehlt(S) {
   return f.join(', ');
 }
 export function epocheWechseln(S) {
-  const f = epocheFehlt(S); if (epoche(S) >= 2) return { ok: false, grund: 'Schon in der Späten Republik' };
+  const f = epocheFehlt(S); if (epoche(S) >= 3) return { ok: false, grund: 'Schon in der Kaiserzeit' };
   if (f) return { ok: false, grund: 'Es fehlt: ' + f };
-  S.epoche = 2; return { ok: true };
+  S.epoche = epoche(S) + 1;
+  if (S.epoche === 3) S.frieden = Math.max(S.frieden || 0, 60);   // Pax Augusta: fünf Jahre keine Überfälle
+  return { ok: true };
 }
 export const vermMonate = S => hat(S, 'landvermessung') ? 1 : VERMESSEN.monate;
 export const vermKosten = S => hat(S, 'landvermessung') ? { denare: 10 } : VERMESSEN.kosten;
@@ -1143,7 +1159,7 @@ function ereignisMonat(S) {
   const log = S.ereignisLog = S.ereignisLog || {};
   const po = !S.region || S.region === 'po';
   const fest = EREIGNISSE.find(e => e.fest === S.monat && log[e.id] === undefined && (po || !e.nurPo))
-    || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
+    || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (!e.wenn || e.wenn(S)) && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
   if (fest) { S.ereignis = fest.id; return; }
   if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
   const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && (po || !e.nurPo) && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));

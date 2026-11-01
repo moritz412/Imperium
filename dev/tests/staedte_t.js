@@ -281,7 +281,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Forschung: Ziel, Schule bringt Wissen, Fruchtwechsel wirkt', /erforschen/.test(fo.schreinVor) && /Fruchtwechsel/.test(fo.villaVor) && /Republik/.test(fo.ep2) && fo.schule && fo.wahl && fo.w1 > fo.w0 && fo.fertig && fo.bonus === 1.25, JSON.stringify(fo));
   ok('Erfindungen: Schrein, Landvermessung, Bauhütte, Villa rustica', fo.schreinNach && fo.verm === 1 && fo.holzK === 28 && fo.villa === true);
-  ok('Forschungsseite: 20 Karten, Ziel per Antippen, Anzeige im Auftrag', fo.offen && fo.karten === 20 && fo.ziel === 'ziegelbrand' && /Ziegelbrand/.test(fo.zeile) && fo.zu);
+  ok('Forschungsseite: 26 Karten (drei Epochen), Ziel per Antippen, Anzeige im Auftrag', fo.offen && fo.karten === 26 && fo.ziel === 'ziegelbrand' && /Ziegelbrand/.test(fo.zeile) && fo.zu);
   // S3.2 Stände: Sklavenquartier (kaufen, arbeiten nur in Sklaven-Betrieben, Hunger, Freilassung, Furcht), Insula
   const st3 = await p.evaluate(() => {
     const sim = SR.sim, S = SR.S, GEB = SR.GEB, kopie = () => JSON.parse(JSON.stringify(S));
@@ -563,7 +563,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { ev, n, plus: B.familie.ansehen - a0, ok: r.ok };
   });
   ok('Erster Tempel wird mit einer Weihe eröffnet', weihe.ev === 'eroeffnung_tempel' && weihe.plus >= 15, JSON.stringify(weihe));
-  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 16);
+  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 18);
   const auf = await p.evaluate(() => {
     const sim = SR.sim, A = JSON.parse(JSON.stringify(SR.S)); A.ereignisseAus = true; A.auftrag = 6; A.land = {};
     const vor = A.auftrag; ['0,1', '1,0', '-1,1'].forEach(k => A.land[k] = { verm: 2, betrieb: k === '0,1' ? 'gehoeft' : '' }); sim.monat(A, SR.welt);
@@ -790,6 +790,18 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   if (BILD) { await p.evaluate(() => SR.tempo(0)); await p.waitForTimeout(500); await p.screenshot({ path: BILD }); console.log('  Bild: ' + BILD); }
   const umg = await p.evaluate(() => { SR.monate(1); const u = SR.ton.umgebungStand(); return { ...u, js2: SR.sim.jahreszeit(SR.S), ein: SR.sim.einwohner(SR.S) }; });
   ok('Klangkulisse folgt Jahreszeit und Einwohnern (Werte, Klang selbst nicht gehört)', umg.js >= 0 && umg.js <= 3 && umg.einwohner > 0, JSON.stringify(umg));
+  const kz = await p.evaluate(() => { const sim = SR.sim, K = JSON.parse(JSON.stringify(SR.S)); K.ereignisseAus = true; K.sofortBauen = false; K.epoche = 2;
+    const F = sim.forschungS(K); const vor = sim.epocheFehlt(K);
+    F.fertig = [...new Set([...F.fertig, 'weinbau', 'olivenpresse', 'weberei', 'garum', 'archiv'])]; K.gunst = 70;
+    K.geb.push({ id: 90001, t: 'basilika', x: 50, z: 2, stufe: 1, bew: 0, w: 4, status: [], dreh: 0 });
+    const w = sim.epocheWechseln(K); const pax = K.frieden >= 60;
+    F.fertig.push('kaiserkult', 'amphitheater', 'beton', 'macellum'); Object.assign(K.gut, { stein: 900, ziegel: 900, holz: 900, denare: 3000 });
+    let a = null; for (let z = 0; z <= 34 && !a; z++) for (let x = 0; x <= 56 && !a; x++) { const r = sim.bauen(K, SR.welt, 'amphitheater', x, z); if (r.ok) a = r.b; }
+    const bau = a && a.bau;
+    let m = null; for (let z = 0; z <= 34 && !m; z++) for (let x = 0; x <= 56 && !m; x++) { const r = sim.bauen(K, SR.welt, 'macellum', x, z); if (r.ok) m = r.b; }
+    const sperre = sim.sperrGrund(SR.S, 'augusteum');
+    return { vor: /Basilika/.test(vor), ok: w.ok, ep: K.epoche, pax, bau, macellum: !!m, sperre }; });
+  ok('Kaiserzeit: Übergang mit Basilika, Erfindungen, Gunst; Pax; Amphitheater mit Beton schneller', kz.vor && kz.ok && kz.ep === 3 && kz.pax && kz.bau === 7 && kz.macellum && /Kaiserzeit|erforschen/.test(kz.sperre), JSON.stringify(kz));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();
