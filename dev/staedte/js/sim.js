@@ -904,6 +904,10 @@ function forschungMonat(S, meld) {
   const F = forschungS(S);
   F.wissen += wissenProMonat(S);
   const d = FORSCHUNG[F.ziel];
+  if (!d) {   // ohne Ziel höchstens so viel Wissen wie die teuerste offene Erfindung (sonst 150) – kein Vorrat für die nächste Epoche
+    const offen = Object.keys(FORSCHUNG).filter(id => forschungsStand(S, id) === 'offen').map(id => FORSCHUNG[id].kosten);
+    F.wissen = Math.min(F.wissen, offen.length ? Math.max(...offen) : 150);
+  }
   if (d && F.wissen >= d.kosten) {
     F.wissen -= d.kosten; F.fertig.push(F.ziel); F.ziel = '';
     meld.push(`Erforscht: ${d.n}. ${d.text}`);

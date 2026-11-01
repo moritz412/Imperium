@@ -658,7 +658,7 @@ function forschungZeigen() {
     ${epocheBlock()}
     <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
       <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
-      : '<b>Wähle ein Ziel</b><small>Wissen sammelt sich auch ohne Ziel. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
+      : '<b>Wähle ein Ziel</b><small>Ohne Ziel sammelt sich nur wenig Wissen an. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
     <div class="fbaum">${spalten}</div></div>`;
   $('#forschung').hidden = false;
 }

@@ -42,21 +42,25 @@ for (let m = 0; m < JAHRE * 12; m++) {
   if (haeuser.length >= 8 && anz('latrine') < Math.floor(haeuser.length / 8)) versuch('latrine');
   if (haeuser.length >= 6 && anz('schrein') < 1 && sim.hat(S, 'schreine')) versuch('schrein');
   if (anz('speicher') < 1 && haeuser.length >= 6) versuch('speicher');
+  if (sim.rang(S) >= 2 && anz('basilika') < 1) versuch('basilika');   // Wahrzeichen (1.11.: Weg in die Kaiserzeit)
+  if (sim.epoche(S) >= 2 && sim.hat(S, 'tempel') && anz('tempel') < 1) versuch('tempel');
+  if (sim.epoche(S) >= 3 && sim.hat(S, 'kaiserkult') && anz('augusteum') < 1) versuch('augusteum');
+  if (sim.epoche(S) >= 3 && sim.hat(S, 'amphitheater') && anz('amphitheater') < 1) versuch('amphitheater');
   // Umland: ab 150 Denaren Acker/Wald neben vermessenem Land vermessen, Betrieb + Weg
   if (S.gut.denare > 150) {
-    const k = sim.regionKarte().filter(f => sim.kannVermessen(S, f) && ['acker', 'wald', 'lehm', 'fluss'].includes(f.typ)).sort((a, b) => sim.hexAbstand(a, { q: 0, r: 0 }) - sim.hexAbstand(b, { q: 0, r: 0 }))[0];
+    const k = sim.regionKarte().filter(f => sim.kannVermessen(S, f) && ['acker', 'wald', 'lehm', 'fluss', 'stein'].includes(f.typ)).sort((a, b) => sim.hexAbstand(a, { q: 0, r: 0 }) - sim.hexAbstand(b, { q: 0, r: 0 }))[0];
     if (k) sim.vermessen(S, k);
   }
   for (const f of sim.regionKarte()) { const st = sim.landStand(S, f);
     if (st === 'vermessen' && sim.betriebFuer(f) && f.typ !== 'fluss') sim.landBauen(S, f);
     if ((st === 'betrieb' || st === 'vermessen') && !sim.hatWeg(S, f)) sim.wegAnlegen(S, f); }
   // Forschung, Epoche, Familie
-  if (!sim.forschungS(S).ziel) for (const id of ['fruchtwechsel', 'ziegelbrand', 'steuerlisten', 'schotter', 'landvermessung', 'schreine', 'bauhuette', 'toepferscheibe', 'feste', 'villa', 'weinbau', 'roemerstrasse', 'aquaedukt', 'archiv']) if (sim.forschungWaehlen(S, id).ok) break;
+  if (!sim.forschungS(S).ziel) for (const id of ['fruchtwechsel', 'ziegelbrand', 'steuerlisten', 'schotter', 'landvermessung', 'schreine', 'bauhuette', 'toepferscheibe', 'feste', 'villa', 'weinbau', 'roemerstrasse', 'aquaedukt', 'archiv', 'olivenpresse', 'tempel', 'zoelle', 'municipium', 'beton', 'kaiserkult', 'amphitheater', 'macellum', 'villenwirtschaft']) if (sim.forschungWaehlen(S, id).ok) break;
   sim.epocheWechseln(S); sim.kandidieren(S);
   const meld = sim.monat(S, welt);
   if (S.ereignis) sim.ereignisWaehlen(S, 1) .ok || sim.ereignisWaehlen(S, 0).ok || sim.ereignisWaehlen(S, 2);
-  meld.filter(t => /abgebrannt|Seuche|gestorben|hungern|Gallier fallen|ist jetzt|gewählt|Republik/.test(t)).forEach(t => zeilen.push(`  M${S.monat} ${t}`));
-  merk('Dorf', sim.rang(S) >= 1); merk('Kleinstadt', sim.rang(S) >= 2); merk('Kolonie', sim.rang(S) >= 3); merk('Späte Republik', S.epoche >= 2); merk('Ädil', (S.familie || {}).amt >= 1);
+  meld.filter(t => /abgebrannt|Seuche|gestorben|hungern|Gallier fallen|ist jetzt|gewählt|Republik|Kaiserzeit|fertig/.test(t)).forEach(t => zeilen.push(`  M${S.monat} ${t}`));
+  merk('Dorf', sim.rang(S) >= 1); merk('Kleinstadt', sim.rang(S) >= 2); merk('Kolonie', sim.rang(S) >= 3); merk('Späte Republik', S.epoche >= 2); merk('Basilika', S.geb.some(b => b.t === 'basilika' && !(b.bau > 0))); merk('Kaiserzeit', S.epoche >= 3); merk('Amphitheater', S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0))); merk('Ädil', (S.familie || {}).amt >= 1);
   if (S.monat % 12 === 2) zeilen.push(`Jahr ${Math.floor(S.monat / 12)}: Einw ${sim.einwohner(S)}, Häuser ${anz('huette')}, Felder ${anz('feld')}, Denare ${Math.round(S.gut.denare)}, Holz ${Math.round(S.gut.holz)}, Ziegel ${Math.round(S.gut.ziegel)}, Getreide ${Math.round(S.gut.getreide)}, Brot ${Math.round(S.gut.brot)}, Stimmung ${Math.round(S.stimmung)}, Umland ${Object.keys(S.land).length}, Forschung ${sim.forschungS(S).fertig.length}, Ansehen ${Math.round(sim.familieS(S).ansehen)}`);
 }
 console.log(zeilen.join('\n'));

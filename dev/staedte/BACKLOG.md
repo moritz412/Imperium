@@ -369,6 +369,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       +15 %), Kaiserkult, Amphitheater. Bauten Amphitheater (Wahrzeichen, 10 Monate), Augusteum, Macellum (wirkt als Markt,
       26 Felder) mit Blender-Modellen; Eröffnungen, jährliches Munus, Kaiserbesuch, 2 Inschriften, 3 Senatsaufträge.
       Test 96/96, Bilder angesehen. **Balance der Kaiserzeit nicht nachgespielt.**
+- [x] **Eigenes Icon** (1.11.): Tempel aus dem Blender-Modell vor Abendhimmel (`dev/staedte/icons/`, 180/192/512 + maskable),
+      Manifest, Apple-Touch-Icon, Titel „Städte Roms“. Auf dem iPad-Home-Bildschirm **nicht getestet**.
+- [x] **Wissensgrenze** (1.11.): ohne Ziel höchstens so viel Wissen wie die teuerste offene Erfindung – vorher sprang man nach dem
+      Epochenwechsel durch angesparte Erfindungen. Balance-Spieler (60 Jahre): Späte Republik 94 min, Kaiserzeit 116 min (vorher 95).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
