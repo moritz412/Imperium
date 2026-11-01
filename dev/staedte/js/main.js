@@ -91,7 +91,7 @@ function kopfleiste() {
   $('#ahnungZeile').textContent = pr ? `Ein Präfekt aus Rom verwaltet die Stadt – noch ${S.praefekt} Monate.` : ko ? `Vorzeichen: ${ko.g.titel || sim.ereignis(ko.g.id, S).titel} – in etwa ${ko.monate} Monaten.` : '';
   const Fa = sim.familieS(S);
   $('#familieZeile').textContent = `Familie der ${Fa.name} · ${AEMTER[Fa.amt].n} · Ansehen ${Math.round(Fa.ansehen)} · Vermögen ${rund(Fa.vermoegen)}`;
-  $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / fz.kosten * 100))} %)` : 'Forschung: kein Ziel gewählt';
+  $('#forschZeile').textContent = fz ? `Forschung: ${fz.n} (${Math.min(99, Math.floor(F.wissen / sim.forschungsKosten(S, F.ziel) * 100))} %)` : 'Forschung: kein Ziel gewählt';
 }
 
 // ---------- Bauleiste ----------
@@ -700,19 +700,19 @@ function forschungZeigen() {
   const F = sim.forschungS(S), w = sim.wissenProMonat(S), ziel = FORSCHUNG[F.ziel];
   const karte = id => {
     const d = FORSCHUNG[id], st = sim.forschungsStand(S, id);
-    const unten = st === 'offen' ? `${d.kosten} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : st === 'epoche' ? EPOCHEN[d.ep] : STAND_TEXT[st];
+    const unten = st === 'offen' ? `${sim.forschungsKosten(S, id)} Wissen` : st === 'gesperrt' ? 'braucht ' + FORSCHUNG[d.braucht].n : st === 'epoche' ? EPOCHEN[d.ep] : STAND_TEXT[st];
     return `<button class="fkarte ${st}" data-f="${id}"${st === 'epoche' || st === 'fertig' || st === 'bald' ? ' disabled' : ''}><b>${d.n}</b><span>${d.text}</span><small>${unten}</small></button>`;
   };
   const spalten = ZWEIGE.map((z, i) => {
     const ids = ep => Object.keys(FORSCHUNG).filter(id => FORSCHUNG[id].zweig === i && FORSCHUNG[id].ep === ep);
     return `<div class="fzweig"><h3>${z}</h3>${ids(1).map(karte).join('')}<div class="fepoche">${EPOCHEN[2]}</div>${ids(2).map(karte).join('')}<div class="fepoche">${EPOCHEN[3]}</div>${ids(3).map(karte).join('')}</div>`;
   }).join('');
-  const rest = ziel ? Math.max(0, ziel.kosten - F.wissen) : 0, mon = Math.ceil(rest / w);
+  const zk = ziel ? sim.forschungsKosten(S, F.ziel) : 0, rest = ziel ? Math.max(0, zk - F.wissen) : 0, mon = Math.ceil(rest / w);
   $('#forschung').innerHTML = `<div class="feld forschungsseite">
     <button class="schliessen" data-f="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     ${buchReiter('forschung')}<h2>Forschung</h2><div class="untertitel">Epoche ${['', 'I', 'II', 'III'][sim.epoche(S)]} · ${EPOCHEN[sim.epoche(S)]} · ${zahl(F.wissen)} Wissen gesammelt · +${zahl(w)} im Monat</div>
     ${epocheBlock()}
-    <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / ziel.kosten * 100)}%"></i></div>
+    <div class="fziel">${ziel ? `<b>${ziel.n}</b><div class="balken"><i style="width:${Math.min(100, F.wissen / zk * 100)}%"></i></div>
       <small>noch ${zahl(rest)} Wissen – etwa ${mon} ${mon === 1 ? 'Monat' : 'Monate'}</small>`
       : '<b>Wähle ein Ziel</b><small>Ohne Ziel sammelt sich nur wenig Wissen an. Schulen bringen je 3 Wissen im Monat.</small>'}</div>
     <div class="fbaum">${spalten}</div></div>`;

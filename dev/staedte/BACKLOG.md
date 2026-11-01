@@ -396,6 +396,7 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Blender-Modell (Kai, Lagerhaus, Kran, Schiff). Test 101/101, Bild angesehen.
 - [x] **Regionen mit eigenem Charakter** (1.11.): Florentia – Töpferei für Terra sigillata (Lehm + Holz → Sigillata, teure
       Handelsware, Blender-Modell); Luceria – apulische Wolle +50 %. Test 102/102, Bild angesehen.
+      Puteoli: Puzzolanerde halbiert die Forschung Opus caementicium, Erdbeben-Ereignis (nur Kampanien). Startseite nennt die Besonderheiten.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

@@ -922,6 +922,8 @@ export function forschungWaehlen(S, id) {
   forschungS(S).ziel = id;
   return { ok: true };
 }
+// Forschungskosten (1.11.): Puzzolanerde in Kampanien halbiert Opus caementicium
+export const forschungsKosten = (S, id) => Math.round(FORSCHUNG[id].kosten * (id === 'beton' && (S.region || 'po') === 'kampanien' ? 0.5 : 1));
 function forschungMonat(S, meld) {
   const F = forschungS(S);
   F.wissen += wissenProMonat(S);
@@ -930,8 +932,8 @@ function forschungMonat(S, meld) {
     const offen = Object.keys(FORSCHUNG).filter(id => forschungsStand(S, id) === 'offen').map(id => FORSCHUNG[id].kosten);
     F.wissen = Math.min(F.wissen, offen.length ? Math.max(...offen) : 150);
   }
-  if (d && F.wissen >= d.kosten) {
-    F.wissen -= d.kosten; F.fertig.push(F.ziel); F.ziel = '';
+  if (d && F.wissen >= forschungsKosten(S, F.ziel)) {
+    F.wissen -= forschungsKosten(S, F.ziel); F.fertig.push(F.ziel); F.ziel = '';
     meld.push(`Erforscht: ${d.n}. ${d.text}`);
   }
 }
@@ -1188,7 +1190,7 @@ function ereignisMonat(S) {
     || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (!e.wenn || e.wenn(S)) && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
   if (fest) { S.ereignis = fest.id; return; }
   if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
-  const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && (po || !e.nurPo) && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
+  const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && (po || !e.nurPo) && (!e.nurReg || e.nurReg === (S.region || 'po')) && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
   if (moegl.length) S.ereignis = moegl[Math.floor(wurf(S, 4243) * moegl.length)].id;
 }
 export function wahlMoeglich(S, w) {
