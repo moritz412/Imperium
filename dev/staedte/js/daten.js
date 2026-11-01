@@ -9,9 +9,10 @@ export const ERWEITERUNG = [
   { rang: 1, gunst: 50, kosten: { denare: 150 }, text: 'Der Senat weist der Kolonie Land östlich der Mauer zu.' },
   { rang: 2, gunst: 60, kosten: { denare: 400 }, text: 'Entlang der Via Postumia darf die Stadt bis an die Grenzsteine wachsen.' },
 ];
-export const MONAT_S = 25;           // Sekunden je Monat bei normalem Tempo (1.11.: 5 → 9 → 15 → 25; Moritz: Jahreszeiten viel zu schnell)
+export const MONAT_S = 60;           // Sekunden je Monat bei 1× (1.11. abends: Tempo wie Manor Lords – 1× langsam zum Bauen, dazu 4× und 12×)
 export const STEUER = 0.3;           // Denare je Einwohner und Monat bei Stimmung 70 (1.11.: 0,4 → 0,3)
-export const LAGER_GRUND = 150;      // Lagergrenze je Ware ohne Speicher
+export const LAGER_GRUND = 150;
+export const NAHRUNG = new Set(['getreide', 'mehl', 'brot', 'fisch']);   // lagert im Kornspeicher (1.11.)      // Lagergrenze je Ware ohne Speicher
 export const ARBEIT_ANTEIL = 0.7;    // Anteil der Einwohner, der arbeitet
 export const ESSEN_JE_MONAT = 0.1;   // Nahrung je Einwohner und Monat
 
@@ -72,7 +73,10 @@ export const GEB = {
     text: 'Versorgt Häuser, die er über Straßen in höchstens 20 Feldern erreicht. Nötig für den Aufstieg zur Casa.' },
   speicher: { n: 'Speicher', kat: 'Öffentlich', g: [3, 2], h: 0.9, wand: 0xcbb894, dach: 0x9a4a2b,
     kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200, unterhalt: 2,
-    text: 'Erhöht die Lagergrenze jeder Ware um 200.' },
+    text: 'Lager für Baustoffe und Waren (alles außer Nahrung): +200 Platz je Ware. Betriebe in 16 Feldern liefern hierher und holen hier ihre Rohstoffe.' },
+  horreum: { n: 'Kornspeicher', kat: 'Nahrung', g: [3, 2], h: 1.0, wand: 0xd8c8a0, dach: 0x9a4a2b,
+    kosten: { holz: 35, ziegel: 15 }, arbeiter: 1, lager: 200, unterhalt: 2,
+    text: 'Horreum auf Stelzen, luftig und trocken: Lager für Getreide, Mehl, Brot und Fisch (+200 Platz). Felder, Mühlen und Bäckereien in 16 Feldern liefern hierher.' },
   holzfaeller: { n: 'Holzfäller', kat: 'Handwerk', g: [2, 2], h: 0.6, wand: 0x9c7a55, dach: 0x6b4a32, sklaven: true,
     kosten: { holz: 8 }, arbeiter: 2, erzeugt: { holz: 4 }, wald: 6,
     text: 'Schlägt Holz. Braucht Wald in höchstens 6 Feldern Abstand.' },

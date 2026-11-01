@@ -521,5 +521,21 @@ def curia():
     for x in (-1.1, 1.1): kasten(bm, (x, -0.6, 0.35), (0.22, 0.22, 0.62), "stein_hell")
     ablegen("curia", bm)
 
+def horreum():
+    """Kornspeicher (horreum): auf Steinpfeilern erhöht (Luft gegen Feuchte und Mäuse), Lüftungsschlitze, Rampe, Getreidesäcke."""
+    bm = bmesh.new()
+    for x in (-1.1, -0.55, 0.0, 0.55, 1.1):
+        for y in (-0.35, 0.55): kasten(bm, (x, y, 0.13), (0.14, 0.14, 0.26), "stein")
+    kasten(bm, (0, 0.1, 0.29), (2.5, 1.1, 0.06), "holz")
+    kasten(bm, (0, 0.1, 0.62), (2.4, 1.0, 0.62), "putz_hell")
+    for i in range(6): kasten(bm, (-1.0 + i * 0.4, -0.41, 0.72), (0.05, 0.02, 0.22), "dunkel")
+    satteldach(bm, 0, 0.1, 0.93, 1.2, 0.5, 0.28, "dach", "putz_hell")
+    tuer(bm, 0.75, -0.4, 0.24, 0.42, z0=0.32)
+    kasten(bm, (0.75, -0.62, 0.17), (0.32, 0.5, 0.03), "holz_hell", rx=0.62)     # Rampe
+    for i, (x, y) in enumerate(((-0.6, -0.65), (-0.4, -0.68), (-0.5, -0.55), (0.2, -0.7))):
+        kuppel(bm, (x, y, 0.0), 0.09, 0.14, "stoff_hell", 7, 3, 0.15, i + 50)
+    korb(bm, (0.1, -0.6, 0.0), "korn", 0.07)
+    ablegen("horreum", bm)
+
 for fn in (insula, domus, ludus, wache, quartier, schrein, latrine, schmiede, kelter, oelmuehle, weberei, garumsiederei,
-           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia): fn()
+           tabernae, tempel, theater, thermen, basilika, tor, zeltlager, statue, garten, amphitheater, augusteum, macellum, hafen, toepferei, tabularium, curia, horreum): fn()

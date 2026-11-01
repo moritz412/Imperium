@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, ALEXANDRIA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, ALEXANDRIA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, NAHRUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -63,7 +63,7 @@ export function erzeugeWelt(rid = REG_ID) {
 
 // Spielstand-Revision (1.11.): alte Stände werden beim Laden ergänzt statt verworfen. Bei neuen Pflichtfeldern STAND erhöhen
 // und hier nachtragen.
-export const STAND = 3;
+export const STAND = 4;
 export function aufbereiten(S) {
   if (!S || S.v !== 1 || !Array.isArray(S.geb) || !S.gut) return null;
   S.land = S.land || {}; S.letzte = S.letzte || {}; S.versorgt = S.versorgt || { brot: false, essen: true };
@@ -73,7 +73,8 @@ export function aufbereiten(S) {
   for (const g of Object.keys(WAREN)) S.gut[g] = Number.isFinite(S.gut[g]) ? S.gut[g] : 0;
   if (typeof S.stimmung !== 'number') S.stimmung = START.stimmung;
   if (S.region && !REGION_DATEN[S.region]) S.region = 'po';
-  if ((S.stand || 1) < 3) S.lagerFrei = true;   // Stände vor der Lager-Regel (1.11.) spielen ohne sie weiter
+  if ((S.stand || 1) < 3) S.lagerFrei = true;
+  if ((S.stand || 1) < 4) S.kornImSpeicher = true;   // vor dem Kornspeicher (1.11.): Speicher fasst auch Nahrung   // Stände vor der Lager-Regel (1.11.) spielen ohne sie weiter
   S.stand = STAND;
   return S;
 }
@@ -151,9 +152,11 @@ export const def = b => GEB[b.t];
 export const ernteFaktor = (S, js) => js === 0 && hat(S, 'fruchtwechsel') ? 1 : JAHRESZEITEN[js].ernte;
 // Lager in Laufweite (1.11.): fertiger, besetzter Speicher oder das Zeltlager der Kolonisten; alte Spielstände ohne Regel (S.lagerFrei)
 export const LAGERWEG = 16, HALDE = 8;
-export const lagerNah = (S, b) => S.lagerFrei || S.geb.some(o => ((o.t === 'speicher' && o.w > 0 && !(o.bau > 0)) || o.t === 'zeltlager') && abstand(o, b) <= LAGERWEG);
+export const lagerNah = (S, b, g = 'holz') => S.lagerFrei || S.geb.some(o => ((o.t === lagerTyp(S, g) && o.w > 0 && !(o.bau > 0)) || o.t === 'zeltlager') && abstand(o, b) <= LAGERWEG);
 export const besetzt = (S, t) => S.geb.some(b => b.t === t && !(b.bau > 0) && b.w > 0);   // Gebäude steht und hat Arbeiter
-export const lagerGrenze = S => LAGER_GRUND + (hat(S, 'toepferscheibe') ? 50 : 0) + S.geb.filter(b => b.t === 'speicher' && (b.w || 0) > 0).length * GEB.speicher.lager;
+// Lagergrenze je Ware (1.11.): Nahrung im Kornspeicher, alles andere im Speicher; alte Stände (kornImSpeicher) zählen den Speicher für beides
+export const lagerTyp = (S, g) => NAHRUNG.has(g) && !S.kornImSpeicher ? 'horreum' : 'speicher';
+export const lagerGrenze = (S, g = 'holz') => LAGER_GRUND + (hat(S, 'toepferscheibe') ? 50 : 0) + S.geb.filter(b => b.t === lagerTyp(S, g) && (b.w || 0) > 0).length * GEB.speicher.lager;
 export const groesse = t => GEB[t].g;
 
 export const rang = S => { const e = einwohner(S); let r = 0; RAENGE.forEach((x, i) => { if (e >= x.ab) r = i; }); return Math.max(r, S.rang || 0); };
@@ -283,7 +286,7 @@ export function monat(S, welt) {
   const meld = []; orte.clear();
   for (const g of Object.keys(WAREN)) S.gut[g] = S.gut[g] || 0;   // neue Waren in alten Spielständen
   const gutVor = { ...S.gut };   // Warenbilanz des Monats (1.11.: Trendpfeile, Warenfenster)
-  const js = jahreszeit(S), grenze = lagerGrenze(S);
+  const js = jahreszeit(S), gN = lagerGrenze(S, 'getreide'), gW = lagerGrenze(S, 'holz'), grenze = g => NAHRUNG.has(g) && !S.kornImSpeicher ? gN : gW;
   const bew = einwohner(S);
 
   // Arbeiter verteilen (S1.2): Betriebe nach Priorität, dann Bauzeit; jeder holt sich Arbeiter aus den nächsten Häusern
@@ -333,17 +336,17 @@ export function monat(S, welt) {
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
     if (!d.erzeugt) continue;
     // Lager als Orte (1.11.): ohne Speicher/Zeltlager in der Nähe bleiben die Waren am Betrieb liegen (Halde bis 8), Rohstoffe gibt es nicht
-    const lager = lagerNah(S, b);
-    if (!lager) {
-      const g0 = Object.keys(d.erzeugt)[0];
-      if (d.braucht) { b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – keine Rohstoffe` }); continue; }
-      if ((b.halde || 0) >= HALDE) { b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – ${WAREN[g0].n} stapelt sich, Arbeit ruht` }); continue; }
-      b.status.push({ art: 'lager', text: `Kein Speicher in ${LAGERWEG} Feldern – ${WAREN[g0].n} bleibt hier liegen`, leicht: true });
+    const g0 = Object.keys(d.erzeugt)[0], lagerN = GEB[lagerTyp(S, g0)].n;
+    const fehltRoh = d.braucht && Object.keys(d.braucht).find(g => !lagerNah(S, b, g));
+    if (fehltRoh) { b.status.push({ art: 'lager', text: `Kein ${GEB[lagerTyp(S, fehltRoh)].n} in ${LAGERWEG} Feldern – keine Rohstoffe` }); continue; }
+    if (!lagerNah(S, b, g0)) {
+      if ((b.halde || 0) >= HALDE) { b.status.push({ art: 'lager', text: `Kein ${lagerN} in ${LAGERWEG} Feldern – ${WAREN[g0].n} stapelt sich, Arbeit ruht` }); continue; }
+      b.status.push({ art: 'lager', text: `Kein ${lagerN} in ${LAGERWEG} Feldern – ${WAREN[g0].n} bleibt hier liegen`, leicht: true });
       const f0 = anteil * (d.ernte ? ernteFaktor(S, js) : 1);
       b.halde = Math.min(HALDE, (b.halde || 0) + Object.values(d.erzeugt)[0] * f0 * bonus(S, b.t, g0)); b.haldeGut = g0;
       continue;
     }
-    if (b.halde > 0) { S.gut[b.haldeGut] = Math.min(grenze, (S.gut[b.haldeGut] || 0) + b.halde); b.halde = 0; }   // Träger bringen die Halde ins Lager
+    if (b.halde > 0) { S.gut[b.haldeGut] = Math.min(grenze(b.haldeGut), (S.gut[b.haldeGut] || 0) + b.halde); b.halde = 0; }   // Träger bringen die Halde ins Lager
     let faktor = anteil * (d.ernte ? ernteFaktor(S, js) : 1);
     if (d.ernte && js === 3) b.status.push({ art: 'winter', text: 'Winterruhe', leicht: true });
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) {
@@ -352,12 +355,12 @@ export function monat(S, welt) {
       faktor = Math.min(faktor, anteil * moeglich);
     }
     for (const [g, n] of Object.entries(d.erzeugt)) {
-      if (S.gut[g] >= grenze) { b.status.push({ art: 'voll', text: `Lager für ${WAREN[g].n} voll` }); faktor = 0; }
+      if (S.gut[g] >= grenze(g)) { b.status.push({ art: 'voll', text: `${lagerN} für ${WAREN[g].n} voll` }); faktor = 0; }
     }
     if (faktor <= 0) continue;
     if (d.sklaven && S.gut.werkzeug >= 0.1) { faktor *= 1.15; S.gut.werkzeug -= 0.1; }   // Werkzeug (1.11.)
     if (d.braucht) for (const [g, n] of Object.entries(d.braucht)) S.gut[g] = Math.max(0, S.gut[g] - n * faktor);
-    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, S.gut[g] + n * faktor * bonus(S, b.t, g));
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze(g), S.gut[g] + n * faktor * bonus(S, b.t, g));
   }
 
   // Umland (S2.2): Vermessung schreitet fort, Betriebe liefern
@@ -750,7 +753,7 @@ function landMonat(S, js, grenze, meld) {
     if (l.villa) { l.villaMonate = (l.villaMonate || 0) + 1; if (!l.vicus && l.villaMonate >= 36) { l.vicus = true; meld.push('Rund um eine Villa rustica ist ein Dorf (vicus) entstanden.'); } }
     if (l.vicus) { S.gut.denare += 3; if (S.familie) S.familie.ansehen += 0.05; }
     const faktor = landFaktor(f, S) * (d.ernte ? ernteFaktor(S, js) : 1) * (l.villa ? (hat(S, 'villenwirtschaft') ? 2.2 : 1.75) : 1);
-    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze, (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze(g), (S.gut[g] || 0) + n * faktor * bonus(S, l.betrieb, g));
   }
   gefahren(S, meld);
 }
@@ -850,7 +853,7 @@ export function handeln(S, g, art, id = 'placentia') {
   } else {
     if (S.gut.denare < summe) return { ok: false, grund: `Es fehlen ${Math.ceil(summe - S.gut.denare)} Denare` };
     if (handelVorrat(S, g, id) < n) return { ok: false, grund: `${p.n} hat kaum noch ${WAREN[g].n}` };
-    if ((S.gut[g] || 0) + n > lagerGrenze(S)) return { ok: false, grund: `Lager für ${WAREN[g].n} voll` };
+    if ((S.gut[g] || 0) + n > lagerGrenze(S, g)) return { ok: false, grund: `Lager für ${WAREN[g].n} voll` };
     S.gut.denare -= summe; S.gut[g] = (S.gut[g] || 0) + n; v[g] = handelVorrat(S, g, id) - n;
   }
   (S.zaehler = S.zaehler || {}).handel = (S.zaehler.handel || 0) + 1;

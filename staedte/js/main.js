@@ -49,7 +49,7 @@ $('#waren').addEventListener('click', e => { if (e.target.closest('[data-kasse]'
   const w = e.target.closest('[data-ware]'); if (w) { auswahl = 0; szene.abgleichen(S, 0); warenZeigen(w.dataset.ware); } });
 // ---------- Warenfenster (1.11.): woher kommt eine Ware, wohin geht sie, reicht sie? ----------
 function warenZeigen(g) {
-  const W = WAREN[g], dl = (S.delta || {})[g] || 0, bestand = S.gut[g] || 0, grenze = sim.lagerGrenze(S);
+  const W = WAREN[g], dl = (S.delta || {})[g] || 0, bestand = S.gut[g] || 0, grenze = sim.lagerGrenze(S, g);
   const nahrung = ['getreide', 'brot', 'fisch'].includes(g);
   const gruppe = pred => { const m = new Map(); for (const b of S.geb) if (GEB[b.t] && pred(GEB[b.t], b)) { const e = m.get(b.t) || { n: 0, laeuft: 0, grund: '', id: 0 }; e.n++;
     if (b.bau > 0) e.grund = e.grund || 'im Bau'; else if (b.w > 0) e.laeuft++; else { const st = (b.status || []).find(x => !x.leicht) || (b.status || [])[0]; e.grund = e.grund || (st ? st.text : 'ohne Arbeiter'); e.id = e.id || b.id; }
@@ -59,7 +59,7 @@ function warenZeigen(g) {
   const land = Object.values(S.land || {}).filter(l => l.betrieb && LAND_BETRIEBE[l.betrieb] && (LAND_BETRIEBE[l.betrieb].erzeugt || {})[g] !== undefined).length;
   const reicht = dl < -0.4 && bestand > 0 ? Math.floor(bestand / -dl) : null;
   $('#info').innerHTML = `<button class="schliessen" data-a="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h2>${W.n}</h2><div class="unter">${rund(bestand)}${W.lager ? ' von ' + rund(grenze) + ' im Lager' : ''}</div>
+    <h2>${W.n}</h2><div class="unter">${rund(bestand)}${W.lager ? ' von ' + rund(grenze) + ' im ' + GEB[sim.lagerTyp(S, g)].n : ''}</div>
     <div class="lage ${dl >= 0 ? 'gut' : reicht !== null && reicht < 4 ? 'schlecht' : 'warn'}">${Math.abs(dl) < 0.5 ? 'Gleichbleibend' : dl > 0 ? `Mehr: +${zahl(dl)} im letzten Monat` : `Weniger: ${zahl(dl)} im letzten Monat`}${reicht !== null ? ` – reicht noch etwa ${reicht} ${reicht === 1 ? 'Monat' : 'Monate'}` : ''}</div>
     <h3 class="fh">Hergestellt in</h3>
     ${her.length || land ? her.map(zeile).join('') + (land ? `<div class="zeile"><span>Betriebe im Umland</span><b>${land}</b></div>` : '') : '<p class="fp">Noch kein Betrieb stellt diese Ware her.</p>'}
@@ -91,10 +91,9 @@ function kopfleiste() {
   const r = sim.rang(S), naechster = RAENGE[r + 1];
   $('#datum').textContent = `${RAENGE[r].n} · ${sim.datumText(S)}`;
   $('#datum').title = naechster ? `${naechster.n} ab ${naechster.ab} Einwohnern` : '';
-  const grenze = sim.lagerGrenze(S);
   const zellen = ANZEIGE.filter(g => !NUR_WENN_DA.has(g) || S.gut[g] >= 1).map(g => {
     const knapp = g !== 'denare' && S.gut[g] < 5 ? ' knapp' : '';
-    const voll = WAREN[g].lager && S.gut[g] >= grenze ? ' (voll)' : '';
+    const voll = WAREN[g].lager && S.gut[g] >= sim.lagerGrenze(S, g) ? ' (voll)' : '';
     const titel = g === 'denare' ? ' data-kasse="1" role="button" tabindex="0"' : ` data-ware="${g}" role="button" tabindex="0"`;
     const dl = (S.delta || {})[g] || 0, pfeil = Math.abs(dl) < 0.5 ? '' : dl > 0 ? '<i class="trend auf">▲</i>' : '<i class="trend ab">▼</i>';
     return `<div class="ware${knapp} kasse"${titel}><b>${rund(S.gut[g])}${pfeil}</b><small>${WAREN[g].n}${voll}</small></div>`;

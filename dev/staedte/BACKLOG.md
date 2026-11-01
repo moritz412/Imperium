@@ -421,6 +421,9 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
 - [x] **Lager als Orte, Stufe 1** (1.11.): Betriebe brauchen Speicher/Zeltlager in 16 Feldern; sonst stapelt sich die Ware sichtbar am
       Betrieb (Halde bis 8, Kisten-Symbol), Rohstoffe gibt es nur mit Lager in der Nähe. Alte Stände ohne Regel (lagerFrei).
       Balance-Spieler 30 J. (25 s/Monat): Dorf 17 min, Kolonie 72 min, Kaiserzeit 110 min. Test 101/101.
+- [x] **Kornspeicher getrennt** (1.11.): Nahrung (Getreide, Mehl, Brot, Fisch) lagert im Kornspeicher (horreum, Blender-Modell),
+      alles andere im Speicher; Betriebe brauchen das passende Lager in 16 Feldern. Alte Stände: Speicher fasst beides.
+- [x] **Tempo wie Manor Lords** (1.11.): 1× = 60 s je Monat (Jahr 12 min), dazu 4× und 12×. Test 101/101.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

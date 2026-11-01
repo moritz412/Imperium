@@ -1,6 +1,6 @@
 // Städte Roms – 3D-Szene: feste Schrägsicht (orthografisch), Gelände, Gebäude, Vorschau, Problem-Symbole
 import { RASTER, TIEFE, GEB, CASA, INSULA, JAHRESZEITEN, REGION_TYPEN } from './daten.js';
-import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, lagerGrenze, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
+import { WALD, WASSER, frontSeite, groesse, strassenMaske, randFelder, erzeugeRegion, nachbarFeld, sonderFelder, landStand, landKey, hatWeg, nachbarn, wegPfad, hat, bauzeit, handelOffen, lagerGrenze, lagerTyp, PARTNER, verbunden, regionKarte, mantuaFeld } from './sim.js';
 import { LAND_BETRIEBE } from './daten.js';
 
 const THREE = window.THREE;
@@ -537,13 +537,14 @@ export function erzeugeSzene(leinwand, welt) {
   for (let i = 0; i < 4 * 60; i++) stapel.setColorAt(i, new THREE.Color(0xffffff));   // Farbpuffer vor dem ersten Bild anlegen
   stapel.count = 0; stapel.castShadow = true; stapel.frustumCulled = false; szene.add(stapel);
   function stapelZeichnen(S) {
-    const grenze = lagerGrenze(S), waren = Object.keys(STAPEL_FARBE).map(g => [g, (S.gut[g] || 0) / grenze]).filter(([, f]) => f > 0.02).sort((a, b) => b[1] - a[1]).slice(0, 4);
-    const sp = S.geb.filter(b => b.t === 'speicher' && !(b.bau > 0)).slice(0, 60), mm = new THREE.Matrix4(), q = new THREE.Quaternion(), farbe = new THREE.Color();
+    const wahl = typ => Object.keys(STAPEL_FARBE).filter(g => lagerTyp(S, g) === typ).map(g => [g, (S.gut[g] || 0) / lagerGrenze(S, g)]).filter(([, f]) => f > 0.02).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const wahlS = wahl('speicher'), wahlH = wahl('horreum');
+    const sp = S.geb.filter(b => (b.t === 'speicher' || b.t === 'horreum') && !(b.bau > 0)).slice(0, 60), mm = new THREE.Matrix4(), q = new THREE.Quaternion(), farbe = new THREE.Color();
     let n = 0;
     for (const b of sp) {
       const [gw, gd] = groesse(b.t), mitte = weltPos(b.x + gw / 2, b.z + gd / 2), dreh = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];
       q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), dreh);
-      waren.forEach(([g, f], i) => {
+      (b.t === 'horreum' ? wahlH : wahlS).forEach(([g, f], i) => {
         const [lx, lz] = STAPEL_PLATZ[i], p = new THREE.Vector3(lx, 0, lz).applyQuaternion(q).add(mitte);
         stapel.setMatrixAt(n, mm.compose(p, q, new THREE.Vector3(1, 0.06 + 0.32 * Math.min(1, f), 1)));
         stapel.setColorAt(n++, farbe.setHex(STAPEL_FARBE[g]));
@@ -573,7 +574,7 @@ export function erzeugeSzene(leinwand, welt) {
   const TUNIKA = [0xb08a5a, 0x8c6f4e, 0xa25a3c, 0x7d7a5c, 0xc4b08a, 0x6f5a48].map(c => new THREE.Color(c));
   const WARE = { getreide: 0xe0c464, mehl: 0xf0e8d6, brot: 0x9a5a2a, holz: 0x6b4a2a, lehm: 0x8a5a3a, ziegel: 0xa94c2c };
   // Abnehmer je Ware: wer sie braucht, sonst Markt (Brot) oder Speicher
-  const ABNEHMER = g => Object.keys(GEB).filter(t => GEB[t].braucht && GEB[t].braucht[g]).concat(g === 'brot' ? ['markt'] : [], ['speicher']);
+  const ABNEHMER = g => Object.keys(GEB).filter(t => GEB[t].braucht && GEB[t].braucht[g]).concat(g === 'brot' ? ['markt'] : [], [['getreide', 'mehl', 'brot', 'fisch'].includes(g) ? 'horreum' : 'speicher']);
   let laeufer = [], lzeit = 0;
   const tuer = b => { const [gw, gd] = groesse(b.t); return [welt0 + b.x + gw / 2, welt0 + b.z + gd + 0.3]; };
   // Weg über die Straßen (Breitensuche von den Straßenfeldern vor a zu denen vor b), sonst L-förmig querfeldein

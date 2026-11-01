@@ -130,7 +130,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Betrieb ohne Häuser in Laufweite bekommt keine Arbeiter', /Laufweite/.test(lauf2.fern), lauf2.fern);
   ok('Arbeiter kommen aus Häusern (Laufwege)', lauf2.von >= 5, lauf2.von + ' Betriebe mit Herkunft');
-  await p.evaluate(() => SR.tempo(3)); await p.waitForTimeout(1500);
+  await p.evaluate(() => SR.tempo(4)); await p.waitForTimeout(1500);
   const figuren = await p.evaluate(() => SR.szene.laeuferZahl());
   ok('Läufer sind unterwegs', figuren > 0, figuren + ' Figuren');
 
@@ -703,7 +703,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     document.querySelector('#chronik [data-ch="zu"]').click(); SR.chronik(); const inChronik = /Zensus/.test(document.querySelector('#chronik').textContent); document.querySelector('#chronik [data-ch="zu"]').click();
     return { meld: /Zensus/.test(m), z: !!z && z.u.length === 3, seite, offen, inChronik, zu: document.querySelector('#chronik').hidden }; });
   ok('Zensus alle fünf Jahre: Bilanz mit drei Urteilen, Seite und Chronik', zen.meld && zen.z && zen.seite === 3 && zen.offen && zen.inChronik && zen.zu, JSON.stringify(zen));
-  ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand === 3 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
+  ok('Alter Spielstand wird ergänzt und läuft weiter', altStand.ok && altStand.stand >= 4 && altStand.land && altStand.wolle && altStand.weg && altStand.lauf === true && altStand.kaputt, JSON.stringify(altStand));
   ok('Spielstände: drei Plätze, speichern und laden', sp.plaetze === 3 && /Einwohner/.test(sp.text) && sp.zurueck && sp.zu, JSON.stringify(sp));
   const rgn = await p.evaluate(() => {
     const sim = SR.sim, wasser = w => w.typ.reduce((n, t) => n + (t === 2 ? 1 : 0), 0), wald = w => w.typ.reduce((n, t) => n + (t === 1 ? 1 : 0), 0);
@@ -822,8 +822,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const liegt = hh.halde > 0 && hh.status.some(s => s.art === 'lager'), kasseGleich = L.gut.holz <= holz0;
     L.geb.push({ id: 90010, t: 'speicher', x: h.x + 3, z: h.z, stufe: 1, bew: 0, w: 1, status: [], dreh: 0 }); L.gut.holz = 0;
     const st = L.geb.find(b => b.id === 90010); sim.monat(L, SR.welt); const hh2 = L.geb.find(b => b.id === h.id);
-    return { liegt, kasseGleich, abgeholt: !(hh2.halde > 0) && L.gut.holz > 0, alt: !!sim.aufbereiten({ ...JSON.parse(JSON.stringify(SR.S)), stand: 2 }).lagerFrei }; });
-  ok('Lager als Orte: ohne Speicher stapelt sich die Ware am Betrieb, mit Speicher wird abgeholt', lg.liegt && lg.kasseGleich && lg.abgeholt && lg.alt, JSON.stringify(lg));
+    // Kornspeicher: Getreidefeld liefert nur mit Kornspeicher (oder Zeltlager) in der Nähe; Speicher allein genügt nicht
+    const K = JSON.parse(JSON.stringify(L)); K.kornImSpeicher = false; const f = K.geb.find(b => b.t === 'feld'); K.monat = 8;
+    K.geb.push({ id: 90011, t: 'speicher', x: f.x + 3, z: f.z, stufe: 1, bew: 0, w: 1, status: [], dreh: 0 }); sim.monat(K, SR.welt);
+    const ohneKorn = K.geb.find(b => b.id === f.id).status.some(s => s.art === 'lager' && /Kornspeicher/.test(s.text));
+    return { liegt, kasseGleich, abgeholt: !(hh2.halde > 0) && L.gut.holz > 0, alt: !!sim.aufbereiten({ ...JSON.parse(JSON.stringify(SR.S)), stand: 2 }).lagerFrei, ohneKorn,
+      typ: sim.lagerTyp(K, 'getreide') === 'horreum' && sim.lagerTyp(K, 'holz') === 'speicher' }; });
+  ok('Lager als Orte: Speicher für Waren, Kornspeicher für Nahrung; ohne Lager stapelt sich die Ware am Betrieb', lg.liegt && lg.kasseGleich && lg.abgeholt && lg.alt && lg.ohneKorn && lg.typ, JSON.stringify(lg));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();
