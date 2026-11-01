@@ -505,9 +505,27 @@ export function erzeugeSzene(leinwand, welt) {
       o.g.traverse(m => { if (m.isMesh && m.material.emissive) m.material.emissive.setHex(glanz); });
     }
     for (const [id, o] of objekte) if (!da.has(id)) { gruppe.remove(o.g); objekte.delete(id); }
-    strassenZeichnen(strassen); mauernZeichnen(mauern); stapelZeichnen(S);
+    strassenZeichnen(strassen); mauernZeichnen(mauern); stapelZeichnen(S); aquaeduktZeichnen(S);
     laufwege(S);
   }
+
+  // Aquädukt (1.11.): sichtbare Bogenreihe vom Nordrand zu den Thermen oder zum ersten Brunnen, sobald erforscht
+  let aqSchl = '', aqMesh = null;
+  function aquaeduktZeichnen(S) {
+    const ziel = hat(S, 'aquaedukt') && (S.geb.find(b => b.t === 'thermen' && !(b.bau > 0)) || S.geb.find(b => b.t === 'brunnen' && !(b.bau > 0)));
+    const k = ziel ? ziel.id + ':' + ziel.x + ':' + ziel.z : '';
+    if (k === aqSchl) return; aqSchl = k;
+    if (aqMesh) { szene.remove(aqMesh); aqMesh.traverse(m => m.geometry && m.geometry.dispose()); aqMesh = null; }
+    if (!ziel) return;
+    const [gw] = groesse(ziel.t), x = ziel.x + gw / 2, z1 = Math.max(1, ziel.z - 0.5), n = Math.max(1, Math.floor(z1));
+    const lam = c => new THREE.MeshLambertMaterial({ color: c }), mm = new THREE.Matrix4(), q = new THREE.Quaternion();
+    const pfeiler = new THREE.InstancedMesh(new THREE.BoxGeometry(0.3, 1.9, 0.42).translate(0, 0.95, 0), lam(0xcdbf9f), n + 1);
+    const kanal = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.3, z1 + 0.4).translate(0, 2.05, 0), lam(0xd8ccae));
+    for (let i = 0; i <= n; i++) pfeiler.setMatrixAt(i, mm.compose(weltPos(x, i * z1 / n), q, new THREE.Vector3(1, 1, 1)));
+    kanal.position.copy(weltPos(x, z1 / 2));
+    aqMesh = new THREE.Group(); [pfeiler, kanal].forEach(m => { m.castShadow = true; aqMesh.add(m); }); szene.add(aqMesh);
+  }
+  const aquaeduktDa = () => !!aqMesh;
 
   // Warenstapel vor den Speichern (1.11.): die vier vollsten Waren, Höhe nach Füllstand des Lagers
   const STAPEL_FARBE = { holz: 0x6b4a2a, ziegel: 0xa94c2c, lehm: 0x8a5a3a, getreide: 0xe0c464, mehl: 0xf0e8d6, brot: 0x9a5a2a, fisch: 0x8fa3ad,
@@ -1010,5 +1028,5 @@ export function erzeugeSzene(leinwand, welt) {
     r.dispose(); if (r.forceContextLoss) r.forceContextLoss();
     return ziel;
   }
-  return { bilderMachen, bilder, laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, stapelZahl: () => stapel.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { aquaeduktDa, bilderMachen, bilder, laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, stapelZahl: () => stapel.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

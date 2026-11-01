@@ -373,6 +373,10 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Manifest, Apple-Touch-Icon, Titel „Städte Roms“. Auf dem iPad-Home-Bildschirm **nicht getestet**.
 - [x] **Wissensgrenze** (1.11.): ohne Ziel höchstens so viel Wissen wie die teuerste offene Erfindung – vorher sprang man nach dem
       Epochenwechsel durch angesparte Erfindungen. Balance-Spieler (60 Jahre): Späte Republik 94 min, Kaiserzeit 116 min (vorher 95).
+- [x] **Aquädukt sichtbar** (1.11.): Pfeilerreihe mit Kanal vom Nordrand zu den Thermen (sonst erstem Brunnen), sobald erforscht.
+      Test 97/97, Bild angesehen.
+- **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
+      Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker
