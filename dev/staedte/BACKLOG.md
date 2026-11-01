@@ -383,6 +383,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       (ersetzt den Tooltip, den es auf dem iPad nicht gibt). Test 98/98, Bild angesehen.
 - [x] **Zeitleisten bis in die Kaiserzeit** (1.11.): Cremona Vierkaiserjahr 69 n. Chr. (Belagerung), Puteoli Caligulas
       Schiffsbrücke 39 n. Chr., Luceria Veteranen des Augustus 27 v. Chr. Test 98/98.
+- [x] **Großes Ziel „Splendidissima“** (1.11.): Metropole, Kaiserzeit, Amphitheater, Prätor → Ehrentitel mit Festseite (Bild, Bilanz),
+      Gunst +20, Ansehen +50, danach weiterspielen. Fortschritt in der Chronik. Test 99/99, Bild angesehen.
 - **Pages-Deploy hängt** (1.11. 9:05): GitHub hält den Deploy von 64a699d für „laufend“, alle späteren werden abgelehnt.
       Lösung durch Moritz: Settings → Pages Quelle kurz umstellen oder hängenden Deploy abbrechen (API ist für Claude gesperrt).
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.

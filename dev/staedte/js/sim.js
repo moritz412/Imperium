@@ -474,6 +474,7 @@ export function monat(S, welt) {
   S.monat++;
   if (S.monat % 12 === 0) (S.chronik = S.chronik || []).push({ j: jahr(S) - 1, e: einwohner(S), d: Math.round(S.gut.denare), s: Math.round(S.stimmung), a: Math.round((S.familie || {}).ansehen || 0) });
   if (S.monat % 60 === 0) zensus(S, meld);
+  zielMonat(S, meld);
   if (jahreszeit(S) !== altJs) meld.push(JAHRESZEITEN[jahreszeit(S)].n + ' beginnt.');
   if (S.monat % 12 === 6 && S.monat >= 12) meld.push(`Rom erwartet am Ende des Herbstes ${abgabeBetrag(S)} Denare Abgaben.`);
   if (bedarf > 0 && !essen) meld.push('Die Vorräte reichen nicht – die Menschen hungern.');
@@ -1404,6 +1405,21 @@ function praefektMonat(S, meld) {
     Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
       gText: 'Der Senat hat das Vertrauen in die Stadt verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
   }
+}
+
+// ---------- Großes Ziel (1.11.): Ehrentitel „Splendidissima“ ----------
+export function zielStand(S) {
+  return [
+    ['Metropole mit 800 Einwohnern', rang(S) >= 4],
+    ['Die Kaiserzeit hat begonnen', epoche(S) >= 3],
+    ['Ein Amphitheater steht', S.geb.some(b => b.t === 'amphitheater' && !(b.bau > 0))],
+    ['Ein Valerier ist Prätor', familieS(S).amt >= 2],
+  ];
+}
+function zielMonat(S, meld) {
+  if (S.titel || !zielStand(S).every(z => z[1])) return;
+  S.titel = S.monat; S.titelNeu = true; S.gunst = Math.min(100, gunst(S) + 20); familieS(S).ansehen += 50;
+  meld.push(`Der Senat verleiht ${REG.stadt} den Ehrentitel „Splendidissima“!`);
 }
 
 // ---------- Zensus (Lustrum) alle fünf Jahre (1.11.): Bilanz mit Urteil für Stadt, Familie und Rom ----------

@@ -213,3 +213,8 @@ body.umland #leiste,body.umland #auftrag,body.umland #ansicht [data-ansicht]{dis
 .naehe .ja{color:#9ccb8e;border-color:#5f7d52;background:rgba(156,203,142,.08)}
 .naehe .nein{color:#c9b9a0;opacity:.75}
 .ware.kasse{cursor:pointer}
+.titelseite{text-align:center}
+.titelseite .zeile{text-align:left}
+.titelkranz{font:700 15px Cinzel,serif;letter-spacing:.35em;color:#e9b44c;margin:6px 0 4px}
+.titelseite .knopf{display:block;margin:12px auto 0}
+.titelbild{height:170px;border-radius:12px;background-size:cover;background-position:center;margin:4px 0 10px}
