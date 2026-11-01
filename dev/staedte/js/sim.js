@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -135,12 +135,15 @@ export function fehlendeKosten(S, kosten) {
 
 export function bauen(S, welt, t, x, z) {
   if (gesperrt(S, t)) return { ok: false, grund: sperrGrund(S, t) };
+  if (GEB[t].wahrzeichen && S.geb.some(b => b.t === t)) return { ok: false, grund: `Cremona hat schon eine ${GEB[t].n}` };
+  if (GEB[t].rang && rang(S) < GEB[t].rang) return { ok: false, grund: `Erst ab Stadtrang ${RAENGE[GEB[t].rang].n}` };
   const grund = pruefePlatz(S, welt, t, x, z);
   if (grund) return { ok: false, grund };
   const k = baukosten(S, t);
   if (!kannBezahlen(S, k)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, k).join(', ') };
   for (const [g, n] of Object.entries(k)) S.gut[g] -= n;
   const b = { id: S.naechste++, t, x, z, w: 0, prio: false, stufe: 1, bew: 0, status: [], dreh: frontSeite(S, t, x, z) };
+  if (GEB[t].bauzeit) b.bau = GEB[t].bauzeit;   // Wahrzeichen: Baustelle über mehrere Monate
   S.geb.push(b);
   return { ok: true, b };
 }
@@ -215,6 +218,8 @@ export function monat(S, welt) {
   for (const b of S.geb) {
     const d = GEB[b.t]; b.status = [];
     if (b.brand > 0) { b.status.push({ art: 'brand', text: b.brand === 1 ? 'Es brennt!' : `Es brennt seit ${b.brand} Monaten!` }); continue; }
+    if (b.bau > 0) { b.status.push({ art: 'bau', text: `Baustelle – noch ${b.bau} ${b.bau === 1 ? 'Monat' : 'Monate'}`, leicht: true });
+      if (--b.bau === 0) { delete b.bau; if (b.t === 'basilika') S.ereignis = 'eroeffnung'; meld.push(`Die ${d.n} ist fertig!`); } continue; }
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
@@ -321,6 +326,7 @@ export function monat(S, welt) {
   if (haeuser && tempel.length) ziel += 12 * S.geb.filter(h => h.t === 'huette' && tempel.some(o => abstand(o, h) <= GEB.tempel.reichweite)).length / haeuser;
   if (tempel.length && S.monat % 12 === 8) S.gunst = Math.min(100, gunst(S) + 2);
   if (S.geb.some(b => b.t === 'theater' && b.w > 0)) ziel += 8;
+  if (S.geb.some(b => b.t === 'basilika' && !(b.bau > 0) && b.w > 0)) { ziel += 5; familieS(S).ansehen += 0.5; }
   if (haeuser && rang(S) >= INSULA.rang) {   // S3.3: Ordnung – Häuser ohne Wache in der Nähe
     const ohne = S.geb.filter(h => h.t === 'huette' && !wacheNah(S, h)).length;
     ziel -= FEUER.unruhe * ohne / haeuser;
@@ -350,6 +356,7 @@ export function monat(S, welt) {
 
   familieMonat(S, meld);
   ereignisMonat(S);
+  inschriftenMonat(S, meld);
 
   // Handel und Abgaben (S2.5), Forschung und Erntefest (S3.1)
   handelMonat(S);
@@ -673,6 +680,7 @@ export function handeln(S, g, art, id = 'placentia') {
     if ((S.gut[g] || 0) + n > lagerGrenze(S)) return { ok: false, grund: `Lager für ${WAREN[g].n} voll` };
     S.gut.denare -= summe; S.gut[g] = (S.gut[g] || 0) + n; v[g] = handelVorrat(S, g, id) - n;
   }
+  (S.zaehler = S.zaehler || {}).handel = (S.zaehler.handel || 0) + 1;
   return { ok: true, summe };
 }
 function handelMonat(S) {
@@ -1016,7 +1024,7 @@ function ereignisMonat(S) {
     || (S.monat >= 12 && EREIGNISSE.find(e => e.jaehrlich === S.monat % 12 && (log[e.id] === undefined || Math.floor(log[e.id] / 12) < Math.floor(S.monat / 12))));
   if (fest) { S.ereignis = fest.id; return; }
   if (S.monat < 6 || wurf(S, 4242) >= EREIGNIS_CHANCE) return;
-  const moegl = EREIGNISSE.filter(e => !e.fest && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
+  const moegl = EREIGNISSE.filter(e => !e.fest && !e.nurAusgeloest && e.jaehrlich === undefined && S.monat >= (e.ab || 0) && (log[e.id] === undefined || S.monat - log[e.id] >= EREIGNIS_PAUSE) && (!e.wenn || e.wenn(S)));
   if (moegl.length) S.ereignis = moegl[Math.floor(wurf(S, 4243) * moegl.length)].id;
 }
 export function wahlMoeglich(S, w) {
@@ -1088,5 +1096,12 @@ function seucheMonat(S, meld) {
   }
   if (neu) meld.push(neu === 1 ? 'Krankheit! In einem Haus liegen die Menschen mit Fieber.' : `Eine Seuche breitet sich aus: ${neu} Häuser sind betroffen.`);
   if (tote) meld.push(`${tote} Menschen sind an der Krankheit gestorben.`);
+}
+
+// ---------- Inschriften (1.11.) ----------
+const SIM = { rang: S => rang(S) };
+function inschriftenMonat(S, meld) {
+  const da = S.inschriften = S.inschriften || {};
+  for (const i of INSCHRIFTEN) if (!da[i.id] && i.ok(S, SIM)) { da[i.id] = S.monat; meld.push(`Inschrift auf dem Forum: „${i.n}“`); }
 }
 

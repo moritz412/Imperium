@@ -218,6 +218,11 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       ×0,8, Aquädukt ×0,7). Kranke Häuser: 3 Monate, je Monat −10 % Bewohner, kein Wachstum, stecken Häuser im Umkreis 3 an
       (30 %, mit Latrine 8 %). Neues Gebäude **Latrine** (2×1, ohne Straße, Reichweite 9, eigene Form), Symbol, Ansicht
       „Gesundheit“, Zeilen im Hausfenster. Balance-Lauf: kleine Stadt (≈ 10 Häuser) 5 Jahre ohne Seuche. Test 70/70.
+- [x] Wahrzeichen und Inschriften: **Basilika** (6×4, einmal je Stadt, ab Kleinstadt, Stein 120/Ziegel 150/Holz 80/300 Denare,
+      **8 Monate Baustelle** mit Fundament, Gerüst, Tretkran, Steinstapeln) → Eröffnungs-Ereignis (Ansehen +25/30, Gunst +10,
+      Stimmung); danach Stimmung +5 stadtweit und Ansehen +0,5/Monat; eigene Form (Säulenumgang, Obergaden, Apsis).
+      **Inschriften des Forums** (Menü): 15 Erfolge (Ränge, erste Casa/Insula, Erfindungen, Späte Republik, Ädil/Prätor, volle
+      Kasse, Handel, Umland, Basilika, zehn Jahre) als Steintafel mit Jahr. Test 72/72, Bild angesehen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

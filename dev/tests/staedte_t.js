@@ -533,6 +533,22 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { krank, angesteckt, weniger, lat, senkt: p1 < p0 * 0.5, legende: ans.legende.length, knopf: !!document.querySelector('#ansicht [data-ansicht="gesundheit"]') };
   });
   ok('Seuche: Ausbruch, Ansteckung, Tote; Latrine senkt die Gefahr; Ansicht Gesundheit', se.krank && se.angesteckt > 0 && se.weniger && se.lat && se.senkt && se.legende === 5 && se.knopf, JSON.stringify(se));
+  // Wahrzeichen und Inschriften (1.11.): Basilika mit Baustelle und Eröffnung, nur einmal; Inschriften-Tafel
+  const wz = await p.evaluate(() => {
+    const sim = SR.sim, S = SR.S, B = JSON.parse(JSON.stringify(S)); B.ereignisseAus = true;
+    const zuKlein = (() => { const K = JSON.parse(JSON.stringify(B)); K.rang = 0; K.geb.forEach(h => h.bew = 0); return sim.bauen(K, SR.welt, 'basilika', 2, 2).grund || ''; })();
+    B.rang = 2; Object.assign(B.gut, { stein: 500, ziegel: 500, holz: 500, denare: 2000 }); B.grenze = 2;
+    let ba = null; for (let z = 0; z <= 34 && !ba; z++) for (let x = 0; x <= 56 && !ba; x++) { const r = sim.bauen(B, SR.welt, 'basilika', x, z); if (r.ok) ba = r.b; }
+    if (!ba) return { fehler: 'kein Platz' };
+    const zweite = (() => { for (let z = 0; z <= 34; z++) for (let x = 0; x <= 56; x++) { const r = sim.bauen(B, SR.welt, 'basilika', x, z); if (!/Platz|Straße|schon etwas|Wald|Fluss|freigegeben|Außerhalb/.test(r.grund || '')) return r.grund || 'ok'; } return ''; })();
+    const bau0 = ba.bau; for (let i = 0; i < 8; i++) sim.monat(B, SR.welt);
+    const fertig = !(ba.bau > 0), eroeffnung = B.ereignis === 'eroeffnung'; const a0 = B.familie.ansehen; sim.ereignisWaehlen(B, 1); const ansehen = B.familie.ansehen - a0;
+    sim.monat(B, SR.welt); const tafel = Object.keys(B.inschriften || {});
+    SR.inschriften(); const steine = document.querySelectorAll('#inschriften .fkarte').length; document.querySelector('#inschriften [data-in="zu"]').click();
+    return { zuKlein, bau0, zweite, fertig, eroeffnung, ansehen, tafel, steine };
+  });
+  ok('Basilika: ab Kleinstadt, 8 Monate Baustelle, Eröffnung, nur einmal', /Kleinstadt/.test(wz.zuKlein) && wz.bau0 === 8 && /schon eine/.test(wz.zweite) && wz.fertig && wz.eroeffnung && wz.ansehen >= 25, JSON.stringify(wz));
+  ok('Inschriften des Forums: Erfolge werden eingetragen, Tafel im Menü', wz.tafel.includes('basilika') && wz.tafel.includes('dorf') && wz.steine === 15);
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

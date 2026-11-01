@@ -115,6 +115,9 @@ export const GEB = {
   latrine: { n: 'Latrine', kat: 'Öffentlich', g: [2, 1], h: 0.55, wand: 0xd8ccb0, dach: 0xa9583a,
     kosten: { ziegel: 12, holz: 6 }, reichweite: 9,
     text: 'Öffentliche Latrine mit fließendem Wasser in der Rinne. Häuser im Umkreis von 9 Feldern erkranken viel seltener.' },
+  basilika: { n: 'Basilika', kat: 'Öffentlich', g: [6, 4], h: 1.6, wand: 0xeee6d4, dach: 0xa9482a, wahrzeichen: true, rang: 2,
+    kosten: { stein: 120, ziegel: 150, holz: 80, denare: 300 }, bauzeit: 8, arbeiter: 4, unterhalt: 6,
+    text: 'Wahrzeichen am Forum: Markthalle und Gerichtssaal unter einem Dach. Einmal je Stadt, ab der Kleinstadt, 8 Monate Bauzeit. Danach Stimmung +5 in der ganzen Stadt und jeden Monat Ansehen für die Familie.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -379,6 +382,9 @@ export const EREIGNISSE = [
   { id: 'saturnalia', jaehrlich: 9, titel: 'Saturnalien', bild: 'volk',
     text: 'Im Dezember steht die Welt Kopf: Sklaven sitzen mit ihren Herren an einem Tisch, man beschenkt sich mit Kerzen und Tonfiguren.',
     wahl: [{ t: 'Ein Festmahl für alle', w: { gut: { brot: -20 }, stimmung: 8 } }, { t: 'Geschenke an die Klienten', w: { vermoegen: -30, ansehen: 4, stimmung: 3 } }, { t: 'Still feiern', w: {} }] },
+  { id: 'eroeffnung', nurAusgeloest: true, titel: 'Die Basilika wird eröffnet', bild: 'spiele',
+    text: 'Nach Monaten voller Lärm, Staub und Ochsenkarren steht die Basilika am Forum. Die ganze Stadt drängt sich unter den Säulen, ein Stier wird geopfert, der Name der Valerier steht in Stein über dem Eingang.',
+    wahl: [{ t: 'Ein Festmahl für die ganze Stadt', w: { gut: { brot: -30 }, ansehen: 30, gunst: 10, stimmung: 15 } }, { t: 'Eine feierliche Rede', w: { ansehen: 25, gunst: 10, stimmung: 8 } }] },
 ];
 export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasselbe Ereignis wiederkommen kann
 
@@ -387,4 +393,23 @@ export const EREIGNIS_CHANCE = 0.12, EREIGNIS_PAUSE = 36;   // Monate, bis dasse
 // stecken Häuser im Umkreis 3 mit 30 % an (mit Latrine 8 %).
 export const SEUCHE = { ab: 12, basis: 0.0008, dichte: 0.2, umkreis: 4, insula: 2, sommer: 1.5, latrine: 0.3, brunnen: 0.8, aquaedukt: 0.7,
   monate: 3, verlust: 0.1, ueber: 0.3, ueberLatrine: 0.08, nachbar: 3 };
+
+// Inschriften auf dem Forum (1.11.): Erfolge, einmal je Spiel. ok(S, sim) prüft monatlich.
+export const INSCHRIFTEN = [
+  { id: 'casa', n: 'Die erste Casa', text: 'Aus Lehm wurde Ziegel: die erste Casa der Kolonie.', ok: (S) => S.geb.some(b => b.t === 'huette' && b.stufe >= 2) },
+  { id: 'dorf', n: 'Ein Dorf am Padus', text: 'Vierzig Seelen leben in Cremona.', ok: (S, sim) => sim.rang(S) >= 1 },
+  { id: 'kleinstadt', n: 'Eine Kleinstadt', text: 'Hundertzwanzig Bürger zählt der Census.', ok: (S, sim) => sim.rang(S) >= 2 },
+  { id: 'kolonie', n: 'Eine blühende Kolonie', text: 'Dreihundert Bürger – Cremona zählt in Rom.', ok: (S, sim) => sim.rang(S) >= 3 },
+  { id: 'metropole', n: 'Metropole der Po-Ebene', text: 'Achthundert Bürger. Selbst Placentia blickt neidisch.', ok: (S, sim) => sim.rang(S) >= 4 },
+  { id: 'insula', n: 'Mietshäuser', text: 'Die erste Insula erhebt sich über die Dächer.', ok: (S) => S.geb.some(b => b.t === 'huette' && b.stufe === 3) },
+  { id: 'erfindung', n: 'Wissen ist Macht', text: 'Fünf Erfindungen hat die Stadt gemacht.', ok: (S) => ((S.forschung || {}).fertig || []).length >= 5 },
+  { id: 'republik', n: 'Die Späte Republik', text: 'Eine neue Zeit beginnt für Cremona.', ok: (S) => (S.epoche || 1) >= 2 },
+  { id: 'aedil', n: 'Ädil von Cremona', text: 'Das Volk wählte einen Valerier zum Ädil.', ok: (S) => (S.familie || {}).amt >= 1 },
+  { id: 'praetor', n: 'Prätor', text: 'Recht und Ordnung liegen in der Hand der Valerier.', ok: (S) => (S.familie || {}).amt >= 2 },
+  { id: 'kasse', n: 'Volle Kasse', text: 'Tausend Denare liegen in der Stadtkasse.', ok: (S) => S.gut.denare >= 1000 },
+  { id: 'handel', n: 'Händler am Tor', text: 'Die erste Ladung ging nach Placentia oder Mantua.', ok: (S) => (S.zaehler || {}).handel >= 1 },
+  { id: 'umland', n: 'Herr des Umlands', text: 'Zehn Felder im Umland sind vermessen.', ok: (S) => Object.keys(S.land || {}).length >= 10 },
+  { id: 'basilika', n: 'Die Basilika', text: 'Das Wahrzeichen am Forum ist eröffnet.', ok: (S) => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)) },
+  { id: 'zehn', n: 'Zehn Jahre Cremona', text: 'Seit zehn Jahren steht die Kolonie am Padus.', ok: (S) => S.monat >= 122 },
+];
 

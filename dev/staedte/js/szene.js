@@ -205,6 +205,17 @@ export function erzeugeSzene(leinwand, welt) {
       teil(new THREE.SphereGeometry(0.16, 8, 6), 0xff7a2a, 0.55, 0.3, -0.05).material.emissive = new THREE.Color(0x8a2a00);
       box(0.3, 0.2, 0.15, 0x3a3a3a, -0.35, 0.22, 0.45); box(0.12, 0.12, 0.12, 0x3a3a3a, -0.35, 0.06, 0.45);
       box(0.4, 0.15, 0.3, 0x7a5848, 0.3, 0.07, 0.6); g.userData.h = 1.4; return g; },
+    basilika: geist => { const { g, box, teil } = teileBau(geist);   // Hallenbau mit Säulenumgang, Obergaden und Apsis
+      box(5.6, 0.2, 3.6, 0xd8ccb0, 0, 0.1, 0);
+      box(4.6, 1.1, 2.6, 0xeee6d4, 0, 0.75, 0); box(4.6, 0.55, 1.4, 0xe6dccb, 0, 1.55, 0);
+      for (let i = 0; i < 11; i++) for (const z of [-1.6, 1.6]) teil(new THREE.CylinderGeometry(0.07, 0.08, 1.1, 8), 0xf6f0e2, -2.5 + i * 0.5, 0.75, z);
+      for (const x of [-2.6, 2.6]) for (let i = 0; i < 6; i++) teil(new THREE.CylinderGeometry(0.07, 0.08, 1.1, 8), 0xf6f0e2, x, 0.75, -1.25 + i * 0.5);
+      box(5.4, 0.1, 3.4, 0xa9482a, 0, 1.35, 0);
+      const d1 = new THREE.Shape(); d1.moveTo(-0.8, 0); d1.lineTo(0.8, 0); d1.lineTo(0, 0.4); d1.lineTo(-0.8, 0);
+      teil(new THREE.ExtrudeGeometry(d1, { depth: 4.7, bevelEnabled: false }).translate(0, 0, -2.35).rotateY(Math.PI / 2), 0xa9482a, 0, 1.82, 0);
+      teil(new THREE.CylinderGeometry(0.8, 0.8, 1.1, 16, 1, false, Math.PI / 2, Math.PI).rotateY(Math.PI / 2), 0xe6dccb, -2.3, 0.75, 0);
+      for (let i = 0; i < 6; i++) box(0.16, 0.22, 0.02, 0x3a2a1e, -1.9 + i * 0.75, 1.55, 0.71);
+      g.userData.h = 2.3; return g; },
     latrine: geist => { const { g, box, dach } = teileBau(geist);   // langer Raum mit Bogenöffnungen, Wasserrinne
       box(1.7, 0.5, 0.7, 0xd8ccb0, 0, 0.25, -0.05); dach(1.8, 0.8, 0.2, 0xa9583a, 0, 0.5, -0.05);
       for (const x of [-0.5, 0, 0.5]) box(0.24, 0.3, 0.02, 0x3a2a1e, x, 0.17, 0.31);
@@ -246,6 +257,18 @@ export function erzeugeSzene(leinwand, welt) {
       for (let i = 0; i < 5; i++) box(0.22, 0.4, 0.02, 0x3a2a1e, -1.2 + i * 0.6, 0.25, 0.97);
       box(2.6, 0.12, 0.4, 0xb8a888, 0, 0.06, 0.75); g.userData.h = 1.1; return g; },
   };
+  // Baustelle (Wahrzeichen): Fundament, halbhohe Mauern, Gerüst aus Stangen, Kran (Tretkran), Steinstapel
+  function baueBaustelle(t) {
+    const { g, box, teil } = teileBau(false), [gw, gd] = groesse(t), W = gw - 0.3, D = gd - 0.3;
+    box(W, 0.15, D, 0xc8bca4, 0, 0.07, 0);
+    for (const [x, z, w, d] of [[0, -D / 2 + 0.1, W, 0.2], [0, D / 2 - 0.1, W, 0.2], [-W / 2 + 0.1, 0, 0.2, D], [W / 2 - 0.1, 0, 0.2, D]]) box(w, 0.6, d, 0xe6dccb, x, 0.45, z);
+    for (let x = -W / 2; x <= W / 2 + 0.01; x += W / 5) for (const z of [-D / 2 - 0.15, D / 2 + 0.15]) box(0.05, 1.3, 0.05, 0x8a6a46, x, 0.65, z);
+    for (const z of [-D / 2 - 0.15, D / 2 + 0.15]) for (const y of [0.6, 1.2]) box(W, 0.04, 0.05, 0x8a6a46, 0, y, z);
+    box(0.1, 2.2, 0.1, 0x6b4a2a, W / 2 - 0.5, 1.1, 0); const arm = box(1.6, 0.08, 0.08, 0x6b4a2a, W / 2 - 1.0, 2.15, 0); arm.rotation.z = -0.25;
+    teil(new THREE.CylinderGeometry(0.35, 0.35, 0.15, 12).rotateZ(Math.PI / 2), 0x8a6a46, W / 2 - 0.5, 0.4, 0.5);
+    for (let i = 0; i < 4; i++) box(0.4, 0.2, 0.3, 0xd8d2c4, -W / 2 + 0.6 + i * 0.45, 0.25 + (i % 2) * 0.2, D / 2 - 0.6);
+    g.userData.h = 2.3; return g;
+  }
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
     if (t === 'huette' && stufe === 3) return baueInsula();
@@ -333,11 +356,11 @@ export function erzeugeSzene(leinwand, welt) {
     for (const b of S.geb) {
       da.add(b.id);
       if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
-      const schluessel = b.t + b.stufe + 'd' + b.dreh;
+      const schluessel = b.t + b.stufe + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
       let o = objekte.get(b.id);
       if (!o || o.schluessel !== schluessel) {
         if (o) gruppe.remove(o.g);
-        const g = baueMesh(b.t, b.stufe);
+        const g = b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, b.stufe);
         const [gw, gd] = groesse(b.t);
         g.position.copy(weltPos(b.x + gw / 2, b.z + gd / 2));
         g.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];

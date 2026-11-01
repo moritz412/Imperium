@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG } from './daten.js';
+import { RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, ZWEIGE, EPOCHEN, EPOCHE2, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -304,6 +304,7 @@ $('#menue').addEventListener('click', e => {
   const m = b.dataset.m;
   if (m === 'weiter') $('#menue').hidden = true;
   if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
+  if (m === 'inschriften') { $('#menue').hidden = true; inschriftenZeigen(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
@@ -426,6 +427,20 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Inschriften des Forums (1.11.) ----------
+function inschriftenZeigen() {
+  const da = S.inschriften || {}, n = INSCHRIFTEN.filter(i => da[i.id] !== undefined).length;
+  const jahrText = m => { const j = S.jahr0 + Math.floor(m / 12); return j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.'; };
+  $('#inschriften').innerHTML = `<div class="feld forschungsseite tafel">
+    <button class="schliessen" data-in="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Inschriften des Forums</h2><div class="untertitel">${n} von ${INSCHRIFTEN.length} Taten in Stein gemeißelt</div>
+    <div class="fbaum fam">${INSCHRIFTEN.map(i => da[i.id] !== undefined
+      ? `<div class="fkarte fertig stein"><b>${i.n.toUpperCase()}</b><span>${i.text}</span><small>${jahrText(da[i.id])}</small></div>`
+      : `<div class="fkarte epoche stein"><b>· · ·</b><span>${i.text}</span><small>noch nicht erreicht</small></div>`).join('')}</div></div>`;
+  $('#inschriften').hidden = false;
+}
+$('#inschriften').addEventListener('click', e => { if (e.target.id === 'inschriften' || e.target.closest('[data-in="zu"]')) $('#inschriften').hidden = true; });
+
 // ---------- Familie und Ämter (S4.1) ----------
 let heiratWahl = '';
 function familieZeigen() {
@@ -620,7 +635,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -650,7 +665,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },
