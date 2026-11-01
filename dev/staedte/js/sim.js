@@ -15,6 +15,23 @@ export function regionSetzen(id) {
   REGION_TYPEN.nachbar.n = REG.west; REGION_TYPEN.nachbar.text = REG.westText;
   REGION_TYPEN.gallier.n = REG.dorf; REGION_TYPEN.gallier.text = REG.dorfText;
   if (PARTNER_OBJ) { PARTNER_OBJ.placentia.n = REG.west; PARTNER_OBJ.mantua.n = REG.ost; PARTNER_OBJ.mantua.text = REG.ostText; PARTNER_OBJ.mantua.unter = `Stadt im Osten · Handel`; }
+  vorlagenFuellen();
+}
+// Texte mit Platzhaltern ({stadt}, {fluss}, {west}, {ost}, {feind}, {ebeneGen}) je Region füllen (1.11.); Vorlage bleibt gemerkt
+const VORLAGE = new WeakMap();
+function vorlagenFuellen() {
+  const werte = { stadt: REG.stadt, fluss: REG.fluss, west: REG.west, ost: REG.ost, feind: REG.feind, ebeneGen: REG.ebeneGen }, gesehen = new Set();
+  const gehe = o => {
+    if (!o || typeof o !== 'object' || gesehen.has(o)) return; gesehen.add(o);
+    const v = VORLAGE.get(o) || {};
+    for (const k of Object.keys(o)) {
+      const t = v[k] !== undefined ? v[k] : o[k];
+      if (typeof t === 'string' && t.includes('{')) { v[k] = t; o[k] = t.replace(/\{(\w+)\}/g, (m, n) => werte[n] !== undefined ? werte[n] : m); }
+      else if (typeof o[k] === 'object') gehe(o[k]);
+    }
+    if (Object.keys(v).length) VORLAGE.set(o, v);
+  };
+  [AUFTRAEGE, FORSCHUNG, RIVALEN, HEIRAT, AUSBILDUNG, LAND_BETRIEBE, SCHUTZ, REGION_TYPEN, EREIGNISSE, INSCHRIFTEN, RUF].forEach(gehe);
 }
 let PARTNER_OBJ = null;
 export function erzeugeWelt(rid = REG_ID) {
@@ -1223,7 +1240,7 @@ export function rat(S) {
   const bedarf = (bew + skl) * ESSEN_JE_MONAT, vorrat = (S.gut.getreide || 0) + (S.gut.brot || 0) + (S.gut.fisch || 0);
   const ernteBald = jahreszeit(S) === 1 || (jahreszeit(S) === 0 && S.monat % 3 === 2);
   if (bedarf > 0 && vorrat / bedarf < 3 && !ernteBald) { const m = Math.floor(vorrat / bedarf);
-    return `${m < 1 ? 'Die Vorräte sind aufgebraucht' : `Die Vorräte reichen nur noch ${m} ${m === 1 ? 'Monat' : 'Monate'}`}. Baue Getreidefelder oder Gehöfte – oder kaufe Getreide in Placentia.`; }
+    return `${m < 1 ? 'Die Vorräte sind aufgebraucht' : `Die Vorräte reichen nur noch ${m} ${m === 1 ? 'Monat' : 'Monate'}`}. Baue Getreidefelder oder Gehöfte – oder kaufe Getreide in ${REG.west}.`; }
   if (S.gut.denare < (S.letzte.unterhalt || 0) * 2 && S.gut.denare < 30) return 'Die Kasse ist fast leer. Ohne Lohn stehen Markt, Schule und Wache still. Mehr Einwohner bringen mehr Steuern.';
   const leer = S.geb.filter(b => GEB[b.t].arbeiter && b.w === 0 && !(b.bau > 0) && !b.unbezahlt);
   if (leer.length) return `${leer.length === 1 ? GEB[leer[0].t].n + ' steht' : leer.length + ' Betriebe stehen'} ohne Arbeiter. ${leer.some(b => b.einzug === 0) ? 'Baue Hütten in höchstens 16 Feldern Entfernung.' : 'Es fehlen Arbeitskräfte: Baue mehr Hütten oder gib wichtigen Betrieben Vorrang.'}`;

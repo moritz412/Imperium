@@ -357,6 +357,8 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Gebäudearten), Fehler im Monatsablauf halten das Spiel an statt es hängen zu lassen. Test 92/92.
 - [x] **Zensus alle fünf Jahre** (1.11.): Bilanzseite mit Urteil für Stadt, Familie, Rom (dreimal gut → Gunst +5, Ansehen +5),
       Liste in der Chronik. Test 93/93, Bild angesehen.
+- [x] **Texte je Region** (1.11.): Inschriften, Ereignisse, Aufträge, Ruf, Heirat, Umland nennen Stadt, Fluss, Nachbarn und Feind
+      der gewählten Region (Platzhalter, gefüllt in `regionSetzen`). Test 94/94.
 - Römerstraße als Ausbau der Feldwege: schon als Erfindung „Römerstraße“ vorhanden (Karren ×3, Räuber halb) – kein eigener Bau nötig.
 - [x] Offline/App (PWA): `staedte/manifest.webmanifest` (Name, Icons aus `icons/`, Vollbild) und `staedte/sw.js` (Netz zuerst, ohne Netz
       der zuletzt geladene Stand; Modelle, Musik, Ereignisbilder vorab). **Fehler im Hauptspiel behoben:** dessen Service Worker

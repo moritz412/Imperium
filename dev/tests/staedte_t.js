@@ -751,6 +751,10 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const poWeide = sim.regionKarte().filter(f => f.typ === 'weide').length, poStein = sim.regionKarte().filter(f => f.typ === 'stein').length;
     return { po, k, a, e, zurueck, poWeide, poStein };
   });
+  const vorl = await p.evaluate(async () => { const D = await import('./js/daten.js'), sim = SR.sim, zehn = () => D.INSCHRIFTEN.find(i => i.id === 'zehn').n;
+    sim.regionSetzen('apulien'); const lu = zehn(), ruf = D.RUF.kornkammer.n, rest = JSON.stringify([D.INSCHRIFTEN.map(i => [i.n, i.text]), D.EREIGNISSE.map(e => e.text), D.AUFTRAEGE.map(a => a.n), D.RUF]).match(/\{[a-zA-Z]+\}/g);
+    sim.regionSetzen('po'); return { lu, ruf, po: zehn(), rest }; });
+  ok('Texte nennen die gewählte Stadt (Platzhalter je Region)', vorl.lu === 'Zehn Jahre Luceria' && vorl.ruf === 'Kornkammer Apuliens' && vorl.po === 'Zehn Jahre Cremona' && !vorl.rest, JSON.stringify(vorl));
   ok('Regionen: Puteoli am Meer, Luceria trocken, Florentia mit Stein, eigene Zeitleisten je Region', rgn.k.stadt === 'Puteoli' && rgn.k.jahr === -194 && rgn.k.fisch === 30 && rgn.k.partner === 'Neapolis' && rgn.k.w > rgn.po.w && rgn.a.stadt === 'Luceria' && rgn.a.weide > rgn.poWeide && rgn.a.wald < rgn.po.wald && rgn.a.duerre && rgn.e.stadt === 'Florentia' && rgn.e.stein > rgn.poStein && rgn.e.eigeneGeschichte && rgn.e.piraten && rgn.e.cannae && rgn.zurueck, JSON.stringify(rgn));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 

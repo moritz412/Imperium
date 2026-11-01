@@ -152,11 +152,11 @@ export const SKLAVEN = { los: 5, preis: 25, essen: 0.1, furcht: 0.5, vicesima: 0
 export const REGION_RING = 4;   // 1.11.: Ring 4 dazu (61 Felder); die inneren 37 Felder bleiben wie zuvor erzeugt
 export const REGION_TYPEN = {
   stadt: { n: 'Cremona', farbe: 0x8f9a5c, text: 'Die Stadt innerhalb ihrer Grenzen.', nutzen: '' },
-  acker: { n: 'Ackerland', farbe: 0x9aa456, text: 'Fruchtbarer Boden der Po-Ebene.', nutzen: 'Gehöft mit Getreide, später Villa rustica' },
+  acker: { n: 'Ackerland', farbe: 0x9aa456, text: 'Fruchtbarer Boden – gut für Getreide.', nutzen: 'Gehöft mit Getreide, später Villa rustica' },
   wald:  { n: 'Wald', farbe: 0x55703a, text: 'Eichen- und Buchenwald.', nutzen: 'Holzfällerlager' },
   lehm:  { n: 'Lehmgrund', farbe: 0x9a7650, text: 'Schwerer Lehm in der Flussaue.', nutzen: 'Lehmgrube und Ziegelei' },
   weide: { n: 'Weide', farbe: 0x86a35a, text: 'Feuchte Wiesen.', nutzen: 'Schafe und Rinder (Wolle, Leder)' },
-  hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Kastell gegen die Gallier, später Wein und Oliven' },
+  hang:  { n: 'Hang', farbe: 0x8c8a58, text: 'Sanfte Hügel am Rand der Ebene.', nutzen: 'Kastell gegen die {feind}, später Wein und Oliven' },
   fluss: { n: 'Padus', farbe: 0x5e8fb0, text: 'Der Fluss Padus, schiffbar bis zur Adria.', nutzen: 'Anleger und Fischerei' },
   stein: { n: 'Steinbruch', farbe: 0x9a958a, text: 'Kalkstein aus den Ausläufern der Alpen.', nutzen: 'Steinbruch (Stein für Insulae)' },
   erz:   { n: 'Erzader', farbe: 0x8a6e5a, text: 'Eisenhaltiges Gestein am Hügelrand.', nutzen: 'Erzgrube (Erz für die Schmiede)' },
@@ -199,9 +199,9 @@ export const LAND_BETRIEBE = {
   lehmstich:  { n: 'Lehmstich', auf: 'lehm', kosten: { holz: 10 }, erzeugt: { lehm: 3 }, modell: 'lehmgrube',
     text: 'Lehm aus der Flussaue für die Ziegeleien.' },
   fischer:    { n: 'Fischerhütte', auf: 'fluss', kosten: { holz: 15 }, erzeugt: { fisch: 3 }, modell: 'huette',
-    text: 'Fischer werfen ihre Netze im Padus aus. Fisch macht satt wie Brot.' },
+    text: 'Fischer werfen ihre Netze im {fluss} aus. Fisch macht satt wie Brot.' },
   anleger:    { n: 'Anleger', auf: 'fluss', kosten: { holz: 30, ziegel: 10 }, erzeugt: {}, modell: '',
-    text: 'Flussboote verbinden alle Anleger am Padus: Was einen Anleger erreicht, kommt über einen anderen in die Stadt.' },
+    text: 'Flussboote verbinden alle Anleger am {fluss}: Was einen Anleger erreicht, kommt über einen anderen in die Stadt.' },
   steinbruch: { n: 'Steinbruch', auf: 'stein', kosten: { holz: 20 }, erzeugt: { stein: 2 }, modell: 'lehmgrube',
     text: 'Steinmetze brechen Kalksteinblöcke. Insulae brauchen Stein.' },
   erzgrube:   { n: 'Erzgrube', auf: 'erz', kosten: { holz: 25, denare: 20 }, erzeugt: { erz: 2 }, modell: 'holzfaeller',
@@ -213,13 +213,13 @@ export const LAND_BETRIEBE = {
   schaeferei: { n: 'Schäferei', auf: 'weide', forschung: 'weberei', kosten: { holz: 20 }, erzeugt: { wolle: 2 }, modell: 'huette',
     text: 'Hirten scheren die Schafe der feuchten Wiesen. Die Wolle geht an die Weberei.' },
   kastell:    { n: 'Kastell', auf: 'hang', unterhalt: 6, kosten: { holz: 60, ziegel: 40, denare: 80 }, erzeugt: {}, modell: '',
-    text: 'Eine Besatzung auf den Hügeln hält die Gallier ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
+    text: 'Eine Besatzung auf den Hügeln hält die {feind} ab und vertreibt Räuber im Umkreis von 2 Feldern.' },
 };
 
 // Gefahren (S2.6). Schutzbauten als Zusatz auf vermessenem Land (wie der Feldweg)
 export const SCHUTZ = {
   turm:  { n: 'Wachturm', unterhalt: 1, kosten: { holz: 25, ziegel: 10 }, text: 'Wächter halten Räuber fern – auf diesem Feld und den Feldern daneben.' },
-  deich: { n: 'Deich', kosten: { holz: 10, lehm: 15 }, text: 'Schützt das Feld vor dem Hochwasser des Padus im Frühling.' },
+  deich: { n: 'Deich', kosten: { holz: 10, lehm: 15 }, text: 'Schützt das Feld vor dem Hochwasser im Frühling.' },
 };
 // ab = erster Spielmonat, monat = Monat im Jahr (0 = erster Frühlingsmonat), chance je Gelegenheit, monate = Ausfall
 export const GEFAHR = {
@@ -268,7 +268,7 @@ export const AUFTRAEGE = [
   { n: 'Schütze die Stadt: Baue eine Feuerwache.', ok: S => anzahl(S, 'wache') >= 1, lohn: { denare: 80, ziegel: 20 } },
   { n: 'Werde eine Kleinstadt mit 120 Einwohnern.', ok: S => (S.rang || 0) >= 2, lohn: { denare: 200 } },
   { n: 'Baue eine Latrine und lass eine Casa zur Insula aufstocken.', ok: S => anzahl(S, 'latrine') >= 1 && S.geb.some(b => b.t === 'huette' && b.stufe === 3), lohn: { denare: 150, stein: 20 } },
-  { n: 'Führe Cremona in die Späte Republik (Forschungsseite).', ok: S => (S.epoche || 1) >= 2, lohn: { denare: 250 } },
+  { n: 'Führe {stadt} in die Späte Republik (Forschungsseite).', ok: S => (S.epoche || 1) >= 2, lohn: { denare: 250 } },
   { n: 'Lass einen Valerier zum Ädil wählen (Knopf „Familie“).', ok: S => !!S.familie && S.familie.amt >= 1, lohn: { denare: 200 } },
   { n: 'Errichte die Basilika am Forum.', ok: S => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)), lohn: { denare: 300 } },
   { n: 'Werde eine Kolonie mit 300 Einwohnern.', ok: S => (S.rang || 0) >= 3, lohn: { denare: 400 } },
@@ -293,7 +293,7 @@ export const FORSCHUNG = {
   weinbau:        { n: 'Weinbau', zweig: 0, ep: 2, kosten: 80, text: 'Weinberge an den Hängen und Kelter in der Stadt. Wein brauchen die Equites.' },
   olivenpresse:   { n: 'Olivenpresse', zweig: 0, ep: 2, kosten: 90, text: 'Olivenhaine an den Hängen und Ölmühle: Equites mit Öl zahlen mehr.' },
   weberei:        { n: 'Weberei', zweig: 1, ep: 2, kosten: 80, text: 'Schäfereien auf den Weiden und Weberei: Tuch für Casa und Insula.' },
-  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, text: 'Fischsoße aus Padus-Fisch: teuer im Handel, Luxus für die Equites.' },
+  garum:          { n: 'Garum-Siederei', zweig: 1, ep: 2, kosten: 90, text: 'Fischsoße aus eigenem Fisch: teuer im Handel, Luxus für die Equites.' },
   roemerstrasse:  { n: 'Römerstraße', zweig: 2, ep: 2, kosten: 100, braucht: 'schotter', text: 'Gepflasterte Wege: Karren dreimal so schnell, Räuber halb so oft.' },
   aquaedukt:      { n: 'Aquädukt', zweig: 2, ep: 2, kosten: 120, text: 'Wasser aus den Hügeln: Brunnen reichen 12 statt 7 Felder, weniger Brände, Thermen bauen.' },
   archiv:         { n: 'Archiv', zweig: 3, ep: 2, kosten: 80, text: 'Verträge mit den Nachbarstädten: Händler nehmen nur 8 statt 15 % Aufschlag.' },
@@ -335,19 +335,19 @@ export const AEMTER = [
 ];
 export const RIVALEN = [
   { gens: 'Fabii', n: 'Fabier', ansehen: 22, wachstum: 0.6, text: 'Alte Grundbesitzer, stolz und vorsichtig.' },
-  { gens: 'Sempronii', n: 'Sempronier', ansehen: 14, wachstum: 0.75, text: 'Händlerfamilie mit Freunden in Placentia.' },
+  { gens: 'Sempronii', n: 'Sempronier', ansehen: 14, wachstum: 0.75, text: 'Händlerfamilie mit Freunden in {west}.' },
 ];
 // Heirat (S4.2). Tochter: Die Familie zahlt die Mitgift (dos) und gewinnt ein Bündnis. Sohn: Die Braut bringt die Mitgift mit.
 export const HEIRAT = {
   tochter: [
     { id: 'fabii', n: 'Gnaeus Fabius', haus: 'Fabier', mitgift: 200, bund: 'Fabii', text: 'Bündnis: Die Fabier treten bei Wahlen nicht mehr gegen euch an.' },
     { id: 'sempronii', n: 'Tiberius Sempronius', haus: 'Sempronier', mitgift: 150, bund: 'Sempronii', text: 'Bündnis: Die Sempronier treten nicht mehr gegen euch an und öffnen ihre Handelskontakte (Aufschlag −5 %).' },
-    { id: 'annii', n: 'Titus Annius', haus: 'Kaufmann aus Placentia', mitgift: 80, text: 'Gemeinsame Geschäfte mit Placentia: 3 Denare im Monat für das Familienvermögen.' },
+    { id: 'annii', n: 'Titus Annius', haus: 'Kaufmann aus {west}', mitgift: 80, text: 'Gemeinsame Geschäfte mit {west}: 3 Denare im Monat für das Familienvermögen.' },
   ],
   sohn: [
     { id: 'fabia', n: 'Fabia', haus: 'Fabier', mitgift: 120, bund: 'Fabii', text: 'Sie bringt eine Mitgift von 120 Denaren und das Bündnis mit den Fabiern.' },
     { id: 'sempronia', n: 'Sempronia', haus: 'Sempronier', mitgift: 150, bund: 'Sempronii', text: 'Sie bringt 150 Denare und das Bündnis mit den Sempronieren.' },
-    { id: 'annia', n: 'Annia', haus: 'Kaufmannsfamilie aus Placentia', mitgift: 250, text: 'Eine reiche Mitgift von 250 Denaren, aber kein politisches Bündnis.' },
+    { id: 'annia', n: 'Annia', haus: 'Kaufmannsfamilie aus {west}', mitgift: 250, text: 'Eine reiche Mitgift von 250 Denaren, aber kein politisches Bündnis.' },
   ],
   alterTochter: 14, alterSohn: 18, kindChance: 0.35,
 };
@@ -356,7 +356,7 @@ export const KLIENTEN = { kosten: 1.5, ansehen: 0.06, schritt: 5, grund: 10, jeR
 // Ausbildung des Sohnes (S4.2) ab 14 Jahren, 36 Monate
 export const AUSBILDUNG = {
   rhetor: { n: 'Rhetorenschule', kosten: 100, monate: 36, eig: 'Redner', text: 'Lernt bei einem griechischen Rhetor: Ansehen wächst 20 % schneller.' },
-  militaer: { n: 'Militärdienst', kosten: 0, monate: 36, eig: 'Veteran', text: 'Dient in einer Legion: Gallier fallen nur halb so oft ein.' },
+  militaer: { n: 'Militärdienst', kosten: 0, monate: 36, eig: 'Veteran', text: 'Dient in einer Legion: {feind} fallen nur halb so oft ein.' },
 };
 export const FAMILIE = {
   geschaeftMax: 3, geschaeftGewinn: 4, gerede: 3,   // ab 3 Familiengeschäften: Gunst −1 im Monat
@@ -383,7 +383,7 @@ export const EREIGNISSE = [
     text: 'Ein Händler aus Ariminum bietet eine Schiffsladung Weizen an – teuer, aber sofort.',
     wahl: [{ t: '60 Getreide für 90 Denare kaufen', w: { gut: { denare: -90, getreide: 60 } } }, { t: 'Ablehnen', w: {} }] },
   { id: 'fieber', titel: 'Fieber in den Gassen', bild: 'seuche', ab: 12, wenn: S => S.geb.reduce((s, b) => s + (b.bew || 0), 0) >= 80,
-    text: 'Aus den Sümpfen am Padus zieht ein Fieber in die dichten Viertel. Die ersten Familien liegen krank.',
+    text: 'Aus den Sümpfen am {fluss} zieht ein Fieber in die dichten Viertel. Die ersten Familien liegen krank.',
     wahl: [{ t: 'Griechische Ärzte holen', w: { gut: { denare: -60 }, leute: -0.02 } }, { t: 'Apollo ein Opfer bringen', w: { gut: { denare: -20 }, stimmung: 3, leute: -0.06 } }, { t: 'Abwarten', w: { leute: -0.1, stimmung: -6 } }] },
   { id: 'unruhe', titel: 'Murren auf dem Markt', bild: 'volk', ab: 6, wenn: S => S.stimmung < 45,
     text: 'Plebejer versammeln sich auf dem Markt. Sie klagen über Preise, Hunger und die Herren im Rat.',
@@ -408,7 +408,7 @@ export const EREIGNISSE = [
     text: 'Im Frühling ehrt die Stadt Ceres, die Göttin des Getreides. Die Bauern hoffen auf ihren Segen für die Aussaat.',
     wahl: [{ t: 'Ein großes Fest mit Opfern und Umzug', w: { gut: { getreide: -15, denare: -20 }, stimmung: 8, ansehen: 2 } }, { t: 'Ein schlichtes Opfer', w: { gut: { getreide: -5 }, stimmung: 3 } }, { t: 'Dieses Jahr ausfallen lassen', w: { stimmung: -4 } }] },
   { id: 'ludi', jaehrlich: 6, titel: 'Ludi Romani', bild: 'spiele',
-    text: 'Im Herbst feiert ganz Rom die Römischen Spiele zu Ehren Jupiters. Auch in Cremona erwarten die Bürger Wettläufe und Theater.',
+    text: 'Im Herbst feiert ganz Rom die Römischen Spiele zu Ehren Jupiters. Auch in {stadt} erwarten die Bürger Wettläufe und Theater.',
     wahl: [{ t: 'Prächtige Spiele aus der Stadtkasse', w: { gut: { denare: -60 }, stimmung: 10 } }, { t: 'Die Familie bezahlt die Spiele', w: { vermoegen: -50, stimmung: 8, ansehen: 6 } }, { t: 'Nur ein Opfer am Altar', w: { stimmung: -2 } }] },
   { id: 'saturnalia', jaehrlich: 9, titel: 'Saturnalien', bild: 'volk',
     text: 'Im Dezember steht die Welt Kopf: Sklaven sitzen mit ihren Herren an einem Tisch, man beschenkt sich mit Kerzen und Tonfiguren.',
@@ -460,21 +460,21 @@ export const SEUCHE = { ab: 12, basis: 0.0008, dichte: 0.2, umkreis: 4, insula: 
 // Inschriften auf dem Forum (1.11.): Erfolge, einmal je Spiel. ok(S, sim) prüft monatlich.
 export const INSCHRIFTEN = [
   { id: 'casa', n: 'Die erste Casa', text: 'Aus Lehm wurde Ziegel: die erste Casa der Kolonie.', ok: (S) => S.geb.some(b => b.t === 'huette' && b.stufe >= 2) },
-  { id: 'dorf', n: 'Ein Dorf am Padus', text: 'Vierzig Seelen leben in Cremona.', ok: (S, sim) => sim.rang(S) >= 1 },
+  { id: 'dorf', n: 'Ein Dorf am {fluss}', text: 'Vierzig Seelen leben in {stadt}.', ok: (S, sim) => sim.rang(S) >= 1 },
   { id: 'kleinstadt', n: 'Eine Kleinstadt', text: 'Hundertzwanzig Bürger zählt der Census.', ok: (S, sim) => sim.rang(S) >= 2 },
-  { id: 'kolonie', n: 'Eine blühende Kolonie', text: 'Dreihundert Bürger – Cremona zählt in Rom.', ok: (S, sim) => sim.rang(S) >= 3 },
-  { id: 'metropole', n: 'Metropole der Po-Ebene', text: 'Achthundert Bürger. Selbst Placentia blickt neidisch.', ok: (S, sim) => sim.rang(S) >= 4 },
+  { id: 'kolonie', n: 'Eine blühende Kolonie', text: 'Dreihundert Bürger – {stadt} zählt in Rom.', ok: (S, sim) => sim.rang(S) >= 3 },
+  { id: 'metropole', n: 'Metropole {ebeneGen}', text: 'Achthundert Bürger. Selbst {west} blickt neidisch.', ok: (S, sim) => sim.rang(S) >= 4 },
   { id: 'insula', n: 'Mietshäuser', text: 'Die erste Insula erhebt sich über die Dächer.', ok: (S) => S.geb.some(b => b.t === 'huette' && b.stufe === 3) },
   { id: 'erfindung', n: 'Wissen ist Macht', text: 'Fünf Erfindungen hat die Stadt gemacht.', ok: (S) => ((S.forschung || {}).fertig || []).length >= 5 },
-  { id: 'republik', n: 'Die Späte Republik', text: 'Eine neue Zeit beginnt für Cremona.', ok: (S) => (S.epoche || 1) >= 2 },
-  { id: 'aedil', n: 'Ädil von Cremona', text: 'Das Volk wählte einen Valerier zum Ädil.', ok: (S) => (S.familie || {}).amt >= 1 },
+  { id: 'republik', n: 'Die Späte Republik', text: 'Eine neue Zeit beginnt für {stadt}.', ok: (S) => (S.epoche || 1) >= 2 },
+  { id: 'aedil', n: 'Ädil von {stadt}', text: 'Das Volk wählte einen Valerier zum Ädil.', ok: (S) => (S.familie || {}).amt >= 1 },
   { id: 'praetor', n: 'Prätor', text: 'Recht und Ordnung liegen in der Hand der Valerier.', ok: (S) => (S.familie || {}).amt >= 2 },
   { id: 'kasse', n: 'Volle Kasse', text: 'Tausend Denare liegen in der Stadtkasse.', ok: (S) => S.gut.denare >= 1000 },
-  { id: 'handel', n: 'Händler am Tor', text: 'Die erste Ladung ging nach Placentia oder Mantua.', ok: (S) => (S.zaehler || {}).handel >= 1 },
+  { id: 'handel', n: 'Händler am Tor', text: 'Die erste Ladung ging nach {west} oder {ost}.', ok: (S) => (S.zaehler || {}).handel >= 1 },
   { id: 'umland', n: 'Herr des Umlands', text: 'Zehn Felder im Umland sind vermessen.', ok: (S) => Object.keys(S.land || {}).length >= 10 },
   { id: 'basilika', n: 'Die Basilika', text: 'Das Wahrzeichen am Forum ist eröffnet.', ok: (S) => S.geb.some(b => b.t === 'basilika' && !(b.bau > 0)) },
-  { id: 'gehalten', n: 'Cremona hielt stand', text: 'Die Gallier stürmten vergeblich gegen die Mauern.', ok: (S) => (S.zaehler || {}).belagerung === 'gehalten' },
-  { id: 'zehn', n: 'Zehn Jahre Cremona', text: 'Seit zehn Jahren steht die Kolonie am Padus.', ok: (S) => S.monat >= 122 },
+  { id: 'gehalten', n: '{stadt} hielt stand', text: 'Die Feinde stürmten vergeblich gegen die Mauern.', ok: (S) => Object.values(S.zaehler || {}).includes('gehalten') },
+  { id: 'zehn', n: 'Zehn Jahre {stadt}', text: 'Seit zehn Jahren steht die Kolonie am {fluss}.', ok: (S) => S.monat >= 122 },
 ];
 
 // Zeitleiste der Geschichte (Phase B, 1.11.): Wendepunkte als Prüfung der Stadt, Vorwarnung 24 Monate vorher.
@@ -522,8 +522,8 @@ export const LAGE = { gut: 4, hoch: 8, domus: 4, steuer: 0.2 };   // Domus brauc
 
 // Ruf der Stadt (Phase D): einmal ab der Kleinstadt wählbar
 export const RUF = {
-  kornkammer: { n: 'Kornkammer der Po-Ebene', text: 'Getreide und Brot +15 %, Abgaben an Rom −20 % (Rom braucht Getreide).' },
-  handel: { n: 'Handelsstadt am Padus', text: 'Händler nehmen 5 % weniger Aufschlag, Zoll: 5 Denare im Monat je offener Handelsstraße.' },
+  kornkammer: { n: 'Kornkammer {ebeneGen}', text: 'Getreide und Brot +15 %, Abgaben an Rom −20 % (Rom braucht Getreide).' },
+  handel: { n: 'Handelsstadt am {fluss}', text: 'Händler nehmen 5 % weniger Aufschlag, Zoll: 5 Denare im Monat je offener Handelsstraße.' },
   handwerk: { n: 'Stadt der Werkstätten', text: 'Alle Handwerksbetriebe arbeiten 15 % schneller.' },
 };
 // Lieferverträge (Phase D): monatlich 5 Einheiten zu festem Preis (95 % des Grundpreises), höchstens 3; dreimal nicht geliefert → Bruch
@@ -531,16 +531,16 @@ export const VERTRAG = { menge: 5, preis: 0.95, max: 3, fehlschlag: 3, ansehen: 
 
 // Spielbare Regionen (Phase E, 1.11.): Namen, Startjahr, Gelände, Partner, Feinde, Startvorrat. Geschichte (Hannibal usw.) nur Po.
 export const REGION_DATEN = {
-  po: { stadt: 'Cremona', jahr0: -218, fluss: 'Padus', flussText: 'Der Fluss Padus, schiffbar bis zur Adria.', west: 'Placentia', westText: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.',
+  po: { stadt: 'Cremona', ebeneGen: 'der Po-Ebene', jahr0: -218, fluss: 'Padus', flussText: 'Der Fluss Padus, schiffbar bis zur Adria.', west: 'Placentia', westText: 'Schwesterkolonie flussaufwärts, im selben Jahr gegründet wie Cremona.',
     ost: 'Mantua', ostText: 'Alte etruskische Stadt in den Sümpfen des Mincius. Ihre Schmiede kaufen Erz und verkaufen Werkzeug.',
     feind: 'Gallier', dorf: 'Dorf der Insubrer', dorfText: 'Ein keltisches Dorf hinter Palisaden. Die Insubrer haben Rom nicht vergessen, dass es ihr Land nahm.', start: {} },
-  etrurien: { stadt: 'Florentia', jahr0: -59, fluss: 'Arnus', flussText: 'Der Arnus fließt durch das Tal nach Pisae und ins Meer.', west: 'Pisae', westText: 'Hafenstadt an der Mündung des Arnus.',
+  etrurien: { stadt: 'Florentia', ebeneGen: 'Etruriens', jahr0: -59, fluss: 'Arnus', flussText: 'Der Arnus fließt durch das Tal nach Pisae und ins Meer.', west: 'Pisae', westText: 'Hafenstadt an der Mündung des Arnus.',
     ost: 'Arretium', ostText: 'Etruskische Stadt der Töpfer – berühmt für rotes Tafelgeschirr. Kauft Erz und verkauft Werkzeug.',
     feind: 'Räuberbanden', dorf: 'Räubernest im Apennin', dorfText: 'Entlaufene Sklaven und verarmte Bauern hausen in den Bergen.', start: { stein: 40 }, welt: { flussZ: 35.5, wald: [[12, 26, 3], [6, 18, 2.5]] }, hang: true },
-  kampanien: { stadt: 'Puteoli', jahr0: -194, fluss: 'Golf von Puteoli', flussText: 'Das Meer am Golf – Fischgründe und Hafen.', west: 'Neapolis', westText: 'Griechische Stadt am Golf, reich an Wein und Kunst.',
+  kampanien: { stadt: 'Puteoli', ebeneGen: 'Kampaniens', jahr0: -194, fluss: 'Golf von Puteoli', flussText: 'Das Meer am Golf – Fischgründe und Hafen.', west: 'Neapolis', westText: 'Griechische Stadt am Golf, reich an Wein und Kunst.',
     ost: 'Capua', ostText: 'Reiche Stadt im fruchtbaren Hinterland. Kauft Erz und verkauft Werkzeug.',
     feind: 'Seeräuber', dorf: 'Seeräuberbucht', dorfText: 'Kilikische Piraten ankern in einer versteckten Bucht.', start: { fisch: 30 }, welt: { flussZ: 32.5 }, meer: true },
-  apulien: { stadt: 'Luceria', jahr0: -314, fluss: 'Bach Celone', flussText: 'Ein Bach, der im Sommer fast versiegt.', west: 'Arpi', westText: 'Alte daunische Stadt in der Ebene.',
+  apulien: { stadt: 'Luceria', ebeneGen: 'Apuliens', jahr0: -314, fluss: 'Bach Celone', flussText: 'Ein Bach, der im Sommer fast versiegt.', west: 'Arpi', westText: 'Alte daunische Stadt in der Ebene.',
     ost: 'Venusia', ostText: 'Latinische Kolonie an der Straße nach Süden. Kauft Erz und verkauft Werkzeug.',
     feind: 'Samniten', dorf: 'Lager der Samniten', dorfText: 'Die Samniten kämpfen um ihre Berge – und um Luceria.', start: { getreide: 80, holz: 100 }, welt: { flussZ: 38.2, wenigWald: true }, duerre: true },
 };
