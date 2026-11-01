@@ -594,7 +594,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { fehler, ...ok, kapitel };
   });
   ok('Alter Spielstand aus Stufe 1 läuft weiter (Familie, Waren, Drehung ergänzt)', !alt.fehler.length && alt.monat === 33 && alt.familie && alt.fisch && alt.dreh, JSON.stringify(alt));
-  ok('Hilfe in 8 Kapiteln', alt.kapitel === 8);
+  ok('Hilfe in 9 Kapiteln (mit Regionen)', alt.kapitel === 9);
   const th = await p.evaluate(() => {
     const sim = SR.sim, T = JSON.parse(JSON.stringify(SR.S)); T.ereignisseAus = true; T.epoche = 2;
     const vor = sim.bauen(T, SR.welt, 'thermen', 30, 13).grund || '';
