@@ -340,7 +340,8 @@ function infoZeichnen() {
     const u = sim.ursache(S, b); if (u) html += `<div class="ursache"><b>Ursache:</b> ${u}</div>`;
   }
   if (d.arbeiter) {
-    html += `<div class="zeile"><span>Arbeiter</span><b>${b.w} / ${d.arbeiter}</b></div>`;
+    const soll = b.soll ?? d.arbeiter;   // Arbeiter von Hand verteilen (1.11., wie Manor Lords)
+    html += `<div class="zeile arbeiterwahl"><span>Arbeiter <small>(arbeiten / zugeteilt)</small></span><b><button class="mini" data-a="soll-"${soll <= 0 ? ' disabled' : ''} aria-label="Weniger Arbeiter">−</button> ${b.w} / ${soll} <button class="mini" data-a="soll+"${soll >= d.arbeiter ? ' disabled' : ''} aria-label="Mehr Arbeiter">+</button></b></div>${soll < d.arbeiter ? `<p class="fp">${soll === 0 ? 'Stillgelegt – die Arbeiter gehen in andere Betriebe.' : `Auf ${soll} von ${d.arbeiter} begrenzt – die übrigen arbeiten anderswo.`} Gilt ab dem nächsten Monat.</p>` : ''}`;
     html += `<div class="zeile"><span>Häuser in Laufweite (${sim.EINZUG} Felder)</span><b>${b.einzug ?? '–'}</b></div>`;
     html += `<div class="zeile"><span>Freie Arbeitskräfte in der Stadt</span><b>${S.letzte.arbeitslos ?? 0}${S.letzte.sklavenFrei ? ' + ' + S.letzte.sklavenFrei + ' Sklaven' : ''}</b></div>`;
     html += `<div class="zeile"><span>Sklaven</span><b>${d.sklaven ? 'arbeiten hier' : 'nicht hier'}</b></div>`;
@@ -449,6 +450,7 @@ $('#info').addEventListener('click', e => {
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
+  if (a.dataset.a === 'soll-' || a.dataset.a === 'soll+') { const max = GEB[b.t].arbeiter; b.soll = Math.max(0, Math.min(max, (b.soll ?? max) + (a.dataset.a === 'soll+' ? 1 : -1))); if (b.soll === max) delete b.soll; ton.sfx('klick'); infoZeichnen(); }
   if (a.dataset.a === 'familie') { const r = sim.familienGeschaeft(S, b); melden(r.ok ? r.text : r.grund); if (!r.ok) ton.sfx('fehler'); infoZeichnen(); kopfleiste(); }
   if (a.dataset.a === 'kaufen' || a.dataset.a === 'frei') {
     const r = a.dataset.a === 'kaufen' ? sim.sklavenKaufen(S, b) : sim.freilassen(S, b);

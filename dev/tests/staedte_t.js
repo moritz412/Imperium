@@ -810,6 +810,12 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const sprung = document.querySelector('#info [data-ziel]'); let offen = false; if (sprung) { sprung.click(); offen = !document.querySelector('#info').hidden && /Getreidefeld|Mühle|Gehöft/.test(document.querySelector('#info h2').textContent); }
     SR.oeffne(0); return { titel: /Getreide/.test(t), her: /Hergestellt in/.test(t), feld: /Getreidefeld/.test(t), weg: /Gebraucht von/.test(t), offen, delta: SR.S.delta && 'getreide' in SR.S.delta }; });
   ok('Warenfenster: Herkunft, Verbraucher, Sprung zum Betrieb, Bilanz', wf.titel && wf.her && wf.feld && wf.weg && wf.offen && wf.delta, JSON.stringify(wf));
+  const av = await p.evaluate(() => { const sim = SR.sim, S = SR.S, B = JSON.parse(JSON.stringify(S)); B.ereignisseAus = true;
+    const f = B.geb.find(b => b.t === 'feld' && b.w > 0); const id = f.id; f.soll = 1; sim.monat(B, SR.welt); const g1 = B.geb.find(b => b.id === id);
+    const begrenzt = g1.w === 1; g1.soll = 0; sim.monat(B, SR.welt); const g2 = B.geb.find(b => b.id === id); const still = g2.w === 0 && g2.status.some(s => s.art === 'still');
+    const echt = S.geb.find(b => b.t === 'feld'); SR.oeffne(echt.id); document.querySelector('#info [data-a="soll-"]').click(); const ui = echt.soll === SR.GEB.feld.arbeiter - 1 && /zugeteilt/.test(document.querySelector('#info').innerText);
+    document.querySelector('#info [data-a="soll+"]').click(); const zurueck = echt.soll === undefined; SR.oeffne(0); return { begrenzt, still, ui, zurueck }; });
+  ok('Arbeiter von Hand verteilen: begrenzen, stilllegen, − und + im Fenster', av.begrenzt && av.still && av.ui && av.zurueck, JSON.stringify(av));
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 4).join(' | '));
   console.log(`STAEDTE ${R.filter(Boolean).length}/${R.length}`);
   await b.close();

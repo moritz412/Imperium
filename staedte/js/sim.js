@@ -290,7 +290,7 @@ export function monat(S, welt) {
   const baustellen = S.geb.filter(b => b.bau > 0).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   const betriebe = S.geb.filter(b => GEB[b.t].arbeiter && !(b.bau > 0)).sort((a, b) => (b.prio - a.prio) || (a.id - b.id));
   for (const b of [...baustellen, ...betriebe]) {
-    const bau = b.bau > 0, brauch = bau ? bauarbeiter(b.t) : GEB[b.t].arbeiter;
+    const bau = b.bau > 0, brauch = bau ? bauarbeiter(b.t) : Math.min(GEB[b.t].arbeiter, b.soll ?? GEB[b.t].arbeiter);   // b.soll: von Hand begrenzt (1.11.)
     const nah = wohnorte.filter(x => abstand(x.h, b) <= EINZUG && (!x.skl || bau || GEB[b.t].sklaven) && (!x.lager || bau));
     let n0 = 0; b.w = 0; b.bw = 0; b.von = []; b.einzug = nah.length;
     for (const x of nah.filter(x => x.frei > 0).sort((p, q) => (q.skl ? 1 : 0) - (p.skl ? 1 : 0) || abstand(p.h, b) - abstand(q.h, b))) {
@@ -320,8 +320,9 @@ export function monat(S, welt) {
     if (b.unbezahlt) { b.status.push({ art: 'arbeiter', text: `Kein Geld für den Lohn (${d.unterhalt} Denare)` }); continue; }
     if (!d.arbeiter) continue;
     const anteil = b.w / d.arbeiter;
+    if (b.soll === 0) { b.status.push({ art: 'still', text: 'Stillgelegt – keine Arbeiter zugeteilt', leicht: true }); continue; }
     if (b.w === 0) { b.status.push({ art: 'arbeiter', text: b.einzug === 0 ? 'Keine Häuser in Laufweite' : 'Keine Arbeiter' }); continue; }
-    if (b.w < d.arbeiter) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${d.arbeiter} Arbeitern`, leicht: true });
+    if (b.w < Math.min(d.arbeiter, b.soll ?? d.arbeiter)) b.status.push({ art: 'arbeiter', text: `Nur ${b.w} von ${Math.min(d.arbeiter, b.soll ?? d.arbeiter)} Arbeitern`, leicht: true });
     if (d.wald && !waldNah(welt, b)) { b.status.push({ art: 'wald', text: 'Kein Wald in der Nähe' }); continue; }
     if (!d.erzeugt) continue;
     let faktor = anteil * (d.ernte ? JAHRESZEITEN[js].ernte : 1);

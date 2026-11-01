@@ -368,7 +368,7 @@ export function erzeugeSzene(leinwand, welt) {
   }
 
   // Problem-Symbole als Sprite (gezeichnet, keine Schrift)
-  const FARBE = { krank: '#9ccb8e', brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
+  const FARBE = { still: '#a89f8f',  krank: '#9ccb8e', brand: '#f2683a', arbeiter: '#e8a33a', rohstoff: '#e8a33a', voll: '#c9bba4', wald: '#9ccb8e', hunger: '#f28c6e', wasser: '#7fb6e0', markt: '#e9b44c', winter: '#dfe6ee' };
   function symbol(art) {
     if (symbolTex.has(art)) return symbolTex.get(art);
     const c = document.createElement('canvas'); c.width = c.height = 64;
@@ -379,6 +379,7 @@ export function erzeugeSzene(leinwand, welt) {
     x.strokeStyle = '#1f1a15'; x.fillStyle = '#1f1a15'; x.lineWidth = 3.5; x.lineCap = 'round'; x.lineJoin = 'round';
     x.beginPath();
     if (art === 'arbeiter') { x.arc(32, 22, 6, 0, Math.PI * 2); x.moveTo(20, 42); x.quadraticCurveTo(32, 26, 44, 42); }
+    else if (art === 'still') { x.moveTo(26, 18); x.lineTo(26, 42); x.moveTo(38, 18); x.lineTo(38, 42); }   // stillgelegt: Pause
     else if (art === 'wasser') { x.moveTo(32, 14); x.quadraticCurveTo(46, 32, 42, 38); x.arc(32, 36, 10, 0.2, Math.PI - 0.2); x.quadraticCurveTo(18, 32, 32, 14); }
     else if (art === 'rohstoff') { x.moveTo(26, 16); x.lineTo(38, 16); x.lineTo(35, 22); x.quadraticCurveTo(46, 30, 42, 40); x.lineTo(22, 40); x.quadraticCurveTo(18, 30, 29, 22); x.closePath(); }
     else if (art === 'voll') { x.rect(20, 18, 24, 22); x.moveTo(20, 26); x.lineTo(44, 26); }
