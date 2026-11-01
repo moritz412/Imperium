@@ -575,7 +575,33 @@ export function erzeugeSzene(leinwand, welt) {
     geist.traverse(m => { if (m.isMesh) m.material.emissive && m.material.emissive.setHex(gueltig ? 0x1e5a1e : 0x7a1e1e); });
   }
 
-  function jahreszeitFarbe(js) { bodenMat.color.setHex(JAHRESZEITEN[js].boden); }
+  function jahreszeitFarbe(js) { bodenMat.color.setHex(JAHRESZEITEN[js].boden); wetterSetzen(js); }
+  // Wetter (1.11.): Schnee im Winter, Regen im Frühling, Blätter im Herbst – ein Points-Objekt um den Blickpunkt
+  const WN = 700, wPos = new Float32Array(WN * 3), wGeo = new THREE.BufferGeometry();
+  for (let i = 0; i < WN; i++) { wPos[i * 3] = (Math.random() - 0.5) * 60; wPos[i * 3 + 1] = Math.random() * 20; wPos[i * 3 + 2] = (Math.random() - 0.5) * 60; }
+  wGeo.setAttribute('position', new THREE.BufferAttribute(wPos, 3));
+  const wMat = new THREE.PointsMaterial({ color: 0xffffff, size: 3, sizeAttenuation: false, transparent: true, opacity: 0.8, depthWrite: false });
+  const wetter = new THREE.Points(wGeo, wMat); wetter.frustumCulled = false; wetter.visible = false; szene.add(wetter);
+  let wArt = '', wetterAn = true;
+  const WETTER = { 3: { farbe: 0xffffff, size: 3, fall: 1.6, wind: 0.4, op: 0.85 }, 0: { farbe: 0xa8c4dc, size: 2, fall: 14, wind: 1.5, op: 0.55 }, 2: { farbe: 0xc8742a, size: 4, fall: 1.2, wind: 1.8, op: 0.9, wenige: true } };
+  function wetterSetzen(js) {
+    const w = WETTER[js]; wArt = w ? js : ''; wetter.visible = !!w && wetterAn;
+    if (w) { wMat.color.setHex(w.farbe); wMat.size = w.size; wMat.opacity = w.op; wGeo.setDrawRange(0, w.wenige ? 90 : WN); }
+  }
+  function wetterSchalten(an) { wetterAn = an; wetter.visible = an && wArt !== ''; }
+  function wetterBewegen(dt) {
+    if (!wetter.visible) return;
+    const w = WETTER[wArt], t = performance.now() / 1000;
+    for (let i = 0; i < WN; i++) {
+      let y = wPos[i * 3 + 1] - w.fall * dt * (0.7 + (i % 7) / 10);
+      wPos[i * 3] += (w.wind + Math.sin(t + i) * 0.3) * dt;
+      if (y < 0) { y += 20; wPos[i * 3] = (Math.random() - 0.5) * 60; wPos[i * 3 + 2] = (Math.random() - 0.5) * 60; }
+      if (wPos[i * 3] > 30) wPos[i * 3] -= 60;
+      wPos[i * 3 + 1] = y;
+    }
+    wGeo.attributes.position.needsUpdate = true;
+    wetter.position.set(ziel.x, 0, ziel.z);
+  }
 
   // Kamera
   function groesseAnpassen() {
@@ -854,7 +880,7 @@ export function erzeugeSzene(leinwand, welt) {
   let zeit = 0;
   function zeichnen(dt, laufTempo = 1) {
     zeit += dt;
-    laufen(dt * laufTempo);
+    laufen(dt * laufTempo); wetterBewegen(dt * Math.max(0.3, Math.min(1, laufTempo || 0.3)));
     if (modus === 'region') karrenFahren(dt * laufTempo);
     gruppe.traverse(o => { if (o.userData.dreht) o.rotation.z += dt * 0.8; if (o.userData.drehY) o.rotation.y += dt * o.userData.drehY;
       if (o.userData.flamme !== undefined) o.scale.y = 0.75 + 0.35 * Math.abs(Math.sin(zeit * 9 + o.userData.flamme * 1.7)); });
@@ -872,5 +898,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

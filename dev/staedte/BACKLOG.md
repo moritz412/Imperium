@@ -255,6 +255,9 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
 - [x] Rat des Verwalters (unter dem Senatsauftrag): das dringendste Problem mit Vorschlag – Vorräte < 3 Monate (außer kurz vor
       der Ernte), leere Kasse, Betriebe ohne Arbeiter (Häuser zu weit vs. zu wenig Arbeitskräfte), Holz < 15, Häuser ohne
       Brunnen, ≥ 10 Arbeitslose, Stimmung < 45, alle Häuser voll. Test 80/80.
+- [x] Wetter je Jahreszeit (ein Points-Objekt, 1 Draw-Call): Schnee im Winter, Regen im Frühling, Blätter im Herbst, klar im
+      Sommer; bewegt sich mit dem Spieltempo, Menü „Wetter: an/aus“ (im Browser gemerkt). Test 81/81, Bild Winter angesehen
+      (Schnee eher dezent).
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

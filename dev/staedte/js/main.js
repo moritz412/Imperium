@@ -308,6 +308,7 @@ $('#menue').addEventListener('click', e => {
   if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
   if (m === 'chronik') { $('#menue').hidden = true; chronikZeigen(); return; }
   if (m === 'inschriften') { $('#menue').hidden = true; inschriftenZeigen(); return; }
+  if (m === 'wetter') { wetterAn = !wetterAn; try { localStorage.setItem('staedte_wetter', wetterAn ? '1' : '0'); } catch (e) {} szene.wetterSchalten(wetterAn); tonKnopf(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
   if (m === 'neu') { speichern(true); $('#menue').hidden = true; start.zeigen(); }
@@ -675,7 +676,10 @@ function schleife(jetzt) {
   requestAnimationFrame(schleife);
 }
 const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus';
-  $('#menue [data-m="ereignisse"]').textContent = S.ereignisseAus ? 'Ereignisse: aus' : 'Ereignisse: an'; };
+  $('#menue [data-m="ereignisse"]').textContent = S.ereignisseAus ? 'Ereignisse: aus' : 'Ereignisse: an';
+  $('#menue [data-m="wetter"]').textContent = wetterAn ? 'Wetter: an' : 'Wetter: aus'; };
+let wetterAn = (() => { try { return localStorage.getItem('staedte_wetter') !== '0'; } catch (e) { return true; } })();
+szene.wetterSchalten(wetterAn);
 tonKnopf();
 
 // ---------- Startseite (S1.5) ----------

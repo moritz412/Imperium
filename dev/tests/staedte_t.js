@@ -619,6 +619,9 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { hunger, holz, anzeige: zeile.hidden ? '' : zeile.textContent };
   });
   ok('Rat des Verwalters: Vorräte, Holz', /Vorräte (reichen nur noch|sind aufgebraucht)/.test(rt.hunger) && /Holz wird knapp/.test(rt.holz), JSON.stringify(rt));
+  const wt = await p.evaluate(() => { SR.szene.jahreszeitFarbe(3); const winter = SR.szene.wetterSichtbar(); SR.szene.jahreszeitFarbe(1); const sommer = SR.szene.wetterSichtbar();
+    SR.szene.jahreszeitFarbe(SR.sim.jahreszeit(SR.S)); return { winter, sommer, knopf: !!document.querySelector('#menue [data-m="wetter"]') }; });
+  ok('Wetter: Schnee im Winter, klar im Sommer, Schalter im Menü', wt.winter && !wt.sommer && wt.knopf, JSON.stringify(wt));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang
