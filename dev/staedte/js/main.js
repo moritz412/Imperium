@@ -228,6 +228,7 @@ function infoZeichnen() {
       <div class="zeile"><span>Markt in der Nähe</span><b>${ja(sim.inReichweite(S, b, 'markt'))}</b></div>
       <div class="zeile"><span>Feuerwache in der Nähe</span><b>${ja(sim.wacheNah(S, b))}</b></div>
       <div class="zeile"><span>Latrine in der Nähe</span><b>${ja(sim.latrineNah(S, b))}</b></div>
+      <div class="zeile"><span>Bodenwert (Lage)</span><b>${zahl(sim.bodenwert(S, b))}</b></div>
       <div class="zeile"><span>Seuchengefahr</span><b>${b.krank > 0 ? 'krank' : (p => p < 0.001 ? 'gering' : p < 0.003 ? 'mittel' : 'hoch')(sim.seuchenGefahr(S, b))}</b></div>`;
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
     else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
@@ -237,6 +238,7 @@ function infoZeichnen() {
   if (b.t === 'domus') {
     html += `<div class="zeile"><span>Equites</span><b>${b.bew} / ${sim.wohnraum(b)}</b></div>
       <div class="zeile"><span>Wein im Lager</span><b>${rund(S.gut.wein)}</b></div>
+      <div class="zeile"><span>Lage (Bodenwert, nötig 4)</span><b>${zahl(sim.bodenwert(S, b))}</b></div>
       <div class="zeile"><span>Brunnen / Markt in der Nähe</span><b>${sim.inReichweite(S, b, 'brunnen') ? 'ja' : 'nein'} / ${sim.inReichweite(S, b, 'markt') ? 'ja' : 'nein'}</b></div>
       <div class="zeile"><span>Luxus (Öl, Garum)</span><b>${b.lux > 1.4 ? 'beides' : b.lux > 1.1 ? 'eins davon' : 'nichts'}</b></div>
       <p>Equites zahlen viermal so viel Steuern wie Plebejer, mit Öl und Garum je ein Viertel mehr. Sie trinken jeden Monat Wein (0,1 je Kopf).</p>`;
@@ -666,7 +668,7 @@ function gallierInfo() {
 
 // ---------- Ansichten (S1.4) ----------
 let ansicht = '';
-const ANSICHT_NAME = { gesundheit: 'Gesundheit: Seuchengefahr', feuer: 'Feuer: Brandgefahr', wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
+const ANSICHT_NAME = { bodenwert: 'Bodenwert: Lage', gesundheit: 'Gesundheit: Seuchengefahr', feuer: 'Feuer: Brandgefahr', wasser: 'Wasser', stimmung: 'Stimmung: Versorgung', arbeit: 'Arbeit' };
 function ansichtZeichnen() {
   const d = ansicht ? sim.ansicht(S, welt, ansicht) : null;
   szene.ansicht(d);

@@ -43,7 +43,7 @@ export const JAHRESZEITEN = [
   { n: 'Winter',   boden: 0xc4c8bd, ernte: 0 },
 ];
 
-export const KATEGORIEN = ['Wohnen', 'Nahrung', 'Handwerk', 'Öffentlich'];
+export const KATEGORIEN = ['Wohnen', 'Nahrung', 'Handwerk', 'Öffentlich', 'Schmuck'];
 
 // g = Größe [Breite x, Tiefe z] in Feldern, h = Wandhöhe, flach = nur Bodenfläche
 export const GEB = {
@@ -127,6 +127,14 @@ export const GEB = {
     text: 'Ein Abschnitt der Stadtmauer – durch Ziehen gebaut. Häuser, die die Mauer ganz umschließt, sind bei Überfällen sicher. Fluss und Mauer sperren, Tore lassen Straßen hindurch.' },
   tor: { n: 'Stadttor', kat: 'Öffentlich', g: [1, 1], h: 1.2, wand: 0xcfc4a8, kosten: { ziegel: 12, holz: 6 }, bauarbeiter: 2, bauzeit: 2,
     text: 'Tor in der Stadtmauer. Wird auf eine Straße gebaut: Wagen fahren hindurch, bei Gefahr wird es geschlossen.' },
+  tabernae: { n: 'Läden (tabernae)', kat: 'Öffentlich', g: [2, 1], h: 0.6, wand: 0xd8c4a0, dach: 0xa9583a, kosten: { holz: 15, ziegel: 10 }, arbeiter: 1, reichweite: 8,
+    text: 'Kleine Läden an der Straße: Brot, Öl, Töpfe. Häuser im Umkreis von 8 Feldern gelten als vom Markt versorgt – auch ohne Straßenweg.' },
+  garten: { n: 'Garten', kat: 'Schmuck', g: [2, 2], flach: true, wand: 0x6f9a48, kosten: { holz: 5, denare: 20 }, bodenwert: [3, 5],
+    text: 'Ein gepflegter Garten mit Bäumen und Beeten. Hebt den Bodenwert der Umgebung.' },
+  statue: { n: 'Statue', kat: 'Schmuck', g: [1, 1], h: 0.9, wand: 0xe8e2d4, kosten: { stein: 10, denare: 30 }, bodenwert: [2, 5],
+    text: 'Ein Standbild auf hohem Sockel – für einen verdienten Bürger oder einen Gott. Hebt den Bodenwert.' },
+  platz: { n: 'Platz', kat: 'Schmuck', g: [3, 3], flach: true, wand: 0xd8ccb0, kosten: { stein: 15, ziegel: 10 }, bodenwert: [3, 6],
+    text: 'Gepflasterter Platz. Gilt als Straße und hebt den Bodenwert ringsum.' },
   strasse: { n: 'Straße', kat: 'Öffentlich', g: [1, 1], flach: true, wand: 0xb3a07c,
     kosten: { denare: 2 }, text: 'Pflasterweg. Gebäude brauchen eine Straße vor der Tür, der Markt erreicht Häuser nur über Straßen.' },
 };
@@ -457,4 +465,11 @@ export const GESCHICHTE = [
   { id: 'enteignung', jahr: -41, art: 'wahl', warnung: 'Die Triumvirn suchen Land für ihre Veteranen. Man sagt, Cremona sei auf der Liste.' },
 ];
 export const PRAEFEKT = { monate: 24, steuer: 0.7 };   // Gunst 0 → Rom schickt einen Präfekten
+
+// Bodenwert (Phase D, 1.11.): [Wert, Reichweite] je Gebäudeart; positive Nachbarn heben, laute/stinkende senken.
+export const BODENWERT = {
+  markt: [3, 8], basilika: [4, 10], tempel: [3, 10], brunnen: [1, 5], thermen: [2, 8], theater: [2, 8], schrein: [1, 5], tabernae: [1, 5],
+  ziegelei: [-3, 6], schmiede: [-3, 6], lehmgrube: [-2, 5], garumsiederei: [-4, 6], quartier: [-2, 5], latrine: [-1, 3], muehle: [-1, 4],
+};
+export const LAGE = { gut: 4, hoch: 8, domus: 4, steuer: 0.2 };   // Domus braucht Bodenwert ≥ 4; ab 8 zahlen Häuser 20 % mehr
 

@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, WISSEN_GRUND, EPOCHE2, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -44,7 +44,7 @@ export function neuesSpiel() {
 
 // ---------- Straßen (S1.3) ----------
 export const START_STRASSE = 12;
-export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein', 'latrine', 'mauer', 'tor']);
+export const OHNE_STRASSE = new Set(['strasse', 'brunnen', 'schrein', 'latrine', 'mauer', 'tor', 'garten', 'statue', 'platz']);
 export const ZIEHBAR = new Set(['strasse', 'mauer']);
 export const sklaven = S => S.geb.reduce((s, b) => s + (b.skl || 0), 0);   // brauchen keine Straße vor der Tür
 const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -52,6 +52,7 @@ const NACHBARN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 export function strassenMaske(S) {
   const m = new Uint8Array(RASTER * TIEFE);
   for (const b of S.geb) if (b.t === 'strasse' || (b.t === 'tor' && !(b.bau > 0))) m[b.z * RASTER + b.x] = 1;
+    else if (b.t === 'platz' && !(b.bau > 0)) for (let z = b.z; z < b.z + 3; z++) for (let x = b.x; x < b.x + 3; x++) m[z * RASTER + x] = 1;
   return m;
 }
 // Felder rings um die Grundfläche (ohne Ecken)
@@ -170,6 +171,7 @@ export const abstand = (a, b) => { const p = mitte(a), q = mitte(b); return Math
 export const reichweite = (S, typ) => typ === 'brunnen' && hat(S, 'aquaedukt') ? 12 : GEB[typ].reichweite;
 export function inReichweite(S, b, typ, maske) {
   const d = GEB[typ];
+  if (typ === 'markt' && S.geb.some(o => o.t === 'tabernae' && o.w > 0 && abstand(o, b) <= GEB.tabernae.reichweite)) return true;   // Läden
   if (!d.strassen) return S.geb.some(o => o.t === typ && !(o.bau > 0) && abstand(o, b) <= reichweite(S, typ));
   // über Straßen: Weg vom Versorger bis zu einem Straßenfeld vor dem Haus
   maske = maske || strassenMaske(S);
@@ -332,7 +334,8 @@ export function monat(S, welt) {
     for (const [g, n] of [['oel', 0.05], ['garum', 0.02]]) if (b.bew > 0 && S.gut[g] >= b.bew * n) { S.gut[g] -= b.bew * n; lux += 0.25; }
     if (b.bew > 0 && thermeNah(S, b)) lux += 0.25;
     b.lux = lux;
-    const fehlt = !wasser ? 'Brunnen' : !markt ? 'Markt' : !S.versorgt.brot ? 'Brot' : !wein ? 'Wein' : '';
+    const lage = bodenwert(S, b) >= LAGE.domus;
+    const fehlt = !wasser ? 'Brunnen' : !markt ? 'Markt' : !S.versorgt.brot ? 'Brot' : !wein ? 'Wein' : !lage ? 'guter Lage (Bodenwert ' + LAGE.domus + ')' : '';
     if (fehlt && b.bew === 0) b.status.push({ art: 'markt', text: 'Equites ziehen erst ein mit ' + fehlt, leicht: true });
     else if (!fehlt && b.bew < wohnraum(b) && S.stimmung >= 50) b.bew++;
     equites += b.bew * lux;
@@ -362,7 +365,10 @@ export function monat(S, welt) {
   if (haeuser && schreine.length) ziel += 10 * S.geb.filter(h => h.t === 'huette' && schreine.some(o => abstand(o, h) <= GEB.schrein.reichweite)).length / haeuser;
   S.stimmung += (Math.max(0, Math.min(100, ziel)) - S.stimmung) * 0.3;
   S.gut.denare += (einwohner(S) + equites * 3) * STEUER * (hat(S, 'steuerlisten') ? 1.2 : 1) * 1.1 * (S.stimmung / 70) * (S.praefekt > 0 ? PRAEFEKT.steuer : 1);   // ×1,1: Quästor; Präfekt kassiert mit
-  if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia   // Equites zahlen vierfach
+  if (S.via) S.gut.denare += 6;   // Zoll und Herbergen an der Via Postumia
+  // Lage (Phase D): Häuser in bester Lage zahlen mehr
+  const teuer = S.geb.filter(h => h.t === 'huette' && h.bew > 0 && bodenwert(S, h) >= LAGE.hoch).reduce((n, h) => n + h.bew, 0);
+  S.gut.denare += teuer * STEUER * LAGE.steuer * (S.stimmung / 70);   // Equites zahlen vierfach
   if (hat(S, 'zoelle')) S.gut.denare += 8 * Object.keys(PARTNER).filter(id => handelOffen(S, id)).length;
 
   // Senatsauftrag (Lohn nach Gunst Roms, S2.5)
@@ -472,6 +478,13 @@ function ansichtRoh(S, welt, art) {
       const p = seuchenGefahr(S, h); geb.push([h.id, p < 0.001 ? GRUEN : p < 0.003 ? GELB : ORANGE]);
     }
     return { felder, geb, legende: [[BLAU, 'Latrine erreicht'], [GRUEN, 'gesund'], [GELB, 'mittlere Seuchengefahr'], [ORANGE, 'hohe Seuchengefahr'], [ROT, 'krank']] };
+  }
+  if (art === 'bodenwert') {   // Bodenwert je Haus und Werkstatt
+    for (const b of S.geb) {
+      if (GEB[b.t].flach || b.t === 'mauer' || b.t === 'strasse') continue;
+      const v = bodenwert(S, b); geb.push([b.id, v >= LAGE.hoch ? GRUEN : v >= LAGE.gut ? GELB : v >= 0 ? ORANGE : ROT]);
+    }
+    return { felder, geb, legende: [[GRUEN, `beste Lage (ab ${LAGE.hoch}): mehr Steuern`], [GELB, `gute Lage (ab ${LAGE.gut}): Domus möglich`], [ORANGE, 'gewöhnlich'], [ROT, 'laut und schmutzig']] };
   }
   if (art === 'arbeit') {
     const geht = new Map();
@@ -1280,5 +1293,16 @@ function praefektMonat(S, meld) {
     Object.assign(S, { ereignis: S.ereignis || 'g:praefekt', gTitel: 'Ein Präfekt aus Rom', gBild: 'krieg',
       gText: 'Der Senat hat das Vertrauen in Cremona verloren. Ein Präfekt übernimmt die Verwaltung: Er treibt Steuern für Rom ein (Steuern −30 % für die Stadt), die Valerier verlieren ihr Amt. In zwei Jahren entscheidet Rom neu.' });
   }
+}
+
+// ---------- Bodenwert (Phase D) ----------
+export function bodenwert(S, b) {
+  let v = 0;
+  for (const o of S.geb) {
+    if (o === b || o.bau > 0) continue;
+    const w = GEB[o.t].bodenwert || BODENWERT[o.t]; if (!w) continue;
+    const d = abstand(o, b); if (d <= w[1]) v += w[0] * (1 - 0.5 * d / w[1]);
+  }
+  return Math.round(v * 10) / 10;
 }
 

@@ -321,6 +321,13 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       dem iPad – Menü „Bürger auf den Straßen: an/aus“ als Notbremse. Test 85/85, Bild angesehen.
 - [ ] Blender-Modelle für die übrigen Gebäude, Musik je Jahreszeit (MusicGen) – PC-Pipeline, Auftrag für Moritz' PC.
 
+## Phase D – Stadt-Tiefe (1.11.)
+- [x] Bodenwert je Gebäude (`BODENWERT`, `LAGE`): Markt, Basilika, Tempel, Brunnen, Thermen, Theater, Schrein, Läden, Garten, Statue,
+      Platz heben; Ziegelei, Schmiede, Lehmgrube, Garum, Sklavenquartier, Latrine, Mühle senken (Wert × Abstand). Domus braucht
+      Lage ≥ 4, Häuser ab 8 zahlen 20 % mehr Steuern. Ansicht „Lage“, Zeilen im Haus-/Domus-Fenster. Neue Gebäude: **Läden
+      (tabernae)** – versorgen Häuser im Umkreis 8 wie ein Markt; Reiter **Schmuck**: **Garten**, **Statue**, **Platz** (gilt als
+      Straße), alle mit eigener Form. Test 86/86.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

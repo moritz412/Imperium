@@ -404,6 +404,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
       if (sim.inReichweite(E, t.b, 'markt')) { domus = t.b; for (let k = 0; k < 40 && !sim.inReichweite(E, t.b, 'brunnen'); k++) sim.bauen(E, SR.welt, 'brunnen', x - 3 + (k % 9), z - 2 + Math.floor(k / 9) * 2); }
       else sim.abreissen(E, t.b.id);
     }
+    if (domus) for (let k = 0; k < 4; k++) E.geb.push({ id: 95000 + k, t: 'statue', x: domus.x + (k % 2) * 3 - 1, z: domus.z + Math.floor(k / 2) * 3 - 1, w: 0, prio: false, stufe: 1, bew: 0, status: [] });   // gute Lage (Bodenwert)
     E.monat = 4; sim.monat(E, SR.welt); sim.monat(E, SR.welt);
     const A = kopie(); const ohne = sim.handelSumme(A, 'holz', 'kauf'); A.forschung = { ziel: '', wissen: 0, fertig: ['archiv'] }; const mit = sim.handelSumme(A, 'holz', 'kauf');
     return { block, knopfAus, vorher, domusVor, wechsel, wein, tempel, berg, kelter, domus: !!domus, eq: domus ? domus.bew : -1, dst: domus ? JSON.stringify(domus.status) + ' st' + Math.round(E.stimmung) + ' w' + sim.inReichweite(E, domus, 'brunnen') : '', weinWeg: E.gut.wein < 60, archiv: mit < ohne };
@@ -674,6 +675,19 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
   });
   ok('Geschichte: Vorwarnung, Belagerung nach Vorbereitung (gut/schlecht), Via Postumia', gs.warn && gs.schlecht && gs.gut && gs.via && gs.viaAn, JSON.stringify(gs));
   ok('Präfekt bei Gunst 0, Geschichte als Kulisse ohne Folgen', gs.praef && gs.kulisse);
+  const bw = await p.evaluate(() => {
+    const sim = SR.sim, B = JSON.parse(JSON.stringify(SR.S)); Object.assign(B.gut, { holz: 200, ziegel: 200, stein: 200, denare: 900 });
+    const h = B.geb.find(b => b.t === 'huette'), v0 = sim.bodenwert(B, h);
+    let g = false; for (let r = 2; r <= 6 && !g; r++) for (let dz = -r; dz <= r && !g; dz++) for (let dx = -r; dx <= r && !g; dx++) g = sim.bauen(B, SR.welt, 'garten', h.x + dx, h.z + dz).ok;
+    const v1 = sim.bodenwert(B, h);
+    let z = false; for (let r = 2; r <= 6 && !z; r++) for (let dz = -r; dz <= r && !z; dz++) for (let dx = -r; dx <= r && !z; dx++) z = sim.bauen(B, SR.welt, 'ziegelei', h.x + dx, h.z + dz).ok;
+    const v2 = sim.bodenwert(B, h);
+    let t = null; for (let r = 1; r <= 8 && !t; r++) for (let dz = -r; dz <= r && !t; dz++) for (let dx = -r; dx <= r && !t; dx++) { const q = sim.bauen(B, SR.welt, 'tabernae', h.x + dx, h.z + dz); if (q.ok) t = q.b; }
+    t.w = 1; const nahe = B.geb.find(o => o.t === 'huette' && sim.abstand(o, t) <= 8); const laden = nahe ? sim.inReichweite(B, nahe, 'markt') : 'kein Haus';
+    const ans = SR.ansicht('bodenwert'); SR.ansicht('');
+    return { v0, v1, v2, g, z, laden, legende: ans.legende.length };
+  });
+  ok('Bodenwert: Garten hebt, Ziegelei senkt; Läden versorgen wie ein Markt; Ansicht Lage', bw.g && bw.v1 > bw.v0 && bw.z && bw.v2 < bw.v1 && bw.laden === true && bw.legende === 4, JSON.stringify(bw));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

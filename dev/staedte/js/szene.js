@@ -236,6 +236,21 @@ export function erzeugeSzene(leinwand, welt) {
       for (const x of [-0.42, 0.42]) { box(0.3, 1.3, 0.9, 0xc4b89c, x, 0.65, 0); box(0.34, 0.1, 0.94, 0xa9482a, x, 1.33, 0); }
       box(0.6, 0.35, 0.9, 0xcfc4a8, 0, 1.0, 0); box(0.54, 0.02, 0.92, 0x3a2a1e, 0, 0.82, 0);
       g.userData.h = 1.4; return g; },
+    tabernae: geist => { const { g, box, dach } = teileBau(geist);   // Ladenzeile mit Markisen und Auslagen
+      box(1.8, 0.6, 0.7, 0xd8c4a0, 0, 0.3, -0.1); dach(1.9, 0.8, 0.2, 0xa9583a, 0, 0.6, -0.1);
+      [0xb0402a, 0x3f6e8c, 0xe0c464].forEach((c, i) => { box(0.5, 0.03, 0.3, c, -0.6 + i * 0.6, 0.48, 0.38); box(0.42, 0.3, 0.02, 0x3a2a1e, -0.6 + i * 0.6, 0.18, 0.26); box(0.4, 0.12, 0.18, 0xb08a5a, -0.6 + i * 0.6, 0.12, 0.38); });
+      g.userData.h = 0.85; return g; },
+    garten: geist => { const { g, box, teil } = teileBau(geist);   // Beete, Wege, Bäume, Brunnenbecken
+      box(1.9, 0.04, 1.9, 0x6f9a48, 0, 0.02, 0); box(1.9, 0.05, 0.25, 0xd8ccb0, 0, 0.03, 0); box(0.25, 0.05, 1.9, 0xd8ccb0, 0, 0.03, 0);
+      for (const [x, z] of [[-0.55, -0.55], [0.55, 0.55], [-0.55, 0.55], [0.55, -0.55]]) { teil(new THREE.CylinderGeometry(0.04, 0.05, 0.35, 5), 0x5a4330, x, 0.18, z); teil(new THREE.SphereGeometry(0.28, 8, 6), x * z > 0 ? 0x4f7a3a : 0x6a8a3a, x, 0.52, z); }
+      teil(new THREE.CylinderGeometry(0.22, 0.24, 0.12, 12), 0xd8ccb0, 0, 0.06, 0); box(0.3, 0.02, 0.3, 0x5e8fb0, 0, 0.12, 0);
+      g.userData.h = 0.8; return g; },
+    statue: geist => { const { g, box, teil } = teileBau(geist);   // Sockel und Figur
+      box(0.5, 0.45, 0.5, 0xd8ccb0, 0, 0.22, 0); teil(new THREE.CylinderGeometry(0.1, 0.13, 0.5, 8), 0xe8e2d4, 0, 0.7, 0); teil(new THREE.SphereGeometry(0.08, 8, 6), 0xe8e2d4, 0, 1.02, 0);
+      box(0.06, 0.32, 0.06, 0xe8e2d4, 0.15, 0.78, 0); g.userData.h = 1.1; return g; },
+    platz: geist => { const { g, box, teil } = teileBau(geist);   // Pflaster mit Mittelbrunnen
+      box(2.95, 0.04, 2.95, 0xd8ccb0, 0, 0.02, 0); for (let i = -1; i <= 1; i++) { box(2.95, 0.045, 0.02, 0xbfb39a, 0, 0.025, i * 0.98); box(0.02, 0.045, 2.95, 0xbfb39a, i * 0.98, 0.025, 0); }
+      teil(new THREE.CylinderGeometry(0.3, 0.34, 0.15, 12), 0xc8bca4, 0, 0.08, 0); g.userData.h = 0.4; return g; },
     latrine: geist => { const { g, box, dach } = teileBau(geist);   // langer Raum mit Bogenöffnungen, Wasserrinne
       box(1.7, 0.5, 0.7, 0xd8ccb0, 0, 0.25, -0.05); dach(1.8, 0.8, 0.2, 0xa9583a, 0, 0.5, -0.05);
       for (const x of [-0.5, 0, 0.5]) box(0.24, 0.3, 0.02, 0x3a2a1e, x, 0.17, 0.31);
