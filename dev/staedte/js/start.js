@@ -19,7 +19,7 @@ const FLUESSE = [[[7.6, 45.0], [9.0, 45.1], [10.0, 45.1], [11.0, 45.0], [12.2, 4
 
 const $ = s => document.querySelector(s);
 
-export function startseite({ hatStand, weiter, gruenden }) {
+export function startseite({ hatStand, weiter, gruenden, standText = () => '' }) {
   let wahl = REGIONEN[0];
   const pfad = pts => 'M' + pts.map(([a, b]) => P(a, b).join(',')).join('L');
   const karte = `<svg viewBox="0 0 322 350" class="italien" role="group" aria-label="Karte Italiens">
@@ -56,7 +56,7 @@ export function startseite({ hatStand, weiter, gruenden }) {
       <div class="zeile"><span>Schwierigkeit</span><b>${wahl.schwer}</b></div>
       ${wahl.aktiv ? '' : '<div class="schloss">🔒 Diese Provinz öffnet sich in einer späteren Ausbaustufe.</div>'}</div>`;
     const k = [];
-    if (hatStand() && wahl.aktiv) k.push(`<button class="knopf haupt" data-s="weiter">Weiterspielen</button>`);
+    if (hatStand() && wahl.aktiv) k.push(`<button class="knopf haupt weiterknopf" data-s="weiter">Weiterspielen${standText() ? `<small>${standText()}</small>` : ''}</button>`);
     if (wahl.aktiv) k.push(`<button class="knopf${hatStand() ? '' : ' haupt'}" data-s="neu">${hatStand() ? `${wahl.stadt} neu gründen` : `${wahl.stadt} gründen`}</button>`);
     else k.push(`<button class="knopf" disabled>${wahl.stadt} noch nicht wählbar</button>`);
     el.querySelector('.startknoepfe').innerHTML = k.join('');

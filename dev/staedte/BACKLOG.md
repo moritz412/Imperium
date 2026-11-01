@@ -249,6 +249,9 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       Schornstein). Holz-Senke fürs Spätspiel. **Vicus**: Villa rustica nach 36 verbundenen Monaten → Dorf mit Hütten,
       +3 Denare/Monat, +0,05 Ansehen. **Töne**: Feuer (Knistern), Ereignis (Hornruf), Feste/Eröffnung (Leier).
       Töne nicht angehört. Test 78/78, Bild angesehen.
+- [x] Chronik der Stadt (Menü): Jahreswerte (Einwohner, Stadtkasse, Stimmung, Ansehen) als Verlaufskurven, darunter die
+      letzten 30 Meldungen mit Datum (ohne Jahreszeitwechsel, Wiederholungen als „(3×)“). Startseite: „Weiterspielen“ zeigt
+      Rang, Datum, Einwohner und Amt des Spielstands. Test 79/79, Bild angesehen.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

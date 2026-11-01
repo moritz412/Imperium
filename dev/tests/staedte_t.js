@@ -603,6 +603,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { vicus: !!l.vicus, text: /vicus/.test(m), ton: typeof SR.ton.sfx === 'function' };
   });
   ok('Vicus: Dorf wächst um die Villa rustica', vc.vicus && vc.text, JSON.stringify(vc));
+  const ch = await p.evaluate(() => {
+    const c = (SR.S.chronik || []).length, t = (SR.S.tagebuch || []).length;
+    SR.chronik(); const kurven = document.querySelectorAll('#chronik .kurve svg').length, zeilen = document.querySelectorAll('#chronik .zeile').length;
+    document.querySelector('#chronik [data-ch="zu"]').click();
+    return { c, t, kurven, zeilen };
+  });
+  ok('Chronik: Jahreswerte, Kurven, letzte Meldungen', ch.c >= 2 && ch.t >= 3 && ch.kurven === 4 && ch.zeilen === ch.t, JSON.stringify(ch));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

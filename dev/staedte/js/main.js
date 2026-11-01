@@ -305,6 +305,7 @@ $('#menue').addEventListener('click', e => {
   const m = b.dataset.m;
   if (m === 'weiter') $('#menue').hidden = true;
   if (m === 'ton') { ton.schalten(); tonKnopf(); return; }
+  if (m === 'chronik') { $('#menue').hidden = true; chronikZeigen(); return; }
   if (m === 'inschriften') { $('#menue').hidden = true; inschriftenZeigen(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
@@ -412,6 +413,29 @@ function hexInfo(f) {
 
 // ---------- Nachbarstadt und Rom (S2.5) ----------
 const zahl = n => (Math.round(n * 10) / 10).toLocaleString('de-DE');
+// ---------- Chronik der Stadt (1.11.): Verlauf je Jahr, letzte Meldungen ----------
+function kurve(daten, feld, titel, farbe, einheit = '') {
+  const W = 300, H = 90, P = 6, w = daten.map(x => x[feld]), max = Math.max(1, ...w), min = Math.min(0, ...w);
+  if (daten.length < 2) return `<div class="kurve"><b>${titel}</b><small>Erst nach dem zweiten Jahr zu sehen.</small></div>`;
+  const pt = (v, i) => `${(P + i * (W - 2 * P) / (daten.length - 1)).toFixed(1)},${(H - P - (v - min) / (max - min || 1) * (H - 2 * P)).toFixed(1)}`;
+  const letzt = w[w.length - 1];
+  return `<div class="kurve"><b>${titel}</b><small>zuletzt ${rund(letzt)}${einheit} · höchstens ${rund(max)}${einheit}</small>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="${titel} je Jahr"><polyline fill="none" stroke="${farbe}" stroke-width="2.5" points="${w.map(pt).join(' ')}"/>
+    <circle cx="${pt(letzt, w.length - 1).split(',')[0]}" cy="${pt(letzt, w.length - 1).split(',')[1]}" r="3.5" fill="${farbe}"/></svg>
+    <div class="kachse"><span>${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(daten[0].j)}</span><span>${(j => j < 0 ? -j + ' v. Chr.' : j + ' n. Chr.')(daten[daten.length - 1].j)}</span></div></div>`;
+}
+function chronikZeigen() {
+  const c = S.chronik || [], t = S.tagebuch || [];
+  $('#chronik').innerHTML = `<div class="feld forschungsseite">
+    <button class="schliessen" data-ch="zu" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2>Chronik der Stadt</h2><div class="untertitel">${c.length} ${c.length === 1 ? 'Jahr' : 'Jahre'} Cremona · Stand am Ende jedes Jahres</div>
+    <div class="fbaum fam">${kurve(c, 'e', 'Einwohner', '#e9b44c')}${kurve(c, 'd', 'Stadtkasse', '#9ccb8e', ' Denare')}${kurve(c, 's', 'Stimmung', '#7fb6e0', ' %')}${kurve(c, 'a', 'Ansehen der Familie', '#f28c6e')}</div>
+    <h3 class="fh">Zuletzt geschehen</h3>
+    ${t.length ? t.map(([d, x]) => `<div class="zeile"><span>${x}</span><b>${d}</b></div>`).join('') : '<p class="fp">Noch nichts Erwähnenswertes.</p>'}</div>`;
+  $('#chronik').hidden = false;
+}
+$('#chronik').addEventListener('click', e => { if (e.target.id === 'chronik' || e.target.closest('[data-ch="zu"]')) $('#chronik').hidden = true; });
+
 // ---------- Hilfe in Kapiteln (1.11.) ----------
 const HILFE = [
   ['Bedienung', ['Gebäude aus der unteren Leiste aufs Feld ziehen – oder antippen und dann Felder antippen.', 'Wischen verschiebt die Karte, zwei Finger zoomen. Ein Gebäude antippen öffnet sein Fenster.', 'Ein Symbol über einem Gebäude zeigt ein Problem; im Fenster steht die Ursache.', 'Links: Umland, Familie, Wissen und die Ansichten Wasser, Stimmung, Gesundheit, Feuer, Arbeit.']],
@@ -633,6 +657,10 @@ $('#ansicht').addEventListener('click', e => {
 function monatAblaufen() {
   const js = sim.jahreszeit(S);
   const meld = sim.monat(S, welt); meld.forEach(melden);
+  const wichtig = meld.filter(t => !/ beginnt\.$/.test(t));   // Jahreszeitwechsel nicht ins Tagebuch
+  if (wichtig.length) { const d = sim.datumText(S); let tb = S.tagebuch || [];
+    for (const t of wichtig) { if (tb[0] && tb[0][1].replace(/ \(\d+×\)$/, '') === t) { const n = (+((tb[0][1].match(/\((\d+)×\)$/) || [])[1]) || 1) + 1; tb[0] = [d, `${t} (${n}×)`]; } else tb = [[d, t], ...tb]; }
+    S.tagebuch = tb.slice(0, 30); }
   if (meld.some(m => /Casa|ist jetzt|Insula|vicus/.test(m))) ton.sfx('aufstieg');
   if (meld.some(m => /^Feuer!/.test(m))) ton.sfx('feuer');
   if (sim.jahreszeit(S) !== js) { szene.jahreszeitFarbe(sim.jahreszeit(S)); speichern(true); ton.sfx('jahreszeit', sim.jahreszeit(S)); }
@@ -641,7 +669,7 @@ function monatAblaufen() {
 let zuletzt = performance.now();
 function schleife(jetzt) {
   const dt = Math.min(0.1, (jetzt - zuletzt) / 1000); zuletzt = jetzt;
-  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
+  if (tempo && $('#menue').hidden && $('#startseite').hidden && $('#forschung').hidden && $('#familie').hidden && $('#ereignis').hidden && $('#inschriften').hidden && $('#hilfe').hidden && $('#chronik').hidden) { uhr += dt * tempo; if (uhr >= MONAT_S) { uhr -= MONAT_S; monatAblaufen(); } }
   szene.zeichnen(dt, $('#menue').hidden && $('#startseite').hidden ? tempo : 0);
   requestAnimationFrame(schleife);
 }
@@ -654,6 +682,9 @@ const willkommen = () => melden('Willkommen in Cremona. Der Senat erwartet die e
 const start = startseite({
   hatStand: () => { try { return !!localStorage.getItem(SPEICHER); } catch (e) { return false; } },
   weiter: () => {},
+  standText: () => { try { const s = JSON.parse(localStorage.getItem(SPEICHER)); if (!s) return '';
+    const e = s.geb.reduce((n, b) => n + (b.bew || 0), 0), r = RAENGE[s.rang || 0].n, a = s.familie ? AEMTER[s.familie.amt].n : 'Quästor';
+    return `${r} · ${sim.datumText(s)} · ${e} Einwohner · ${a}`; } catch (e) { return ''; } },
   gruenden: r => {
     if (szene.modus() === 'region') umland(false);
     S = sim.neuesSpiel(); S.region = r.id; auswahl = 0; bauTyp = ''; uhr = 0;
@@ -671,7 +702,7 @@ window.SR = {
   bauen: (t, x, z) => { const r = sim.bauen(S, welt, t, x, z); allesZeichnen(); return r; },
   monate: n => { for (let i = 0; i < n; i++) monatAblaufen(); return S; },
   oeffne: id => oeffneInfo(id), neu: () => { S = sim.neuesSpiel(); allesZeichnen(); },
-  tempo: t => { tempo = t; kopfleiste(); }, hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
+  tempo: t => { tempo = t; kopfleiste(); }, chronik: () => chronikZeigen(), hilfe: () => hilfeZeigen(), setzeStand: neu => { S = neu; auswahl = 0; allesZeichnen(); }, inschriften: () => inschriftenZeigen(), ereignis: i => { const r = sim.ereignisWaehlen(S, i); $('#ereignis').hidden = true; allesZeichnen(); return r; }, erweiterungInfo: () => erweiterungInfo(), forschung: () => forschungZeigen(), familie: () => familieZeigen(),
   modelle: () => szene.modelleBereit, szene, start, ton, umland, hexInfo: f => hexInfo(f),
   handeln: (g, art, id) => { const r = sim.handeln(S, g, art, id); allesZeichnen(); return r; },
   ansicht: a => { ansicht = a; ansichtZeichnen(); return sim.ansicht(S, welt, a); },

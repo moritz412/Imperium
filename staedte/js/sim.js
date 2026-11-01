@@ -376,6 +376,7 @@ export function monat(S, welt) {
 
   const altJs = js;
   S.monat++;
+  if (S.monat % 12 === 0) (S.chronik = S.chronik || []).push({ j: jahr(S) - 1, e: einwohner(S), d: Math.round(S.gut.denare), s: Math.round(S.stimmung), a: Math.round((S.familie || {}).ansehen || 0) });
   if (jahreszeit(S) !== altJs) meld.push(JAHRESZEITEN[jahreszeit(S)].n + ' beginnt.');
   if (S.monat % 12 === 6 && S.monat >= 12) meld.push(`Rom erwartet am Ende des Herbstes ${abgabeBetrag(S)} Denare Abgaben.`);
   if (bedarf > 0 && !essen) meld.push('Die Vorräte reichen nicht – die Menschen hungern.');
