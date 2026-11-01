@@ -1222,7 +1222,7 @@ function seucheMonat(S, meld) {
     if (wurf(S, 6000 + b.id) < seuchenGefahr(S, b)) { b.krank = X.monate; neu++; erstes = erstes || b; }
   }
   if (neu) mitOrt(meld, neu === 1 ? 'Krankheit! In einem Haus liegen die Menschen mit Fieber.' : `Eine Seuche breitet sich aus: ${neu} Häuser sind betroffen.`, erstes);
-  if (tote) meld.push(`${tote} Menschen sind an der Krankheit gestorben.`);
+  if (tote) meld.push(tote === 1 ? "Ein Mensch ist an der Krankheit gestorben." : `${tote} Menschen sind an der Krankheit gestorben.`);
 }
 
 // ---------- Inschriften (1.11.) ----------
