@@ -328,7 +328,7 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     const weg = !A.geb.some(b => b.id === ziel.id);
     // Übergreifen
     const U = kopie(); U.monat = 26; U.geb = U.geb.filter(b => b.t !== 'wache');
-    sim.setzeZufall(nur()); sim.monat(U, SR.welt); sim.setzeZufall(salz => salz >= 7000 ? 0 : 1); sim.monat(U, SR.welt);
+    sim.setzeZufall(nur()); sim.monat(U, SR.welt); sim.setzeZufall(salz => salz >= 7000 && salz < 90000 ? 0 : 1); sim.monat(U, SR.welt);
     const ueber = U.geb.filter(b => b.brand > 0 && b.id !== ziel.id).length;
     // mit Feuerwache: wird gelöscht
     const W = kopie(); W.monat = 26; W.gut.holz += 60; W.gut.ziegel += 40;
@@ -556,6 +556,13 @@ const PORT = process.argv[2] || '8772', BILD = process.argv[3] || '';
     return { vor, nach: A.auftrag, text };
   });
   ok('Senatsaufträge führen weiter ins Umland', auf.vor === 6 && auf.nach === 7 && /Umland/.test(auf.text), JSON.stringify(auf));
+  const eimer = await p.evaluate(() => {
+    const sim = SR.sim, E = JSON.parse(JSON.stringify(SR.S)); E.ereignisseAus = true; E.geb = E.geb.filter(b => b.t !== 'wache');
+    const h = E.geb.find(b => b.t === 'huette' && b.bew > 0); h.brand = 1; E.monat = 30;
+    sim.setzeZufall(z => z >= 99000 ? 0 : 1); const m = sim.monat(E, SR.welt).join(' | '); sim.setzeZufall(null);
+    return { aus: !(h.brand > 0), text: /Eimerketten/.test(m) };
+  });
+  ok('Feuer: Nachbarn löschen auch ohne Wache mit Eimerketten', eimer.aus && eimer.text, JSON.stringify(eimer));
   ok('Handelsfenster Placentia mit Knöpfen', handel.ui.titel === 'Placentia' && handel.ui.n === 2 * handel.pWaren && handel.ui.frei && handel.ui.klick, JSON.stringify(handel.ui));
 
   // Stadtrang

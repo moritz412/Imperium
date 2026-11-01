@@ -231,6 +231,12 @@ Plan (Konzept „Ausbaustufen“ 3: Epoche I–II, alle Stände, Wasser/Feuer):
       (≈ 138.000): jedes Gebäude wird beim Bauen zu einem Mesh mit Farben je Ecke verschmolzen (bewegte/durchsichtige Teile
       bleiben einzeln), alle Straßen sind ein Instanced-Mesh. Bild vorher/nachher gleich. Test 73/73.
       **Nicht gemessen:** Bildrate auf dem iPad.
+- [x] Balance-Spieler (`dev/staedte/werkzeug/balance_spieler.js`, baut nach Bedarf, Umland, Forschung, Wahl). Befunde vorher:
+      Holz in den ersten 3 Jahren 3–25 (Engpass), Brandketten im 5. Jahr (6 Brände, beide Holzfäller), ein Gallierüberfall
+      verwüstete 13 Betriebe. Geändert: Holzfäller 3 → 4 Holz, Feuer greift zu 15 % statt 25 % über, ohne Wache löschen Nachbarn
+      mit Eimerketten (35 %/Monat, Bewohner −25 %), Gallier verwüsten höchstens die 4 Betriebe nächst ihrem Dorf. Danach:
+      Dorf nach 43 Monaten (≈ 11 min), Kleinstadt nach 93 (≈ 23 min), keine Brandketten. Ab Jahr 8 Überschuss an Holz/Denaren
+      (Spieler baut zu wenig Neues) – nächster Balance-Schritt: mehr Bedarf im Spätspiel. Test 74/74.
 ### Vorschläge für den nächsten Block
 - Denare-Senke: Unterhalt je Gebäude oder Sold für Wache/Lehrer (Balance-Lauf: > 1.400 Denare nach 5 Jahren ungenutzt).
 - Gebäude zur Straße drehen. Händler-/Ochsenkarren nach Mantua und Placentia sichtbar.

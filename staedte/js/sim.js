@@ -635,7 +635,7 @@ function gefahren(S, meld) {
   if (S.frieden > 0) S.frieden--;
   else if (m >= G.gallier.ab && m % 12 === G.gallier.monat && einwohner(S) >= G.gallier.einwohner && wurf(S, 1002) < G.gallier.chance * (S.familie && eigenschaft(S.familie, 'Veteran') ? 0.5 : 1)) {
     if (hatKastell(S)) { meld.push('Gallier ziehen heran – die Besatzung des Kastells schlägt sie zurück.'); return; }
-    const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5);
+    const nord = betriebe.filter(f => f.r + f.q / 2 < 0.5).sort((a, b) => hexAbstand(a, gallierFeld) - hexAbstand(b, gallierFeld)).slice(0, 4);
     nord.forEach(f => stoeren(land[landKey(f)], 'gallier', G.gallier.monate));
     for (const g of ['getreide', 'holz']) S.gut[g] = (S.gut[g] || 0) * (1 - G.gallier.raub);
     S.stimmung = Math.max(0, S.stimmung - G.gallier.stimmung);
@@ -830,6 +830,7 @@ function feuerMonat(S, meld) {
   for (const b of brennt) {
     const name = b.t === 'huette' ? (b.stufe === 3 ? INSULA.n : b.stufe === 2 ? CASA.n : GEB.huette.n) : GEB[b.t].n;
     if (wacheNah(S, b)) { b.brand = 0; meld.push(`Brand gelöscht: ${name}. Die Wache war rechtzeitig da.`); continue; }
+    if (wurf(S, 99000 + b.id) < FEUER.eimer) { b.brand = 0; if (b.bew) b.bew = Math.floor(b.bew * 0.75); meld.push(`Nachbarn haben den Brand mit Eimerketten gelöscht: ${name}.`); continue; }
     for (const o of S.geb) {
       if (o.brand > 0 || brandGefahr(S, o) === 0 || abstand(o, b) > FEUER.nachbar) continue;
       if (wurf(S, 7000 + o.id * 3 + b.id) < (wacheNah(S, o) ? FEUER.ueberWache : FEUER.ueber)) { o.brand = 1; o.neu = true; }

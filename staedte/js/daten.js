@@ -71,7 +71,7 @@ export const GEB = {
     kosten: { holz: 40, ziegel: 20 }, arbeiter: 1, lager: 200, unterhalt: 2,
     text: 'Erhöht die Lagergrenze jeder Ware um 200.' },
   holzfaeller: { n: 'Holzfäller', kat: 'Handwerk', g: [2, 2], h: 0.6, wand: 0x9c7a55, dach: 0x6b4a32, sklaven: true,
-    kosten: { holz: 8 }, arbeiter: 2, erzeugt: { holz: 3 }, wald: 6,
+    kosten: { holz: 8 }, arbeiter: 2, erzeugt: { holz: 4 }, wald: 6,
     text: 'Schlägt Holz. Braucht Wald in höchstens 6 Feldern Abstand.' },
   lehmgrube: { n: 'Lehmgrube', kat: 'Handwerk', g: [2, 2], flach: true, wand: 0x9a6b4a, sklaven: true,
     kosten: { holz: 10 }, arbeiter: 2, erzeugt: { lehm: 3 },
@@ -288,10 +288,11 @@ export const EPOCHEN = ['', 'Frühe Republik', 'Späte Republik', 'Kaiserzeit'];
 
 // Feuer und Ordnung (S3.3). Chance je Gebäude und Monat = basis × Dichte × Schutz (ab dem 3. Jahr; 1.11. nach Balance-Lauf gesenkt).
 // Dichte = 1 + 0,15 je Gebäude (nicht flach) im Umkreis von 3 Feldern. Feuerwache in Reichweite ×0,2, Brunnen ×0,7.
-// Ein Brand ohne Wache greift zu 25 % je Monat auf Nachbarn (bis 3,5 Felder) über und zerstört nach 3 Monaten das Gebäude.
+// Ein Brand ohne Wache: Nachbarn löschen mit Eimerketten (35 % je Monat), sonst greift er zu 15 % auf Nachbarn (bis 3,5 Felder)
+// über und zerstört nach 3 Monaten das Gebäude (1.11. nach Balance-Spieler: vorher 25 %, ohne Eimer).
 export const FEUER = {
   ab: 24, basis: { huette: 0.0015, casa: 0.0012, insula: 0.003, baeckerei: 0.0045, ziegelei: 0.0045, schmiede: 0.0045, quartier: 0.002 }, sonst: 0.0008,
-  dichte: 0.15, umkreis: 3, wache: 0.2, brunnen: 0.7, sommer: 1.5, ueber: 0.25, ueberWache: 0.05, nachbar: 3.5, monate: 3,
+  dichte: 0.15, umkreis: 3, wache: 0.2, brunnen: 0.7, sommer: 1.5, ueber: 0.15, ueberWache: 0.05, nachbar: 3.5, monate: 3, eimer: 0.35,
   unruhe: 6,   // Stimmungsziel − bis 6, wenn Häuser ab der Kleinstadt keine Wache in der Nähe haben
 };
 
