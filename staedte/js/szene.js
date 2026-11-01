@@ -431,6 +431,8 @@ export function erzeugeSzene(leinwand, welt) {
     mauerMesh = baue(fertig, 1, 0xcfc4a8); mauerBau = baue(bau, 0.4, 0xe2d8c0);
   }
 
+  let buergerAn = true;
+
   let letzter = null;
   function abgleichen(S, auswahlId) {
     letzter = [S, auswahlId];
@@ -491,7 +493,7 @@ export function erzeugeSzene(leinwand, welt) {
   }
 
   // Laufwege (S1.2): Arbeiter zwischen Haus und Betrieb, Träger vom Erzeuger zum Abnehmer (Instancing, Farbe je Figur)
-  const LMAX = 240, SCHRITT = 1.1;   // Figuren höchstens, Felder je Sekunde bei normalem Tempo
+  const LMAX = 700, SCHRITT = 1.1;   // 1.11. Phase C: Bürger und Markttreiben (vorher 240)   // Figuren höchstens, Felder je Sekunde bei normalem Tempo
   const figur = (geo, farbe) => {
     const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: 0xffffff }), LMAX);
     for (let i = 0; i < LMAX; i++) m.setColorAt(i, new THREE.Color(farbe));
@@ -563,6 +565,21 @@ export function erzeugeSzene(leinwand, welt) {
       if (d.erzeugt && !b.status.some(s => !s.leicht)) {
         const g = Object.keys(d.erzeugt)[0], ziel = nachste(b, ABNEHMER(g));
         if (ziel) neu.push(weg(punkte(maske, b, ziel), TUNIKA[(b.id + 3) % TUNIKA.length], g, `t${b.id}-${ziel.id}`));
+      }
+    }
+    // Phase C: Bürger gehen von ihrem Haus zum Markt (sonst Brunnen) und zurück; Markttreiben rund um die Stände
+    if (buergerAn) {
+      for (const h of S.geb) {
+        if (h.t !== 'huette' && h.t !== 'domus' || !(h.bew > 0) || h.bau > 0) continue;
+        const ziel = nachste(h, ['markt']) || S.geb.find(o => o.t === 'brunnen' && !(o.bau > 0) && Math.hypot(o.x - h.x, o.z - h.z) < 12);
+        if (!ziel) continue;
+        const n = h.bew >= 20 ? 2 : 1;
+        for (let i = 0; i < n; i++) neu.push(weg(punkte(maske, h, ziel), TUNIKA[(h.id * 3 + i) % TUNIKA.length], '', `b${h.id}-${i}`));
+      }
+      for (const m of S.geb.filter(b => b.t === 'markt' && b.w > 0)) {
+        const [gw, gd] = groesse('markt'), cx = welt0 + m.x + gw / 2, cz = welt0 + m.z + gd / 2, r = 1.75;
+        for (let i = 0; i < 6; i++) { const a0 = i * 1.05, ring = []; for (let k = 0; k <= 8; k++) { const a = a0 + k * 0.78; ring.push([cx + Math.cos(a) * r * (0.8 + (i % 3) * 0.12), cz + Math.sin(a) * r * (0.8 + (i % 3) * 0.12)]); }
+          neu.push(weg(ring, TUNIKA[(m.id + i) % TUNIKA.length], i % 3 === 0 ? 'getreide' : '', `mk${m.id}-${i}`)); }
       }
     }
     laeufer = neu.filter(l => l.L > 0.5).slice(0, LMAX);
@@ -935,5 +952,5 @@ export function erzeugeSzene(leinwand, welt) {
     if (letzter) abgleichen(letzter[0], letzter[1]);
     return true;
   });
-  return { wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
+  return { laeuferGesamt: () => laeufer.length, laufMessen: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) laufen(0.016); return (performance.now() - t0) / n; }, buergerSchalten: an => { buergerAn = an; if (letzter) abgleichen(letzter[0], letzter[1]); }, wetterSchalten, wetterSichtbar: () => wetter.visible, grenze, zeigeModus, hexAn, regionInfo, landAbgleichen, karrenZahl: () => karren.length, haendlerZahl: () => karren.filter(k => k.haendler).length, modus: () => modus, modelleBereit, laeuferZahl: () => koerper.count, ansicht, ansichtZahl: () => ansichtFelder.count, abgleichen, vorschau, jahreszeitFarbe, zoom, bodenPunkt, feldAn, verschieben, gebaeudeAn, zentrieren, zeichnen, groesseAnpassen, renderer };
 }

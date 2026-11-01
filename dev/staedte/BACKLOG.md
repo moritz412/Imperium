@@ -313,6 +313,14 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       Familie verliert Amt, Gunst +1/Monat). Menü „Geschichte: Wendepunkte / nur Kulisse / aus“; bei „Ereignisse aus“ nur Meldungen.
       Test 85/85. **Nicht nachgespielt:** Belagerung erst nach ≈ 55 Minuten Spielzeit.
 
+## Phase C – Lebendige Stadt (1.11.)
+- [x] Bürgerfiguren, Machbarkeit geprüft: Aus jedem bewohnten Haus geht ein Bürger (ab 20 Bewohnern zwei) zum nächsten Markt, sonst
+      zum Brunnen und zurück; je Markt 6 Figuren im Markttreiben (Käufer mit Säcken). Gleiche Instanced-Meshes wie Arbeiter
+      (Grenze 240 → 700 Figuren). Messung (`werkzeug/leistung.js`, 236 Gebäude, 99 bewohnte Häuser, 8 Märkte): 179 Figuren,
+      **Draw-Calls unverändert 247**, Figurenbewegung **0,035 ms je Bild** (Rechenzeit, Cloud). **Nicht gemessen:** GPU/Bildrate auf
+      dem iPad – Menü „Bürger auf den Straßen: an/aus“ als Notbremse. Test 85/85, Bild angesehen.
+- [ ] Blender-Modelle für die übrigen Gebäude, Musik je Jahreszeit (MusicGen) – PC-Pipeline, Auftrag für Moritz' PC.
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.

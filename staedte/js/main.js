@@ -331,6 +331,7 @@ $('#menue').addEventListener('click', e => {
   if (m === 'chronik') { $('#menue').hidden = true; chronikZeigen(); return; }
   if (m === 'inschriften') { $('#menue').hidden = true; inschriftenZeigen(); return; }
   if (m === 'geschichte') { S.geschichte = { an: 'kulisse', kulisse: 'aus', aus: 'an' }[S.geschichte || 'an']; tonKnopf(); return; }
+  if (m === 'buerger') { buergerAn = !buergerAn; try { localStorage.setItem('staedte_buerger', buergerAn ? '1' : '0'); } catch (e) {} szene.buergerSchalten(buergerAn); tonKnopf(); return; }
   if (m === 'wetter') { wetterAn = !wetterAn; try { localStorage.setItem('staedte_wetter', wetterAn ? '1' : '0'); } catch (e) {} szene.wetterSchalten(wetterAn); tonKnopf(); return; }
   if (m === 'ereignisse') { S.ereignisseAus = !S.ereignisseAus; tonKnopf(); return; }
   if (m === 'speichern') { speichern(); $('#menue').hidden = true; }
@@ -702,9 +703,12 @@ function schleife(jetzt) {
 const tonKnopf = () => { $('#menue [data-m="ton"]').textContent = ton.istAn() ? 'Ton: an' : 'Ton: aus';
   $('#menue [data-m="ereignisse"]').textContent = S.ereignisseAus ? 'Ereignisse: aus' : 'Ereignisse: an';
   $('#menue [data-m="wetter"]').textContent = wetterAn ? 'Wetter: an' : 'Wetter: aus';
+  $('#menue [data-m="buerger"]').textContent = buergerAn ? 'Bürger auf den Straßen: an' : 'Bürger auf den Straßen: aus';
   $('#menue [data-m="geschichte"]').textContent = 'Geschichte: ' + ({ an: 'Wendepunkte', kulisse: 'nur Kulisse', aus: 'aus' })[S.geschichte || 'an']; };
 let wetterAn = (() => { try { return localStorage.getItem('staedte_wetter') !== '0'; } catch (e) { return true; } })();
 szene.wetterSchalten(wetterAn);
+let buergerAn = (() => { try { return localStorage.getItem('staedte_buerger') !== '0'; } catch (e) { return true; } })();
+szene.buergerSchalten(buergerAn);
 tonKnopf();
 
 // ---------- Startseite (S1.5) ----------
