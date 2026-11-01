@@ -280,6 +280,11 @@ Sklaven als historischer Stand, Senatsgunst/Abgaben, echte Orte), keine Übernah
       (vorher 300/170/40), Gehöft 4 → 3 Getreide. Der Test gibt sich für den Stadtaufbau den alten Vorrat (prüft Abläufe).
       **Nicht nachgespielt** – ob es jetzt passt, muss Moritz sagen.
 
+## Großes Konzept „vom Prototyp zum Spiel“ (1.11.)
+`dev/staedte/docs/konzept_spiel.md`: Befund, fünf Säulen (Familie als Hauptfigur, sichtbares Leben, Geschichte als Bühne,
+Knappheit, klare Enden), Kampagne in vier Akten 218–27 v. Chr. + freies Spiel, Systeme A–K, Abgrenzung zu Anno, Fahrplan
+Phasen A–E, sechs offene Entscheidungen für Moritz. **Wartet auf Moritz' Entscheidungen.**
+
 ## Später
 Stufe 3 Forschung & Stände · Stufe 4 Familie & Politik · Stufe 5 Ereignisse & Wahrzeichen ·
 Stufe 6 weitere Regionen, Verbindung Hauptspiel.
