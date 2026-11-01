@@ -253,3 +253,6 @@ body:has(#info:not([hidden])) #meldung div{max-width:calc(100vw - 540px)}
 .pkarte.ziel{border-color:var(--gold);background:rgba(233,180,76,.08)}
 .pkarte.offen small{color:var(--gold)}
 #auftrag .winter.warn{color:#f2a46e}#auftrag .winter.gut{color:#9ccb8e}
+.hofwahl{display:flex;flex-direction:column;gap:6px}
+.hofwahl .knopf{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:8px 12px}
+.hofwahl .knopf small{font-weight:400;font-size:11px;opacity:.8}

@@ -310,6 +310,16 @@ export function erzeugeSzene(leinwand, welt) {
     for (let i = 0; i < 4; i++) box(0.4, 0.2, 0.3, 0xd8d2c4, -W / 2 + 0.6 + i * 0.45, 0.25 + (i % 2) * 0.2, D / 2 - 0.6);
     g.userData.h = 2.3; return g;
   }
+  // Hinterhof (1.11.): kleiner Anbau an der hinteren Ecke des Hauses (Hausfeld 2×2, Haus nutzt die Mitte)
+  function hofMesh(art) {
+    const g = new THREE.Group(), box = (w, h, d, c, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: c })); m.position.set(x, y, z); m.castShadow = true; g.add(m); return m; };
+    const X = 0.62, Z = 0.74;   // vordere rechte Ecke (zur Kamera)
+    if (art === 'garten') { box(0.5, 0.04, 0.36, 0x6b4a2a, X, 0.02, Z); for (let i = 0; i < 3; i++) box(0.42, 0.08, 0.06, 0x5c8a2e, X, 0.08, Z - 0.12 + i * 0.12); }
+    else if (art === 'huehner') { box(0.3, 0.24, 0.24, 0x8a6a46, X, 0.12, Z); box(0.34, 0.03, 0.28, 0x9a4a2b, X, 0.26, Z); for (let i = 0; i < 3; i++) box(0.05, 0.06, 0.07, 0xf0e8d6, X + 0.2 + i * 0.07, 0.03, Z + 0.15 - i * 0.05); }
+    else if (art === 'webstuhl') { box(0.04, 0.4, 0.04, 0x6b4a2a, X - 0.15, 0.2, Z); box(0.04, 0.4, 0.04, 0x6b4a2a, X + 0.15, 0.2, Z); box(0.34, 0.03, 0.04, 0x6b4a2a, X, 0.4, Z); box(0.28, 0.28, 0.01, 0x2e4a7a, X, 0.24, Z + 0.01); }
+    else if (art === 'laube') { for (const [a, c] of [[-0.18, -0.12], [0.18, -0.12], [-0.18, 0.12], [0.18, 0.12]]) box(0.03, 0.42, 0.03, 0x6b4a2a, X + a, 0.21, Z + c); box(0.46, 0.06, 0.34, 0x4f7a2a, X, 0.44, Z); box(0.08, 0.08, 0.08, 0x5a2a5a, X + 0.1, 0.38, Z); }
+    return g;
+  }
   function baueMesh(t, stufe = 1, geist = false) {
     const d = GEB[t], [gw, gd] = groesse(t);
     const mname = t === 'huette' ? ['huette', 'huette', 'casa', 'insula'][stufe || 1] : t;   // Blender-Modell vor Ersatzform (1.11.)
@@ -466,11 +476,12 @@ export function erzeugeSzene(leinwand, welt) {
       da.add(b.id);
       if (b.dreh === undefined) b.dreh = frontSeite(S, b.t, b.x, b.z);   // alte Spielstände
       const st = b.t === 'feld' && !(b.bau > 0) ? feldStand(S, b) : b.stufe;   // Felder im Jahreslauf (1.11.)
-      const schluessel = b.t + st + 'd' + b.dreh + (b.bau > 0 ? 'B' : '');
+      const schluessel = b.t + st + 'd' + b.dreh + (b.bau > 0 ? 'B' : '') + (b.hof ? 'h' + b.hof : '');
       let o = objekte.get(b.id);
       if (!o || o.schluessel !== schluessel) {
         if (o) gruppe.remove(o.g);
         const g = verschmelzen(b.bau > 0 ? baueBaustelle(b.t) : baueMesh(b.t, st));
+        if (b.hof && !(b.bau > 0)) { const hh = g.userData.h; g.add(verschmelzen(hofMesh(b.hof))); g.userData.h = hh; }   // Hinterhof extra (Farben je Teil)
         const [gw, gd] = groesse(b.t);
         g.position.copy(weltPos(b.x + gw / 2, b.z + gd / 2));
         g.rotation.y = [0, Math.PI / 2, Math.PI, -Math.PI / 2][b.dreh || 0];

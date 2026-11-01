@@ -12,6 +12,13 @@ export const ERWEITERUNG = [
 export const MONAT_S = 60;           // Sekunden je Monat bei 1× (1.11. abends: Tempo wie Manor Lords – 1× langsam zum Bauen, dazu 4× und 12×)
 export const STEUER = 0.3;           // Denare je Einwohner und Monat bei Stimmung 70 (1.11.: 0,4 → 0,3)
 export const LAGER_GRUND = 150;
+// Hinterhöfe der Häuser (1.11., nach dem Prinzip der Wohnparzellen): einer je Hütte/Casa, bindet einen Arbeiter des Hauses
+export const HOF = {
+  garten: { n: 'Gemüsegarten', text: 'Bohnen, Kohl und Lauch: 1 Nahrung im Monat (nicht im Winter).', kosten: { holz: 5 }, erzeugt: { getreide: 1 }, ohneWinter: true },
+  huehner: { n: 'Hühner', text: 'Ein Stall mit Hühnern: 0,5 Nahrung im Monat, das ganze Jahr.', kosten: { holz: 8 }, erzeugt: { getreide: 0.5 } },
+  webstuhl: { n: 'Hausweberei', text: 'Ein Webstuhl im Hof: macht aus 0,3 Wolle 0,3 Tuch im Monat.', kosten: { holz: 10 }, braucht: { wolle: 0.3 }, erzeugt: { tuch: 0.3 } },
+  laube: { n: 'Weinlaube', text: 'Reben über dem Hof: 0,2 Wein im Monat, im Herbst mehr.', kosten: { holz: 6, denare: 15 }, erzeugt: { wein: 0.2 }, epoche: 2 },
+};
 export const NAHRUNG = new Set(['getreide', 'mehl', 'brot', 'fisch']);   // lagert im Kornspeicher (1.11.)      // Lagergrenze je Ware ohne Speicher
 export const ARBEIT_ANTEIL = 0.7;    // Anteil der Einwohner, der arbeitet
 export const ESSEN_JE_MONAT = 0.1;   // Nahrung je Einwohner und Monat

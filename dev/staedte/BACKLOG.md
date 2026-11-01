@@ -432,6 +432,9 @@ Konzept entsprechend überarbeitet (Zeitleiste der Geschichte statt Akte, Rücks
       anderswohin), Herbst ernten (Getreide erst jetzt in den Kornspeicher), im Winter verdirbt Ungeerntetes; Felder sichtbar
       braun/Furchen/grün/golden/Stoppeln. Ertrag 32 je Feld und Jahr (Fruchtwechsel 40). Start-Getreide 40 → 80.
       Test 103/103, Bild angesehen. Balance-Spieler 20 J.: kein Hunger, Dorf 42 min, Kolonie 235 min bei 1× (Ziegel knapp).
+- [x] **Hinterhöfe** (1.11.): Hütte/Casa bekommt einen Hof, den der Haushalt selbst betreibt (bindet 1 Arbeiter): Gemüsegarten
+      (1 Nahrung, nicht im Winter), Hühner (0,5 ganzjährig), Hausweberei (Wolle → Tuch), Weinlaube (ab Späte Republik). Sichtbar an
+      der vorderen Ecke des Hauses; Auswahl im Hausfenster (Knöpfe in einer Spalte). Test 104/104, Bild angesehen.
 - [ ] **Moritz 1.11.: „wie Manor Lords, auf Rom gemünzt“** – Genre-Prinzipien in eigener Form (keine kopierte Oberfläche/Assets):
       Lager/Kornspeicher getrennt + Träger, Arbeitskraft je Haushalt, Wohnparzellen mit Hinterhof-Ausbau, Ackerbau im Jahreslauf
       (pflügen/säen/ernten), Marktstände beliefert von Haushalten, regionale Entwicklungspunkte.

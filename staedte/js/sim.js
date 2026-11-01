@@ -1,5 +1,5 @@
 // Städte Roms – Spiellogik ohne Grafik (Gelände, Bauen, Monatsablauf)
-import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, ALEXANDRIA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, NAHRUNG, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
+import { RASTER, TIEFE, GRENZE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, FEUER, WAREN, JAHRESZEITEN, LAGER_GRUND, ARBEIT_ANTEIL, ESSEN_JE_MONAT, START, AUFTRAEGE, RAENGE, REGION_RING, VERMESSEN, LAND_BETRIEBE, WEG, NACHBAR, MANTUA, ALEXANDRIA, GALLIER, HANDEL, ABGABE, SCHUTZ, GEFAHR, STEUER, FORSCHUNG, NAHRUNG, HOF, WISSEN_GRUND, EPOCHE2, EPOCHE3, EPOCHEN, FAMILIE_START, AEMTER, RIVALEN, FAMILIE, HEIRAT, KLIENTEN, AUSBILDUNG, EREIGNISSE, EREIGNIS_CHANCE, EREIGNIS_PAUSE, SEUCHE, INSCHRIFTEN, GESCHICHTE, PRAEFEKT, BODENWERT, LAGE, RUF, VERTRAG, REGION_DATEN, REGION_TYPEN } from './daten.js';
 
 export const GRAS = 0, WALD = 1, WASSER = 2;
 export const EINZUG = 16;   // Laufweite der Arbeiter in Feldern (Mitte Haus → Mitte Betrieb)
@@ -273,6 +273,15 @@ export function abreissen(S, id) {
   return true;
 }
 // Rückgängig (1.11.): Baustelle oder frisch gelegte Straße/Mauer zurücknehmen – volle Erstattung
+export function hofBauen(S, b, art) {
+  const d = HOF[art]; if (!b || b.t !== 'huette' || !d) return { ok: false, grund: 'Kein Hinterhof möglich' };
+  if (b.stufe === 3) return { ok: false, grund: 'Eine Insula hat keinen Hof' };
+  if (d.epoche && epoche(S) < d.epoche) return { ok: false, grund: 'Erst in der Späten Republik' };
+  if (b.hof === art) return { ok: false, grund: 'Steht schon' };
+  if (!kannBezahlen(S, d.kosten)) return { ok: false, grund: 'Es fehlen ' + fehlendeKosten(S, d.kosten).join(', ') };
+  for (const [g, n] of Object.entries(d.kosten)) S.gut[g] -= n;
+  b.hof = art; return { ok: true };
+}
 export function zuruecknehmen(S, id) {
   const i = S.geb.findIndex(b => b.id === id); if (i < 0) return { ok: false, grund: 'Steht nicht mehr' };
   const b = S.geb[i];
@@ -331,7 +340,7 @@ export function monat(S, welt) {
   // Arbeiter verteilen (S1.2): Betriebe nach Priorität, dann Bauzeit; jeder holt sich Arbeiter aus den nächsten Häusern
   // in Laufweite. b.von = [[Haus-Id, Anzahl], …] für die Laufwege in der Szene.
   // Sklaven (S3.2) arbeiten vollständig, aber nur in Betrieben mit „sklaven“; dort gehen sie vor den Freien hin.
-  const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.round(h.bew * ARBEIT_ANTEIL) }))
+  const wohnorte = S.geb.filter(b => b.t === 'huette' && b.bew > 0).map(h => ({ h, frei: Math.max(0, Math.round(h.bew * ARBEIT_ANTEIL) - (h.hof ? 1 : 0)) }))
     .concat(S.geb.filter(b => b.t === 'quartier' && b.skl > 0).map(h => ({ h, frei: h.skl, skl: true })))
     .concat(S.geb.filter(b => b.t === 'zeltlager').map(h => ({ h, frei: GEB.zeltlager.bautrupp * (hat(S, 'bauhuette') ? 2 : 1), lager: true })));   // Bautrupp, nur für Baustellen
   const alle = wohnorte.reduce((s, x) => s + x.frei, 0);
@@ -440,6 +449,15 @@ export function monat(S, welt) {
     }
   }
   if (S.monat % 12 === 6) meld.push(`Der Winter naht: ${wintervorrat(S).holzBrauch} Holz Brennholz und ${wintervorrat(S).essenBrauch} Nahrung für drei Monate anlegen.`);
+
+  // Hinterhöfe (1.11.): der Haushalt bewirtschaftet seinen Hof selbst
+  for (const h of S.geb) {
+    const d = h.t === 'huette' && h.hof && h.bew > 1 && !(h.bau > 0) && HOF[h.hof]; if (!d) continue;
+    if (d.ohneWinter && js === 3) continue;
+    if (d.braucht && Object.entries(d.braucht).some(([g, n]) => (S.gut[g] || 0) < n)) { h.status.push({ art: 'rohstoff', gut: Object.keys(d.braucht)[0], text: `${d.n}: ${WAREN[Object.keys(d.braucht)[0]].n} fehlt`, leicht: true }); continue; }
+    for (const [g, n] of Object.entries(d.braucht || {})) S.gut[g] -= n;
+    for (const [g, n] of Object.entries(d.erzeugt)) S.gut[g] = Math.min(grenze(g), (S.gut[g] || 0) + n * (h.hof === 'laube' && js === 2 ? 3 : 1));
+  }
 
   // Häuser: Wasser, Markt, Wachstum, Aufstieg
   let wasserN = 0, marktN = 0, haeuser = 0;

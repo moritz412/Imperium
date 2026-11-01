@@ -1,5 +1,5 @@
 // Städte Roms – Start, Eingabe (Touch/Maus), Oberfläche, Spielschleife, Speichern
-import { ESSEN_JE_MONAT, RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, FORSCHUNG_BILD, ZWEIGE, EPOCHEN, EPOCHE2, EPOCHE3, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
+import { ESSEN_JE_MONAT, RASTER, TIEFE, ERWEITERUNG, GEB, CASA, INSULA, SKLAVEN, WAREN, KATEGORIEN, MONAT_S, AUFTRAEGE, JAHRESZEITEN, ARBEIT_ANTEIL, RAENGE, REGION_TYPEN, LAND_BETRIEBE, WEG, HANDEL, SCHUTZ, GEFAHR, FORSCHUNG, FORSCHUNG_BILD, HOF, ZWEIGE, EPOCHEN, EPOCHE2, EPOCHE3, AEMTER, RIVALEN, FAMILIE, KLIENTEN, AUSBILDUNG, INSCHRIFTEN, RUF, VERTRAG } from './daten.js';
 import * as sim from './sim.js';
 import { erzeugeSzene } from './szene.js';
 import { startseite } from './start.js';
@@ -359,6 +359,11 @@ function infoZeichnen() {
         ['Wache', sim.wacheNah(S, b)], ['Latrine', sim.latrineNah(S, b)], ['Thermen', sim.thermeNah(S, b)]].map(([n, v]) => `<span class="${v ? 'ja' : 'nein'}">${v ? '✓' : '✗'} ${n}</span>`).join('')}</div>
       <div class="zeile"><span>Bodenwert (Lage)</span><b>${zahl(sim.bodenwert(S, b))}</b></div>
       <div class="zeile"><span>Seuchengefahr</span><b>${b.krank > 0 ? 'krank' : (p => p < 0.001 ? 'gering' : p < 0.003 ? 'mittel' : 'hoch')(sim.seuchenGefahr(S, b))}</b></div>`;
+    if (b.stufe !== 3) {   // Hinterhof (1.11.)
+      const hd = b.hof && HOF[b.hof];
+      html += `<h3 class="fh">Hinterhof${hd ? ': ' + hd.n : ''}</h3><p class="fp">${hd ? hd.text + ' Ein Familienmitglied arbeitet dort statt in der Stadt.' : 'Die Familie kann im Hof etwas anbauen oder herstellen. Das bindet einen Arbeiter des Hauses.'}</p>
+        <div class="hofwahl">${Object.entries(HOF).map(([k, d]) => `<button class="knopf${b.hof === k ? ' an' : ''}" data-a="hof" data-hof="${k}"${b.hof === k || (d.epoche && sim.epoche(S) < d.epoche) ? ' disabled' : ''}>${d.n}<small>${d.epoche && sim.epoche(S) < d.epoche ? 'Späte Republik' : kostenText(d.kosten)}</small></button>`).join('')}</div>`;
+    }
     if (!casa) html += `<p>Aufstieg zur Casa (16 Bewohner): Haus voll, Brot, Brunnen und Markt in der Nähe, 10 Ziegel.</p>`;
     else if (b.stufe === 2) html += sim.rang(S) < INSULA.rang
       ? `<p>Ab der Kleinstadt (${RAENGE[INSULA.rang].ab} Einwohner) kann eine volle Casa zur Insula aufgestockt werden (30 Bewohner).</p>`
@@ -453,6 +458,7 @@ $('#info').addEventListener('click', e => {
   const b = S.geb.find(x => x.id === auswahl); if (!b) return;
   if (a.dataset.a === 'zu') schliesseInfo();
   if (a.dataset.a === 'prio') { b.prio = !b.prio; infoZeichnen(); }
+  if (a.dataset.a === 'hof') { const r = sim.hofBauen(S, b, a.dataset.hof); if (!r.ok) { melden(r.grund); ton.sfx('fehler'); } else { ton.sfx('bauen'); allesZeichnen(); } infoZeichnen(); }
   if (a.dataset.a === 'soll-' || a.dataset.a === 'soll+') { const max = GEB[b.t].arbeiter; b.soll = Math.max(0, Math.min(max, (b.soll ?? max) + (a.dataset.a === 'soll+' ? 1 : -1))); if (b.soll === max) delete b.soll; ton.sfx('klick'); infoZeichnen(); }
   if (a.dataset.a === 'familie') { const r = sim.familienGeschaeft(S, b); melden(r.ok ? r.text : r.grund); if (!r.ok) ton.sfx('fehler'); infoZeichnen(); kopfleiste(); }
   if (a.dataset.a === 'kaufen' || a.dataset.a === 'frei') {
