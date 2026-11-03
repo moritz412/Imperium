@@ -1,5 +1,5 @@
 // Limes – Service Worker: Netz zuerst, ohne Netz der zuletzt geladene Stand. Version wird von deploy_limes.py gesetzt.
-const CACHE = 'limes-510371bfa6';
+const CACHE = 'limes-d5a952cadd';
 const VORAB = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'lib/three.min.js', 'lib/CopyShader.js', 'lib/LuminosityHighPassShader.js', 'lib/GammaCorrectionShader.js',
   'lib/EffectComposer.js', 'lib/RenderPass.js', 'lib/ShaderPass.js', 'lib/UnrealBloomPass.js',

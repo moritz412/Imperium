@@ -130,7 +130,8 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,9vw,56px);l
     <div class="legend">
       <div><b>Pfeilhagel</b>Pfeilregen auf eine Stelle deiner Wahl</div>
       <div><b>Legion</b>Stellt sich auf den Weg und hält Feinde auf</div>
-      <div><b>Zenturio</b>Dein Held: schicke ihn hin, er kämpft und steigt auf</div>
+      <div><b>Zenturio</b>Dein Held: schicke ihn hin, er kämpft und steigt auf. Ab Stufe 3 betäubt sein Schlachtruf Feinde ringsum</div>
+      <div><b>Ereignisse</b>Nebel, Sturm, Festtage – manche Wellen bringen Überraschungen</div>
       <div><b>Spezialisierung</b>Türme auf Stufe 3 wählen eine von zwei Meisterformen</div>
     </div>
     <p class="lead" style="font-size:13px">Wische über das Spielfeld zum Verschieben, ziehe mit zwei Fingern zum Zoomen.</p>
@@ -213,32 +214,32 @@ const ENEMIES={
 };
 const SC_D=[293.7,329.6,349.2,392,440,493.9,523.3,587.3], SC_H=[293.7,311.1,370,392,440,466.2,554.4,587.3];
 const LEVELS=[
-  {name:'Limes am Rhein',style:'germ',epoch:'Antike · 9 n. Chr.',desc:'Germanische Stämme stürmen aus den Wäldern.',waves:8,gold:160,roster:['krieger','reiter','schild','druide'],boss:'Germanenfürst',
+  {name:'Limes am Rhein',brief:'Im Jahr 9 n. Chr. vernichtete Arminius drei römische Legionen im Teutoburger Wald. Danach sicherte Rom die Rheingrenze mit Kastellen und Wachtürmen – dem Limes.',style:'germ',epoch:'Antike · 9 n. Chr.',desc:'Germanische Stämme stürmen aus den Wäldern.',waves:8,gold:160,roster:['krieger','reiter','schild','druide'],boss:'Germanenfürst',
    path:[[2,-1],[2,4],[7,4],[7,9],[3,9],[3,12],[6,12],[6,15]],scale:SC_D,
    pal:{g1:'#4a6b35',g2:'#43632f',road:'#8a6d47',edge:'#4a3a28',deco:'tree',sky:'#9fb6c4',fog:'#8fa7b0',unit:'#7a6a4a',sun:['#fff0d6',2.2,58],hemi:['#cfe2ff','#3d4a2a'],wx:'leaves',water:'left',hill:'#3e5d2c'}},
-  {name:'Pass über die Alpen',style:'gall',epoch:'Antike · Gallische Kriege',desc:'Gallische Reiter auf schmalen Bergpfaden.',waves:9,gold:180,roster:['krieger','reiter','schild','druide'],boss:'Gallischer Häuptling',
+  {name:'Pass über die Alpen',brief:'Die Alpenpässe verbanden Italien mit Gallien. Wer sie hielt, beherrschte Handel und Heerzüge – in Caesars Gallischen Kriegen wurde um jeden Pass gekämpft.',style:'gall',epoch:'Antike · Gallische Kriege',desc:'Gallische Reiter auf schmalen Bergpfaden.',waves:9,gold:180,roster:['krieger','reiter','schild','druide'],boss:'Gallischer Häuptling',
    path:[[8,-1],[8,3],[1,3],[1,7],[8,7],[8,11],[4,11],[4,15]],scale:SC_D,
    pal:{g1:'#66735c',g2:'#5e6b55',road:'#9b8f7c',edge:'#4c463d',deco:'rock',sky:'#c4d2e0',fog:'#b8c6d2',unit:'#6b7a3a',sun:['#eef4ff',1.6,50],hemi:['#c8d6ee','#3a3a36'],hi:.7,wx:'snow',hill:'#7f8a7a',peaks:true}},
-  {name:'Ebene von Cannae',style:'karth',epoch:'Antike · Punische Kriege',desc:'Hannibals Elefanten rollen heran.',waves:10,gold:220,roster:['krieger','reiter','schild','elefant'],boss:'Feldherr Karthagos',
+  {name:'Ebene von Cannae',brief:'Bei Cannae schloss Hannibal 216 v. Chr. ein viel größeres römisches Heer ein – eine der schwersten Niederlagen Roms. Seine Elefanten hatte er über die Alpen geführt, nur wenige überlebten.',style:'karth',epoch:'Antike · Punische Kriege',desc:'Hannibals Elefanten rollen heran.',waves:10,gold:220,roster:['krieger','reiter','schild','elefant'],boss:'Feldherr Karthagos',
    path:[[-1,2],[6,2],[6,6],[2,6],[2,10],[7,10],[7,13],[10,13]],scale:SC_H,
    pal:{g1:'#9a9357',g2:'#8e874f',road:'#b6955f',edge:'#5e4a2c',deco:'bush',sky:'#e3cf9f',fog:'#d6c08e',unit:'#a07a4a',sun:['#ffd9a0',2.4,48],hemi:['#ffe9c4','#5a4a2a'],wx:'dust',hill:'#8a8048'}},
-  {name:'Mauern von Byzanz',style:'crus',epoch:'Mittelalter · 1204',desc:'Gepanzerte Ritter und Rammböcke drängen zum Goldenen Tor.',waves:11,gold:250,roster:['krieger','reiter','schild','ritter','ramme'],boss:'Belagerungsturm',
+  {name:'Mauern von Byzanz',brief:'1204 eroberten die Kreuzfahrer des Vierten Kreuzzugs Konstantinopel. Die Theodosianischen Mauern hatten zuvor fast 800 Jahre lang jedem Angriff standgehalten.',style:'crus',epoch:'Mittelalter · 1204',desc:'Gepanzerte Ritter und Rammböcke drängen zum Goldenen Tor.',waves:11,gold:250,roster:['krieger','reiter','schild','ritter','ramme'],boss:'Belagerungsturm',
    path:[[5,-1],[5,2],[1,2],[1,13],[4,13],[4,5],[8,5],[8,15]],scale:SC_H,
    pal:{g1:'#ab9568',g2:'#a08b5f',road:'#cbb68a',edge:'#5e5038',deco:'ruin',sky:'#e8a978',fog:'#d39a72',unit:'#5a4a6a',sun:['#ffb070',2.3,28],hemi:['#ffcfa8','#4a3550'],wx:'dust',water:'right',hill:'#9a835a'}},
-  {name:'Kaiserburg Nürnberg',style:'lands',epoch:'Spätmittelalter · Reichstag',desc:'Alles, was das Reich je bedroht hat, auf einmal.',waves:12,gold:280,roster:['krieger','reiter','schild','elefant','ritter','druide','ramme'],boss:'Söldnerobrist',
+  {name:'Kaiserburg Nürnberg',brief:'Die Kaiserburg war eine der wichtigsten Burgen des Heiligen Römischen Reiches. Nach der Goldenen Bulle von 1356 sollte jeder neue König seinen ersten Reichstag in Nürnberg halten.',style:'lands',epoch:'Spätmittelalter · Reichstag',desc:'Alles, was das Reich je bedroht hat, auf einmal.',waves:12,gold:280,roster:['krieger','reiter','schild','elefant','ritter','druide','ramme'],boss:'Söldnerobrist',
    path:[[1,-1],[1,3],[8,3],[8,6],[1,6],[1,9],[8,9],[8,12],[3,12],[3,15]],scale:[261.6,293.7,329.6,349.2,392,440,493.9,523.3],
    pal:{g1:'#6b7a3e',g2:'#637238',road:'#a85f45',edge:'#4e2a1e',deco:'autumn',sky:'#c9b9a0',fog:'#b8a88e',unit:'#6a5a3a',sun:['#ffe2b0',2.0,40],hemi:['#f4e2c8','#4a3a26'],wx:'leaves',hill:'#6a6a36'}},
-  {name:'Hochland von Aksum',style:'aksum',epoch:'Antike · Reich von Aksum',desc:'Kamelreiter stürmen auf die Stelen von Aksum zu.',waves:12,gold:300,roster:['krieger','kamel','schild','elefant','druide'],boss:'Wüstenkönig',names:{druide:'Seher'},
+  {name:'Hochland von Aksum',brief:'Das Reich von Aksum im Hochland des heutigen Eritrea und Äthiopien handelte mit Rom, Persien und Indien. Seine gewaltigen Stelen stehen bis heute.',style:'aksum',epoch:'Antike · Reich von Aksum',desc:'Kamelreiter stürmen auf die Stelen von Aksum zu.',waves:12,gold:300,roster:['krieger','kamel','schild','elefant','druide'],boss:'Wüstenkönig',names:{druide:'Seher'},
    path:[[-1,1],[7,1],[7,4],[2,4],[2,8],[8,8],[8,11],[1,11],[1,15]],scale:[261.6,293.7,329.6,392,440,523.3,587.3,659.3],
    pal:{g1:'#857e46',g2:'#7b7441',road:'#a6603c',edge:'#4e2b19',deco:'stele',sky:'#e8d2a6',fog:'#d8bf8e',unit:'#8a5a3a',sun:['#fff2d6',2.6,62],hemi:['#fff0d8','#5a3a22'],wx:'dust',hill:'#8f7a44',peaks:true}},
-  {name:'Burg Himeji',style:'ashi',epoch:'Sengoku · 16. Jahrhundert',desc:'Samurai, Ashigaru und Rammböcke rücken über den Burgweg vor.',waves:13,gold:320,roster:['krieger','reiter','samurai','schild','ramme','druide'],boss:'Daimyō',names:{krieger:'Ashigaru',reiter:'Berittene Bogenschützen',druide:'Mönch'},
+  {name:'Burg Himeji',brief:'Burg Himeji wurde im 16. Jahrhundert zur Festung ausgebaut und ist bis heute im Original erhalten. Wegen ihrer weißen Mauern heißt sie „Burg des Weißen Reihers“.',style:'ashi',epoch:'Sengoku · 16. Jahrhundert',desc:'Samurai, Ashigaru und Rammböcke rücken über den Burgweg vor.',waves:13,gold:320,roster:['krieger','reiter','samurai','schild','ramme','druide'],boss:'Daimyō',names:{krieger:'Ashigaru',reiter:'Berittene Bogenschützen',druide:'Mönch'},
    path:[[4,-1],[4,2],[8,2],[8,6],[2,6],[2,10],[7,10],[7,13],[2,13],[2,15]],scale:[293.7,311.1,392,440,466.2,587.3,622.3,784],
    pal:{g1:'#557549',g2:'#4e6d43',road:'#c9c2ad',edge:'#55504a',deco:'sakura',sky:'#d9c6d4',fog:'#c9b4c4',unit:'#3a3a48',hat:true,sun:['#fff0f0',2.1,46],hemi:['#ffe6f0','#33443a'],wx:'petals',water:'right',hill:'#4a6a42'}},
-  {name:'Völkerschlacht bei Leipzig',style:'napo',epoch:'Napoleonische Kriege · 1813',desc:'Die Grande Armée marschiert mit Geschützen auf. Deine Kanonen antworten.',waves:14,gold:360,towers:'neu',roster:['krieger','reiter','schild','ritter','ramme'],boss:'Napoleon Bonaparte',
+  {name:'Völkerschlacht bei Leipzig',brief:'1813 standen sich bei Leipzig über eine halbe Million Soldaten gegenüber. Napoleons Niederlage beendete seine Herrschaft über Deutschland.',style:'napo',epoch:'Napoleonische Kriege · 1813',desc:'Die Grande Armée marschiert mit Geschützen auf. Deine Kanonen antworten.',waves:14,gold:360,towers:'neu',roster:['krieger','reiter','schild','ritter','ramme'],boss:'Napoleon Bonaparte',
    names:{krieger:'Linieninfanterie',reiter:'Chasseurs',schild:'Grenadiere',ritter:'Kürassiere',ramme:'Feldgeschütz'},
    path:[[-1,2],[4,2],[4,6],[8,6],[8,9],[2,9],[2,12],[7,12],[7,15]],scale:[293.7,329.6,370,392,440,493.9,554.4,587.3],
    pal:{g1:'#7a8448',g2:'#717b42',road:'#9a8466',edge:'#4a3a28',deco:'autumn',sky:'#bab4a6',fog:'#aaa496',unit:'#2a3f8a',sun:['#ffe8c8',1.8,36],hemi:['#e8e2d6','#3a3426'],wx:'leaves',hill:'#6e7040'}},
-  {name:'Ewiger Limes',style:'mix',towers:'neu',epoch:'Endlos-Modus',desc:'Welle um Welle aus allen Epochen. Wie lange hältst du?',endless:true,waves:Infinity,gold:260,roster:['krieger','reiter','schild','druide','elefant','ritter','kamel','samurai','ramme'],boss:'Weltenbrecher',
+  {name:'Ewiger Limes',brief:'Kein Reich hält ewig. Hier zählt nur, wie viele Wellen du überstehst.',style:'mix',towers:'neu',epoch:'Endlos-Modus',desc:'Welle um Welle aus allen Epochen. Wie lange hältst du?',endless:true,waves:Infinity,gold:260,roster:['krieger','reiter','schild','druide','elefant','ritter','kamel','samurai','ramme'],boss:'Weltenbrecher',
    path:[[0,-1],[0,2],[9,2],[9,5],[0,5],[0,8],[9,8],[9,11],[0,11],[0,13],[5,13],[5,15]],scale:SC_D,
    pal:{g1:'#466a46',g2:'#406240',road:'#7a6a58',edge:'#2a2420',deco:'tree',sky:'#2a3450',fog:'#2a3450',unit:'#5a4a3a',sun:['#b8c8ff',1.3,38],hemi:['#6a7aa8','#201a24'],wx:'embers',hill:'#2e4436',night:true}}
 ];
@@ -257,6 +258,14 @@ const ACH=[
   {id:'pax',n:'Pax Romana',d:'Gewinne alle acht Gebiete'}
 ];
 let BQ=[], bUntil=0;
+const EVENTS=[
+  {id:'nebel',n:'Nebel zieht auf',d:'Reichweite aller Türme −20 %',range:.8,fog:true},
+  {id:'fest',n:'Festtag in der Stadt',d:'Besiegte Feinde bringen doppelte Denare',gold:2},
+  {id:'seuche',n:'Seuche im Feindlager',d:'Feinde dieser Welle haben 25 % weniger Leben',hp:.75},
+  {id:'sturm',n:'Sturm',d:'Pfeile und Bolzen verlieren 25 % Schaden',arrow:.75},
+  {id:'eil',n:'Eilmarsch',d:'Feinde laufen 20 % schneller, bringen aber 50 % mehr Denare',spd:1.2,gold:1.5},
+  {id:'verst',n:'Verstärkung',d:'Legion und Pfeilhagel sind sofort bereit',ready:true}
+];
 function ach(id){ progress.ach=progress.ach||{}; if(progress.ach[id]) return; const A=ACH.find(a=>a.id===id); if(!A) return;
   progress.ach[id]=1; saveProgress(); showBanner('Erfolg: '+A.n,A.d+' · +10 Startdenare'); sfx('coin'); }
 const achBonus=()=>Object.keys(progress.ach||{}).length*10;
@@ -410,7 +419,7 @@ function renderKarte(){
 function renderKCard(){
   const i=kSel, L=LEVELS[i], lk=isLocked(i), sv=loadRun(), box=$('kcard');
   const lock=L.endless?'Gewinne zuerst Gebiet I, dann öffnet sich der Ewige Limes.':'Gewinne das vorige Gebiet, um hierher vorzurücken.';
-  box.innerHTML=`<div class="eyebrow">${ROMAN[i]} · ${L.epoch}</div><div class="t">${L.name}</div><div class="s">${lk?lock:L.desc}${lk?'':'<br>'+(L.endless?'Endlos, alle zehn Wellen ein Boss.':L.waves+' Wellen · Anführer: '+L.boss)+(L.towers==='neu'?' · mit Kanonen':'')}</div>`;
+  box.innerHTML=`<div class="eyebrow">${ROMAN[i]} · ${L.epoch}</div><div class="t">${L.name}</div><div class="s">${lk?lock:L.desc}${lk||!L.brief?'':'<br><i style="color:var(--stein)">'+L.brief+'</i>'}${lk?'':'<br>'+(L.endless?'Endlos, alle zehn Wellen ein Boss.':L.waves+' Wellen · Anführer: '+L.boss)+(L.towers==='neu'?' · mit Kanonen':'')}</div>`;
   if(lk) return;
   const row=document.createElement('div'); row.className='row';
   const b=document.createElement('button'); b.className='prim'; b.textContent=(progress.stars[i]?'Erneut spielen':'Feldzug beginnen'); b.onclick=()=>startLevel(i); row.append(b);
@@ -515,18 +524,21 @@ function startWave(){
   G.wave++; if(G.L.endless&&G.wave>=20) ach('ewig');
   const hpMul=1+(G.L.endless?.15:.12)*(G.wave-1)+.3*G.diff;
   const ev=buildWave(G.L,G.wave);
-  ev.forEach(e=>G.queue.push({t:G.t+e.t,type:e.type,hpMul}));
+  const isBoss=ev.some(e=>e.type==='boss');
+  G.ev=null; if(G.wave>=3&&!isBoss&&Math.random()<.35){ G.ev=EVENTS[Math.floor(Math.random()*EVENTS.length)]; if(G.ev.ready){ G.cd.hail=0; G.cd.legion=0; } }
+  ev.forEach(e=>G.queue.push({t:G.t+e.t,type:e.type,hpMul:hpMul*(G.ev&&G.ev.hp||1),ev:G.ev}));
   if(early&&G.wave>1){G.gold+=15;floatText(COLS/2*C,2*C,'+15 früher Angriff','#f0cf7a');}
   let inc=0; for(const k in G.towers){ const t=G.towers[k]; if(t.type==='markt'){ const v=st(t).income; inc+=v; floatText(t.x,t.y,'+'+v,'#f0cf7a'); puff(t.x,t.y,.6,8,'#f0cf7a',60,.6,.05,2,5);} }
   if(inc){ G.gold+=inc; sfx('coin'); }
   const boss=ev.some(e=>e.type==='boss');
   if(!boss) showBanner('Welle '+G.wave,waveSummary(G.wave));
+  if(G.ev) showBanner(G.ev.n,G.ev.d);
   G.savedIdle=false;
   sfx(boss?'boss':'horn'); updateHud(); renderPanel();
 }
-function spawn(type,hpMul){
+function spawn(type,hpMul,ev){
   const d=ENEMIES[type], hp=d.hp*hpMul;
-  G.enemies.push({type,hp,max:hp,hpMul,spd:d.spd,armor:d.armor,gold:d.gold,lives:d.lives,noSlow:!!d.noSlow,heal:d.heal||0,
+  G.enemies.push({type,hp,max:hp,hpMul,spd:d.spd*(ev&&ev.spd||1),armor:d.armor,gold:Math.round(d.gold*(ev&&ev.gold||1)),lives:d.lives,noSlow:!!d.noSlow,heal:d.heal||0,
     seg:0,x:G.wp[0][0],y:G.wp[0][1],dist:0,ang:0,slow:0,slowT:0,burn:0,hitT:0,step:Math.random()*6});
   if(type==='boss'){ R.focus={e:G.enemies[G.enemies.length-1],t:0,dur:2.8}; showBanner(G.L.boss,'Der Anführer greift an!'); }
 }
@@ -574,7 +586,7 @@ function loop(now){
 }
 function update(dt){
   G.t+=dt;
-  for(let i=G.queue.length-1;i>=0;i--){ if(G.queue[i].t<=G.t){ spawn(G.queue[i].type,G.queue[i].hpMul); G.queue.splice(i,1);} }
+  for(let i=G.queue.length-1;i>=0;i--){ if(G.queue[i].t<=G.t){ spawn(G.queue[i].type,G.queue[i].hpMul,G.queue[i].ev); G.queue.splice(i,1);} }
   // Fähigkeiten
   G.cd.hail=Math.max(0,G.cd.hail-dt); G.cd.legion=Math.max(0,G.cd.legion-dt);
   for(const f of G.fx){ f.t+=dt; if(f.t>=.8&&!f.done){ f.done=true; G.shake=Math.max(G.shake,.12);
@@ -602,6 +614,7 @@ function update(dt){
     if(e.heal&&!e.dead){ e.healT=(e.healT||0)-dt;
       for(const o of G.enemies){ if(o!==e&&!o.dead&&o.hp<o.max&&Math.hypot(o.x-e.x,o.y-e.y)<C*1.5){ o.hp=Math.min(o.max,o.hp+e.heal*e.hpMul*dt); if(e.healT<=0&&Math.random()<.2){ puff(o.x,o.y,.4,2,'#9cff8a',20,.6,.05,1,-1); } } }
       if(e.healT<=0){ e.healT=1.2; ring(e.x,e.y,C*1.5,'#9cff8a'); sfx('heal'); } }
+    if(e.stun>0){ e.stun-=dt; if(Math.random()<dt*6) puff(e.x,e.y,EHEAD[e.type]+.2,1,'#f0cf7a',20,.4,.04,.3,0); continue; }
     if(e.blocked||e.dead) { e.step+=dt*6; continue; }
     if((e.type==='reiter'||e.type==='ritter'||e.type==='kamel'||e.type==='elefant'||e.type==='ramme')&&Math.random()<dt*7) puff(e.x-Math.cos(e.ang)*10,e.y-Math.sin(e.ang)*10,.03,1,G.L.pal.road,14,.7,.09,.4,.3);
     let mv=e.spd*(1-e.slow)*C*dt; e.step+=dt*e.spd*(1-e.slow)*9;
@@ -622,7 +635,7 @@ function update(dt){
   for(const k in G.towers){
     const t=G.towers[k], S=TOWERS[t.type];
     if(t.type==='aquila'||t.type==='markt') continue;
-    const ST=st(t), rr=ST.range*C, mul=1+t.buff;
+    const EV=curEv(), ST=st(t), rr=ST.range*C*(EV&&EV.range||1), mul=(1+t.buff)*((t.type==='archer'||t.type==='ballista')&&EV&&EV.arrow||1);
     if(t.swing>0) t.swing=Math.max(0,t.swing-dt*1.6);
     if(t.recoil>0) t.recoil-=dt;
     if(t.type==='fire'){
@@ -672,11 +685,13 @@ function update(dt){
   if(G.lives<=0) endGame(false);
   else if(G.wave>=G.L.waves&&!G.queue.length&&!G.enemies.length) endGame(true);
   const idle=!G.queue.length&&!G.enemies.length;
+  if(idle) G.ev=null;
   $('waveBtn').classList.toggle('pulse',idle&&G.wave<G.L.waves);
   if(idle&&!G.savedIdle&&!G.over&&G.lives>0){ G.savedIdle=true; saveRun(); }
   updateAbil();
 }
 const towerH=l=>.3+l*.15;
+function curEv(){ return G.ev&&(G.queue.length||G.enemies.length)?G.ev:null; }
 function tickFx(dt){ for(const q of G.parts){ q.life-=dt; q.x+=q.vx*dt; q.y+=q.vy*dt; q.vx*=.93; q.vy*=.93; q.h+=q.vh*dt; q.vh-=q.g*dt; if(q.h<0&&!q.nf){q.h=0;q.vh=0;} if(q.nf&&q.h<-2) q.life=0; }
   G.parts=G.parts.filter(q=>q.life>0); }
 function heroDmg(){ return (22+6*G.diff)*(1+.3*(G.hero.lvl-1)); }
@@ -685,7 +700,10 @@ function updateHero(dt){
   if(H.dead>0){ H.dead-=dt; if(H.dead<=0){ H.dead=0; H.hp=H.max; H.x=H.hx; H.y=H.hy; H.tx=H.hx; H.ty=H.hy; floatText(H.x,H.y,'Zenturio ist zurück','#f0cf7a'); } return; }
   const blocked=[];
   for(const e of G.enemies){ if(e.dead||e.blocked) continue; if(Math.hypot(e.x-H.x,e.y-H.y)<C*.55&&blocked.length<2){ e.blocked=H; blocked.push(e); } }
-  H.fight=blocked.length>0; if(H.swing>0) H.swing-=dt;
+  H.fight=blocked.length>0; if(H.swing>0) H.swing-=dt; H.shout=(H.shout||0)-dt;
+  if(H.lvl>=3&&H.shout<=0){ const near=G.enemies.filter(e=>!e.dead&&Math.hypot(e.x-H.x,e.y-H.y)<C*1.6);
+    if(near.length>=3||(H.fight&&near.length>=2)){ H.shout=18; for(const e of near){ if(e.type!=='boss') e.stun=2; hit(e,heroDmg()*1.5,.3,'hero'); }
+      ring(H.x,H.y,C*1.6,'#f0cf7a'); floatText(H.x,H.y,'Schlachtruf!','#f0cf7a'); G.shake=Math.max(G.shake,.15); sfx('horn'); } }
   if(H.fight){
     H.cd-=dt; const tg=blocked[0]; H.ang=Math.atan2(tg.y-H.y,tg.x-H.x); H.moving=false;
     if(H.cd<=0){ H.cd=.7; H.swing=.3; hit(tg,heroDmg(),.3,'hero'); sfx('sword'); puff(tg.x,tg.y,.4,3,'#e8e0d0',60,.25,.04,1.5,6); }
@@ -1171,8 +1189,13 @@ function animWalk(U,step,amp){
   if(U.legs) U.legs.forEach((l,i)=>l.rotation.z=Math.sin(step+(i%2)*Math.PI)*amp);
   if(U.arms) U.arms.forEach((a,i)=>a.rotation.z=Math.sin(step+(i%2?0:Math.PI))*amp*.8);
 }
+function autoQ(dt){
+  if(!R.hq||R.autoDone||G.paused||G.over||document.hidden) return; R.fs=(R.fs||0)+dt; R.fn=(R.fn||0)+1;
+  if(R.fs<5) return; const avg=R.fs/R.fn; R.fs=0; R.fn=0;
+  if(avg>1/26){ if(R.tilt&&R.tilt.enabled){ R.tilt.enabled=false; return; } if(R.bloom&&R.bloom.enabled){ R.bloom.enabled=false; return; } R.hq=false; R.sun.castShadow=false; R.autoDone=true; showBanner('Grafik angepasst','Für flüssigeres Spielen vereinfacht – änderbar im Pause-Menü'); }
+  else R.autoDone=true; }
 function render3d(dt){
-  const tm=performance.now()/1000;
+  const tm=performance.now()/1000; autoQ(dt);
   for(const e of G.enemies){
     if(!e.obj){ e.obj=makeEnemy(e.type); R.dyn.add(e.obj); }
     const inner=e.obj.userData.inner, U=inner.userData;
@@ -1256,6 +1279,7 @@ function render3d(dt){
     const el=(P.sun[2]+12-R.tod*26)*Math.PI/180, az=(-35+R.tod*70)*Math.PI/180, d=20;
     R.sun.position.set(COLS/2+Math.sin(az)*Math.cos(el)*d*-1,Math.sin(el)*d+1,ROWS/2-Math.cos(az)*Math.cos(el)*d*.6);
     if(!P.night){ R.sun.color.copy(R.sunBase).lerp(lin('#ff9a5a'),R.tod*.45); R.sun.intensity=R.sunI*(1-R.tod*.15); } }
+  if(R.scene.fog&&R.camD0){ const f=curEv()&&curEv().fog?.55:1; R.fogK=(R.fogK||1)+(f-(R.fogK||1))*Math.min(1,dt*.8); R.scene.fog.near=R.camD0*1.05*R.fogK; R.scene.fog.far=R.camD0*2.3*R.fogK; }
   if(R.water){ R.water.position.y=-1.45+Math.sin(tm*1.2)*.015; TEX.water.offset.y=-tm*.04; TEX.water.offset.x=Math.sin(tm*.3)*.05; }
   // Kamera wackeln
   let base=R.camBase, look=R.camLook;
@@ -1454,7 +1478,8 @@ function renderPanel(){
   }
   if(!G.sel){
     const nx=G.wave<G.L.waves?`<br>Nächste Welle: <b>${waveSummary(G.wave+1)}</b>`:'<br><b>Letzte Welle unterwegs – halte durch!</b>';
-    p.innerHTML=`<div class="hint">Tippe auf ein <b>freies Feld</b>, um zu bauen, oder auf einen <b>Turm</b>, um ihn zu verbessern.${nx}</div>`;
+    const evx=curEv()?`<br><span style="color:var(--gold)">Ereignis: ${curEv().n}</span> – ${curEv().d}`:'';
+    p.innerHTML=`<div class="hint">Tippe auf ein <b>freies Feld</b>, um zu bauen, oder auf einen <b>Turm</b>, um ihn zu verbessern.${nx}${evx}</div>`;
     return;
   }
   const t=G.towers[G.sel.join(',')];
@@ -1529,7 +1554,7 @@ function endGame(win){
 function pause(){
   if(!G||G.over) return; G.paused=true; musicStop();
   const o=overlay(`<h2>Pause</h2><p>${G.L.name} · Welle ${G.L.endless?G.wave:G.wave+'/'+G.L.waves}</p><button class="prim" id="ovGo">Weiterspielen</button><button id="ovGfx">Grafik: ${R.hq?'Hoch':'Einfach (schneller)'}</button><button id="ovRetry">Neu starten</button><button id="ovMenu">Gebietsauswahl</button>`);
-  o.querySelector('#ovGfx').onclick=e=>{ R.hq=!R.hq; R.sun.castShadow=R.hq; try{localStorage.setItem('limes-gfx',R.hq?'high':'low');}catch(_){} e.target.textContent='Grafik: '+(R.hq?'Hoch':'Einfach (schneller)'); render3d(0); };
+  o.querySelector('#ovGfx').onclick=e=>{ R.hq=!R.hq; R.sun.castShadow=R.hq; R.autoDone=true; if(R.tilt) R.tilt.enabled=true; if(R.bloom) R.bloom.enabled=true; try{localStorage.setItem('limes-gfx',R.hq?'high':'low');}catch(_){} e.target.textContent='Grafik: '+(R.hq?'Hoch':'Einfach (schneller)'); render3d(0); };
   o.querySelector('#ovGo').onclick=()=>{ G.paused=false; o.hidden=true; last=performance.now(); musicStart(); };
   o.querySelector('#ovRetry').onclick=()=>startLevel(G.li);
   o.querySelector('#ovMenu').onclick=toMenu;

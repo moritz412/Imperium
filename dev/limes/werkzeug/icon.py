@@ -37,6 +37,6 @@ def icon(pad=0.0):
     d.rectangle([sc(.15),sc(.80),sc(.85),sc(.83)],fill=dark)
     return im.resize((S//2,S//2),Image.LANCZOS)
 base=icon(0.06); mask=icon(0.14)
-for n,sz,im in [('icon-180.png',180,base),('icon-192.png',192,base),('icon-512.png',512,base),('icon-maskable-512.png',512,mask),('favicon-64.png',64,base)]:
+for n,sz,im in [('icon-180.png',180,base),('icon-192.png',192,base),('icon-512.png',512,base),('icon-maskable-512.png',512,mask),('favicon-64.png',64,base),('icon-152.png',152,base),('icon-167.png',167,base),('apple-touch-icon.png',180,base)]:
     im.resize((sz,sz),Image.LANCZOS).save(os.path.join(OUT,n),optimize=True)
 print('ok')

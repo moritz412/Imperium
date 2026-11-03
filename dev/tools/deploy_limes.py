@@ -18,8 +18,11 @@ HEAD = '''<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Limes">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest?v=__V__">
+<link rel="apple-touch-icon" href="/Imperium/limes/icons/apple-touch-icon.png?v=__V__">
+<link rel="apple-touch-icon" sizes="180x180" href="/Imperium/limes/icons/icon-180.png?v=__V__">
+<link rel="apple-touch-icon" sizes="167x167" href="/Imperium/limes/icons/icon-167.png?v=__V__">
+<link rel="apple-touch-icon" sizes="152x152" href="/Imperium/limes/icons/icon-152.png?v=__V__">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="stylesheet" href="../fonts/fonts.css">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
@@ -49,6 +52,7 @@ def bauen():
         shutil.copytree(os.path.join(SRC, d), os.path.join(DST, d))
     shutil.copy(os.path.join(SRC, 'manifest.webmanifest'), DST)
     ver = hashlib.sha1(html.encode('utf-8')).hexdigest()[:10]
+    html = html.replace('__V__', ver)
     open(os.path.join(DST, 'index.html'), 'w', encoding='utf-8').write(html)
     sw = open(os.path.join(SRC, 'sw.js'), encoding='utf-8').read().replace('__VER__', ver)
     open(os.path.join(DST, 'sw.js'), 'w', encoding='utf-8').write(sw)
