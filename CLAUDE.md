@@ -67,6 +67,12 @@ Eigenständiges Aufbauspiel „Imperium der Epochen: Städte Roms“: römische 
   Kamera fest schräg (orthografisch) – Modelle für diesen Blickwinkel und für Instancing bauen.
 - Alle festen Regeln oben gelten auch hier (keine erfundenen Tests/FPS, iPad nicht getestet sagen, Spiel statt Software).
 
+## Ableger „Limes“ (Tower Defense, ab 03.11.2026)
+- Quelle `dev/limes/limes.html` – eine Datei, zugleich die claude.ai-Artifact-Fassung (ohne `<head>`). Three.js r128.
+- Veröffentlichen: `python dev/tools/deploy_limes.py` (baut `limes/` mit Kopf, Manifest, Icon, Service Worker und lokalen
+  Three.js-Kopien aus `dev/limes/lib/`); `deploy.py` macht das mit. Seite: https://moritz412.github.io/Imperium/limes/
+- Icons: `python dev/limes/werkzeug/icon.py`. Der Haupt-Service-Worker lässt `limes/` und `staedte/` in Ruhe (build.py).
+
 ## PC-Pipeline (Moritz' Windows-PC, RTX 4060 8 GB)
 Ordner `Desktop\imperium-bilder`. `warteschlange.bat` läuft dauerhaft und arbeitet `warteschlange\<job>\` ab:
 `items.json` → FLUX-Bilder (`gen.py`), `tts.json` → XTTS-Sprecher, zusätzlich `pruef.json` → Whisper-Prüfung (`tts_pruef.py`).

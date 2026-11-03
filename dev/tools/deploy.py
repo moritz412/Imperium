@@ -35,4 +35,6 @@ if os.path.isdir(P): shutil.copytree(P, os.path.join(ROOT, 'proto'), dirs_exist_
 # Ableger Städte Roms: Quelle dev/staedte → staedte/ (eigene Seite neben dem Hauptspiel)
 sys.path.insert(0, os.path.dirname(__file__))
 import deploy_staedte; deploy_staedte.kopieren()
+# Ableger Limes (Tower Defense): Quelle dev/limes → limes/
+import deploy_limes; deploy_limes.bauen()
 print('Fertig. Jetzt: git add -A && git commit -m "..." && git push')
