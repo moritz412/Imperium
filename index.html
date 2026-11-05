@@ -8321,6 +8321,7 @@ function openHof(tab){if(typeof tab!=='string')tab=null;if(tab)HOF_TAB=tab;if(ta
 
 function stanceHtml(a,mine){const at=attritionOf(a);let h='';
   if(a.st==='belagern'&&siegeAt(a.sieg)){const s=siegeAt(a.sieg),P=S.prov[a.sieg];h+=`<div class="siegebox">⛺ Belagert <b>${esc(PROV_DEF[a.sieg].name)}</b> seit ${s.t} ${s.t===1?'Runde':'Runden'} · Garnison ${P.gar} · Mauern ${Math.round(siegeMul(a.sieg)*100)} %<small>Spätestens nach acht Runden ergibt sich die Stadt. ${stormOk(a.f,a.sieg)?'Die Mauern sind sturmreif.':`Sturm ab Runde ${siegeNeed(a.f,a.sieg,a)}${artCut(a,a.sieg)?` (Geschütze sparen ${artCut(a,a.sieg)})`:''}.`}</small></div>${a.f===S.player?`<div class="row" style="margin:-2px 0 10px"><button class="btn${stormOk(a.f,a.sieg)?' primary':''}" data-act="storm" data-id="${a.id}"${a.mp>0?'':' disabled'}>⚔ Stadt angreifen</button><button class="btn" data-act="unsiege" data-id="${a.id}">Abziehen</button></div>`:''}${a.f===S.player?(s.ringT==null?`<div class="row" style="margin:-4px 0 10px"><button class="btn" data-act="ring" data-id="${a.id}">Belagerungsring bauen (2 Runden)</button></div><p class="note" style="margin:-8px 0 10px">Ist der Ring geschlossen, hungert die Stadt schneller aus und Entsatz kämpft gegen +30 %.</p>`:`<p class="note" style="margin:-4px 0 10px">${ringOn(s)?'Belagerungsring steht: Die Stadt hungert schneller aus, Entsatz kämpft gegen +30 %.':'Belagerungsring im Bau.'}</p>`):''}`;}
+  if(a.f===S.player)try{h+=hnPassHtml(a);}catch(e){}
   if(a.f===S.player)try{h+=armyStateHtml(a);}catch(e){}
   if(a.f===S.player&&a.st!=='belagern')h+=planHtml(a);
   if(a.f===S.player&&a.st!=='belagern'){const BT=bridgeTargets(a);if(BT.length)h+=`<div class="row wrap" style="margin:0 0 8px">${BT.slice(0,3).map(j=>`<button class="btn small" data-act="bridge" data-id="${a.id}" data-p="${j}"${canBridge(a)?'':' disabled'}>Brücke nach ${esc(PROV_DEF[j].name)} (${bridgeCost()} Gold)</button>`).join('')}</div>`;}
@@ -9706,6 +9707,7 @@ function scenEvents(){const out=[];if(!S||!S.scen||!S.scen.q||!S.scen.q.length)r
 function scenHtml(){if(!S||!S.scen)return'';const Z=S.scen,D=SCEN[Z.id];if(Z.over)return`<p class="note">${esc(D.n)}: ${Z.res==='win'?'gewonnen ('+Z.rank+')':Z.res==='still'?'still beendet':'verloren'}. Freies Spiel.</p>`;
   const left=D.turns+(Z.ext||0)-(S.turn-Z.t0);let h=`<div class="scenbar"><b>${esc(D.n)}</b> <span class="muted">noch ${left} Runden</span> · Ruhm ${Math.round(Z.ruhm||0)}`;
   if(D.rules&&D.rules.senat&&!Z.flags.rubikon)h+=` · ${D.sen?D.sen.bar:'Einfluss im Senat'} <b style="color:${Z.einfl<20?'var(--danger)':'inherit'}">${Math.round(Z.einfl)}</b> <button class="btn small" data-act="scenbribe">${D.sen?D.sen.btn:'Freunde in Rom'} (${Math.round(150*G())} Gold)</button>`;
+  try{if(hnKeltOn()){const K=Z.flags.hn_kelt;h+=` · <span title="Sieg +15, Plündern keltischen Landes −20, 3 Runden ohne Sieg −5 je Runde. Ab 50 stellen die Kelten Krieger, unter 20 laufen sie davon.">Kelten-Treue</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(K)}%;background:${K<20?'#c2412f':K>=50?'#6aa84f':'#d6a43a'}"></i></span><b style="color:${K<20?'var(--danger)':'inherit'}">${Math.round(K)}</b>`;}}catch(e){}
   return h+'</div>';}
 function scenChoice(act){const Z=S.scen;if(!Z)return;try{scenChoiceAS(act);}catch(e){console.warn('Wahl AS',e);}try{scenChoice2(act);}catch(e){console.warn('Wahl',e);}if(act==='rubikon'){Z.flags.rubikon=1;const f=S.player;for(const x of PLAYABLE)if(x==='samniten'&&alive(x))try{const d=dip(f,x);d.st='peace';declareWar(f,x,true);}catch(e){}addLog('Alea iacta est: Cäsar überschreitet den Rubikon. Krieg gegen den Senat.',true,'bad');scenFame(f,20);}
   if(act==='entlassen'){scenWin(true);}}
@@ -9720,7 +9722,12 @@ function scenChoice(act){const Z=S.scen;if(!Z)return;try{scenChoiceAS(act);}catc
 // hier ist nichts mehr zu tauschen, die Rückfallbilder dahinter bleiben als Sicherheit.
 const HN_IMG={sagunt:['hn_u_sagunt','siege'],besatzung:['hn_u_besatzung','sc_hannibal','ev_soeldner'],landung:['hn_u_landung','naval_win','ev_ueberfall'],
   rhone:['hn_kap_rhone','hn_u_rhone','sc_hannibal','naval_win'],floss:['hn_u_floss','hn_kap_rhone','naval_win'],seeweg:['hn_u_seeweg','naval_lose','ev_lost'],
-  rom:['hn_u_rom','siege','ev_conq'],elefant:['hn_u_elefant','battle_win']};
+  rom:['hn_u_rom','siege','ev_conq'],elefant:['hn_u_elefant','battle_win'],
+  // H2 (Job 40 fehlt noch): Rückfall bevorzugt karthagische Motive (sc_hannibal zeigt Elefanten im Schnee), keine römischen Bilder
+  route:['hn_ps_route','sc_hannibal','ev_feldherr'],berg:['hn_k2_bergstaemme','ev_ueberfall','sc_hannibal'],fuehrer:['hn_ps_haeuptling','ev_feldherr','sc_hannibal'],
+  fels:['hn_k2_fels','ev_feuer','sc_hannibal'],lawine:['hn_ps_lawine','sc_hannibal','ev_lost'],frost:['hn_ps_frost','sc_hannibal','ev_krank'],
+  absturz:['hn_ps_absturz','sc_hannibal','ev_lost'],vorraete:['hn_ps_vorraete','ev_seuche','sc_hannibal'],poebene:['hn_k2_poebene','hn_k2_elefanten','sc_hannibal','battle_win'],
+  trebia:['hn_kap_trebia','hn_sf_trebia','battle_win'],trasimene:['hn_kap_trasimene','hn_sf_trasimene','battle_win']};
 function hnImg(k){const L=HN_IMG[k]||[];for(const x of L){try{if(heroImg(x,0,false))return x;}catch(e){}}return L[L.length-1]||'ev_thron';}
 const hnOn=()=>{try{return!!(S&&S.scen&&!S.scen.over&&S.scen.id==='hannibal'&&!S.mp);}catch(e){return false;}};
 const hnFl=()=>(S.scen.flags=S.scen.flags||{});
@@ -9796,6 +9803,7 @@ function hnRhoneShow(a,pi,go){const volk=HN_TXT_RHONE_VOLK(pi),O=[{k:'floss',lab
 function hnGate(a,pi,go){try{if(!hnOn()||!a||a.f!==S.player||a.boat)return false;const F=hnFl();
   if(!F.hn_besatz&&S.scen.hero===a.id&&hnHisp(a.p)&&hnReg(pi)==='gallien_sued'){hnBesatzShow(a,go);return true;}
   if(!F.hn_rhone&&hnEleN(a)&&(pi===PI.narbo||pi===PI.vocontier)){hnRhoneShow(a,pi,go);return true;}
+  if(!F.hn_pass&&!a.hnPick&&S.scen.hero===a.id&&HN_PASSID.has(PROV_DEF[pi].id)){hnRouteShow(a,pi,go);return true;}
   if(hnRomGate(a,pi,go))return true;}catch(e){console.warn('Hannibal-Tor',e);}return false;}
 
 /* ---- Landung der Scipionen (Gegner-Drehbuch Akt I) ---- */
@@ -9826,10 +9834,12 @@ function hnRound(){if(!hnOn())return;const Z=S.scen,F=hnFl(),f=S.player;
   for(const a of S.armies)if(a.hnRhone&&(S.turn>a.hnRhone.t+8||(a.p===a.hnRhone.to&&S.prov[a.p].owner===a.f)))delete a.hnRhone;
   if(!F.hn_landung){const due=F.hn_besatzT!=null?Math.max(Z.t0+5,F.hn_besatzT+2):Z.t0+15;
     if(S.turn>=due)hnLanding();else if(S.turn===due-1&&!F.hn_warn){F.hn_warn=1;addLog('Späher melden römische Schiffe vor der Küste Hispaniens.',true,'bad');}}
-  hnKaelte();}
+  hnKaelte();
+  try{hnPassRound(h);}catch(e){console.warn('Pass',e);}try{hnKeltRound();}catch(e){console.warn('Kelten',e);}try{hnJagdRound();}catch(e){console.warn('Konsuln',e);}}
 
 /* ---- Ereignisfenster (über stEvents, Meldungen {k:'hn',id}) ---- */
 function hnEv(id,m){
+  if(id==='pass'||id==='route'||id==='ankunft')return hnEv2(id,m);
   if(id==='sagunt')return{E:{id:'hn_sagunt',img:hnImg('sagunt'),eb:'Akt I · Sagunt',title:()=>'Sagunt ist eingeschlossen',text:()=>`Mit dem Ring um Sagunt beginnt der Krieg. Rom, Sagunts Bundesgenosse, erklärt Karthago den Krieg, und die Schuld trägt Hannibal. Die Stadt hat hohe Mauern und eine große Garnison: Erst nach ${minSiege(PI.edetaner)} Runden Belagerung lässt sie sich stürmen.`,opts:[{label:'Weiter',desc:()=>'Rom steht jetzt im Krieg mit dir. Halte den Ring, bis die Mauern fallen.',fx:()=>null}]},ctx:{}};
   if(id==='landung'){const o=m.out,nm=m.pn,T={abgewehrt:m.hanno?'Hanno wirft die Scipionen zurück':'Die Landung scheitert',gefallen:`${nm} fällt an Rom`,belagert:`Rom belagert ${nm}`}[o];
     const tx={abgewehrt:m.hanno?`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten. Doch Hanno steht bereit und wirft sie ins Meer zurück. Hispanien bleibt karthagisch, und Hannibals Rücken ist gesichert.`:`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten, aber die Garnison von ${nm} hält stand und wirft sie zurück.`,
@@ -9857,10 +9867,177 @@ function elePanic(a,defArmies){const out=[];
 function eleNote(a){if(!hnEleN(a))return'';return`<p class="note" style="margin:-4px 0 8px">Elefanten: Ihr Schrecken drückt den Gegner um 10 % und seine Reiterei um weitere 15 %, außer er hat selbst Elefanten. Fällt eine Elefanten-Einheit unter die Hälfte, brechen die Tiere mit 30 % in die eigenen Reihen aus.${hnOn()?' Im Winter in Gebirge und Norditalien erfrieren sie.':''}</p>`;}
 function planGassenOk(a){try{return S.armies.some(x=>x.f!==a.f&&x.units.length&&atWar(a.f,x.f)&&hnEleN(x)>0);}catch(e){return false;}}
 
+/* ===== v235 (H2): Hannibal Paket 2 – Akt II Über die Alpen: Pass-Abschnitt, Kelten-Treue, Konsulheere, Hinterhalt =====
+   Gilt nur in der Hannibal-Geschichte (hnOn); Endlosspiel und andere Geschichten behalten die leise Geländeregel passRound.
+   Zustand nur in S.scen.flags (hn_pass, hn_ankunft, hn_kelt, hn_w, hn_lastW, hn_jagd, hn_flam) und an Heeren (a.hnPass, a.hnPick, a.hnJagd):
+   alte Spielstände laden ohne Umrechnung. Das Heer steht im Pass still (Route 2/3/4 Tage), kommt erst danach in der Poebene an. */
+const HN_PASSID=new Set(['salasser','segusiner','seealpen']);
+const HN_ROUTE={
+  kurz:{n:'Der kurze, steile Weg',dur:2,b:0.165,vd:16,desc:'2 Tage. Hohe Verluste je Tag (Schnee, Absturz), dafür reichen die Vorräte bis zum Ziel. Felsstürze und Lawinen sind häufig.'},
+  lang:{n:'Der lange Weg durch die Wälder',dur:4,b:0.09,vd:22,desc:'4 Tage. Wenig Verluste je Tag, aber die Vorräte gehen zur Neige. Führer, Frost und Hunger sind häufig.'},
+  wacht:{n:'Der bewachte Pass',dur:3,b:0.12,vd:18,desc:'3 Tage. Bergstämme halten den Pass: Du kämpfst dich durch oder kaufst sie frei. Danach mittlere Verluste.'}};
+const HN_SCH=[15,5,35,70];// Schneelage nach Jahreszeit: Frühling, Sommer, Herbst, Winter
+const hnPA=()=>{try{return hnOn()?(S.armies.find(x=>x.id===S.scen.hero&&x.hnPass&&x.units.length)||null):null;}catch(e){return null;}};
+const hnHero=()=>{try{return S.armies.find(x=>x.id===S.scen.hero&&x.f===S.player&&x.units.length&&!x.boat)||null;}catch(e){return null;}};
+const hnMen=a=>a.units.reduce((s,u)=>hnIsEle(u)?s:s+u.men,0);
+const hnSchnee=a=>{const P=a&&a.hnPass;return clamp(HN_SCH[season()]+(P?P.day*6:0),0,100);};
+function hnPassTxt(a){const P=a.hnPass;return P&&P.r?`${a.name} ist im Pass (Tag ${Math.min(P.day+1,P.dur)} von ${P.dur}) und kann erst in der Poebene wieder marschieren.`:`${a.name} wartet im Pass auf die Wahl des Weges.`;}
+// Männer-Verlust im Pass: Elefanten leiden weniger (historisch kamen fast alle durch, starben erst im Winter)
+function hnCut(a,fr){for(const u of a.units){const k=hnIsEle(u)?0.4:1;u.men=Math.max(1,Math.round(u.men*(1-clamp(fr*k*rnd(0.9,1.1),0,0.9))));}}
+function hnBar(P,dv,dt,dm){P.v=clamp(P.v+dv,0,100);P.t=clamp(P.t+dt,0,100);P.m=clamp(P.m+dm,0,100);}
+function hnPassSet(a,r){const P=a.hnPass,R=HN_ROUTE[r];if(!P||!R)return;P.r=r;P.dur=R.dur;P.wait=0;P.pl=0;
+  addLog(`Hannibal wählt den Weg: ${R.n}. ${R.dur} Tage durch den Pass; das Heer kann unterwegs nicht marschieren.`,true,'info');}
+function hnPassStart(a,pick){const F=hnFl();F.hn_pass=S.turn;a.goal=null;a.goalPt=null;try{clearStance(a);}catch(e){}
+  a.hnPass={t0:S.turn,day:0,dur:0,v:100,t:100,m:80,men0:hnMen(a),ele0:hnEleN(a),wait:1,pl:0,seen:{},r:null};
+  addLog(`${a.name} betritt den Pass in ${PROV_DEF[a.p].name}. Vorräte, Tragtiere und Moral stehen im Heer-Blatt.`,true,'info');
+  if(pick&&HN_ROUTE[pick]){hnPassSet(a,pick);hnPassPlan(a);}
+  else{const s=stState(S.player);if(s){s.q=s.q||[];s.q.push({k:'hn',id:'route'});}}}
+// Tagesereignisse: 1–2 je Runde nach Route, Schneelage und Lage des Heeres; „bewacht“ beginnt immer mit den Bergstämmen
+function hnPassPlan(a){const P=a.hnPass,s=stState(S.player);if(!P||P.wait||!s)return;P.pl=1;
+  const rt=P.r,sn=clamp(HN_SCH[season()]+P.day*6,0,100),ele=hnEleN(a)>0;
+  const w={berg:P.seen.berg?0.3:1,fuehrer:rt==='lang'?1.2:rt==='wacht'?0.8:0.6,fels:P.seen.fels>=2?0:(rt==='kurz'?1.4:rt==='wacht'?1:0.5)*(P.seen.fels?0.3:1),lawine:(rt==='kurz'?1.5:rt==='lang'?0.5:1)*clamp(sn/50,0.3,1.6),frost:sn>=40?1:0.2,absturz:ele?(rt==='kurz'?1.2:0.8):0,vorraete:P.v<=50?3:0};
+  let n=(P.day===0||Math.random()<0.5)?1:2;const list=[];
+  if(rt==='wacht'&&!P.seen.berg){list.push('berg');n--;w.berg=0;}
+  for(let i=0;i<n;i++){const ks=Object.keys(w).filter(k=>w[k]>0);if(!ks.length)break;let r=Math.random()*ks.reduce((t,k)=>t+w[k],0),c=ks[0];for(const k of ks){r-=w[k];if(r<=0){c=k;break;}}list.push(c);w[c]*=0.3;}
+  for(const k of list){P.seen[k]=(P.seen[k]||0)+1;s.q=s.q||[];s.q.push({k:'hn',id:'pass',ev:k});}}
+// Ein Tag im Pass (am Ende der Runde): Verlust nach Weg, Schnee und Moral, Vorräte schwinden, danach Ankunft oder nächste Ereignisse
+function hnPassDay(a){const P=a.hnPass,R=HN_ROUTE[P.r];if(!R)return;
+  const sn=clamp(HN_SCH[season()]+(P.day+1)*6,0,100);let w=R.b*(1+0.6*sn/100);if(P.m>=75)w*=0.9;else if(P.m<35)w*=1.3;
+  P.v-=R.vd*(1+(100-P.t)/200);P.m-=4;let hunger=false;if(P.v<=0){P.v=0;w+=0.05;P.m-=10;hunger=true;}
+  P.m=clamp(P.m,0,100);hnCut(a,w);P.day++;P.pl=0;
+  addLog(`Tag ${P.day} im Pass: Männer −${Math.round(w*100)} %${hunger?'. Das Heer hungert, Moral sinkt':''}.`,true,'bad');
+  if(P.day>=P.dur)hnPassArrive(a);else hnPassPlan(a);}
+function hnPassArrive(a){const P=a.hnPass,F=hnFl(),f=a.f;
+  a.units=a.units.filter(u=>u.men>=Math.max(1,Math.ceil(unitStat(f,u.r,u.v).men*0.18)));
+  const m1=hnMen(a),pct=Math.round(m1/Math.max(1,P.men0)*100),e1=hnEleN(a),from=a.p;
+  let dest=[PI.taurini,PI.insubrien,PI.ligurien].find(i=>i!=null&&ADJ[from].has(i));if(dest==null)dest=PI.taurini;
+  const info={t:S.turn,men:m1,men0:P.men0,pct,ele:e1,ele0:P.ele0,r:P.r,dur:P.dur,to:dest,kamp:''};
+  delete a.hnPass;a.hnPick=null;a.p=dest;a.pos=null;a.goal=null;a.mp=0;
+  if(S.prov[dest].owner!==f&&!isAlly(f,S.prov[dest].owner)){let res=null;try{res=resolveAttack(a,dest);}catch(e){console.warn('Ankunft',e);}
+    info.kamp=res&&res.win?`In ${PROV_DEF[dest].name} schlägt das Heer die Verteidiger und setzt sich fest.`:`Die Verteidiger von ${PROV_DEF[dest].name} halten stand.`;}
+  F.hn_ankunft=info;F.hn_kelt=35;F.hn_w=stW(f);F.hn_lastW=S.turn;F.hn_keltLeft=0;
+  addLog(`Das Heer erreicht die Poebene: ${m1} von ${P.men0} Mann (${pct} %), ${e1} von ${P.ele0} Elefanten-Einheiten.`,true,pct>=40?'good':'bad');
+  hnJagdStart();const s=stState(f);if(s){s.q=s.q||[];s.q.push({k:'hn',id:'ankunft'});}}
+function hnPassRound(h){const F=hnFl();if(!h)return;
+  if(h.hnPass){const P=h.hnPass;if(P.wait)return;if(!P.pl){hnPassPlan(h);return;}hnPassDay(h);return;}
+  if(F.hn_pass||!HN_PASSID.has(PROV_DEF[h.p].id))return;
+  hnPassStart(h,h.hnPick);}
+// Leiste im Heer-Blatt: Vorräte · Tragtiere · Moral (0–100) und Jahreszeit-Uhr
+function hnPassHtml(a){if(!a||!a.hnPass||a.f!==S.player)return'';const P=a.hnPass,R=HN_ROUTE[P.r];
+  if(P.wait||!R)return`<div class="siegebox">⛰ Im Pass<small>Der Weg ist noch nicht gewählt. Das Heer wartet auf deine Entscheidung.</small></div>`;
+  const Se=SEASONS[season()],sn=hnSchnee(a),bar=(n,v,c)=>`<div class="mpline"><span>${n}</span><span class="pbar"><i style="width:${Math.round(v)}%;background:${c}"></i></span><b class="num">${Math.round(v)}</b></div>`;
+  return`<div class="siegebox">⛰ ${esc(R.n)} · Tag ${Math.min(P.day+1,P.dur)} von ${P.dur}<small>${Se.ico} ${esc(Se.n)} · Schneelage ${sn} %. Je später im Jahr, desto mehr Schnee. Das Heer erreicht die Poebene erst nach dem letzten Tag; bis dahin steht es still.</small></div>
+    ${bar('Vorräte',P.v,'#c9a13b')}${bar('Tragtiere',P.t,'#9a7b4f')}${bar('Moral',P.m,P.m<35?'#c2412f':P.m<60?'#d6a43a':'#6aa84f')}<p class="note" style="margin:6px 0 10px">Sinken die Vorräte auf 0, hungert das Heer (zusätzlich −5 % Männer je Tag). Unter 35 Moral laufen mehr Männer davon.</p>`;}
+function hnRouteShow(a,pi,go){
+  showModal(`${heroOr(hnImg('route'),'sc_hannibal',S.turn)}<p class="eyebrow" style="margin:0 0 6px">Akt II · Der Pass</p><h2>Welchen Weg über die Alpen?</h2><p class="sub">${esc(a.name)} vor ${esc(PROV_DEF[pi].name)} · ${fmtYear(S.year)}</p><p>Vor dem Heer steigen die Berge auf. Drei Wege führen in die Poebene. Im Pass kann das Heer nicht marschieren; unterwegs warten Ereignisse, die du entscheidest.</p>
+    <div class="list" style="margin-top:12px">${['kurz','lang','wacht'].map(k=>`<button class="rcard evopt" data-hn="${k}"><b>${esc(HN_ROUTE[k].n)}</b><small>${esc(HN_ROUTE[k].desc)}</small></button>`).join('')}</div>
+    <p class="note">Im Heer-Blatt zeigen Leisten Vorräte, Tragtiere und Moral. Ein normaler Marsch kostet etwa die Hälfte der Männer.</p>`,[]);noX();
+  document.querySelectorAll('#dialog [data-hn]').forEach(b=>b.onclick=()=>{closeModal();a.hnPick=b.dataset.hn;AUDIO.sfx('horn');toast(`${HN_ROUTE[a.hnPick].n}: ${HN_ROUTE[a.hnPick].dur} Tage`);refresh();go();});}
+
+/* ---- Ereignisse im Pass, Ankunft ---- */
+const hnPct=x=>Math.round(x*100);
+function hnStand(a){const P=a.hnPass;return P?` Stand: Vorräte ${Math.round(P.v)}, Tragtiere ${Math.round(P.t)}, Moral ${Math.round(P.m)}.`:'';}
+function hnPassEv(key){const a0=hnPA();if(!a0)return null;
+  const E=(img,title,text,opts)=>({E:{id:'hn_p_'+key,img:hnImg(img),eb:'Akt II · Der Pass',title:()=>title,text:()=>{const a=hnPA();return text+(a?hnStand(a):'');},opts},ctx:{}});
+  const wacht=a0.hnPass.r==='wacht';
+  const act=(fn)=>()=>{const a=hnPA();if(!a)return null;const m=fn(a,a.hnPass);return m;};
+  if(key==='berg')return E('berg','Bergstämme sperren den Weg',wacht?'Auf den Felsen über dem Pass stehen Krieger der Bergstämme. Sie halten den Weg und fordern Zoll von jedem, der durchziehen will.':'Krieger der Bergstämme tauchen auf den Hängen auf. Sie rollen Steine in die Schlucht und verlangen Zoll von jedem, der durch ihr Tal zieht.',[
+    {label:'Kämpfen',desc:()=>`Männer −${wacht?9:6} %, Moral +6. Der Weg wird frei.`,fx:act((a,P)=>{hnCut(a,wacht?0.09:0.06);hnBar(P,0,0,6);return'Die Bergstämme weichen. Der Weg ist frei, aber das Heer hat Männer verloren.';})},
+    {label:'Bestechen',cost:()=>Math.round(100*G()),desc:()=>'Männer −1 %, Moral +2. Der Weg bleibt ruhig.',fx:act((a,P)=>{hnCut(a,0.01);hnBar(P,0,0,2);return'Die Häuptlinge nehmen das Gold und lassen das Heer ziehen.';})},
+    {label:'Geiseln nehmen',desc:()=>'Männer −3 %, Vorräte +10, Moral −8. Die Stämme geben Geiseln und Korn, grollen aber.',fx:act((a,P)=>{hnCut(a,0.03);hnBar(P,10,0,-8);return'Geiseln sichern den Weg. Die Stämme geben Korn, die Männer murren.';})}]);
+  if(key==='fuehrer')return E('fuehrer','Ein Häuptling bietet sich als Führer an','Ein Häuptling der Bergstämme tritt vor das Heer. Er kennt einen Pfad und verspricht, ihn zu zeigen. Ob er die Wahrheit sagt, weiß niemand.',[
+    {label:'Ihm vertrauen',desc:()=>'50 %: Abkürzung (1 Tag kürzer, Vorräte +8, Moral +6). 50 %: Hinterhalt (Männer −12 %, Tragtiere −10, Moral −10).',fx:act((a,P)=>{
+      if(Math.random()<0.5){if(P.dur-P.day>1)P.dur--;hnBar(P,8,0,6);addLog('Der Häuptling hält Wort: Ein Pfad spart dem Heer einen Tag.',true,'good');return'Der Führer hält Wort: Das Heer spart einen Tag.';}
+      hnCut(a,0.12);hnBar(P,0,-10,-10);addLog('Der Führer lockt das Heer in einen Hinterhalt der Bergstämme.',true,'bad');return'Ein Hinterhalt! Der Führer hat das Heer verraten.';})},
+    {label:'Ablehnen',desc:()=>'Der Marsch geht weiter wie geplant. Moral −2.',fx:act((a,P)=>{hnBar(P,0,0,-2);return'Das Heer folgt seinem eigenen Weg.';})}]);
+  if(key==='fels')return E('fels','Felssturz versperrt den Pfad','Ein Felsrutsch hat den Pfad verschüttet. Die Tragtiere stauen sich, die Männer frieren in der Enge. Livius erzählt, Hannibal habe Feuer an den Felsen legen und sie mit Essig sprengen lassen.',[
+    {label:'Feuer und Essig',desc:()=>'+1 Tag, Vorräte −8, Moral +10, Männer −1 %. Die Lösung, die Hannibal gewählt haben soll.',fx:act((a,P)=>{P.dur++;hnCut(a,0.01);hnBar(P,-8,0,10);return'Der Fels birst. Das Heer jubelt, ein Tag geht darüber hin.';})},
+    {label:'Umgehen',desc:()=>'+1 Tag, Männer −4 %, Tragtiere −10, Moral −4.',fx:act((a,P)=>{P.dur++;hnCut(a,0.04);hnBar(P,0,-10,-4);return'Der Umweg ist steil und gefährlich. Ein Tag geht verloren.';})}]);
+  if(key==='lawine')return E('lawine','Eine Lawine geht nieder','Ein Donnern in der Höhe, dann rutscht der Hang. Die Lawine reißt Männer und Tragtiere in die Schlucht.',[
+    {label:'Weiter',desc:()=>'Männer −5 bis −10 %, Moral −5.',fx:act((a,P)=>{const d=rnd(0.05,0.10);hnCut(a,d);hnBar(P,0,0,-5);addLog(`Lawine: Männer −${Math.round(d*100)} %.`,true,'bad');return`Die Lawine kostet ${Math.round(d*100)} % der Männer.`;})}]);
+  if(key==='frost')return E('frost','Frostnacht','In der Nacht fällt die Kälte über das Lager. Die Männer drängen sich um die Feuer, das Holz ist knapp.',[
+    {label:'Tragtiere schlachten',desc:()=>'Tragtiere −20, Vorräte +25, Moral −5, Männer −1 %. Fleisch und Felle schützen das Heer.',fx:act((a,P)=>{hnCut(a,0.01);hnBar(P,25,-20,-5);return'Fleisch und Felle retten die Nacht.';})},
+    {label:'Ausharren',desc:()=>'Männer −6 %, Moral −8. Die Tragtiere bleiben.',fx:act((a,P)=>{hnCut(a,0.06);hnBar(P,0,0,-8);return'Erfrierungen: Das Heer verliert Männer.';})}]);
+  if(key==='absturz')return E('absturz','Ein Elefant stürzt','Ein Elefant rutscht auf dem Eis und hängt über dem Abgrund. Die Treiber schreien, die Tiere hinter ihm werden unruhig.',[
+    {label:'Mit Seilen bergen',desc:()=>'Der Elefant wird gerettet. Vorräte −6, Männer −2 %, Moral +4.',fx:act((a,P)=>{hnCut(a,0.02);hnBar(P,-6,0,4);return'Der Elefant ist gerettet.';})},
+    {label:'Zurücklassen',desc:()=>'Eine Elefanten-Einheit verliert die Hälfte ihrer Tiere. Moral −8.',fx:act((a,P)=>{const e=a.units.filter(hnIsEle).sort((x,y)=>y.men-x.men)[0];if(e)e.men=Math.max(1,Math.round(e.men*0.5));hnBar(P,0,0,-8);addLog('Ein Elefant stürzt in die Schlucht.',true,'bad');return'Der Elefant bleibt zurück.';})}]);
+  if(key==='vorraete')return E('vorraete','Die Vorräte werden knapp','Die Kornsäcke sind fast leer, und der Weg ist noch weit. Die Männer murren.',[
+    {label:'Rationen kürzen',desc:()=>'Vorräte +15, Moral −12.',fx:act((a,P)=>{hnBar(P,15,0,-12);return'Die Rationen sind halbiert. Die Männer sind verbittert.';})},
+    {label:'Tragtiere essen',desc:()=>'Tragtiere −20, Vorräte +25, Moral −3.',fx:act((a,P)=>{hnBar(P,25,-20,-3);return'Die Tragtiere werden geschlachtet.';})}]);
+  return null;}
+function hnEv2(id,m){
+  if(id==='pass')return hnPassEv(m.ev);
+  if(id==='route'){const a0=hnPA();if(!a0||!a0.hnPass.wait)return null;
+    return{E:{id:'hn_route',img:hnImg('route'),eb:'Akt II · Der Pass',title:()=>'Welchen Weg über die Alpen?',text:()=>'Vor dem Heer steigen die Berge auf. Drei Wege führen in die Poebene. Im Pass kann das Heer nicht marschieren; unterwegs warten Ereignisse, die du entscheidest.',
+      opts:['kurz','lang','wacht'].map(k=>({label:HN_ROUTE[k].n,desc:()=>HN_ROUTE[k].desc,fx:()=>{const a=hnPA();if(a&&a.hnPass.wait)hnPassSet(a,k);return`${HN_ROUTE[k].n}: ${HN_ROUTE[k].dur} Tage`;}}))},ctx:{}};}
+  if(id==='ankunft'){const I=hnFl().hn_ankunft;if(!I)return null;
+    const lbl=I.pct>=60?'Ein glücklicher Marsch.':I.pct<40?'Ein verlustreicher Marsch.':'Ein harter, aber gelungener Marsch.';
+    return{E:{id:'hn_ankunft',img:hnImg('poebene'),eb:'Akt II · Die Poebene',title:()=>'Die Poebene liegt vor dem Heer',
+      text:()=>`Nach ${I.dur} Tagen im Gebirge steigt das Heer in die Ebene hinab: ${I.men} von ${I.men0} Mann sind angekommen (${I.pct} %), dazu ${I.ele} von ${I.ele0} Elefanten-Einheiten. ${lbl} ${I.kamp} Die Kelten der Poebene beobachten dich. Ihre Treue (Leiste oben) wächst mit jedem Sieg um 15 und sinkt um 20, wenn du keltisches Land plünderst, und um 5 je Runde ohne Sieg. Ab 50 stellen sie Krieger, unter 20 laufen sie davon. Zwei Konsulheere ziehen heran, Sempronius von Ariminum und Scipio von Norden; in zwei Runden sind sie da.`,
+      opts:[{label:'Weiter',desc:()=>'Gewinne die Kelten mit Siegen und stell dich den Konsuln.',fx:()=>null}]},ctx:{}};}
+  return null;}
+
+/* ---- Kelten-Treue (Schwung): Leiste im Szenario-Kopf, wirkt in Akt II ---- */
+const hnKeltLand=pi=>pi!=null&&S.prov[pi].cul==='keltisch'&&hnReg(pi)==='it_nord';
+function hnKeltOn(){try{return hnOn()&&hnFl().hn_kelt!=null&&scenStepI()<=5;}catch(e){return false;}}
+function hnKeltAdd(d){const F=hnFl();if(F.hn_kelt==null)return;F.hn_kelt=clamp(Math.round((F.hn_kelt+d)*10)/10,0,100);}
+function hnKeltPlunder(pi){if(!hnKeltOn()||pi==null)return;const P=S.prov[pi];if(P.cul!=='keltisch')return;const F=hnFl();if(F.hn_plT===S.turn+'|'+pi)return;F.hn_plT=S.turn+'|'+pi;
+  hnKeltAdd(-20);addLog(`Die Plünderung von ${PROV_DEF[pi].name} empört die Kelten. Kelten-Treue −20.`,true,'bad');}
+function hnKeltCount(){return S.armies.filter(x=>x.f===S.player).reduce((s,x)=>s+x.units.filter(u=>u.kelt).length,0);}
+function hnKeltRound(){if(!hnOn())return;const F=hnFl(),f=S.player;if(F.hn_kelt==null||scenStepI()>5)return;
+  const w=stW(f),h=hnHero();
+  if(w>(F.hn_w||0)){const d=w-(F.hn_w||0);F.hn_w=w;F.hn_lastW=S.turn;hnKeltAdd(15*d);addLog(`Ein Sieg überzeugt die Kelten von Hannibals Stärke. Kelten-Treue +${15*d}.`,true,'good');}
+  else if(S.turn-(F.hn_lastW==null?S.turn:F.hn_lastW)>=3){hnKeltAdd(-5);if((S.turn-F.hn_lastW)%2===1)addLog('Seit Runden kein Sieg: Die Kelten zweifeln. Kelten-Treue −5 je Runde.',true,'bad');}
+  const K=F.hn_kelt;
+  if(K>=50&&h&&!h.hnPass&&Math.random()<0.2+(K-50)/250&&hnKeltCount()<4&&(hnKeltLand(h.p)||[...ADJ[h.p]].some(hnKeltLand))){
+    const role=Math.random()<0.7?['sword','langschw']:['cav'],u=newUnit(f,role[0],role[1]);u.kelt=1;
+    let t=h;if(t.units.length>=armyMax(f)){t=S.armies.find(x=>x.f===f&&x.p===h.p&&x!==h&&x.units.length<armyMax(f));if(!t){t=createArmy(f,h.p,[],1);t.name='Keltische Krieger';}}
+    t.units.push(u);addLog(`Insubrer und Boier schicken ${u.r==='cav'?'Reiter':'Krieger'} zu Hannibal: eine keltische Einheit (kostenlos, Unterhalt halb).`,true,'good');}
+  if(K<20&&!F.hn_keltLeft){let n=0;for(const x of S.armies)if(x.f===f){const l=x.units.length;x.units=x.units.filter(u=>!u.kelt);n+=l-x.units.length;}
+    F.hn_keltLeft=1;if(n)addLog(`Die Kelten verlieren das Vertrauen: ${n} keltische ${n===1?'Einheit verlässt':'Einheiten verlassen'} das Heer.`,true,'bad');removeEmpty();}
+  else if(K>=30)F.hn_keltLeft=0;
+  if(K<=30&&!F.hn_keltWarn){F.hn_keltWarn=1;addLog('Die Kelten murren: Kelten-Treue unter 30. Unter 20 verlassen die keltischen Einheiten das Heer.',true,'bad');}else if(K>40)F.hn_keltWarn=0;}
+
+/* ---- Gegner-Drehbuch Akt II: Konsulheere ziehen auf Hannibal zu (maßvoll: eine Provinz je Runde, Angriff nur auf Hannibals Provinz) ---- */
+function hnJagdStart(){const F=hnFl();if(F.hn_jagd)return;F.hn_jagd=S.turn;if(!atWar(S.player,'rom'))try{declareWar('rom',S.player,true);}catch(e){}
+  const sem=S.armies.find(x=>x.f==='rom'&&x.units.length&&x.gen&&/Sempronius/.test(x.gen.n)),sc=S.armies.find(x=>x.f==='rom'&&x.units.length&&x.gen&&/Scipio \(Konsul\)/.test(x.gen.n));
+  if(sem){sem.hnJagd=1;sem.hnHome=sem.p;sem.name='Heer des Sempronius';}
+  if(sc){sc.hnJagd=1;sc.hnHome=sc.p;sc.name='Heer des Publius Scipio';if(PI.ligurien!=null){sc.p=PI.ligurien;sc.pos=null;sc.goal=null;}}
+  addLog('Zwei Konsulheere ziehen auf Hannibal zu: Tiberius Sempronius von Ariminum und Publius Scipio von Norden.',true,'bad');}
+function hnStepTo(r,target){const prev={},q=[r.p];prev[r.p]=-1;
+  while(q.length){const c=q.shift();if(c===target)break;for(const n of ADJ[c]){if(prev[n]!==undefined||!isAct(n)||isSeaLink(c,n))continue;prev[n]=c;q.push(n);}}
+  if(prev[target]===undefined)return null;let k=target;while(prev[k]!==r.p&&prev[k]!==-1&&prev[k]!==undefined)k=prev[k];return k===r.p?null:k;}
+// Feldschlacht, wenn Hannibal nicht in eigener Provinz steht (sonst greift die Provinzschlacht mit Plan und Mauern)
+function hnFeld(r,h){const ti=h.p,eF=(()=>{try{return eleFx(r,ti,r.units,h.units);}catch(e){return{att:1,def:1};}})(),dm=hnLauerMul(h,ti,false);
+  const pa=armyPower(r)*eF.att*rnd(0.85,1.15),pd=armyPower(h)*eF.def*dm*rnd(0.85,1.15)*1.08,win=pd>=pa,q=win?pa/pd:pd/pa,wl=0.08+0.32*q,ll=0.5+0.35*(1-q);
+  if(win){applyLoss(r,ll);applyLoss(h,wl);stat(h.f,'defwin');scenFame(h.f,6);gainXP(h,50);}else{applyLoss(h,ll);applyLoss(r,wl);}
+  removeEmpty();addLog(win?`${h.name} schlägt ${r.name} im Feld bei ${PROV_DEF[ti].name}${dm>1?` (Hinterhalt +${Math.round((dm-1)*100)} %)`:''}.`:`${r.name} schlägt ${h.name} im Feld bei ${PROV_DEF[ti].name}.`,true,win?'good':'bad');return win;}
+function hnJagdRound(){const F=hnFl();if(!F.hn_jagd||scenStepI()>5||S.turn<F.hn_jagd+2)return;const h=hnHero();if(!h||h.hnPass)return;// 2 Runden Schonfrist nach der Ankunft: das Heer erholt sich
+  // Flaminius (Trasimene) erscheint, sobald die ersten Konsuln geschlagen sind und das Kapitel Trebia/Trasimene läuft
+  if(!F.hn_flam&&scenStepI()>=5&&S.turn>=F.hn_jagd+2&&PI.arretium!=null&&S.prov[PI.arretium].owner==='rom'&&!S.armies.some(x=>x.hnJagd&&x.units.length)){
+    F.hn_flam=S.turn;const a=scenArmy('rom',PI.arretium,[['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav']],'Gaius Flaminius');a.name='Heer des Flaminius';a.hnJagd=1;a.hnHome=a.p;
+    addLog('Der Konsul Gaius Flaminius zieht aus Arretium gegen Hannibal, ohne auf die Opfer-Zeichen zu achten.',true,'bad');}
+  for(const r of S.armies.filter(x=>x.hnJagd&&x.f==='rom'&&x.units.length&&!x.boat)){
+    if((r.hnCool||0)>S.turn)continue;
+    if(!atWar(h.f,r.f))continue;
+    if(r.p===h.p||ADJ[h.p].has(r.p)){
+      r.hnCool=S.turn+2;const own=S.prov[h.p].owner===h.f;
+      if(own){if(r.p!==h.p)r.mp=maxMP(r);try{const res=resolveAttack(r,h.p);if(res)addLog(res.win?`${r.name} greift ${PROV_DEF[h.p].name} an und siegt.`:`${PROV_DEF[h.p].name} wehrt ${r.name} ab${res.lauer?` (${res.lauer})`:''}.`,true,res.win?'bad':'good');}catch(e){console.warn('Konsulangriff',e);}}
+      else hnFeld(r,h);
+      continue;}
+    const n=hnStepTo(r,h.p);if(n!=null){r.p=n;r.pos=null;r.goal=null;if(h.f===S.player)addLog(`${r.name} marschiert nach ${PROV_DEF[n].name}.`,true,'info');}}}
+
+/* ---- Plan „Hinterhalt“ (nur Hannibal-Geschichte): Trebia +20 % (Fluss im Winter), Trasimene +25 % (Feind marschiert in Hannibals Provinz) ---- */
+function planLauerOk(a){try{return hnOn()&&HN_ITALY.has(hnReg(a.p));}catch(e){return false;}}
+// Faktor für den Plan-Besitzer: att = er greift an; sonst verteidigt er seine Provinz ti
+function hnLauerMul(a,ti,att){try{if(!hnOn()||a.plan!=='lauer')return 1;const wf=!!(feat(ti).river&&season()===3);
+  if(att)return wf?1.2:0.92;return HN_ITALY.has(hnReg(ti))?1.25:(wf?1.2:1);}catch(e){return 1;}}
+
 /* ---------- Weitere Funktionen aus den Einzelgeschichten (gelten überall) ---------- */
 // Gebirgspässe: Durchzug kostet Männer, im Winter mehr, Elefanten doppelt
 const PASSES=new Set(['salasser','segusiner','seealpen','vasconen','raetien','helvetier','noricum']);
-function passRound(){for(const a of S.armies){if(!a.units.length||a.boat)continue;const id=PROV_DEF[a.p].id;if(!PASSES.has(id))continue;if(a.lastPass===a.p&&a.passT>=S.turn-1){a.passT=S.turn;continue;}
+function passRound(){for(const a of S.armies){if(!a.units.length||a.boat)continue;const id=PROV_DEF[a.p].id;if(!PASSES.has(id))continue;if(a.hnPass)continue;// in der Hannibal-Geschichte ersetzt der Pass-Abschnitt die leise Regel
+  if(a.lastPass===a.p&&a.passT>=S.turn-1){a.passT=S.turn;continue;}
   a.lastPass=a.p;a.passT=S.turn;const w=season()===3?0.14:season()===2?0.08:0.05;for(const u of a.units){const k=u.v&&/^elef/.test(u.v)?2:1;u.men=Math.max(1,Math.round(u.men*(1-w*k)));}
   if(a.f===S.player)addLog(`${a.name} zieht über den Pass in ${PROV_DEF[a.p].name}: ${Math.round(w*100)} % Verluste${season()===3?' im Winterschnee':''}.`,true,'bad');}}
 // Bundesgenossen abwerben: Gold und Siege bringen fremde Provinzen zum Seitenwechsel
@@ -9879,11 +10056,13 @@ function supplyRound(){for(const a of S.armies){if(!a.units.length||a.boat||a.f=
   if(near||a.st==='pluendern'||rzFed(a)||lagerReach(a))continue;for(const u of a.units)u.men=Math.max(1,Math.round(u.men*0.98));a.unsup=S.turn;}}
 // Schlachtplan: vor dem Angriff gewählt, wirkt in der automatischen Schlacht
 const PLANS={frontal:{n:'Frontal',d:'Kein Bonus, kein Risiko.'},umfassung:{n:'Umfassung',d:'+15 % mit mindestens 30 % Reiterei, sonst −10 %.'},hinterhalt:{n:'Geländeangriff',d:'Angriff aus Wald oder Bergland: +20 %, im offenen Land −10 %. (Nicht zu verwechseln mit der Haltung „Hinterhalt“, die eigenes Land verteidigt.)'},
+  lauer:{n:'Hinterhalt',d:'Nur in Hannibals Geschichte, in Italien: Im Winter an einem Fluss +20 % (Trebia), gegen einen Feind, der in deine Provinz einmarschiert, +25 % (Trasimene). Sonst als Angreifer −8 %.'},
   gassen:{n:'Gassen öffnen',d:'Gegen Elefanten: Die Reihen öffnen sich, ihr Schrecken wirkt nicht, und die Tiere laufen mit 30 % in die eigenen Reihen. Ohne gegnerische Elefanten −8 %.'}};
 function planMul(a,ti){const p=a.plan||'frontal';if(p==='umfassung'){const c=a.units.filter(u=>u.r==='cav').length/Math.max(1,a.units.length);return(c>=0.3?1.15:0.9)*(a.hnRhone&&a.hnRhone.to===ti&&hnOn()?1.1:1);}
   if(p==='gassen'){try{return S.armies.some(x=>x.p===ti&&x.f!==a.f&&hnEleN(x)>0)?1:0.92;}catch(e){return 0.92;}}
+  if(p==='lauer')return hnLauerMul(a,ti,true);
   if(p==='hinterhalt'){let t='';try{t=(typeof PTER!=='undefined'&&PTER)?PTER[ti]:'';}catch(e){}return feat(ti).forest||/mountain|hill/i.test(t||'')?1.2:0.9;}return 1;}
-function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).filter(k=>k!=='gassen'||cur==='gassen'||planGassenOk(a)).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>${a.hnRhone&&hnOn()?`<p class="note" style="margin:-4px 0 8px">Rhone: Greift das Heer ${esc(PROV_DEF[a.hnRhone.to].name)} an, gibt „Umfassung“ +10 % zusätzlich (Hanno quert flussaufwärts).</p>`:''}${eleNote(a)}`;}
+function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).filter(k=>(k!=='gassen'||cur==='gassen'||planGassenOk(a))&&(k!=='lauer'||cur==='lauer'||planLauerOk(a))).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>${a.hnRhone&&hnOn()?`<p class="note" style="margin:-4px 0 8px">Rhone: Greift das Heer ${esc(PROV_DEF[a.hnRhone.to].name)} an, gibt „Umfassung“ +10 % zusätzlich (Hanno quert flussaufwärts).</p>`:''}${eleNote(a)}`;}
 // Königsboten: prüfen eine Region (Unruhe −2, Steuern +10 % für 10 Runden), ab der Völkerwanderung
 const kbCost=()=>Math.round(60*EPOCH_COST[ep()]);
 function kbReady(f,pi){const P=S.prov[pi];return ep()>=1&&ep()<=2&&P.owner===f&&(P.kbT==null||S.turn>=P.kbT+8);}
@@ -12697,6 +12876,7 @@ const RUL_TRAITS={
 // v232 (31.10.): Neue Schlacht: Eroberungspunkt bei Siedlungen ohne Mauern (Angreifer haelt den Kreis 60 s = Sieg, Verteidiger im Kreis haelt die Uhr an), Anzeige in der Kopfleiste
 // v233 (05.11.): Triarier mit Hasta, 8 Ostasien-Figuren (China/Japan Ep. 1-2), Paletten chinesisch/japanisch, Artillerie in der Aufstellung hinter der Linie; Integrationstest Rueckzug repariert (Testskript, kein Spielfehler)
 // v234 (05.11., H1 Hannibal Paket 1): Akt I Hispanien: Sagunt mit Mauern III/Garnison 26 (Sturm erst nach 3 Runden), Rom erklaert Krieg beim Beginn der Belagerung (hnSiegeBegin); Besatzung zuruecklassen a/b/c (hnBesatzShow/hnBesatzDo, Hanno-Heer), Landung der Scipionen (hnLanding, 2 Runden nach der Wahl, spaetestens Runde 16); Rhone-Uebergang Floss/sofort (hnRhoneShow, Umfassung +10 %); gesperrte Wege mit Grund: Seeweg nach Italien bis Akt IV (hnSeaLock), Rom-Angriff vor Akt III mit Rueckfrage (hnRomGate), Rom nicht unterwerfbar (noSubmit); Elefanten-Regeln allgemein in der berechneten Schlacht (eleFx Schrecken, elePanic, Plan Gassen oeffnen), Kaelte nur Hannibal (hnKaelte); Scipio Vater/Sohn benannt. Bilder ueber HN_IMG (TODO Job 40: hn_u_*). Test hn1_t.js.
+// v235 (05.11., H2 Hannibal Paket 2): Akt II Ueber die Alpen: Pass-Abschnitt (hnRouteShow beim Angriff auf Salasser/Segusiner/Seealpen oder Ereignis "route"; Routen kurz 2 / lang 4 / bewacht 3 Tage; Heer steht im Pass still (a.hnPass, Marsch/Angriff/Rundenwechsel gesperrt); Leiste Vorraete/Tragtiere/Moral + Jahreszeit-Uhr im Heer-Blatt (hnPassHtml); Tagesereignisse hnPassEv: Bergstaemme, Fuehrer, Felssturz (Feuer+Essig belohnt), Lawine, Frostnacht, Elefant stuerzt, Vorraete knapp; Ankunft in Taurini mit ~50 % der Maenner (hnPassArrive); passRound bleibt im Endlosspiel die leise Regel). Kelten-Treue 0-100 im Szenario-Kopf (Start 35; Sieg +15, Pluendern -20, 3 Runden ohne Sieg -5/Runde; ab 50 keltische Einheit kostenlos/Unterhalt halb, max. 4; unter 20 Abzug; nur Akt II). Gegner-Drehbuch: Sempronius (Ariminum) und Scipio (Ligurien) marschieren auf Hannibal (hnJagdRound), Flaminius im Kapitel Trebia/Trasimene. Plan Hinterhalt (lauer): Fluss+Winter +20 % (Trebia), Verteidiger in Italien +25 % (Trasimene), sonst als Angreifer -8 %. Bilder ueber HN_IMG (TODO Job 40: hn_ps_*, hn_k2_*, hn_kap_*). Test hn2_t.js.
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -13097,7 +13277,7 @@ function rzDef(pi,kind){const P=S.prov[pi],why=[];let m=1,p=1;
   if(kind==='see'&&(P.b.port||0)>0){let fl=false;try{const h=fleetSeaPos(pi);fl=(S.fleets||[]).some(x=>x.f===P.owner&&x.x!=null&&Math.hypot(x.x-h.x,x.z-h.z)<2.5);}catch(e){}m-=fl?0.25:0.1;why.push(fl?'Küstenwache':'Hafen');}
   return{m:clamp(m,0.3,1),p,why};}
 // Eine Plünderung der Provinz t durch das Heer a (mode 'rz' Raubzug, 'st' Haltung Plündern). Gibt {loot,men,dur} zurück.
-function plunderProv(a,t,mode){const P=S.prov[t],rf=a.f,o=P.owner;if(o==='frei'||o===rf||!atWar(rf,o)||raidPact(rf,o))return null;
+function plunderProv(a,t,mode){const P=S.prov[t],rf=a.f,o=P.owner;if(o==='frei'||o===rf||!atWar(rf,o)||raidPact(rf,o))return null;if(rf===S.player)try{hnKeltPlunder(t);}catch(e){}
   const k=raidKind(rf),pr=RZ_PROF[k||'other'],sev=dvSev(t),bf=1-0.85*sev,df=rzDef(t,k),cruel=genFx(a,'cruel');
   let m=pr.m;if(k==='see'){let wet=false;try{const ft=feat(t);wet=!!(ft.coast||ft.river);}catch(e){}if(wet)m*=1.2;}
   const loot=Math.max(0,Math.round(PROV_DEF[t].tax*1.2*EPOCH_INC[ep()]*(1+cruel+genFx(a,'raid'))*m*bf*df.m*lnLoot(rf)*raidLootMul(rf)));
@@ -13188,7 +13368,7 @@ const CONQ={besetzen:{n:'Besetzen',d:'Die Stadt bleibt, wie sie ist. Unruhe wie 
   pluendern:{n:'Plündern',d:'Viel Gold, die Bevölkerung sinkt um ein Viertel, ein Gebäude verliert eine Stufe, Unruhe +3.'},
   ausloeschen:{n:'Auslöschen',d:'Wenig Gold, die Bevölkerung sinkt um 60 %, alle Gebäude verlieren eine Stufe. Danach keine Unruhe, Glaube und Kultur werden deine. Alle Reiche trauen dir weniger (Beziehung −10).'}};
 function conqGold(pi,k){return Math.round(PROV_DEF[pi].tax*(k==='pluendern'?7:3)*EPOCH_INC[ep()]);}
-function applyConquest(f,pi,k){const P=S.prov[pi],a=S.armies.find(x=>x.f===f&&x.p===pi);if(k==='besetzen')return;const g=conqGold(pi,k)*(a&&genFx(a,'cruel')?1.3:1);S.fac[f].gold+=Math.round(g);if(k==='pluendern'&&f===S.player&&S.scen&&!S.scen.over)S.scen.flags.beute=(S.scen.flags.beute||0)+Math.round(g);
+function applyConquest(f,pi,k){const P=S.prov[pi],a=S.armies.find(x=>x.f===f&&x.p===pi);if(k==='besetzen')return;if(f===S.player)try{hnKeltPlunder(pi);}catch(e){}const g=conqGold(pi,k)*(a&&genFx(a,'cruel')?1.3:1);S.fac[f].gold+=Math.round(g);if(k==='pluendern'&&f===S.player&&S.scen&&!S.scen.over)S.scen.flags.beute=(S.scen.flags.beute||0)+Math.round(g);
   cruelAdd(f,k==='pluendern'?1:2);
   if(k==='pluendern'){P.pop=Math.max(0.5,P.pop*0.75);const ks=BKEYS.filter(x=>P.b[x]>0&&x!=='farm');if(ks.length){const x=ks[Math.floor(Math.random()*ks.length)];P.b[x]--;}P.unrest=(P.unrest||0)+3;if(a)genDeed(a,'p');}
   else{P.pop=Math.max(0.4,P.pop*0.4);for(const x of BKEYS)if(P.b[x]>1)P.b[x]--;P.unrest=0;P.rebel=0;try{const c=facCul(f),r=facRel(f);if(c!=null)P.cul=c;if(r!=null)P.rel=r;}catch(e){}for(const x of rivals(f))if(x!=='horde'&&S.fac[x]&&S.fac[x].alive)relAdd(f,x,-(10),'Gewaltsame Eingliederung');}
@@ -14506,12 +14686,14 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
 }
 function resolveAttack(a,ti){
   const ctx=startAttackCtx(a,ti),P=S.prov[ti];
-  const ar=ctx.res.att*(a._land&&!(a.rz&&raidKind(a.f)==='see')?0.8:1)*planMul(a,ti)*rnd(0.85,1.15),dr=ctx.res.def*rnd(0.85,1.15)*1.08;
+  const lm=(()=>{try{const d=ctx.defArmies.find(x=>x.f===S.player&&x.plan==='lauer');return d?hnLauerMul(d,ti,false):1;}catch(e){return 1;}})();
+  const ar=ctx.res.att*(a._land&&!(a.rz&&raidKind(a.f)==='see')?0.8:1)*planMul(a,ti)*rnd(0.85,1.15),dr=ctx.res.def*rnd(0.85,1.15)*1.08*lm;
   const win=ar>dr,r=win?dr/ar:ar/dr,winLoss=0.08+0.32*r,loseLoss=0.5+0.35*(1-r);
   if(win){applyLoss(a,winLoss);ctx.defArmies.forEach(d=>applyLoss(d,loseLoss));ctx.attRe.forEach(d=>applyLoss(d,winLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,loseLoss*0.5));}
   else{applyLoss(a,loseLoss);ctx.defArmies.forEach(d=>applyLoss(d,winLoss));P.gar=Math.max(1,Math.round(P.gar*(1-winLoss)));ctx.attRe.forEach(d=>applyLoss(d,loseLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,winLoss*0.5));}
   let pan=[];try{pan=elePanic(a,ctx.defArmies);}catch(e){console.warn('Elefanten-Panik',e);}
   const rs=concludeAttack(ctx,win);
+  try{const pl=planMul(a,ti);if(a.plan==='lauer'&&pl!==1)rs.lauer=`Hinterhalt ${pl>1?'+':'−'}${Math.round(Math.abs(pl-1)*100)} %`;else if(lm!==1)rs.lauer=`Hinterhalt +${Math.round((lm-1)*100)} %`;}catch(e){}
   if(pan.length){rs.eleTxt=`Elefanten-Panik: Die Tiere von ${pan.map(x=>x.name).join(' und ')} brechen aus und reißen Lücken ins eigene Heer.`;if(a.f===S.player||P.owner===S.player)addLog(rs.eleTxt,true,'warn');}
   return rs;
 }
@@ -17112,6 +17294,7 @@ function uStat(f,u){
   if(ue<e){st.str=Math.round(st.str*EPOCH_STR[ue]/EPOCH_STR[e]*10)/10;if(!u.v)st.name=unitName(f,u.r,ue);st.old=true;}
   if(u.tier){st.str=Math.round(st.str*1.2*10)/10;st.name=u.v?st.name+' (Veteranen)':eliteName(f,u.r,ue);st.upk=Math.round(st.upk*1.25);st.elite=true;}
   if(u.sld){st.upk=Math.round(st.upk*2);st.name+=' (Söldner)';st.sld=true;}else if(u.v==='condott')st.sld=true;
+  if(u.kelt){st.upk=Math.max(1,Math.round(st.upk*0.5));st.name+=' (keltische Verbündete)';}
   const rk=rankOf(u),R=RANKS[rk];st.rank=rk;st.atkM=(1+R.b)*(1+0.08*(u.wpn||0));st.defM=(1+R.b)*(1+0.08*(u.arm||0));st.morB=R.m;st.pow=st.str*(st.atkM+st.defM)/2;
   return st;
 }
@@ -17458,7 +17641,7 @@ function reachMap(a,maxT=8){if(a.boat)return new Map([[a.p,{t:0,r:0,prev:-1,own:
   return R;
 }
 function pathTo(R,dest){const p=[];let k=dest;while(k!=null&&k!==-1){p.unshift(k);const l=R.get(k);if(!l)return[];k=l.prev;}p.shift();return p;}
-function walkPath(a,R,dest){let moved=false,kn=false;const me=a.f===S.player&&S.known;for(const n of pathTo(R,dest)){const l=R.get(n);if(!l.own||l.t>0)break;a.p=n;a.mp=l.r;moved=true;trespass(a,n);if(me)for(const m of[n,...ADJ[n]])if(isAct(m)&&!S.known[m]){S.known[m]=true;kn=true;}}if(kn){try{applyKnown();refreshOwnership();}catch(e){}}if(moved)clearStance(a);return moved;}
+function walkPath(a,R,dest){if(a.hnPass)return false;let moved=false,kn=false;const me=a.f===S.player&&S.known;for(const n of pathTo(R,dest)){const l=R.get(n);if(!l.own||l.t>0)break;a.p=n;a.mp=l.r;moved=true;trespass(a,n);if(me)for(const m of[n,...ADJ[n]])if(isAct(m)&&!S.known[m]){S.known[m]=true;kn=true;}}if(kn){try{applyKnown();refreshOwnership();}catch(e){}}if(moved)clearStance(a);return moved;}
 // Freie Aufstellung: a.pos={pi,x,z} gilt nur, solange das Heer in dieser Provinz steht
 function posOf(a){return a&&a.pos&&a.pos.pi===a.p?a.pos:null;}
 function ptIn(pi,pt){return!!pt&&pidAt(pt.x,pt.z)===pi;}
@@ -17468,6 +17651,7 @@ function setPos(a,pi,pt){if(!a)return;a.pos=pt&&ptIn(pi,pt)?{pi,x:+pt.x.toFixed(
 function turnsTxt(t){return t===0?'diese Runde':t===1?'nächste Runde':`in ${t} Runden`;}
 function marchTo(a,dest,pt){
   if(!S||S.over||!a)return;
+  if(a.hnPass){toast(hnPassTxt(a));UI.preview=null;UI.previewPt=null;refresh();return;}
   if(a.st==='belagern'&&a.sieg!=null&&siegeAt(a.sieg)){
     if(dest===a.sieg){if(a.mp>0)orderMove(a,dest);else toast('Sturm in der nächsten Runde möglich.');return;}
     if(!UI._liftOk){UI.preview=null;UI.previewPt=null;showModal(`<h2>Belagerung abbrechen?</h2><p>${esc(a.name)} belagert ${esc(PROV_DEF[a.sieg].city||PROV_DEF[a.sieg].name)} seit ${siegeAt(a.sieg).t} ${siegeAt(a.sieg).t===1?'Runde':'Runden'}. Wenn das Heer abzieht, ist der Fortschritt verloren.</p>`,
@@ -17731,7 +17915,7 @@ function aiFaction(f){
 }
 // Winterquartier: Heere, die im Winter im eigenen Land stehen und nicht belagern, kosten weniger Sold und füllen schneller auf
 function winterQ(a){return!!(S&&season()===3&&a&&!a.boat&&S.prov[a.p]&&S.prov[a.p].owner===a.f&&a.st!=='belagern');}
-function replenish(f){for(const a of S.armies){if(a.f!==f)continue;const P=S.prov[a.p];if(!P||P.owner!==f)continue;const rate=0.07+0.04*(P.b.barracks||0)+(a.mp>=maxMP(a)?0.04:0)+genFx(a,'rep')+(a.st==='fest'?0.03:0)+(winterQ(a)?0.03:0);for(const u of a.units){const mx=uStat(f,u).men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*rate));}}}
+function replenish(f){for(const a of S.armies){if(a.f!==f||a.hnPass)continue;const P=S.prov[a.p];if(!P||P.owner!==f)continue;const rate=0.07+0.04*(P.b.barracks||0)+(a.mp>=maxMP(a)?0.04:0)+genFx(a,'rep')+(a.st==='fest'?0.03:0)+(winterQ(a)?0.03:0);for(const u of a.units){const mx=uStat(f,u).men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*rate));}}}
 // Ratgeber: zwei einmalige Hinweise für den Spieler (frühe Expansion, Ende der Schonfrist)
 function hintsOff(){try{return localStorage.getItem('imperium.hints')==='off';}catch(e){return false;}}
 function devOn(){try{return localStorage.getItem('imperium.dev')==='1';}catch(e){return false;}}
@@ -17814,7 +17998,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
   siegeRound();try{diffRound();}catch(e){console.warn('Wandel',e);}try{ambushRound();}catch(e){console.warn('Hinterhalt',e);}raidRound();attritionRound();faithRound();fleetRound();for(const f of PLAYABLE)if(alive(f)){aiAgents(f);asP(f,()=>agentRound(f));}crisisRound();coalitionRound();try{pk1Round();}catch(e){console.warn('Gegner',e);}missionRound();try{epSysRound();}catch(e){console.warn('Epochensystem',e);}try{ringRound();bundRound();scenRound();}catch(e){console.warn('Geschichte',e);}try{lagerRound();}catch(e){console.warn('Winterlager',e);}try{wikRound();}catch(e){console.warn('Alfred-Drehbuch',e);}try{hnRound();}catch(e){console.warn('Hannibal-Drehbuch',e);}try{feat2Round();feat3Round();}catch(e){console.warn('Funktionen',e);}histRound();for(const f of PLAYABLE)if(alive(f))try{polRound(f);}catch(e){console.warn('Politik',e);}
   try{weltRound();}catch(e){console.warn('Weltgeschehen',e);}
   checkElimination();
-  S.armies.forEach(a=>{a.mp=maxMP(a);const P=S.prov[a.p],drill=P.owner===a.f&&P.b.barracks>=3;for(const u of a.units){const mx=unitStat(a.f,u.r,u.v).men,b0=u.men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*0.08));if(u.men>b0&&u.men>0)u.xp=Math.round((u.xp||0)*b0/u.men);if(drill&&(u.xp||0)<300)u.xp=(u.xp||0)+15;}});
+  S.armies.forEach(a=>{a.mp=a.hnPass?0:maxMP(a);const P=S.prov[a.p],drill=P.owner===a.f&&P.b.barracks>=3;if(a.hnPass)return;/* im Pass keine Erholung */for(const u of a.units){const mx=unitStat(a.f,u.r,u.v).men,b0=u.men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*0.08));if(u.men>b0&&u.men>0)u.xp=Math.round((u.xp||0)*b0/u.men);if(drill&&(u.xp||0)<300)u.xp=(u.xp||0)+15;}});
   for(const k in S.dip){const d=S.dip[k];if(d.trade)d.usedL=Math.round((d.used||0)*10)/10;}
   for(const f of PLAYABLE)if(alive(f)){try{govRound(f);}catch(e){console.warn('Statthalter',e);}}
   try{if(!S.mp&&alive(S.player)){hofRound2(S.player);ratRound(S.player);}}catch(e){console.warn('Rat',e);}
@@ -21481,7 +21665,7 @@ function renderHint(){const h=$('#hint');if(UI.mode==='move')$('#legend').hidden
 
 function armyRow(a,clickable=true){
   const mine=a.f===S.player;
-  const tag=mine?(a.fz?'<span class="tag">⚑ Feldzug</span>':a.goal!=null?'<span class="tag">unterwegs</span>':a.mp>0?'<span class="tag">bereit</span>':'<span class="tag off">marschiert</span>'):'';
+  const tag=mine?(a.hnPass?'<span class="tag">⛰ im Pass</span>':a.fz?'<span class="tag">⚑ Feldzug</span>':a.goal!=null?'<span class="tag">unterwegs</span>':a.mp>0?'<span class="tag">bereit</span>':'<span class="tag off">marschiert</span>'):'';
   return `<button class="arow" data-act="army" data-id="${a.id}"${clickable?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)}</b><small>${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · ${armyMen(a)} Mann${a.gen?` · ${esc(a.gen.n)}, Stufe ${a.gen.lvl}`:''}</small></span>${tag}<span class="pw num" title="Stärke">${Math.round(armyPower(a))}</span></button>`;
 }
 (()=>{const sh=document.getElementById('sheet');if(!sh||!window.MutationObserver)return;const up=()=>document.body.classList.toggle('shopen',!sh.hidden&&!sh.classList.contains('collapsed')&&getComputedStyle(sh).display!=='none');new MutationObserver(up).observe(sh,{attributes:true,attributeFilter:['class','hidden','style']});up();})();
@@ -21984,6 +22168,7 @@ function onProvinceTap(pi){
 function heroWarn(a,pct){try{const Z=S.scen;if(!Z||Z.over||Z.heroFell||a.id!==Z.hero||pct>=60)return'';
   return`<p class="dmsg no" style="margin:6px 0">⚠ Der Held führt dieses Heer. Bei ${pct} % Aussicht könnte er fallen, und dann ist die Geschichte verloren. Erst verstärken oder ein anderes Heer schicken?</p>`;}catch(e){return'';}}
 function orderMove(a,pi){
+  if(a.hnPass){toast(hnPassTxt(a));return;}
   if(a.mp<=0){toast('Dieses Heer ist in dieser Runde schon marschiert.');return;}
   if(hnGate(a,pi,()=>orderMove(a,pi)))return;
   if(passOk(a.f,pi)){
@@ -22012,7 +22197,7 @@ function showBattle(res,cb){
   showModal(`${res.captured?`<div class="ephero evhero" style="background-image:url('${evImg(me?'conq':'lost',S.turn+'_'+res.prov)}')"></div>`:heroHtml(battleKey(good,res.prov),S.turn+'_'+res.prov,false)}<h2>${good?'Sieg':'Niederlage'} bei ${esc(PROV_DEF[res.prov].city)}</h2><p class="sub">${esc(pn)} · ${fmtYear(S.year)}</p>
   <div class="vs"><div><div class="who"><span class="crest" style="${cst(res.attF)}"></span>${esc(FACTIONS[res.attF].name)}</div><dl><dt>Stärke</dt><dd>${Math.round(res.att)}</dd><dt>Verluste</dt><dd>${res.attLost}</dd></dl></div>
   <div><div class="who"><span class="crest" style="${cst(res.defF)}"></span>${esc(FACTIONS[res.defF].name)}</div><dl><dt>Stärke</dt><dd>${Math.round(res.def)}</dd><dt>Verluste</dt><dd>${res.defLost}</dd></dl></div></div>
-  <p class="verdict">${esc(verdict)}</p>${res.eleTxt?`<p class="note">${esc(res.eleTxt)}</p>`:''}`,[{label:'Weiter',cls:'primary',fn:cb||afterAction}]);
+  <p class="verdict">${esc(verdict)}</p>${res.eleTxt?`<p class="note">${esc(res.eleTxt)}</p>`:''}${res.lauer?`<p class="note">${esc(res.lauer)}: Der Plan wirkte in dieser Schlacht.</p>`:''}`,[{label:'Weiter',cls:'primary',fn:cb||afterAction}]);
 }
 function afterAction(){
   if(S.over){showDefeat();return;}

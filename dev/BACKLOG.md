@@ -2,6 +2,11 @@
 
 > **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
 
+## ZUERST – Hannibal H2 (05.11., v235, nicht veröffentlicht)
+- H2 fertig in dev/imperium.html (Präfix `hn…`, Block „v235 (H2)“): Pass-Abschnitt (Routenfenster beim Angriff auf Salasser/Segusiner/Seealpen, kurz 2 / lang 4 / bewacht 3 Tage, Heer steht still, Leiste Vorräte·Tragtiere·Moral + Schneelage im Heer-Blatt, 7 Tagesereignisse, Ankunft Taurini), Kelten-Treue (Leiste im Szenario-Kopf, nur Akt II), Konsulheere (Sempronius, Scipio, Flaminius; 2 Runden Schonfrist), Plan „Hinterhalt“ (Trebia +20 % / Trasimene +25 %). Test hn2_t.js (Ergebnis siehe Verlauf unten im Chat/Bericht; iPad nicht getestet).
+- Messung: Pass-Männer bei Ankunft im Mittel ~51 % (90 Läufe, Spanne 27–82 %). Spielerlauf-Bot: Pass-Eintritt Runde 9–11, Ankunft Runde 12–15 – das Ziel 9–12 gelingt nur mit der kurzen Route; Hebel für H3: Sagunt-Belagerung/Weg durch Gallien straffen oder Routen kürzen.
+- Offen: Bilder Job 40 (hn_ps_*, hn_k2_*, hn_kap_trebia/trasimene in IMGLIB + HN_IMG); Konsuln greifen nur Hannibals eigene Provinz an (sonst hnFeld); Kelten-Treue friert nach Akt II ein; Hasdrubal-Pass in Kurzform (H4); Kino 2 (H4).
+
 ## ZUERST – Hannibal H1 (05.11., v234, nicht veröffentlicht)
 - H1 fertig in dev/imperium.html: Sagunt/Kriegserklärung, Besatzung a/b/c + Scipio-Landung, Rhone-Übergang, Seeweg-/Rom-Sperren, Elefanten-Regeln, Scipio-Namen. Tests: hn1_t.js 57/57, smoke 4/4, w5_t 49/49, w6_t 45/45 (Cloud, Software-Rendering; iPad nicht getestet).
 - Offen: Bilder Job 40 (hn_u_sagunt/besatzung/landung/rhone/floss/seeweg/rom/elefant in IMGLIB + HN_IMG); Landung erst nach Wahl (Runde ~6 nur frühestens); Poebene-Ziel Runde 9–12 erst mit H2 messbar; Rat-Verstärkung setzt flags.hn_seeOk (H3); H2 Pass, H3 Cannae/Fabius/Rat, H4 Akt IV.
