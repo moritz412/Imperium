@@ -49,3 +49,45 @@ Läufe (Messwerte unten): A = naiv, vor den Korrekturen von v238 (Rhone-Umweg, A
 
 ## Tests nach den Korrekturen
 chkf.sh „checked“, smoke 4/4, hn1 57, hn2 43, hn3 36 (`HN3_SKIP=BI,PP`), hn4 39 PASS, `hn_kampagne_t.js` FIX-/ALT-Teile PASS. Lauf A/B: BEFUND-Meldungen (keine FAIL). iPad nicht getestet.
+
+## Akt IV im Spielerlauf (v243, 05.11.)
+
+Test: `dev/tests/hn_akt4_t.js` (Bot, Playwright, Software-Rendering; ca. 12 Min für 15 Läufe). Aufruf z. B. `HN4_LAUFE="B:4,C:4,A:3,E:3,D:1" HN4_ZAMA=16 node hn_akt4_t.js ../imperium.html 8772`.
+**Abkürzung (gekennzeichnet):** Schritte 1–8 werden nicht gespielt. `akt3()` stellt einen typischen Stand nach Akt III her: Runde 53 (Jahr 206 v. Chr.), Hannibal in Kampanien mit 65 % der Startstärke (515 Mann, 10 Einheiten, 3 Elefanten-Einheiten), Gunst 50, Gold 3000, Cannae erledigt, Provinzen Kampanien, Lukanien, Bruttium, Apulien, Insubrien, Taurini; die Geschichte rückt per `storyRound` selbst auf Schritt 9 (Hook 8). Der Bot bewegt beide Heere (Hannibal und Hasdrubal) über `marchTo`/Angriffsfenster, klickt Fenster, beendet Runden; Friedensangebote Roms lehnt er ab. Zama-Wiederholungen laufen aus einem Ladepunkt direkt vor der Schlacht (`resolveAttack` ohne Fenster, gekennzeichnet). Echtes iPad nicht getestet; Kino/Bilder nicht geprüft.
+Varianten: A = Hasdrubal entgegen, vereinen, dann Rom (3 Läufe); B = passiv im Süden, Heimkehr, Zama (4); C = wie B mit Plan „Elefanten zurückhalten“ (4); E = wie B, Poebene nicht in Karthagos Hand (3); D = ganz passiv (1). Würfel streuen, Stichproben klein.
+
+### Messwerte
+| Messung | Ergebnis |
+|---|---|
+| Hasdrubals Ankunft | Runde 57 in allen Läufen (Aufbruch 53, Pass 55–56, 2 Tage), 58–77 % der Männer (meist 73 %), 1 von 3 Elefanten-Einheiten |
+| Neros Eilmarsch | Start Runde 56/57, Abstand zu Hasdrubal 5 Provinzen; erreicht ihn Runde 59 (2 Provinzen/Runde) |
+| Nero vor Hannibal? | Aktiv (A): Hannibal in Runde 58 beim Heer, Vereinigung („vereint“) 3 von 3 Läufen, **vor** Nero (Runde 59–62). Passiv (B/C/E): Nero stellt Hasdrubal in Runde 59, **Hasdrubal siegt jedes Mal** („nero geschlagen“) |
+| „Hasdrubals Kopf“ | **0 von 14** Läufen (auch mit fremder Poebene, Variante E) |
+| Rom-Angriff (A) | 3 Läufe: Ende B in 3 von 3 (Karthago fiel in 2, Hannibal fiel in 1), Latium nicht erobert; Lauf mit frühem Ende A („Rom fällt“, Runde 59–60) nur, wenn Hannibals Heer Latium schon vor der Wahl nimmt |
+| Zama-Siegquote | Sofortiger Angriff nach der Heimkehr (Stärkeverhältnis 0,8–1,1): B 2 von 48 Schlachten (4 %), C 1 von 48 (2 %), E kein Lauf erreichte Zama. Echte Läufe: 0 von 6 gewonnen. Nach Warten und Rekrutieren (Verhältnis 2,4): 16 von 16 gewonnen |
+| Enden (heim/rom/passiv) | Ende B „Zama“ 6, B „Hauptstadt gefallen“ 5 (nach Korrektur) bzw. früher fälschlich als „Zama“, B „Rom“ 3, A „Zama“ 1 (nur nach Warten), A „Rom“ 1, B „Zeit“ 2 (Lauf vor Korrektur) |
+| Jahr im Endfenster | 204–202 v. Chr. (Zama 203/204, nach Warten 202), Ende A „Rom“ 204; Metaurus-Ankunft Hasdrubal Runde 57 = 205 (Geschichte: 207) |
+| Fehler | keine Seiten-/Konsolenfehler, keine Platzhalter (undefined/NaN/`${`) in Fenstertexten, keine Fenster ohne Knopf (`stuck` leer), keine Warnungen aus den Hannibal-Bausteinen |
+
+### Befunde nach Schwere
+**Blockiert (behoben in v243)**
+1. **Scipio verließ Byzacena.** Der Text sagt „Scipio lagert in Byzacena: Dort fällt bei Zama die Entscheidung“, die KI zog ihn aber nach Gaetulien weiter oder ließ ihn das leere Karthago nehmen, solange Hannibals Heer noch zwei Runden auf See war. Zama war dann nicht mehr erreichbar. Fix: `hnWahlRound` hält Scipio (`hold`) in Byzacena, bis Zama entschieden ist (nur wenn er dort steht; wie das Bürgerheer bei „Rom angreifen“).
+2. **Mago landet im aufgegebenen Italien.** Nach „Heimkehren“ bot der Rat weiter Verstärkung an (Gunst −25), die bei Locri in Italien landete, das schon an Rom gefallen war. Fix: `hnVerstWhy` sperrt die Verstärkung nach der Heimkehr.
+
+**Verwirrend**
+3. **Falscher Endtext (behoben).** Fällt Karthago in Akt IV durch Landung statt in einer Schlacht, zeigte Ende B den Zama-Text („Elefanten rasen durch die Gassen“), obwohl nie gekämpft wurde. Neuer Grund „kapital“ in `hnEndMark`/`hnEndInfo`: „Rom hat Karthago genommen, ehe Hannibals Heer es schützen konnte …“.
+4. **Friede mit Rom sperrt Zama (nicht behoben).** Nimmt der Spieler ein Friedensangebot Roms an (Gesandtschaft „Annehmen“ ist die Standardwahl) oder die erste Option des Friedenskongresses (Separatfrieden), gilt Waffenstillstand: Hannibal kann Scipio nicht angreifen („Solange kannst du keinen Krieg erklären“), die Gunst fällt um 3 je Runde. Der Bot musste Frieden ablehnen, sonst endete jeder Lauf an dieser Stelle (Zeit/Abberufung). *Vorschlag:* In der Hannibal-Geschichte ab Akt IV keine Friedensangebote Roms an den Spieler (Regel wie `noSubmit`), oder Warnhinweis im Angebotsfenster.
+5. Ende B „Zeit“ in Läufen, die Zama nicht erreichen, wirkt wie ein Sprung: es gibt keine Meldung, dass Scipios Heer aufgesucht werden muss (Wahlfenster verspricht „Heimkehren und Scipio schlagen“, Karte zeigt keine Marke).
+
+**Balance (nur Vorschläge)**
+6. **Rom nimmt Karthago vor der Entscheidung.** Ab Akt IV (`hnNoLand` endet bei Schritt 9 = Index 8) landet Rom in Zeugitana: Karthago fiel in 5 von 11 Läufen mit Heimkehr, in 2 von 3 mit „Rom angreifen“, im passiven Lauf einmal in Runde 63 – meist **vor** dem Wahlfenster oder während der Heimfahrt (3 Runden Frist). *Vorschlag:* `hnNoLand` bis zum Wahlfenster (Index 9) verlängern oder Garnison/Mauern Karthagos beim Beginn von Akt IV stärken.
+7. **Zama praktisch nicht gewinnbar bei sofortigem Angriff.** Mit 65 % Startstärke, Panik 40 % je Elefanten-Einheit, Masinissa +12 % und Gassen-Regel liegt das Verhältnis bei 0,8–1,1: Siegquote 2–4 %. Der Plan „Elefanten zurückhalten“ (−5 %) ändert nichts (C 2 %). Wer wartet und rekrutiert, gewinnt sicher (Verhältnis 2,4: 100 %) – dann fällt aber Karthago öfter oder die Gunst sinkt. *Vorschlag:* Panik 25–30 %, Masinissa +8 % oder Heer-Auffüllung bei der Heimkehr (Veteranen aus Africa), dazu Hinweis, dass Warten und Verstärken lohnt.
+8. **Nero ist zu schwach.** Er greift Hasdrubal in der Poebene an und verliert immer (14 von 14); „Hasdrubals Kopf“ kommt nie vor. Mit aktivem Hannibal ist die Vereinigung leicht (Runde 58). *Vorschlag:* Nero 9–10 Einheiten oder Angriff mit +25 % (Überraschung); Hasdrubal ohne Heimvorteil.
+9. **Rom angreifen** schlägt in 3 von 3 Läufen fehl (Garnison 46, Mauern 4, Bürgerheer; Belagerung dauert, derweil fällt Karthago). Ende A „Rom“ ist praktisch nur über Latium vor dem Wahlfenster erreichbar.
+
+**Kosmetik**
+10. Jahre: Hasdrubal kommt 205 an (Geschichte 207), Zama 203/204 (Geschichte 202). Folge von ypt 0,25 und der Rundenzählung (siehe Befund 7 der Gesamtprüfung).
+11. Der Bot-Fund „Fenster Schritt 10 von 10“ und das Wahlfenster erscheinen unmittelbar hintereinander (zwei Fenster mit demselben Text): zusammenlegen oder das Schrittfenster in dieser Runde unterdrücken.
+
+### Geänderte Funktionen (v243)
+`hnWahlRound` (Scipio hold), `hnVerstWhy` (keine Verstärkung nach Heimkehr), `hnEndMark`/`hnEndInfo` (Grund „kapital“). Tests nach den Korrekturen: chkf „checked“, smoke, hn4 (siehe unten). iPad nicht getestet.
