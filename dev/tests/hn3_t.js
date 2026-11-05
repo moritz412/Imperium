@@ -297,5 +297,13 @@ const PP=SKIP.includes('PP')?null:await p.evaluate(()=>{const out={};
  return out;});
 if(PP){console.log('Pingpong (30 Runden, Bot-Hannibal):',JSON.stringify(PP));
  ok('Messziel Pingpong: keine Provinz (außer bewusst abgefallene Städte) wechselt in 30 Runden mehr als 2-mal zwischen Karthago und Rom (Aufstände ungehaltener Provinzen werden getrennt gemeldet)',Object.values(PP).every(x=>x.max<=2&&x.rounds>=5),Object.values(PP).map(x=>[x.rounds,x.max,x.maxAll]));}
+
+// ---- Screenshots (nur Sichtprüfung): Szenario-Kopf mit Gunst im laufenden Spiel, Rat-Fenster ----
+await p.evaluate(()=>{setup();const f=S.player;gotoStep(7);clearRom();clearMine();heroAt('kampanien',true);S.turn++;hnRound();clearRom();hnFl().hn_gunst=62;S.q=[];stState(f).q=[];closeAll();try{const st=document.getElementById('start');if(st)st.hidden=true;}catch(e){}UI.sel=PI.kampanien;UI.mode='prov';refresh();try{$('#sheet').classList.remove('collapsed');}catch(e){}});
+await p.waitForTimeout(700);await p.screenshot({path:SHOT+'/hn3_kopf.jpg',type:'jpeg',quality:70,timeout:120000}).catch(()=>{});
+await p.evaluate(()=>{hnFl().hn_vo1=null;stState(S.player).q=[{k:'hn',id:'rat',ev:'barkiden',n:1}];const x=popEv()[0];if(x)showEvent(x.E,x.ctx,()=>{});});
+await p.waitForTimeout(700);await p.screenshot({path:SHOT+'/hn3_rat.jpg',type:'jpeg',quality:70,timeout:120000}).catch(()=>{});
+const IM=await p.evaluate(()=>{const o={};for(const k of['cannae','fabius','ochsen','weich','rat_hanno','rat_barkiden','rat_verstaerkung']){const x=hnImg(k);o[k]=x+':'+(heroImg(x,0,false)?'ja':'nein');}return o;});
+ok('HN_IMG (H3): jeder Schlüssel fällt auf ein vorhandenes Bild zurück (TODO Job 40: hn_k3_*, hn_u_*, hn_rat_*)',Object.values(IM).every(v=>/:ja$/.test(v)),IM);
 ok('Keine Seitenfehler',!errs.length,errs.slice(0,3));
 const nP=R.filter(x=>x).length;console.log(`${nP} PASS / ${R.length-nP} FAIL`);console.log(R.every(x=>x)?'ALLE PASS':'FEHLER '+R.filter(x=>!x).length);await b.close();})();
