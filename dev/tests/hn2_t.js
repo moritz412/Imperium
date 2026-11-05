@@ -88,6 +88,13 @@ const L=await p.evaluate(()=>{const h=inPass('kurz',6);for(const k of ['taurini'
  for(let g=0;g<14&&hero().hnPass;g++){for(const x of popEv()){if(/^hn_p_/.test(x.E.id))x.E.opts[x.E.opts.length-1].fx(S.player,x.ctx);}if(!hero().hnPass)break;S.turn++;hnRound();}
  const I=hnFl().hn_ankunft,hh=hero();return{p:PROV_DEF[hh.p].id,kamp:I&&I.kamp,men:hnMen(hh),im:I&&I.men,pass:!!hh.hnPass};});
 ok('Ankunft gegen übermächtige Besatzung: kein Kampf, Heer lagert am Fuß des Passes, keine Verluste',L.p==='seealpen'&&/lagert/.test(L.kamp||'')&&L.men===L.im&&!L.pass,L);
+// v240: Söldner gegen Gold in Italien
+const SO=await p.evaluate(()=>{const h=inPass('kurz',6);hnRound();
+ for(let g=0;g<14&&hero().hnPass;g++){for(const x of popEv()){if(/^hn_p_/.test(x.E.id))x.E.opts[x.E.opts.length-1].fx(S.player,x.ctx);}if(!hero().hnPass)break;S.turn++;hnRound();}
+ const hh=hero();while(hh.units.length>6)hh.units.pop();S.fac[S.player].gold=5000;const n0=hh.units.length,c0=hnSoeldCost(),btn=/Söldner/.test(hnSoeldBtn());
+ const w1=hnSoeld(),w2=hnSoeld();S.turn+=1;const c1=hnSoeldCost(),w3=hnSoeld();
+ return{btn,w1,w2,w3,n:hh.units.length-n0,c0,c1,gold:S.fac[S.player].gold,reg:hnReg(hh.p)};});
+ok('Söldner in Italien: Knopf da, Anwerben kostet Gold, einmal je Runde, Preis steigt',SO.btn&&SO.w1==null&&/Werber/.test(SO.w2||'')&&SO.w3==null&&SO.n===2&&SO.c1>SO.c0&&SO.gold===5000-SO.c0-SO.c1,SO);
 
 // ---- (d) Ereignisse: jedes mit Bild, Text, Wahl; Wirkung der Wahl stimmt ----
 const D=await p.evaluate(()=>{const o={};const keys=['berg','fuehrer','fels','lawine','frost','absturz','vorraete'];

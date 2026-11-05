@@ -9693,7 +9693,7 @@ function scenEvents(){const out=[];if(!S||!S.scen||!S.scen.q||!S.scen.q.length)r
 function scenHtml(){if(!S||!S.scen)return'';const Z=S.scen,D=SCEN[Z.id];if(Z.over)return`<p class="note">${esc(D.n)}: ${Z.res==='win'?'gewonnen ('+Z.rank+')':Z.res==='still'?'still beendet':'verloren'}. Freies Spiel.</p>`;
   const left=D.turns+(Z.ext||0)-(S.turn-Z.t0);let h=`<div class="scenbar"><b>${esc(D.n)}</b> <span class="muted">noch ${left} Runden</span> · Ruhm ${Math.round(Z.ruhm||0)}`;
   if(D.rules&&D.rules.senat&&!Z.flags.rubikon)h+=` · ${D.sen?D.sen.bar:'Einfluss im Senat'} <b style="color:${Z.einfl<20?'var(--danger)':'inherit'}">${Math.round(Z.einfl)}</b> <button class="btn small" data-act="scenbribe">${D.sen?D.sen.btn:'Freunde in Rom'} (${Math.round(150*G())} Gold)</button>`;
-  try{if(hnKeltOn()){const K=Z.flags.hn_kelt;h+=` · <span title="Sieg +15, Plündern keltischen Landes −20, 3 Runden ohne Sieg −5 je Runde. Ab 50 stellen die Kelten Krieger, unter 20 laufen sie davon.">Kelten-Treue</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(K)}%;background:${K<20?'#c2412f':K>=50?'#6aa84f':'#d6a43a'}"></i></span><b style="color:${K<20?'var(--danger)':'inherit'}">${Math.round(K)}</b>`;}}catch(e){}
+  try{if(hnKeltOn()){const K=Z.flags.hn_kelt;h+=` · <span title="Sieg +15, Plündern keltischen Landes −20, 3 Runden ohne Sieg −5 je Runde. Ab 50 stellen die Kelten Krieger, unter 20 laufen sie davon.">Kelten-Treue</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(K)}%;background:${K<20?'#c2412f':K>=50?'#6aa84f':'#d6a43a'}"></i></span><b style="color:${K<20?'var(--danger)':'inherit'}">${Math.round(K)}</b>`+hnSoeldBtn();}}catch(e){}
   try{if(hnRatOn())h+=hnRatBar(Z);}catch(e){}
   return h+'</div>';}
 function scenChoice(act){const Z=S.scen;if(!Z)return;try{scenChoiceAS(act);}catch(e){console.warn('Wahl AS',e);}try{scenChoice2(act);}catch(e){console.warn('Wahl',e);}if(act==='rubikon'){Z.flags.rubikon=1;const f=S.player;for(const x of PLAYABLE)if(x==='samniten'&&alive(x))try{const d=dip(f,x);d.st='peace';declareWar(f,x,true);}catch(e){}addLog('Alea iacta est: Cäsar überschreitet den Rubikon. Krieg gegen den Senat.',true,'bad');scenFame(f,20);}
@@ -10193,6 +10193,17 @@ function hnGunst(d){const F=hnFl();F.hn_gunst=clamp(Math.round((F.hn_gunst+d)*10
 function hnBotenCost(){return Math.round(150*G());}
 function hnBotenWhy(){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F.hn_botenT!=null&&S.turn-F.hn_botenT<HN_RAT.botenCd)return`Die Boten sind noch unterwegs (noch ${HN_RAT.botenCd-(S.turn-F.hn_botenT)} Runden).`;if(F.hn_gunst>=100)return'Die Gunst ist schon am Höchststand.';if(S.fac[S.player].gold<hnBotenCost())return`Zu wenig Gold (${hnBotenCost()} nötig).`;return null;}
 function hnBoten(){const w=hnBotenWhy();if(w)return w;S.fac[S.player].gold-=hnBotenCost();hnGunst(HN_RAT.botenPlus);hnFl().hn_botenT=S.turn;addLog(`Boten mit Gold und Beutestücken erreichen Karthago. Gunst +${HN_RAT.botenPlus}.`,true,'good');return null;}
+// v240: Söldner in Italien gegen Gold (Prüfbericht: Gold häuft sich ungenutzt). Bei Kelten-Treue ab 40 keltische Krieger, sonst Numider oder Balearer.
+function hnSoeldCost(){return Math.round((200+60*(hnFl().hn_sn||0))*G());}
+function hnSoeldWhy(){const F=hnFl(),h=hnHero();if(!hnOn()||F.hn_ankunft==null)return'Erst in Italien.';if(!h||h.hnPass)return'Hannibals Heer ist nicht bereit.';
+  if(!HN_ITALY.has(hnReg(h.p)))return'Nur in Italien.';if(F.hn_snT===S.turn)return'Die Werber sind schon unterwegs. Nächste Runde wieder.';
+  if(h.units.length>=armyMax(S.player))return'Hannibals Heer ist voll.';if(S.fac[S.player].gold<hnSoeldCost())return`${hnSoeldCost()} Gold nötig.`;return null;}
+function hnSoeld(){const w=hnSoeldWhy();if(w)return w;const F=hnFl(),f=S.player,h=hnHero(),kel=hnKeltOn()&&F.hn_kelt>=40;
+  const role=kel?(Math.random()<0.7?['sword','langschw']:['cav']):(Math.random()<0.5?['cav']:['missile']);
+  const u=newUnit(f,role[0],role[1]);if(kel)u.kelt=1;S.fac[f].gold-=hnSoeldCost();h.units.push(u);F.hn_sn=(F.hn_sn||0)+1;F.hn_snT=S.turn;
+  addLog(kel?`Keltische ${u.r==='cav'?'Reiter':'Krieger'} nehmen Hannibals Gold und schließen sich dem Heer an.`:`${u.r==='cav'?'Numidische Reiter':'Schleuderer von den Balearen'} landen an der Küste und stoßen zum Heer.`,true,'good');return null;}
+function hnSoeldBtn(){try{if(!hnOn()||hnFl().hn_ankunft==null)return'';const w=hnSoeldWhy();if(w==='Nur in Italien.'||w==='Erst in Italien.')return'';
+  return` <button class="btn small" data-act="hnsold"${w?' disabled':''} title="${esc(w||'Eine Einheit für Hannibals Heer')}">Söldner (${hnSoeldCost()} Gold)</button>`;}catch(e){return'';}}
 function hnVerstNext(){return hnFl().hn_v1?2:1;}
 function hnVerstWhy(n){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F['hn_v'+n])return'Diese Verstärkung ist schon bewilligt.';if(n===2&&!F.hn_v1)return'Erst nach der ersten Verstärkung.';if(F.hn_vq)return'Die Schiffe sind schon unterwegs.';
   const need=n===1?HN_RAT.v1:HN_RAT.v2;if(F.hn_gunst<need)return`Gunst ${need} nötig (jetzt ${Math.round(F.hn_gunst)}).`;return null;}
@@ -10232,7 +10243,7 @@ function hnRatBar(Z){const F=Z.flags,g=F.hn_gunst,col=g<HN_RAT.warn?'#c2412f':g>
   return` · <span title="Siege +10, Abfall einer Stadt +5, Niederlage −15, Stillstand −3 je Runde (nach ${HN_RAT.grace} Runden ohne Erfolg). Ab 60 schickt der Rat Verstärkung, ab 80 ein zweites Mal. Unter 25 ruft er Hannibal heim.">Gunst in Karthago</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(g)}%;background:${col}"></i></span><b style="color:${g<HN_RAT.ab?'var(--danger)':'inherit'}">${Math.round(g)}</b>`
    +(S.turn-F.hn_gLast>=HN_RAT.grace&&g>=HN_RAT.ab?` <small style="color:var(--danger)">−${HN_RAT.still} je Runde, Abberufung in ${Math.max(1,Math.ceil((g-HN_RAT.ab)/HN_RAT.still))} Runden – siege oder bringe eine Stadt zum Abfall</small>`:'')
    +(n<=2&&!F['hn_v'+n]&&!F.hn_vq?` <button class="btn small" data-act="hnrat" data-k="verst"${vw?' disabled':''} title="${esc(vw||`Gunst −${n===1?20:25}: Mago landet in 2 Runden bei Locri.`)}">Verstärkung${vw?'':' anfordern'}</button>`:'')
-   +` <button class="btn small" data-act="hnrat" data-k="boten"${bw?' disabled':''} title="${esc(bw||`Gunst +${HN_RAT.botenPlus}, ${HN_RAT.botenCd} Runden Pause`)}">Boten (${hnBotenCost()} Gold)</button>`;}
+   +` <button class="btn small" data-act="hnrat" data-k="boten"${bw?' disabled':''} title="${esc(bw||`Gunst +${HN_RAT.botenPlus}, ${HN_RAT.botenCd} Runden Pause`)}">Boten (${hnBotenCost()} Gold)</button>`+hnSoeldBtn();}
 function hnRatAct(k){const w=k==='verst'?hnVerst(hnVerstNext()):hnBoten();if(w){toast(w);AUDIO.sfx('error');}else{AUDIO.sfx('click');toast(k==='verst'?'Verstärkung bewilligt':`Gunst +${HN_RAT.botenPlus}`);}}
 
 /* ---- Ereignisfenster H3 ---- */
@@ -13287,6 +13298,7 @@ const RUL_TRAITS={
 // v237b (05.11.): Ratgeber-Einblendung (#ratSay) verschwindet, sobald ein Fenster aufgeht (verdeckte sonst die unteren Wahlknoepfe)
 // v238 (05.11.): Pruefung Hannibal-Kampagne (Test hn_kampagne_t.js, Bericht docs/pruef_hannibal_kampagne.md): (1) hnNoLand: Roms KI (aiFaction-Angriff, Belagerungsbeginn, campStep/Erzfeind, aiLanding) greift Karthagos Heimat (Africa) vor Akt IV nicht an – vorher fiel die Hauptstadt in Runde 13–15 (Spieler passiv oder unterwegs); (2) Herrscher von Karthago stirbt in der Hannibal-Geschichte nicht (dynRound; vorher „Hannibal Barkas ist gestorben“ in Runde 3–15, Thronwechsel-Malus); (3) Rhone-Fenster auch beim Zug nach Allobroger (Weg ueber Arverner umging es); (4) SC_COND.pass zaehlt hn_ankunft sofort (Ziel 2/2 bei Ankunft); (5) Heer des Helden flieht bei verlorener Verteidigung ohne eigene Nachbarprovinz in eine Nachbarprovinz ohne Feindheer, sonst faellt der Held (vorher still geloescht, Held tauchte in Hispanien wieder auf).
 // v239 (05.11.): Hannibal nach Pruefbericht: Ankunft in der Poebene waehlt das Ziel mit der besten Aussicht, Insubrer schwaechen die Besatzung (Garnison x0,6); bei zu schlechter Aussicht kein Zwangskampf, das Heer lagert am Fuss des Passes (vorher fiel das Heer in Lauf A von 49 % auf 15 %). Cannae-Text ohne Jahreszahl (Spieljahr laeuft voraus). Ratsleiste zeigt beim Stillstand sichtbar 'Gunst −3 je Runde, Abberufung in n Runden'.
+// v240 (05.11.): Hannibal: Knopf „Söldner“ in der Kelten- bzw. Ratsleiste, sobald Hannibals Heer in Italien steht: eine Einheit für 200 Gold (+60 je Anwerbung), einmal je Runde; bei Kelten-Treue ab 40 keltische Krieger/Reiter, sonst Numider oder Balearer (Prüfbericht: 3000–4300 Gold blieben ungenutzt).
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -22280,6 +22292,7 @@ $('#shBody').addEventListener('click',e=>{
   else if(act==='storychoice'){const s=stState(S.player),C=stCh(S.player),st=s&&C.steps[s.i];if(st&&st.choice){const x=stChoiceEv(st,s,C);showEvent(x.E,x.ctx,()=>refresh());}}
   else if(act==='scenbribe'){const c=Math.round(150*G());if(S.fac[S.player].gold>=c&&S.scen){S.fac[S.player].gold-=c;S.scen.einfl+=12;AUDIO.sfx('click');toast('Einfluss +12');renderTop();refresh();}}
   else if(act==='hnrat'){hnRatAct(b.dataset.k);renderTop();refresh();}
+  else if(act==='hnsold'){const w=hnSoeld();if(w){toast(w);AUDIO.sfx('error');}else{AUDIO.sfx('click');toast('Söldner angeworben');}renderTop();refresh();}
   else if(act==='defect'){if(tryDefect(S.player,+b.dataset.p))AUDIO.sfx('win');else AUDIO.sfx('error');renderTop();refreshOwnership();refresh();}
   else if(act==='kb'){if(sendKb(S.player,UI.sel)){AUDIO.sfx('click');renderTop();refresh();}}
   else if(act==='f3'){feat3Act(b.dataset.k,+b.dataset.p);}

@@ -199,4 +199,4 @@ Spielregeln (Entscheidung nötig):
 - `pk2_t.js` „3 Runden mit neuen Reichen“ schlägt unter Last gelegentlich fehl (nur 2 Runden in der Wartezeit).
 - Klick-Zeitüberschreitungen in `reach_*` unter hoher Last (Software-Rendering) – kein Spielfehler.
 
-- **v239 (05.11.)** Hannibal nach Prüfbericht: Ankunft Poebene ohne Zwangskampf bei schlechter Aussicht (Heer lagert am Pass), Insubrer-Hilfe (Garnison ×0,6), Cannae-Text ohne Jahreszahl, Ratsleiste zeigt Abberufungs-Countdown. Offen aus dem Bericht: Epirus frisst Süditalien (KI, vorsichtig), Gold ohne Verwendung (Söldner?), Aufstände in Gallien nach Abmarsch, `AGE_TURN` ignoriert `ypt`.
+- **v239 (05.11.)** Hannibal nach Prüfbericht: Ankunft Poebene ohne Zwangskampf bei schlechter Aussicht (Heer lagert am Pass), Insubrer-Hilfe (Garnison ×0,6), Cannae-Text ohne Jahreszahl, Ratsleiste zeigt Abberufungs-Countdown. Offen aus dem Bericht: Epirus frisst Süditalien (KI, vorsichtig), Gold ohne Verwendung → v240 Söldner-Knopf, Aufstände in Gallien nach Abmarsch, `AGE_TURN` ignoriert `ypt`.
