@@ -2,6 +2,11 @@
 
 > **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
 
+## ZUERST – Hannibal H4 (05.11., v237, nicht veröffentlicht)
+- H4 fertig in dev/imperium.html (Block „v237 (H4)“): Hasdrubal (Pass kurz) + Nero-Drehbuch, Vereinigung/Nero schlagen/„Hasdrubals Kopf“ (nur Text), Wahlfenster Rom/Heimkehr, Sonderschlacht Zama (Panik 40 %, Plan „Elefanten zurückhalten“, Masinissa +12 %), Ende A/B (Abberufung, Zeit, Zama verloren). Test hn4_t.js (iPad nicht getestet).
+- **Hannibal-Kampagne komplett bis auf Kino/Bilder.** Offen: Job 40 (hn_k4_nero/hasdrubal, hn_k5b_landung/zama/heimfahrt, hn_k5a_triumph, hn_sf_zama; Rückfall sc_hannibal) und Kino 4/5A/5B + Sprecher Job 43 (HN_KINO in dev/imperium.html: ikeys/keys eintragen, leer = übersprungen).
+- Nicht gemessen: Spielerlauf-Balance Akt IV (Nero 6 Einheiten gegen Hasdrubal ~68 % Männer nach dem Pass; Wettlauf Nero 2 Provinzen/Runde gegen Hannibals Marsch). Zama gilt nur in der berechneten Schlacht (nicht in der selbst geschlagenen); Zama-Niederlage beendet sofort mit Ende B.
+
 ## ZUERST – Hannibal H3 (05.11., v236, nicht veröffentlicht)
 - H3 fertig in dev/imperium.html (Block „v236 (H3)“): Cannae-Drehbuch + Umfassung +25 %, Fabius-Skript, Winterlager Capua + Verweichlichung, Ochsen mit Fackeln, Rat von Karthago (Gunst). Test hn3_t.js (iPad nicht getestet).
 - Messung (Bot): Bilanz Italien (Steuer − Unterhalt) ohne Abfall −48 bis −53, mit 3 Städten −2 bis +7 (dafür Unterhalt in Italien ×0,5, hnUpkMul – bewusst gesetzt, änderbar). Pingpong 30 Runden: Rom/Karthago-Wechsel je Provinz ≤ 1; Aufstände nicht gehaltener Provinzen (12–20 je Lauf) sind das alte Unruhesystem, nicht das Skript.
