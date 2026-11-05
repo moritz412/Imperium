@@ -83,6 +83,11 @@ for(const [rt,d] of [['kurz',2],['lang',4],['wacht',3]]){const c=C[rt];
  ok(`Route ${rt}: Ankunft nach der Routendauer (${d} Tage, mit Umwegen ${c.I?c.I.dur:'?'}), Heer danach in Taurini (erobert)`,c.I&&c.I.dur>=d-1&&c.rounds===c.I.dur+1&&c.dest&&c.owner&&!c.left,c);}
 ok('Route „bewacht“ beginnt mit den Bergstämmen',C.wacht.first==='hn_p_berg',C.wacht.first);
 ok('Ankunft: Kelten-Treue 35, Konsulheere marschieren (hn_jagd), Ereignis „Poebene“ bereit',C.kurz.kelt===35&&C.kurz.jagd,[C.kurz.kelt,C.kurz.jagd]);
+// v239: starke Besatzung in allen Zielen -> kein Zwangskampf, Heer lagert am Fuß des Passes
+const L=await p.evaluate(()=>{const h=inPass('kurz',6);for(const k of ['taurini','insubrien','ligurien'])if(PI[k]!=null)S.prov[PI[k]].gar=900;hnRound();
+ for(let g=0;g<14&&hero().hnPass;g++){for(const x of popEv()){if(/^hn_p_/.test(x.E.id))x.E.opts[x.E.opts.length-1].fx(S.player,x.ctx);}if(!hero().hnPass)break;S.turn++;hnRound();}
+ const I=hnFl().hn_ankunft,hh=hero();return{p:PROV_DEF[hh.p].id,kamp:I&&I.kamp,men:hnMen(hh),im:I&&I.men,pass:!!hh.hnPass};});
+ok('Ankunft gegen übermächtige Besatzung: kein Kampf, Heer lagert am Fuß des Passes, keine Verluste',L.p==='seealpen'&&/lagert/.test(L.kamp||'')&&L.men===L.im&&!L.pass,L);
 
 // ---- (d) Ereignisse: jedes mit Bild, Text, Wahl; Wirkung der Wahl stimmt ----
 const D=await p.evaluate(()=>{const o={};const keys=['berg','fuehrer','fels','lawine','frost','absturz','vorraete'];
