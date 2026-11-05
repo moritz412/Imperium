@@ -9,7 +9,7 @@
 const {chromium}=require('playwright');
 const FILE=process.argv[2]||require('path').join(__dirname,'..','imperium.html'),PORT=process.argv[3]||'8772';
 const PLAN=(process.env.HN4_LAUFE||'A:2,B:2,C:2,D:1').split(',').map(x=>x.split(':')).map(([v,n])=>[v,+n]);
-const MAXRV={A:28,B:18,C:18,D:12},MAXR0=+(process.env.HN4_RUNDEN||0),NZ=+(process.env.HN4_ZAMA||12),LOG=!!process.env.HN4_LOG;
+const MAXRV={A:26,B:18,C:18,D:12,E:18},MAXR0=+(process.env.HN4_RUNDEN||0),NZ=+(process.env.HN4_ZAMA||12),LOG=!!process.env.HN4_LOG;
 (async()=>{const b=await chromium.launch({executablePath:process.env.PW_CHROMIUM||undefined,args:process.env.PW_GPU?[]:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const R=[];const ok=(n,c,i='')=>{R.push(!!c);console.log((c?'PASS ':'FAIL ')+n+(i!==''?'  '+JSON.stringify(i):''));};
 const bef=(n,problem,i='')=>{console.log((problem?'BEFUND ':'ok-kein-Befund ')+n+(i!==''?'  '+JSON.stringify(i):''));};
@@ -82,7 +82,7 @@ await p.evaluate(()=>{
  window.akt3=()=>{setup();for(let i=0;i<8&&mOpen();i++){answer('start');}
   const Z=S.scen,D=SCEN.hannibal,f=S.player,F=hnFl();
   S.turn=Z.t0+52;S.year=D.year+Math.floor(52*(D.ypt||1));// Akt IV beginnt im Spielerlauf um Runde 53 (Jahr ~207 v. Chr.)
-  for(const id of['kampanien','lukanien','bruttium','apulien','insubrien','taurini'])S.prov[PI[id]].owner=f;S.prov[PI.tarraco].owner=f;
+  for(const id of['kampanien','lukanien','bruttium','apulien',...(window.NOPO?[]:['insubrien','taurini'])])S.prov[PI[id]].owner=f;S.prov[PI.tarraco].owner=f;
   try{refreshOwnership();}catch(e){}
   const h=hero();h.p=PI.kampanien;h.pos=null;h.goal=null;h.st=null;h.mp=maxMP(h);for(const u of h.units)u.men=Math.max(1,Math.round(unitStat(f,u.r,u.v).men*0.65));
   F.hn_besatz='b';F.hn_rhone=1;F.hn_landung=1;F.hn_krieg=Z.t0+3;F.hn_pass=Z.t0+10;F.hn_ankunft={t:Z.t0+14,men:men(h),pct:50};F.hn_jagd=Z.t0+16;F.hn_kelt=60;
@@ -96,7 +96,7 @@ await p.evaluate(()=>{
   return{step:scenStepI(),turn:S.turn-Z.t0,year:S.year,men:men(h),u:h.units.length,hasd:F.hn_hasd,gunst:F.hn_gunst};};
 });
 const BOTRUN=async(variant,nr)=>{
- const S0=await p.evaluate((variant)=>{BOT.ev=[];BOT.stuck=[];BOT.att=[];BOT.ph=[];BOT.txt=[];BOT.wait=0;BOT.wopt=(variant==='A'?0:1);errsW.length=0;window.PL={rows:[],snap:null,t0:null};
+ const S0=await p.evaluate((variant)=>{window.NOPO=(variant==='E');BOT.ev=[];BOT.stuck=[];BOT.att=[];BOT.ph=[];BOT.txt=[];BOT.wait=0;BOT.wopt=(variant==='A'?0:1);errsW.length=0;window.PL={rows:[],snap:null,t0:null};
   const s=akt3();const h=hero();PL.t0=S.turn-s.turn;s.men0=men(h);s.ele=h.units.filter(u=>u.v==='elef').length;
   s.hasdA=!!hnHasdA();s.neroA=!!hnNeroA();return s;},variant);
  info(`Lauf ${variant}${nr} Start (nach Abkürzung akt3)`,S0);
@@ -120,7 +120,7 @@ const BOTRUN=async(variant,nr)=>{
    if(!h.hnPass){
     if(variant==='A'&&wahl==null){// Hasdrubal entgegen: in die Poebene bzw. zu seinem Heer
      const tgt=H&&!H.hnPass&&HN_ITALY.has(hnReg(H.p))?H.p:PI.taurini;
-     if(h.p!==tgt&&F.hn_hasd==='lauf'){const path=bfs(h.p,i=>i===tgt);if(path&&path.length){const w=await stepTo(h,path,0.8);acts.push('Hannibal → '+PROV_DEF[h.p].id+(w?' '+w:''));}else acts.push('Hannibal: kein Weg zu '+PROV_DEF[tgt].id);}
+     if(h.p!==tgt&&F.hn_hasd==='lauf'){const path=bfs(h.p,i=>i===tgt);if(path&&path.length){const w=await stepTo(h,path,1.1);acts.push('Hannibal → '+PROV_DEF[h.p].id+(w?' '+w:''));}else acts.push('Hannibal: kein Weg zu '+PROV_DEF[tgt].id);}
      else acts.push('Hannibal wartet bei '+PROV_DEF[h.p].id);}
     else if(variant==='A'&&wahl==='rom'){// Rom: Latium belagern/stürmen, beide Heere
      for(const a of [h,H].filter(x=>x&&!x.hnPass&&x.units.length)){a.mp=a.mp==null?maxMP(a):a.mp;const sg=await siegeAct(a);if(sg){acts.push((a===h?'Hannibal ':'Hasdrubal ')+sg);continue;}
@@ -132,6 +132,7 @@ const BOTRUN=async(variant,nr)=>{
      if(sc&&h.p===PI.karthago&&F.hn_zama==null){
       if(!PL.snap){PL.snap=JSON.stringify(S);const cx=startAttackCtx(h,sc.p);PL.pre={men:men(h),u:h.units.length,ele:h.units.filter(u=>u.v==='elef').length,eleMen:h.units.filter(u=>u.v==='elef').reduce((s,u)=>s+u.men,0),sc:men(sc),q:cx.res.att/Math.max(1,cx.res.def),plan:h.plan||'frontal'};}
       const rr=await attack(h,sc.p);acts.push('Zama-Angriff: '+rr+' → hn_zama='+F.hn_zama);}
+     else if(sc&&F.hn_zama==null&&!h.hnPass){h.mp=h.mp==null?maxMP(h):h.mp;const path=bfs(h.p,i=>i===sc.p);if(path&&path.length){const w=await stepTo(h,path,0.2);acts.push('Hannibal sucht Scipio ('+PROV_DEF[sc.p].id+') → '+PROV_DEF[h.p].id+(w?' '+w:''));}else acts.push('Scipio unerreichbar ('+PROV_DEF[sc.p].id+')');}
      else acts.push('Heimkehr: '+(sc?'Scipio '+PROV_DEF[sc.p].id:'kein Scipio')+', Hannibal '+PROV_DEF[h.p].id);}
     else if(variant!=='A'&&wahl==null){acts.push('Hannibal bleibt in '+PROV_DEF[h.p].id+' (passiv)');}
     else if(variant==='D'){acts.push('passiv');}
@@ -159,6 +160,7 @@ const BOTRUN=async(variant,nr)=>{
    console.log('ENDE: Szenario over='+row.sov+' res='+row.res+' '+row.why+' hnEnd='+JSON.stringify(row.hnEnd));break;}
   if(Date.now()-t0>420000){console.log('Zeitlimit des Laufs (7 Min) erreicht');break;}
  }
+ if(process.env.HN4_DBG)console.log('DBG',JSON.stringify(await p.evaluate(()=>({sc:S.armies.filter(a=>a.scip).map(a=>({p:PROV_DEF[a.p].id,u:a.units.length,m:men(a),st:a.st,sieg:a.sieg!=null?PROV_DEF[a.sieg].id:null,hold:a.hold,mp:a.mp})),hero:hero()&&{p:PROV_DEF[hero().p].id,mp:hero().mp,st:hero().st,u:hero().units.length},sieges:S.sieges,kar:{o:S.prov[PI.karthago].owner,gar:S.prov[PI.karthago].gar},byz:S.prov[PI.byzacena].owner,log:S.log.filter(e=>/Scipio|Zeugitana|Byzacena|Karthago/.test(e.t)).slice(-12).map(e=>e.t)}))));
  // Nach dem Ende: Spielerlauf-Zustand für Auswertung
  const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{botlog:BOT.log,rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
    scen:{over:Z.over,res:Z.res,why:Z.why,hnEnd:Z.hnEnd||null,rank:Z.rank},year:S.year,yearTxt:fmtYear(S.year),fl:{hasd:F.hn_hasd,how:F.hn_hasdHow,arr:F.hn_hasdArr,go:F.hn_neroGo,wahl:F.hn_wahl,zama:F.hn_zama,gunst:F.hn_gunst},t0:Z.t0,story:{i:stState(S.player).i,end:stState(S.player).end,done:stState(S.player).done}};});
@@ -188,7 +190,7 @@ for(const [v,n] of PLAN){ALL[v]=[];for(let i=1;i<=n;i++){
   const warn=E.warn.filter(w=>/Hannibal|Pass|Kelten|Konsul|Cannae|Fabius|Rat|Hasdrubal|Wahl|Nero|Zama|Verweich|Geschichte|Ereignis/.test(w));bef(`Lauf ${v}${i}: Warnungen aus Hannibal-Bausteinen`,warn.length>0,warn.slice(0,5));
   bef(`Lauf ${v}${i}: Ende kam (scen.over) innerhalb der Rundengrenze`,!E.scen.over,{runden:rows.length,step:last.step});
   if(LOG)console.log('Logzeilen:\n  '+(await p.evaluate(()=>S.log.slice(-25).map(e=>e.t).join('\n  '))));
-  if(v==='B'||v==='C'){const Q=await ZAMAQ(v==='C'?'zurueck':'frontal');ALL[v][ALL[v].length-1].Q=Q;
+  if(v==='B'||v==='C'||v==='E'){const Q=await ZAMAQ(v==='C'?'zurueck':'frontal');ALL[v][ALL[v].length-1].Q=Q;
    if(Q){const w=Q.filter(x=>x.zama==='won').length,l=Q.filter(x=>x.zama==='lost').length,er=Q.filter(x=>x.err);
     info(`Zama-Wiederholungen ${v}${i} (Ladepunkt vor der Schlacht, ${Q.length} Schlachten, resolveAttack ohne Fenster)`,{gewonnen:w,verloren:l,anders:Q.length-w-l,fehler:er.slice(0,2),beispiel:Q.slice(0,2)});}
    else info(`Zama-Wiederholungen ${v}${i}`,'nicht getestet: Lauf erreichte Zama nicht (kein Ladepunkt)');}
@@ -198,7 +200,7 @@ for(const [v,n] of PLAN){ALL[v]=[];for(let i=1;i<=n;i++){
 for(const v of Object.keys(ALL)){const L=ALL[v];if(!L.length)continue;
  const sum=L.map(E=>({arr:(E.rows.find(x=>x.arr)||{}).rel||null,pct:(E.fl.arr||{}).pct||null,how:E.fl.hasd+(E.fl.how?':'+E.fl.how:''),wahl:E.fl.wahl,zama:E.fl.zama,end:E.scen.hnEnd&&E.scen.hnEnd.e+'/'+E.scen.hnEnd.c,res:E.scen.res,jahr:E.yearTxt,runden:E.rows.length}));
  info(`Zusammenfassung Variante ${v}`,sum);
- if(v==='B'||v==='C'){const Q=[].concat(...L.map(E=>E.Q||[]));if(Q.length){const w=Q.filter(x=>x.zama==='won').length;info(`Zama-Siegquote Variante ${v} (alle Wiederholungen)`,{siege:w,von:Q.length,quote:Math.round(100*w/Q.length)+' %'});}}}
+ if(v==='B'||v==='C'||v==='E'){const Q=[].concat(...L.map(E=>E.Q||[]));if(Q.length){const w=Q.filter(x=>x.zama==='won').length;info(`Zama-Siegquote Variante ${v} (alle Wiederholungen)`,{siege:w,von:Q.length,quote:Math.round(100*w/Q.length)+' %'});}}}
 ok('Keine Seiten-/Konsolenfehler im ganzen Test',!errs.length,errs.slice(0,3));
 console.log(`Gesamtlaufzeit ${Math.round((Date.now()-T0)/1000)} s`);
 console.log(R.every(x=>x)?'ALLE PASS':'FEHLER '+R.filter(x=>!x).length);await b.close();})();
