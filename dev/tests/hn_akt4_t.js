@@ -48,6 +48,7 @@ await p.evaluate(()=>{
   if(/Wer bleibt in Hispanien/.test(t)){b=bs.find(x=>/Alle ziehen mit/.test(x.textContent));why='alle';}
   else if(/Welchen Weg/.test(t)){b=bs.find(x=>/lange Weg/.test(x.textContent))||ev[0];why='route lang';}
   else if(/Rom angreifen|heimkehren/.test(t)&&/Scipio landet/.test(h2)&&ev.length>=2){b=ev[BOT.wopt]||bs[BOT.wopt];why='wahl'+BOT.wopt;if(!b){BOT.log.push({r:rel,wahlOhneKnopf:[...d.querySelectorAll('.evopt, .actions .btn')].map(x=>x.textContent.replace(/\s+/g,' ').slice(0,60)+(x.disabled?' [gesperrt]':'')+' '+x.className)});b=bs[0];why='wahl-Ausweichknopf';}}
+  else if(/Römische Republik/.test(h2+t)&&/Frieden/.test(t)&&!/Angriff auf/.test(t)&&bs.length>1){BOT.peace=(BOT.peace||0)+1;b=bs.find(x=>/Ablehnen|Absagen|Nicht annehmen/.test(x.textContent))||bs[bs.length-1];why='Friede mit Rom abgelehnt';}
   else if(ev.length){b=ev[0];why='erste Option';}
   else{const pref=[/Belagern/,/Weiter|Verstanden|Weiterspielen|Annehmen|Flöße/,/Ablehnen/,/Fortsetzen|Berechnen/];for(const re of pref){b=bs.find(x=>re.test(x.textContent));if(b)break;}if(!b)b=bs.find(x=>x.classList.contains('primary'))||bs[0];why='Standard';}
   BOT.ev.push({r:rel,y:(sub.match(/(\d{1,4}) (v|n)\. Chr\./)||['',''])[0],eb:eb.replace(/\s+/g,' ').slice(0,30),h2:h2.replace(/\s+/g,' ').slice(0,50),n:bs.length,pick:(b.querySelector('b')||b).textContent.trim().slice(0,30),why,tag:tag||''});
@@ -98,7 +99,7 @@ await p.evaluate(()=>{
   return{step:scenStepI(),turn:S.turn-Z.t0,year:S.year,men:men(h),u:h.units.length,hasd:F.hn_hasd,gunst:F.hn_gunst};};
 });
 const BOTRUN=async(variant,nr)=>{
- const S0=await p.evaluate((variant)=>{window.NOPO=(variant==='E');BOT.ev=[];BOT.stuck=[];BOT.att=[];BOT.ph=[];BOT.txt=[];BOT.wait=0;BOT.wopt=(variant==='A'?0:1);errsW.length=0;window.PL={rows:[],snap:null,t0:null};
+ const S0=await p.evaluate((variant)=>{window.NOPO=(variant==='E');BOT.ev=[];BOT.stuck=[];BOT.att=[];BOT.ph=[];BOT.txt=[];BOT.wait=0;BOT.peace=0;BOT.wopt=(variant==='A'?0:1);errsW.length=0;window.PL={rows:[],snap:null,t0:null};
   const s=akt3();const h=hero();PL.t0=S.turn-s.turn;s.men0=men(h);s.ele=h.units.filter(u=>u.v==='elef').length;
   s.hasdA=!!hnHasdA();s.neroA=!!hnNeroA();return s;},variant);
  info(`Lauf ${variant}${nr} Start (nach Abkürzung akt3)`,S0);
@@ -164,7 +165,7 @@ const BOTRUN=async(variant,nr)=>{
  }
  if(process.env.HN4_DBG)console.log('DBG',JSON.stringify(await p.evaluate(()=>({sc:S.armies.filter(a=>a.scip).map(a=>({p:PROV_DEF[a.p].id,u:a.units.length,m:men(a),st:a.st,sieg:a.sieg!=null?PROV_DEF[a.sieg].id:null,hold:a.hold,mp:a.mp})),hero:hero()&&{p:PROV_DEF[hero().p].id,mp:hero().mp,st:hero().st,u:hero().units.length},sieges:S.sieges,kar:{o:S.prov[PI.karthago].owner,gar:S.prov[PI.karthago].gar},byz:S.prov[PI.byzacena].owner,rom:S.armies.filter(a=>a.f==='rom'&&a.units.length&&['karthago','byzacena','numidien','gaetulien','emporia'].includes(PROV_DEF[a.p].id)).map(a=>({n:a.name,p:PROV_DEF[a.p].id,m:men(a),sc:!!a.scip,hold:a.hold})),log:S.log.filter(e=>/Scipio|Zeugitana|Byzacena|Karthago/.test(e.t)).slice(-8).map(e=>e.t)}))));
  // Nach dem Ende: Spielerlauf-Zustand für Auswertung
- const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{botlog:BOT.log,rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
+ const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{botlog:BOT.log,rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,peace:BOT.peace||0,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
    scen:{over:Z.over,res:Z.res,why:Z.why,hnEnd:Z.hnEnd||null,rank:Z.rank},year:S.year,yearTxt:fmtYear(S.year),fl:{hasd:F.hn_hasd,how:F.hn_hasdHow,arr:F.hn_hasdArr,go:F.hn_neroGo,wahl:F.hn_wahl,zama:F.hn_zama,gunst:F.hn_gunst},t0:Z.t0,story:{i:stState(S.player).i,end:stState(S.player).end,done:stState(S.player).done}};});
  fs.writeFileSync((process.env.HN4_OUT||'/tmp')+`/hn4_lauf_${variant}${nr}.json`,JSON.stringify(E));return E;};
 // ---- Zama-Wiederholungen aus dem Ladepunkt (Schlacht von Hand: resolveAttack wie hinter „Berechnen“, ABKÜRZUNG: ohne Fenster)
@@ -183,6 +184,7 @@ for(const [v,n] of PLAN){ALL[v]=[];for(let i=1;i<=n;i++){
   if(v!=='D'){info(`Lauf ${v}${i}: Hasdrubal Ankunft Runde / Männer / Nero`,{ankunftRunde:arrRow?arrRow.rel:null,arr:arrRow?arrRow.arr:null,neroLos:goRow?goRow.go:null,
      neroAbstandBeiLos:goRow?goRow.nd:null,hannibalAbstandBeiLos:goRow?goRow.hd:null,ausgang:E.fl.hasd+(E.fl.how?':'+E.fl.how:''),
      neroNah:(()=>{const x=rows.find(y=>y.nd!=null&&y.nd<=1);return x?x.rel:null;})(),hannibalNah:(()=>{const x=rows.find(y=>y.hd!=null&&y.hd<=1&&y.go!=null);return x?x.rel:null;})()});}
+  info(`Lauf ${v}${i}: Friedensangebote/-kongresse mit Rom (Bot lehnt ab)`,E.peace);
   if(E.pre)info(`Lauf ${v}${i}: Zama-Vorstand`,E.pre);
   if(E.txt.length)for(const t of E.txt.filter(t=>/Ende|Sieg|Niederlage|Zama/.test(t.h2)))console.log(`  Endfenster R${t.r} Jahr ${t.y}: ${t.h2} | ${t.sub} | ${t.t.slice(0,420)}`);
   console.log('Ereignisfenster (Runde | Jahr | Kopf | Titel | Optionen | Wahl):');for(const e of E.ev)console.log(`  R${e.r} | ${e.y} | ${e.eb} | ${e.h2} | ${e.n} | ${e.pick} (${e.why})`);
