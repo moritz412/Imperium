@@ -67,8 +67,8 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
     }
     if (bd === 0) memIn = await p.evaluate(() => ({ g: renderer.info.memory.geometries, t: renderer.info.memory.textures }));
     // Rückzug: zweimal tippen
-    await p.screenshot({ path: 'shot/eschlacht_integ_auf' + bd + '.png' });
-    await p.click('#esch #bRueck'); await p.waitForTimeout(200); await p.click('#esch #bRueck');
+    await p.screenshot({ path: 'shot/eschlacht_integ_auf' + bd + '.png' }).catch(() => {});
+    await p.evaluate(() => { const b = document.querySelector('#esch #bRueck'); b.click(); b.click(); });  // beide Tipps sofort: unter Software-Rendering lagen zwischen zwei p.click() mehr als die 3,5 s Bestätigungsfrist
     await warte(() => !ESCH && document.getElementById('modal').hidden === false);
     await p.evaluate(() => closeModal());
   }
@@ -89,7 +89,7 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
     await p.waitForTimeout(1500);
     const erg = await p.evaluate(() => { const r = ESCH.api.ergebnisDaten(true); return { n: r.einheiten.length, ver: r.einheiten.filter(e => e.verst === -1).map(e => [e.np, e.rest, e.geflohen]), tags: r.einheiten.filter(e => e.verst != null).length }; });
     ok('R5: Schlachtergebnis enthält die Verstärkung (nicht eingetroffen = unversehrt)', erg.tags === vs.wartet && erg.ver.length === vs.wartet && erg.ver.every(v => v[1] === v[0] && v[2] === 0), JSON.stringify(erg));
-    await p.click('#esch #bRueck'); await p.waitForTimeout(200); await p.click('#esch #bRueck');
+    await p.evaluate(() => { const b = document.querySelector('#esch #bRueck'); b.click(); b.click(); });  // beide Tipps sofort: unter Software-Rendering lagen zwischen zwei p.click() mehr als die 3,5 s Bestätigungsfrist
     await warte(() => !ESCH && document.getElementById('modal').hidden === false);
     await p.evaluate(() => closeModal());
     const men2 = await p.evaluate(() => window.__a.units.slice(9).map(u => u.men));
@@ -102,18 +102,18 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   const info = await p.evaluate(() => ({ name: ESCH.api.bdiffName, iv: ESCH.api.kiIntervall, n: ESCH.api.units.length, tris: ESCH.api.tris }));
   console.log('LAUF 3', JSON.stringify(info));
   ok('Normal: KI-Intervall 1 s', info.name === 'Normal' && info.iv === 1);
-  await p.screenshot({ path: 'shot/eschlacht_integ_aufstellung.png' });
+  await p.screenshot({ path: 'shot/eschlacht_integ_aufstellung.png' }).catch(() => {});
   await p.evaluate(() => { const A = ESCH.api; A.start(); A.tempo(4); for (const u of A.units) if (u.side === 0) A.haltung(u.i, 'angreifen'); });
   await p.waitForTimeout(25000);
   await p.evaluate(() => { const A = ESCH.api; let x = 0, z = 0, n = 0; for (const u of A.units) if (u.side === 0 && u.strength > 0) { x += u.cx; z += u.cz; n++; } A.kamera(Math.PI * 0.9, 0.42, 70, x / n, z / n + 15); A.tempo(2); });
   await p.waitForTimeout(6000);
-  await p.screenshot({ path: 'shot/eschlacht_integ.png' });
+  await p.screenshot({ path: 'shot/eschlacht_integ.png' }).catch(() => {});
   const mitten = await p.evaluate(() => ({ phase: ESCH.api.phase, st: ESCH.api.units.map(u => u.side + ':' + u.strength + '/' + u.np), fps: ESCH.api.fps.slice(-3) }));
   console.log('MITTEN', JSON.stringify(mitten));
   await p.evaluate(() => ESCH.api.tempo(30));
   await warte(() => ESCH && ESCH.api && ESCH.api.phase === 'ende', null, 900000);
   await p.waitForTimeout(1500);
-  await p.screenshot({ path: 'shot/eschlacht_integ_ende.png' });
+  await p.screenshot({ path: 'shot/eschlacht_integ_ende.png' }).catch(() => {});
   const ende = await p.evaluate(() => { const A = ESCH.api; return { erg: A.ergebnis, zeit: Math.round(A.schlachtZeit), st: A.units.map(u => u.side + ':' + u.strength + '+' + u.fled + '/' + u.np), weiter: !!document.querySelector('#esch #bNoch') }; });
   console.log('ENDE', JSON.stringify(ende));
   ok('Endtafel mit Weiter-Knopf', ende.weiter && /Weiter/.test(await p.textContent('#esch #bNoch')));
@@ -150,7 +150,7 @@ const MIME = { '.json': 'application/json', '.mp3': 'audio/mpeg', '.webp': 'imag
   });
   ok('Schalter aus: alte Schlacht startet wie bisher', !alt.esch && alt.battle && alt.alt && !alt.neu, JSON.stringify(alt));
   await p.waitForTimeout(1500);
-  await p.screenshot({ path: 'shot/eschlacht_integ_alt.png' });
+  await p.screenshot({ path: 'shot/eschlacht_integ_alt.png' }).catch(() => {});
   await p.evaluate(() => { try { retreat(); } catch (e) {} });
   await p.waitForTimeout(500);
   ok('Keine Seiten-/Konsolenfehler', !errs.length, errs.slice(0, 5).join(' | '));

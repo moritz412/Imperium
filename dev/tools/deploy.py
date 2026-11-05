@@ -22,6 +22,11 @@ if os.path.exists(os.path.join(P0, 'einheiten_kampagne.json')): shutil.copy2(os.
 r = subprocess.run([sys.executable, os.path.join(ROOT, 'dev', 'tools', 'build.py'), os.path.join(ROOT, 'dev', 'imperium.html'),
                     '--assets', A, '--out', B, '--zip', os.path.join(A, 'imperium_pwa.zip')])
 if r.returncode: sys.exit('Build fehlgeschlagen')
+# Dateien, die die Ableger (staedte/) aus dem Wurzelverzeichnis laden, aber nicht im OFF_MAN des Hauptspiels stehen
+for rel in ('models/staedte_geb.json', 'audio/st_rom.json', 'img/st_ev.json'):
+    src, dst = os.path.join(A, rel), os.path.join(B, rel)
+    if os.path.exists(src) and not os.path.exists(dst):
+        os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy2(src, dst)
 for n in os.listdir(ROOT):
     if n in KEEP or n == '_build_assets': continue
     p = os.path.join(ROOT, n)

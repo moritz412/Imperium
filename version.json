@@ -1,5 +1,5 @@
 {
-"version": "v220-1e70925b5d",
+"version": "v221-2452999004",
 "files": {
 "img/pk_lk.json": "1e42421565c2d897",
 "img/pk_lb.json": "3c38083e6e69af9f",
@@ -141,10 +141,11 @@
 "snd/g_base.json": "7e56cd25bc1a869e",
 "snd/g_folk.json": "560cf27c252cf123",
 "snd/g_world.json": "03bd41e568b2fc6e",
-"proto/einheiten_kampagne.json": "797e0c06f3b4c090",
+"proto/einheiten_kampagne.json": "d99d9f9609075320",
 "proto/figuren/k_A1_eques.json": "46048179727689bb",
 "proto/figuren/k_A1_hastatus.json": "118afd45fc5733ca",
 "proto/figuren/k_A1_legion.json": "0825a5d4ebab1b62",
+"proto/figuren/k_A1_triarius.json": "2f770dbdbd84d864",
 "proto/figuren/k_A1_veles.json": "d5299d172a85a693",
 "proto/figuren/k_A2_libysch.json": "4248282a000165fc",
 "proto/figuren/k_A2_numidisch.json": "8a8796931d08aec2",
@@ -174,6 +175,14 @@
 "proto/figuren/k_M3_skutatos.json": "a861f7a511498cad",
 "proto/figuren/k_M3_thematen.json": "71add98934a6fa28",
 "proto/figuren/k_M3_toxotes.json": "a54f033eecdb680d",
+"proto/figuren/k_O1_cn_armbrust.json": "2ea80ba7b5c66470",
+"proto/figuren/k_O1_cn_dao.json": "74aec0f30fd3efaa",
+"proto/figuren/k_O1_cn_reiter.json": "65e20221671724cb",
+"proto/figuren/k_O1_cn_speer.json": "35b0a523c435bb24",
+"proto/figuren/k_O1_jp_bogen.json": "893ede18658d96ab",
+"proto/figuren/k_O1_jp_reiter.json": "06ac2e92bd03338f",
+"proto/figuren/k_O1_jp_speer.json": "dc31da97a5a3c2e2",
+"proto/figuren/k_O1_jp_tachi.json": "8887e7621e0f8c2c",
 "proto/figuren/k_P_pferd.json": "80a8b1dac019cbe9",
 "proto/figuren/umgebung.json": "35e92a0c21ecc189",
 "proto/ton/m_aufmarsch_hellen_a.mp3": "1493d0a1e7b41f6e",
@@ -306,6 +315,6 @@
 "proto/ton/s_wurf_1.mp3": "de7bf5abdf6cea59",
 "proto/ton/s_wurf_2.mp3": "88f739c7bad00df0",
 "proto/ton/s_wurf_3.mp3": "b315c140796b30c1",
-"index.html": "0524fceb61c8832b"
+"index.html": "a21b5ee0375b76f0"
 }
 }

@@ -5,3 +5,4 @@ dev/tests/*.jpg
 __pycache__/
 dev/tests/package-lock.json
 dev/tests/shot/
+dev/tests/node_modules
