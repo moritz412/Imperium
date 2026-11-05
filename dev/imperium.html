@@ -9697,6 +9697,152 @@ function scenChoice(act){const Z=S.scen;if(!Z)return;try{scenChoiceAS(act);}catc
   if(act==='entlassen'){scenWin(true);}}
 
 
+/* ===== v234 (H1): Hannibal Paket 1 – Akt I Hispanien, gesperrte falsche Wege, Elefanten-Regeln =====
+   Alles Szenariospezifische gilt nur, solange die Hannibal-Geschichte läuft (hnOn). Die Elefanten-Regeln Schrecken und Panik (eleFx, elePanic)
+   gelten in der berechneten Schlacht allgemein, maßvoll; die Kälte (hnKaelte) nur in der Geschichte. Zustand nur in S.scen.flags (hn_*) und
+   an den Heeren (a.hnRhone, a.hnHanno): alte Spielstände laden ohne Umrechnung. */
+// Bildwahl: der erste Schlüssel, zu dem ein Bild vorhanden ist, gewinnt (wie WIK_IMG).
+// TODO Job 40: Die Hannibal-Bilder (hn_*) liegen noch auf dem PC. Sobald sie im Bildpaket sind, nur die Schlüssel hn_u_* in IMGLIB eintragen;
+// hier ist nichts mehr zu tauschen, die Rückfallbilder dahinter bleiben als Sicherheit.
+const HN_IMG={sagunt:['hn_u_sagunt','siege'],besatzung:['hn_u_besatzung','sc_hannibal','ev_soeldner'],landung:['hn_u_landung','naval_win','ev_ueberfall'],
+  rhone:['hn_kap_rhone','hn_u_rhone','sc_hannibal','naval_win'],floss:['hn_u_floss','hn_kap_rhone','naval_win'],seeweg:['hn_u_seeweg','naval_lose','ev_lost'],
+  rom:['hn_u_rom','siege','ev_conq'],elefant:['hn_u_elefant','battle_win']};
+function hnImg(k){const L=HN_IMG[k]||[];for(const x of L){try{if(heroImg(x,0,false))return x;}catch(e){}}return L[L.length-1]||'ev_thron';}
+const hnOn=()=>{try{return!!(S&&S.scen&&!S.scen.over&&S.scen.id==='hannibal'&&!S.mp);}catch(e){return false;}};
+const hnFl=()=>(S.scen.flags=S.scen.flags||{});
+const hnIsEle=u=>!!(u&&u.v&&/^elef/.test(u.v));
+const hnEleN=a=>a?a.units.filter(hnIsEle).length:0;
+const hnReg=pi=>PROV_DEF[pi].reg;
+const hnHisp=pi=>/^hisp_/.test(hnReg(pi));
+const HN_ITALY=new Set(['it_nord','it_mitte','it_sued']);
+const HN_FAR=new Set(['gallien_sued','gallien_mitte','gallien_nord','it_nord','it_mitte','it_sued']);
+const HN_STEP_ROM=6,HN_STEP_SEE=8;// Akt III (Cannae) und Akt IV (Nachschub): ab hier ist Rom angreifbar bzw. der Seeweg offen
+const HN_TXT_SEE='Rom beherrscht das Meer. Der Weg nach Italien führt über die Alpen.';
+const HN_TXT_RHONE_VOLK=pi=>pi===PI.vocontier?'die Vocontier':'die Volcae';
+
+/* ---- Start: Sagunt und Rom befestigen, Scipio-Vater benennen ---- */
+function hnStart(f){try{const ed=PI.edetaner,lat=PI.latium;
+  if(ed!=null){const P=S.prov[ed];P.b.walls=Math.max(P.b.walls||0,3);P.gar=Math.max(P.gar||0,26);}
+  if(lat!=null){const P=S.prov[lat];P.b.walls=Math.max(P.b.walls||0,3);P.gar=Math.max(P.gar||0,34);}
+  addLog('Sagunt liegt hinter hohen Mauern, mit großer Garnison. Wer die Stadt einschließt, bringt den Krieg mit Rom: Die Schuld trägt dann Hannibal.',true,'info');}catch(e){console.warn('Hannibal Start',e);}}
+
+/* ---- Schritt 1: Kriegserklärung Roms beim Beginn der Belagerung von Sagunt ---- */
+function hnSiegeBegin(a,ti){try{if(!hnOn()||!a||a.f!==S.player||ti!==PI.edetaner)return;const F=hnFl();if(F.hn_krieg)return;F.hn_krieg=S.turn;
+  if(!atWar(a.f,'rom'))declareWar('rom',a.f,true);
+  addLog('Hannibal schließt Sagunt ein. Rom, Sagunts Bundesgenosse, erklärt Karthago den Krieg. Die Kriegsschuld liegt bei Hannibal.',true,'bad');
+  const s=stState(a.f);if(s){s.q=s.q||[];s.q.push({k:'hn',id:'sagunt'});}}catch(e){console.warn('Sagunt',e);}}
+
+/* ---- Gesperrte Wege mit Grund ---- */
+function hnSeaLock(a,pi){try{if(!hnOn()||!a||a.f!==S.player||!HN_ITALY.has(hnReg(pi)))return null;if(scenStepI()>=HN_STEP_SEE||hnFl().hn_seeOk)return null;return HN_TXT_SEE;}catch(e){}return null;}
+function hnLockModal(a,pi,why){showModal(`${heroOr(hnImg('seeweg'),'ev_lost',S.turn)}<h2>Der Seeweg ist versperrt</h2><p class="sub">${esc(a.name)} vor ${esc(isKnown(pi)?PROV_DEF[pi].name:'der Küste')}</p><p>${esc(why)}</p><p class="note">Rom hält die Häfen und die See. Erst wenn Karthago selbst Schiffe schicken kann, ändert sich das.</p>`,[{label:'Verstanden',cls:'primary'}]);}
+function hnRomLage(a,pi){const P=S.prov[pi],rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat),un=rom.reduce((s,x)=>s+x.units.length,0);let r=1;try{const cx=startAttackCtx(a,pi);r=cx.res.att/Math.max(1,cx.res.def);}catch(e){}
+  const lage=r>1.5?'der Sieg liegt in Reichweite':r>1.15?'die Aussichten sind gut':r>0.9?'der Ausgang ist offen':r>0.65?'ein riskantes Wagnis':r>0.33?'kaum zu gewinnen':r>0.18?'fast aussichtslos':'aussichtslos';
+  const w=P.b.walls||0;return`Rom hat noch ${rom.length} ${rom.length===1?'Heer':'Heere'} im Feld (${un} Einheiten), ${P.gar} Mann Bürgerheer in der Stadt und ${w>=3?'starke':w>=1?'feste':'schwache'} Mauern – ${lage}.`;}
+function hnRomGate(a,pi,go){if(pi!==PI.latium||scenStepI()>=HN_STEP_ROM||a._hnRom===S.turn)return false;
+  showModal(`${heroOr(hnImg('rom'),'siege',S.turn)}<h2>Angriff auf Rom?</h2><p class="sub">${esc(a.name)} vor Latium</p><p>${esc(hnRomLage(a,pi))}</p><p class="note">Rom ist noch nicht verwundbar. Erst wenn seine Heere in Italien gebrochen sind (Cannae), öffnen sich die Tore. Bis dahin kostet ein Sturm auf die Stadt das Heer.</p>`,
+    [{label:'Abbrechen',fn:()=>{toast(`${a.name} hält Stellung`);refresh();}},{label:'Trotzdem angreifen',fn:()=>{a._hnRom=S.turn;go();}}]);return true;}
+
+/* ---- Besatzung zurücklassen (erstes Betreten jenseits der Pyrenäen) ---- */
+function hnBase(){const f=S.player;for(const id of['tarraco','ilergeten','ilerkavonen','edetaner']){const i=PI[id];if(i!=null&&S.prov[i].owner===f)return i;}const c=PI.contestaner;return c!=null&&S.prov[c].owner===f?c:capitalOf(f);}
+function hnLandProv(){const f=S.player,b=hnBase();if(b!=null&&S.prov[b].owner===f&&b!==capitalOf(f))return b;return PI.tarraco!=null?PI.tarraco:b;}
+function hnHannoPick(a){const pick=[];for(const r of['missile','sword','spear']){const u=a.units.find(x=>x.r===r&&!hnIsEle(x)&&!pick.includes(x));if(u)pick.push(u);}
+  for(const u of a.units){if(pick.length>=3)break;if(u.r!=='cav'&&!hnIsEle(u)&&!pick.includes(u))pick.push(u);}return pick.slice(0,3);}
+function hnHeimPick(a){return a.units.filter(u=>u.r!=='cav'&&!hnIsEle(u)).sort((x,y)=>(x.men*(1+(x.xp||0)/400))-(y.men*(1+(y.xp||0)/400))).slice(0,2);}
+function hnBesatzOpts(a){const bp=hnBase(),bn=bp!=null?(PROV_DEF[bp].city||PROV_DEF[bp].name):'Hispanien';
+  const okA=a.units.length>=6&&hnHannoPick(a).length===3&&bp!=null&&bp!==capitalOf(S.player)&&hnHisp(bp),okC=a.units.length>=5&&hnHeimPick(a).length===2;
+  return[{k:'a',label:'Hanno bleibt mit 3 Einheiten',ok:okA,desc:okA?`Hanno hält ${bn} nördlich des Ebro, hebt Küstenwachen aus (Garnison mindestens 15) und sichert den Rückweg. Landet Rom, wird es dort meist abgewehrt. Das Heer wird um 3 Einheiten kleiner.`:'Dafür fehlen Fußtruppen: Es müssen 3 Einheiten bleiben können und mindestens 3 weiterziehen.'},
+    {k:'b',label:'Alle ziehen mit',ok:true,desc:`Das stärkste Heer für den Marsch. Hispanien bleibt offen: Rom landet ungehindert und nimmt sich ${bn}.`},
+    {k:'c',label:'Unwillige Iberer heimschicken',ok:okC,desc:okC?'−2 Einheiten. Der Rest folgt williger (Erfahrung +40), der Sold sinkt. Hispanien bleibt offen wie bei „Alle ziehen mit“.':'Dafür sind zu wenige Einheiten im Heer.'}];}
+function hnBesatzDo(a,k,auto){const F=hnFl(),f=S.player;if(F.hn_besatz||!a)return null;let m='';
+  if(k==='a'&&hnBesatzOpts(a)[0].ok){const pick=hnHannoPick(a),T=hnBase();a.units=a.units.filter(u=>!pick.includes(u));
+    const h=scenArmy(f,T,[],'Hanno');h.units=pick;h.name='Hannos Heer';h.hnHanno=1;h.mp=maxMP(h);S.prov[T].gar=Math.max(S.prov[T].gar||0,15);F.hn_besatz='a';
+    m=`Hanno bleibt mit 3 Einheiten in ${PROV_DEF[T].city||PROV_DEF[T].name} zurück.`;addLog(m+' Er hebt Küstenwachen aus (Garnison mindestens 15), sichert den Rückweg und hält Hispanien.',true,'good');}
+  else if(k==='c'&&hnBesatzOpts(a)[2].ok){const pick=hnHeimPick(a);a.units=a.units.filter(u=>!pick.includes(u));for(const u of a.units)u.xp=(u.xp||0)+40;F.hn_besatz='c';
+    m='Zwei Einheiten gehen heim, der Rest folgt williger.';addLog('Unwillige Iberer ziehen heim: −2 Einheiten, die übrigen sind entschlossener (Erfahrung +40), der Sold sinkt. Hispanien bleibt offen.',true,'info');}
+  else{F.hn_besatz='b';m='Alle ziehen mit.';addLog(auto?'Das ganze Heer ist über die Pyrenäen gezogen. Hispanien bleibt ungeschützt.':'Alle ziehen mit über die Pyrenäen. Hispanien bleibt ungeschützt.',true,'info');}
+  F.hn_besatzT=S.turn;return m;}
+function hnBesatzShow(a,go){const O=hnBesatzOpts(a);
+  showModal(`${heroOr(hnImg('besatzung'),'ev_feldherr',S.turn)}<p class="eyebrow" style="margin:0 0 6px">Akt I · Über die Pyrenäen</p><h2>Wer bleibt in Hispanien?</h2><p class="sub">${esc(a.name)} · ${fmtYear(S.year)}</p><p>Vor dem Heer liegen die Pyrenäen, hinter ihm Hispanien. Rom rüstet Schiffe und wird bald im Rücken landen. Entscheide, wer mitkommt.</p>
+    <div class="list" style="margin-top:12px">${O.map(o=>`<button class="rcard evopt" data-hn="${o.k}"${o.ok?'':' disabled'}><b>${esc(o.label)}</b><small>${esc(o.desc)}</small></button>`).join('')}</div>`,[]);noX();
+  document.querySelectorAll('#dialog [data-hn]').forEach(b=>b.onclick=()=>{if(b.disabled)return;closeModal();const m=hnBesatzDo(a,b.dataset.hn);AUDIO.sfx('horn');if(m)toast(m);refreshOwnership();refresh();go();});}
+
+/* ---- Rhone-Übergang ---- */
+function hnRhoneDo(a,pi,k,auto){const F=hnFl();if(F.hn_rhone||!a)return null;F.hn_rhone=S.turn;a.hnRhone={to:pi,t:S.turn};let m='';
+  if(k==='floss'){a.mp=0;m='Flöße werden gebaut. Das Heer setzt in der nächsten Runde über, die Elefanten sind sicher.';addLog('Hannibal lässt Flöße bauen und mit Erde bedecken. Die Elefanten gehen ruhig an Bord; übergesetzt wird in der nächsten Runde.',true,'good');}
+  else{let n=0,lost=0;for(const u of a.units){if(!hnIsEle(u)||Math.random()>=0.5)continue;const d=Math.round(u.men*0.3);u.men=Math.max(1,u.men-d);n++;lost+=d;}
+    m=n?`Im Strom gehen Elefanten verloren (${n} ${n===1?'Einheit':'Einheiten'}, ${lost} Tiere und Treiber).`:'Alle Elefanten kommen unversehrt hinüber.';addLog(auto?`Das Heer hat die Rhone ohne Flöße gequert. ${m}`:`Das Heer setzt sofort über. ${m}`,true,n?'bad':'good');}
+  return m;}
+function hnRhoneShow(a,pi,go){const volk=HN_TXT_RHONE_VOLK(pi),O=[{k:'floss',label:'Flöße bauen',desc:'1 Runde Wartezeit: Das Heer bleibt stehen. Die Elefanten kommen sicher hinüber.'},{k:'sofort',label:'Sofort übersetzen',desc:'Keine Wartezeit, aber jede Elefanten-Einheit hat 50 % Risiko, 30 % ihrer Männer im Strom zu verlieren.'}];
+  showModal(`${heroOr(hnImg('rhone'),'battle_win',S.turn)}<p class="eyebrow" style="margin:0 0 6px">Akt I · Die Rhone</p><h2>Der Strom ist breit</h2><p class="sub">${esc(a.name)} vor ${esc(PROV_DEF[pi].name)} · ${fmtYear(S.year)}</p><p>Am anderen Ufer warten ${volk}. Die Elefanten scheuen das Wasser.</p>
+    <div class="list" style="margin-top:12px">${O.map(o=>`<button class="rcard evopt" data-hn="${o.k}"><b>${esc(o.label)}</b><small>${esc(o.desc)}</small></button>`).join('')}</div>
+    <p class="note">Danach steht ${volk} im Kampf: Der Plan „Umfassung“ gibt dann +10 % zusätzlich, weil Hanno flussaufwärts quert und in den Rücken fällt.</p>`,[]);noX();
+  document.querySelectorAll('#dialog [data-hn]').forEach(b=>b.onclick=()=>{closeModal();const k=b.dataset.hn,m=hnRhoneDo(a,pi,k);AUDIO.sfx(k==='floss'?'click':'horn');if(m)toast(m);refresh();if(k!=='floss')go();});}
+
+/* ---- Torwächter in orderMove: liefert true, wenn ein Fenster geöffnet wurde (das Fenster ruft danach go() auf) ---- */
+function hnGate(a,pi,go){try{if(!hnOn()||!a||a.f!==S.player||a.boat)return false;const F=hnFl();
+  if(!F.hn_besatz&&S.scen.hero===a.id&&hnHisp(a.p)&&hnReg(pi)==='gallien_sued'){hnBesatzShow(a,go);return true;}
+  if(!F.hn_rhone&&hnEleN(a)&&(pi===PI.narbo||pi===PI.vocontier)){hnRhoneShow(a,pi,go);return true;}
+  if(hnRomGate(a,pi,go))return true;}catch(e){console.warn('Hannibal-Tor',e);}return false;}
+
+/* ---- Landung der Scipionen (Gegner-Drehbuch Akt I) ---- */
+const HN_SCIPIO=[['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav']];
+function hnLanding(){const F=hnFl(),f=S.player;if(F.hn_landung)return;F.hn_landung=S.turn;const T=hnLandProv();if(T==null)return;
+  const P=S.prov[T],nm=PROV_DEF[T].city||PROV_DEF[T].name,hanno=armiesAt(T).some(x=>x.f===f&&x.hnHanno&&x.units.length);
+  if(!atWar(f,'rom'))try{declareWar('rom',f,true);}catch(e){}
+  const a=scenArmy('rom',T,HN_SCIPIO,'Gnaeus Cornelius Scipio');a.name='Heer der Scipionen';a.hnScip=1;a._land=true;let res=null,out='abgewehrt';
+  try{res=resolveAttack(a,T);}catch(e){console.warn('Landung',e);}delete a._land;
+  if(res&&res.captured)out='gefallen';else if(res&&res.siegeStarted)out='belagert';
+  else{S.armies=S.armies.filter(x=>x!==a);}// Die Landung ist gescheitert: die Überlebenden segeln ab
+  F.hn_scipio=out;
+  addLog(out==='gefallen'?`Gnaeus und Publius Scipio landen bei Emporion mit 5 Einheiten und nehmen ${nm}.`:out==='belagert'?`Gnaeus und Publius Scipio landen bei Emporion, schlagen die Verteidiger und belagern ${nm}.`:`Gnaeus und Publius Scipio landen bei Emporion. ${hanno?'Hanno':'Die Garnison von '+nm} wirft sie ins Meer zurück.`,true,out==='abgewehrt'?'good':'bad');
+  const s=stState(f);if(s){s.q=s.q||[];s.q.push({k:'hn',id:'landung',out,pn:nm,hanno});}try{refreshOwnership();}catch(e){}}
+
+/* ---- Kälte (nur Hannibal-Geschichte): Winter in Gebirge und Norditalien kosten Elefanten ---- */
+function hnKaelte(){if(season()!==3)return;const f=S.player;
+  for(const a of S.armies){if(a.f!==f||a.boat||!a.units.length||!hnEleN(a))continue;const id=PROV_DEF[a.p].id;let cold=PASSES.has(id)||hnReg(a.p)==='it_nord';if(!cold)try{cold=pter(a.p)==='mountain';}catch(e){}if(!cold)continue;
+    let n=0;for(const u of a.units){if(!hnIsEle(u)||Math.random()>=0.2)continue;u.men=Math.max(0,u.men-Math.max(1,Math.round(unitStat(a.f,u.r,u.v).men/12)));n++;}
+    if(n){a.units=a.units.filter(u=>u.men>0);addLog(`Kälte in ${PROV_DEF[a.p].name}: ${n===1?'Ein Elefant erfriert':n+' Elefanten erfrieren'} (${a.name}).`,true,'bad');}}}
+
+/* ---- Runde der Geschichte ---- */
+function hnRound(){if(!hnOn())return;const Z=S.scen,F=hnFl(),f=S.player;
+  const h=S.armies.find(x=>x.id===Z.hero&&x.f===f&&x.units.length&&!x.boat);
+  if(h){const r=hnReg(h.p);// Rückfall: Heer ist ohne Angriffsdialog (verbündetes oder eigenes Land) über die Pyrenäen bzw. an die Rhone gelangt
+    if(!F.hn_besatz&&HN_FAR.has(r))hnBesatzDo(h,'b',true);
+    if(!F.hn_rhone&&hnEleN(h)&&(h.p===PI.narbo||h.p===PI.vocontier))hnRhoneDo(h,h.p,'sofort',true);}
+  for(const a of S.armies)if(a.hnRhone&&(S.turn>a.hnRhone.t+8||(a.p===a.hnRhone.to&&S.prov[a.p].owner===a.f)))delete a.hnRhone;
+  if(!F.hn_landung){const due=F.hn_besatzT!=null?Math.max(Z.t0+5,F.hn_besatzT+2):Z.t0+15;
+    if(S.turn>=due)hnLanding();else if(S.turn===due-1&&!F.hn_warn){F.hn_warn=1;addLog('Späher melden römische Schiffe vor der Küste Hispaniens.',true,'bad');}}
+  hnKaelte();}
+
+/* ---- Ereignisfenster (über stEvents, Meldungen {k:'hn',id}) ---- */
+function hnEv(id,m){
+  if(id==='sagunt')return{E:{id:'hn_sagunt',img:hnImg('sagunt'),eb:'Akt I · Sagunt',title:()=>'Sagunt ist eingeschlossen',text:()=>`Mit dem Ring um Sagunt beginnt der Krieg. Rom, Sagunts Bundesgenosse, erklärt Karthago den Krieg, und die Schuld trägt Hannibal. Die Stadt hat hohe Mauern und eine große Garnison: Erst nach ${minSiege(PI.edetaner)} Runden Belagerung lässt sie sich stürmen.`,opts:[{label:'Weiter',desc:()=>'Rom steht jetzt im Krieg mit dir. Halte den Ring, bis die Mauern fallen.',fx:()=>null}]},ctx:{}};
+  if(id==='landung'){const o=m.out,nm=m.pn,T={abgewehrt:m.hanno?'Hanno wirft die Scipionen zurück':'Die Landung scheitert',gefallen:`${nm} fällt an Rom`,belagert:`Rom belagert ${nm}`}[o];
+    const tx={abgewehrt:m.hanno?`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten. Doch Hanno steht bereit und wirft sie ins Meer zurück. Hispanien bleibt karthagisch, und Hannibals Rücken ist gesichert.`:`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten, aber die Garnison von ${nm} hält stand und wirft sie zurück.`,
+      gefallen:`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten. Niemand hält sie auf, und ${nm} fällt an Rom. Hannibals Rücken ist offen, seine Nachschubwege führen nun durch umkämpftes Land.`,
+      belagert:`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten, schlagen die Verteidiger und schließen ${nm} ein. Entsatz oder Fall: Die Stadt hält nur eine Weile.`}[o];
+    return{E:{id:'hn_landung',img:hnImg('landung'),eb:'Akt I · Rom im Rücken',title:()=>T,text:()=>tx,opts:[{label:'Weiter',desc:()=>o==='abgewehrt'?'Hispanien bleibt in karthagischer Hand.':'Hole die Provinz zurück oder sichere, was dir bleibt.',fx:()=>null}]},ctx:{}};}
+  return null;}
+
+/* ---- Elefanten in der berechneten Schlacht (allgemein, maßvoll) ---- */
+// Völker mit eigenen Elefanten: ein Heer mit Elefanten oder eine Kultur, die sie stellt (VARIANTS.elef.g)
+function eleFolk(f){try{if(S.armies.some(x=>x.f===f&&x.units.some(hnIsEle)))return true;const g=(VARIANTS.elef&&VARIANTS.elef.g)||[],c=facCul(f);return!!c&&g.includes(c);}catch(e){return false;}}
+// Schrecken: Elefanten (ab 20 % der Einheiten volle Wirkung) drücken die gegnerische Stärke um 10 % (Moral) und 15 % ihres Reiteranteils (Pferde scheuen), außer der Gegner hat selbst Elefanten.
+function eleFx(a,ti,aU,dU){const R={att:1,def:1,n:0};const sa=aU.length?aU.filter(hnIsEle).length/aU.length:0,sd=dU.length?dU.filter(hnIsEle).length/dU.length:0;
+  const cavS=us=>{const t=unitsMen(us);return t?unitsMen(us,'cav')/t:0;};
+  if(sa>0&&!sd&&!eleFolk(S.prov[ti].owner)){R.def=1-(0.10+0.15*cavS(dU))*Math.min(1,sa/0.2);R.n=1;}
+  if(sd>0&&!sa&&!eleFolk(a.f)&&a.plan!=='gassen'){R.att=1-(0.10+0.15*cavS(aU))*Math.min(1,sd/0.2);R.n=2;}
+  return R;}
+// Panik: Wird eine Elefanten-Einheit unter 50 % gedrückt (oder öffnet der Gegner mit dem Plan „Gassen öffnen“ die Reihen), brechen die Tiere mit 30 % in die eigenen Reihen aus.
+function elePanic(a,defArmies){const out=[];
+  for(const s of[{x:a,att:true},...defArmies.map(x=>({x,att:false}))]){const x=s.x,ele=x.units.filter(hnIsEle);if(!ele.length)continue;
+    let trig=!s.att&&a.plan==='gassen';for(const u of ele)if(u.men<unitStat(x.f,u.r,u.v).men*0.5)trig=true;
+    if(!trig||Math.random()>=0.3)continue;
+    for(const u of x.units)u.men=Math.max(1,Math.round(u.men*(hnIsEle(u)?0.8:0.94)));out.push(x);}
+  return out;}
+function eleNote(a){if(!hnEleN(a))return'';return`<p class="note" style="margin:-4px 0 8px">Elefanten: Ihr Schrecken drückt den Gegner um 10 % und seine Reiterei um weitere 15 %, außer er hat selbst Elefanten. Fällt eine Elefanten-Einheit unter die Hälfte, brechen die Tiere mit 30 % in die eigenen Reihen aus.${hnOn()?' Im Winter in Gebirge und Norditalien erfrieren sie.':''}</p>`;}
+function planGassenOk(a){try{return S.armies.some(x=>x.f!==a.f&&x.units.length&&atWar(a.f,x.f)&&hnEleN(x)>0);}catch(e){return false;}}
+
 /* ---------- Weitere Funktionen aus den Einzelgeschichten (gelten überall) ---------- */
 // Gebirgspässe: Durchzug kostet Männer, im Winter mehr, Elefanten doppelt
 const PASSES=new Set(['salasser','segusiner','seealpen','vasconen','raetien','helvetier','noricum']);
@@ -9718,10 +9864,12 @@ function supplyRound(){for(const a of S.armies){if(!a.units.length||a.boat||a.f=
   if(ok(a.p))continue;let near=false;for(const n of ADJ[a.p]){if(ok(n)){near=true;break;}for(const m of ADJ[n]){if(ok(m)){near=true;break;}if(a.tr)for(const q of ADJ[m])if(ok(q)){near=true;break;}if(near)break;}if(near)break;}
   if(near||a.st==='pluendern'||rzFed(a)||lagerReach(a))continue;for(const u of a.units)u.men=Math.max(1,Math.round(u.men*0.98));a.unsup=S.turn;}}
 // Schlachtplan: vor dem Angriff gewählt, wirkt in der automatischen Schlacht
-const PLANS={frontal:{n:'Frontal',d:'Kein Bonus, kein Risiko.'},umfassung:{n:'Umfassung',d:'+15 % mit mindestens 30 % Reiterei, sonst −10 %.'},hinterhalt:{n:'Geländeangriff',d:'Angriff aus Wald oder Bergland: +20 %, im offenen Land −10 %. (Nicht zu verwechseln mit der Haltung „Hinterhalt“, die eigenes Land verteidigt.)'}};
-function planMul(a,ti){const p=a.plan||'frontal';if(p==='umfassung'){const c=a.units.filter(u=>u.r==='cav').length/Math.max(1,a.units.length);return c>=0.3?1.15:0.9;}
+const PLANS={frontal:{n:'Frontal',d:'Kein Bonus, kein Risiko.'},umfassung:{n:'Umfassung',d:'+15 % mit mindestens 30 % Reiterei, sonst −10 %.'},hinterhalt:{n:'Geländeangriff',d:'Angriff aus Wald oder Bergland: +20 %, im offenen Land −10 %. (Nicht zu verwechseln mit der Haltung „Hinterhalt“, die eigenes Land verteidigt.)'},
+  gassen:{n:'Gassen öffnen',d:'Gegen Elefanten: Die Reihen öffnen sich, ihr Schrecken wirkt nicht, und die Tiere laufen mit 30 % in die eigenen Reihen. Ohne gegnerische Elefanten −8 %.'}};
+function planMul(a,ti){const p=a.plan||'frontal';if(p==='umfassung'){const c=a.units.filter(u=>u.r==='cav').length/Math.max(1,a.units.length);return(c>=0.3?1.15:0.9)*(a.hnRhone&&a.hnRhone.to===ti&&hnOn()?1.1:1);}
+  if(p==='gassen'){try{return S.armies.some(x=>x.p===ti&&x.f!==a.f&&hnEleN(x)>0)?1:0.92;}catch(e){return 0.92;}}
   if(p==='hinterhalt'){let t='';try{t=(typeof PTER!=='undefined'&&PTER)?PTER[ti]:'';}catch(e){}return feat(ti).forest||/mountain|hill/i.test(t||'')?1.2:0.9;}return 1;}
-function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>`;}
+function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).filter(k=>k!=='gassen'||cur==='gassen'||planGassenOk(a)).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>${a.hnRhone&&hnOn()?`<p class="note" style="margin:-4px 0 8px">Rhone: Greift das Heer ${esc(PROV_DEF[a.hnRhone.to].name)} an, gibt „Umfassung“ +10 % zusätzlich (Hanno quert flussaufwärts).</p>`:''}${eleNote(a)}`;}
 // Königsboten: prüfen eine Region (Unruhe −2, Steuern +10 % für 10 Runden), ab der Völkerwanderung
 const kbCost=()=>Math.round(60*EPOCH_COST[ep()]);
 function kbReady(f,pi){const P=S.prov[pi];return ep()>=1&&ep()<=2&&P.owner===f&&(P.kbT==null||S.turn>=P.kbT+8);}
@@ -9781,7 +9929,7 @@ Object.assign(SCEN,{
   peopleOf:{rom:'rom_rep'},
   armies:[{f:'karthago',p:'contestaner',hero:'Hannibal Barkas',u:[['cav','elef'],['cav','elef'],['cav','elef'],['cav','numid'],['cav','numid'],['missile','balear'],['sword','scutar'],['sword','scutar'],['spear','libyer'],['spear','libyer']]},
    {f:'karthago',p:'carpetaner',gen:'Hasdrubal Barkas',u:[['spear','libyer'],['sword','scutar'],['cav','numid'],['missile','balear']]},
-   {f:'rom',p:'latium',gen:'Publius Cornelius Scipio',u:[['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav']]},
+   {f:'rom',p:'latium',gen:'Publius Cornelius Scipio (Konsul)',u:[['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav']]},
    {f:'rom',p:'ariminum',gen:'Tiberius Sempronius Longus',u:[['sword','manipel'],['sword','manipel'],['spear','socii'],['cav']]},
    {f:'rom',p:'kampanien',gen:'Quintus Fabius Maximus',u:[['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav'],['missile']]}],
   allies:[['rom','syrakus'],['rom','massilia']],wars:[],cap:'karthago',
@@ -9800,9 +9948,10 @@ Object.assign(SCEN,{
    {t:'Akt IV · Rom oder Zama',txt:'Der junge Publius Cornelius Scipio hat Hispanien erobert und landet nun in Africa. Karthago ruft Hannibal nach Hause. Zwei Wege bleiben: Rom selbst angreifen, solange er noch in Italien steht, oder heimkehren und Scipio vor den Toren Karthagos schlagen. Die Entscheidung wiegt sechzehn Jahre Krieg.',g:{cond:'zama',txt:'Rom einnehmen oder Scipios Heer in Africa vernichten und Karthago halten.'},rew:{gold:500}}],
    end:{t:'Der Sieg Karthagos',txt:'Rom bittet um Frieden. Karthago beherrscht das westliche Mittelmeer, von Hispanien bis Sizilien. Hannibal ist fünfundvierzig, ein Sieger, dem viele in Karthago misstrauen. Was wird aus ihm?',opts:[
      {l:'Suffet in Karthago werden',d:'Steuern +15 % für 40 Runden',fx:{tax:0.15}},{l:'Das Heer behalten',d:'Angriff +12 % für 40 Runden',fx:{atk:0.12}},{l:'Die Flotte neu bauen',d:'Ordnung +2 für 40 Runden',fx:{order:2}}]}},
-  hooks:{1:f=>{try{declareWar(f,'rom',true);}catch(e){}addLog('Rom erklärt Karthago den Krieg.',true,'bad');},
+  rules:{noSubmit:{rom:'Rom oder Zama'}},
+  hooks:{0:f=>{hnStart(f);},1:f=>{if(!atWar(f,'rom')){try{declareWar('rom',f,true);}catch(e){}}},
    8:f=>{const c=PI.tarraco!=null&&S.prov[PI.tarraco].owner===f?PI.tarraco:capitalOf(f);const a=scenArmy(f,c,[['cav','elef'],['spear','libyer'],['spear','libyer'],['sword','scutar'],['cav','numid'],['missile','balear']],'Hasdrubal Barkas');a.hasd=true;addLog('Hasdrubal bricht mit einem zweiten Heer nach Italien auf.',true,'info');},
-   9:f=>{const p=PI.byzacena;const a=scenArmy('rom',p,[['sword','manipel'],['sword','manipel'],['sword','manipel'],['spear','socii'],['cav','numid'],['cav'],['missile']],'Publius Cornelius Scipio');a.scip=true;S.scen.flags.scip=1;S.prov[p].owner='rom';addLog('Scipio landet in Africa und nimmt Byzacena.',true,'bad');}},
+   9:f=>{const p=PI.byzacena;const a=scenArmy('rom',p,[['sword','manipel'],['sword','manipel'],['sword','manipel'],['spear','socii'],['cav','numid'],['cav'],['missile']],'Scipio der Jüngere');a.scip=true;S.scen.flags.scip=1;S.prov[p].owner='rom';addLog('Scipio landet in Africa und nimmt Byzacena.',true,'bad');}},
   gold:(f)=>(S.scen.flags.abw||0)>=5&&S.armies.some(a=>a.f===f&&a.units.some(u=>u.v==='elef'))},
  karl:{n:'Karl der Große',sub:'Das Reich der Franken',ep:1,year:768,ypt:0.5,slot:'arverner',people:'frankenreich',turns:80,img:'hist_kaiser',
   desc:'768. König Pippin ist tot, seine Söhne Karl und Karlmann teilen das Frankenreich. Ringsum Sachsen, Langobarden, Basken, Mauren und Awaren. Am Ende dieses Weges steht eine Kaiserkrone in Rom.',win:'Karl stirbt im Januar 814 in Aachen und wird in seiner Kapelle begraben. Sein Sohn Ludwig erbt das Reich, doch unter den Enkeln zerfällt es. Aus den Teilen werden einmal Frankreich und Deutschland. Die Abschriften antiker Bücher aus seinen Schulen bewahren vieles, was sonst verloren wäre.',lose:'Das Frankenreich zerfällt, ehe es ein Kaiserreich werden kann. Sachsen, Langobarden und die Großen des eigenen Landes gehen ihre eigenen Wege. In den Klosterchroniken bleibt Karl einer von vielen Königen.',
@@ -12533,6 +12682,7 @@ const RUL_TRAITS={
 // v231 (31.10.): Neue Schlacht: Feldartillerie der Antike (Torsionsgeschuetze als Ballisten mit Bedienung, grosse Reichweite, langes Nachladen, Durchschlag; KI laesst sie hinten stehen), Aufstellung hinter der Linie
 // v232 (31.10.): Neue Schlacht: Eroberungspunkt bei Siedlungen ohne Mauern (Angreifer haelt den Kreis 60 s = Sieg, Verteidiger im Kreis haelt die Uhr an), Anzeige in der Kopfleiste
 // v233 (05.11.): Triarier mit Hasta, 8 Ostasien-Figuren (China/Japan Ep. 1-2), Paletten chinesisch/japanisch, Artillerie in der Aufstellung hinter der Linie; Integrationstest Rueckzug repariert (Testskript, kein Spielfehler)
+// v234 (05.11., H1 Hannibal Paket 1): Akt I Hispanien: Sagunt mit Mauern III/Garnison 26 (Sturm erst nach 3 Runden), Rom erklaert Krieg beim Beginn der Belagerung (hnSiegeBegin); Besatzung zuruecklassen a/b/c (hnBesatzShow/hnBesatzDo, Hanno-Heer), Landung der Scipionen (hnLanding, 2 Runden nach der Wahl, spaetestens Runde 16); Rhone-Uebergang Floss/sofort (hnRhoneShow, Umfassung +10 %); gesperrte Wege mit Grund: Seeweg nach Italien bis Akt IV (hnSeaLock), Rom-Angriff vor Akt III mit Rueckfrage (hnRomGate), Rom nicht unterwerfbar (noSubmit); Elefanten-Regeln allgemein in der berechneten Schlacht (eleFx Schrecken, elePanic, Plan Gassen oeffnen), Kaelte nur Hannibal (hnKaelte); Scipio Vater/Sohn benannt. Bilder ueber HN_IMG (TODO Job 40: hn_u_*). Test hn1_t.js.
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -13017,7 +13167,7 @@ function reliefBattle(a,ti){const foes=siegersIn(ti,a.f);if(!foes.length)return 
 function aiRelief(f){for(const a of S.armies.filter(x=>x.f===f)){if(!S.armies.includes(a)||a.mp<=0||a.boat||a.st==='belagern')continue;
     for(const n of[a.p,...ADJ[a.p]]){const o=S.prov[n].owner;if(o!==f&&!isAlly(f,o))continue;if(n!==a.p&&isSeaLink(a.p,n))continue;const fo=siegersIn(n,f);if(!fo.length)continue;
       const dp=fo.reduce((s,x)=>s+armyPower(x),0);if(armyPower(a)+S.prov[n].gar*EPOCH_STR[ep()]*0.35<dp*1.15)continue;a.p=n;a.pos=null;reliefBattle(a,n);break;}}}
-function startSiege(a,ti){if(!canSiege(a,ti).ok)return false;if(a.st==='belagern')liftSiege(a);a.rz=false;S.sieges=S.sieges||{};S.sieges[ti]={f:a.f,aid:a.id,t:0};a.st='belagern';a.sieg=ti;a.mp=0;siegeCamp(a,ti);
+function startSiege(a,ti){if(!canSiege(a,ti).ok)return false;if(a.st==='belagern')liftSiege(a);a.rz=false;S.sieges=S.sieges||{};S.sieges[ti]={f:a.f,aid:a.id,t:0};a.st='belagern';a.sieg=ti;a.mp=0;siegeCamp(a,ti);hnSiegeBegin(a,ti);
   const o=S.prov[ti].owner;if(a.f!==S.player)provNews(o,'siege',ti,a.f);addLog(`${FACTIONS[a.f].name} belagert ${PROV_DEF[ti].name}.`,a.f===S.player||o===S.player,o===S.player?'bad':'info');return true;}
 function liftSiege(a){const ti=a?a.sieg:null;if(a&&a.sieg!=null&&S.sieges)delete S.sieges[a.sieg];if(a){a.sieg=null;if(a.st==='belagern')a.st=null;if(ti!=null&&a.p===ti&&S.prov[ti].owner!==a.f)siegeRetreat(a,ti);}}
 const CONQ={besetzen:{n:'Besetzen',d:'Die Stadt bleibt, wie sie ist. Unruhe wie gewohnt.'},
@@ -13430,6 +13580,7 @@ function stEvents(f){const s=stState(f);if(!s||!s.q||!s.q.length)return[];const 
   for(const m of s.q.splice(0)){
     const sid=S.scen&&f===S.player?S.scen.id:(f===S.player&&!s.gen&&STORY[s.pid]&&STORY[s.pid][s.e]?stPack(s.pid,s.e):null),gk=!sid&&f===S.player&&!!(s.gen||C.gen);
     if(m.k==='wik'){try{const W=wikEv(m.id);if(W)out.push(W);}catch(e){console.warn('Wikinger-Ereignis',e);}continue;}
+    if(m.k==='hn'){try{const W=hnEv(m.id,m);if(W)out.push(W);}catch(e){console.warn('Hannibal-Ereignis',e);}continue;}
     if(m.k==='end'){if(s.done)continue;const E=C.end;out.push({E:{id:'st_end',img:E.img||C.img||'ev_thron',eb:'Geschichte · Abschluss',vo:(E.vo||E.txt),vk:sid?[sid+'_ende']:gk?genVk(C,s,'ende'):[],title:()=>E.t,text:()=>(m.done?`Erfüllt: ${m.done}. `:'')+E.txt,
       opts:E.opts.map(o=>({label:o.l,desc:()=>o.d,fx:ff=>{const x=o.fx;if(x.cul)S.culture[ff]=(S.culture[ff]||0)+x.cul;for(const k of['order','tax','atk','rp','grow','gar'])if(x[k])addMod(ff,k,x[k],40,'Vermächtnis');const z=stState(ff);if(z)z.done=true;if(S.scen&&ff===S.player)scenWin();try{chronAdd('hist',`${C.t}: ${o.l}`);}catch(e){}return`Kapitel abgeschlossen: ${C.t}`;}}))},ctx:{}});continue;}
     const st=C.steps[s.i];if(!st)continue;
@@ -14153,7 +14304,7 @@ function cargoUnits(fl){return(fl.cargo||[]).reduce((s,id)=>{const a=getArmy(id)
 function embarkFleets(a){if(a.boat)return[];const out=[];for(const fl of S.fleets||[]){if(fl.f!==a.f)continue;fleetInit(fl);if(!coastNear(fl.x,fl.z,LAND_R).has(a.p))continue;if(cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP)continue;out.push(fl);}return out;}
 function embark(a,fl){if(!a||!fl||a.boat||a.mp<=0)return false;if(!embarkFleets(a).includes(fl))return false;a.boat=fl.id;a.embP=a.p;fl.cargo.push(a.id);a.mp=0;a.goal=null;a.pos=null;try{clearStance(a);}catch(e){}if(a.camp!=null)a.camp=null;return true;}
 function landTargets(fl){fleetInit(fl);return[...coastNear(fl.x,fl.z,LAND_R)].filter(j=>isAct(j));}
-function disembark(a,fl,pi){if(!a||!fl||a.boat!==fl.id)return null;if(a.landT===S.turn)return{err:'Dieses Heer ist in dieser Runde schon gelandet.'};if(!landTargets(fl).includes(pi))return{err:'Diese Küste ist zu weit entfernt.'};{const lk=wikRaidLock(a,pi,false,true);if(lk)return{err:lk};}
+function disembark(a,fl,pi){if(!a||!fl||a.boat!==fl.id)return null;if(a.landT===S.turn)return{err:'Dieses Heer ist in dieser Runde schon gelandet.'};if(!landTargets(fl).includes(pi))return{err:'Diese Küste ist zu weit entfernt.'};{const lk=wikRaidLock(a,pi,false,true);if(lk)return{err:lk};}{const lk=hnSeaLock(a,pi);if(lk)return{err:lk};}
   const drop=()=>{a.boat=null;fl.cargo=fl.cargo.filter(x=>x!==a.id);a.landT=S.turn;a.mp=0;};
   const unk=a.f===S.player&&S.known&&!S.known[pi];if(a.f===S.player&&S.known){S.known[pi]=true;for(const m of ADJ[pi])if(isAct(m))S.known[m]=true;try{applyKnown();}catch(e){}}
   if(walkOk(a.f,pi)){drop();a.p=pi;let best=null,bd=9;for(let r=0.2;r<=1.6&&!best;r+=0.2)for(let k=0;k<16;k++){const t=k/16*6.2832,x=fl.x+Math.cos(t)*r,z=fl.z+Math.sin(t)*r;if(pidAt(x,z)===pi){best={x,z};break;}}try{if(best)setPos(a,pi,best);}catch(e){}trespass(a,pi);return{landed:true,unk};}
@@ -14232,7 +14383,7 @@ function fleetAnim(t){let on=false;for(const[,k]of FLT){if(!k.path)continue;cons
 function embarkWhy(a,fl){fleetInit(fl);if(a.mp<=0)return'Dieses Heer hat keine Bewegung mehr.';if(!coastNear(fl.x,fl.z,LAND_R).has(a.p))return`Flotte zu weit weg – erst an die Küste von ${PROV_DEF[a.p].name} segeln.`;if(cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP)return`Kein Platz: ${SHIP_CAP} Einheiten je Schiff.`;return'';}
 function doEmbark(a,fl){if(a&&fl&&embark(a,fl)){AUDIO.sfx('march');toast(`${a.name} ist an Bord von ${fl.name}`);UI.army=null;UI.fleet=fl.id;UI.mode='fleet';UI.sel=fl.p;refresh();return true;}toast('Einschiffen nicht möglich.');return false;}
 function askEmbark(a,fl){showModal(`<h2>Einschiffen?</h2><p>${esc(a.name)} geht an Bord von ${esc(fl.name)}. Restliche Bewegung verfällt.</p><p class="note">${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · Platz ${cargoUnits(fl)+a.units.length}/${fl.n*SHIP_CAP}</p>`,[{label:'Abbrechen'},{label:'Einschiffen',cls:'primary',fn:()=>doEmbark(a,fl)}]);}
-function doLand(a,fl,pi){{const lk=wikRaidLock(a,pi,false,true);if(lk){wikLockModal(a,pi,()=>doLand(a,fl,pi),true);return;}}const r=disembark(a,fl,pi);if(!r)return;if(r.err){toast(r.err);return;}
+function doLand(a,fl,pi){{const lk=wikRaidLock(a,pi,false,true);if(lk){wikLockModal(a,pi,()=>doLand(a,fl,pi),true);return;}}{const lk=hnSeaLock(a,pi);if(lk){hnLockModal(a,pi,lk);return;}}const r=disembark(a,fl,pi);if(!r)return;if(r.err){toast(r.err);return;}
   if(r.landed){AUDIO.sfx('march');toast(`${a.name} ist in ${PROV_DEF[pi].name} gelandet${r.unk?' · neues Land erkundet':''}`);UI.army=a.id;UI.mode='army';UI.sel=pi;refreshOwnership();refresh();}
   else if(r.res){AUDIO.sfx('horn');battleLog(r.res);UI.mode=r.res.captured?'prov':'fleet';UI.sel=r.res.captured?pi:fl.p;refreshOwnership();refresh();showBattle(r.res);}}
 // Lage „etwas anlanden“: eigene Flotte mit Ladung gewählt oder ein Heer an Bord gewählt
@@ -14241,7 +14392,7 @@ function landCtx(){if(!S)return null;let fl=null,list=[];const a=UI.army!=null?g
   else if(UI.mode==='fleet'&&UI.fleet!=null){fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(fl&&fl.f===S.player)list=(fl.cargo||[]).map(id=>getArmy(id)).filter(Boolean);}
   return fl&&fl.f===S.player&&list.length?{fl,list}:null;}
 function landTapOk(pi){const c=landCtx();return!!(c&&landTargets(c.fl).includes(pi));}
-function askLand(L,fl,pi){{const lk=L.find(x=>wikRaidLock(x,pi,false,true));if(lk){wikLockModal(lk,pi,()=>doLand(lk,fl,pi),true);return;}}const o=S.prov[pi].owner,kn=isKnown(pi),nm=kn?PROV_DEF[pi].name:'unerforschter Küste',a0=L[0],foe=!walkOk(a0.f,pi),raid=!!(a0.rz&&raidKind(a0.f)==='see');
+function askLand(L,fl,pi){{const lk=L.find(x=>wikRaidLock(x,pi,false,true));if(lk){wikLockModal(lk,pi,()=>doLand(lk,fl,pi),true);return;}}{const lk=L.map(x=>hnSeaLock(x,pi)).find(Boolean);if(lk){hnLockModal(L[0],pi,lk);return;}}const o=S.prov[pi].owner,kn=isKnown(pi),nm=kn?PROV_DEF[pi].name:'unerforschter Küste',a0=L[0],foe=!walkOk(a0.f,pi),raid=!!(a0.rz&&raidKind(a0.f)==='see');
   const tx=foe?`${o==='frei'?'Die Provinz ist bewacht.':esc(FACTIONS[o].name)+' hält '+(kn?esc(PROV_DEF[pi].name):'diese Küste')+'.'} Das ist ein Landungsangriff${raid?': im Raubzug ohne Abzug.':' (Angriff −20 %).'}`:(o===a0.f?'Eigenes Land, die Landung ist friedlich.':'Die Landung ist friedlich.');
   showModal(`<h2>Anlanden bei ${esc(nm)}?</h2><p>${tx}</p>`,[{label:'Abbrechen'},...L.map(a=>({label:L.length>1?`${a.name} anlanden`:(foe?'Angreifen':'Anlanden'),cls:'primary',fn:()=>doLand(a,fl,pi)}))]);}
 // Nach dem Segeln einer beladenen Flotte an eine Küste: einmal je Spiel ein Hinweis
@@ -14276,7 +14427,7 @@ function fleetSheetHtml(){const fl=(S.fleets||[]).find(x=>x.id===UI.fleet);if(!f
   const cargo=(fl.cargo||[]).map(id=>getArmy(id)).filter(Boolean);
   if(cargo.length){const LT=landTargets(fl);h+=`<h3>An Bord · ${cargoUnits(fl)}/${fl.n*SHIP_CAP} Einheiten</h3>`;
     for(const a of cargo){h+=`<p class="note" style="margin:4px 0"><b>${esc(a.name)}</b> · ${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'}${a.landT===S.turn?' · diese Runde schon gelandet':''}</p>`;
-      if(a.landT!==S.turn)h+=`<div class="list">${LT.map(j=>{const o=S.prov[j].owner,ok=walkOk(a.f,j);return`<button class="arow" data-act="land" data-a="${a.id}" data-p="${j}"><span class="crest" style="${cst(o)}"></span><span class="nm"><b>Ausladen: ${isKnown(j)?esc(PROV_DEF[j].name):'Unerforschte Küste'}</b><small>${ok?(o===a.f?'Eigenes Land':'Anlanden'):'Landung mit Angriff · '+esc(FACTIONS[o].name)}${!ok&&minSiege(j)?' · Stadt: erst Belagerung nötig':''}</small></span></button>`;}).join('')||'<p class="note">Keine Küste in Reichweite. Fahre näher ans Land.</p>'}</div>`;}}
+      if(a.landT!==S.turn)h+=`<div class="list">${LT.map(j=>{const o=S.prov[j].owner,ok=walkOk(a.f,j);return`<button class="arow" data-act="land" data-a="${a.id}" data-p="${j}"><span class="crest" style="${cst(o)}"></span><span class="nm"><b>Ausladen: ${isKnown(j)?esc(PROV_DEF[j].name):'Unerforschte Küste'}</b><small>${hnSeaLock(a,j)?'🔒 '+esc(hnSeaLock(a,j)):ok?(o===a.f?'Eigenes Land':'Anlanden'):'Landung mit Angriff · '+esc(FACTIONS[o].name)}${!ok&&!hnSeaLock(a,j)&&minSiege(j)?' · Stadt: erst Belagerung nötig':''}</small></span></button>`;}).join('')||'<p class="note">Keine Küste in Reichweite. Fahre näher ans Land.</p>'}</div>`;}}
   else{const near=coastNear(fl.x,fl.z,LAND_R),cand=S.armies.filter(a=>a.f===fl.f&&!a.boat&&near.has(a.p));
     if(cand.length)h+=`<h3>Einschiffen</h3><div class="list">${cand.map(a=>`<button class="arow" data-act="embark2" data-a="${a.id}" data-id="${fl.id}"${a.mp>0&&cargoUnits(fl)+a.units.length<=fl.n*SHIP_CAP?'':' disabled'}><span class="crest" style="${cst(a.f)}"></span><span class="nm"><b>${esc(a.name)} an Bord nehmen</b><small>${a.units.length} ${a.units.length===1?'Einheit':'Einheiten'} · ${a.mp>0?'kostet die restliche Bewegung des Heeres':'Heer hat keine Bewegung mehr'}${cargoUnits(fl)+a.units.length>fl.n*SHIP_CAP?' · zu wenig Platz':''}</small></span></button>`).join('')}</div>`;
     else h+=`<p class="note">Zum Einschiffen ein eigenes Heer in eine Küstenprovinz neben der Flotte bringen.</p>`;}
@@ -14314,7 +14465,8 @@ function startAttackCtx(a,ti){
   const aU=a.units.concat(...attRe.map(x=>x.units)),dU=[].concat(...defArmies.map(x=>x.units),...defRe.map(x=>x.units));
   const dArm=defArmies.reduce((s,x)=>s+armyPower(x),0)+reD,dTot=Math.max(1,provDefense(ti,a.f)-gp+reD),dSh=clamp(dArm/dTot,0,1);
   const mA=dU.length?matchMul(aU,dU):1+Math.min(MIX_MAX,MIX_STEP*Math.max(0,['spear','sword','missile','cav','art'].filter(r=>unitsMen(aU,r)>=unitsMen(aU)*0.08).length-1)),mD=dU.length?1+(matchMul(dU,aU)-1)*dSh:1;
-  return{a,ti,defArmies,attRe,defRe,res:{river:rvx,att:(armyPower(a)+reA)*kirAtt(a,ti)*mA,def:(provDefense(ti,a.f)-gp+reD)*(rvx?1.2:1)*mD,mA,mD,reA:attRe.length,reD:defRe.length,attF:a.f,defF:P.owner,prov:ti,from:a.p===ti?(a.sFrom!=null?a.sFrom:null):a.p,captured:false,win:false,
+  const EF=(()=>{try{return eleFx(a,ti,aU,dU);}catch(e){return{att:1,def:1,n:0};}})();
+  return{a,ti,defArmies,attRe,defRe,res:{river:rvx,eleN:EF.n,att:(armyPower(a)+reA)*kirAtt(a,ti)*mA*EF.att,def:(provDefense(ti,a.f)-gp+reD)*(rvx?1.2:1)*mD*EF.def,mA,mD,reA:attRe.length,reD:defRe.length,attF:a.f,defF:P.owner,prov:ti,from:a.p===ti?(a.sFrom!=null?a.sFrom:null):a.p,captured:false,win:false,
     attMen0:armyMen(a),defMen0:defArmies.reduce((s,x)=>s+armyMen(x),0)+P.gar*12,attLost:0,defLost:0}};
 }
 function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
@@ -14328,7 +14480,7 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
   res.defLost=Math.max(0,Math.round(res.defMen0-remDef));
   if(win&&a.units.length&&HOLY.has(PROV_DEF[ti].id)&&P.owner==='frei'){for(const x of PLAYABLE)if(x!==a.f&&alive(x)&&facRel(x)===P.rel){relAdd(a.f,x,-(15),'Heilige Stätte erobert');}if(a.f===S.player)addLog(`Die Eroberung der heiligen Stätte ${PROV_DEF[ti].city} empört alle Reiche dieses Glaubens.`,true,'bad');}
   if(win&&a.units.length&&!rz&&!stormOk(a.f,ti,a)){res.siegeNeed=minSiege(ti);
-    if(!(S.sieges&&S.sieges[ti])&&(a.p===ti||ADJ[a.p].has(ti)||a._land)){if(a.st==='belagern'&&a.sieg!==ti)liftSiege(a);S.sieges=S.sieges||{};S.sieges[ti]={f:a.f,aid:a.id,t:0};a.st='belagern';a.sieg=ti;siegeCamp(a,ti);res.siegeStarted=true;}
+    if(!(S.sieges&&S.sieges[ti])&&(a.p===ti||ADJ[a.p].has(ti)||a._land)){if(a.st==='belagern'&&a.sieg!==ti)liftSiege(a);S.sieges=S.sieges||{};S.sieges[ti]={f:a.f,aid:a.id,t:0};a.st='belagern';a.sieg=ti;siegeCamp(a,ti);res.siegeStarted=true;hnSiegeBegin(a,ti);}
     if(a.f===S.player||P.owner===S.player)addLog(`${PROV_DEF[ti].city||PROV_DEF[ti].name}: Die Verteidiger sind geschlagen, doch die Stadt hält stand. ${res.siegeStarted?'Die Belagerung beginnt.':''} Sturm erst nach ${minSiege(ti)} Runden Belagerung.`,true,a.f===S.player?'info':'bad');}
   if(rz){try{rzLand(a,ti,res);}catch(e){console.warn('Raubzug',e);}}
   if(win&&a.units.length&&!rz&&stormOk(a.f,ti,a)){try{const _cn=PROV_DEF[ti].city||PROV_DEF[ti].name;if(a.f===S.player)chronAdd('conq',`${_cn} erobert${P.owner!=='frei'?' (von '+FACTIONS[P.owner].name+')':''}`);else if(P.owner===S.player)chronAdd('lost',`${_cn} an ${FACTIONS[a.f].name} verloren`);}catch(e){}if(P.owner!=='frei'){stat(a.f,'conq');a.hold=S.turn+1;const dw=dip(a.f,P.owner);dw.won=dw.won||{};dw.won[a.f]=(dw.won[a.f]||0)+1;}if(P.owner==='frei')try{leagueStrike(a.f,ti);}catch(e){}P.prot=null;const _pv=P.owner,_wc=holdConq(a.f)&&isCapP(ti);provNews(P.owner,'lost',ti,a.f);P.tier=Math.max(0,(P.tier||0)-1);P.tierP=0;shCut(P,0.6,0.4);P.owner=a.f;try{epochKit(ti);}catch(e){}P.gar=Math.max(2,Math.round(garMax(ti)*0.3));P.build=null;P.pop=Math.max(0.6,P.pop*0.85);P.unrest=hasTech(a.f,'citizenship')?2:4;P.uw='Eroberung';P.rebel=0;if(holdConq(a.f)){P.gar=Math.max(2,Math.round(garMax(ti)*0.6));P.unrest=Math.min(P.unrest,2);holdCapFall(a.f,_pv,_wc,ti);}a.p=ti;res.captured=true;try{conquestDecide(a,ti);}catch(e){console.warn('Eroberung',e);}const G=S.fac[a.f];G.gains=(G.gains||[]).filter(t=>S.turn-t<12);G.gains.push(S.turn);}
@@ -14344,7 +14496,10 @@ function resolveAttack(a,ti){
   const win=ar>dr,r=win?dr/ar:ar/dr,winLoss=0.08+0.32*r,loseLoss=0.5+0.35*(1-r);
   if(win){applyLoss(a,winLoss);ctx.defArmies.forEach(d=>applyLoss(d,loseLoss));ctx.attRe.forEach(d=>applyLoss(d,winLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,loseLoss*0.5));}
   else{applyLoss(a,loseLoss);ctx.defArmies.forEach(d=>applyLoss(d,winLoss));P.gar=Math.max(1,Math.round(P.gar*(1-winLoss)));ctx.attRe.forEach(d=>applyLoss(d,loseLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,winLoss*0.5));}
-  return concludeAttack(ctx,win);
+  let pan=[];try{pan=elePanic(a,ctx.defArmies);}catch(e){console.warn('Elefanten-Panik',e);}
+  const rs=concludeAttack(ctx,win);
+  if(pan.length){rs.eleTxt=`Elefanten-Panik: Die Tiere von ${pan.map(x=>x.name).join(' und ')} brechen aus und reißen Lücken ins eigene Heer.`;if(a.f===S.player||P.owner===S.player)addLog(rs.eleTxt,true,'warn');}
+  return rs;
 }
 function battleLog(res){
   try{revBattle(res);}catch(e){}
@@ -16617,7 +16772,7 @@ function aiVassals(f){
 }
 // KI-Bewertung eines Angebots von p an ai
 function aiEval(ai,p,type,o={}){
-  if((type==='vassal'||type==='demand')&&p===S.player&&scenNoSubmit(ai))return{ok:false,why:`${FACTIONS[ai].name} beugt sich nicht – noch nicht.`};
+  if((type==='vassal'||type==='demand')&&p===S.player&&scenNoSubmit(ai))return{ok:false,why:S.scen&&S.scen.id==='hannibal'&&ai==='rom'?'Rom beugt sich keinem Feind. Es verhandelt nur über Frieden.':`${FACTIONS[ai].name} beugt sich nicht – noch nicht.`};
   if(type!=='peace'&&!inContact(ai,p))return{ok:false,why:'Kein Kontakt: Eure Reiche kennen sich kaum. Erst eine Grenze, derselbe Kontinent oder ein Seeweg bringt Gesandte zusammen.'};
   const d=dip(ai,p),rel=relation(ai,p),ratio=warPower(p)/Math.max(1,warPower(ai));
   if(type==='peace'){
@@ -16836,6 +16991,7 @@ function openDiplomacy(f,msg){
     {const mu=mapsUnknown(p,f),mc=mapCost(f),cd=(d.mapT||-99)+15-S.turn;if(mu>0)acts+=btn('maps',cd>0?`Karten kaufen (wieder in ${cd} Runden)`:`Karten kaufen · ${mc} Gold · ${mu} unbekannte Provinzen`,'',cd>0||myGold<mc||relation(f,p)<-20);}
     if(d.vas===f){const cost=40*provsOf(f).length,since=S.turn-d.vasT,ok=since>=10&&rel>=25;acts+=`<p class="note">Vasall seit ${since} Runden, zahlt ${vassalTribute(f)} Gold Tribut pro Runde. Eingliedern geht nach 10 Runden bei Beziehung ab +25.</p>`+btn('integrate',`Friedlich eingliedern (${cost} Gold)`,'primary',!ok||myGold<cost);}
     else if(!d.vas&&d.st!=='war'&&(provsOf(f).length<=3||scenNoSubmit(f)))acts+=btn('vassal','Unterwerfung fordern','',tried('vassal')||scenNoSubmit(f));
+    if(f==='rom'&&scenNoSubmit(f)&&S.scen&&S.scen.id==='hannibal')acts+='<p class="note">Rom beugt sich keinem Feind. Es verhandelt nur über Frieden.</p>';
     if(d.st==='ally')acts+=btn('unally',d.vas===f?'Vasallen freigeben':'Bündnis lösen','danger');
     {const cb=cbOf(p,f);acts+=`<p class="note cbline" style="margin:8px 0 4px">${cb.length?`<b class="okc">Kriegsgrund:</b> ${cb.map(c=>`<b>${esc(c.n)}</b> – ${esc(c.d)}`).join(' · ')}`:`<b class="badc">Kein Kriegsgrund.</b> Ein Krieg kostet dich Beziehung bei allen Reichen (−12) und Ruf (−8) und ${NOCB_TURNS} Runden lang Ordnung −1 im ganzen Reich. Gesandte können Ansprüche begründen.`}</p>`;}
     acts+=btn('war',d.truce>0?`Krieg erklären (Waffenstillstand noch ${d.truce} Runden)`:'Krieg erklären','danger',d.truce>0);
@@ -17641,7 +17797,7 @@ function newRound(){try{advisorHints();}catch(e){}try{if(season()===0||!S.harv)h
     }else P.rebel=0;
     if(P.unrest>0)P.unrest=Math.max(0,P.unrest-((hasTech(f,'citizenship')?1.2:0.75)+techBonus(f,'unrest'))*(lagerOn(i)?2:1));
   }finally{S.player=_pp;}});
-  siegeRound();try{diffRound();}catch(e){console.warn('Wandel',e);}try{ambushRound();}catch(e){console.warn('Hinterhalt',e);}raidRound();attritionRound();faithRound();fleetRound();for(const f of PLAYABLE)if(alive(f)){aiAgents(f);asP(f,()=>agentRound(f));}crisisRound();coalitionRound();try{pk1Round();}catch(e){console.warn('Gegner',e);}missionRound();try{epSysRound();}catch(e){console.warn('Epochensystem',e);}try{ringRound();bundRound();scenRound();}catch(e){console.warn('Geschichte',e);}try{lagerRound();}catch(e){console.warn('Winterlager',e);}try{wikRound();}catch(e){console.warn('Alfred-Drehbuch',e);}try{feat2Round();feat3Round();}catch(e){console.warn('Funktionen',e);}histRound();for(const f of PLAYABLE)if(alive(f))try{polRound(f);}catch(e){console.warn('Politik',e);}
+  siegeRound();try{diffRound();}catch(e){console.warn('Wandel',e);}try{ambushRound();}catch(e){console.warn('Hinterhalt',e);}raidRound();attritionRound();faithRound();fleetRound();for(const f of PLAYABLE)if(alive(f)){aiAgents(f);asP(f,()=>agentRound(f));}crisisRound();coalitionRound();try{pk1Round();}catch(e){console.warn('Gegner',e);}missionRound();try{epSysRound();}catch(e){console.warn('Epochensystem',e);}try{ringRound();bundRound();scenRound();}catch(e){console.warn('Geschichte',e);}try{lagerRound();}catch(e){console.warn('Winterlager',e);}try{wikRound();}catch(e){console.warn('Alfred-Drehbuch',e);}try{hnRound();}catch(e){console.warn('Hannibal-Drehbuch',e);}try{feat2Round();feat3Round();}catch(e){console.warn('Funktionen',e);}histRound();for(const f of PLAYABLE)if(alive(f))try{polRound(f);}catch(e){console.warn('Politik',e);}
   try{weltRound();}catch(e){console.warn('Weltgeschehen',e);}
   checkElimination();
   S.armies.forEach(a=>{a.mp=maxMP(a);const P=S.prov[a.p],drill=P.owner===a.f&&P.b.barracks>=3;for(const u of a.units){const mx=unitStat(a.f,u.r,u.v).men,b0=u.men;if(u.men<mx)u.men=Math.min(mx,Math.round(u.men+mx*0.08));if(u.men>b0&&u.men>0)u.xp=Math.round((u.xp||0)*b0/u.men);if(drill&&(u.xp||0)<300)u.xp=(u.xp||0)+15;}});
@@ -21815,6 +21971,7 @@ function heroWarn(a,pct){try{const Z=S.scen;if(!Z||Z.over||Z.heroFell||a.id!==Z.
   return`<p class="dmsg no" style="margin:6px 0">⚠ Der Held führt dieses Heer. Bei ${pct} % Aussicht könnte er fallen, und dann ist die Geschichte verloren. Erst verstärken oder ein anderes Heer schicken?</p>`;}catch(e){return'';}}
 function orderMove(a,pi){
   if(a.mp<=0){toast('Dieses Heer ist in dieser Runde schon marschiert.');return;}
+  if(hnGate(a,pi,()=>orderMove(a,pi)))return;
   if(passOk(a.f,pi)){
     clearStance(a);a.p=pi;a.mp=Math.max(0,a.mp-1);AUDIO.sfx('march');
     const other=S.armies.find(x=>x!==a&&x.f===a.f&&x.p===pi&&x.units.length+a.units.length<=armyMax(a.f));
@@ -21841,7 +21998,7 @@ function showBattle(res,cb){
   showModal(`${res.captured?`<div class="ephero evhero" style="background-image:url('${evImg(me?'conq':'lost',S.turn+'_'+res.prov)}')"></div>`:heroHtml(battleKey(good,res.prov),S.turn+'_'+res.prov,false)}<h2>${good?'Sieg':'Niederlage'} bei ${esc(PROV_DEF[res.prov].city)}</h2><p class="sub">${esc(pn)} · ${fmtYear(S.year)}</p>
   <div class="vs"><div><div class="who"><span class="crest" style="${cst(res.attF)}"></span>${esc(FACTIONS[res.attF].name)}</div><dl><dt>Stärke</dt><dd>${Math.round(res.att)}</dd><dt>Verluste</dt><dd>${res.attLost}</dd></dl></div>
   <div><div class="who"><span class="crest" style="${cst(res.defF)}"></span>${esc(FACTIONS[res.defF].name)}</div><dl><dt>Stärke</dt><dd>${Math.round(res.def)}</dd><dt>Verluste</dt><dd>${res.defLost}</dd></dl></div></div>
-  <p class="verdict">${esc(verdict)}</p>`,[{label:'Weiter',cls:'primary',fn:cb||afterAction}]);
+  <p class="verdict">${esc(verdict)}</p>${res.eleTxt?`<p class="note">${esc(res.eleTxt)}</p>`:''}`,[{label:'Weiter',cls:'primary',fn:cb||afterAction}]);
 }
 function afterAction(){
   if(S.over){showDefeat();return;}

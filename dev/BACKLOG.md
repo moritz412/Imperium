@@ -2,6 +2,10 @@
 
 > **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
 
+## ZUERST – Hannibal H1 (05.11., v234, nicht veröffentlicht)
+- H1 fertig in dev/imperium.html: Sagunt/Kriegserklärung, Besatzung a/b/c + Scipio-Landung, Rhone-Übergang, Seeweg-/Rom-Sperren, Elefanten-Regeln, Scipio-Namen. Tests: hn1_t.js 57/57, smoke 4/4, w5_t 49/49, w6_t 45/45 (Cloud, Software-Rendering; iPad nicht getestet).
+- Offen: Bilder Job 40 (hn_u_sagunt/besatzung/landung/rhone/floss/seeweg/rom/elefant in IMGLIB + HN_IMG); Landung erst nach Wahl (Runde ~6 nur frühestens); Poebene-Ziel Runde 9–12 erst mit H2 messbar; Rat-Verstärkung setzt flags.hn_seeOk (H3); H2 Pass, H3 Cannae/Fabius/Rat, H4 Akt IV.
+
 ## ZUERST (Stand 31.10. 20:30, NICHT veröffentlicht – letzte Version v232)
 - dev enthält zusätzlich: Triarius-Figur mit Hasta (Moritz: Speerträger Roms hielten ein Schwert), 8 Ostasien-Figuren (China/Japan Ep. 1–2, Zuordnung per EIGEN), Paletten chinesisch/japanisch, OFF_VER v221.
 - BLOCKER: eschlacht_integ_t.js hängt beim Rückzug in der Aufstellung (2× Klick auf #bRueck → keine Wirkung, Knopftext bleibt „Rückzug“, keine Seitenfehler; Lauf 1).
