@@ -29,6 +29,7 @@ await p.evaluate(()=>{
  window.sl=ms=>new Promise(z=>setTimeout(z,ms));
  window.BOT={ev:[],stuck:[],att:[],wopt:0,ph:[],txt:[],wait:0,log:[]};
  window.PHRE=/undefined|NaN|\$\{|\[object|\bnull\b/;
+ {const _t=window.toast;window.toast=function(m){BOT.lastToast=String(m).slice(0,120);return _t.apply(this,arguments);};}
  window.setup=()=>{startScenario('hannibal');try{closeModal();}catch(e){}storyRound();};
  window.gotoStep=i=>{const f=S.player,s=S.story[f];s.i=i;s.t0=S.turn;s.done=false;s.end=false;s.w0=stW(f);s.g=stResolve(f,stCh(f).steps[i].g);return s;};
  window.RU=n=>{const L=[];for(let i=0;i<n;i++)L.push(i%3===2?['spear','socii']:i%7===6?['cav']:['sword','manipel']);return L;};
@@ -67,6 +68,7 @@ await p.evaluate(()=>{
     for(let j=0;j<5&&mOpen();j++){answer('kampf');await sl(40);}break;}
    else if(/Krieg|Frieden mit/.test(t)&&bs.find(x=>/Krieg erklären/.test(x.textContent))){bs.find(x=>/Krieg erklären/.test(x.textContent)).click();res='krieg';await sl(80);}
    else answer('weg');}
+  if(res==='nichts')BOT.log.push({r:S.turn-S.scen.t0,nichts:PROV_DEF[pi].id,toast:BOT.lastToast||null,mp:a.mp,pass:!!a.hnPass,war:atWar(a.f,S.prov[pi].owner)});
   return res;};
  // Heer entlang eines Weges: marschieren in eigenes/verbündetes Land, sonst Angriff (nur mit brauchbarer Aussicht, sonst warten)
  window.stepTo=async(h,path,minq)=>{let hops=0;h.mp=h.mp==null?maxMP(h):h.mp;
@@ -160,7 +162,7 @@ const BOTRUN=async(variant,nr)=>{
    console.log('ENDE: Szenario over='+row.sov+' res='+row.res+' '+row.why+' hnEnd='+JSON.stringify(row.hnEnd));break;}
   if(Date.now()-t0>420000){console.log('Zeitlimit des Laufs (7 Min) erreicht');break;}
  }
- if(process.env.HN4_DBG)console.log('DBG',JSON.stringify(await p.evaluate(()=>({sc:S.armies.filter(a=>a.scip).map(a=>({p:PROV_DEF[a.p].id,u:a.units.length,m:men(a),st:a.st,sieg:a.sieg!=null?PROV_DEF[a.sieg].id:null,hold:a.hold,mp:a.mp})),hero:hero()&&{p:PROV_DEF[hero().p].id,mp:hero().mp,st:hero().st,u:hero().units.length},sieges:S.sieges,kar:{o:S.prov[PI.karthago].owner,gar:S.prov[PI.karthago].gar},byz:S.prov[PI.byzacena].owner,log:S.log.filter(e=>/Scipio|Zeugitana|Byzacena|Karthago/.test(e.t)).slice(-12).map(e=>e.t)}))));
+ if(process.env.HN4_DBG)console.log('DBG',JSON.stringify(await p.evaluate(()=>({sc:S.armies.filter(a=>a.scip).map(a=>({p:PROV_DEF[a.p].id,u:a.units.length,m:men(a),st:a.st,sieg:a.sieg!=null?PROV_DEF[a.sieg].id:null,hold:a.hold,mp:a.mp})),hero:hero()&&{p:PROV_DEF[hero().p].id,mp:hero().mp,st:hero().st,u:hero().units.length},sieges:S.sieges,kar:{o:S.prov[PI.karthago].owner,gar:S.prov[PI.karthago].gar},byz:S.prov[PI.byzacena].owner,rom:S.armies.filter(a=>a.f==='rom'&&a.units.length&&['karthago','byzacena','numidien','gaetulien','emporia'].includes(PROV_DEF[a.p].id)).map(a=>({n:a.name,p:PROV_DEF[a.p].id,m:men(a),sc:!!a.scip,hold:a.hold})),log:S.log.filter(e=>/Scipio|Zeugitana|Byzacena|Karthago/.test(e.t)).slice(-8).map(e=>e.t)}))));
  // Nach dem Ende: Spielerlauf-Zustand für Auswertung
  const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{botlog:BOT.log,rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
    scen:{over:Z.over,res:Z.res,why:Z.why,hnEnd:Z.hnEnd||null,rank:Z.rank},year:S.year,yearTxt:fmtYear(S.year),fl:{hasd:F.hn_hasd,how:F.hn_hasdHow,arr:F.hn_hasdArr,go:F.hn_neroGo,wahl:F.hn_wahl,zama:F.hn_zama,gunst:F.hn_gunst},t0:Z.t0,story:{i:stState(S.player).i,end:stState(S.player).end,done:stState(S.player).done}};});
