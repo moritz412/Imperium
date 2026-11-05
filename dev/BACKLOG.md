@@ -1,35 +1,13 @@
-# Backlog – Imperium der Epochen 2 (Stand 29.10.2026 morgens, v215 veröffentlicht)
+# Backlog – Imperium der Epochen 2 (Stand 05.11.2026, v242 veröffentlicht)
 
 > **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
 
-## ZUERST – Prüfung Hannibal-Kampagne (05.11., v238, nicht veröffentlicht)
-- Bericht `dev/docs/pruef_hannibal_kampagne.md`, Test `dev/tests/hn_kampagne_t.js` (Bot-Spieler, ca. 20–35 Min je Lauf; BEFUND-Meldungen statt nur PASS/FAIL). Behoben in v238: Rom eroberte Karthago in Runde 13–15 (`hnNoLand`), Held-Heer still gelöscht (Held tauchte in Hispanien auf), Herrscher „Hannibal Barkas“ starb, Rhone-Umweg über Allobroger, Pass-Ziel 1/2 nach Ankunft. chkf, smoke 4/4, hn1–hn4 grün (iPad nicht getestet).
-- Offen (Vorschläge im Bericht): Ankunft Poebene Runde 15–17 statt 9–12 (Männer 49–57 % ok), erzwungene Ankunftsschlacht (`hnPassArrive`), Jahreszahlen laufen der Geschichte voraus (Cannae 213 statt 216), Epirus erobert Süditalien vor Hannibal, Gold 3000+ ohne Verwendung, Aufstände eroberter Provinzen, `AGE_TURN` ignoriert `ypt`. Nicht im Spielerlauf getestet: Hasdrubal/Nero, Wahl, Zama, Ende A.
-
-## ZUERST – Hannibal H4 (05.11., v237, nicht veröffentlicht)
-- H4 fertig in dev/imperium.html (Block „v237 (H4)“): Hasdrubal (Pass kurz) + Nero-Drehbuch, Vereinigung/Nero schlagen/„Hasdrubals Kopf“ (nur Text), Wahlfenster Rom/Heimkehr, Sonderschlacht Zama (Panik 40 %, Plan „Elefanten zurückhalten“, Masinissa +12 %), Ende A/B (Abberufung, Zeit, Zama verloren). Test hn4_t.js (iPad nicht getestet).
-- **Hannibal-Kampagne komplett bis auf Kino/Bilder.** Offen: Job 40 (hn_k4_nero/hasdrubal, hn_k5b_landung/zama/heimfahrt, hn_k5a_triumph, hn_sf_zama; Rückfall sc_hannibal) und Kino 4/5A/5B + Sprecher Job 43 (HN_KINO in dev/imperium.html: ikeys/keys eintragen, leer = übersprungen).
-- Nicht gemessen: Spielerlauf-Balance Akt IV (Nero 6 Einheiten gegen Hasdrubal ~68 % Männer nach dem Pass; Wettlauf Nero 2 Provinzen/Runde gegen Hannibals Marsch). Zama gilt nur in der berechneten Schlacht (nicht in der selbst geschlagenen); Zama-Niederlage beendet sofort mit Ende B.
-
-## ZUERST – Hannibal H3 (05.11., v236, nicht veröffentlicht)
-- H3 fertig in dev/imperium.html (Block „v236 (H3)“): Cannae-Drehbuch + Umfassung +25 %, Fabius-Skript, Winterlager Capua + Verweichlichung, Ochsen mit Fackeln, Rat von Karthago (Gunst). Test hn3_t.js (iPad nicht getestet).
-- Messung (Bot): Bilanz Italien (Steuer − Unterhalt) ohne Abfall −48 bis −53, mit 3 Städten −2 bis +7 (dafür Unterhalt in Italien ×0,5, hnUpkMul – bewusst gesetzt, änderbar). Pingpong 30 Runden: Rom/Karthago-Wechsel je Provinz ≤ 1; Aufstände nicht gehaltener Provinzen (12–20 je Lauf) sind das alte Unruhesystem, nicht das Skript.
-- NICHT gemessen: Cannae-Zeitpunkt im vollen Spielerlauf (nur strukturell: Riesenheer erst mit Schritt 7, Marsch aus Apulien ≥ 4 Runden). Offen: Bilder Job 40 (hn_k3_cannae, hn_u_fabius/ochsen/capua, hn_rat_hanno/barkiden/verstaerkung; Rückfall sc_hannibal), Hasdrubal/Nero + Kino + Enden = H4 (Fabius-Phase mit flags.hn_fabOff abschaltbar).
-
-## ZUERST – Hannibal H2 (05.11., v235, nicht veröffentlicht)
-- H2 fertig in dev/imperium.html (Präfix `hn…`, Block „v235 (H2)“): Pass-Abschnitt (Routenfenster beim Angriff auf Salasser/Segusiner/Seealpen, kurz 2 / lang 4 / bewacht 3 Tage, Heer steht still, Leiste Vorräte·Tragtiere·Moral + Schneelage im Heer-Blatt, 7 Tagesereignisse, Ankunft Taurini), Kelten-Treue (Leiste im Szenario-Kopf, nur Akt II), Konsulheere (Sempronius, Scipio, Flaminius; 2 Runden Schonfrist), Plan „Hinterhalt“ (Trebia +20 % / Trasimene +25 %). Test hn2_t.js (Ergebnis siehe Verlauf unten im Chat/Bericht; iPad nicht getestet).
-- Messung: Pass-Männer bei Ankunft im Mittel ~51 % (90 Läufe, Spanne 27–82 %). Spielerlauf-Bot: Pass-Eintritt Runde 9–11, Ankunft Runde 12–15 – das Ziel 9–12 gelingt nur mit der kurzen Route; Hebel für H3: Sagunt-Belagerung/Weg durch Gallien straffen oder Routen kürzen.
-- Offen: Bilder Job 40 (hn_ps_*, hn_k2_*, hn_kap_trebia/trasimene in IMGLIB + HN_IMG); Konsuln greifen nur Hannibals eigene Provinz an (sonst hnFeld); Kelten-Treue friert nach Akt II ein; Hasdrubal-Pass in Kurzform (H4); Kino 2 (H4).
-
-## ZUERST – Hannibal H1 (05.11., v234, nicht veröffentlicht)
-- H1 fertig in dev/imperium.html: Sagunt/Kriegserklärung, Besatzung a/b/c + Scipio-Landung, Rhone-Übergang, Seeweg-/Rom-Sperren, Elefanten-Regeln, Scipio-Namen. Tests: hn1_t.js 57/57, smoke 4/4, w5_t 49/49, w6_t 45/45 (Cloud, Software-Rendering; iPad nicht getestet).
-- Offen: Bilder Job 40 (hn_u_sagunt/besatzung/landung/rhone/floss/seeweg/rom/elefant in IMGLIB + HN_IMG); Landung erst nach Wahl (Runde ~6 nur frühestens); Poebene-Ziel Runde 9–12 erst mit H2 messbar; Rat-Verstärkung setzt flags.hn_seeOk (H3); H2 Pass, H3 Cannae/Fabius/Rat, H4 Akt IV.
-
-## ZUERST (Stand 31.10. 20:30, NICHT veröffentlicht – letzte Version v232)
-- dev enthält zusätzlich: Triarius-Figur mit Hasta (Moritz: Speerträger Roms hielten ein Schwert), 8 Ostasien-Figuren (China/Japan Ep. 1–2, Zuordnung per EIGEN), Paletten chinesisch/japanisch, OFF_VER v221.
-- BLOCKER: eschlacht_integ_t.js hängt beim Rückzug in der Aufstellung (2× Klick auf #bRueck → keine Wirkung, Knopftext bleibt „Rückzug“, keine Seitenfehler; Lauf 1).
-  Bis v232 lief der Test 24/24. Danach geändert: eschAufstellen (Artillerie hinter der Linie), FAEH/ECHT_PAKET/FERN_PAKET/KFARB-Einträge, neue Pakete. Erst klären, dann v233.
-- Rom verlor im e1-Test 3/3 nach Triarius-Umstellung (Einzelläufe) → Balance beobachten.
+## ZUERST – Stand 05.11. abends (v242 veröffentlicht)
+- **Hannibal-Kampagne komplett veröffentlicht** (v234 H1 Akt I, v235 H2 Pass/Kelten, v236 H3 Cannae/Fabius/Rat, v237 H4 Hasdrubal/Zama/Enden, v238 Prüfung, v239–v241 Nachbesserungen). Tests hn1–hn4_t.js, Bot-Spieler hn_kampagne_t.js (20–35 Min), Bericht `dev/docs/pruef_hannibal_kampagne.md`. iPad nicht getestet.
+- v238: Rom nahm Karthago in Runde 13–15 (`hnNoLand`), Held-Heer still gelöscht, Herrscher „Hannibal Barkas“ starb, Rhone-Umweg, Pass-Ziel 1/2. v239: Ankunft Poebene ohne Zwangskampf (Ziel mit bester Aussicht, Insubrer Garnison ×0,6, sonst Lager am Pass), Cannae-Text ohne Jahreszahl, Rats-Countdown sichtbar. v240: Knopf „Söldner“ (200 Gold +60, 1×/Runde). v241: fremde KI greift Roms Italien vor Akt IV nicht an (`hnNoIt`). v242 (alle Geschichten): Altern nach Szenario-ypt (`AGE_TURN`, Test age_t.js).
+- **Moritz bewerten beim Spielen:** Sold ×0,5 in Italien, Boten +10 Gunst, Frist vor Abberufung, Seeweg-Ausnahme Süditalien, Söldnerpreis, Elefanten-Schrecken jetzt auch KI gegen KI.
+- Offen: Ankunft Poebene im Bot Runde 14–17 statt Ziel 9–12 (Hebel: Sagunt/Gallien straffen oder Ziel anpassen – Entscheidung Moritz); Aufstände eroberter Gallier nach Abmarsch (Designfrage); Jahre im Fenster laufen der Geschichte voraus (ypt 0,25 = Jahreszeiten); Akt IV (Hasdrubal/Nero, Wahl, Zama, Ende A) nur strukturell in hn4_t.js, nicht im Spielerlauf. hn2-Messziel „Spielerlauf“ streut (lange Route Runde 16 → FAIL in Einzelläufen).
+- Mit PC: Bilder Job 40 (hn_* in IMGLIB + `HN_IMG`, Rückfall sc_hannibal), Kino 4/5A/5B + Sprecher Job 43 (`HN_KINO` ikeys/keys).
 
 ## SCHLACHT-PLAN 31.10. (Figuren, Farben, Ideen aus Rome-II-Spielmechanik)
 Stand Figuren: 18 Soldaten-Kits + Pferd + Elefant. Kampagnenprofile 333: Antike 53 von 55 mit eigener Figur, Epoche 1–4 (278 Profile) nur Rückfall auf Antike-Kits.
@@ -199,4 +177,3 @@ Spielregeln (Entscheidung nötig):
 - `pk2_t.js` „3 Runden mit neuen Reichen“ schlägt unter Last gelegentlich fehl (nur 2 Runden in der Wartezeit).
 - Klick-Zeitüberschreitungen in `reach_*` unter hoher Last (Software-Rendering) – kein Spielfehler.
 
-- **v239 (05.11.)** Hannibal nach Prüfbericht: Ankunft Poebene ohne Zwangskampf bei schlechter Aussicht (Heer lagert am Pass), Insubrer-Hilfe (Garnison ×0,6), Cannae-Text ohne Jahreszahl, Ratsleiste zeigt Abberufungs-Countdown. Epirus → v241 (fremde KI greift Roms Italien vor Akt IV nicht an; passiv 30 Runden: kein Wechsel in Süditalien). Gold → v240 Söldner-Knopf. `AGE_TURN` → v242 (Altern nach Szenario-ypt, Test age_t.js). Offen: Aufstände in Gallien nach Abmarsch (Designfrage), Ankunftsrunde Poebene 14–17 statt 9–12 (Bot).
