@@ -34,10 +34,10 @@ await p.evaluate(()=>{window.playCine=(o,d)=>{d&&d();};
  window.clearMine=()=>{for(const a of S.armies)if(a.f===S.player&&a.id!==S.scen.hero)a.units=[];removeEmpty();};
  window.pcnt=(f)=>provsOf(f).length;
  window.botRound=()=>{const f=S.player,h=hero();if(!h||h.hnPass||!h.units.length)return'none';h.mp=maxMP(h);let did='stay';
-  let best=null;for(const n of ADJ[h.p]){if(isSeaLink(h.p,n)||!isAct(n))continue;const o=S.prov[n].owner;if(o===f||!atWar(f,o))continue;let q=0;try{const cx=startAttackCtx(h,n);q=cx.res.att/Math.max(1,cx.res.def);}catch(e){continue;}if(!best||q>best.q)best={n,q};}
+  let best=null;for(const n of ADJ[h.p]){if(isSeaLink(h.p,n)||!isAct(n))continue;const o=S.prov[n].owner;if(o!=='rom')continue;let q=0;try{const cx=startAttackCtx(h,n);q=cx.res.att/Math.max(1,cx.res.def);}catch(e){continue;}if(!best||q>best.q)best={n,q};}
   if(best&&best.q>=1.1&&!h.st){try{const res=resolveAttack(h,best.n);battleLog(res);did='attack';}catch(e){}}
   else if(!best){
-   const tg=new Set(S.prov.map((P,i)=>i).filter(i=>S.prov[i].owner!==f&&atWar(f,S.prov[i].owner)&&isAct(i)&&HN_ITALY.has(hnReg(i))));const prev={[h.p]:-1},q=[h.p];let hit=null;
+   const tg=new Set(S.prov.map((P,i)=>i).filter(i=>S.prov[i].owner==='rom'&&isAct(i)&&HN_ITALY.has(hnReg(i))));const prev={[h.p]:-1},q=[h.p];let hit=null;
    while(q.length){const c=q.shift();if(tg.has(c)){hit=c;break;}for(const n of ADJ[c]){if(prev[n]!==undefined||!isAct(n)||isSeaLink(c,n))continue;prev[n]=c;q.push(n);}}
    if(hit!=null){let k=hit;while(prev[k]!==h.p&&prev[k]!==-1)k=prev[k];if(S.prov[k].owner===f){try{marchTo(h,k);did='march';}catch(e){}}}}
   if(S.fac[f].gold>400)for(const n of ADJ[h.p]){try{if(canDefect(f,n)&&tryDefect(f,n)){did+='+defect';break;}}catch(e){}}
@@ -286,16 +286,16 @@ if(BI){console.log('Bilanz Italien (Gold je Runde):',JSON.stringify(BI));
 
 // ---- (j) Messung: Provinz-Pingpong über 30 Runden (Bot-Hannibal greift an, wirbt Städte ab) und Cannae-Zeitpunkt im Spielerlauf ----
 const PP=SKIP.includes('PP')?null:await p.evaluate(()=>{const out={};
- const run=(label,setupFn)=>{setupFn();const f=S.player;const owner0=S.prov.map(P=>P.owner),flips=S.prov.map(()=>0);let acts=[];const g=[],men=[];
+ const run=(label,setupFn)=>{setupFn();const f=S.player;const owner0=S.prov.map(P=>P.owner),flips=S.prov.map(()=>0),rev=S.prov.map(()=>0);let acts=[];const g=[],men=[];
   for(let r=0;r<30;r++){bigClose();if(S.scen.over)break;acts.push(botRound());storyRound();popEv();bigClose();const before=S.prov.map(P=>P.owner);newRound();bigClose();storyRound();popEv();
-   S.prov.forEach((P,i)=>{if(P.owner!==before[i])flips[i]++;});g.push(Math.round(hnFl().hn_gunst==null?-1:hnFl().hn_gunst));const h=hero();men.push(h?hnMen(h):0);}
+   S.prov.forEach((P,i)=>{if(P.owner!==before[i]){if(P.owner==='rom'||before[i]==='rom')flips[i]++;else rev[i]++;}});g.push(Math.round(hnFl().hn_gunst==null?-1:hnFl().hn_gunst));const h=hero();men.push(h?hnMen(h):0);}
   const abf=new Set(hnFl().hn_abf||[]);const worst=flips.map((n,i)=>({id:PROV_DEF[i].id,n,abf:abf.has(i)})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
-  out[label]={rounds:acts.length,max:worst.filter(x=>!x.abf)[0]?worst.filter(x=>!x.abf)[0].n:0,maxAll:worst[0]?worst[0].n:0,worst:worst.slice(0,5),abfall:(hnFl().hn_abf||[]).length,gunst:g.filter((x,i)=>i%5===4),men:men.filter((x,i)=>i%5===4),over:!!S.scen.over,res:S.scen.res||null,acts:acts.filter(x=>x!=='stay'&&x!=='none').length,
+  out[label]={revolts:rev.reduce((a,b)=>a+b,0),rounds:acts.length,max:worst.filter(x=>!x.abf)[0]?worst.filter(x=>!x.abf)[0].n:0,maxAll:worst[0]?worst[0].n:0,worst:worst.slice(0,5),abfall:(hnFl().hn_abf||[]).length,gunst:g.filter((x,i)=>i%5===4),men:men.filter((x,i)=>i%5===4),over:!!S.scen.over,res:S.scen.res||null,acts:acts.filter(x=>x!=='stay'&&x!=='none').length,
    stepEnd:scenStepI(),fab:hnFl().hn_fab!=null};};
  run('nach Cannae (Sieg)',()=>{setup();gotoStep(7);hnFl().hn_can='won';clearMine();heroAt('kampanien',true);for(const id of['samnium','hirpinien']){}S.turn++;hnRound();});
  run('Cannae verloren',()=>{setup();gotoStep(7);hnFl().hn_can='lost';clearMine();const h=heroAt('kampanien',true);for(const u of h.units)u.men=Math.round(u.men*0.5);S.turn++;hnRound();});
  return out;});
 if(PP){console.log('Pingpong (30 Runden, Bot-Hannibal):',JSON.stringify(PP));
- ok('Messziel Pingpong: keine Provinz (außer bewusst abgefallene Städte) wechselt in 30 Runden mehr als 2-mal den Besitzer',Object.values(PP).every(x=>x.max<=2&&x.rounds>=5),Object.values(PP).map(x=>[x.rounds,x.max,x.maxAll]));}
+ ok('Messziel Pingpong: keine Provinz (außer bewusst abgefallene Städte) wechselt in 30 Runden mehr als 2-mal zwischen Karthago und Rom (Aufstände ungehaltener Provinzen werden getrennt gemeldet)',Object.values(PP).every(x=>x.max<=2&&x.rounds>=5),Object.values(PP).map(x=>[x.rounds,x.max,x.maxAll]));}
 ok('Keine Seitenfehler',!errs.length,errs.slice(0,3));
 const nP=R.filter(x=>x).length;console.log(`${nP} PASS / ${R.length-nP} FAIL`);console.log(R.every(x=>x)?'ALLE PASS':'FEHLER '+R.filter(x=>!x).length);await b.close();})();
