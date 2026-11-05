@@ -2,6 +2,10 @@
 
 > **Ableger Städte Roms** (Stadtaufbau, seit 31.10.): eigener Backlog in `dev/staedte/BACKLOG.md`, Konzept `dev/staedte/docs/konzept.md`.
 
+## ZUERST – Prüfung Hannibal-Kampagne (05.11., v238, nicht veröffentlicht)
+- Bericht `dev/docs/pruef_hannibal_kampagne.md`, Test `dev/tests/hn_kampagne_t.js` (Bot-Spieler, ca. 20–35 Min je Lauf; BEFUND-Meldungen statt nur PASS/FAIL). Behoben in v238: Rom eroberte Karthago in Runde 13–15 (`hnNoLand`), Held-Heer still gelöscht (Held tauchte in Hispanien auf), Herrscher „Hannibal Barkas“ starb, Rhone-Umweg über Allobroger, Pass-Ziel 1/2 nach Ankunft. chkf, smoke 4/4, hn1–hn4 grün (iPad nicht getestet).
+- Offen (Vorschläge im Bericht): Ankunft Poebene Runde 15–17 statt 9–12 (Männer 49–57 % ok), erzwungene Ankunftsschlacht (`hnPassArrive`), Jahreszahlen laufen der Geschichte voraus (Cannae 213 statt 216), Epirus erobert Süditalien vor Hannibal, Gold 3000+ ohne Verwendung, Aufstände eroberter Provinzen, `AGE_TURN` ignoriert `ypt`. Nicht im Spielerlauf getestet: Hasdrubal/Nero, Wahl, Zama, Ende A.
+
 ## ZUERST – Hannibal H4 (05.11., v237, nicht veröffentlicht)
 - H4 fertig in dev/imperium.html (Block „v237 (H4)“): Hasdrubal (Pass kurz) + Nero-Drehbuch, Vereinigung/Nero schlagen/„Hasdrubals Kopf“ (nur Text), Wahlfenster Rom/Heimkehr, Sonderschlacht Zama (Panik 40 %, Plan „Elefanten zurückhalten“, Masinissa +12 %), Ende A/B (Abberufung, Zeit, Zama verloren). Test hn4_t.js (iPad nicht getestet).
 - **Hannibal-Kampagne komplett bis auf Kino/Bilder.** Offen: Job 40 (hn_k4_nero/hasdrubal, hn_k5b_landung/zama/heimfahrt, hn_k5a_triumph, hn_sf_zama; Rückfall sc_hannibal) und Kino 4/5A/5B + Sprecher Job 43 (HN_KINO in dev/imperium.html: ikeys/keys eintragen, leer = übersprungen).

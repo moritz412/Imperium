@@ -23,22 +23,25 @@ await p.evaluate(()=>{
  window.playCine=(o,d)=>{d&&d();};/* Kino (Bilder fehlen ohnehin) überspringen */
  window.errsW=[];const _w=console.warn;console.warn=function(){errsW.push([...arguments].map(x=>x&&x.message||String(x)).join(' ').slice(0,200));_w.apply(console,arguments);};
  window.sl=ms=>new Promise(z=>setTimeout(z,ms));
- window.BOT={ev:[],stuck:[],att:[],wopt:0,prevOwn:null,flips:[]};
+ window.BOOST=false;window.BOT={ev:[],stuck:[],att:[],wopt:0,prevOwn:null,flips:[]};
  window.setup=()=>{startScenario('hannibal');try{closeModal();}catch(e){}storyRound();};
+ window.gotoStep=i=>{const f=S.player,s=S.story[f];s.i=i;s.t0=S.turn;s.done=false;s.end=false;s.w0=stW(f);s.g=stResolve(f,stCh(f).steps[i].g);return s;};
+ window.RU=n=>{const L=[];for(let i=0;i<n;i++)L.push(i%3===2?['spear','socii']:i%7===6?['cav']:['sword','manipel']);return L;};
+ window.REGS=new Set(['hisp_ost','hisp_sued','hisp_west','gallien_sued','gallien_mitte','gallien_nord','it_nord','it_mitte','it_sued','inseln','africa','salasser','segusiner','vocontier','helvetier']);
  window.mOpen=()=>{const m=document.querySelector('#modal');return!!m&&!m.hidden;};
  window.mText=()=>mOpen()?document.querySelector('#dialog').innerText.replace(/\s+/g,' ').trim():'';
- window.mBtns=()=>[...document.querySelectorAll('#dialog .actions .btn, #dialog .rcard')].filter(x=>!x.disabled);
+ window.mBtns=()=>[...document.querySelectorAll('#dialog .actions .btn, #dialog .evopt')].filter(x=>!x.disabled);
  // Ein offenes Fenster beantworten wie ein Spieler: Ereignis = erste Option; sonst Weiter/Verstanden/…; protokolliert Titel, Jahr, Wahl
  window.answer=(tag)=>{if(!mOpen())return null;const d=document.querySelector('#dialog'),t=mText(),h2=(d.querySelector('h2')||{}).innerText||'',sub=(d.querySelector('.sub')||{}).innerText||'',eb=(d.querySelector('.eyebrow')||{}).innerText||'';
   const bs=mBtns();let b=null,why='';
-  if(!bs.length){const x=d.querySelector('.dlgx');BOT.stuck.push({r:S.turn-S.scen.t0,h2,t:t.slice(0,160)});if(x)x.click();else closeModal();return{h2,none:true};}
-  const ev=bs.filter(x=>x.classList.contains('rcard'));
+  if(!bs.length){const x=d.querySelector('.dlgx');if(!/Das Zeitalter|Buch des Reiches|Untergang/.test(h2+t))BOT.stuck.push({r:S.turn-S.scen.t0,h2,t:t.slice(0,160)});if(x)x.click();else closeModal();return{h2,none:true};}
+  const ev=bs.filter(x=>x.classList.contains('evopt'));
   if(/Wer bleibt in Hispanien/.test(t)){b=bs.find(x=>/Alle ziehen mit/.test(x.textContent));why='alle';}
   else if(/Welchen Weg/.test(t)){b=bs.find(x=>/lange Weg/.test(x.textContent))||ev[0];why='route lang';}
   else if(/Rom angreifen|heimkehren/.test(t)&&/Rom/.test(h2)){b=ev[BOT.wopt]||bs[BOT.wopt];why='wahl'+BOT.wopt;}
   else if(ev.length){b=ev[0];why='erste Option';}
   else{const pref=[/Belagern/,/Weiter|Verstanden|Weiterspielen|Annehmen|Flöße/,/Ablehnen/,/Fortsetzen|Berechnen/];for(const re of pref){b=bs.find(x=>re.test(x.textContent));if(b)break;}if(!b)b=bs.find(x=>x.classList.contains('primary'))||bs[0];why='Standard';}
-  BOT.ev.push({r:S.turn-S.scen.t0,y:(sub.match(/\d+\s*(v\. Chr\.|n\. Chr\.)?/)||[''])[0].trim()+(/v\. Chr/.test(sub)?' v':''),eb:eb.slice(0,40),h2:h2.slice(0,60),n:bs.length,pick:b.textContent.trim().slice(0,40),why,tag:tag||''});
+  BOT.ev.push({r:S.turn-S.scen.t0,y:(sub.match(/(\d{1,4}) (v|n)\. Chr\./)||['',''])[0],eb:eb.replace(/\s+/g,' ').slice(0,30),h2:h2.replace(/\s+/g,' ').slice(0,50),n:bs.length,pick:(b.querySelector('b')||b).textContent.trim().slice(0,30),why,tag:tag||''});
   b.click();return{h2,pick:b.textContent.trim()};};
  window.drain=async(tag,max=60)=>{let n=0;for(let i=0;i<max;i++){await sl(40);if(!mOpen()){if(!busy)break;continue;}answer(tag);n++;await sl(30);}return n;};
  // Runde beenden wie der Knopf: endTurn(), danach alle Fenster beantworten, bis die nächste Runde frei ist
@@ -62,8 +65,10 @@ await p.evaluate(()=>{
  // Heer zum Ziel: Schritt für Schritt (jeder Hop ist ein Marsch- oder Angriffsbefehl), solange Bewegung übrig ist
  window.stepTo=async(h,path)=>{let hops=0;while(path&&path.length&&h.mp>0&&hops++<7&&!h.hnPass&&h.units.length){const nx=path[0];if(h.p===nx){path.shift();continue;}const o=S.prov[nx].owner,own=o===S.player;
    if(own||passOk(h.f,nx)){const p0=h.p;marchTo(h,nx);for(let j=0;j<6&&mOpen();j++){answer('marsch');await sl(50);}if(h.p===nx){path.shift();continue;}if(h.p===p0&&!h.goal)break;break;}
+   if(scenStepI()>=4){let q=9;try{const cx=startAttackCtx(h,nx);q=cx.res.att/Math.max(1,cx.res.def);}catch(e){}if(q<0.9){BOT.wait=(BOT.wait||0)+1;break;}}
    const m0=h.p;await attack(h,nx);if(S.prov[nx].owner===S.player&&h.p!==nx&&h.mp>0){marchTo(h,nx);for(let j=0;j<4&&mOpen();j++){answer('marsch');await sl(50);}}if(h.p===nx){path.shift();continue;}break;}};
 });
+await p.evaluate(b=>{window.BOOST=b;},process.env.HN_BOOST==='1');
 // ---- Spielerlauf: Bot
 const lauf=async(nr,wopt)=>{
  const S0=await p.evaluate((wopt)=>{BOT.ev=[];BOT.stuck=[];BOT.att=[];BOT.wopt=wopt;errsW.length=0;setup();window.PL={rows:[],own:S.prov.map(P=>P.owner),flip:S.prov.map(()=>[]),ev:{},t0:S.turn};
@@ -74,7 +79,7 @@ const lauf=async(nr,wopt)=>{
   const o=await p.evaluate(async()=>{
    const f=S.player,F=hnFl(),h=hero(),rel=S.turn-S.scen.t0,acts=[];
    // Ereignisse/Kelten/Rat vorher (Fenster der letzten Runde sind schon beantwortet)
-   while(mOpen())answer('vor');
+   for(let i=0;i<10&&mOpen();i++){answer('vor');await sl(40);}
    if(!h)return{dead:true,rel,txt:'Heer des Helden fehlt; Over='+S.over+' '+(S.scen.why||'')};
    h.mp=h.mp==null?maxMP(h):h.mp;
    if(!h.hnPass){
@@ -82,12 +87,21 @@ const lauf=async(nr,wopt)=>{
     const step=scenStepI();
     // Rekrutieren: in eigener Provinz mit Platz, Gold über Reserve (wie ein Spieler, der Lücken füllt)
     try{const P=S.prov[h.p];if(P.owner===f&&S.fac[f].gold>350&&h.units.length<armyMax(f)&&P.rec>0){let n=0;for(const [ro,v] of [['spear','libyer'],['sword','scutar'],['spear','libyer']]){if(S.fac[f].gold<300||h.units.length>=armyMax(f)||P.rec<=0)break;const rr=recruit(f,h.p,ro,v);if(rr)n++;}if(n)acts.push('rekr'+n);}}catch(e){}
+    // Abkürzung HN_BOOST=1: nach der Ankunft in der Poebene wird das Heer einmalig aufgefüllt (sonst bricht der Bot hier ein und späte Schritte bleiben unmessbar)
+    if(BOOST&&F.hn_ankunft&&!F.zz_boost){F.zz_boost=1;for(const u of h.units)u.men=unitStat(f,u.r,u.v).men;for(const [ro,v] of [['spear','libyer'],['spear','libyer'],['sword','scutar'],['sword','scutar'],['cav','numid'],['missile','balear']]){if(h.units.length<armyMax(f))h.units.push(newUnit(f,ro,v));}acts.push('ABKÜRZUNG: Heer aufgefüllt');}
+    // Läuft eine Belagerung: warten, bis Sturm möglich ist (wie ein Spieler), dann stürmen
+    if(h.st==='belagern'&&h.sieg!=null&&S.prov[h.sieg].owner!==f&&S.sieges&&S.sieges[h.sieg]){const need=siegeNeed(f,h.sieg,h),t=S.sieges[h.sieg].t;
+     if(t>=need){const sg=h.sieg,r=await attack(h,sg);acts.push('Sturm '+PROV_DEF[sg].id+' '+r+' (Besitz: '+S.prov[sg].owner+')');}else acts.push('Belagerung '+PROV_DEF[h.sieg].id+' '+t+'/'+need);}
+    else {
     // Ziel wählen
     let path=null,why='';
-    if(step<=1&&!owned(PI.edetaner)){const dist=bfs(h.p,i=>i===PI.edetaner);path=dist;why='Sagunt';}
-    else if(!F.hn_ankunft&&step<=3){path=bfs(h.p,i=>i===PI.seealpen||i===PI.salasser||i===PI.segusiner);why='Pass';}
-    else if(step<=4){path=bfs(h.p,i=>['insubrien','aemilia','cenomanen','taurini'].some(id=>PI[id]===i&&!owned(i)))||bfs(h.p,i=>S.prov[i].owner==='rom'&&isAct(i));why='Kelten';}
-    else if(step===5){// Konsulheere schlagen: Heer von Rom, das am nächsten steht, sonst nächste römische Provinz
+    const SET=ids=>i=>ids.some(id=>PI[id]===i)&&!owned(i);
+    if(step===0){path=bfs(h.p,i=>i===PI.edetaner);why='Sagunt';}
+    else if(step<=1){path=bfs(h.p,SET(['tarraco','ilergeten','ilerkavonen','vasconen']));why='Ebro/Pyrenäen';}
+    else if(step===2){path=bfs(h.p,SET(['narbo','vocontier','allobroger']));why='Rhone';}
+    else if(step===3){path=F.hn_ankunft?null:bfs(h.p,i=>i===PI.seealpen||i===PI.salasser||i===PI.segusiner);why=F.hn_ankunft?'Poebene halten':'Pass';}
+    else if(step===4){path=bfs(h.p,SET(['insubrien','aemilia','cenomanen','taurini']))||bfs(h.p,i=>S.prov[i].owner==='rom'&&isAct(i));why='Kelten';}
+    else if(step===5){// Trebia/Trasimene: Konsulheere schlagen: Heer von Rom, das am nächsten steht, sonst nächste römische Provinz
      const rp=new Set(S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat).map(x=>x.p));path=bfs(h.p,i=>rp.has(i)&&S.prov[i].owner!==f)||bfs(h.p,i=>S.prov[i].owner==='rom'&&isAct(i)&&!owned(i));why='Konsul';}
     else if(step===6){const ids=new Set(S.armies.filter(x=>x.f==='rom'&&x.units.length&&x.hnCan===1).map(x=>x.p));
      path=bfs(h.p,i=>ids.has(i)&&S.prov[i].owner!==f)||bfs(h.p,i=>S.prov[i].owner==='rom'&&isAct(i)&&!owned(i));if(!path&&ids.has(h.p))path=null;why='Cannae';}
@@ -97,6 +111,7 @@ const lauf=async(nr,wopt)=>{
     // Aktion: Rom-Heer neben dem Helden mit guter Aussicht angreifen (Verteidigung gegen die Konsuln)
     if(path&&path.length){await stepTo(h,path);acts.push(why+' → '+PROV_DEF[h.p].id+(h.hnPass?' (Pass)':''));}
     else acts.push(why+' (kein Weg)');
+    }
     // Abfall Süditalien (Schritt Capua): wie der Knopf
     try{if(step>=7)for(const n of [h.p,...ADJ[h.p]]){if(S.fac[f].gold>=defectCost()+150&&canDefect(f,n)&&tryDefect(f,n)){acts.push('Abfall '+PROV_DEF[n].id);break;}}}catch(e){}
    } else acts.push('im Pass');
@@ -117,14 +132,14 @@ const lauf=async(nr,wopt)=>{
   // acts aus dem ersten evaluate übernehmen
   row.acts=(o&&(o.acts||[o.txt]).join('; '))||'';
   await p.evaluate((x)=>PL.rows.push(x),row);
-  console.log(`R${String(row.rel).padStart(2)} | ${row.y<0?-row.y+' v':row.y} | S${row.step} | ${row.gold} (${row.net>=0?'+':''}${row.net}) | ${row.men}/${row.u}E @${row.at}${row.pass?' PASS':''} | G${row.gunst} K${row.kelt} | ${row.provs}P | ${row.acts}`);
+  console.log(`R${String(row.rel).padStart(2)} | ${row.y<0?-row.y+' v':row.y} | S${row.step} | ${row.gold} (${row.net>=0?'+':''}${row.net}) | ${row.men}/${row.u}E @${row.at}${row.pass?' PASS':''} | G${row.gunst==null?'-':row.gunst} K${row.kelt==null?'-':row.kelt} | ${row.provs}P | ${row.acts}`);
   if(o&&o.dead){console.log('ABBRUCH: '+o.txt);break;}
   if(!t){console.log('BEFUND blockiert: Runde ließ sich nicht beenden (R'+row.rel+')');break;}
   if(row.sov||row.over){console.log('ENDE: Szenario over='+row.sov+' res='+row.res+' '+row.why);break;}
   if(row.step!==lastStep){lastStep=row.step;stepSince=row.rel;}
   if(Date.now()-t0>1500000){console.log('Zeitlimit des Laufs erreicht');break;}
  }
- const E=await p.evaluate(()=>{const f=S.player;return{rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,flip:PL.flip.map((a,i)=>a.length>2?[PROV_DEF[i].id,a]:null).filter(Boolean),flipN:PL.flip.map((a,i)=>a.length?[PROV_DEF[i].id,a.length]:null).filter(Boolean),warn:errsW.slice(),story:stState(f)&&{i:stState(f).i,end:stState(f).end},scen:{over:S.scen.over,res:S.scen.res,rank:S.scen.rank,why:S.scen.why,turn:S.turn-S.scen.t0}};});
+ const E=await p.evaluate(()=>{const f=S.player;return{rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,flip:PL.flip.map((a,i)=>a.length>2&&REGS.has(PROV_DEF[i].reg)?[PROV_DEF[i].id,a]:null).filter(Boolean),flipN:PL.flip.map((a,i)=>a.length&&REGS.has(PROV_DEF[i].reg)?[PROV_DEF[i].id,a.length]:null).filter(Boolean),warn:errsW.slice(),log:S.log.slice(-45).map(e=>e.t),story:stState(f)&&{i:stState(f).i,end:stState(f).end},scen:{over:S.scen.over,res:S.scen.res,rank:S.scen.rank,why:S.scen.why,turn:S.turn-S.scen.t0}};});
  fs.writeFileSync((process.env.HN_OUT||'/tmp')+`/hn_lauf${nr}.json`,JSON.stringify(E));
  return E;};
 const auswerten=(nr,E)=>{const rows=E.rows;const first=(fn)=>{const r=rows.find(fn);return r?r.rel:null;};
@@ -152,6 +167,7 @@ const auswerten=(nr,E)=>{const rows=E.rows;const first=(fn)=>{const r=rows.find(
  info(`Lauf ${nr}: Runden je Schritt`,dur);bef(`Lauf ${nr}: Schritt dauert > 25 Runden (Stillstand)`,dur.some(d=>d[1]>25&&d[0]<9),dur.filter(d=>d[1]>25));
  // Ereignisfenster: Jahr, Titel, Wahl
  console.log('Ereignisfenster (Runde | Jahr | Kopfzeile | Titel | Optionen | Wahl):');for(const e of E.ev)console.log(`  R${e.r} | ${e.y} | ${e.eb} | ${e.h2} | ${e.n} | ${e.pick} (${e.why})`);
+ if(process.env.HN_LOG)console.log('Letzte Logzeilen:\n  '+E.log.join('\n  '));
  const warn=E.warn.filter(w=>/Hannibal|Pass|Kelten|Konsul|Cannae|Fabius|Rat|Hasdrubal|Wahl|Verweich|Geschichte|Ereignis/.test(w));
  bef(`Lauf ${nr}: Warnungen aus Hannibal-Bausteinen`,warn.length>0,warn.slice(0,5));};
 // ===== Lauf 1 (und 2)
@@ -179,10 +195,32 @@ if(!SKIP.includes('ABK')){const A=await p.evaluate(async()=>{const o={};BOT.ev=[
 if(!SKIP.includes('PASSIV')){const Pz=await p.evaluate(async()=>{setup();const f=S.player;BOT.ev=[];window.PL={own:S.prov.map(P=>P.owner),flip:S.prov.map(()=>[])};const rows=[];
   for(let r=1;r<=30;r++){const ok=await turn();if(!ok)break;const cur=S.prov.map(P=>P.owner);S.prov.forEach((P,i)=>{if(PL.own[i]!==cur[i])PL.flip[i].push([r,PL.own[i],cur[i]]);});PL.own=cur;
    if(r%5===0)rows.push({r,gold:Math.round(S.fac[f].gold),net:Math.round(income(f).net),men:men(hero()),provs:provsOf(f).length,war:atWar(f,'rom'),step:scenStepI(),y:S.year});if(S.over||S.scen.over)break;}
-  return{rows,flip:PL.flip.map((a,i)=>a.length?[PROV_DEF[i].id,a.map(x=>x.join('>'))]:null).filter(Boolean),ev:BOT.ev.map(e=>'R'+e.r+' '+e.h2),over:S.scen.over,res:S.scen.res,why:S.scen.why,turn:S.turn-S.scen.t0,hasHero:!!hero(),landung:hnFl().hn_landung};});
+  return{rows,flip:PL.flip.map((a,i)=>a.length&&REGS.has(PROV_DEF[i].reg)?[PROV_DEF[i].id,a.map(x=>x.join('>'))]:null).filter(Boolean),ev:BOT.ev.map(e=>'R'+e.r+' '+e.h2),over:S.scen.over,res:S.scen.res,why:S.scen.why,turn:S.turn-S.scen.t0,hasHero:!!hero(),landung:hnFl().hn_landung,cap:S.prov[PI.karthago].owner};});
  info('Stillstand passiv (30 Runden, Spieler tut nichts): Haushalt alle 5 Runden',Pz.rows);info('Stillstand passiv: Besitzwechsel, Ereignisse, Ende',{flip:Pz.flip,ev:Pz.ev,over:Pz.over,res:Pz.res,why:Pz.why,turn:Pz.turn,landung:Pz.landung});
+ bef('Passiv: Hauptstadt Karthago nach 30 Runden noch eigen (Rom-Landung gesperrt)',Pz.cap!=='karthago',Pz.cap);
  bef('Passiv: Provinz wechselt > 2-mal den Besitzer in 30 Runden',Pz.flip.some(x=>x[1].length>2),Pz.flip.filter(x=>x[1].length>2));
  bef('Passiv: Gold nach 10 Runden <= 0',(Pz.rows.find(x=>x.r===10)||{gold:1}).gold<=0,Pz.rows.find(x=>x.r===10));}
+// ===== Korrekturen v238 (PASS/FAIL): Rom landet nicht in Africa, Rhone-Tor am Allobroger, Pass-Ziel nach Ankunft, Herrscher stirbt nicht, Held flieht statt zu verschwinden
+if(!SKIP.includes('FIX')){const X=await p.evaluate(async()=>{const o={};setup();const f=S.player,F=hnFl(),h=hero();
+  o.noLand0=hnNoLand(PI.karthago);o.noLandSpain=hnNoLand(PI.tarraco);gotoStep(8);o.noLand8=hnNoLand(PI.karthago);gotoStep(0);
+  // Rhone-Tor am Allobroger
+  F.hn_besatz='b';F.hn_rhone=null;S.prov[PI.arverner].owner=f;h.p=PI.arverner;h.pos=null;h.mp=maxMP(h);orderMove(h,PI.allobroger);await sl(120);o.rhone=/Der Strom ist breit/.test(mText());o.rhoneBtns=mBtns().length;closeModal();
+  // Pass-Ziel nach Ankunft
+  F.hn_ankunft={t:S.turn};S.scen.flags.in_segusiner=1;o.pass=SC_COND.pass(f,{});delete F.hn_ankunft;
+  // Herrscher stirbt nicht
+  const D=dynOf(f),n0=D.ruler.n;D.ruler.age=95;for(let i=0;i<60;i++)dynRound(f);o.ruler=[n0,D.ruler.n];
+  // Held ohne eigene Nachbarprovinz: Rückzug statt Löschung
+  setup();{const F2=hnFl();F2.hn_besatz='b';F2.hn_rhone=1;const h2=hero(),v=PI.venetien;for(const a of S.armies)if(a.id!==h2.id&&a.f===S.player)a.units=[];removeEmpty();for(const n of ADJ[v])if(S.prov[n].owner===S.player)S.prov[n].owner='rom';S.prov[v].owner=S.player;h2.p=v;h2.pos=null;for(const u of h2.units)u.men=30;
+   let alive=0,fell=0,moved=0,wins=0,tries=18;for(let i=0;i<tries;i++){const ro=scenArmy('rom',[...ADJ[v]].find(n=>!isSeaLink(v,n)&&isAct(n)),RU(14),null);ro.mp=85;S.scen.heroFell=false;const r=resolveAttack(ro,v);const hh=S.armies.find(x=>x.id===S.scen.hero&&x.units.length);if(r.win){wins++;if(hh){alive++;if(hh.p!==v)moved++;}else if(S.scen.heroFell)fell++;}
+    h2.units=h2.units.length?h2.units:[newUnit(S.player,'spear','libyer')];if(!S.armies.includes(h2)){S.armies.push(h2);}h2.p=v;S.prov[v].owner=S.player;for(const u of h2.units)u.men=30;S.scen.heroFell=false;removeEmpty();for(const a of S.armies.filter(x=>x.f==='rom'&&x.id!==ro.id))a.units=[];}
+   o.rout={wins,alive,fell,moved,still:wins-alive-fell};}
+  return o;});
+ info('Korrekturen v238',X);
+ ok('Rom landet nicht in Karthagos Heimat vor Akt IV (hnNoLand), in Hispanien weiter möglich, ab Akt IV frei',X.noLand0===true&&X.noLandSpain===false&&X.noLand8===false,[X.noLand0,X.noLandSpain,X.noLand8]);
+ ok('Rhone-Fenster auch beim Zug nach Allobroger (Umweg über Arverner nicht mehr möglich)',X.rhone&&X.rhoneBtns===2,[X.rhone,X.rhoneBtns]);
+ ok('Pass-Ziel 2 von 2 sofort nach der Ankunft in der Poebene (nicht erst eine Runde später)',X.pass&&X.pass[0]===2,X.pass);
+ ok('Herrscher von Karthago stirbt in der Hannibal-Geschichte nicht (60 Runden mit Alter 95)',X.ruler[0]===X.ruler[1],X.ruler);
+ ok('Held ohne eigene Nachbarprovinz: geschlagenes Heer flieht in eine Nachbarprovinz ohne Feindheer (oder fällt, nie still gelöscht)',X.rout.wins>=3&&X.rout.still===0&&X.rout.alive===X.rout.moved,X.rout);}
 // ===== Alte Spielstände: Zustand mitten im Spiel ohne hn_-Flags laden (wie ein Stand von vor H1–H4)
 if(!SKIP.includes('ALT')){const Al=await p.evaluate(async()=>{setup();const f=S.player;for(let r=0;r<4;r++)await turn();
   const J=JSON.parse(JSON.stringify(S));const fl=J.scen.flags||{};for(const k of Object.keys(fl))if(/^hn_/.test(k))delete fl[k];

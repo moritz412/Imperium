@@ -9757,6 +9757,8 @@ function hnSiegeBegin(a,ti){try{if(!hnOn()||!a||a.f!==S.player||ti!==PI.edetaner
 
 /* ---- Gesperrte Wege mit Grund ---- */
 function hnSeaLock(a,pi){try{if(hnOn()&&a&&a.f===S.player&&hnFl().hn_wahl==='rom'&&hnReg(pi)===hnReg(PI.karthago))return HN_TXT_HEIM;if(!hnOn()||!a||a.f!==S.player||!HN_ITALY.has(hnReg(pi)))return null;if(scenStepI()>=HN_STEP_SEE||(hnFl().hn_seeOk&&hnReg(pi)==='it_sued'))return null;return HN_TXT_SEE;}catch(e){}return null;}
+/* v238: Roms KI landet nicht in Karthagos Heimat (Africa), solange Hannibal unterwegs ist (bis Akt IV; dort landet Scipio per Skript) – sonst fiel die Hauptstadt in Runde 12–15 */
+function hnNoLand(j){try{return hnOn()&&scenStepI()<HN_STEP_SEE&&hnReg(j)===hnReg(PI.karthago);}catch(e){return false;}}
 function hnLockModal(a,pi,why){const hm=why===HN_TXT_HEIM;showModal(`${heroOr(hnImg('seeweg'),'ev_lost',S.turn)}<h2>${hm?'Es gibt keinen Weg zurück':'Der Seeweg ist versperrt'}</h2><p class="sub">${esc(a.name)} vor ${esc(isKnown(pi)?PROV_DEF[pi].name:'der Küste')}</p><p>${esc(why)}</p><p class="note">${hm?'Du hast dich für den Angriff auf Rom entschieden. Karthago muss sich ohne Hannibal halten.':'Rom hält die Häfen und die See. Erst wenn Karthago selbst Schiffe schicken kann, ändert sich das.'}</p>`,[{label:'Verstanden',cls:'primary'}]);}
 function hnRomLage(a,pi){const P=S.prov[pi],rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat),un=rom.reduce((s,x)=>s+x.units.length,0);let r=1;try{const cx=startAttackCtx(a,pi);r=cx.res.att/Math.max(1,cx.res.def);}catch(e){}
   const lage=r>1.5?'der Sieg liegt in Reichweite':r>1.15?'die Aussichten sind gut':r>0.9?'der Ausgang ist offen':r>0.65?'ein riskantes Wagnis':r>0.33?'kaum zu gewinnen':r>0.18?'fast aussichtslos':'aussichtslos';
@@ -9804,7 +9806,7 @@ function hnRhoneShow(a,pi,go){const volk=HN_TXT_RHONE_VOLK(pi),O=[{k:'floss',lab
 /* ---- Torwächter in orderMove: liefert true, wenn ein Fenster geöffnet wurde (das Fenster ruft danach go() auf) ---- */
 function hnGate(a,pi,go){try{if(!hnOn()||!a||a.f!==S.player||a.boat)return false;const F=hnFl();
   if(!F.hn_besatz&&S.scen.hero===a.id&&hnHisp(a.p)&&hnReg(pi)==='gallien_sued'){hnBesatzShow(a,go);return true;}
-  if(!F.hn_rhone&&hnEleN(a)&&(pi===PI.narbo||pi===PI.vocontier)){hnRhoneShow(a,pi,go);return true;}
+  if(!F.hn_rhone&&hnEleN(a)&&(pi===PI.narbo||pi===PI.vocontier||pi===PI.allobroger)){hnRhoneShow(a,pi,go);return true;}
   if(!F.hn_pass&&!a.hnPick&&S.scen.hero===a.id&&HN_PASSID.has(PROV_DEF[pi].id)){hnRouteShow(a,pi,go);return true;}
   if(hnRomGate(a,pi,go))return true;}catch(e){console.warn('Hannibal-Tor',e);}return false;}
 
@@ -9832,7 +9834,7 @@ function hnRound(){if(!hnOn())return;const Z=S.scen,F=hnFl(),f=S.player;
   const h=S.armies.find(x=>x.id===Z.hero&&x.f===f&&x.units.length&&!x.boat);
   if(h){const r=hnReg(h.p);// Rückfall: Heer ist ohne Angriffsdialog (verbündetes oder eigenes Land) über die Pyrenäen bzw. an die Rhone gelangt
     if(!F.hn_besatz&&HN_FAR.has(r))hnBesatzDo(h,'b',true);
-    if(!F.hn_rhone&&hnEleN(h)&&(h.p===PI.narbo||h.p===PI.vocontier))hnRhoneDo(h,h.p,'sofort',true);}
+    if(!F.hn_rhone&&hnEleN(h)&&(h.p===PI.narbo||h.p===PI.vocontier||h.p===PI.allobroger))hnRhoneDo(h,h.p,'sofort',true);}
   for(const a of S.armies)if(a.hnRhone&&(S.turn>a.hnRhone.t+8||(a.p===a.hnRhone.to&&S.prov[a.p].owner===a.f)))delete a.hnRhone;
   if(!F.hn_landung){const due=F.hn_besatzT!=null?Math.max(Z.t0+5,F.hn_besatzT+2):Z.t0+15;
     if(S.turn>=due)hnLanding();else if(S.turn===due-1&&!F.hn_warn){F.hn_warn=1;addLog('Späher melden römische Schiffe vor der Küste Hispaniens.',true,'bad');}}
@@ -10508,7 +10510,7 @@ Object.assign(PEOPLE,{
   frankenreich:{name:'Frankenreich',color:'#3f7d3a',prefix:'Scara',desc:'Das Reich der Karolinger.',next:[]},
   nordleute:{name:'Nordmänner',color:'#2f5f8f',prefix:'Lið',desc:'Ein Jarl mit Langschiffen und großem Ehrgeiz.',next:[]}});
 Object.assign(SC_COND,{
-  pass:(f,g)=>[(['salasser','segusiner','seealpen'].some(id=>S.scen.flags['in_'+id])?1:0)+(['taurini','insubrien','cenomanen','aemilia','ligurien'].some(id=>S.scen.flags['in_'+id])?1:0),2],
+  pass:(f,g)=>[(['salasser','segusiner','seealpen'].some(id=>S.scen.flags['in_'+id])?1:0)+((['taurini','insubrien','cenomanen','aemilia','ligurien'].some(id=>S.scen.flags['in_'+id])||S.scen.flags.hn_ankunft)?1:0),2],
   hasdrubal:(f,g)=>{const F=S.scen.flags,inIt=S.armies.some(a=>a.hasd&&a.f===f&&a.units.length&&['it_nord','it_mitte','it_sued'].includes(PROV_DEF[a.p].reg))||F.hasd?1:0;
     if(F.hn_hasd==='won'||F.hn_hasd==='lost')return[2,2];if(F.hn_hasd==null)return[inIt?2:0,2];return[inIt,2];},// alte Spielstände ohne H4: wie bisher, Hasdrubal in Italien genügt
   cannae:(f,g)=>{const F=S.scen.flags;return F.hn_can==='lost'||F.hn_can==='skip'?[1,1]:[Math.min(2,F.hn_canN||0),F.hn_can==='won'?Math.min(2,F.hn_canN||2):2];},
@@ -13290,6 +13292,7 @@ const RUL_TRAITS={
 // v236 (05.11., H3 Hannibal Paket 3): Akt III Italien: Cannae = Ziel „Das Heer von Cannae schlagen“ (SC_COND.cannae; Paullus und Varro mit 14 Einheiten erscheinen erst mit Schritt 7 in Apulien und marschieren auf Hannibal, hnCannaeRound; Plan Umfassung +25 % bei Cannae, hnCannaeMul; Sieg = beide Heere geschlagen, Niederlage = Fabius-Phase früher und nur ein Viertel der Belohnung); Fabius-Verhalten nur als Szenario-Skript für römische Heere in Italien (hnFabRound: Angriff auf Hannibal erst ab Kräfteverhältnis 1,5, sonst Folgen in 2 Provinzen Abstand mit Meldung „Fabius weicht aus …“, Verbrannte Erde über das Verwüstungssystem (dv), Hunger in verbrannter Erde, kleine Heere und abgefallene Städte werden angegriffen, Marcellus greift an, Kessel mit Ereignis „Ochsen mit Fackeln“); Winterlager in Capua (Kampanien, ab Schritt 8, nutzt lagerOn/setLager) mit Ereignis Verweichlichung; Rat von Karthago: Leiste Gunst im Szenario-Kopf (Sieg +10, Abfall +5, Niederlage −15, Stillstand −3 je Runde nach 3 Runden, Verstärkung ab 60/80 mit Landung bei Locri und Seeweg-Ausnahme hn_seeOk nur für Süditalien, Warnung 35, Abberufung unter 25 nach einer Runde Frist, Boten +10); Unterhalt von Hannibals Heeren in Italien halb (hnUpkMul). Bilder ueber HN_IMG (TODO Job 40: hn_k3_*, hn_u_fabius/ochsen/capua, hn_rat_*). Test hn3_t.js.
 // v237 (05.11., H4 Hannibal Paket 4): Akt IV Die Entscheidung: Schritt 9 Hasdrubal (Hook 8: Heer des Hasdrubal nutzt den Pass in Kurzform, 2 Tage/2 Ereignisse, hnHasdPass) und Gegner-Drehbuch Claudius Nero (Heer in Apulien, ab Hasdrubals Ankunft in Italien Eilmarsch 2 Provinzen je Runde, greift Hasdrubal an; hnHasdRound); Ziel „Nachschub“ = Heere vereinen (gleiche Provinz) oder Nero schlagen, sonst Ereignis „Hasdrubals Kopf“ nur als Text (Angriff −10 % fuer 8 Runden, Gunst −20); alte Spielstaende ohne hn_hasd behalten die alte Regel. Schritt 10 Wahlfenster beim Hook 9 (hnWahlStart/hnWahlDo): Rom angreifen (Latium Mauern 4, Garnison 46, Buergerheer, Heimkehr gesperrt, Gunst −10) oder heimkehren (Heer 2 Runden nach Zeugitana, Italien faellt an Rom, Gunst +15); Seeweg in Akt IV offen (schon H1). Sonderschlacht Zama (hnZama, nur Hannibals Heer gegen Scipios Heer nach der Heimkehr): Roemer oeffnen Gassen (Schrecken wirkt nicht), Elefanten-Panik 40 % je Einheit (HN_ZAMA.pan), neuer Plan „Elefanten zurueckhalten“ (zurueck, nur mit Elefanten, Staerke −5 %, keine Panik), Masinissa: roemische Reiterei +12 %; Sieg vernichtet Scipios Heer (Ziel zama), Niederlage = Ende B. Enden: hnEndMark/hnEndInfo – Ende A „Karthago triumphiert“ (Rom faellt oder Zama gewonnen), Ende B „Zama“ (Zama verloren, Abberufung durch den Rat, Zeit abgelaufen, Tod in Akt IV); frueher Heldentod behaelt den alten Text. Kino nur vorbereitet (HN_KINO/hnCine, leere Bildliste = uebersprungen, TODO Job 40/43). Bilder ueber HN_IMG (TODO Job 40: hn_k4_*, hn_k5a/b_*, hn_sf_zama). Test hn4_t.js.
 // v237b (05.11.): Ratgeber-Einblendung (#ratSay) verschwindet, sobald ein Fenster aufgeht (verdeckte sonst die unteren Wahlknoepfe)
+// v238 (05.11.): Pruefung Hannibal-Kampagne (Test hn_kampagne_t.js, Bericht docs/pruef_hannibal_kampagne.md): (1) hnNoLand: Roms KI (aiFaction-Angriff, Belagerungsbeginn, campStep/Erzfeind, aiLanding) greift Karthagos Heimat (Africa) vor Akt IV nicht an – vorher fiel die Hauptstadt in Runde 13–15 (Spieler passiv oder unterwegs); (2) Herrscher von Karthago stirbt in der Hannibal-Geschichte nicht (dynRound; vorher „Hannibal Barkas ist gestorben“ in Runde 3–15, Thronwechsel-Malus); (3) Rhone-Fenster auch beim Zug nach Allobroger (Weg ueber Arverner umging es); (4) SC_COND.pass zaehlt hn_ankunft sofort (Ziel 2/2 bei Ankunft); (5) Heer des Helden flieht bei verlorener Verteidigung ohne eigene Nachbarprovinz in eine Nachbarprovinz ohne Feindheer, sonst faellt der Held (vorher still geloescht, Held tauchte in Hispanien wieder auf).
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},
@@ -13488,7 +13491,7 @@ function dynJump(years){if(!(years>=20))return;const yy=Math.min(years,60);for(c
     let g=0;while(D.ruler.age>70&&g++<4)succeed(f,'tod');}}
 function dynRound(f){const D=dynOf(f);if(!D)return;const me=f===S.player,dy=AGE_TURN(),R=D.ruler;
   R.age+=dy;if(R.sp)R.sp.age+=dy;
-  if(!(me&&typeof quietStart==='function'&&quietStart())&&Math.random()<deathRisk(R)){succeed(f,'tod');return;}
+  if(!(me&&typeof quietStart==='function'&&quietStart())&&!(me&&S.scen&&S.scen.id==='hannibal')&&Math.random()<deathRisk(R)){succeed(f,'tod');return;}
   for(const k of D.kids){k.age+=dy;if(k.age>=16&&(!k.tr.length||k.tal===1)){if(k.tal===1){k.tal=2;const keep=k.tr.slice();adultTraits(k,null);k.tr=[...new Set(keep.concat(k.tr.filter(t=>RUL_TRAITS[t].neg)))];}else adultTraits(k,k.id===dynHeir(f)?.id?D.edu:null);if(me)addLog(`${k.n} aus dem Haus der ${D.house} ist volljährig: ${k.tr.map(t=>RUL_TRAITS[t].n).join(', ')}.`,true,'good');}}
   for(const k of D.kin){k.age+=dy;}D.kin=D.kin.filter(k=>Math.random()>deathRisk(k));
   // Kindersterblichkeit (gering)
@@ -15083,7 +15086,7 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
   try{if(win){stat(a.f,'win');if(a.units.filter(u=>u.r==='cav').length>=3)stat(a.f,'cavwin');}else if(P.owner!=='frei')stat(P.owner,'defwin');}catch(e){}try{if(win)scenFame(a.f,6);}catch(e){}try{if(win){natChange(a.f,4);if(P.owner!=='frei')natChange(P.owner,-4);}else{natChange(a.f,-4);if(P.owner!=='frei')natChange(P.owner,3);}}catch(e){}
   a.units=a.units.filter(u=>u.men>0);defArmies.forEach(d=>d.units=d.units.filter(u=>u.men>0));[...(ctx.attRe||[]),...(ctx.defRe||[])].forEach(d=>{d.units=d.units.filter(u=>u.men>0);gainXP(d,20);});
   res.win=win;const rz=!!(win&&a.rz&&a.units.length&&P.owner!=='frei'&&P.owner!==a.f&&!raidPact(a.f,P.owner));// v199 Raubzug: kein Besetzen, kein Belagern
-  if(win)for(const d of defArmies)if(d.units.length){const back=[...ADJ[ti]].find(n=>S.prov[n].owner===d.f);if(back!=null){d.p=back;d.mp=0;}else d.units=[];}
+  if(win)for(const d of defArmies)if(d.units.length){let back=[...ADJ[ti]].find(n=>S.prov[n].owner===d.f);const hz=S.scen&&d.id===S.scen.hero;/* v238: das Heer des Helden flieht notfalls in eine Nachbarprovinz ohne Feindheer; sonst fällt der Held (vorher: Heer still gelöscht, der Held tauchte in Hispanien wieder auf) */if(back==null&&hz)back=[...ADJ[ti]].find(n=>!isSeaLink(ti,n)&&isAct(n)&&!armiesAt(n).some(x=>x.f!==d.f&&x.units.length&&atWar(d.f,x.f)));if(back!=null){d.p=back;d.mp=0;}else{if(hz)S.scen.heroFell=true;d.units=[];}}
   const remDef=defArmies.reduce((s,d)=>s+armyMen(d),0)+(win?0:P.gar*12);
   res.defLost=Math.max(0,Math.round(res.defMen0-remDef));
   if(win&&a.units.length&&HOLY.has(PROV_DEF[ti].id)&&P.owner==='frei'){for(const x of PLAYABLE)if(x!==a.f&&alive(x)&&facRel(x)===P.rel){relAdd(a.f,x,-(15),'Heilige Stätte erobert');}if(a.f===S.player)addLog(`Die Eroberung der heiligen Stätte ${PROV_DEF[ti].city} empört alle Reiche dieses Glaubens.`,true,'bad');}
@@ -18245,7 +18248,7 @@ function bfsDist(f,targets){const d=S.prov.map(()=>Infinity);const q=[];for(cons
 function aiLandingPass(f){if(!rivals(f).some(x=>atWar(f,x)&&(!isHumanP(x)||landVsHumanOk(f,x))))return;for(const a of S.armies){if(a.f!==f||a.mp<=0||a.units.length<4||S.prov[a.p].owner!==f||a.st==='belagern'||a.hold>=S.turn)continue;const att=armyPower(a),hT=threat(a.p,f);if(hT>0&&hT>(provDefense(a.p)-att)*1.1)continue;if(aiLanding(f,a,att))return;if((S.fac[f].landT||-99)+6>S.turn)return;}}
 function aiLanding(f,a,att){const F=S.fac[f];if((F.landT||-99)+6>S.turn||Math.random()<0.4)return false;
   const fl=(S.fleets||[]).find(x=>x.f===f&&x.mp>0&&x.hp>=60&&x.x!=null&&coastNear(x.x,x.z,LAND_R).has(a.p));if(!fl)return false;
-  let best=null,bv=0;for(let j=0;j<S.prov.length;j++){if(!coastal(j)||!isAct(j))continue;const o=S.prov[j].owner;if(o==='frei'||o===f||!atWar(f,o)||raidPact(f,o)||minSiege(j))continue;const hum=isHumanP(o);if(hum&&(!landVsHumanOk(f,o)||armiesAt(j).some(z=>z.f===o)))continue;const hp=fleetSeaPos(j);if(Math.hypot(hp.x-fl.x,hp.z-fl.z)>fl.mp)continue;if(enemyFleetNear(fl,hp.x,hp.z,1.5))continue;
+  let best=null,bv=0;for(let j=0;j<S.prov.length;j++){if(!coastal(j)||!isAct(j))continue;const o=S.prov[j].owner;if(o==='frei'||o===f||!atWar(f,o)||raidPact(f,o)||minSiege(j))continue;if(f==='rom'&&o===S.player&&hnNoLand(j))continue;const hum=isHumanP(o);if(hum&&(!landVsHumanOk(f,o)||armiesAt(j).some(z=>z.f===o)))continue;const hp=fleetSeaPos(j);if(Math.hypot(hp.x-fl.x,hp.z-fl.z)>fl.mp)continue;if(enemyFleetNear(fl,hp.x,hp.z,1.5))continue;
     const r=att/Math.max(1,provDefense(j,f,true));if(r<(hum?1.8:1.5))continue;const v=r+PROV_DEF[j].tax/15;if(v>bv){bv=v;best=j;}}
   if(best==null)return false;F.landT=S.turn;if(isHumanP(S.prov[best].owner)){S.landP=S.turn;addLog(`Landung! Ein Heer von ${FACTIONS[f].name} geht bei ${PROV_DEF[best].name} an Land.`,true,'bad');}const r=moveFleet(fl,best);if(!r||r.p!=null||!landTargets(fl).includes(best))return true;
   a.mp=0;fl.mp=0;a._land=true;const res=resolveAttack(a,best);delete a._land;battleLog(res);if(res.captured&&S.armies.includes(a))a.p=best;
@@ -18299,7 +18302,7 @@ function aiFaction(f){
     let best=null,bv=0;
     for(const n of ADJ[a.p]){
       const o=S.prov[n].owner;if(o===f||!atWar(f,o)||raidPact(f,o))continue;if(isSeaLink(a.p,n)&&seaBlocked(f,a.p,n))continue;
-      if(isHumanP(o)&&shielded())continue;
+      if(isHumanP(o)&&shielded())continue;if(f==='rom'&&o===S.player&&hnNoLand(n))continue;
       if(o==='frei'&&(S.fac[f].gains||[]).filter(t=>S.turn-t<10).length>=frL.st)continue;if(stopP&&isHumanP(o))continue;
       const ratio=att/Math.max(1,provDefense(n,f,true))/(riverX(a.p,n)?1.2:1);
       if(ratio<(o==='frei'?1.6:isHumanP(o)?dif().need:1.3)*(siegeAt(n)&&siegeAt(n).aid===a.id?0.8:1)*(shaken(a)?1.3:1))continue;
@@ -18311,7 +18314,7 @@ function aiFaction(f){
       battleLog(resolveAttack(a,best));continue;
     }
     if(a.st==='belagern'&&siegeAt(a.sieg))continue;
-    if(!homeNeed&&Math.random()<0.3){let sg=null,sv=0;for(const n of ADJ[a.p]){const o=S.prov[n].owner;if(o===f||!atWar(f,o)||raidPact(f,o)||(isHumanP(o)&&shielded()))continue;if(stopP&&isHumanP(o))continue;if(o==='frei'&&((S.fac[f].gains||[]).filter(t=>S.turn-t<10).length>=frL.sg||S.armies.some(x=>x.f===f&&x.st==='belagern'&&S.prov[x.sieg]&&S.prov[x.sieg].owner==='frei')))continue;if(!canSiege(a,n).ok)continue;const r=att/Math.max(1,provDefense(n,f,true));if(r<0.75)continue;const v=r+PROV_DEF[n].tax/20;if(v>sv){sv=v;sg=n;}}if(sg!=null){startSiege(a,sg);continue;}}
+    if(!homeNeed&&Math.random()<0.3){let sg=null,sv=0;for(const n of ADJ[a.p]){const o=S.prov[n].owner;if(o===f||!atWar(f,o)||raidPact(f,o)||(isHumanP(o)&&shielded()))continue;if(stopP&&isHumanP(o))continue;if(f==='rom'&&o===S.player&&hnNoLand(n))continue;if(o==='frei'&&((S.fac[f].gains||[]).filter(t=>S.turn-t<10).length>=frL.sg||S.armies.some(x=>x.f===f&&x.st==='belagern'&&S.prov[x.sieg]&&S.prov[x.sieg].owner==='frei')))continue;if(!canSiege(a,n).ok)continue;const r=att/Math.max(1,provDefense(n,f,true));if(r<0.75)continue;const v=r+PROV_DEF[n].tax/20;if(v>sv){sv=v;sg=n;}}if(sg!=null){startSiege(a,sg);continue;}}
     if(!homeNeed&&a.mp>=maxMP(a)&&Math.random()<0.25&&raidTarget(a)!=null&&!S.armies.some(x=>x.f===f&&x.st==='pluendern')){setStance(a,'pluendern');continue;}
     if(homeNeed){if(a.mp>=maxMP(a)&&!a.st)setStance(a,pter(a.p)!=='plain'&&Math.random()<0.5?'hinter':'fest');continue;}
     let rf=null,rv=0;
@@ -21037,6 +21040,7 @@ function nemStat(res){const N=S&&S.nem,f=nemF(),me=S.player;if(!N||!f||!res)retu
   else if(res.attF===f&&res.defF===me){if(res.win)N.st.bl++;else N.st.bw++;if(res.captured)N.st.pl++;}}
 function campStep(a){const t=a.camp;if(t==null)return false;const o=S.prov[t].owner;if(isHumanP(o)&&pk1Stop(a.f)){a.camp=null;return false;}
   if(o===a.f||!atWar(a.f,o)){a.camp=null;return false;}
+  if(a.f==='rom'&&o===S.player&&hnNoLand(t)){a.camp=null;return false;}// v238: Erzfeind-Heer zieht nicht gegen Karthagos Heimat
   if(ADJ[a.p].has(t)&&!(isSeaLink(a.p,t)&&seaBlocked(a.f,a.p,t))){
     if(isHumanP(o)&&shielded()){a.mp=0;return true;}
     const ratio=armyPower(a)/Math.max(1,provDefense(t,a.f,true));
