@@ -10221,7 +10221,7 @@ function hnSoeld(){const w=hnSoeldWhy();if(w)return w;const F=hnFl(),f=S.player,
 function hnSoeldBtn(){try{if(!hnOn()||hnFl().hn_ankunft==null)return'';const w=hnSoeldWhy();if(w==='Nur in Italien.'||w==='Erst in Italien.')return'';
   return` <button class="btn small" data-act="hnsold"${w?' disabled':''} title="${esc(w||'Eine Einheit für Hannibals Heer')}">Söldner (${hnSoeldCost()} Gold)</button>`;}catch(e){return'';}}
 function hnVerstNext(){return hnFl().hn_v1?2:1;}
-function hnVerstWhy(n){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F['hn_v'+n])return'Diese Verstärkung ist schon bewilligt.';if(n===2&&!F.hn_v1)return'Erst nach der ersten Verstärkung.';if(F.hn_vq)return'Die Schiffe sind schon unterwegs.';
+function hnVerstWhy(n){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F['hn_v'+n])return'Diese Verstärkung ist schon bewilligt.';if(n===2&&!F.hn_v1)return'Erst nach der ersten Verstärkung.';if(F.hn_vq)return'Die Schiffe sind schon unterwegs.';if(F.hn_wahl==='heim')return'Italien ist aufgegeben: Die Schiffe hätten dort kein Ziel mehr.';
   const need=n===1?HN_RAT.v1:HN_RAT.v2;if(F.hn_gunst<need)return`Gunst ${need} nötig (jetzt ${Math.round(F.hn_gunst)}).`;return null;}
 function hnVerst(n){const w=hnVerstWhy(n);if(w)return w;const F=hnFl();hnGunst(n===1?-20:-25);F['hn_v'+n]=S.turn;F.hn_vq={t:S.turn+2,n};F.hn_seeOk=1;
   addLog(`Der Rat bewilligt Verstärkung: Karthagische Schiffe laufen aus und landen in zwei Runden bei Locri in Bruttium. Der Seeweg nach Süditalien ist für Karthago offen. Gunst −${n===1?20:25}.`,true,'good');return null;}
@@ -10373,6 +10373,7 @@ function hnWahlDo(k){const F=hnFl(),f=S.player;if(F.hn_wahl)return null;F.hn_wah
   try{refreshOwnership();}catch(e){}
   hnGunstAdd(15);addLog(`Karthago ruft, und Hannibal folgt: ${L.length} Heer${L.length===1?'':'e'} fahren nach Zeugitana (Ankunft in 2 Runden). ${n} Provinz${n===1?'':'en'} in Italien fallen an Rom. Gunst +15.`,true,'info');return'Heimkehr: Ankunft in 2 Runden';}
 function hnWahlRound(){const F=hnFl(),f=S.player;
+  if(F.hn_wahl==='heim'&&!F.hn_zama)for(const r of S.armies)if(r.scip&&r.f==='rom'&&r.units.length&&r.p===PI.byzacena)r.hold=S.turn+1;// Scipio lagert in Byzacena, bis bei Zama entschieden ist (sonst nimmt er das leere Karthago während der Heimfahrt oder zieht davon)
   if(F.hn_wahl==='rom')for(const r of S.armies)if(r.hnBuerg&&r.units.length)r.hold=S.turn+1;
   if(F.hn_wahl==='heim')for(const a of S.armies.filter(x=>x.f===f&&x.units.length&&x.hnPass&&x.hnPass.heim)){if(S.turn<a.hnPass.arr)continue;
     delete a.hnPass;a.p=PI.karthago;a.pos=null;a.goal=null;a.mp=0;
@@ -10410,7 +10411,7 @@ function hnZamaTally(A,D,aWon,po){const F=hnFl();if(F.hn_wahl!=='heim'||F.hn_zam
 function hnEndMark(win,why){const Z=S.scen;if(!Z||Z.id!=='hannibal'||S.mp)return;const F=Z.flags||{};
   if(win){Z.hnEnd={e:'A',c:(F.hn_wahl==='heim'||F.hn_zama==='won')?'zama':'rom'};return;}
   const w=String(why||'');let c=null;
-  if(/abberufen/.test(w))c='rat';else if(/Zeit/.test(w))c='zeit';else if(/Zama/.test(w))c='zama';
+  if(/abberufen/.test(w))c='rat';else if(/Zeit/.test(w))c='zeit';else if(/Zama/.test(w))c='zama';else if(F.hn_wahl!=='rom'&&F.hn_zama!=='lost'&&scenStepI()>=HN_STEP_NACH&&/ist verloren/.test(w)&&PI.karthago!=null&&S.prov[PI.karthago].owner!==S.player)c='kapital';
   else if(scenStepI()>=HN_STEP_NACH)c=F.hn_wahl==='rom'?'rom':F.hn_wahl==='heim'?'zama':'akt4';
   if(c)Z.hnEnd={e:'B',c};}
 function hnEndInfo(win){const Z=S.scen;if(!Z||Z.id!=='hannibal'||!Z.hnEnd)return null;const E=Z.hnEnd,D=SCEN.hannibal,why=Z.why||'';
@@ -10421,6 +10422,7 @@ function hnEndInfo(win){const Z=S.scen;if(!Z||Z.id!=='hannibal'||!Z.hnEnd)return
     rat:'Der Rat von Karthago hat Hannibal abberufen. Hannos Partei hat sich durchgesetzt, das Heer wird heimgerufen, und Italien bleibt unvollendet. Der Krieg wird ohne seinen Sieg entschieden, bei Zama.',
     zeit:'Die Zeit ist abgelaufen. Hannibal hat Rom nicht gebrochen und Karthago nicht gerettet; Scipio entscheidet den Krieg bei Zama.',
     rom:`${why} Rom hält, und hinter Hannibal fällt Karthago an Scipio. Er hat den Weg zurück selbst abgeschnitten, und nun ist es zu spät.`,
+    kapital:`${why} Rom hat Karthago genommen, ehe Hannibals Heer es schützen konnte. Der Krieg ist entschieden, ohne dass es bei Zama zur Schlacht kam.`,
     akt4:`${why} Hannibals Heer ist am Ende. Scipio entscheidet den Krieg, wie Rom ihn immer entscheiden wollte: mit Geduld und Übermacht.`}[E.c];
   if(!lead)return null;return{img:hnImg('endB'),title:'Ende B · Zama',text:`${lead.replace(/^\s+/,'')} ${D.lose}`};}
 function hnEndCine(){const hi=hnEndInfo(S.scen&&S.scen.res==='win');if(!hi)return null;return hnCine(S.scen.hnEnd.e==='A'?'ende_a':'ende_b',hi.text);}
@@ -13317,6 +13319,7 @@ const RUL_TRAITS={
 // v240 (05.11.): Hannibal: Knopf „Söldner“ in der Kelten- bzw. Ratsleiste, sobald Hannibals Heer in Italien steht: eine Einheit für 200 Gold (+60 je Anwerbung), einmal je Runde; bei Kelten-Treue ab 40 keltische Krieger/Reiter, sonst Numider oder Balearer (Prüfbericht: 3000–4300 Gold blieben ungenutzt).
 // v241 (05.11.): Hannibal: fremde KI-Reiche (Epirus, Makedonien …) greifen Roms Provinzen in Italien vor Akt IV nicht an (hnNoIt an denselben vier Stellen wie hnNoLand: Landung, Angriff, Nachbarangriff, Feldzug). Rom und Karthago bleiben unberührt (Prüfbericht: Epirus nahm Tarent in Runde 8, Hirpinien wechselte 6-mal).
 // v242 (05.11.): Geschichten: Herrscher, Erben und Verbannte altern im Takt der Spieljahre (AGE_TURN mit Szenario-ypt; +2 Jahre alle round(2/ypt) Runden, Geiseln nach AGE_RATE). Endlosspiel unverändert.
+// v243 (05.11.): Hannibal Akt IV (Prüfung im Spielerlauf, hn_akt4_t.js): Scipio bleibt nach der Heimkehr in Byzacena stehen (hold, bis Zama entschieden ist; vorher nahm er das leere Karthago während der Heimfahrt oder zog nach Gaetulien davon); neues Ende B „Hauptstadt gefallen“ (Grund „kapital", wenn Karthago in Akt IV fällt) statt des falschen Zama-Textes; nach „Heimkehren“ bietet der Rat keine Verstärkung mehr an (hnVerstWhy: Mago landete im aufgegebenen Italien).
   verwalter:{n:'Guter Verwalter',d:'Steuern +6 %',fx:{tax:0.06}},
   bauherr:{n:'Bauherr',d:'Baukosten −8 %',fx:{build:-0.08}},
   volksnah:{n:'Volksnah',d:'Wachstum +0,3 %',fx:{grow:0.003}},

@@ -91,3 +91,4 @@ Varianten: A = Hasdrubal entgegen, vereinen, dann Rom (3 Läufe); B = passiv im 
 
 ### Geänderte Funktionen (v243)
 `hnWahlRound` (Scipio hold), `hnVerstWhy` (keine Verstärkung nach Heimkehr), `hnEndMark`/`hnEndInfo` (Grund „kapital“). Tests nach den Korrekturen: chkf „checked“, smoke, hn4 (siehe unten). iPad nicht getestet.
+Ergebnis nach v243: `chkf.sh` „checked“, `smoke.js` 4 PASS, `hn4_t.js` alle PASS (siehe Lauf vom 05.11.).
