@@ -46,7 +46,7 @@ await p.evaluate(()=>{
   const ev=bs.filter(x=>x.classList.contains('evopt'));
   if(/Wer bleibt in Hispanien/.test(t)){b=bs.find(x=>/Alle ziehen mit/.test(x.textContent));why='alle';}
   else if(/Welchen Weg/.test(t)){b=bs.find(x=>/lange Weg/.test(x.textContent))||ev[0];why='route lang';}
-  else if(/Rom angreifen|heimkehren/.test(t)&&/Rom/.test(h2)){b=ev[BOT.wopt]||bs[BOT.wopt];why='wahl'+BOT.wopt;}
+  else if(/Rom angreifen|heimkehren/.test(t)&&/Scipio landet/.test(h2)&&ev.length>=2){b=ev[BOT.wopt]||bs[BOT.wopt];why='wahl'+BOT.wopt;if(!b){BOT.log.push({r:rel,wahlOhneKnopf:[...d.querySelectorAll('.evopt, .actions .btn')].map(x=>x.textContent.replace(/\s+/g,' ').slice(0,60)+(x.disabled?' [gesperrt]':'')+' '+x.className)});b=bs[0];why='wahl-Ausweichknopf';}}
   else if(ev.length){b=ev[0];why='erste Option';}
   else{const pref=[/Belagern/,/Weiter|Verstanden|Weiterspielen|Annehmen|Flöße/,/Ablehnen/,/Fortsetzen|Berechnen/];for(const re of pref){b=bs.find(x=>re.test(x.textContent));if(b)break;}if(!b)b=bs.find(x=>x.classList.contains('primary'))||bs[0];why='Standard';}
   BOT.ev.push({r:rel,y:(sub.match(/(\d{1,4}) (v|n)\. Chr\./)||['',''])[0],eb:eb.replace(/\s+/g,' ').slice(0,30),h2:h2.replace(/\s+/g,' ').slice(0,50),n:bs.length,pick:(b.querySelector('b')||b).textContent.trim().slice(0,30),why,tag:tag||''});
