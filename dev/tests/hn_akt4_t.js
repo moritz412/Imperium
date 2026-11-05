@@ -36,7 +36,8 @@ await p.evaluate(()=>{
  window.mText=()=>mOpen()?document.querySelector('#dialog').innerText.replace(/\s+/g,' ').trim():'';
  window.mBtns=()=>[...document.querySelectorAll('#dialog .actions .btn, #dialog .evopt')].filter(x=>!x.disabled);
  // Ein offenes Fenster beantworten wie ein Spieler. Protokoll: Titel, Jahr, Wahl; Platzhalter-Prüfung auf den ganzen Fenstertext.
- window.answer=(tag)=>{if(!mOpen())return null;const d=document.querySelector('#dialog'),t=mText(),h2=(d.querySelector('h2')||{}).innerText||'',sub=(d.querySelector('.sub')||{}).innerText||'',eb=(d.querySelector('.eyebrow')||{}).innerText||'';
+ window.answer=(tag)=>{try{return answer0(tag);}catch(e){BOT.log.push({r:S.turn-S.scen.t0,err:String(e.stack||e).slice(0,300)});try{closeModal();}catch(e2){}return null;}};
+ window.answer0=(tag)=>{if(!mOpen())return null;const d=document.querySelector('#dialog'),t=mText(),h2=(d.querySelector('h2')||{}).innerText||'',sub=(d.querySelector('.sub')||{}).innerText||'',eb=(d.querySelector('.eyebrow')||{}).innerText||'';
   const rel=S.turn-S.scen.t0;
   if(PHRE.test(t))BOT.ph.push({r:rel,h2:h2.slice(0,50),m:(t.match(new RegExp('.{0,40}('+PHRE.source+').{0,40}'))||[''])[0]});
   if(/Ende [AB]|Sieg:|Niederlage|Der Sieg Karthagos|Hasdrubal|Nero|Zama|Heimkehr|Rom oder/.test(h2+eb))BOT.txt.push({r:rel,y:S.year,h2:h2.replace(/\s+/g,' ').slice(0,60),sub:sub.replace(/\s+/g,' ').slice(0,80),t:t.slice(0,900)});
@@ -141,7 +142,7 @@ const BOTRUN=async(variant,nr)=>{
    try{if(hnRatOn()&&F.hn_gunst<45&&!hnBotenWhy()&&S.fac[f].gold>hnBotenCost()+250){hnRatAct('boten');acts.push('Boten');}}catch(e){}
    return{acts};},variant);
   await p.evaluate(async()=>{for(let i=0;i<8&&mOpen();i++){answer('nach-aktion');await sl(40);}});
-  const t=await p.evaluate(async()=>await turn());
+  const t=await p.evaluate(async()=>await turn()).catch(e=>{console.log('BEFUND Seitenfehler in turn(): '+String(e.message).slice(0,200));return false;});
   const row=await p.evaluate((o)=>{const f=S.player,F=hnFl(),h=hero(),rel=S.turn-S.scen.t0,H=hnHasdA(),N=hnNeroA();
    const x={rel,y:S.year,step:scenStepI(),men:men(h),u:h?h.units.length:0,ele:h?h.units.filter(u=>u.v==='elef').length:0,at:h?PROV_DEF[h.p].id:'-',hpass:h&&h.hnPass?(h.hnPass.heim?'heim':'pass'):'',
     hm:H?men(H):null,hat:H?PROV_DEF[H.p].id:null,hpas:H&&H.hnPass?1:0,hasd:F.hn_hasd,how:F.hn_hasdHow||null,
@@ -159,7 +160,7 @@ const BOTRUN=async(variant,nr)=>{
   if(Date.now()-t0>420000){console.log('Zeitlimit des Laufs (7 Min) erreicht');break;}
  }
  // Nach dem Ende: Spielerlauf-Zustand für Auswertung
- const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
+ const E=await p.evaluate(()=>{const Z=S.scen,F=hnFl();return{botlog:BOT.log,rows:PL.rows,ev:BOT.ev,stuck:BOT.stuck,att:BOT.att,ph:BOT.ph,txt:BOT.txt,wait:BOT.wait,warn:errsW.slice(),pre:PL.pre||null,hasSnap:!!PL.snap,
    scen:{over:Z.over,res:Z.res,why:Z.why,hnEnd:Z.hnEnd||null,rank:Z.rank},year:S.year,yearTxt:fmtYear(S.year),fl:{hasd:F.hn_hasd,how:F.hn_hasdHow,arr:F.hn_hasdArr,go:F.hn_neroGo,wahl:F.hn_wahl,zama:F.hn_zama,gunst:F.hn_gunst},t0:Z.t0,story:{i:stState(S.player).i,end:stState(S.player).end,done:stState(S.player).done}};});
  fs.writeFileSync((process.env.HN4_OUT||'/tmp')+`/hn4_lauf_${variant}${nr}.json`,JSON.stringify(E));return E;};
 // ---- Zama-Wiederholungen aus dem Ladepunkt (Schlacht von Hand: resolveAttack wie hinter „Berechnen“, ABKÜRZUNG: ohne Fenster)
@@ -181,6 +182,7 @@ for(const [v,n] of PLAN){ALL[v]=[];for(let i=1;i<=n;i++){
   if(E.pre)info(`Lauf ${v}${i}: Zama-Vorstand`,E.pre);
   if(E.txt.length)for(const t of E.txt.filter(t=>/Ende|Sieg|Niederlage|Zama/.test(t.h2)))console.log(`  Endfenster R${t.r} Jahr ${t.y}: ${t.h2} | ${t.sub} | ${t.t.slice(0,420)}`);
   console.log('Ereignisfenster (Runde | Jahr | Kopf | Titel | Optionen | Wahl):');for(const e of E.ev)console.log(`  R${e.r} | ${e.y} | ${e.eb} | ${e.h2} | ${e.n} | ${e.pick} (${e.why})`);
+  bef(`Lauf ${v}${i}: Fehler im Fensterbot`,E.botlog.length>0,E.botlog.slice(0,3));
   bef(`Lauf ${v}${i}: Fenster ohne Knopf (Sackgasse)`,E.stuck.length>0,E.stuck.slice(0,3));
   bef(`Lauf ${v}${i}: Platzhalter im Text (undefined/NaN/\${/[object/null)`,E.ph.length>0,E.ph.slice(0,4));
   const warn=E.warn.filter(w=>/Hannibal|Pass|Kelten|Konsul|Cannae|Fabius|Rat|Hasdrubal|Wahl|Nero|Zama|Verweich|Geschichte|Ereignis/.test(w));bef(`Lauf ${v}${i}: Warnungen aus Hannibal-Bausteinen`,warn.length>0,warn.slice(0,5));
