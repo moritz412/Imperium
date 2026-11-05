@@ -9694,6 +9694,7 @@ function scenHtml(){if(!S||!S.scen)return'';const Z=S.scen,D=SCEN[Z.id];if(Z.ove
   const left=D.turns+(Z.ext||0)-(S.turn-Z.t0);let h=`<div class="scenbar"><b>${esc(D.n)}</b> <span class="muted">noch ${left} Runden</span> · Ruhm ${Math.round(Z.ruhm||0)}`;
   if(D.rules&&D.rules.senat&&!Z.flags.rubikon)h+=` · ${D.sen?D.sen.bar:'Einfluss im Senat'} <b style="color:${Z.einfl<20?'var(--danger)':'inherit'}">${Math.round(Z.einfl)}</b> <button class="btn small" data-act="scenbribe">${D.sen?D.sen.btn:'Freunde in Rom'} (${Math.round(150*G())} Gold)</button>`;
   try{if(hnKeltOn()){const K=Z.flags.hn_kelt;h+=` · <span title="Sieg +15, Plündern keltischen Landes −20, 3 Runden ohne Sieg −5 je Runde. Ab 50 stellen die Kelten Krieger, unter 20 laufen sie davon.">Kelten-Treue</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(K)}%;background:${K<20?'#c2412f':K>=50?'#6aa84f':'#d6a43a'}"></i></span><b style="color:${K<20?'var(--danger)':'inherit'}">${Math.round(K)}</b>`;}}catch(e){}
+  try{if(hnRatOn())h+=hnRatBar(Z);}catch(e){}
   return h+'</div>';}
 function scenChoice(act){const Z=S.scen;if(!Z)return;try{scenChoiceAS(act);}catch(e){console.warn('Wahl AS',e);}try{scenChoice2(act);}catch(e){console.warn('Wahl',e);}if(act==='rubikon'){Z.flags.rubikon=1;const f=S.player;for(const x of PLAYABLE)if(x==='samniten'&&alive(x))try{const d=dip(f,x);d.st='peace';declareWar(f,x,true);}catch(e){}addLog('Alea iacta est: Cäsar überschreitet den Rubikon. Krieg gegen den Senat.',true,'bad');scenFame(f,20);}
   if(act==='entlassen'){scenWin(true);}}
@@ -9740,7 +9741,7 @@ function hnSiegeBegin(a,ti){try{if(!hnOn()||!a||a.f!==S.player||ti!==PI.edetaner
   const s=stState(a.f);if(s){s.q=s.q||[];s.q.push({k:'hn',id:'sagunt'});}}catch(e){console.warn('Sagunt',e);}}
 
 /* ---- Gesperrte Wege mit Grund ---- */
-function hnSeaLock(a,pi){try{if(!hnOn()||!a||a.f!==S.player||!HN_ITALY.has(hnReg(pi)))return null;if(scenStepI()>=HN_STEP_SEE||hnFl().hn_seeOk)return null;return HN_TXT_SEE;}catch(e){}return null;}
+function hnSeaLock(a,pi){try{if(!hnOn()||!a||a.f!==S.player||!HN_ITALY.has(hnReg(pi)))return null;if(scenStepI()>=HN_STEP_SEE||(hnFl().hn_seeOk&&hnReg(pi)==='it_sued'))return null;return HN_TXT_SEE;}catch(e){}return null;}
 function hnLockModal(a,pi,why){showModal(`${heroOr(hnImg('seeweg'),'ev_lost',S.turn)}<h2>Der Seeweg ist versperrt</h2><p class="sub">${esc(a.name)} vor ${esc(isKnown(pi)?PROV_DEF[pi].name:'der Küste')}</p><p>${esc(why)}</p><p class="note">Rom hält die Häfen und die See. Erst wenn Karthago selbst Schiffe schicken kann, ändert sich das.</p>`,[{label:'Verstanden',cls:'primary'}]);}
 function hnRomLage(a,pi){const P=S.prov[pi],rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat),un=rom.reduce((s,x)=>s+x.units.length,0);let r=1;try{const cx=startAttackCtx(a,pi);r=cx.res.att/Math.max(1,cx.res.def);}catch(e){}
   const lage=r>1.5?'der Sieg liegt in Reichweite':r>1.15?'die Aussichten sind gut':r>0.9?'der Ausgang ist offen':r>0.65?'ein riskantes Wagnis':r>0.33?'kaum zu gewinnen':r>0.18?'fast aussichtslos':'aussichtslos';
@@ -9821,11 +9822,13 @@ function hnRound(){if(!hnOn())return;const Z=S.scen,F=hnFl(),f=S.player;
   if(!F.hn_landung){const due=F.hn_besatzT!=null?Math.max(Z.t0+5,F.hn_besatzT+2):Z.t0+15;
     if(S.turn>=due)hnLanding();else if(S.turn===due-1&&!F.hn_warn){F.hn_warn=1;addLog('Späher melden römische Schiffe vor der Küste Hispaniens.',true,'bad');}}
   hnKaelte();
-  try{hnPassRound(h);}catch(e){console.warn('Pass',e);}try{hnKeltRound();}catch(e){console.warn('Kelten',e);}try{hnJagdRound();}catch(e){console.warn('Konsuln',e);}}
+  try{hnPassRound(h);}catch(e){console.warn('Pass',e);}try{hnKeltRound();}catch(e){console.warn('Kelten',e);}try{hnJagdRound();}catch(e){console.warn('Konsuln',e);}
+  try{hnCannaeRound();}catch(e){console.warn('Cannae',e);}try{hnFabRound();}catch(e){console.warn('Fabius',e);}try{hnWeichRound();}catch(e){console.warn('Verweichlichung',e);}try{hnRatRound();}catch(e){console.warn('Rat',e);}}
 
 /* ---- Ereignisfenster (über stEvents, Meldungen {k:'hn',id}) ---- */
 function hnEv(id,m){
   if(id==='pass'||id==='route'||id==='ankunft')return hnEv2(id,m);
+  if(id==='cannae'||id==='fabius'||id==='ochsen'||id==='weich'||id==='rat')return hnEv3(id,m);
   if(id==='sagunt')return{E:{id:'hn_sagunt',img:hnImg('sagunt'),eb:'Akt I · Sagunt',title:()=>'Sagunt ist eingeschlossen',text:()=>`Mit dem Ring um Sagunt beginnt der Krieg. Rom, Sagunts Bundesgenosse, erklärt Karthago den Krieg, und die Schuld trägt Hannibal. Die Stadt hat hohe Mauern und eine große Garnison: Erst nach ${minSiege(PI.edetaner)} Runden Belagerung lässt sie sich stürmen.`,opts:[{label:'Weiter',desc:()=>'Rom steht jetzt im Krieg mit dir. Halte den Ring, bis die Mauern fallen.',fx:()=>null}]},ctx:{}};
   if(id==='landung'){const o=m.out,nm=m.pn,T={abgewehrt:m.hanno?'Hanno wirft die Scipionen zurück':'Die Landung scheitert',gefallen:`${nm} fällt an Rom`,belagert:`Rom belagert ${nm}`}[o];
     const tx={abgewehrt:m.hanno?`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten. Doch Hanno steht bereit und wirft sie ins Meer zurück. Hispanien bleibt karthagisch, und Hannibals Rücken ist gesichert.`:`Gnaeus und Publius Scipio landen bei Emporion mit fünf Einheiten, aber die Garnison von ${nm} hält stand und wirft sie zurück.`,
@@ -9994,9 +9997,10 @@ function hnStepTo(r,target){const prev={},q=[r.p];prev[r.p]=-1;
   while(q.length){const c=q.shift();if(c===target)break;for(const n of ADJ[c]){if(prev[n]!==undefined||!isAct(n)||isSeaLink(c,n))continue;prev[n]=c;q.push(n);}}
   if(prev[target]===undefined)return null;let k=target;while(prev[k]!==r.p&&prev[k]!==-1&&prev[k]!==undefined)k=prev[k];return k===r.p?null:k;}
 // Feldschlacht, wenn Hannibal nicht in eigener Provinz steht (sonst greift die Provinzschlacht mit Plan und Mauern)
-function hnFeld(r,h){const ti=h.p,eF=(()=>{try{return eleFx(r,ti,r.units,h.units);}catch(e){return{att:1,def:1};}})(),dm=hnLauerMul(h,ti,false);
+function hnFeld(r,h){const ti=h.p,eF=(()=>{try{return eleFx(r,ti,r.units,h.units);}catch(e){return{att:1,def:1};}})(),dm=hnLauerMul(h,ti,false,r);
   const pa=armyPower(r)*eF.att*rnd(0.85,1.15),pd=armyPower(h)*eF.def*dm*rnd(0.85,1.15)*1.08,win=pd>=pa,q=win?pa/pd:pd/pa,wl=0.08+0.32*q,ll=0.5+0.35*(1-q);
   if(win){applyLoss(r,ll);applyLoss(h,wl);stat(h.f,'defwin');scenFame(h.f,6);gainXP(h,50);}else{applyLoss(h,ll);applyLoss(r,wl);}
+  try{hnTally([r],[h],!win);}catch(e){}
   removeEmpty();addLog(win?`${h.name} schlägt ${r.name} im Feld bei ${PROV_DEF[ti].name}${dm>1?` (Hinterhalt +${Math.round((dm-1)*100)} %)`:''}.`:`${r.name} schlägt ${h.name} im Feld bei ${PROV_DEF[ti].name}.`,true,win?'good':'bad');return win;}
 function hnJagdRound(){const F=hnFl();if(!F.hn_jagd||scenStepI()>5||S.turn<F.hn_jagd+2)return;const h=hnHero();if(!h||h.hnPass)return;// 2 Runden Schonfrist nach der Ankunft: das Heer erholt sich
   // Flaminius (Trasimene) erscheint, sobald die ersten Konsuln geschlagen sind und das Kapitel Trebia/Trasimene läuft
@@ -10016,8 +10020,234 @@ function hnJagdRound(){const F=hnFl();if(!F.hn_jagd||scenStepI()>5||S.turn<F.hn_
 /* ---- Plan „Hinterhalt“ (nur Hannibal-Geschichte): Trebia +20 % (Fluss im Winter), Trasimene +25 % (Feind marschiert in Hannibals Provinz) ---- */
 function planLauerOk(a){try{return hnOn()&&HN_ITALY.has(hnReg(a.p));}catch(e){return false;}}
 // Faktor für den Plan-Besitzer: att = er greift an; sonst verteidigt er seine Provinz ti
-function hnLauerMul(a,ti,att){try{if(!hnOn()||a.plan!=='lauer')return 1;const wf=!!(feat(ti).river&&season()===3);
+function hnLauerMul(a,ti,att,foe){try{if(!hnOn())return 1;if(a.plan==='umfassung')return att?1:hnCannaeMul(a,ti,foe);if(a.plan!=='lauer')return 1;const wf=!!(feat(ti).river&&season()===3);
   if(att)return wf?1.2:0.92;return HN_ITALY.has(hnReg(ti))?1.25:(wf?1.2:1);}catch(e){return 1;}}
+
+/* ===== v236 (H3): Hannibal Paket 3 – Akt III Italien: Cannae, Fabius-Skript, Winterlager in Capua, Rat von Karthago =====
+   Gilt nur in der Hannibal-Geschichte (hnOn). Zustand nur in S.scen.flags (hn_can*, hn_fab*, hn_gunst*, hn_v*) und an Heeren
+   (a.hnCan, a.hnBeaten, a.hnFab, a.hnMarc, a.hnCool): alte Spielstände laden ohne Umrechnung, fehlender Zustand wird beim Rundenwechsel
+   nachgebaut. Die allgemeine KI bleibt unverändert: Die Heere dieses Drehbuchs bekommen a.hold und werden vom Skript bewegt.
+   Schritt 7 (Index 6) Cannae: Paullus und Varro (14 Einheiten) erscheinen in Apulien und marschieren auf Hannibal; Plan Umfassung +25 %.
+   Schritt 8 (Index 7) Capua: Fabius-Verhalten (hnFabRound), Winterlager in Kampanien, Verweichlichung, Ochsen mit Fackeln, Rat von Karthago (Gunst). */
+Object.assign(HN_IMG,{
+  // Job 40 fehlt noch (hn_k3_*, hn_u_*, hn_rat_*): Rückfall nur mit karthagischen oder neutralen Motiven, keine römischen
+  cannae:['hn_k3_cannae','hn_kap_cannae','sc_hannibal','battle_win'],fabius:['hn_u_fabius','ev_feldherr','sc_hannibal'],
+  ochsen:['hn_u_ochsen','ev_feuer','sc_hannibal'],weich:['hn_u_capua','ev_ernte','ev_haendler'],
+  rat_hanno:['hn_rat_hanno','ev_thronwarnung','ev_thron'],rat_barkiden:['hn_rat_barkiden','ev_thron','ev_feldherr'],
+  rat_verstaerkung:['hn_rat_verstaerkung','naval_win','sc_hannibal']});
+const HN_STEP_CAN=6,HN_STEP_CAP=7;
+const HN_RAT={start:50,sieg:10,abfall:5,still:3,grace:3,nied:15,v1:60,v2:80,warn:35,ab:25,botenCd:6,botenPlus:10};
+const HN_FAB_RATIO=1.5;
+const hnFmt=v=>(Math.round(v*10)/10).toLocaleString('de-DE');
+const hnQ=m=>{const s=stState(S.player);if(s){s.q=s.q||[];s.q.push(m);}};
+function hnDist(src){const d=S.prov.map(()=>null);d[src]=0;const q=[src];while(q.length){const c=q.shift();for(const n of ADJ[c]){if(d[n]!==null||!isAct(n)||isSeaLink(c,n))continue;d[n]=d[c]+1;q.push(n);}}return d;}
+const hnRomIt=r=>HN_ITALY.has(hnReg(r.p));
+
+/* ---- Schritt 7 Cannae: Rom-Drehbuch und Sonderschlacht ---- */
+function hnCannaeOn(){try{return hnOn()&&hnFl().hn_can==='lauf'&&scenStepI()===HN_STEP_CAN;}catch(e){return false;}}
+// Umfassung bei Cannae: +25 % (Sonderwert statt +15 %), für den Angreifer (planMul) und für den Verteidiger (hnLauerMul); foe = der angreifende Gegner
+function hnCannaeMul(a,ti,foe){try{if(!hnCannaeOn()||a.f!==S.player||a.plan!=='umfassung')return 1;
+  const hit=foe?!!foe.hnCan:S.armies.some(x=>x.p===ti&&x.hnCan&&x.units.length&&x.f!==a.f);return hit?1.25:1;}catch(e){return 1;}}
+function hnCannaeNote(a){return hnCannaeOn()&&a.f===S.player?`<p class="note" style="margin:-4px 0 8px">Cannae: Gegen das Heer von Varro und Paullus gibt „Umfassung“ +25 % (statt +15 %), auch ohne starke Reiterei.</p>`:'';}
+function hnCannaeStart(){const F=hnFl(),f=S.player;if(F.hn_can)return;F.hn_can='lauf';F.hn_canT=S.turn;F.hn_canB=[];
+  if(!atWar(f,'rom'))try{declareWar('rom',f,true);}catch(e){}
+  let T=PI.apulien;if(T==null||S.prov[T].owner!=='rom'){const alt=['daunien','hirpinien','tarent','samnium','lukanien'].map(id=>PI[id]).find(i=>i!=null&&S.prov[i].owner==='rom');if(alt!=null)T=alt;}
+  if(T==null)return;
+  const mk=(gen,name,units)=>{const a=scenArmy('rom',T,units,gen);a.name=name;a.hnCan=1;a.hold=S.turn+1;return a;};
+  const P=mk('Lucius Aemilius Paullus','Heer des Paullus',[['sword','manipel'],['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['spear','socii'],['cav']]);
+  const V=mk('Gaius Terentius Varro','Heer des Varro',[['sword','manipel'],['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav'],['missile']]);
+  F.hn_canIds=[P.id,V.id];
+  addLog(`Rom stellt das größte Heer seiner Geschichte auf: Paullus und Varro ziehen mit ${P.units.length+V.units.length} Einheiten aus ${PROV_DEF[T].name} gegen Hannibal. Der Plan „Umfassung“ gibt in dieser Schlacht +25 %.`,true,'bad');
+  hnQ({k:'hn',id:'cannae',ev:'start',n:P.units.length+V.units.length,pn:PROV_DEF[T].name});}
+function hnCanBeat(x){const F=hnFl();if(x.hnBeaten)return;x.hnBeaten=1;x.hnCan=0;F.hn_canB=F.hn_canB||[];if(!F.hn_canB.includes(x.id))F.hn_canB.push(x.id);F.hn_canN=F.hn_canB.length;
+  if(x.f==='rom')addLog(`Cannae: ${x.name} ist geschlagen.`,true,'good');}
+function hnCanLost(){const F=hnFl();if(F.hn_can!=='lauf')return;F.hn_can='lost';F.hn_canT2=S.turn;
+  for(const x of S.armies)if(x.hnCan){x.hnCan=0;}
+  for(const x of S.armies)if(x.f==='rom'&&x.units.length&&!x.boat)x.hnCool=Math.max(x.hnCool||0,S.turn+2);// Atempause: Hannibal kann das Heer sammeln
+  addLog('Cannae ist nicht gefallen: Hannibals Heer unterliegt dem Riesenheer. Der Krieg geht weiter, doch Rom hat gelernt und weicht der offenen Schlacht künftig aus.',true,'bad');
+  hnQ({k:'hn',id:'cannae',ev:'lost'});}
+function hnCanWon(){const F=hnFl();if(F.hn_can!=='lauf')return;F.hn_can='won';F.hn_canT2=S.turn;scenFame(S.player,15);
+  addLog('Cannae! Das Heer von Varro und Paullus ist vernichtet. Italien liegt offen vor Hannibal.',true,'good');hnQ({k:'hn',id:'cannae',ev:'won'});}
+function hnCannaeRound(){const F=hnFl();
+  if(F.hn_can==null&&scenStepI()===HN_STEP_CAN){hnCannaeStart();return;}
+  if(F.hn_can==='lauf'&&scenStepI()!==HN_STEP_CAN){F.hn_can='skip';for(const x of S.armies)if(x.hnCan)x.hnCan=0;}
+  if(F.hn_can!=='lauf'){for(const r of S.armies)if(r.f==='rom'&&r.hnBeaten&&r.units.length&&F.hn_fab==null)r.hold=S.turn+1;return;}
+  const B=F.hn_canB=F.hn_canB||[];for(const id of(F.hn_canIds||[]))if(!B.includes(id)&&!S.armies.some(x=>x.id===id&&x.units.length))B.push(id);F.hn_canN=B.length;
+  for(const r of S.armies)if(r.f==='rom'&&r.units.length&&(r.hnCan||r.hnBeaten))r.hold=S.turn+1;
+  if(B.length>=2){hnCanWon();return;}
+  const h=hnHero();if(!h||h.hnPass||!atWar(h.f,'rom'))return;
+  for(const r of S.armies.filter(x=>x.hnCan&&x.f==='rom'&&x.units.length&&!x.boat)){
+    if((r.hnCool||0)>S.turn)continue;
+    if(r.p===h.p||ADJ[h.p].has(r.p)&&!isSeaLink(h.p,r.p)){hnStrike(r,h);continue;}
+    const n=hnStepTo(r,h.p);if(n!=null){r.p=n;r.pos=null;r.goal=null;addLog(`${r.name} marschiert nach ${PROV_DEF[n].name}.`,true,'info');}}}
+// Rom greift das Heer t an: in Hannibals eigener Provinz als Provinzschlacht (mit Plan und Mauern), sonst als Feldschlacht. Gibt true zurück, wenn der Angreifer siegt.
+function hnStrike(r,t){const ti=t.p,own=S.prov[ti].owner===t.f;let win=false;
+  try{if(own){r.mp=Math.max(r.mp||0,maxMP(r));const res=resolveAttack(r,ti);win=!!(res&&res.win);if(res)addLog(win?`${r.name} greift ${PROV_DEF[ti].name} an und siegt.`:`${PROV_DEF[ti].name} wehrt ${r.name} ab${res.lauer?` (${res.lauer})`:''}.`,true,win?'bad':'good');}
+    else win=!hnFeld(r,t);}catch(e){console.warn('Römischer Angriff',e);}
+  r.hnCool=S.turn+2;return win;}
+// Ergebnis jeder Schlacht (concludeAttack, hnFeld): Cannae-Heere geschlagen, Niederlage des Hauptheeres bei Cannae, Niederlagen für den Rat
+function hnTally(A,D,aWon){try{if(!hnOn())return;const F=hnFl(),f=S.player;
+  for(const[L,lost]of[[A,!aWon],[D,aWon]])for(const x of L)if(x.hnCan&&!x.hnBeaten&&lost)hnCanBeat(x);
+  if(F.hn_gunst!=null&&((A.some(x=>x.f===f)&&!aWon)||(D.some(x=>x.f===f)&&aWon)))F.hn_nied=(F.hn_nied||0)+1;
+  if(F.hn_can==='lauf'){const hid=S.scen.hero,lost=(A.some(x=>x.id===hid)&&!aWon)||(D.some(x=>x.id===hid)&&aWon);if(lost&&[...A,...D].some(x=>x.f==='rom'&&(x.hnCan||x.hnBeaten)))hnCanLost();}}catch(e){console.warn('Schlachtbilanz',e);}}
+
+/* ---- Fabius-Verhalten (nur die römischen Heere in Italien, nur diese Geschichte) ---- */
+const hnFabOn=()=>{try{return hnOn()&&hnFl().hn_fab!=null&&!hnFl().hn_fabOff;}catch(e){return false;}};
+function hnFabStart(){const F=hnFl();if(F.hn_fab!=null)return;F.hn_fab=S.turn;
+  const fa=S.armies.find(x=>x.f==='rom'&&x.units.length&&x.gen&&/Fabius/.test(x.gen.n));if(fa)fa.name='Heer des Fabius';
+  if(!F.hn_marc){const T=['samnium','hirpinien','sabina','latium'].map(id=>PI[id]).find(i=>i!=null&&S.prov[i].owner==='rom');
+    if(T!=null){const m=scenArmy('rom',T,[['sword','manipel'],['sword','manipel'],['sword','manipel'],['spear','socii'],['spear','socii'],['cav']],'Marcus Claudius Marcellus');m.name='Heer des Marcellus';m.hnMarc=1;F.hn_marc=m.id;}}
+  addLog('Rom ändert seine Taktik: Fabius meidet die offene Schlacht, folgt Hannibal in zwei Provinzen Abstand und verbrennt das Land. Nur Marcellus, das Schwert Roms, greift an.',true,'bad');
+  hnQ({k:'hn',id:'fabius'});}
+// Kräfteverhältnis: römische Heere in einer Provinz gegen Hannibals Heere in seiner Provinz
+function hnRatio(r,h){const grp=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat&&x.p===r.p&&!x.hnCan);const pr=grp.reduce((s,x)=>s+armyPower(x),0);
+  const ph=S.armies.filter(x=>x.f===h.f&&x.units.length&&!x.boat&&x.p===h.p).reduce((s,x)=>s+armyPower(x),0);return pr/Math.max(1,ph);}
+function hnBurn(ti){const P=S.prov[ti];P.dv={a:4,r:RZ_REC,r0:RZ_REC,by:'rom'};P.raid=S.turn;}
+function hnFabMsg(t,k){const F=hnFl();if(F.hn_fabMsgT!=null&&S.turn-F.hn_fabMsgT<2&&k!=='force')return;F.hn_fabMsgT=S.turn;addLog(t,true,'info');}
+// Hannibal ist eingekesselt: kein Nachbarland ist frei (jedes ist von einem römischen Heer besetzt oder von römischem Land aus überwacht), mindestens zwei römische Heere beteiligt
+function hnTrap(h){const N=[...ADJ[h.p]].filter(n=>isAct(n)&&!isSeaLink(h.p,n));if(N.length<1)return null;
+  const rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat),at=n=>rom.filter(x=>x.p===n);
+  const watched=n=>at(n).length>0||(S.prov[n].owner==='rom'&&rom.some(x=>ADJ[n].has(x.p)&&!isSeaLink(n,x.p)));
+  if(N.some(n=>!watched(n)))return null;const ids=new Set();for(const n of N)for(const x of rom)if(x.p===n||ADJ[n].has(x.p))ids.add(x.id);
+  return ids.size>=2?N:null;}
+function hnFabRound(){const F=hnFl(),f=S.player;
+  if(F.hn_fab==null){if(scenStepI()>=HN_STEP_CAP||F.hn_can==='lost')hnFabStart();else return;}
+  if(F.hn_fabOff)return;
+  const rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat&&hnRomIt(x));
+  for(const r of rom){r.hnFab=1;r.hold=S.turn+1;}
+  const h=hnHero();if(!h||h.hnPass||!atWar(f,'rom'))return;
+  const D=hnDist(h.p);
+  for(const r of rom.slice()){if(!S.armies.includes(r)||!r.units.length||r.hnCan||(r.hnCool||0)>S.turn)continue;
+    const d=D[r.p];if(d==null)continue;const ratio=hnRatio(r,h),mar=!!r.hnMarc;
+    // 1. Marcellus und starke Heere greifen Hannibals Heer an
+    if(d<=1&&(mar?ratio>=0.7:ratio>=HN_FAB_RATIO)){addLog(mar?`${r.name} greift an: Marcellus, das Schwert Roms, wartet nicht.`:`${r.name} greift an: Rom ist stark genug (Kräfte ${hnFmt(ratio)} zu 1).`,true,'bad');hnStrike(r,h);continue;}
+    // 2. kleine karthagische Heere (ohne das Hauptheer) werden angegriffen
+    const small=S.armies.filter(s=>s.f===f&&s!==h&&s.units.length&&!s.boat&&!s.hnPass&&s.p!==h.p&&(s.p===r.p||(ADJ[r.p].has(s.p)&&!isSeaLink(r.p,s.p)))&&armyPower(s)<=0.6*armyPower(r)).sort((x,y)=>armyPower(x)-armyPower(y))[0];
+    if(small){addLog(`${r.name} fällt über das kleine Heer „${small.name}“ bei ${PROV_DEF[small.p].name} her.`,true,'bad');hnStrike(r,small);continue;}
+    // 3. abgefallene Städte zurückholen (höchstens zweimal je Stadt, mit Pause)
+    let tgt=null;F.hn_abfCd=F.hn_abfCd||{};F.hn_abfN=F.hn_abfN||{};
+    for(const ti of(F.hn_abf||[])){if(S.prov[ti].owner!==f||ti===h.p||!ADJ[r.p].has(ti)||isSeaLink(r.p,ti)||(F.hn_abfCd[ti]||0)>S.turn||(F.hn_abfN[ti]||0)>=2)continue;
+      let q=0;try{const cx=startAttackCtx(r,ti);q=cx.res.att/Math.max(1,cx.res.def);}catch(e){}if(q>=1.15&&(!tgt||q>tgt.q))tgt={ti,q};}
+    if(tgt){F.hn_abfCd[tgt.ti]=S.turn+5;F.hn_abfN[tgt.ti]=(F.hn_abfN[tgt.ti]||0)+1;r.mp=Math.max(r.mp||0,maxMP(r));
+      try{const res=resolveAttack(r,tgt.ti);battleLog(res);if(res.win)addLog(`${r.name} holt die abgefallene Stadt ${PROV_DEF[tgt.ti].city||PROV_DEF[tgt.ti].name} zurück.`,true,'bad');}catch(e){console.warn('Rückeroberung',e);}
+      r.hnCool=S.turn+2;continue;}
+    // 4. Verbrannte Erde: Provinz neben Hannibal, die der Fabius-Trupp erreicht
+    if(!mar&&d>=2&&(r.hnBurn||-9)<S.turn-2){const cand=[h.p,...[...ADJ[h.p]].filter(n=>!isSeaLink(h.p,n))].find(n=>S.prov[n].owner==='rom'&&!S.prov[n].dv&&(r.p===n||(ADJ[r.p].has(n)&&!isSeaLink(r.p,n))));
+      if(cand!=null){hnBurn(cand);r.hnBurn=S.turn;addLog(`${r.name} verbrennt die Felder von ${PROV_DEF[cand].name}: Hannibals Heer findet dort kein Korn.`,true,'bad');continue;}}
+    // 5. Abstand halten: folgen bis zwei Provinzen, bei Nähe ausweichen
+    if(mar){if(d>1){const n=hnStepTo(r,h.p);if(n!=null){r.p=n;r.pos=null;r.goal=null;}}continue;}
+    if(d>2){const n=hnStepTo(r,h.p);if(n!=null&&D[n]>=2){r.p=n;r.pos=null;r.goal=null;}}
+    else if(d<=1){let best=null;for(const n of ADJ[r.p]){if(isSeaLink(r.p,n)||!isAct(n)||D[n]==null||D[n]<=d)continue;if(S.armies.some(x=>x.f===f&&x.units.length&&!x.boat&&x.p===n))continue;if(!best||D[n]>D[best.n]||(D[n]===D[best.n]&&S.prov[n].owner==='rom'&&S.prov[best.n].owner!=='rom'))best={n};}
+      hnFabMsg(`Fabius weicht aus: ${r.name} ist nur ${hnFmt(ratio)}-mal so stark wie Hannibals Heer (nötig ${hnFmt(HN_FAB_RATIO)}) und stellt sich ihm nicht.`);
+      if(best){r.p=best.n;r.pos=null;r.goal=null;}}}
+  // verbrannte Erde trifft Hannibals Heer: kein Korn, außer ein Winterlager versorgt es
+  if(!h.hnPass&&S.prov[h.p].owner!==f&&dvSev(h.p)>0&&!lagerReach(h)){for(const u of h.units)u.men=Math.max(1,Math.round(u.men*0.98));if(F.hn_hungT==null||S.turn-F.hn_hungT>=3){F.hn_hungT=S.turn;addLog(`Verbrannte Erde bei ${PROV_DEF[h.p].name}: Das Heer hungert (Männer −2 % je Runde). Ein Winterlager in Capua versorgt es.`,true,'bad');}}
+  // Kessel und Ochsen mit Fackeln
+  const trap=hnTrap(h);
+  if(trap){F.hn_kessel=(F.hn_kessel||0)+1;for(const u of h.units)u.men=Math.max(1,Math.round(u.men*0.97));
+    if(F.hn_kessel>=2&&(F.hn_ochT==null||S.turn-F.hn_ochT>=8)){F.hn_ochT=S.turn;hnQ({k:'hn',id:'ochsen',pn:PROV_DEF[h.p].name,names:trap.map(n=>PROV_DEF[n].name).join(', ')});}}
+  else F.hn_kessel=0;}
+// Ochsen mit Fackeln (Ager Falernus): das Heer bricht aus dem Kessel aus; die römischen Wachen in der Umgebung bleiben drei Runden verwirrt
+function hnOchsen(){const h=hnHero(),F=hnFl();if(!h)return'Kein Heer';const N=[...ADJ[h.p]].filter(n=>isAct(n)&&!isSeaLink(h.p,n)),rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat);
+  const pw=n=>rom.filter(x=>x.p===n).reduce((s,x)=>s+armyPower(x),0);N.sort((a,b)=>pw(a)-pw(b)||(S.prov[b].owner===h.f)-(S.prov[a].owner===h.f));
+  const n=N[0];if(n==null)return'Kein Ausweg';
+  for(const x of rom)if(x.p===n||x.p===h.p||ADJ[n].has(x.p)||ADJ[h.p].has(x.p)){x.hnCool=S.turn+3;x.hold=S.turn+3;if(x.p===n){const back=[...ADJ[n]].find(q=>q!==h.p&&!isSeaLink(n,q)&&isAct(q)&&S.prov[q].owner==='rom'&&q!==x.p);if(back!=null){x.p=back;x.pos=null;}}}
+  for(const u of h.units)u.men=Math.max(1,Math.round(u.men*0.97));h.p=n;h.pos=null;h.goal=null;h.mp=Math.round(maxMP(h)/2);F.hn_kessel=0;
+  addLog(`Ochsen mit Fackeln: Hannibal bricht in der Nacht nach ${PROV_DEF[n].name} aus. Die römischen Wachen laufen dem Feuerschein nach und bleiben drei Runden verwirrt.`,true,'good');scenFame(S.player,5);try{refreshOwnership();}catch(e){}return`Ausbruch nach ${PROV_DEF[n].name}`;}
+function hnDurchbruch(){const h=hnHero(),F=hnFl();if(!h)return'Kein Heer';const N=[...ADJ[h.p]].filter(n=>isAct(n)&&!isSeaLink(h.p,n)&&S.prov[n].owner==='rom');
+  const rom=S.armies.filter(x=>x.f==='rom'&&x.units.length&&!x.boat),pw=n=>rom.filter(x=>x.p===n).reduce((s,x)=>s+armyPower(x),0);N.sort((a,b)=>pw(a)-pw(b));
+  const n=N[0];if(n==null)return'Kein Ziel';h.mp=Math.max(h.mp||0,maxMP(h));let win=false;
+  try{const res=resolveAttack(h,n);battleLog(res);win=!!(res&&res.win);}catch(e){console.warn('Durchbruch',e);}
+  F.hn_kessel=0;if(win){for(const x of rom)if(ADJ[h.p].has(x.p)||x.p===h.p)x.hnCool=S.turn+1;}return win?`Durchbruch bei ${PROV_DEF[n].name}`:'Der Durchbruch scheitert';}
+
+/* ---- Winterlager in Capua (Baustein aus dem Wikinger-Umbau) und Verweichlichung ---- */
+function hnLagerShow(a){try{return hnOn()&&scenStepI()>=HN_STEP_CAP&&a.f===S.player&&!a.boat&&PROV_DEF[a.p].id==='kampanien';}catch(e){return false;}}
+function hnWeichRound(){const F=hnFl(),h=hnHero();
+  if(h&&!h.hnPass&&lagerOn(h.p)&&PROV_DEF[h.p].id==='kampanien'){F.hn_lagN=(F.hn_lagN||0)+1;
+    if(F.hn_lagN>=2&&(F.hn_weichT==null||S.turn-F.hn_weichT>=15)){F.hn_weichT=S.turn;hnQ({k:'hn',id:'weich'});}}
+  else F.hn_lagN=0;}
+function hnWeichFx(zucht){const h=hnHero(),f=S.player;if(!h)return null;let add=0;
+  for(const u of h.units){const mx=unitStat(f,u.r,u.v).men,gap=mx-u.men;if(gap<=0)continue;const g=zucht?Math.ceil(gap*0.5):gap;u.men+=g;add+=g;}
+  if(!zucht){addMod(f,'atk',-0.08,8,'Verweichlichung in Capua');for(const u of h.units)u.xp=Math.round((u.xp||0)*0.9);}
+  addLog(zucht?`Zucht im Lager: ${add} Mann kehren in die Reihen zurück, Capua verweichlicht das Heer nicht.`:`Capua verweichlicht das Heer: ${add} Mann zurück in den Reihen, doch Angriff −8 % für 8 Runden.`,true,zucht?'good':'info');
+  return zucht?`Männer +${add}`:`Männer +${add}, Moral −`;}
+
+/* ---- Rat von Karthago: Gunst 0–100 ---- */
+function hnRatOn(){try{const F=hnFl();return hnOn()&&F.hn_gunst!=null&&!F.hn_ratEnd&&scenStepI()<99;}catch(e){return false;}}
+function hnRatStart(){const F=hnFl(),f=S.player;if(F.hn_gunst!=null)return;F.hn_gunst=HN_RAT.start;F.hn_gw=stW(f);F.hn_ga=F.abw||0;F.hn_nied=F.hn_nied||0;F.hn_gn=F.hn_nied;F.hn_pn=provsOf(f).length;F.hn_gLast=S.turn;}
+function hnGunst(d){const F=hnFl();F.hn_gunst=clamp(Math.round((F.hn_gunst+d)*10)/10,0,100);}
+function hnBotenCost(){return Math.round(150*G());}
+function hnBotenWhy(){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F.hn_botenT!=null&&S.turn-F.hn_botenT<HN_RAT.botenCd)return`Die Boten sind noch unterwegs (noch ${HN_RAT.botenCd-(S.turn-F.hn_botenT)} Runden).`;if(F.hn_gunst>=100)return'Die Gunst ist schon am Höchststand.';if(S.fac[S.player].gold<hnBotenCost())return`Zu wenig Gold (${hnBotenCost()} nötig).`;return null;}
+function hnBoten(){const w=hnBotenWhy();if(w)return w;S.fac[S.player].gold-=hnBotenCost();hnGunst(HN_RAT.botenPlus);hnFl().hn_botenT=S.turn;addLog(`Boten mit Gold und Beutestücken erreichen Karthago. Gunst +${HN_RAT.botenPlus}.`,true,'good');return null;}
+function hnVerstNext(){return hnFl().hn_v1?2:1;}
+function hnVerstWhy(n){const F=hnFl();if(!hnRatOn())return'Der Rat tagt nicht.';if(F['hn_v'+n])return'Diese Verstärkung ist schon bewilligt.';if(n===2&&!F.hn_v1)return'Erst nach der ersten Verstärkung.';if(F.hn_vq)return'Die Schiffe sind schon unterwegs.';
+  const need=n===1?HN_RAT.v1:HN_RAT.v2;if(F.hn_gunst<need)return`Gunst ${need} nötig (jetzt ${Math.round(F.hn_gunst)}).`;return null;}
+function hnVerst(n){const w=hnVerstWhy(n);if(w)return w;const F=hnFl();hnGunst(n===1?-20:-25);F['hn_v'+n]=S.turn;F.hn_vq={t:S.turn+2,n};F.hn_seeOk=1;
+  addLog(`Der Rat bewilligt Verstärkung: Karthagische Schiffe laufen aus und landen in zwei Runden bei Locri in Bruttium. Der Seeweg nach Süditalien ist für Karthago offen. Gunst −${n===1?20:25}.`,true,'good');return null;}
+function hnMagoLand(n){const F=hnFl(),f=S.player;F.hn_vq=null;
+  const cand=['bruttium','lukanien','tarent'].map(id=>PI[id]).filter(i=>i!=null),T=cand.find(i=>!S.armies.some(x=>x.f==='rom'&&x.units.length&&x.p===i))??cand[0];if(T==null)return;
+  const U=n===1?[['cav','elef'],['cav','elef'],['cav','numid'],['cav','numid'],['spear','libyer'],['missile','balear']]:[['cav','elef'],['cav','numid'],['cav','numid'],['sword','scutar'],['spear','libyer']];
+  const a=scenArmy(f,T,U,n===1?'Mago Barkas':'Hasdrubal Gisgo');a.name=n===1?'Heer des Mago':'Zweites Heer aus Karthago';a.hnMago=n;
+  addLog(`${a.name} landet bei Locri in ${PROV_DEF[T].name}: ${U.length} Einheiten, darunter ${U.filter(u=>u[1]==='elef').length} Elefanten-Einheiten und numidische Reiter.`,true,'good');hnQ({k:'hn',id:'rat',ev:'verst',n,units:U.length,pn:PROV_DEF[T].name});}
+function hnDefected(pi){const F=hnFl();if(!hnOn())return;F.hn_abf=F.hn_abf||[];if(!F.hn_abf.includes(pi))F.hn_abf.push(pi);}
+function hnRatRound(){const F=hnFl(),f=S.player,i=scenStepI();
+  if(F.hn_gunst==null&&i>=HN_STEP_CAN&&i<99)hnRatStart();
+  if(!hnRatOn())return;
+  const w=stW(f),dw=Math.max(0,w-(F.hn_gw||0)),da=Math.max(0,(F.abw||0)-(F.hn_ga||0)),dn=Math.max(0,(F.hn_nied||0)-(F.hn_gn||0)),np=provsOf(f).length;
+  F.hn_gw=w;F.hn_ga=F.abw||0;F.hn_gn=F.hn_nied||0;
+  let ok=dw>0||da>0||np>(F.hn_pn||0);F.hn_pn=np;
+  if(dw){hnGunst(HN_RAT.sieg*Math.min(dw,2));addLog(`Siegesbotschaften erreichen Karthago: Der Rat jubelt. Gunst +${HN_RAT.sieg*Math.min(dw,2)}.`,true,'good');}
+  if(da){hnGunst(HN_RAT.abfall*da);addLog(`Der Abfall ${da>1?'von '+da+' Städten':'einer Stadt'} stärkt die Barkiden im Rat. Gunst +${HN_RAT.abfall*da}.`,true,'good');}
+  if(dn){hnGunst(-HN_RAT.nied*Math.min(dn,2));addLog(`Die Niederlage erreicht Karthago: Hanno nutzt sie gegen die Barkiden. Gunst −${HN_RAT.nied*Math.min(dn,2)}.`,true,'bad');}
+  if(ok||i===HN_STEP_CAN)F.hn_gLast=S.turn;
+  else if(S.turn-F.hn_gLast>=HN_RAT.grace){hnGunst(-HN_RAT.still);if((S.turn-F.hn_gLast-HN_RAT.grace)%2===0)addLog(`Seit ${S.turn-F.hn_gLast} Runden kein Erfolg: Karthago verliert die Geduld. Gunst −${HN_RAT.still} je Runde.`,true,'bad');}
+  // Landung der Verstärkung
+  if(F.hn_vq&&S.turn>=F.hn_vq.t)hnMagoLand(F.hn_vq.n);
+  const g=F.hn_gunst;
+  // Angebot der Verstärkung (einmal je Stufe)
+  for(const n of[1,2]){if(!F['hn_vo'+n]&&!hnVerstWhy(n)){F['hn_vo'+n]=S.turn;hnQ({k:'hn',id:'rat',ev:'barkiden',n});break;}}
+  // Warnung bei 35, Abberufung unter 25 (eine Runde Frist)
+  if(g>HN_RAT.warn+10)F.hn_warn=0;
+  if(g<=HN_RAT.warn&&g>=HN_RAT.ab&&!F.hn_warn){F.hn_warn=1;hnQ({k:'hn',id:'rat',ev:'hanno'});}
+  if(g<HN_RAT.ab){F.hn_low=(F.hn_low||0)+1;
+    if(F.hn_low===1){F.hn_warn=1;addLog(`Gunst ${Math.round(g)}: Hanno hat die Mehrheit. Steigt sie bis zur nächsten Runde nicht auf 25, ruft der Rat Hannibal heim.`,true,'bad');hnQ({k:'hn',id:'rat',ev:'frist'});}
+    else{F.hn_ratEnd=1;hnQ({k:'hn',id:'rat',ev:'ab'});addLog('Der Rat von Karthago ruft Hannibal heim.',true,'bad');scenLose('Der Rat von Karthago hat Hannibal abberufen.');}}
+  else F.hn_low=0;}
+function hnRatBar(Z){const F=Z.flags,g=F.hn_gunst,col=g<HN_RAT.warn?'#c2412f':g>=HN_RAT.v1?'#6aa84f':'#d6a43a',n=hnVerstNext();
+  const vw=hnVerstWhy(n),bw=hnBotenWhy();
+  return` · <span title="Siege +10, Abfall einer Stadt +5, Niederlage −15, Stillstand −3 je Runde (nach ${HN_RAT.grace} Runden ohne Erfolg). Ab 60 schickt der Rat Verstärkung, ab 80 ein zweites Mal. Unter 25 ruft er Hannibal heim.">Gunst in Karthago</span> <span class="pbar" style="display:inline-block;width:70px;vertical-align:middle;margin:0 4px"><i style="width:${Math.round(g)}%;background:${col}"></i></span><b style="color:${g<HN_RAT.ab?'var(--danger)':'inherit'}">${Math.round(g)}</b>`
+   +(n<=2&&!F['hn_v'+n]&&!F.hn_vq?` <button class="btn small" data-act="hnrat" data-k="verst"${vw?' disabled':''} title="${esc(vw||`Gunst −${n===1?20:25}: Mago landet in 2 Runden bei Locri.`)}">Verstärkung${vw?'':' anfordern'}</button>`:'')
+   +` <button class="btn small" data-act="hnrat" data-k="boten"${bw?' disabled':''} title="${esc(bw||`Gunst +${HN_RAT.botenPlus}, ${HN_RAT.botenCd} Runden Pause`)}">Boten (${hnBotenCost()} Gold)</button>`;}
+function hnRatAct(k){const w=k==='verst'?hnVerst(hnVerstNext()):hnBoten();if(w){toast(w);AUDIO.sfx('error');}else{AUDIO.sfx('click');toast(k==='verst'?'Verstärkung bewilligt':`Gunst +${HN_RAT.botenPlus}`);}}
+
+/* ---- Ereignisfenster H3 ---- */
+function hnEv3(id,m){
+  const Ok=(label,desc)=>({label,desc:()=>desc,fx:()=>null});
+  if(id==='cannae'){const e=m.ev;
+    if(e==='start')return{E:{id:'hn_cannae',img:hnImg('cannae'),eb:'Akt III · Cannae',title:()=>'Rom stellt das Riesenheer auf',text:()=>`Paullus und Varro ziehen mit ${m.n} Einheiten aus ${m.pn} gegen Hannibal, das größte Heer in Roms Geschichte. Wer es schlägt, hat Italien in der Hand; wer unterliegt, muss sich neu aufstellen. Hannibal braucht beide Heere: Ziel ist, Varro und Paullus zu schlagen. Wähle für die Schlacht den Plan „Umfassung“: Er gibt hier +25 %. Ein Sieg hebt die Gunst in Karthago um 10, eine Niederlage senkt sie um 15.`,opts:[Ok('Weiter','Die Römer marschieren auf Hannibal zu.')]},ctx:{}};
+    if(e==='won')return{E:{id:'hn_cannae_won',img:hnImg('cannae'),eb:'Akt III · Cannae',title:()=>'Cannae: Roms Heer ist vernichtet',text:()=>'Die Mitte weicht, die Flügel schwenken ein, die Reiterei fällt den Legionen in den Rücken. Ein Heer von Zehntausenden bleibt auf dem Feld. Süditalien schwankt: Die ersten Städte denken über Karthago nach. Versuche sie zum Abfall zu bewegen, mit Gold und Siegen.',opts:[Ok('Weiter','Der nächste Schritt: Städte des Südens gewinnen.')]},ctx:{}};
+    if(e==='lost')return{E:{id:'hn_cannae_lost',img:hnImg('cannae'),eb:'Akt III · Cannae',title:()=>'Hannibal unterliegt dem Riesenheer',text:()=>'Die Übermacht erdrückt das Heer. Der Krieg geht weiter, aber Rom hat gelernt: Es meidet nun die offene Schlacht, folgt Hannibal und lässt das Land verbrennen. Die Fabius-Phase beginnt früher. Die Gunst in Karthago sinkt um 15.',opts:[Ok('Weiter','Gewinne die Städte des Südens, sonst verhungert das Heer.')]},ctx:{}};}
+  if(id==='fabius')return{E:{id:'hn_fabius',img:hnImg('fabius'),eb:'Akt III · Der Zauderer',title:()=>'Fabius weicht der Schlacht aus',text:()=>`Rom hat Cannae gelernt. Fabius, der „Zauderer“, stellt sich Hannibal nicht mehr, solange seine Heere nicht anderthalbmal so stark sind. Er folgt in zwei Provinzen Abstand, verbrennt die Felder neben Hannibal, fällt über kleine Heere und abgefallene Städte her und besetzt die Ausgänge. Nur Marcellus greift an. Was hilft: ein kleines Heer als Köder, dann steht Hannibal daneben; die Hinterhalt-Haltung; Abfall der Städte (ihre Steuern tragen den Sold); ein Winterlager in Capua (Versorgung, Abwehr ×2). Im Kessel hilft der Ausbruch mit Ochsen und Fackeln. In Italien lebt das Heer vom Land: Der Unterhalt ist dort halb.`,opts:[Ok('Weiter','Die Meldungen „Fabius weicht aus …“ zeigen dir den Grund.')]},ctx:{}};
+  if(id==='ochsen'){const trapTx=m.names?`Fabius hat die Ausgänge von ${m.pn} besetzt (${m.names}). `:'';
+    return{E:{id:'hn_ochsen',img:hnImg('ochsen'),eb:'Akt III · Ager Falernus',title:()=>'Hannibal ist eingekesselt',text:()=>`${trapTx}Das Heer sitzt im Kessel und hungert. Livius erzählt, wie Hannibal zweitausend Ochsen Reisig an die Hörner binden und nachts in die Hügel treiben ließ: Die römischen Wachen liefen dem Feuerschein nach, und das Heer glitt durch den Pass.`,opts:[
+      {label:'Ochsen mit Fackeln',cost:()=>Math.round(80*G()),desc:()=>'Das Heer bricht in die Provinz mit den schwächsten Wachen aus, Männer −3 %, die Römer rundum bleiben 3 Runden verwirrt.',fx:()=>hnOchsen()},
+      {label:'Sich durchschlagen',desc:()=>'Angriff auf den schwächsten Riegel: Ausgang offen, Verluste wie in jeder Schlacht.',fx:()=>hnDurchbruch()},
+      {label:'Im Kessel bleiben',desc:()=>'Männer −3 % je Runde, solange der Kessel hält.',fx:()=>null}]},ctx:{}};}
+  if(id==='weich')return{E:{id:'hn_weich',img:hnImg('weich'),eb:'Akt III · Winterlager in Capua',title:()=>'Capua verweichlicht das Heer',text:()=>'Livius schreibt, der Winter in Capua habe Hannibals Männer verdorben: Weiche Betten, Wein und Frauen machten aus Hartgesottenen Genießer. Zugleich füllen sich die Reihen. Wie hält Hannibal sein Heer?',opts:[
+      {label:'Feiern lassen',desc:()=>'Männer auf volle Stärke, doch Angriff −8 % für 8 Runden und Erfahrung −10 %.',fx:()=>hnWeichFx(false)},
+      {label:'Zucht erzwingen',cost:()=>Math.round(80*G()),desc:()=>'Die Hälfte der Lücken füllt sich, Moral unverändert.',fx:()=>hnWeichFx(true)}]},ctx:{}};
+  if(id==='rat'){const e=m.ev,F=hnFl();
+    if(e==='barkiden'){const n=m.n,U=n===1?'Mago mit Elefanten und numidischen Reitern (6 Einheiten)':'ein zweites Heer mit Elefanten, Reitern und Schleuderern (5 Einheiten)';
+      return{E:{id:'hn_rat_barkiden',img:hnImg('rat_barkiden'),eb:'Rat von Karthago',title:()=>n===1?'Die Barkiden setzen sich im Rat durch':'Karthago schickt ein zweites Heer',text:()=>`Hannibals Erfolge wirken in Karthago. Die Freunde der Barkiden gewinnen im Rat die Oberhand über Hanno und seine Partei und bieten Verstärkung an: ${U}. Sie landen bei Locri in Bruttium, und der Seeweg nach Süditalien öffnet sich für Karthago. Gunst jetzt ${Math.round(F.hn_gunst)}.`,opts:[
+        {label:'Verstärkung anfordern',desc:()=>`Gunst −${n===1?20:25}. Landung in 2 Runden bei Locri.`,fx:()=>hnVerst(n)||`Verstärkung bewilligt`},
+        {label:'Später',desc:()=>'Der Knopf in der Kopfleiste bleibt, solange die Gunst reicht.',fx:()=>null}]},ctx:{}};}
+    if(e==='verst')return{E:{id:'hn_rat_verstaerkung',img:hnImg('rat_verstaerkung'),eb:'Rat von Karthago',title:()=>m.n===1?'Mago landet bei Locri':'Das zweite Heer landet',text:()=>`Karthagische Schiffe laufen in Locri ein: ${m.units} Einheiten, darunter Elefanten und numidische Reiter, stehen in ${m.pn}. Führe sie zu Hannibal oder setze sie gegen Rom ein.`,opts:[Ok('Weiter','Das Heer steht in Bruttium.')]},ctx:{}};
+    if(e==='hanno'||e==='frist'){const fr=e==='frist';
+      return{E:{id:'hn_rat_hanno',img:hnImg('rat_hanno'),eb:'Rat von Karthago',title:()=>fr?'Der Rat verlangt Hannibals Rückkehr':'Hanno spricht gegen den Krieg',text:()=>fr?`Hanno der Große hat die Mehrheit: Der Krieg in Italien kostet Gold und bringt nichts. Fällt die Gunst nicht bis zur nächsten Runde über 25, ruft der Rat Hannibal heim, und die Geschichte endet früh. Gunst jetzt ${Math.round(F.hn_gunst)}.`:`Hanno und seine Partei sagen im Rat, der Krieg in Italien verschlinge Gold, und die Siege blieben ohne Frucht. Die Gunst ist auf ${Math.round(F.hn_gunst)} gesunken. Unter 25 wird Hannibal heimgerufen. Siege, abgefallene Städte und Eroberungen heben sie wieder.`,opts:[
+        {label:'Boten mit Gold schicken',cost:()=>hnBotenCost(),desc:()=>`Gunst +${HN_RAT.botenPlus}, danach ${HN_RAT.botenCd} Runden Pause.`,fx:()=>{hnGunst(HN_RAT.botenPlus);hnFl().hn_botenT=S.turn;addLog(`Boten mit Gold erreichen Karthago. Gunst +${HN_RAT.botenPlus}.`,true,'good');return`Gunst +${HN_RAT.botenPlus}`;}},
+        {label:fr?'Hinnehmen':'Siege abwarten',desc:()=>'Nichts weiter. Die Gunst ändert sich nur durch Taten.',fx:()=>null}]},ctx:{}};}
+    if(e==='ab')return{E:{id:'hn_rat_ab',img:hnImg('rat_hanno'),eb:'Rat von Karthago',title:()=>'Hannibal wird abberufen',text:()=>'Der Rat von Karthago hat entschieden: Hannibal soll mit seinem Heer heimkehren. Seine Feinde im Rat haben sich durchgesetzt, und Italien bleibt unvollendet.',opts:[Ok('Weiter','Das Ende dieser Geschichte.')]},ctx:{}};}
+  return null;}
 
 /* ---------- Weitere Funktionen aus den Einzelgeschichten (gelten überall) ---------- */
 // Gebirgspässe: Durchzug kostet Männer, im Winter mehr, Elefanten doppelt
@@ -10032,7 +10262,7 @@ function defectChance(f,pi){const P=S.prov[pi],o=P.owner;let c=0.2;try{if(provOr
   c+=Math.min(0.2,0.05*((S.fac[f].st&&S.fac[f].st.win)||0)/5);if(armiesAt(pi).some(a=>a.f===o))c-=0.2;return clamp(c,0.05,0.75);}
 function canDefect(f,pi){const P=S.prov[pi],o=P.owner;if(o===f||o==='frei'||o==='horde'||!atWar(f,o))return false;if((P.defT||-99)+6>S.turn)return false;return S.armies.some(a=>a.f===f&&a.units.length&&(a.p===pi||ADJ[a.p].has(pi)));}
 function tryDefect(f,pi){if(!canDefect(f,pi)||S.fac[f].gold<defectCost())return false;S.fac[f].gold-=defectCost();const P=S.prov[pi];P.defT=S.turn;const ok=Math.random()<defectChance(f,pi);
-  if(ok){const o=P.owner;P.owner=f;P.unrest=1;if(ep()===0)P.integ=0;for(const a of S.armies)if(a.p===pi&&a.f===o){const back=[...ADJ[pi]].find(n=>S.prov[n].owner===o);if(back!=null)a.p=back;}if(S.scen&&f===S.player)S.scen.flags.abw=(S.scen.flags.abw||0)+1;
+  if(ok){const o=P.owner;P.owner=f;P.unrest=1;if(ep()===0)P.integ=0;for(const a of S.armies)if(a.p===pi&&a.f===o){const back=[...ADJ[pi]].find(n=>S.prov[n].owner===o);if(back!=null)a.p=back;}if(S.scen&&f===S.player){S.scen.flags.abw=(S.scen.flags.abw||0)+1;try{hnDefected(pi);}catch(e){}}
     if(f===S.player)addLog(`${PROV_DEF[pi].name} fällt von ${FACTIONS[o].name} ab und schließt sich dir an.`,true,'good');try{refreshOwnership();}catch(e){}}
   else if(f===S.player)addLog(`Die Gesandten in ${PROV_DEF[pi].name} kehren mit leeren Händen zurück.`,true,'info');return ok;}
 function defectHtml(pi){const f=S.player;if(!S||!canDefect(f,pi))return'';return`<div class="row" style="margin:6px 0"><button class="btn" data-act="defect" data-p="${pi}"${S.fac[f].gold>=defectCost()?'':' disabled'}>Zum Abfall bewegen · ${defectCost()} Gold · ${Math.round(defectChance(f,pi)*100)} %</button></div><p class="note" style="margin:2px 0 6px">Gelingt es, wechselt die Provinz zu dir (Unruhe 1), feindliche Heere dort weichen zurück. Misslingt es, ist das Gold verloren. Neuer Versuch nach 6 Runden.</p>`;}
@@ -10041,14 +10271,14 @@ function supplyRound(){for(const a of S.armies){if(!a.units.length||a.boat||a.f=
   if(ok(a.p))continue;let near=false;for(const n of ADJ[a.p]){if(ok(n)){near=true;break;}for(const m of ADJ[n]){if(ok(m)){near=true;break;}if(a.tr)for(const q of ADJ[m])if(ok(q)){near=true;break;}if(near)break;}if(near)break;}
   if(near||a.st==='pluendern'||rzFed(a)||lagerReach(a))continue;for(const u of a.units)u.men=Math.max(1,Math.round(u.men*0.98));a.unsup=S.turn;}}
 // Schlachtplan: vor dem Angriff gewählt, wirkt in der automatischen Schlacht
-const PLANS={frontal:{n:'Frontal',d:'Kein Bonus, kein Risiko.'},umfassung:{n:'Umfassung',d:'+15 % mit mindestens 30 % Reiterei, sonst −10 %.'},hinterhalt:{n:'Geländeangriff',d:'Angriff aus Wald oder Bergland: +20 %, im offenen Land −10 %. (Nicht zu verwechseln mit der Haltung „Hinterhalt“, die eigenes Land verteidigt.)'},
+const PLANS={frontal:{n:'Frontal',d:'Kein Bonus, kein Risiko.'},umfassung:{n:'Umfassung',d:'+15 % mit mindestens 30 % Reiterei, sonst −10 %. Bei Cannae (Hannibals Geschichte) +25 %.'},hinterhalt:{n:'Geländeangriff',d:'Angriff aus Wald oder Bergland: +20 %, im offenen Land −10 %. (Nicht zu verwechseln mit der Haltung „Hinterhalt“, die eigenes Land verteidigt.)'},
   lauer:{n:'Hinterhalt',d:'Nur in Hannibals Geschichte, in Italien: Im Winter an einem Fluss +20 % (Trebia), gegen einen Feind, der in deine Provinz einmarschiert, +25 % (Trasimene). Sonst als Angreifer −8 %.'},
   gassen:{n:'Gassen öffnen',d:'Gegen Elefanten: Die Reihen öffnen sich, ihr Schrecken wirkt nicht, und die Tiere laufen mit 30 % in die eigenen Reihen. Ohne gegnerische Elefanten −8 %.'}};
-function planMul(a,ti){const p=a.plan||'frontal';if(p==='umfassung'){const c=a.units.filter(u=>u.r==='cav').length/Math.max(1,a.units.length);return(c>=0.3?1.15:0.9)*(a.hnRhone&&a.hnRhone.to===ti&&hnOn()?1.1:1);}
+function planMul(a,ti){const p=a.plan||'frontal';if(p==='umfassung'){{const cm=hnCannaeMul(a,ti);if(cm>1)return cm;}const c=a.units.filter(u=>u.r==='cav').length/Math.max(1,a.units.length);return(c>=0.3?1.15:0.9)*(a.hnRhone&&a.hnRhone.to===ti&&hnOn()?1.1:1);}
   if(p==='gassen'){try{return S.armies.some(x=>x.p===ti&&x.f!==a.f&&hnEleN(x)>0)?1:0.92;}catch(e){return 0.92;}}
   if(p==='lauer')return hnLauerMul(a,ti,true);
   if(p==='hinterhalt'){let t='';try{t=(typeof PTER!=='undefined'&&PTER)?PTER[ti]:'';}catch(e){}return feat(ti).forest||/mountain|hill/i.test(t||'')?1.2:0.9;}return 1;}
-function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).filter(k=>(k!=='gassen'||cur==='gassen'||planGassenOk(a))&&(k!=='lauer'||cur==='lauer'||planLauerOk(a))).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>${a.hnRhone&&hnOn()?`<p class="note" style="margin:-4px 0 8px">Rhone: Greift das Heer ${esc(PROV_DEF[a.hnRhone.to].name)} an, gibt „Umfassung“ +10 % zusätzlich (Hanno quert flussaufwärts).</p>`:''}${eleNote(a)}`;}
+function planHtml(a){if(a.f!==S.player)return'';const cur=a.plan||'frontal';return`<div class="seg" style="margin:4px 0 8px">${Object.keys(PLANS).filter(k=>(k!=='gassen'||cur==='gassen'||planGassenOk(a))&&(k!=='lauer'||cur==='lauer'||planLauerOk(a))).map(k=>`<button data-act="plan" data-id="${a.id}" data-p="${k}" class="${cur===k?'on':''}">${PLANS[k].n}</button>`).join('')}</div><p class="note" style="margin:-4px 0 8px">Schlachtplan: ${esc(PLANS[cur].d)} Der Plan wirkt nur beim Berechnen, nicht in der selbst geschlagenen Schlacht.</p>${a.hnRhone&&hnOn()?`<p class="note" style="margin:-4px 0 8px">Rhone: Greift das Heer ${esc(PROV_DEF[a.hnRhone.to].name)} an, gibt „Umfassung“ +10 % zusätzlich (Hanno quert flussaufwärts).</p>`:''}${eleNote(a)}${hnCannaeNote(a)}`;}
 // Königsboten: prüfen eine Region (Unruhe −2, Steuern +10 % für 10 Runden), ab der Völkerwanderung
 const kbCost=()=>Math.round(60*EPOCH_COST[ep()]);
 function kbReady(f,pi){const P=S.prov[pi];return ep()>=1&&ep()<=2&&P.owner===f&&(P.kbT==null||S.turn>=P.kbT+8);}
@@ -10092,6 +10322,7 @@ Object.assign(PEOPLE,{
 Object.assign(SC_COND,{
   pass:(f,g)=>[(['salasser','segusiner','seealpen'].some(id=>S.scen.flags['in_'+id])?1:0)+(['taurini','insubrien','cenomanen','aemilia','ligurien'].some(id=>S.scen.flags['in_'+id])?1:0),2],
   hasdrubal:(f,g)=>[S.armies.some(a=>a.hasd&&a.f===f&&['it_nord','it_mitte','it_sued'].includes(PROV_DEF[a.p].reg))||S.scen.flags.hasd?1:0,1],
+  cannae:(f,g)=>{const F=S.scen.flags;return F.hn_can==='lost'||F.hn_can==='skip'?[1,1]:[Math.min(2,F.hn_canN||0),F.hn_can==='won'?Math.min(2,F.hn_canN||2):2];},
   zama:(f,g)=>[(S.prov[PI.latium].owner===f||(S.scen.flags.scip&&!S.armies.some(a=>a.scip)&&S.prov[PI.karthago].owner===f))?1:0,1],
   karlmann:(f,g)=>[S.scen.flags.karlmann?1:0,1],
   kroenung:(f,g)=>[(S.scen.flags.in_latium?1:0)+(S.prov[PI.insubrien].owner===f?1:0),2],
@@ -10121,7 +10352,7 @@ Object.assign(SCEN,{
    {t:'Akt II · Der Pass',txt:'Der Herbst ist weit fortgeschritten, als das Heer in die Berge zieht. Bergstämme rollen Felsen von den Hängen, auf den Pässen liegt schon Schnee. Tragtiere stürzen in die Schluchten, Männer erfrieren nachts am Feuer. Nach fünfzehn Tagen sieht Hannibal unter sich die Ebene des Po. Fast die Hälfte seines Heeres ist auf dem Weg geblieben.',g:{cond:'pass',txt:'Mit einem Heer über einen Alpenpass ziehen und die Poebene erreichen.'},rew:{gold:200}},
    {t:'Akt II · Freunde in der Poebene',txt:'Die Kelten der Poebene, Insubrer und Boier, haben Rom nie vergeben. Sie beobachten den Fremden mit den Elefanten: Ist er stark genug, um Rom zu schlagen? Hannibal braucht ihre Krieger, ihr Korn und ihre Pferde, denn aus Karthago kommt kaum Nachschub. Gewinne sie, mit Gold oder mit dem Schwert.',vo:'Die Kelten der Poebene, Insubrer und Boier, haben Rom nie vergeben. Sie beobachten den Fremden mit den Elefanten: Ist er stark genug, um Rom zu schlagen? Hannibal braucht ihre Krieger, ihr Korn und ihre Pferde, denn aus Karthago kommt kaum Nachschub.',g:{any:[['insubrien','aemilia','cenomanen','taurini'],2]},rew:{gold:250,order:1}},
    {t:'Akt II · Trebia und Trasimenischer See',txt:'Zwei Heere der Konsuln marschieren heran. An der Trebia versteckt Hannibal seinen Bruder Mago in einem Bachbett und lockt die Römer durch eiskaltes Wasser. Am Trasimenischen See wartet er im Morgennebel an den Hängen. Rom lernt, dass dieser Feind nicht dort kämpft, wo man ihn erwartet. Wähle den Schlachtplan Hinterhalt oder Umfassung.',vo:'Zwei Heere der Konsuln marschieren heran. An der Trebia versteckt Hannibal seinen Bruder Mago in einem Bachbett und lockt die Römer durch eiskaltes Wasser. Am Trasimenischen See wartet er im Morgennebel an den Hängen. Rom lernt, dass dieser Feind nicht dort kämpft, wo man ihn erwartet.',g:{wins:2},rew:{gold:300,atk:0.1}},
-   {t:'Akt III · Cannae',txt:'Sommer 216 vor Christus. Bei Cannae stellt Rom das größte Heer seiner Geschichte auf, acht Legionen und mehr. Hannibal lässt seine Mitte langsam zurückweichen. Die Römer drängen nach, bis die afrikanischen Veteranen von beiden Seiten einschwenken und die Reiterei ihnen in den Rücken fällt. Es wird der blutigste Tag, den Rom je gesehen hat. Umfasse den Feind von beiden Seiten.',vo:'Sommer 216 vor Christus. Bei Cannae stellt Rom das größte Heer seiner Geschichte auf, acht Legionen und mehr. Hannibal lässt seine Mitte langsam zurückweichen. Die Römer drängen nach, bis die afrikanischen Veteranen von beiden Seiten einschwenken und die Reiterei ihnen in den Rücken fällt. Es wird der blutigste Tag, den Rom je gesehen hat.',g:{hold:['daunien']},rew:{gold:400}},
+   {t:'Akt III · Cannae',txt:'Sommer 216 vor Christus. Bei Cannae stellt Rom das größte Heer seiner Geschichte auf, acht Legionen und mehr. Hannibal lässt seine Mitte langsam zurückweichen. Die Römer drängen nach, bis die afrikanischen Veteranen von beiden Seiten einschwenken und die Reiterei ihnen in den Rücken fällt. Es wird der blutigste Tag, den Rom je gesehen hat. Umfasse den Feind von beiden Seiten.',vo:'Sommer 216 vor Christus. Bei Cannae stellt Rom das größte Heer seiner Geschichte auf, acht Legionen und mehr. Hannibal lässt seine Mitte langsam zurückweichen. Die Römer drängen nach, bis die afrikanischen Veteranen von beiden Seiten einschwenken und die Reiterei ihnen in den Rücken fällt. Es wird der blutigste Tag, den Rom je gesehen hat.',g:{cond:'cannae',txt:'Das Heer von Cannae schlagen: Varro und Paullus ziehen mit 14 Einheiten aus Apulien heran, beide Heere müssen fallen. Der Plan „Umfassung“ gibt in dieser Schlacht +25 %. Bei einer Niederlage geht der Krieg weiter, aber Rom weicht der Schlacht künftig aus.'},rew:{gold:400}},
    {t:'Akt III · Capua',txt:'Rom stellt sich keiner offenen Schlacht mehr. Der Diktator Fabius folgt Hannibal in den Hügeln, wartet und zermürbt. Die Römer nennen ihn den Zauderer, doch seine Taktik wirkt. Hannibal muss die Städte des Südens auf seine Seite ziehen. Das reiche Capua könnte den Anfang machen. Bewege die Städte Süditaliens zum Abfall, mit Siegen und Gold.',vo:'Rom stellt sich keiner offenen Schlacht mehr. Der Diktator Fabius folgt Hannibal in den Hügeln, wartet und zermürbt. Die Römer nennen ihn den Zauderer, doch seine Taktik wirkt. Hannibal muss die Städte des Südens auf seine Seite ziehen. Das reiche Capua könnte den Anfang machen.',g:{any:[['kampanien','lukanien','bruttium','apulien','samnium','hirpinien','tarent'],4]},rew:{gold:400,order:1}},
    {t:'Akt IV · Nachschub',txt:'Elf Jahre steht Hannibal in Italien, und sein Heer wird kleiner. Da bricht sein Bruder Hasdrubal mit einem zweiten Heer aus Hispanien auf und zieht über die Alpen wie er selbst. Wenn die Brüder sich vereinen, kann Rom fallen. Wenn nicht, ist Italien verloren.',g:{cond:'hasdrubal',txt:'Hasdrubals Heer nach Italien bringen.'},rew:{gold:300}},
    {t:'Akt IV · Rom oder Zama',txt:'Der junge Publius Cornelius Scipio hat Hispanien erobert und landet nun in Africa. Karthago ruft Hannibal nach Hause. Zwei Wege bleiben: Rom selbst angreifen, solange er noch in Italien steht, oder heimkehren und Scipio vor den Toren Karthagos schlagen. Die Entscheidung wiegt sechzehn Jahre Krieg.',g:{cond:'zama',txt:'Rom einnehmen oder Scipios Heer in Africa vernichten und Karthago halten.'},rew:{gold:500}}],
@@ -11265,6 +11496,7 @@ function lagerOn(pi){const P=S&&S.prov&&S.prov[pi];if(!P||P.lager==null)return f
 function lagerList(){const o=[];if(S&&S.prov)S.prov.forEach((P,i)=>{if(P.lager!=null&&lagerOn(i))o.push(i);});return o;}
 function lagerWhy(a){if(!a||a.f!==S.player)return'Kein Heer';const P=S.prov[a.p];
   if(a.boat)return'An Bord eines Schiffes gibt es kein Lager.';
+  if(hnOn()&&!hnLagerShow(a))return'Hannibal schlägt sein Winterlager in Capua (Kampanien) auf, im Akt „Capua“.';
   if(P.owner!==S.player)return'Ein Lager steht nur in eigenem Land.';
   if(PROV_DEF[a.p].reg==='skandinavien')return'Daheim braucht ihr kein Lager. Es gilt für die Fremde.';
   if(lagerOn(a.p))return'Hier steht schon ein Lager.';
@@ -11273,12 +11505,12 @@ function lagerWhy(a){if(!a||a.f!==S.player)return'Kein Heer';const P=S.prov[a.p]
   return null;}
 function setLager(a){const w=lagerWhy(a);if(w)return{ok:false,why:w};const P=S.prov[a.p];S.fac[S.player].gold-=lagerCost();P.lager=S.turn;P.gar=Math.max(P.gar,Math.ceil(garMax(a.p)*0.8));
   addLog(`Winterlager in ${PROV_DEF[a.p].name} aufgeschlagen. Garnison und Abwehr steigen, die Unruhe legt sich schneller.`,true,'good');return{ok:true};}
-function lagerHtml(a){if(!scenRule('winterlager')||scenStepI()<1||a.f!==S.player)return'';const P=S.prov[a.p];
+function lagerHtml(a){if((!scenRule('winterlager')||scenStepI()<1||a.f!==S.player)&&!hnLagerShow(a))return'';const P=S.prov[a.p];
   if(lagerOn(a.p))return`<p class="note" style="margin:0 0 10px">⛺ Winterlager seit Runde ${P.lager}: Garnison mindestens 80 %, Abwehr ×2, Unruhe sinkt doppelt so schnell, Heere rundum sind versorgt.</p>`;
   const w=lagerWhy(a);
   return`<div class="list" style="margin:0 0 4px"><button class="btn block" data-act="lager" data-id="${a.id}"${w?' disabled':''}><span style="display:block">⛺ Winterlager aufschlagen · ${lagerCost()} Gold<small style="display:block">${w?esc(w):'Garnison mindestens 80 %, Abwehr ×2, weniger Unruhe, Heere rundum sind versorgt. Höchstens 2 Lager.'}</small></span></button></div>`;}
 function askLager(a){const w=lagerWhy(a);if(w){toast(w);return;}
-  showModal(`${heroOr(wikImg('lager'),'ev_thron',S.turn)}<h2>Winterlager aufschlagen?</h2><p class="sub">${esc(a.name)} · ${esc(PROV_DEF[a.p].name)}</p><p>Das Heer baut ein befestigtes Lager, wie einst bei Repton. Solange die Provinz dir gehört, gilt: Garnison mindestens 80 % und jede Runde aufgefüllt, Abwehr gegen Angriffe ×2, Unruhe sinkt doppelt so schnell, Heere in der Nähe sind versorgt.</p><p class="note">Kostet ${lagerCost()} Gold. Höchstens 2 Lager gleichzeitig, jetzt ${lagerList().length}.</p>`,
+  showModal(`${heroOr(wikImg('lager'),'ev_thron',S.turn)}<h2>Winterlager aufschlagen?</h2><p class="sub">${esc(a.name)} · ${esc(PROV_DEF[a.p].name)}</p><p>Das Heer baut ein befestigtes Lager, ${hnOn()?'wie Hannibal im Winter in Capua':'wie einst bei Repton'}. Solange die Provinz dir gehört, gilt: Garnison mindestens 80 % und jede Runde aufgefüllt, Abwehr gegen Angriffe ×2, Unruhe sinkt doppelt so schnell, Heere in der Nähe sind versorgt.</p><p class="note">Kostet ${lagerCost()} Gold. Höchstens 2 Lager gleichzeitig, jetzt ${lagerList().length}.</p>`,
     [{label:'Abbrechen'},{label:`Aufschlagen · ${lagerCost()} Gold`,cls:'primary',fn:()=>{const r=setLager(a);if(r.ok){AUDIO.sfx('build');toast('Winterlager steht');}else toast(r.why);refreshOwnership();refresh();}}]);}
 function lagerRound(){if(!S||!S.prov)return;S.prov.forEach((P,i)=>{if(P.lager==null)return;if(P.owner!==S.player){delete P.lager;addLog(`Das Winterlager in ${PROV_DEF[i].name} ist verloren.`,true,'bad');return;}
   const m=Math.ceil(garMax(i)*0.8);if(P.gar<m)P.gar=m;});}
@@ -11792,6 +12024,7 @@ Object.assign(SC_COND,{
   anlegen:(f,g)=>{const Z=S.scen;if(!Z)return[0,1];Z.flags=Z.flags||{};const L=stIds(g.ids),k=g.k||L.length;
     for(const i of L){const key='an_'+PROV_DEF[i].id;if(Z.flags[key])continue;const h=anlPos(i);if(h&&(S.fleets||[]).some(x=>x.f===f&&x.x!=null&&Math.hypot(x.x-h.x,x.z-h.z)<(g.r||1.8))){Z.flags[key]=1;if(f===S.player)addLog(`Die Flotte geht vor ${PROV_DEF[i].name} vor Anker.`,true,'good');}}
     const n=L.filter(i=>Z.flags['an_'+PROV_DEF[i].id]).length;return[Math.min(n,k),k];}});
+{const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='cannae')return 16;return _sn(f,g);};}
 {const _sn=scenNeed;scenNeed=function(f,g){if(g&&g.cond==='anlegen'){const L=stIds(g.ids||[]);return 4+3*(g.k||L.length);}return _sn(f,g);};}
 // Kriegselefanten auch für Südostasien (Siam, Birma, Khmer)
 try{for(const k of['elef','elef2']){const V=VARIANTS[k];if(V&&V.g)for(const c of['suedostasiatisch','suedost','khmer','thai','birmanisch'])if(!V.g.includes(c))V.g.push(c);}}catch(e){}
@@ -12686,7 +12919,9 @@ const ADM_FREE=15,ADM_PER=0.008,ADM_MAX=0.2;
 function admMax(f){return ADM_MAX+(S&&!S.scen?0.1*clamp((provsOf(f).length-60)/40,0,1):0);}// ab 60 Provinzen sanft bis 30 %
 function admRate(f){return Math.min(admMax(f),ADM_PER*Math.max(0,provsOf(f).length-ADM_FREE));}
 // v213 Wikinger: Raubvolk lebt im Feindesland (und auf See) aus dem Land, halber Sold (Szenario-Regel raidUpkeep)
-function raidUpkMul(a){try{const Z=S.scen;if(!Z||Z.over||a.f!==S.player)return 1;const R=SCEN[Z.id].rules,m=R&&R.raidUpkeep;if(!m||raidKind(a.f)!=='see')return 1;if(a.boat)return m;const o=S.prov[a.p].owner;return o===a.f?(R.homeUpkeep||1):atWar(a.f,o)?m:1;}catch(e){return 1;}}
+// Hannibal lebt in Italien vom Land: der Unterhalt seiner Heere dort ist halb (Messziel Bilanz: ohne Abfall leicht negativ, mit drei abgefallenen Städten ausgeglichen)
+function hnUpkMul(a){try{return hnOn()&&a.f===S.player&&!a.boat&&HN_ITALY.has(hnReg(a.p))?0.5:1;}catch(e){return 1;}}
+function raidUpkMul(a){try{const hm=hnUpkMul(a);if(hm!==1)return hm;const Z=S.scen;if(!Z||Z.over||a.f!==S.player)return 1;const R=SCEN[Z.id].rules,m=R&&R.raidUpkeep;if(!m||raidKind(a.f)!=='see')return 1;if(a.boat)return m;const o=S.prov[a.p].owner;return o===a.f?(R.homeUpkeep||1):atWar(a.f,o)?m:1;}catch(e){return 1;}}
 function raidLootMul(rf){try{const Z=S.scen;if(!Z||Z.over||rf!==S.player||raidKind(rf)!=='see')return 1;const R=SCEN[Z.id].rules;return(R&&R.raidLoot)||1;}catch(e){return 1;}}
 function income(f){
   const tax=provsOf(f).reduce((s,pi)=>s+provIncome(pi),0),adm=Math.round(tax*admRate(f));
@@ -13685,7 +13920,7 @@ function stGoalText(g){if(g.cond)return g.txt||'';const nm=L=>stIds(L).map(i=>PR
   if(g.trade)return`Halte ${g.trade} Handelsabkommen.`;
   if(g.wins)return`Gewinne ${g.wins} Schlachten.`;
   if(g.region)return`Halte die ganze Region ${REG[g.region]?REG[g.region].name:''}.`;return'';}
-function stTarget(f,g){const L=g.hold?stIds(g.hold):g.any?stIds(g.any[0]):g.build&&g.build[2]?stIds([g.build[2]]):g.region&&REG[g.region]?REG[g.region].provs.filter(isAct):[];return L.find(i=>S.prov[i].owner!==f)??L[0]??null;}
+function stTarget(f,g){if(g.cond==='cannae'){const r=S.armies.find(x=>x.hnCan&&x.units.length);return r?r.p:null;}const L=g.hold?stIds(g.hold):g.any?stIds(g.any[0]):g.build&&g.build[2]?stIds([g.build[2]]):g.region&&REG[g.region]?REG[g.region].provs.filter(isAct):[];return L.find(i=>S.prov[i].owner!==f)??L[0]??null;}
 // Gelehrten-Bild zeigt Mönche mit christlichem Altar: nur für lateinisch-christliche Reiche, sonst Händlerbild
 function stLatin(){try{const r=facRel(S.player),c=facCul(S.player);return(r==='christ'||r==='evang')&&CINE_EU.includes(c);}catch(e){return false;}}
 const stImg=(st,g)=>st.img||(g.wins?'battle_win':g.trade||g.gold?'ev_haendler':g.build?(stLatin()?'ev_gelehrte':'ev_haendler'):'ev_conq');
@@ -13749,7 +13984,8 @@ function storyRound(){if(!S||S.over)return;S.story=S.story||{};
     if(!s||(!(S.scen&&f===S.player)&&(s.pid!==stPid(f)||s.e!==ep()))){stStart(f);continue;}
     if(s.done||s.end)continue;const C=stCh(f),st=C.steps[s.i];if(!st){s.end=true;stMsg(f,{k:'end'});continue;}
     const[c,n]=stProg(f,s.g,s);if(c<n&&n>0)continue;
-    stGrant(f,st.rew||{});addLog(`Geschichte: ${st.t} erfüllt. ${stRew(st.rew||{})}.`,f===S.player,'good');try{if(f===S.player)chronAdd('hist',`${C.t}: ${st.t}`);}catch(e){}
+    const rw=(S.scen&&f===S.player&&S.scen.id==='hannibal'&&s.i===HN_STEP_CAN&&S.scen.flags.hn_can==='lost')?{gold:Math.round((st.rew.gold||0)/4)}:(st.rew||{});// Cannae verloren: nur ein Viertel der Belohnung
+    stGrant(f,rw);addLog(`Geschichte: ${st.t} erfüllt. ${stRew(rw)}.`,f===S.player,'good');try{if(f===S.player)chronAdd('hist',`${C.t}: ${st.t}`);}catch(e){}
     s.i++;s.t0=S.turn;s.w0=stW(f);s.sw0=stv(f,'seewin');
     if(S.scen&&S.scen.einfl!=null&&f===S.player)S.scen.einfl+=6;
     if(s.i<C.steps.length){s.g=stResolve(f,C.steps[s.i].g);stMsg(f,{k:'step',done:st.t});stHook(f,s.i);}else{s.end=true;stMsg(f,{k:'end',done:st.t});}}}
@@ -14667,19 +14903,21 @@ function concludeAttack(ctx,win){faithReset();const _po=S.prov[ctx.ti].owner;
   a.mp=0;if(!(a.st==='belagern'&&a.sieg===ti&&S.prov[ti].owner!==a.f)){clearStance(a);a.st=null;}res.attLost=Math.max(0,res.attMen0-armyMen(a));
   {const dif=clamp(res.def/Math.max(1,res.att),0.3,1.6),dif2=clamp(res.att/Math.max(1,res.def),0.3,1.6);gainXP(a,win?50+60*dif:25);defArmies.forEach(d=>gainXP(d,win?25:50+60*dif2));genXP(a,win?60+80*dif:30);defArmies.forEach(d=>genXP(d,win?30:60+80*dif2));genDeed(a,win?'w':'l');if(win)try{retinueOnWin(a);}catch(e){}if(win&&res.captured)genDeed(a,'c');defArmies.forEach(d=>genDeed(d,win?'l':'d'));try{res.ti=ti;armyWarHook(a,_po,defArmies,win,res);}catch(e){console.warn('Kriegsstand',e);}
    for(const x of[a,...defArmies]){const lost=(x===a)!==win;if(!ctx.eschGen&&lost&&x.units.length&&Math.random()<0.12){const old=genOf(x).n;x.gen=newGeneral(x.f);if(x.f===S.player)addLog(`${old} ist in der Schlacht gefallen. ${x.gen.n} übernimmt ${x.name}.`,true,'bad');}}}
+  try{hnTally([a,...(ctx.attRe||[])],[...defArmies,...(ctx.defRe||[])],win);}catch(e){}
   removeEmpty();checkElimination();try{nemStat(res);}catch(e){}try{pk1Battle(res);}catch(e){}
   return res;
 }
 function resolveAttack(a,ti){
   const ctx=startAttackCtx(a,ti),P=S.prov[ti];
-  const lm=(()=>{try{const d=ctx.defArmies.find(x=>x.f===S.player&&x.plan==='lauer');return d?hnLauerMul(d,ti,false):1;}catch(e){return 1;}})();
+  const lm=(()=>{try{const d=ctx.defArmies.find(x=>x.f===S.player&&(x.plan==='lauer'||x.plan==='umfassung'));return d?hnLauerMul(d,ti,false,a):1;}catch(e){return 1;}})();
   const ar=ctx.res.att*(a._land&&!(a.rz&&raidKind(a.f)==='see')?0.8:1)*planMul(a,ti)*rnd(0.85,1.15),dr=ctx.res.def*rnd(0.85,1.15)*1.08*lm;
   const win=ar>dr,r=win?dr/ar:ar/dr,winLoss=0.08+0.32*r,loseLoss=0.5+0.35*(1-r);
   if(win){applyLoss(a,winLoss);ctx.defArmies.forEach(d=>applyLoss(d,loseLoss));ctx.attRe.forEach(d=>applyLoss(d,winLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,loseLoss*0.5));}
   else{applyLoss(a,loseLoss);ctx.defArmies.forEach(d=>applyLoss(d,winLoss));P.gar=Math.max(1,Math.round(P.gar*(1-winLoss)));ctx.attRe.forEach(d=>applyLoss(d,loseLoss*0.5));ctx.defRe.forEach(d=>applyLoss(d,winLoss*0.5));}
   let pan=[];try{pan=elePanic(a,ctx.defArmies);}catch(e){console.warn('Elefanten-Panik',e);}
+  const cMul=(()=>{try{return hnCannaeMul(a,ti);}catch(e){return 1;}})();// vor der Schlussrechnung: danach sind die Verlierer abgezogen
   const rs=concludeAttack(ctx,win);
-  try{const pl=planMul(a,ti);if(a.plan==='lauer'&&pl!==1)rs.lauer=`Hinterhalt ${pl>1?'+':'−'}${Math.round(Math.abs(pl-1)*100)} %`;else if(lm!==1)rs.lauer=`Hinterhalt +${Math.round((lm-1)*100)} %`;}catch(e){}
+  try{const pl=planMul(a,ti);if(a.plan==='lauer'&&pl!==1)rs.lauer=`Hinterhalt ${pl>1?'+':'−'}${Math.round(Math.abs(pl-1)*100)} %`;else if(a.plan==='umfassung'&&cMul>1)rs.lauer='Umfassung +25 %';else if(lm!==1)rs.lauer=`${ctx.defArmies.some(x=>x.f===S.player&&x.plan==='umfassung')?'Umfassung':'Hinterhalt'} +${Math.round((lm-1)*100)} %`;}catch(e){}
   if(pan.length){rs.eleTxt=`Elefanten-Panik: Die Tiere von ${pan.map(x=>x.name).join(' und ')} brechen aus und reißen Lücken ins eigene Heer.`;if(a.f===S.player||P.owner===S.player)addLog(rs.eleTxt,true,'warn');}
   return rs;
 }
@@ -21849,6 +22087,7 @@ $('#shBody').addEventListener('click',e=>{
   else if(act==='landnahme'){const pi=UI.sel,c=lnCan(S.player,pi);if(c.ok){lnStart(S.player,pi);AUDIO.sfx('horn');toast('Landnahme: Lager gegründet');}else toast(c.why);refreshOwnership();refresh();}
   else if(act==='storychoice'){const s=stState(S.player),C=stCh(S.player),st=s&&C.steps[s.i];if(st&&st.choice){const x=stChoiceEv(st,s,C);showEvent(x.E,x.ctx,()=>refresh());}}
   else if(act==='scenbribe'){const c=Math.round(150*G());if(S.fac[S.player].gold>=c&&S.scen){S.fac[S.player].gold-=c;S.scen.einfl+=12;AUDIO.sfx('click');toast('Einfluss +12');renderTop();refresh();}}
+  else if(act==='hnrat'){hnRatAct(b.dataset.k);renderTop();refresh();}
   else if(act==='defect'){if(tryDefect(S.player,+b.dataset.p))AUDIO.sfx('win');else AUDIO.sfx('error');renderTop();refreshOwnership();refresh();}
   else if(act==='kb'){if(sendKb(S.player,UI.sel)){AUDIO.sfx('click');renderTop();refresh();}}
   else if(act==='f3'){feat3Act(b.dataset.k,+b.dataset.p);}
@@ -22069,6 +22308,7 @@ const HELP_ACT={
   'agmap':el=>el.dataset.agmap==='han'?'Zeigt die Handelskarte: Wo Rohstoffe liegen und was sie bringen. Lohnt, bevor du ein Ziel für den Händler wählst.':'Zeigt die Glaubenskarte: Welche Provinz welchen Glauben hat. Lohnt, bevor du ein Ziel für den Priester wählst.',
   'htab':el=>({hof:'Die Tafel des Hofes: Ämter besetzen. Ernennen kostet einmal Gold, danach zahlt jedes Amt ein Gehalt.',gov:'Statthalter der Regionen einsetzen und ihnen einen Auftrag geben.',gen:'Jedes Heer führt ein Feldherr. Er steigt in Schlachten bis Stufe 6 auf.',fam:'Das Herrscherhaus bestimmt die Thronfolge. Die Eigenschaften des Herrschers wirken im ganzen Reich.',kir:'Glaube und Kirche deines Reichs. Gunst schützt vor dem Bann.',rat:'Der Rat sammelt Vorschläge deiner Berater, was als Nächstes dran ist.',ag:`Agenten handeln im Verborgenen. Du kannst bis zu ${agentCap(S.player)} unterhalten.`})[el.dataset.htab]||'',
   // v207: Szenario und Geschichte (Kapitel, Ziele, Aufträge)
+  'act:hnrat':el=>el.dataset.k==='verst'?`Verstärkung aus Karthago anfordern: Ab Gunst 60 (zweites Mal ab 80) schickt der Rat ein Heer mit Elefanten und numidischen Reitern. Es landet nach 2 Runden bei Locri in Bruttium. Kostet 20 bis 25 Gunst.`:`Boten mit Gold nach Karthago: Gunst +10, danach 6 Runden Pause. Hilft, wenn Hanno im Rat die Oberhand gewinnt. Unter Gunst 25 ruft der Rat Hannibal heim.`,
   'act:scenbribe':()=>`Du schickst ${Math.round(150*G())} Gold an Freunde im Senat: Einfluss +12. Der Einfluss sinkt von selbst um 1 je Runde. Fällt er auf 0, endet deine Laufbahn. Lohnt, wenn die Zahl unter 20 fällt.`,
   'act:lager':el=>`Winterlager (Wikinger): Das Heer baut in einer eigenen Provinz in der Fremde ein befestigtes Lager. Kostet ${lagerCost()} Gold. Solange die Provinz dir gehört: Garnison mindestens 80 % und jede Runde aufgefüllt, Abwehr gegen Angriffe ×2, Unruhe sinkt doppelt so schnell, Heere bis zu drei Provinzen entfernt gelten als versorgt. Höchstens 2 Lager gleichzeitig. Fällt die Provinz, ist das Lager weg. Ist der Knopf grau, steht der Grund darunter.`,
   'act:story':'Das aktuelle Ziel der Geschichte. Tippen zeigt den Ort auf der Karte. Ist das Ziel erfüllt, gibt es die Belohnung am Knopf und der nächste Schritt beginnt.',
